@@ -496,10 +496,7 @@ class Quant:
 
         # 종목 필수인데 없으면 에러
         if entry.stockRequired and not entry.multiStock and stockCode is None:
-            msg = (
-                f'quant("{entry.label}") 축은 종목코드가 필요합니다.\n'
-                f"  사용법: {entry.example}"
-            )
+            msg = f'quant("{entry.label}") 축은 종목코드가 필요합니다.\n  사용법: {entry.example}'
             raise ValueError(msg)
 
         # 멀티종목인데 리스트가 아니면 안내

@@ -54,7 +54,9 @@ def analyze_sentiment(stockCode: str, *, market: str = "auto", **kwargs) -> dict
                     neg_counts[kw] = neg_counts.get(kw, 0) + 1
 
         sc = (pc - nc) / (pc + nc + 1)
-        scores.append({"period": str(period)[:10] if period else None, "score": round(sc, 4), "pos": pc, "neg": nc, "words": nw})
+        scores.append(
+            {"period": str(period)[:10] if period else None, "score": round(sc, 4), "pos": pc, "neg": nc, "words": nw}
+        )
         total_pos += pc
         total_neg += nc
         total_unc += uc
@@ -71,7 +73,9 @@ def analyze_sentiment(stockCode: str, *, market: str = "auto", **kwargs) -> dict
     result["totalWords"] = total_words
     result["positiveRatio"] = round(total_pos / max(total_words, 1), 6)
     result["negativeRatio"] = round(total_neg / max(total_words, 1), 6)
-    result["topNegativeWords"] = [{"word": w, "count": c} for w, c in sorted(neg_counts.items(), key=lambda x: -x[1])[:10]]
+    result["topNegativeWords"] = [
+        {"word": w, "count": c} for w, c in sorted(neg_counts.items(), key=lambda x: -x[1])[:10]
+    ]
     result["timeSeries"] = scores[-20:]
     result["sentimentVerdict"] = "positive" if overall > 0.1 else "negative" if overall < -0.1 else "neutral"
     return result

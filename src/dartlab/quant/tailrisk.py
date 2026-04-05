@@ -73,7 +73,7 @@ def analyze_tailrisk(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     # ── 하방편차 (Downside Deviation) ──
     # MAR = 0 (무위험수익률 0 가정)
     negative_returns = daily_returns[daily_returns < 0]
-    downside_dev = float(np.sqrt(np.mean(negative_returns ** 2))) if len(negative_returns) > 0 else 0
+    downside_dev = float(np.sqrt(np.mean(negative_returns**2))) if len(negative_returns) > 0 else 0
     result["downsideDev"] = round(downside_dev * np.sqrt(252), 4)
 
     # ── Sortino Ratio ──

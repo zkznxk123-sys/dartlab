@@ -66,14 +66,17 @@ def analyze_pairs(*, market: str = "KR", stockCode: str | None = None, **kwargs)
                     coint = level
                     break
 
-            pairs.append({
-                "stockA": a, "stockB": b,
-                "adfStat": round(float(adf_stat), 4),
-                "cointegrated": coint,
-                "halfLife": round(float(half_life), 1) if half_life and half_life > 0 else None,
-                "spreadZ": round(float(z), 4),
-                "dataPoints": ml,
-            })
+            pairs.append(
+                {
+                    "stockA": a,
+                    "stockB": b,
+                    "adfStat": round(float(adf_stat), 4),
+                    "cointegrated": coint,
+                    "halfLife": round(float(half_life), 1) if half_life and half_life > 0 else None,
+                    "spreadZ": round(float(z), 4),
+                    "dataPoints": ml,
+                }
+            )
 
     pairs.sort(key=lambda x: x["adfStat"])
     result["pairs"] = pairs[:10]
@@ -106,7 +109,7 @@ def _adf_test(spread: np.ndarray) -> tuple[float | None, float, float]:
 
     b = float(beta[1])
     resid = dx - X @ beta
-    mse = float(np.sum(resid ** 2) / (n - 3))
+    mse = float(np.sum(resid**2) / (n - 3))
     x_var = float(np.sum((x_lag - np.mean(x_lag)) ** 2))
     if x_var == 0:
         return None, 0, 0

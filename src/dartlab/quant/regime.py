@@ -135,10 +135,18 @@ def _fit_hmm_2state(returns: np.ndarray, max_iter: int = 100, tol: float = 1e-6)
         return None
 
     # 초기화 — 양/음 수익률로 분류
-    mu = np.array([np.mean(returns[returns > 0]) if np.any(returns > 0) else 0.001,
-                    np.mean(returns[returns <= 0]) if np.any(returns <= 0) else -0.001])
-    sigma = np.array([np.std(returns[returns > 0]) if np.any(returns > 0) else 0.01,
-                      np.std(returns[returns <= 0]) if np.any(returns <= 0) else 0.02])
+    mu = np.array(
+        [
+            np.mean(returns[returns > 0]) if np.any(returns > 0) else 0.001,
+            np.mean(returns[returns <= 0]) if np.any(returns <= 0) else -0.001,
+        ]
+    )
+    sigma = np.array(
+        [
+            np.std(returns[returns > 0]) if np.any(returns > 0) else 0.01,
+            np.std(returns[returns <= 0]) if np.any(returns <= 0) else 0.02,
+        ]
+    )
 
     # 전이 확률 초기화
     A = np.array([[0.95, 0.05], [0.10, 0.90]])
@@ -146,10 +154,12 @@ def _fit_hmm_2state(returns: np.ndarray, max_iter: int = 100, tol: float = 1e-6)
 
     for _ in range(max_iter):
         # E-step: forward-backward
-        B = np.column_stack([
-            _gaussian_pdf(returns, mu[0], sigma[0]),
-            _gaussian_pdf(returns, mu[1], sigma[1]),
-        ])
+        B = np.column_stack(
+            [
+                _gaussian_pdf(returns, mu[0], sigma[0]),
+                _gaussian_pdf(returns, mu[1], sigma[1]),
+            ]
+        )
         B = np.clip(B, 1e-300, None)
 
         alpha, scale = _forward(B, A, pi)
@@ -170,14 +180,10 @@ def _fit_hmm_2state(returns: np.ndarray, max_iter: int = 100, tol: float = 1e-6)
                 xi[t] /= denom
 
         # M-step
-        mu_new = np.array([
-            np.sum(gamma[:, k] * returns) / np.sum(gamma[:, k])
-            for k in range(2)
-        ])
-        sigma_new = np.array([
-            np.sqrt(np.sum(gamma[:, k] * (returns - mu_new[k]) ** 2) / np.sum(gamma[:, k]))
-            for k in range(2)
-        ])
+        mu_new = np.array([np.sum(gamma[:, k] * returns) / np.sum(gamma[:, k]) for k in range(2)])
+        sigma_new = np.array(
+            [np.sqrt(np.sum(gamma[:, k] * (returns - mu_new[k]) ** 2) / np.sum(gamma[:, k])) for k in range(2)]
+        )
         sigma_new = np.clip(sigma_new, 1e-6, None)
 
         A_new = np.zeros((2, 2))

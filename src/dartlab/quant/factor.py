@@ -137,7 +137,9 @@ def _get_cross_sectional_position(stockCode: str, market: str) -> dict:
             val, pct = stock_percentile(lf, stockCode, col_name)
             if val is not None and pct is not None:
                 exposures[factor_key] = {
-                    "value": round(val, 2), "percentile": pct, "label": label,
+                    "value": round(val, 2),
+                    "percentile": pct,
+                    "label": label,
                 }
 
     return exposures
@@ -146,7 +148,7 @@ def _get_cross_sectional_position(stockCode: str, market: str) -> dict:
 def _rolling_std(arr: np.ndarray, window: int) -> np.ndarray:
     result = np.full(len(arr), np.nan)
     for i in range(window - 1, len(arr)):
-        result[i] = np.std(arr[i - window + 1:i + 1])
+        result[i] = np.std(arr[i - window + 1 : i + 1])
     return result
 
 
@@ -158,7 +160,7 @@ def _multi_ols(y, X):
         beta = np.linalg.lstsq(X_aug, y, rcond=None)[0]
         y_hat = X_aug @ beta
         resid = y - y_hat
-        ss_res = float(np.sum(resid ** 2))
+        ss_res = float(np.sum(resid**2))
         ss_tot = float(np.sum((y - np.mean(y)) ** 2))
         r2 = 1 - ss_res / ss_tot if ss_tot > 0 else 0
 

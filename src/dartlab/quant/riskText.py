@@ -12,9 +12,26 @@ from dartlab.quant._helpers import load_docs_for_stock, resolve_market
 log = logging.getLogger(__name__)
 
 _RISK_KEYWORDS = {
-    "위험", "리스크", "불확실", "소송", "분쟁", "제재", "우발", "충당",
-    "손상", "감액", "부실", "부도", "파산", "유동성위기", "채무불이행",
-    "횡령", "배임", "과징금", "제소", "손해배상",
+    "위험",
+    "리스크",
+    "불확실",
+    "소송",
+    "분쟁",
+    "제재",
+    "우발",
+    "충당",
+    "손상",
+    "감액",
+    "부실",
+    "부도",
+    "파산",
+    "유동성위기",
+    "채무불이행",
+    "횡령",
+    "배임",
+    "과징금",
+    "제소",
+    "손해배상",
 }
 
 
@@ -56,7 +73,10 @@ def analyze_risk_text(stockCode: str, *, market: str = "auto", **kwargs) -> dict
 
     sorted_periods = sorted(period_risks.keys())
     # 기간별 총 멘션 수
-    ts = [{"period": p, "mentions": sum(period_risks[p].values()), "keywords": list(period_risks[p].keys())} for p in sorted_periods]
+    ts = [
+        {"period": p, "mentions": sum(period_risks[p].values()), "keywords": list(period_risks[p].keys())}
+        for p in sorted_periods
+    ]
 
     result["totalMentions"] = total_mentions
     result["riskTimeSeries"] = ts[-10:]

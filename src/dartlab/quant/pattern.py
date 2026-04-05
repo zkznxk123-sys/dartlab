@@ -88,33 +88,45 @@ def analyze_pattern(stockCode: str, *, market: str = "auto", lookback: int = 20,
             # 6. Bullish Engulfing (상승장악형) — 양봉이 전일 음봉을 완전히 감쌈
             if prev_body < 0 and body > 0 and abs_body > abs_prev_body * 1.0:
                 if o[i] <= c[i - 1] and c[i] >= o[i - 1]:
-                    patterns.append({"date": date_str, "pattern": "bullishEngulfing", "label": "상승장악형", "signal": "상승 반전"})
+                    patterns.append(
+                        {"date": date_str, "pattern": "bullishEngulfing", "label": "상승장악형", "signal": "상승 반전"}
+                    )
 
             # 7. Bearish Engulfing (하락장악형)
             elif prev_body > 0 and body < 0 and abs_body > abs_prev_body * 1.0:
                 if o[i] >= c[i - 1] and c[i] <= o[i - 1]:
-                    patterns.append({"date": date_str, "pattern": "bearishEngulfing", "label": "하락장악형", "signal": "하락 반전"})
+                    patterns.append(
+                        {"date": date_str, "pattern": "bearishEngulfing", "label": "하락장악형", "signal": "하락 반전"}
+                    )
 
             # 8. Piercing Line (관통형)
             if prev_body < 0 and body > 0:
                 mid_prev = (o[i - 1] + c[i - 1]) / 2
                 if o[i] < c[i - 1] and c[i] > mid_prev and c[i] < o[i - 1]:
-                    patterns.append({"date": date_str, "pattern": "piercingLine", "label": "관통형", "signal": "상승 반전"})
+                    patterns.append(
+                        {"date": date_str, "pattern": "piercingLine", "label": "관통형", "signal": "상승 반전"}
+                    )
 
             # 9. Dark Cloud Cover (먹구름형)
             if prev_body > 0 and body < 0:
                 mid_prev = (o[i - 1] + c[i - 1]) / 2
                 if o[i] > c[i - 1] and c[i] < mid_prev and c[i] > o[i - 1]:
-                    patterns.append({"date": date_str, "pattern": "darkCloudCover", "label": "먹구름형", "signal": "하락 반전"})
+                    patterns.append(
+                        {"date": date_str, "pattern": "darkCloudCover", "label": "먹구름형", "signal": "하락 반전"}
+                    )
 
         # 3일 패턴
         if i >= 2:
             # 10. Morning Star (샛별형) — 큰 음봉 + 작은 몸통 + 큰 양봉
             prev2_body = c[i - 2] - o[i - 2]
             prev1_body = c[i - 1] - o[i - 1]
-            if (prev2_body < 0 and abs(prev2_body) > full_range * 0.3
-                    and abs(prev1_body) < abs(prev2_body) * 0.3
-                    and body > 0 and abs_body > abs(prev2_body) * 0.5):
+            if (
+                prev2_body < 0
+                and abs(prev2_body) > full_range * 0.3
+                and abs(prev1_body) < abs(prev2_body) * 0.3
+                and body > 0
+                and abs_body > abs(prev2_body) * 0.5
+            ):
                 patterns.append({"date": date_str, "pattern": "morningStar", "label": "샛별형", "signal": "상승 반전"})
 
     result["patterns"] = patterns[-10:]  # 최근 10개만
@@ -124,7 +136,9 @@ def analyze_pattern(stockCode: str, *, market: str = "auto", lookback: int = 20,
     pivots = _find_pivots(h, lo, threshold=0.05)
     if pivots:
         current_price = float(c[-1])
-        supports = sorted([p["price"] for p in pivots if p["type"] == "low" and p["price"] < current_price], reverse=True)
+        supports = sorted(
+            [p["price"] for p in pivots if p["type"] == "low" and p["price"] < current_price], reverse=True
+        )
         resistances = sorted([p["price"] for p in pivots if p["type"] == "high" and p["price"] > current_price])
 
         result["supportLevels"] = [round(s, 2) for s in supports[:3]]

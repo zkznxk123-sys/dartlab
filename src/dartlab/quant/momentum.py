@@ -132,10 +132,7 @@ def analyze_momentum(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
             result["streakDirection"] = "상승" if direction > 0 else "하락"
 
     # ── 종합 판단 ──
-    signals_count = sum(
-        1 for v in ts_signals.values()
-        if isinstance(v, dict) and v.get("signal") == "long"
-    )
+    signals_count = sum(1 for v in ts_signals.values() if isinstance(v, dict) and v.get("signal") == "long")
     total_signals = len(ts_signals)
     if total_signals > 0:
         if signals_count == total_signals:

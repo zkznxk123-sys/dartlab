@@ -65,7 +65,9 @@ def analyze_liquidity(stockCode: str, *, market: str = "auto", **kwargs) -> dict
                 amihud_recent = float(np.mean(recent[recent_valid]))
                 amihud_change = (amihud_recent - amihud) / amihud if amihud > 0 else 0
                 result["amihudRecent"] = amihud_recent
-                result["liquidityChange"] = "악화" if amihud_change > 0.2 else "개선" if amihud_change < -0.2 else "유지"
+                result["liquidityChange"] = (
+                    "악화" if amihud_change > 0.2 else "개선" if amihud_change < -0.2 else "유지"
+                )
 
     # ── Roll Spread (1984) ──
     # S = 2 * sqrt(-Cov(ΔP_t, ΔP_{t-1}))
@@ -90,7 +92,7 @@ def analyze_liquidity(stockCode: str, *, market: str = "auto", **kwargs) -> dict
     # 일평균 거래량 / 시가총액 근사
     if n >= 20:
         avg_volume_20 = float(np.mean(volume[-20:]))
-        avg_volume_60 = float(np.mean(volume[-min(60, n):])) if n >= 60 else float(np.mean(volume))
+        avg_volume_60 = float(np.mean(volume[-min(60, n) :])) if n >= 60 else float(np.mean(volume))
         result["avgVolume20d"] = round(avg_volume_20, 0)
         result["avgVolume60d"] = round(avg_volume_60, 0)
 

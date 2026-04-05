@@ -70,11 +70,14 @@ def analyze_tone_change(stockCode: str, *, market: str = "auto", **kwargs) -> di
         curr_sc = period_scores[curr_p]["avgScore"]
         shift = curr_sc - prev_sc
         new_neg = period_scores[curr_p]["neg_words"] - period_scores[prev_p]["neg_words"]
-        shifts.append({
-            "from": prev_p, "to": curr_p,
-            "shift": round(shift, 4),
-            "newNegatives": list(new_neg)[:10],
-        })
+        shifts.append(
+            {
+                "from": prev_p,
+                "to": curr_p,
+                "shift": round(shift, 4),
+                "newNegatives": list(new_neg)[:10],
+            }
+        )
 
     latest_shift = shifts[-1]["shift"] if shifts else 0
     result["toneShift"] = round(latest_shift, 4)

@@ -118,12 +118,14 @@ def analyze_ranking(*, market: str = "KR", stockCode: str | None = None, **kwarg
         dr = (d / a * 100) if a > 0 else None
 
         if margin is not None or roa is not None:
-            ranked.append({
-                "stockCode": code,
-                "opMargin": round(margin, 2) if margin else None,
-                "ROA": round(roa, 2) if roa else None,
-                "debtRatio": round(dr, 2) if dr else None,
-            })
+            ranked.append(
+                {
+                    "stockCode": code,
+                    "opMargin": round(margin, 2) if margin else None,
+                    "ROA": round(roa, 2) if roa else None,
+                    "debtRatio": round(dr, 2) if dr else None,
+                }
+            )
 
     if not ranked:
         return {**result, "error": "순위 산출 가능 종목 없음"}

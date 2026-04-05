@@ -99,10 +99,19 @@ def analyze_screen(*, market: str = "KR", preset: str = "quality", stockCode: st
 
         if preset == "quality":
             if roa is not None and roa > cfg["roa_min"] and dr is not None and dr < cfg["debt_max"]:
-                passed.append({"stockCode": code, "name": s.get("name", ""), "ROA": round(roa, 2), "debtRatio": round(dr, 2)})
+                passed.append(
+                    {"stockCode": code, "name": s.get("name", ""), "ROA": round(roa, 2), "debtRatio": round(dr, 2)}
+                )
         elif preset == "value":
             if dr is not None and dr < cfg["debt_max"] and margin is not None and margin > cfg["margin_min"]:
-                passed.append({"stockCode": code, "name": s.get("name", ""), "opMargin": round(margin, 2), "debtRatio": round(dr, 2)})
+                passed.append(
+                    {
+                        "stockCode": code,
+                        "name": s.get("name", ""),
+                        "opMargin": round(margin, 2),
+                        "debtRatio": round(dr, 2),
+                    }
+                )
         elif preset == "growth":
             prev_sales = s.get("prev_sales")
             if sales and prev_sales and prev_sales > 0:

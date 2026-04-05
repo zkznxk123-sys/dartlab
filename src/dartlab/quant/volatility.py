@@ -50,7 +50,7 @@ def analyze_volatility(stockCode: str, *, market: str = "auto", **kwargs) -> dic
     # ── HAR-RV 모델 (Corsi 2009) ──
     # RV_t+1 = β0 + β1*RV_d + β2*RV_w + β3*RV_m + ε
     if len(log_returns) >= 66:
-        rv_daily = log_returns ** 2
+        rv_daily = log_returns**2
         rv_d = _rolling_mean(rv_daily, 1)
         rv_w = _rolling_mean(rv_daily, 5)
         rv_m = _rolling_mean(rv_daily, 22)
@@ -58,13 +58,15 @@ def analyze_volatility(stockCode: str, *, market: str = "auto", **kwargs) -> dic
         # OLS fit (최근 44일 사용)
         valid_start = 22  # rv_m이 유효한 시점부터
         if len(rv_d) > valid_start + 22:
-            y = rv_daily[valid_start + 1:][:44]
-            X = np.column_stack([
-                np.ones(44),
-                rv_d[valid_start:][:44],
-                rv_w[valid_start:][:44],
-                rv_m[valid_start:][:44],
-            ])
+            y = rv_daily[valid_start + 1 :][:44]
+            X = np.column_stack(
+                [
+                    np.ones(44),
+                    rv_d[valid_start:][:44],
+                    rv_w[valid_start:][:44],
+                    rv_m[valid_start:][:44],
+                ]
+            )
             if len(y) == 44 and X.shape[0] == 44:
                 try:
                     beta = np.linalg.lstsq(X, y, rcond=None)[0]
@@ -167,7 +169,7 @@ def _fit_garch11(returns: np.ndarray) -> dict | None:
             if sigma2[t] <= 0:
                 return 1e10
 
-        ll = -0.5 * np.sum(np.log(sigma2) + resid ** 2 / sigma2)
+        ll = -0.5 * np.sum(np.log(sigma2) + resid**2 / sigma2)
         return -ll
 
     # Nelder-Mead simplex optimization

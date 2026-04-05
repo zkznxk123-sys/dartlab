@@ -9,7 +9,7 @@ import logging
 
 import numpy as np
 
-from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
+from dartlab.quant._helpers import resolve_market
 
 log = logging.getLogger(__name__)
 
@@ -130,7 +130,9 @@ def _analyze_investor(data: np.ndarray, name: str) -> dict:
     if n >= 20:
         avg_5 = float(np.mean(data[-5:]))
         avg_20 = float(np.mean(data[-20:]))
-        result["momentum"] = "가속" if abs(avg_5) > abs(avg_20) * 1.3 else "감속" if abs(avg_5) < abs(avg_20) * 0.7 else "유지"
+        result["momentum"] = (
+            "가속" if abs(avg_5) > abs(avg_20) * 1.3 else "감속" if abs(avg_5) < abs(avg_20) * 0.7 else "유지"
+        )
 
     # 추세
     total = result.get("total20d", 0)

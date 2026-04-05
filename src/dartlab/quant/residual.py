@@ -46,8 +46,8 @@ def analyze_residual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     residuals = sr - predicted
 
     n = len(residuals)
-    rm6 = float(np.mean(residuals[-min(126, n):]) * 252)
-    rm1 = float(np.mean(residuals[-min(22, n):]) * 252)
+    rm6 = float(np.mean(residuals[-min(126, n) :]) * 252)
+    rm1 = float(np.mean(residuals[-min(22, n) :]) * 252)
     iv = float(np.std(residuals) * np.sqrt(252))
     ra = float(np.mean(residuals) * 252)
     rs = ra / iv if iv > 0 else 0

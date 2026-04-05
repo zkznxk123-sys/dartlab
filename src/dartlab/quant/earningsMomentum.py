@@ -89,7 +89,12 @@ def analyze_earnings(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         pos = sum(1 for d in diffs if d > 0)
         r = pos / len(diffs)
         result["earningsTrend"] = (
-            "consistent_growth" if r == 1 else "mostly_growing" if r >= 0.7
-            else "mostly_declining" if r <= 0.3 else "mixed"
+            "consistent_growth"
+            if r == 1
+            else "mostly_growing"
+            if r >= 0.7
+            else "mostly_declining"
+            if r <= 0.3
+            else "mixed"
         )
     return result

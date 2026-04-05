@@ -163,7 +163,7 @@ def _recursive_bisection(weights: np.ndarray, cov: np.ndarray, order: list[int])
     for i in left:
         weights[i] *= alpha
     for i in right:
-        weights[i] *= (1 - alpha)
+        weights[i] *= 1 - alpha
 
     _recursive_bisection(weights, cov, left)
     _recursive_bisection(weights, cov, right)
