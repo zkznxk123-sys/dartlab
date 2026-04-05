@@ -299,8 +299,11 @@ def _fetchKeyChanges(company) -> list[str]:
         # topic별 변화 집계 (changeRate > 0인 블록만)
         # 재무제표/주석 topic은 숫자 변화라 의미 없으므로 제외
         _SKIP_TOPICS = {
-            "fsSummary", "financialNotes", "consolidatedNotes",
-            "consolidatedStatements", "separateStatements",
+            "fsSummary",
+            "financialNotes",
+            "consolidatedNotes",
+            "consolidatedStatements",
+            "separateStatements",
             "financialStatements",
         }
         topic_changes: dict[str, list[float]] = {}
@@ -366,7 +369,7 @@ def _renderBusinessSummary(result: dict) -> list[str]:
         return []
     # 300자 이상이면 잘라서 "..."
     display = text[:300] + "..." if len(text) > 300 else text
-    return ["", f"> **사업보고서 발췌**: \"{display}\"", ""]
+    return ["", f'> **사업보고서 발췌**: "{display}"', ""]
 
 
 def _renderBorrowingStructure(result: dict, mainNum: int) -> list[str]:
@@ -392,8 +395,19 @@ def _renderBorrowingStructure(result: dict, mainNum: int) -> list[str]:
     # 최신 연도 컬럼에서 금액 추출 (비금액/소액/비관련 행 제외)
     # notes 데이터는 백만원 단위 → ×1,000,000으로 원 단위 변환
     _EXCLUDE = {
-        "연이자율", "차입금에대한기술", "이자율", "만기일", "통화", "리스료", "리스",
-        "합계", "소계", "차감", "가산", "유동부채", "비유동부채",
+        "연이자율",
+        "차입금에대한기술",
+        "이자율",
+        "만기일",
+        "통화",
+        "리스료",
+        "리스",
+        "합계",
+        "소계",
+        "차감",
+        "가산",
+        "유동부채",
+        "비유동부채",
     }
     _UNIT = 1_000_000  # 백만원 → 원
     yearCols = sorted(
@@ -627,7 +641,9 @@ def _renderFinancialHighlights(result: dict, sectionNum: int) -> list[str]:
     de = latest.get("debtToEbitda")
     prevDe = prev.get("debtToEbitda")
     if de is not None:
-        trend = "↓개선" if prevDe is not None and de < prevDe else "↑악화" if prevDe is not None and de > prevDe else "-"
+        trend = (
+            "↓개선" if prevDe is not None and de < prevDe else "↑악화" if prevDe is not None and de > prevDe else "-"
+        )
         lines.append(f"| Debt/EBITDA | {de:.1f}x | {trend} |")
     else:
         lines.append("| Debt/EBITDA | - | - |")
@@ -818,8 +834,7 @@ def _collectRiskDiagnosis(result: dict) -> dict:
         history = result.get("metricsHistory", [])
         # Q4(연간결산) 또는 연도만 카운트 — DART period는 2025Q4, 2024Q4, ... 형태
         annualCount = sum(
-            1 for h in history
-            if str(h.get("period", "")).endswith("Q4") or "Q" not in str(h.get("period", ""))
+            1 for h in history if str(h.get("period", "")).endswith("Q4") or "Q" not in str(h.get("period", ""))
         )
         diagnosis["consecutiveCleanYears"] = annualCount if annualCount > 0 else None
     else:
@@ -966,10 +981,17 @@ def generateReportMarkdown(
     _holding = result.get("holding", False)
     _sepMetrics = result.get("separateMetrics")
     narratives = buildNarratives(
-        result, captive=_captive, holding=_holding, separateMetrics=_sepMetrics,
+        result,
+        captive=_captive,
+        holding=_holding,
+        separateMetrics=_sepMetrics,
     )
     overallNarrative = buildOverallNarrative(
-        result, narratives, captive=_captive, holding=_holding, separateMetrics=_sepMetrics,
+        result,
+        narratives,
+        captive=_captive,
+        holding=_holding,
+        separateMetrics=_sepMetrics,
     )
 
     # audit 생성 (외부 전달 우선)
@@ -1147,9 +1169,7 @@ def generateReportMarkdown(
         )
         for reason in notchAdj.get("reasons", []):
             lines.append(f"- {reason}")
-        lines.append(
-            "이는 제도권 신평사가 시장 지위, 그룹 지원 등 정성 요소로 등급을 조정하는 것과 유사한 접근이다."
-        )
+        lines.append("이는 제도권 신평사가 시장 지위, 그룹 지원 등 정성 요소로 등급을 조정하는 것과 유사한 접근이다.")
         lines.append("")
 
     # ── 인과 흐름도 (등급 근거 섹션 끝) ──

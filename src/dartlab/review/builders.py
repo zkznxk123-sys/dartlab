@@ -16,8 +16,6 @@ from dartlab.review.blocks import (
     TextBlock,
 )
 from dartlab.review.catalog import getBlockMeta as _meta
-from dartlab.review.utils import unifyTableScale
-
 from dartlab.review.narrate import (
     narrateCashFlow,
     narrateCashQuality,
@@ -29,6 +27,7 @@ from dartlab.review.narrate import (
     narrateROIC,
     narrateValuation,
 )
+from dartlab.review.utils import unifyTableScale
 
 # ── notes enrichment 렌더링 ──
 

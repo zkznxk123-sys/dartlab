@@ -15,7 +15,6 @@ from dataclasses import dataclass
 
 import numpy as np
 
-
 # ══════════════════════════════════════
 # 데이터 구조
 # ══════════════════════════════════════

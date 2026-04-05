@@ -124,7 +124,6 @@ def renderMarkdown(review) -> str:
         TableBlock,
         TextBlock,
     )
-
     from dartlab.review.catalog import ACT_HEADERS
 
     _ACT_HEADERS = ACT_HEADERS

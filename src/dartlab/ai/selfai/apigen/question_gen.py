@@ -109,15 +109,32 @@ _TEMPLATES: dict[str, list[str]] = {
 
 # analysis financial 축 목록
 _FINANCIAL_AXES = [
-    "수익구조", "자금조달", "자산구조", "현금흐름", "수익성", "성장성",
-    "안정성", "효율성", "종합평가", "이익품질", "비용구조", "자본배분",
-    "투자효율", "재무정합성",
+    "수익구조",
+    "자금조달",
+    "자산구조",
+    "현금흐름",
+    "수익성",
+    "성장성",
+    "안정성",
+    "효율성",
+    "종합평가",
+    "이익품질",
+    "비용구조",
+    "자본배분",
+    "투자효율",
+    "재무정합성",
 ]
 
 # scan 축 목록
 _SCAN_AXES = [
-    "profitability", "growth", "debt", "capital", "governance",
-    "cashflow", "quality", "liquidity",
+    "profitability",
+    "growth",
+    "debt",
+    "capital",
+    "governance",
+    "cashflow",
+    "quality",
+    "liquidity",
 ]
 
 # macro 축 목록
@@ -138,16 +155,24 @@ def generateQuestions(*, count: int = 2000, seed: int = 42) -> list[dict]:
     rng = random.Random(seed)
     questions: list[dict] = []
 
-    def _add(q: str, tool: str, group: str | None = None, axis: str | None = None,
-             stock_code: str | None = None, corp_name: str | None = None):
-        questions.append({
-            "question": q,
-            "tool": tool,
-            "group": group,
-            "axis": axis,
-            "stock_code": stock_code,
-            "corp_name": corp_name,
-        })
+    def _add(
+        q: str,
+        tool: str,
+        group: str | None = None,
+        axis: str | None = None,
+        stock_code: str | None = None,
+        corp_name: str | None = None,
+    ):
+        questions.append(
+            {
+                "question": q,
+                "tool": tool,
+                "group": group,
+                "axis": axis,
+                "stock_code": stock_code,
+                "corp_name": corp_name,
+            }
+        )
 
     # 1. analysis/financial — 축 × 종목 × 템플릿
     for axis in _FINANCIAL_AXES:
@@ -193,10 +218,12 @@ def generateQuestions(*, count: int = 2000, seed: int = 42) -> list[dict]:
             _add(tmpl.format(corp=corp), "search", None, None, code, corp)
 
     # 9. comparison — 종목 쌍
-    pairs = [(STOCK_POOL[i], STOCK_POOL[j])
-             for i in range(len(STOCK_POOL))
-             for j in range(i+1, len(STOCK_POOL))
-             if STOCK_POOL[i][2] == STOCK_POOL[j][2]]  # 같은 업종
+    pairs = [
+        (STOCK_POOL[i], STOCK_POOL[j])
+        for i in range(len(STOCK_POOL))
+        for j in range(i + 1, len(STOCK_POOL))
+        if STOCK_POOL[i][2] == STOCK_POOL[j][2]
+    ]  # 같은 업종
     for (c1, n1, _), (c2, n2, _) in rng.sample(pairs, min(15, len(pairs))):
         tmpl = rng.choice(_TEMPLATES["comparison"])
         _add(tmpl.format(corp1=n1, corp2=n2), "analysis", "financial", "비교", c1, n1)

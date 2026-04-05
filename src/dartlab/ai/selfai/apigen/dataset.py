@@ -35,9 +35,7 @@ def buildSftDataset(
     sys_prompt = system_prompt or ROUTER_SYSTEM_PROMPT
     count = 0
 
-    with open(verified_path, encoding="utf-8") as vf, \
-         open(output_path, "w", encoding="utf-8") as of:
-
+    with open(verified_path, encoding="utf-8") as vf, open(output_path, "w", encoding="utf-8") as of:
         for line in vf:
             try:
                 item = json.loads(line)

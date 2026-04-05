@@ -16,8 +16,7 @@ def extractMajorHolder(company: "Company") -> pl.DataFrame | None:
 
     df = loadXbrlTags(
         company,
-        "(?i)CommonStockSharesOutstanding|EntityPublicFloat|"
-        "SharesOutstanding|EntityCommonStockSharesOutstanding",
+        "(?i)CommonStockSharesOutstanding|EntityPublicFloat|SharesOutstanding|EntityCommonStockSharesOutstanding",
         forms=["10-K", "10-Q", "20-F"],
     )
     if df is None:

@@ -10,14 +10,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, timedelta
-
+from datetime import date
 
 # NBER 공식 침체 구간 (미국)
 _NBER_RECESSIONS = [
-    (date(2001, 3, 1), date(2001, 11, 1)),   # 닷컴
-    (date(2007, 12, 1), date(2009, 6, 1)),    # GFC
-    (date(2020, 2, 1), date(2020, 4, 1)),     # 코로나
+    (date(2001, 3, 1), date(2001, 11, 1)),  # 닷컴
+    (date(2007, 12, 1), date(2009, 6, 1)),  # GFC
+    (date(2020, 2, 1), date(2020, 4, 1)),  # 코로나
 ]
 
 
@@ -113,14 +112,16 @@ def walkForwardBacktest(
 
         actual = _is_in_recession(current)
 
-        points.append(BacktestPoint(
-            asOf=as_of_str,
-            phase=phase,
-            recessionProb=recession_prob,
-            overall=overall,
-            score=score,
-            actualRecession=actual,
-        ))
+        points.append(
+            BacktestPoint(
+                asOf=as_of_str,
+                phase=phase,
+                recessionProb=recession_prob,
+                overall=overall,
+                score=score,
+                actualRecession=actual,
+            )
+        )
 
         # 다음 스텝
         month = current.month + stepMonths
@@ -135,9 +136,8 @@ def walkForwardBacktest(
 
     for p in points:
         called_recession = (
-            (p.recessionProb is not None and p.recessionProb >= recessionThreshold)
-            or p.phase == "contraction"
-        )
+            p.recessionProb is not None and p.recessionProb >= recessionThreshold
+        ) or p.phase == "contraction"
         if called_recession:
             recession_calls += 1
         if called_recession and p.actualRecession:

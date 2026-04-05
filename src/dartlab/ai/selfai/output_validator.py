@@ -34,20 +34,17 @@ class ValidationResult:
 
 _RULES: list[tuple[re.Pattern, re.Pattern | None, str]] = [
     # (에러 조건 패턴 on code, 추가 조건 or None, 경고 메시지)
-
     # analysis()는 반드시 2인자: group, axis
     (
         re.compile(r'\.analysis\(\s*"[^"]+"\s*\)'),  # 1인자만
         None,
-        'analysis()는 2인자 필수: c.analysis("financial", "수익성"). '
-        "그룹: financial, valuation, forecast",
+        'analysis()는 2인자 필수: c.analysis("financial", "수익성"). 그룹: financial, valuation, forecast',
     ),
     # macro()에 keyword argument 금지
     (
         re.compile(r"macro\(\s*(topic|axis|market)\s*="),
         None,
-        'macro()는 위치인자만: dartlab.macro("사이클"). '
-        'market은 2번째: dartlab.macro("사이클", market="US")',
+        'macro()는 위치인자만: dartlab.macro("사이클"). market은 2번째: dartlab.macro("사이클", market="US")',
     ),
     # c.sections 직접 접근 (409MB 메모리 위험)
     (
@@ -59,8 +56,7 @@ _RULES: list[tuple[re.Pattern, re.Pattern | None, str]] = [
     (
         re.compile(r"\.review\("),
         None,
-        'review()는 "보고서" 명시 요청 시만 사용. '
-        '분석에는 c.analysis("financial", "축")을 사용',
+        'review()는 "보고서" 명시 요청 시만 사용. 분석에는 c.analysis("financial", "축")을 사용',
     ),
     # scan DataFrame join (타임아웃 위험)
     (

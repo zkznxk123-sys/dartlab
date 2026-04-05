@@ -27,7 +27,13 @@ _THRESHOLDS: dict[str, dict] = {
     },
     "debt_ratio": {
         "lower_is_better": True,
-        "breakpoints": [(50, "매우 안정적인 자본 구조"), (100, "안정적인 자본 구조"), (200, "보통 수준의 레버리지"), (300, "다소 높은 레버리지"), (None, "과도한 레버리지")],
+        "breakpoints": [
+            (50, "매우 안정적인 자본 구조"),
+            (100, "안정적인 자본 구조"),
+            (200, "보통 수준의 레버리지"),
+            (300, "다소 높은 레버리지"),
+            (None, "과도한 레버리지"),
+        ],
     },
     "ocf_to_ni": {
         "breakpoints": [
@@ -104,10 +110,15 @@ def narrateGrowth(yoy: float | None, cagr: float | None) -> str | None:
     parts = []
     if yoy is not None:
         label = _classify(yoy, "growth_yoy")
-        parts.append(f"매출이 전년 대비 {yoy:+.1f}% {label}했다" if label != "보합" else f"매출이 {yoy:+.1f}%로 보합 수준이다")
+        parts.append(
+            f"매출이 전년 대비 {yoy:+.1f}% {label}했다" if label != "보합" else f"매출이 {yoy:+.1f}%로 보합 수준이다"
+        )
     if cagr is not None:
         label = _classify(cagr, "growth_cagr")
-        parts.append(f"중기 CAGR {cagr:+.1f}%로 {label}" + ("하다" if label == "견조" else " 기조다" if "성장" in label else "다"))
+        parts.append(
+            f"중기 CAGR {cagr:+.1f}%로 {label}"
+            + ("하다" if label == "견조" else " 기조다" if "성장" in label else "다")
+        )
     if yoy is not None and cagr is not None:
         if yoy > 10 and cagr < 0:
             parts.append("단기 반등이지만 중기 추세는 아직 하락이다")
@@ -285,10 +296,7 @@ def buildActSummary(actNum: str, sections: list, threads: list, usedIds: set[str
     actSectionKeys = {s.key for s in sections}
     used = usedIds if usedIds is not None else set()
 
-    actThreads = [
-        t for t in threads
-        if actSectionKeys & set(t.involvedSections) and t.threadId not in used
-    ]
+    actThreads = [t for t in threads if actSectionKeys & set(t.involvedSections) and t.threadId not in used]
 
     if actThreads:
         priority = {"critical": 0, "warning": 1, "positive": 2, "neutral": 3}

@@ -154,7 +154,11 @@ def _loadEngine() -> _InferenceEngine:
         return _engine
 
     # 0. Transformers — 학습된 safetensors 모델 있으면 (Phase 3)
-    if _ROUTER_MODEL.exists() and (_ROUTER_MODEL / "config.json").exists() and (_ROUTER_MODEL / "model.safetensors").exists():
+    if (
+        _ROUTER_MODEL.exists()
+        and (_ROUTER_MODEL / "config.json").exists()
+        and (_ROUTER_MODEL / "model.safetensors").exists()
+    ):
         try:
             _engine = _TransformersEngine(_ROUTER_MODEL)
             return _engine
@@ -198,7 +202,7 @@ def _loadEngine() -> _InferenceEngine:
     raise ImportError("로컬 라우터 모델 없음. ~/.dartlab/models/router/에 모델을 설치하거나 Ollama를 실행하세요.")
 
 
-def infer_route(question: str, stock_code: str | None = None) -> "RouteResult | None":
+def infer_route(question: str, stock_code: str | None = None):  # -> RouteResult | None
     """로컬 모델로 라우팅 추론."""
     from dartlab.ai.selfai.router.engine import RouteResult
     from dartlab.ai.selfai.router.prompt import ROUTER_EXAMPLES, ROUTER_SYSTEM_PROMPT

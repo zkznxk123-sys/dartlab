@@ -26,7 +26,7 @@ from dartlab.core.finance.liquidity import capexPressure
 
 def _fetch_crisis_data(market: str, as_of: str | None = None) -> dict[str, float | list | None]:
     """gather에서 위기 감지 지표 수집."""
-    from dartlab.macro._helpers import fetch_change_pct, fetch_latest, fetch_series_list, fetch_yoy, get_gather
+    from dartlab.macro._helpers import fetch_latest, fetch_series_list, fetch_yoy, get_gather
 
     g = get_gather(as_of)
     data: dict[str, float | list | None] = {}
@@ -76,9 +76,12 @@ def _fetch_crisis_data(market: str, as_of: str | None = None) -> dict[str, float
     # Koo BSR (US)
     if market.upper() == "US":
         for label, sid in [
-            ("private_saving", "W987RC1Q027SBEA"), ("private_investment", "GPDI"),
-            ("gdp_level", "GDP"), ("fed_funds", "FEDFUNDS"),
-            ("dsr", "TDSP"), ("npl", "DRSFRMACBS"),
+            ("private_saving", "W987RC1Q027SBEA"),
+            ("private_investment", "GPDI"),
+            ("gdp_level", "GDP"),
+            ("fed_funds", "FEDFUNDS"),
+            ("dsr", "TDSP"),
+            ("npl", "DRSFRMACBS"),
         ]:
             data[label] = fetch_latest(g, sid)
         data["us_cpi_yoy"] = fetch_yoy(g, "CPIAUCSL")
@@ -96,6 +99,7 @@ def analyze_crisis(*, market: str = "US", as_of: str | None = None, overrides: d
     data = _fetch_crisis_data(market, as_of=as_of)
     if overrides:
         from dartlab.macro._helpers import apply_overrides
+
         data = apply_overrides(data, overrides)
     result: dict = {"market": market.upper()}
 

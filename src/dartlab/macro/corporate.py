@@ -20,7 +20,6 @@ from dartlab.core.finance.corporateAggregate import (
     ponziRatio,
 )
 
-
 _SCAN_CACHE: dict[str, pl.DataFrame] = {}
 
 

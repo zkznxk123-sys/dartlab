@@ -60,12 +60,12 @@ _WEIGHTS = {
 }
 
 _CHS_PD_BRACKETS = [
-    (0.001, 3),   # AAA 급
-    (0.01, 10),   # AA 급
-    (0.05, 25),   # A 급
-    (0.1, 40),    # BBB 급
-    (0.3, 60),    # BB 급
-    (1.0, 80),    # B 이하
+    (0.001, 3),  # AAA 급
+    (0.01, 10),  # AA 급
+    (0.05, 25),  # A 급
+    (0.1, 40),  # BBB 급
+    (0.3, 60),  # BB 급
+    (1.0, 80),  # B 이하
 ]
 
 
@@ -544,7 +544,14 @@ def _applyPostAdjustments(company, overall, latest, metrics, axes, captive, hold
 
     # Notch Adjustment
     notchAdj = _calcNotchAdjustment(
-        company, grade, overall, latest, metrics, holding, captive, sepMetrics,
+        company,
+        grade,
+        overall,
+        latest,
+        metrics,
+        holding,
+        captive,
+        sepMetrics,
     )
     if notchAdj["totalNotch"] != 0:
         grade = _notchGrade(grade, -notchAdj["totalNotch"])
@@ -780,7 +787,14 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
 
     # ── CHS + Notch + divergence 공통 후처리 ──
     grade, gradeDesc, pdEstimate, overall, chsResult, notchAdj, divExpl = _applyPostAdjustments(
-        company, overall, latest, metrics, axes, captive, holding, sepMetrics,
+        company,
+        overall,
+        latest,
+        metrics,
+        axes,
+        captive,
+        holding,
+        sepMetrics,
     )
 
     # ── eCR ──
@@ -882,8 +896,11 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
 
         result["narratives"] = {
             "overall": buildOverallNarrative(
-                result, narratives,
-                captive=captive, holding=holding, separateMetrics=sepMetrics,
+                result,
+                narratives,
+                captive=captive,
+                holding=holding,
+                separateMetrics=sepMetrics,
             ),
             "causalChain": causalChain,
             "profile": profileNarrative,
@@ -1194,7 +1211,14 @@ def _evaluateFinancial(
 
     # ── CHS + Notch + divergence 공통 후처리 ──
     grade, gradeDesc, pdEstimate, overall, chsResult, notchAdj, divExpl = _applyPostAdjustments(
-        company, overall, latest, metrics, axes, False, False, None,
+        company,
+        overall,
+        latest,
+        metrics,
+        axes,
+        False,
+        False,
+        None,
     )
 
     sectorLabel = f"{getSectorLabel(sector)} (Track B 금융전용)"

@@ -35,9 +35,7 @@ def _fetch_liquidity_data(market: str, as_of: str | None = None) -> dict[str, fl
     return {k: v for k, v in data.items() if v is not None}
 
 
-def analyze_liquidity(
-    *, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs
-) -> dict:
+def analyze_liquidity(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """유동성 환경 종합 분석."""
     data = _fetch_liquidity_data(market, as_of=as_of)
     if overrides:
@@ -78,9 +76,20 @@ def analyze_liquidity(
     from dartlab.core.finance.fci import calcFCI
 
     if market.upper() == "US":
-        sid_map = {"policy_rate": "FEDFUNDS", "long_rate": "DGS10", "credit_spread": "BAMLH0A0HYM2", "equity": "SP500", "fx": "DTWEXBGS"}
+        sid_map = {
+            "policy_rate": "FEDFUNDS",
+            "long_rate": "DGS10",
+            "credit_spread": "BAMLH0A0HYM2",
+            "equity": "SP500",
+            "fx": "DTWEXBGS",
+        }
     else:
-        sid_map = {"policy_rate": "BASE_RATE", "long_rate": "TREASURY_3Y", "credit_spread": "CORP_BOND_3Y", "fx": "USDKRW"}
+        sid_map = {
+            "policy_rate": "BASE_RATE",
+            "long_rate": "TREASURY_3Y",
+            "credit_spread": "CORP_BOND_3Y",
+            "fx": "USDKRW",
+        }
 
     fci_vars: dict[str, list[float]] = {}
     for key, sid in sid_map.items():
@@ -91,8 +100,10 @@ def analyze_liquidity(
     if len(fci_vars) >= 3:
         fci_result = calcFCI(fci_vars, market=market)
         result["fci"] = {
-            "value": fci_result.value, "regime": fci_result.regime,
-            "regimeLabel": fci_result.regimeLabel, "components": fci_result.components,
+            "value": fci_result.value,
+            "regime": fci_result.regime,
+            "regimeLabel": fci_result.regimeLabel,
+            "components": fci_result.components,
             "description": fci_result.description,
         }
 

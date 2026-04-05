@@ -20,8 +20,8 @@ from .charts import (
     spec_corporate_table,
     spec_cycle_indicators,
     spec_earnings_cycle,
-    spec_fear_greed_components,
     spec_fci_timeline,
+    spec_fear_greed_components,
     spec_ponzi_ratio,
     spec_recession_prob,
     spec_trade_tot,
@@ -35,7 +35,6 @@ from .narrative import (
     _narrate_trade,
     detect_conflicts,
 )
-
 
 # ══════════════════════════════════════
 # 신호등 대시보드 (0막)
@@ -82,6 +81,7 @@ def build_dashboard_blocks(summary: dict) -> list:
 
     # Nowcast (이상값 검증)
     from .narrative import _safe
+
     nc = forecast.get("nowcast") or {}
     nc_est = _safe(nc.get("gdpEstimate"), "gdpEstimate")
     if nc_est is not None:
@@ -131,10 +131,14 @@ def build_phase_blocks(summary: dict) -> list:
     if cycle_text:
         blocks.append(TextBlock(cycle_text))
 
-    blocks.append(MetricBlock([
-        ("국면", cycle.get("phaseLabel", "—")),
-        ("신뢰도", str(cycle.get("confidence", "—"))),
-    ]))
+    blocks.append(
+        MetricBlock(
+            [
+                ("국면", cycle.get("phaseLabel", "—")),
+                ("신뢰도", str(cycle.get("confidence", "—"))),
+            ]
+        )
+    )
 
     sector = cycle.get("sectorStrategy")
     if sector:
@@ -142,7 +146,11 @@ def build_phase_blocks(summary: dict) -> list:
 
     transition = cycle.get("transition")
     if transition:
-        blocks.append(TextBlock(f"전환 감지: {transition.get('from', '?')} → {transition.get('to', '?')} (진행 {transition.get('progress', '?')})"))
+        blocks.append(
+            TextBlock(
+                f"전환 감지: {transition.get('from', '?')} → {transition.get('to', '?')} (진행 {transition.get('progress', '?')})"
+            )
+        )
 
     # 사이클 지표 차트
     cycle_chart = spec_cycle_indicators(cycle.get("timeseries") or {})
@@ -167,32 +175,44 @@ def build_phase_blocks(summary: dict) -> list:
     # DKW 분해
     decomp = rates.get("decomposition")
     if decomp:
-        blocks.append(MetricBlock([
-            ("명목", f"{decomp.get('nominal', 0):.2f}%"),
-            ("실질", f"{decomp.get('realRate', 0):.2f}%"),
-            ("BEI", f"{decomp.get('expectedInflation', 0):.2f}%"),
-            ("기간프리미엄", f"{decomp.get('termPremium', 0):.2f}%"),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("명목", f"{decomp.get('nominal', 0):.2f}%"),
+                    ("실질", f"{decomp.get('realRate', 0):.2f}%"),
+                    ("BEI", f"{decomp.get('expectedInflation', 0):.2f}%"),
+                    ("기간프리미엄", f"{decomp.get('termPremium', 0):.2f}%"),
+                ]
+            )
+        )
 
     # Nelson-Siegel
     yc = rates.get("yieldCurve")
     if yc:
-        blocks.append(MetricBlock([
-            ("β0(Level)", f"{yc.get('beta0', 0):.2f}"),
-            ("β1(Slope)", f"{yc.get('beta1', 0):.2f}"),
-            ("β2(Curv)", f"{yc.get('beta2', 0):.2f}"),
-            ("RMSE", f"{yc.get('rmse', 0):.4f}"),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("β0(Level)", f"{yc.get('beta0', 0):.2f}"),
+                    ("β1(Slope)", f"{yc.get('beta1', 0):.2f}"),
+                    ("β2(Curv)", f"{yc.get('beta2', 0):.2f}"),
+                    ("RMSE", f"{yc.get('rmse', 0):.4f}"),
+                ]
+            )
+        )
         blocks.append(TextBlock(yc.get("description", "")))
 
     # BEI/실질금리 4분면
     rr = rates.get("realRateRegime")
     if rr:
-        blocks.append(MetricBlock([
-            ("실질금리", f"{rr.get('realRate', 0):.2f}%"),
-            ("BEI", f"{rr.get('bei', 0):.2f}%"),
-            ("regime", rr.get("regimeLabel", "—")),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("실질금리", f"{rr.get('realRate', 0):.2f}%"),
+                    ("BEI", f"{rr.get('bei', 0):.2f}%"),
+                    ("regime", rr.get("regimeLabel", "—")),
+                ]
+            )
+        )
 
     # 고용
     emp = rates.get("employment") or {}
@@ -218,34 +238,44 @@ def build_phase_blocks(summary: dict) -> list:
     if asset_list:
         rows = []
         for a in asset_list:
-            rows.append({
-                "자산": a.get("label", ""),
-                "수준": f"{a.get('level', 0):.2f}" if a.get("level") is not None else "—",
-                "변화": f"{a.get('change', 0):+.2f}" if a.get("change") is not None else "—",
-                "해석": a.get("interpretation", ""),
-            })
+            rows.append(
+                {
+                    "자산": a.get("label", ""),
+                    "수준": f"{a.get('level', 0):.2f}" if a.get("level") is not None else "—",
+                    "변화": f"{a.get('change', 0):+.2f}" if a.get("change") is not None else "—",
+                    "해석": a.get("interpretation", ""),
+                }
+            )
         if rows:
             blocks.append(TableBlock("5대 자산", pl.DataFrame(rows)))
 
     # 금 3요인
     gd = assets.get("goldDrivers")
     if gd:
-        blocks.append(MetricBlock([
-            ("실질금리 효과", f"{gd.get('realRateEffect', 0):+.2f}"),
-            ("달러 효과", f"{gd.get('dollarEffect', 0):+.2f}"),
-            ("안전자산 효과", f"{gd.get('safeHavenEffect', 0):+.2f}"),
-            ("지배 요인", gd.get("dominant", "—")),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("실질금리 효과", f"{gd.get('realRateEffect', 0):+.2f}"),
+                    ("달러 효과", f"{gd.get('dollarEffect', 0):+.2f}"),
+                    ("안전자산 효과", f"{gd.get('safeHavenEffect', 0):+.2f}"),
+                    ("지배 요인", gd.get("dominant", "—")),
+                ]
+            )
+        )
 
     # VIX 구간
     vr = assets.get("vixRegime")
     if vr:
         buy_sig = vr.get("buySignal", 0)
-        blocks.append(MetricBlock([
-            ("VIX", f"{vr.get('level', 0):.1f}"),
-            ("구간", vr.get("zoneLabel", "—")),
-            ("분할매수", f"{buy_sig}차" if buy_sig else "없음"),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("VIX", f"{vr.get('level', 0):.1f}"),
+                    ("구간", vr.get("zoneLabel", "—")),
+                    ("분할매수", f"{buy_sig}차" if buy_sig else "없음"),
+                ]
+            )
+        )
 
     # Cu/Au
     cu = assets.get("copperGold")
@@ -256,9 +286,13 @@ def build_phase_blocks(summary: dict) -> list:
     blocks.append(HeadingBlock("시장 심리", level=2))
     fg = sentiment.get("fearGreed")
     if fg:
-        blocks.append(MetricBlock([
-            ("공포탐욕", f"{fg.get('score', 0):.0f} ({fg.get('zoneLabel', '—')})"),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("공포탐욕", f"{fg.get('score', 0):.0f} ({fg.get('zoneLabel', '—')})"),
+                ]
+            )
+        )
         # 구성요소 분해
         comps = fg.get("components") or {}
         if comps:
@@ -278,19 +312,27 @@ def build_phase_blocks(summary: dict) -> list:
         blocks.append(HeadingBlock("재고순환", level=2))
 
     if ip.get("phase"):
-        blocks.append(MetricBlock([
-            ("국면", ip.get("phaseLabel", "—")),
-            ("비율", f"{ip.get('ratio', 0):.3f}"),
-            ("주식", ip.get("equityLabel", "—")),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("국면", ip.get("phaseLabel", "—")),
+                    ("비율", f"{ip.get('ratio', 0):.3f}"),
+                    ("주식", ip.get("equityLabel", "—")),
+                ]
+            )
+        )
         blocks.append(TextBlock(ip.get("description", "")))
 
     if ism_bar.get("level"):
-        blocks.append(MetricBlock([
-            ("ISM", f"{ism_bar['level']:.1f} ({ism_bar.get('zoneLabel', '—')})"),
-            ("주식", ism_bar.get("equityLabel", "—")),
-            ("금리", ism_bar.get("rateLabel", "—") or "—"),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("ISM", f"{ism_bar['level']:.1f} ({ism_bar.get('zoneLabel', '—')})"),
+                    ("주식", ism_bar.get("equityLabel", "—")),
+                    ("금리", ism_bar.get("rateLabel", "—") or "—"),
+                ]
+            )
+        )
 
     if ism_alloc.get("stance"):
         blocks.append(MetricBlock([("ISM 배분", f"{ism_alloc.get('stanceLabel', '—')}")]))
@@ -320,27 +362,39 @@ def build_causation_blocks(summary: dict) -> list:
 
     cg = crisis.get("creditGap")
     if cg:
-        blocks.append(MetricBlock([
-            ("Credit-to-GDP gap", f"{cg.get('gap', 0):+.1f}%p"),
-            ("구간", cg.get("zoneLabel", "—")),
-            ("CCyB", f"{cg.get('ccybBuffer', 0):.1f}%"),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("Credit-to-GDP gap", f"{cg.get('gap', 0):+.1f}%p"),
+                    ("구간", cg.get("zoneLabel", "—")),
+                    ("CCyB", f"{cg.get('ccybBuffer', 0):.1f}%"),
+                ]
+            )
+        )
 
     ghs = crisis.get("ghsScore")
     if ghs:
-        blocks.append(MetricBlock([
-            ("GHS 위기점수", f"{ghs.get('score', 0):.0f}/100"),
-            ("3년 내 위기확률", f"{ghs.get('crisisProb', 0) * 100:.0f}%"),
-            ("구간", ghs.get("zoneLabel", "—")),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("GHS 위기점수", f"{ghs.get('score', 0):.0f}/100"),
+                    ("3년 내 위기확률", f"{ghs.get('crisisProb', 0) * 100:.0f}%"),
+                    ("구간", ghs.get("zoneLabel", "—")),
+                ]
+            )
+        )
 
     # 설비투자 압력
     capex = crisis.get("capexPressure")
     if capex:
-        blocks.append(MetricBlock([
-            ("설비투자 압력", capex.get("pressureLabel", "—")),
-            ("HY 스프레드", f"{capex.get('spreadLevel', 0):.0f}bp ({capex.get('spreadChange', 0):+.0f})"),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("설비투자 압력", capex.get("pressureLabel", "—")),
+                    ("HY 스프레드", f"{capex.get('spreadLevel', 0):.0f}bp ({capex.get('spreadChange', 0):+.0f})"),
+                ]
+            )
+        )
 
     # ── 위기 프레임워크 ──
     blocks.append(HeadingBlock("위기 프레임워크", level=2))
@@ -354,37 +408,53 @@ def build_causation_blocks(summary: dict) -> list:
 
     koo = crisis.get("kooRecession")
     if koo:
-        blocks.append(MetricBlock([
-            ("Koo BSR", "활성" if koo.get("isBSR") else "비활성"),
-            ("민간잉여", f"{koo.get('privateSurplus', 0):.1f}%"),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("Koo BSR", "활성" if koo.get("isBSR") else "비활성"),
+                    ("민간잉여", f"{koo.get('privateSurplus', 0):.1f}%"),
+                ]
+            )
+        )
         if koo.get("description"):
             blocks.append(TextBlock(koo["description"]))
 
     fisher = crisis.get("fisherDeflation")
     if fisher:
-        blocks.append(MetricBlock([
-            ("Fisher", fisher.get("riskLabel", "—")),
-            ("DSR", f"{fisher.get('dsr', 0):.1f}%"),
-            ("CPI", f"{fisher.get('cpiYoy', 0):+.1f}%"),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("Fisher", fisher.get("riskLabel", "—")),
+                    ("DSR", f"{fisher.get('dsr', 0):.1f}%"),
+                    ("CPI", f"{fisher.get('cpiYoy', 0):+.1f}%"),
+                ]
+            )
+        )
 
     # 달러 안전자산
     dsh = crisis.get("dollarSafeHaven")
     if dsh:
-        blocks.append(MetricBlock([
-            ("달러 안전자산", dsh.get("statusLabel", "—")),
-            ("VIX", f"{dsh.get('vix', 0):.1f}"),
-            ("DXY 3M", f"{dsh.get('dxyChange3m', 0):+.1f}%"),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("달러 안전자산", dsh.get("statusLabel", "—")),
+                    ("VIX", f"{dsh.get('vix', 0):.1f}"),
+                    ("DXY 3M", f"{dsh.get('dxyChange3m', 0):+.1f}%"),
+                ]
+            )
+        )
 
     # KR 특화
     kr_housing = crisis.get("krHousingStress")
     if kr_housing:
-        blocks.append(MetricBlock([
-            ("부동산 스트레스", kr_housing.get("stressLabel", "—")),
-            ("아파트 YoY", f"{kr_housing.get('housePriceYoy', 0):+.1f}%"),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("부동산 스트레스", kr_housing.get("stressLabel", "—")),
+                    ("아파트 YoY", f"{kr_housing.get('housePriceYoy', 0):+.1f}%"),
+                ]
+            )
+        )
 
     kr_credit = crisis.get("krCreditRisk")
     if kr_credit:
@@ -392,10 +462,14 @@ def build_causation_blocks(summary: dict) -> list:
 
     # ── 유동성 상세 ──
     blocks.append(HeadingBlock("유동성 환경", level=2))
-    blocks.append(MetricBlock([
-        ("regime", liquidity.get("regimeLabel", "—")),
-        ("score", f"{liquidity.get('score', 0):+.1f}"),
-    ]))
+    blocks.append(
+        MetricBlock(
+            [
+                ("regime", liquidity.get("regimeLabel", "—")),
+                ("score", f"{liquidity.get('score', 0):+.1f}"),
+            ]
+        )
+    )
 
     # NFCI
     nfci = liquidity.get("nfci")
@@ -428,20 +502,32 @@ def build_causation_blocks(summary: dict) -> list:
             blocks.append(TextBlock(corp_text))
 
         if ec:
-            blocks.append(MetricBlock([
-                ("이익사이클", ec.get("currentLabel", "—")),
-                ("종목수", str(ec.get("companyCount", "—"))),
-            ]))
+            blocks.append(
+                MetricBlock(
+                    [
+                        ("이익사이클", ec.get("currentLabel", "—")),
+                        ("종목수", str(ec.get("companyCount", "—"))),
+                    ]
+                )
+            )
         if pr:
-            blocks.append(MetricBlock([
-                ("Ponzi비율", f"{pr.get('currentRatio', 0):.1%}"),
-                ("추세", pr.get("trendLabel", "—")),
-            ]))
+            blocks.append(
+                MetricBlock(
+                    [
+                        ("Ponzi비율", f"{pr.get('currentRatio', 0):.1%}"),
+                        ("추세", pr.get("trendLabel", "—")),
+                    ]
+                )
+            )
         if lc:
-            blocks.append(MetricBlock([
-                ("레버리지", f"{lc.get('currentLevel', 0):.1f}%"),
-                ("추세", lc.get("trendLabel", "—")),
-            ]))
+            blocks.append(
+                MetricBlock(
+                    [
+                        ("레버리지", f"{lc.get('currentLevel', 0):.1f}%"),
+                        ("추세", lc.get("trendLabel", "—")),
+                    ]
+                )
+            )
 
         # 기업집계 시계열 테이블
         corp_table = spec_corporate_table(corporate)
@@ -513,12 +599,17 @@ def build_outlook_blocks(summary: dict) -> list:
     # Nowcast (이상값 검증)
     if nc:
         from .narrative import _safe
+
         gdp_est = _safe(nc.get("gdpEstimate"), "gdpEstimate")
         if gdp_est is not None:
-            blocks.append(MetricBlock([
-                ("GDP Nowcast", f"{gdp_est:.2f}%"),
-                ("신뢰도", nc.get("confidence", "—")),
-            ]))
+            blocks.append(
+                MetricBlock(
+                    [
+                        ("GDP Nowcast", f"{gdp_est:.2f}%"),
+                        ("신뢰도", nc.get("confidence", "—")),
+                    ]
+                )
+            )
 
     # 침체확률 차트
     rc_chart = spec_recession_prob(forecast)
@@ -529,9 +620,14 @@ def build_outlook_blocks(summary: dict) -> list:
     dashboard = crisis.get("recessionDashboard") or {}
     dash_comps = dashboard.get("components") or {}
     if dash_comps:
-        blocks.append(MetricBlock([
-            ("종합", f"{dashboard.get('composite', 0) * 100:.1f}% ({dashboard.get('zoneLabel', '')})"),
-        ] + [(k, f"{v * 100:.1f}%") for k, v in dash_comps.items()]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("종합", f"{dashboard.get('composite', 0) * 100:.1f}% ({dashboard.get('zoneLabel', '')})"),
+                ]
+                + [(k, f"{v * 100:.1f}%") for k, v in dash_comps.items()]
+            )
+        )
 
     # ── 교차 분석: 모순/확인 ──
     conflicts = detect_conflicts(summary)
@@ -548,23 +644,35 @@ def build_outlook_blocks(summary: dict) -> list:
     tot = trade.get("termsOfTrade")
     if tot:
         blocks.append(HeadingBlock("교역 전망", level=2))
-        blocks.append(MetricBlock([
-            ("교역조건", f"{tot.get('level', 0):.1f} ({tot.get('directionLabel', '—')})"),
-            ("모멘텀", f"{tot.get('momentum', 0):+.1f}"),
-            ("수출이익", tot.get("earningsLabel", "—")),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("교역조건", f"{tot.get('level', 0):.1f} ({tot.get('directionLabel', '—')})"),
+                    ("모멘텀", f"{tot.get('momentum', 0):+.1f}"),
+                    ("수출이익", tot.get("earningsLabel", "—")),
+                ]
+            )
+        )
 
     tp = trade.get("totProxy")
     if tp:
-        blocks.append(MetricBlock([
-            ("ToT 대용치", f"{tp.get('value', 0):+.1f}%p ({tp.get('directionLabel', '—')})"),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("ToT 대용치", f"{tp.get('value', 0):+.1f}%p ({tp.get('directionLabel', '—')})"),
+                ]
+            )
+        )
 
     ep = trade.get("exportProfit")
     if ep:
-        blocks.append(MetricBlock([
-            ("수출이익 선행", f"{ep.get('signalLabel', '—')} ({ep.get('confidence', '')})"),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("수출이익 선행", f"{ep.get('signalLabel', '—')} ({ep.get('confidence', '')})"),
+                ]
+            )
+        )
 
     lrs = trade.get("leadingRelativeStrength")
     if lrs:
@@ -610,23 +718,31 @@ def build_allocation_blocks(summary: dict) -> list:
 
     if allocation:
         blocks.append(HeadingBlock("포트폴리오 매핑", level=2))
-        blocks.append(MetricBlock([
-            ("주식", f"{allocation.get('equity', 0)}%"),
-            ("채권", f"{allocation.get('bond', 0)}%"),
-            ("금", f"{allocation.get('gold', 0)}%"),
-            ("현금", f"{allocation.get('cash', 0)}%"),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("주식", f"{allocation.get('equity', 0)}%"),
+                    ("채권", f"{allocation.get('bond', 0)}%"),
+                    ("금", f"{allocation.get('gold', 0)}%"),
+                    ("현금", f"{allocation.get('cash', 0)}%"),
+                ]
+            )
+        )
         rationale = allocation.get("rationale") or []
         for r in rationale:
             blocks.append(TextBlock(r))
 
     if strategies:
         blocks.append(HeadingBlock("투자전략", level=2))
-        blocks.append(MetricBlock([
-            ("활성", f"{strategies.get('active', 0)}/{strategies.get('total', 40)}"),
-            ("Bullish", str(strategies.get("bullish", 0))),
-            ("Bearish", str(strategies.get("bearish", 0))),
-        ]))
+        blocks.append(
+            MetricBlock(
+                [
+                    ("활성", f"{strategies.get('active', 0)}/{strategies.get('total', 40)}"),
+                    ("Bullish", str(strategies.get("bullish", 0))),
+                    ("Bearish", str(strategies.get("bearish", 0))),
+                ]
+            )
+        )
 
         # Bullish 전략 테이블
         sigs = strategies.get("signals") or []
@@ -636,7 +752,15 @@ def build_allocation_blocks(summary: dict) -> list:
         def _strat_table(items, label):
             if not items:
                 return
-            rows = [{"#": s.get("id", ""), "전략": s.get("name", ""), "강도": f"{s.get('strength', 0):.2f}", "설명": s.get("description", "")[:40]} for s in sorted(items, key=lambda x: -(x.get("strength") or 0))]
+            rows = [
+                {
+                    "#": s.get("id", ""),
+                    "전략": s.get("name", ""),
+                    "강도": f"{s.get('strength', 0):.2f}",
+                    "설명": s.get("description", "")[:40],
+                }
+                for s in sorted(items, key=lambda x: -(x.get("strength") or 0))
+            ]
             blocks.append(TableBlock(label, pl.DataFrame(rows)))
 
         _strat_table(bullish, "Bullish 전략")

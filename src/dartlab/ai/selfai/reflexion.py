@@ -70,10 +70,7 @@ def _lookupRecoveryHints(error_text: str, code: str) -> str:
     hints = []
     for p in patterns:
         if p.correct_code:
-            hints.append(
-                f"- **{p.error_type}** (발생 {p.frequency}회): "
-                f"`{p.wrong_code}` → `{p.correct_code}`"
-            )
+            hints.append(f"- **{p.error_type}** (발생 {p.frequency}회): `{p.wrong_code}` → `{p.correct_code}`")
 
     return "\n".join(hints) if hints else ""
 
@@ -85,15 +82,13 @@ _QUICK_RULES: list[tuple[re.Pattern, str, str]] = [
     (
         re.compile(r"analysis\(\) .*(takes|missing).*positional argument", re.IGNORECASE),
         r'\.analysis\("(\w+)"\)',
-        'analysis()는 2인자 필수: c.analysis("financial", "수익성"). '
-        "그룹: financial, valuation, forecast",
+        'analysis()는 2인자 필수: c.analysis("financial", "수익성"). 그룹: financial, valuation, forecast',
     ),
     # macro keyword arg
     (
         re.compile(r"macro\(\) got an unexpected keyword argument", re.IGNORECASE),
         r"macro\(",
-        'macro()는 위치인자만: dartlab.macro("사이클"). '
-        "축: 사이클, 금리, 자산, 심리, 유동성, 종합",
+        'macro()는 위치인자만: dartlab.macro("사이클"). 축: 사이클, 금리, 자산, 심리, 유동성, 종합',
     ),
     # Polars .empty
     (

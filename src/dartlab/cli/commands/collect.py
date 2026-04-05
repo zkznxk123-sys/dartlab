@@ -462,6 +462,8 @@ def _runEdgarUncollected(console, args) -> int:
     tier = getattr(args, "tier", None) or "sp500"
     limit = args.limit or 20
 
+    import polars as pl
+
     df = scanEdgarMarketFreshness(tier=tier)
     uncollected = df.filter(pl.col("status") != "complete")
 

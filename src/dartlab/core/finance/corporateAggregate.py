@@ -13,7 +13,6 @@ from dataclasses import dataclass
 
 import polars as pl
 
-
 # ══════════════════════════════════════
 # 데이터 구조
 # ══════════════════════════════════════

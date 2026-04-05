@@ -126,7 +126,6 @@ def notesByCategory(
         category=None: 데이터 있는 카테고리 dict.
     """
     from dartlab.providers.edgar.docs.notesParsers import (
-        availableCategories,
         extractNoteCategory,
     )
 

@@ -251,7 +251,9 @@ def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: 
             "overall": overall,
             "cycle": cycle,
             "sentiment": sentiment,
-            "liquidity": liquidity if isinstance(liquidity, dict) else {"regime": liquidity.get("regime") if isinstance(liquidity, dict) else ""},
+            "liquidity": liquidity
+            if isinstance(liquidity, dict)
+            else {"regime": liquidity.get("regime") if isinstance(liquidity, dict) else ""},
             "crisis": crisis_result,
         }
         alloc = regimeToAllocation(alloc_input)

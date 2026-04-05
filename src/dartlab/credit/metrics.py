@@ -463,7 +463,11 @@ def _fetchSegmentComposition(company) -> dict | None:
         # 최신 연도에 유효 데이터가 2개 미만이면 차선 연도 사용
         latestYear = yearCols[0]
         for yc in yearCols:
-            validCount = sum(1 for row in df.iter_rows(named=True) if row.get(yc) is not None and isinstance(row.get(yc), (int, float)) and row.get(yc) > 0)
+            validCount = sum(
+                1
+                for row in df.iter_rows(named=True)
+                if row.get(yc) is not None and isinstance(row.get(yc), (int, float)) and row.get(yc) > 0
+            )
             if validCount >= 2:
                 latestYear = yc
                 break

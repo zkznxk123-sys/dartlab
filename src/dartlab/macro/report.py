@@ -69,10 +69,16 @@ def macroReport(
     # 0. 신호등 대시보드
     m = meta["dashboard"]
     dashboard_blocks = build_dashboard_blocks(summary)
-    sections.append(Section(
-        key=m.key, partId=m.partId, title=m.title,
-        blocks=dashboard_blocks, helper=m.helper, aiGuide=m.aiGuide,
-    ))
+    sections.append(
+        Section(
+            key=m.key,
+            partId=m.partId,
+            title=m.title,
+            blocks=dashboard_blocks,
+            helper=m.helper,
+            aiGuide=m.aiGuide,
+        )
+    )
 
     # 1. 제1막: 국면 진단
     m = meta["phase"]
@@ -80,10 +86,16 @@ def macroReport(
     transition_1 = generate_act_transition(1, summary)
     if transition_1:
         phase_blocks.append(TextBlock(transition_1, style="transition"))
-    sections.append(Section(
-        key=m.key, partId=m.partId, title=m.title,
-        blocks=phase_blocks, helper=m.helper, aiGuide=m.aiGuide,
-    ))
+    sections.append(
+        Section(
+            key=m.key,
+            partId=m.partId,
+            title=m.title,
+            blocks=phase_blocks,
+            helper=m.helper,
+            aiGuide=m.aiGuide,
+        )
+    )
 
     # 2. 제2막: 인과 역추적
     m = meta["causation"]
@@ -91,18 +103,30 @@ def macroReport(
     transition_2 = generate_act_transition(2, summary)
     if transition_2:
         causation_blocks.append(TextBlock(transition_2, style="transition"))
-    sections.append(Section(
-        key=m.key, partId=m.partId, title=m.title,
-        blocks=causation_blocks, helper=m.helper, aiGuide=m.aiGuide,
-    ))
+    sections.append(
+        Section(
+            key=m.key,
+            partId=m.partId,
+            title=m.title,
+            blocks=causation_blocks,
+            helper=m.helper,
+            aiGuide=m.aiGuide,
+        )
+    )
 
     # 3. 제3막: 전망과 리스크
     m = meta["outlook"]
     outlook_blocks = build_outlook_blocks(summary)
-    sections.append(Section(
-        key=m.key, partId=m.partId, title=m.title,
-        blocks=outlook_blocks, helper=m.helper, aiGuide=m.aiGuide,
-    ))
+    sections.append(
+        Section(
+            key=m.key,
+            partId=m.partId,
+            title=m.title,
+            blocks=outlook_blocks,
+            helper=m.helper,
+            aiGuide=m.aiGuide,
+        )
+    )
 
     # 4. 자산배분 시사점
     m = meta["allocation"]
@@ -110,10 +134,16 @@ def macroReport(
     so_what = generate_so_what(summary)
     if so_what:
         allocation_blocks.append(TextBlock(so_what, style="sowhat"))
-    sections.append(Section(
-        key=m.key, partId=m.partId, title=m.title,
-        blocks=allocation_blocks, helper=m.helper, aiGuide=m.aiGuide,
-    ))
+    sections.append(
+        Section(
+            key=m.key,
+            partId=m.partId,
+            title=m.title,
+            blocks=allocation_blocks,
+            helper=m.helper,
+            aiGuide=m.aiGuide,
+        )
+    )
 
     # ── Review 조립 ──
     from dartlab.review import Review

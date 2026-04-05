@@ -23,8 +23,14 @@ class StrategySignal:
 
 
 def _sig(
-    id: int, name: str, active: bool | None, direction: str, description: str,
-    *, strength: float = 0.5, confidence: str = "medium",
+    id: int,
+    name: str,
+    active: bool | None,
+    direction: str,
+    description: str,
+    *,
+    strength: float = 0.5,
+    confidence: str = "medium",
 ) -> StrategySignal:
     """전략 신호 생성 헬퍼."""
     if active is None or active is False:
@@ -62,13 +68,17 @@ def evaluateStrategies(macroData: dict) -> list[StrategySignal]:
     rp = forecast.get("recessionProb") or {}
     rate_dir = (rates.get("outlook") or {}).get("direction")
     prob_val = rp.get("probability", 0.5)
-    results.append(_sig(1, "금리 = 전기비 성장률 결정",
-        active=rate_dir is not None,
-        direction="bearish" if rate_dir == "hike" else ("bullish" if rate_dir == "cut" else "neutral"),
-        description=f"금리방향: {rate_dir or '판별불가'}, 침체확률: {prob_val}",
-        strength=min(1.0, abs(prob_val - 0.5) * 2) if isinstance(prob_val, (int, float)) else 0.5,
-        confidence="high" if rate_dir in ("cut", "hike") else "low",
-    ))
+    results.append(
+        _sig(
+            1,
+            "금리 = 전기비 성장률 결정",
+            active=rate_dir is not None,
+            direction="bearish" if rate_dir == "hike" else ("bullish" if rate_dir == "cut" else "neutral"),
+            description=f"금리방향: {rate_dir or '판별불가'}, 침체확률: {prob_val}",
+            strength=min(1.0, abs(prob_val - 0.5) * 2) if isinstance(prob_val, (int, float)) else 0.5,
+            confidence="high" if rate_dir in ("cut", "hike") else "low",
+        )
+    )
 
     # 전략 2: 주가지수 ≈ 명목GDP
     nowcast = forecast.get("nowcast") or {}
@@ -317,9 +327,7 @@ def evaluateStrategies(macroData: dict) -> list[StrategySignal]:
         )
     else:
         results.append(
-            _sig(
-                18, "한국물가 = 환율+유가", active=False, direction="neutral", description="환율/유가 데이터 없음"
-            )
+            _sig(18, "한국물가 = 환율+유가", active=False, direction="neutral", description="환율/유가 데이터 없음")
         )
 
     # 전략 19-22: 금리/통화정책

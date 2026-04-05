@@ -69,7 +69,7 @@ def _ollamaCodeGen(item: dict) -> str | None:
             "코드만 출력하고 설명은 하지 마라.\n\n"
             "사용 가능한 도구:\n"
             '- c.analysis("financial", "축") — 재무분석 (축: 수익성, 성장성, 안정성 등)\n'
-            '- c.credit(detail=True) — 신용등급\n'
+            "- c.credit(detail=True) — 신용등급\n"
             '- dartlab.scan("축") — 시장비교\n'
             '- dartlab.macro("축") — 매크로 (축: 사이클, 금리, 자산, 심리, 유동성)\n'
             '- c.gather("price") — 주가\n'

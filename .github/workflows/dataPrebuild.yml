@@ -11,6 +11,10 @@ on:
     types: [completed]
   workflow_dispatch:
 
+concurrency:
+  group: data-prebuild
+  cancel-in-progress: true
+
 permissions:
   contents: write
 

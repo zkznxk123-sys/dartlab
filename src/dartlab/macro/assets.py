@@ -45,6 +45,7 @@ def analyze_assets(*, market: str = "US", as_of: str | None = None, overrides: d
     data = _fetch_asset_data(market, as_of=as_of)
     if overrides:
         from dartlab.macro._helpers import apply_overrides
+
         data = apply_overrides(data, overrides)
     result: dict = {"market": market.upper()}
 

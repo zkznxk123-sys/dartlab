@@ -21,8 +21,11 @@ def _fetch_ism_data(market: str, as_of: str | None = None) -> dict[str, float | 
 
     if market.upper() == "US":
         for label, sid in [
-            ("ism_pmi", "NAPM"), ("ism_new_orders", "NAPMNOI"), ("ism_inventories", "NAPMII"),
-            ("new_orders", "NEWORDER"), ("inventories", "BUSINV"),
+            ("ism_pmi", "NAPM"),
+            ("ism_new_orders", "NAPMNOI"),
+            ("ism_inventories", "NAPMII"),
+            ("new_orders", "NEWORDER"),
+            ("inventories", "BUSINV"),
         ]:
             val, prev = fetch_latest_with_prev(g, sid)
             if val is not None:
@@ -49,6 +52,7 @@ def analyze_inventory(*, market: str = "US", as_of: str | None = None, overrides
     data = _fetch_ism_data(market, as_of=as_of)
     if overrides:
         from dartlab.macro._helpers import apply_overrides
+
         data = apply_overrides(data, overrides)
     result: dict = {"market": market.upper()}
 
@@ -160,7 +164,9 @@ def analyze_inventory(*, market: str = "US", as_of: str | None = None, overrides
 
     g = get_gather(as_of)
     if market.upper() == "US":
-        result["timeseries"] = collect_timeseries(g, {"ism_pmi": "NAPM", "new_orders": "NAPMNOI", "inventories": "NAPMII"})
+        result["timeseries"] = collect_timeseries(
+            g, {"ism_pmi": "NAPM", "new_orders": "NAPMNOI", "inventories": "NAPMII"}
+        )
     else:
         result["timeseries"] = collect_timeseries(g, {"manufacturing": "MANUFACTURING", "bsi": "BSI_ALL"})
 

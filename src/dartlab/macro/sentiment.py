@@ -39,9 +39,7 @@ def _fetch_sentiment_data(market: str, as_of: str | None = None) -> dict[str, fl
     return data
 
 
-def analyze_sentiment(
-    *, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs
-) -> dict:
+def analyze_sentiment(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """시장 심리 종합 분석."""
     data = _fetch_sentiment_data(market, as_of=as_of)
     if overrides:
@@ -54,7 +52,10 @@ def analyze_sentiment(
     if vix is not None and sp_ratio is not None and hy is not None:
         fg = calcFearGreedProxy(vix, sp_ratio, hy, data.get("gold_equity_ratio"))
         result["fearGreed"] = {
-            "score": fg.score, "zone": fg.zone, "zoneLabel": fg.zoneLabel, "components": fg.components,
+            "score": fg.score,
+            "zone": fg.zone,
+            "zoneLabel": fg.zoneLabel,
+            "components": fg.components,
         }
     else:
         result["fearGreed"] = None

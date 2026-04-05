@@ -11,6 +11,7 @@ on:
     - cron: '0 20 * * *'  # UTC 20:00 = KST 05:00, 일일 감사
   workflow_dispatch:
     inputs:
+
       mode:
         description: 'audit (감사만) / full (수집+프리빌드+감사)'
         default: 'audit'
@@ -21,6 +22,10 @@ on:
         default: 'all'
         type: choice
         options: [all, finance, report, docs]
+
+concurrency:
+  group: data-pipeline
+  cancel-in-progress: false
 
 permissions:
   contents: write

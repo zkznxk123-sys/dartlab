@@ -129,7 +129,9 @@ def spec_corporate_table(corporate: dict) -> list[dict] | None:
     for i, period in enumerate(ec["periods"]):
         row = {"연도": period}
         if ec.get("totalOperatingIncome"):
-            row["영업이익(억)"] = f"{ec['totalOperatingIncome'][i]:,.0f}" if i < len(ec["totalOperatingIncome"]) else "—"
+            row["영업이익(억)"] = (
+                f"{ec['totalOperatingIncome'][i]:,.0f}" if i < len(ec["totalOperatingIncome"]) else "—"
+            )
         if ec.get("yoyChanges"):
             yoy = ec["yoyChanges"][i] if i < len(ec["yoyChanges"]) else None
             row["YoY"] = f"{yoy:+.1f}%" if yoy else "—"

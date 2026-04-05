@@ -25,9 +25,18 @@ def _fetch_forecast_data(market: str, as_of: str | None = None) -> dict[str, flo
 
     if market.upper() == "US":
         for label, sid in [
-            ("t10y3m", "T10Y3M"), ("awhman", "AWHMAN"), ("icsa", "ICSA"), ("acogno", "ACOGNO"),
-            ("napmnoi", "NAPMNOI"), ("acdgno", "ACDGNO"), ("permit", "PERMIT"), ("sp500", "SP500"),
-            ("m2real", "M2REAL"), ("umcsent", "UMCSENT"), ("fedfunds", "FEDFUNDS"), ("dgs10", "DGS10"),
+            ("t10y3m", "T10Y3M"),
+            ("awhman", "AWHMAN"),
+            ("icsa", "ICSA"),
+            ("acogno", "ACOGNO"),
+            ("napmnoi", "NAPMNOI"),
+            ("acdgno", "ACDGNO"),
+            ("permit", "PERMIT"),
+            ("sp500", "SP500"),
+            ("m2real", "M2REAL"),
+            ("umcsent", "UMCSENT"),
+            ("fedfunds", "FEDFUNDS"),
+            ("dgs10", "DGS10"),
         ]:
             hist = fetch_with_history(g, sid)
             if "current" in hist:
@@ -66,6 +75,7 @@ def analyze_forecast(*, market: str = "US", as_of: str | None = None, overrides:
     data = _fetch_forecast_data(market, as_of=as_of)
     if overrides:
         from dartlab.macro._helpers import apply_overrides
+
         data = apply_overrides(data, overrides)
     result: dict = {"market": market.upper()}
 
@@ -187,8 +197,11 @@ def analyze_forecast(*, market: str = "US", as_of: str | None = None, overrides:
         if ur_vals and len(ur_vals) >= 15:
             sr = sahmRule(ur_vals)
             result["sahmRule"] = {
-                "value": sr.value, "triggered": sr.triggered,
-                "zone": sr.zone, "zoneLabel": sr.zoneLabel, "description": sr.description,
+                "value": sr.value,
+                "triggered": sr.triggered,
+                "zone": sr.zone,
+                "zoneLabel": sr.zoneLabel,
+                "description": sr.description,
             }
 
     # ── Hamilton Regime Switching ──
@@ -213,6 +226,7 @@ def analyze_forecast(*, market: str = "US", as_of: str | None = None, overrides:
             }
         except (ValueError, RuntimeError, np.linalg.LinAlgError) as e:
             import logging
+
             logging.getLogger(__name__).warning("Hamilton RS 실패: %s", e)
 
     # ── GDP Nowcasting (DFM) ──
@@ -227,8 +241,10 @@ def analyze_forecast(*, market: str = "US", as_of: str | None = None, overrides:
                 indicators_arr = np.column_stack([s[-min_len:] for s in valid])
                 nc = gdpNowcast(indicators_arr, nFactors=1, arOrder=1, maxIter=30)
                 result["nowcast"] = {
-                    "gdpEstimate": nc.gdpEstimate, "confidence": nc.confidence,
-                    "factorCurrent": nc.factorCurrent, "converged": nc.converged,
+                    "gdpEstimate": nc.gdpEstimate,
+                    "confidence": nc.confidence,
+                    "factorCurrent": nc.factorCurrent,
+                    "converged": nc.converged,
                     "description": nc.description,
                 }
 

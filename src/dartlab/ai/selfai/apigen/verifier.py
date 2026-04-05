@@ -85,9 +85,7 @@ def verifyBatch(
     failed = 0
     total = min(len(items), max_items or len(items))
 
-    with open(verified_path, "w", encoding="utf-8") as vf, \
-         open(failed_path, "w", encoding="utf-8") as ff:
-
+    with open(verified_path, "w", encoding="utf-8") as vf, open(failed_path, "w", encoding="utf-8") as ff:
         for i, item in enumerate(items[:total]):
             if i > 0 and i % 50 == 0:
                 log.info("검증 진행: %d/%d (verified=%d, failed=%d)", i, total, verified, failed)

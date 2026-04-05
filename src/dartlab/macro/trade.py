@@ -38,15 +38,18 @@ def _mom(series: list[float]) -> float | None:
 
 def _fetch_trade_data(market: str, as_of: str | None = None) -> dict[str, float | list | None]:
     """gather에서 교역/환율/유가 지표 수집."""
-    from dartlab.macro._helpers import fetch_latest_with_prev, fetch_series_list, get_gather
+    from dartlab.macro._helpers import fetch_series_list, get_gather
 
     g = get_gather(as_of)
     data: dict[str, float | list | None] = {}
 
     if market.upper() == "KR":
         for label, sid in [
-            ("export_price", "EXPORT_PRICE"), ("import_price", "IMPORT_PRICE"),
-            ("export_vol", "EXPORT"), ("usdkrw", "USDKRW"), ("cli", "CLI"),
+            ("export_price", "EXPORT_PRICE"),
+            ("import_price", "IMPORT_PRICE"),
+            ("export_vol", "EXPORT"),
+            ("usdkrw", "USDKRW"),
+            ("cli", "CLI"),
         ]:
             series = fetch_series_list(g, sid)
             if series:
@@ -75,6 +78,7 @@ def analyze_trade(*, market: str = "US", as_of: str | None = None, overrides: di
     data = _fetch_trade_data(market, as_of=as_of)
     if overrides:
         from dartlab.macro._helpers import apply_overrides
+
         data = apply_overrides(data, overrides)
     result: dict = {"market": market.upper()}
 
@@ -190,7 +194,9 @@ def analyze_trade(*, market: str = "US", as_of: str | None = None, overrides: di
     g_ts = get_gather(as_of)
     ts_map = {"oil": "DCOILWTICO"}
     if market.upper() == "KR":
-        ts_map.update({"export_price": "EXPORT_PRICE", "import_price": "IMPORT_PRICE", "usdkrw": "USDKRW", "export": "EXPORT"})
+        ts_map.update(
+            {"export_price": "EXPORT_PRICE", "import_price": "IMPORT_PRICE", "usdkrw": "USDKRW", "export": "EXPORT"}
+        )
     result["timeseries"] = collect_timeseries(g_ts, ts_map)
 
     return result

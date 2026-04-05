@@ -43,9 +43,7 @@ def _fetch_indicators(market: str, as_of: str | None = None) -> dict[str, float 
     return {k: v for k, v in indicators.items() if v is not None}
 
 
-def analyze_cycle(
-    *, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs
-) -> dict:
+def analyze_cycle(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """경제 사이클 분석."""
     indicators = _fetch_indicators(market, as_of=as_of)
     if overrides:
@@ -74,10 +72,13 @@ def analyze_cycle(
         }
 
     g = get_gather(as_of)
-    result["timeseries"] = collect_timeseries(g, {
-        "hy_spread": "BAMLH0A0HYM2",
-        "vix": "VIXCLS",
-        "term_spread": "T10Y2Y",
-    })
+    result["timeseries"] = collect_timeseries(
+        g,
+        {
+            "hy_spread": "BAMLH0A0HYM2",
+            "vix": "VIXCLS",
+            "term_spread": "T10Y2Y",
+        },
+    )
 
     return result

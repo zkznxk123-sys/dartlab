@@ -1,4 +1,9 @@
-"""현금흐름 패턴 분류 — OCF/ICF/FCF + 라이프사이클 패턴."""
+"""현금흐름 패턴 분류 — OCF/ICF/FCF + 라이프사이클 패턴.
+
+Note: 여기서 FCF는 OCF + ICF (투자활동 후 잔여현금)이다.
+analysis의 FCF(OCF - CAPEX)와 다르다.
+프리빌드 parquet에서 CAPEX를 개별 추출할 수 없으므로 ICF 전체를 사용한다.
+"""
 
 from __future__ import annotations
 

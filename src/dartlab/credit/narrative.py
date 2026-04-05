@@ -495,16 +495,23 @@ def buildNarratives(
 
     return [
         narrateRepayment(
-            latest, _axisScore("채무상환능력"), sector,
-            captive=captive, separateMetrics=separateMetrics,
+            latest,
+            _axisScore("채무상환능력"),
+            sector,
+            captive=captive,
+            separateMetrics=separateMetrics,
         ),
         narrateCapitalStructure(
-            latest, _axisScore("자본구조"),
-            captive=captive, separateMetrics=separateMetrics,
+            latest,
+            _axisScore("자본구조"),
+            captive=captive,
+            separateMetrics=separateMetrics,
         ),
         narrateLiquidity(latest, _axisScore("유동성")),
         narrateCashFlow(
-            latest, _axisScore("현금흐름"), {"history": metricsHistory},
+            latest,
+            _axisScore("현금흐름"),
+            {"history": metricsHistory},
             captive=captive,
         ),
         narrateBusinessStability(biz or {}, _axisScore("사업안정성")),
@@ -803,7 +810,7 @@ def buildOverallNarrative(
             intro += f"[{chainParts[0]}]에서 출발하는 [{chainParts[1]}]이 [{chainParts[2]}]를 유지하게 하고, "
             if len(chainParts) >= 4:
                 intro += f"[{chainParts[3]}]가 "
-            intro += f"등급을 뒷받침하는 구조를 반영한다."
+            intro += "등급을 뒷받침하는 구조를 반영한다."
         else:
             intro += f"[{chainParts[0]}]에서 비롯된 [{chainParts[1]}]이 등급을 뒷받침한다."
         parts.append(intro)

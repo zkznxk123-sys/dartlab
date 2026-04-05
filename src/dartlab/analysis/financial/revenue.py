@@ -92,6 +92,7 @@ def _selectEdgarSegmentRevenue(
 
     try:
         import polars as pl
+
         from dartlab.providers.edgar.report import edgarFinancePath
 
         path = edgarFinancePath(cik)

@@ -8,10 +8,9 @@
 
 from __future__ import annotations
 
-import json
 import logging
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 log = logging.getLogger(__name__)
 
@@ -47,7 +46,14 @@ class RouteResult:
 # (패턴, 도구, 그룹, 축, needs_company, 신뢰도)
 _RULES: list[tuple[re.Pattern, str, str | None, str | None, bool, float]] = [
     # scan — analysis보다 먼저 매칭 (시장 비교 키워드가 우선)
-    (re.compile(r"TOP\s*\d|순위|랭킹|시장.*비교|전종목|좋은.*회사|찾아줘.*회사", re.I), "scan", None, "profitability", False, 0.90),
+    (
+        re.compile(r"TOP\s*\d|순위|랭킹|시장.*비교|전종목|좋은.*회사|찾아줘.*회사", re.I),
+        "scan",
+        None,
+        "profitability",
+        False,
+        0.90,
+    ),
     (re.compile(r"배당.*많|배당.*높|배당.*순위|배당.*찾", re.I), "scan", None, "capital", False, 0.90),
     (re.compile(r"부채.*위험|부채.*높|debt.*risk|위험.*회사", re.I), "scan", None, "debt", False, 0.90),
     (re.compile(r"지배구조.*좋|governance.*좋", re.I), "scan", None, "governance", False, 0.90),
@@ -92,7 +98,14 @@ _RULES: list[tuple[re.Pattern, str, str | None, str | None, bool, float]] = [
     # show/select
     (re.compile(r"재무제표|BS|IS|CF|재고자산|주석|notes", re.I), "show", None, None, True, 0.80),
     # 종합 분석 (마지막 — 다른 규칙에 안 걸리면)
-    (re.compile(r"분석.*해|어때|괜찮|종합|전반|투자.*해도|사도.*될|살만", re.I), "analysis", "financial", "종합", True, 0.75),
+    (
+        re.compile(r"분석.*해|어때|괜찮|종합|전반|투자.*해도|사도.*될|살만", re.I),
+        "analysis",
+        "financial",
+        "종합",
+        True,
+        0.75,
+    ),
     # 비교
     (re.compile(r"(랑|와|과|하고|vs).*비교", re.I), "analysis", "financial", "비교", True, 0.70),
 ]
@@ -119,21 +132,17 @@ def _code_for_route(r: RouteResult, stock_code: str | None = None) -> str:
             f'growth = c.analysis("financial", "성장성")\n'
             f'stab = c.analysis("financial", "안정성")\n'
             f'print(prof["marginTrend"]["history"][:3])\n'
-            f'print(growth.keys())\n'
-            f'print(stab.keys())'
+            f"print(growth.keys())\n"
+            f"print(stab.keys())"
         )
 
     if r.tool == "analysis":
         group = r.group or "financial"
         axis = r.axis or "수익성"
-        return (
-            f'c = dartlab.Company("{sc}")\n'
-            f'r = c.analysis("{group}", "{axis}")\n'
-            f"print(r.keys())"
-        )
+        return f'c = dartlab.Company("{sc}")\nr = c.analysis("{group}", "{axis}")\nprint(r.keys())'
 
     if r.tool == "credit":
-        return f'c = dartlab.Company("{sc}")\ncr = c.credit(detail=True)\nprint(f"등급: {{cr[\'grade\']}}, 건전도: {{cr[\'healthScore\']}}/100")'
+        return f"c = dartlab.Company(\"{sc}\")\ncr = c.credit(detail=True)\nprint(f\"등급: {{cr['grade']}}, 건전도: {{cr['healthScore']}}/100\")"
 
     if r.tool == "scan":
         axis = r.axis or "profitability"

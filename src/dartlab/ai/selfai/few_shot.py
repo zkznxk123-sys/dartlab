@@ -41,11 +41,7 @@ def getFewShots(question: str, *, limit: int = 2) -> str:
         tools = json.loads(skill.tools_used) if skill.tools_used else []
         tools_str = ", ".join(tools) if tools else "?"
 
-        block = (
-            f"\n### Q: {skill.question}\n"
-            f"도구: {tools_str}\n"
-            f"```python\n{skill.code_template}\n```\n"
-        )
+        block = f"\n### Q: {skill.question}\n도구: {tools_str}\n```python\n{skill.code_template}\n```\n"
 
         if total_chars + len(block) > _MAX_CHARS:
             break

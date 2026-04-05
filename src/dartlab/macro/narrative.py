@@ -11,7 +11,6 @@
 
 from __future__ import annotations
 
-
 # ══════════════════════════════════════
 # 이상값 검증
 # ══════════════════════════════════════
@@ -162,8 +161,10 @@ def _narrate_crisis(crisis: dict) -> str:
 
     koo = crisis.get("kooRecession") or {}
     if koo.get("isBSR"):
-        parts.append(f"민간 금융잉여가 GDP의 {koo.get('privateSurplus', 0):.1f}%에 달하고 금리가 낮다 — "
-                     "대차대조표 침체 징후다. 금리 인하만으로는 부족하고 재정 확대가 필수적이다.")
+        parts.append(
+            f"민간 금융잉여가 GDP의 {koo.get('privateSurplus', 0):.1f}%에 달하고 금리가 낮다 — "
+            "대차대조표 침체 징후다. 금리 인하만으로는 부족하고 재정 확대가 필수적이다."
+        )
 
     fisher = crisis.get("fisherDeflation") or {}
     if fisher.get("risk") == "high":
@@ -172,7 +173,9 @@ def _narrate_crisis(crisis: dict) -> str:
     ghs = crisis.get("ghsScore") or {}
     prob = ghs.get("crisisProb", 0)
     if prob > 0.2:
-        parts.append(f"GHS 모델 기준 3년 내 금융위기 확률이 {prob * 100:.0f}%이다 — 신용 팽창과 자산가격 급등이 동시에 진행 중이다.")
+        parts.append(
+            f"GHS 모델 기준 3년 내 금융위기 확률이 {prob * 100:.0f}%이다 — 신용 팽창과 자산가격 급등이 동시에 진행 중이다."
+        )
 
     if not parts:
         parts.append("현재 구조적 위기 징후는 관측되지 않는다.")
@@ -200,7 +203,9 @@ def _narrate_corporate(corporate: dict) -> str:
     ponzi = _safe(pr.get("currentRatio"), "ponziRatio")
     if ponzi is not None:
         if ponzi > 0.3:
-            parts.append(f"Ponzi비율 {ponzi:.1%}로 상장기업의 {ponzi:.0%}이 영업이익으로 이자를 충당하지 못한다 — 금융 시스템 취약성이 높아지고 있다.")
+            parts.append(
+                f"Ponzi비율 {ponzi:.1%}로 상장기업의 {ponzi:.0%}이 영업이익으로 이자를 충당하지 못한다 — 금융 시스템 취약성이 높아지고 있다."
+            )
         elif ponzi > 0.2:
             parts.append(f"Ponzi비율 {ponzi:.1%}로 경계 수준이다.")
 
@@ -422,7 +427,7 @@ def narrate_transmission_chain(summary: dict) -> str:
     outlook = (rates.get("outlook") or {}).get("direction", "")
     fci = (liquidity.get("fci") or {}).get("value")
     hy = (crisis.get("capexPressure") or {}).get("spreadLevel")
-    ponzi = ((corporate.get("ponziRatio") or {}).get("currentRatio"))
+    ponzi = (corporate.get("ponziRatio") or {}).get("currentRatio")
     cg = (crisis.get("creditGap") or {}).get("gap")
 
     # 통화 긴축 전파 경로
@@ -503,6 +508,8 @@ def narrate_overall_story(summary: dict) -> str:
     allocation = summary.get("allocation") or {}
     eq = allocation.get("equity", 0)
     if eq > 0:
-        parts.append(f"현 환경에서 주식 {eq}% / 채권 {allocation.get('bond', 0)}% / 금 {allocation.get('gold', 0)}% / 현금 {allocation.get('cash', 0)}% 배분이 적절하다.")
+        parts.append(
+            f"현 환경에서 주식 {eq}% / 채권 {allocation.get('bond', 0)}% / 금 {allocation.get('gold', 0)}% / 현금 {allocation.get('cash', 0)}% 배분이 적절하다."
+        )
 
     return " ".join(parts)
