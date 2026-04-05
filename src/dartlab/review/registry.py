@@ -885,6 +885,7 @@ def buildReview(
 
     # ── 스토리 템플릿 판별 ──
     detectedTemplate: str | None = None
+    detectedTemplates: list[str] = []
     emphasizedKeys: set[str] = set()
     if template is not None and preset is None:
         from dartlab.review.templates import STORY_TEMPLATES

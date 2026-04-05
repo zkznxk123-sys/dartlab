@@ -146,7 +146,7 @@ class TestFilterAxis:
     def test_invalid_raises(self):
         from dartlab.credit import _filterAxis
 
-        with pytest.raises(ValueError, match="알 수 없는 신용평가 축"):
+        with pytest.raises(ValueError, match="알 수 없는 신용분석 축"):
             _filterAxis({"axes": []}, "garbage")
 
 
