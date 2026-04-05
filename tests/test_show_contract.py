@@ -125,9 +125,7 @@ class TestSelectRegression:
         r = c.select("IS", ["세전순이익"])
         assert r is not None and len(r) >= 1
         sid = r[0, "snakeId"]
-        assert sid in ("profit_before_tax", "pretax_income"), (
-            f"세전순이익 → {sid}"
-        )
+        assert sid in ("profit_before_tax", "pretax_income"), f"세전순이익 → {sid}"
 
     def test_select_multiple_pretax_and_tax(self):
         """Regression for #14: 복합 조회 시 세전순이익 + 법인세비용 2건 반환."""
@@ -152,6 +150,4 @@ class TestSelectRegression:
         ]:
             r = c.select("IS", [name])
             assert r is not None and len(r) >= 1, f"{name} 매칭 실패"
-            assert r[0, "snakeId"] == expected_sid, (
-                f"{name} → {r[0, 'snakeId']} (기대: {expected_sid})"
-            )
+            assert r[0, "snakeId"] == expected_sid, f"{name} → {r[0, 'snakeId']} (기대: {expected_sid})"

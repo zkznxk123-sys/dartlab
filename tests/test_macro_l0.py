@@ -4,8 +4,6 @@
 """
 
 import numpy as np
-import pytest
-
 
 # ══════════════════════════════════════
 # regimeSwitching.py
@@ -253,10 +251,13 @@ class TestFCI:
         from dartlab.core.finance.fci import calcFCI
 
         # 점진적으로 상승하는 금리 + 스프레드 → 최신값이 평균 위 → 긴축
-        r = calcFCI({
-            "policy_rate": [1, 2, 3, 4, 5, 5.5],
-            "credit_spread": [2, 3, 4, 5, 6, 7],
-        }, market="US")
+        r = calcFCI(
+            {
+                "policy_rate": [1, 2, 3, 4, 5, 5.5],
+                "credit_spread": [2, 3, 4, 5, 6, 7],
+            },
+            market="US",
+        )
         assert r.value > 0
 
     def test_loose(self):
@@ -352,13 +353,50 @@ class TestStrategyRules:
 
         mock = {
             "cycle": {"phase": "expansion", "phaseLabel": "확장"},
-            "rates": {"outlook": {"direction": "cut"}, "inflation": {"state": "warm", "stateLabel": "높음"}, "employment": {"state": "strong", "stateLabel": "강함"}, "expectation": {"spread2yFf": -0.3}},
-            "forecast": {"recessionProb": {"probability": 0.12}, "lei": {"signal": "expansion", "description": "LEI", "lagMomentum": 0.3}, "nowcast": {"gdpEstimate": 2.5, "description": "GDP"}},
-            "crisis": {"capexPressure": {"pressure": "easing", "pressureLabel": "완화", "description": "HY"}, "dollarSafeHaven": {"status": "inactive", "description": "V", "dxyChange3m": -1.5}},
-            "inventory": {"inventoryPhase": {"phase": "active_restock", "phaseLabel": "적극보충", "ratio": 1.1, "equityImplication": "bullish", "description": ">"}, "ismBarometer": {"level": 53, "rateImplication": "hike_end"}, "ismAllocation": {"stance": "neutral", "description": "ISM"}},
-            "trade": {"termsOfTrade": {"direction": "improving", "description": "개선"}, "totProxy": {"value": 3, "direction": "stable", "description": "안정", "components": {"fxYoy": 5, "oilYoy": 2}}, "exportProfit": {"signal": "positive", "description": "개선"}, "leadingRelativeStrength": {"fxDirection": "krw_strengthen", "description": "한국"}, "usConsumptionLink": {"usRetailYoy": 6, "implication": "미국"}},
-            "assets": {"goldDrivers": {"dollarEffect": -0.3}, "copperGold": {"implication": "expansion", "description": "Cu/Au"}},
-            "sentiment": {}, "liquidity": {"regime": "normal", "regimeLabel": "정상"},
+            "rates": {
+                "outlook": {"direction": "cut"},
+                "inflation": {"state": "warm", "stateLabel": "높음"},
+                "employment": {"state": "strong", "stateLabel": "강함"},
+                "expectation": {"spread2yFf": -0.3},
+            },
+            "forecast": {
+                "recessionProb": {"probability": 0.12},
+                "lei": {"signal": "expansion", "description": "LEI", "lagMomentum": 0.3},
+                "nowcast": {"gdpEstimate": 2.5, "description": "GDP"},
+            },
+            "crisis": {
+                "capexPressure": {"pressure": "easing", "pressureLabel": "완화", "description": "HY"},
+                "dollarSafeHaven": {"status": "inactive", "description": "V", "dxyChange3m": -1.5},
+            },
+            "inventory": {
+                "inventoryPhase": {
+                    "phase": "active_restock",
+                    "phaseLabel": "적극보충",
+                    "ratio": 1.1,
+                    "equityImplication": "bullish",
+                    "description": ">",
+                },
+                "ismBarometer": {"level": 53, "rateImplication": "hike_end"},
+                "ismAllocation": {"stance": "neutral", "description": "ISM"},
+            },
+            "trade": {
+                "termsOfTrade": {"direction": "improving", "description": "개선"},
+                "totProxy": {
+                    "value": 3,
+                    "direction": "stable",
+                    "description": "안정",
+                    "components": {"fxYoy": 5, "oilYoy": 2},
+                },
+                "exportProfit": {"signal": "positive", "description": "개선"},
+                "leadingRelativeStrength": {"fxDirection": "krw_strengthen", "description": "한국"},
+                "usConsumptionLink": {"usRetailYoy": 6, "implication": "미국"},
+            },
+            "assets": {
+                "goldDrivers": {"dollarEffect": -0.3},
+                "copperGold": {"implication": "expansion", "description": "Cu/Au"},
+            },
+            "sentiment": {},
+            "liquidity": {"regime": "normal", "regimeLabel": "정상"},
         }
         signals = evaluateStrategies(mock)
         assert len(signals) == 40
