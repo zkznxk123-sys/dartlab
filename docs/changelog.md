@@ -9,6 +9,69 @@ All notable changes to DartLab will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] - 2026-04-06
+
+### Added
+
+#### quant 엔진 — 29축 7그룹 확장
+- **축 기반 디스패치**: `dartlab.quant("축명", "종목코드")` — macro/scan과 동일 패턴. `_AXIS_REGISTRY` + `_ALIASES` + lazy import.
+- **기술적 그룹 (7축)**: indicators(45지표), signals(9신호), verdict, momentum(Jegadeesh-Titman/Moskowitz/52주신고가), volatility(GARCH MLE/HAR-RV), regime(Hamilton 2-state HMM), pattern(캔들스틱10종/지지저항)
+- **리스크 그룹 (4축)**: beta(CAPM), factor(FF5 프록시), tailrisk(CVaR/Sortino/최대낙폭), residual(잔여모멘텀)
+- **미시구조 그룹 (3축)**: liquidity(Amihud/Roll), flow(기관외국인수급), volume(OBV추세/거래량괴리)
+- **펀더멘털 그룹 (4축)**: divergence, quality(Asness QMJ), value(장부가신호), earnings(SUE/PEAD)
+- **텍스트/공시 그룹 (5축)**: sentiment(LM감성사전), toneChange(톤변화감지), eventSignal(이벤트분류), riskText(리스크팩터델타), governanceQuant(거버넌스정량화)
+- **횡단면 그룹 (3축)**: ranking(멀티팩터순위), screen(6프리셋스크리닝), pairs(ADF공적분)
+- **포트폴리오 그룹 (3축)**: meanvar(Markowitz), riskparity(HRP Lopez de Prado), allocation(리스크버짓팅)
+- **`_lm_dict.py`**: Loughran-McDonald 한/영 금융 감성 사전 (NEGATIVE/POSITIVE/UNCERTAINTY/LITIGIOUS)
+- **`spec.py`**: 29축 메타데이터 (AI/generateSpec 자동 수집용)
+- **하위호환 브릿지**: 기존 `quant("005930", "indicators")` 호출 → DeprecationWarning + 자동 swap
+
+#### review 엔진
+- **스토리 템플릿 확장**: keyQuestions, actFocus, detectTemplates 복수 매칭 지원
+
+#### macro 엔진
+- **보고서 서사 엔진**: 숫자 나열에서 경제 해석으로. Goldman/BIS 스타일 전파 경로.
+- **2026-04 경제분석 보고서**: US + KR 양쪽 발간 (11축 완전체)
+
+#### selfai 엔진
+- **Phase 3**: 도구 라우터 + APIGen 파이프라인 + QLoRA 학습 스크립트
+
+#### 운영
+- **`ops/issues.md`**: 이슈 관리 체계 (GitHub Issue + 기능별 테스트 + 커밋 연결)
+- **`ops/quant.md`**: quant 엔진 운영문서 신규
+
+### Changed
+
+#### Company (core)
+- **select cascade 재설계**: 인덱스 누적 방식으로 변경. 복합 조회 시 모든 항목이 충족될 때까지 다음 단계 진행.
+- **한국어↔한국어 동의어 bridge 추가**: 회사마다 다른 계정명을 snakeId 통일 변환 → 역변환으로 매칭.
+- **contains 단계 안전장치**: 여러 후보 중 가장 긴 매칭 우선 (짧은 부분문자열 오매칭 방지).
+- **`_KR_SYNONYMS` 동의어 테이블**: 세전순이익, 법인세차감전순이익 등 줄임말/변형 → snakeId 매핑.
+- **ratios 컬럼명 통일**: `"항목"` → `"계정명"` (IS/BS/CF select와 일치). **⚠ Breaking Change**
+
+#### EDGAR
+- **컬럼명 DART 통일**: IS/BS/CF `"account"` → `"snakeId"` + `"계정명"` 컬럼 추가. **⚠ Breaking Change**
+- **ratios 컬럼명 통일**: `"category"` → `"분류"`, `"metric"` → `"계정명"`. **⚠ Breaking Change**
+
+#### labels (L0)
+- **`SNAKEID_ALIASES`**: `pretax_income` → `profit_before_tax` 등 추가.
+- **`_KR_SUPPLEMENTS`**: `profit_before_tax` → `"법인세비용차감전순이익"` 추가.
+
+#### review 엔진
+- **모듈 상태 제거**: 임계값 통일 + catalog 중앙 관리 리팩토링
+
+### Fixed
+
+- **#14**: `select("IS", ["세전순이익", "법인세비용"])` 복합 조회 시 1건만 반환 → 2건 정상 반환.
+- **#15**: `select("IS", ["법인세비용차감전순이익"])` → income_taxes로 잘못 매핑 → profit_before_tax 정상 매핑.
+- **#16**: ratios `"항목"` vs IS select `"계정명"` 컬럼명 불일치 → `"계정명"`으로 통일.
+- **#17**: `_showSegmentsSub("composition")` ShapeError — 연결/개별 중복 컬럼명에 접미사(_2) 부여.
+- **macro 보고서**: 제목 오염 수정, 이상값 차단, 서사 품질 강화.
+
+### Removed
+
+- 미사용 VSCode 스크린샷 15개 삭제 (`screenshots/vscode_*.png`)
+
 ## [0.9.0] - 2026-04-04
 
 ### Changed
