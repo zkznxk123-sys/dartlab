@@ -53,9 +53,13 @@ class _FinanceAccessor:
         krLabels = get_korean_labels()
         rows = []
         for snakeId, values in stmtData.items():
+            label = krLabels.get(snakeId)
+            if label is None:
+                # snake_case → Title Case fallback (e.g., "cash_and_cash_equivalents" → "Cash And Cash Equivalents")
+                label = snakeId.replace("_", " ").title()
             row: dict[str, Any] = {
                 "snakeId": snakeId,
-                "계정명": krLabels.get(snakeId, snakeId),
+                "계정명": label,
             }
             for i, year in enumerate(years):
                 row[str(year)] = values[i] if i < len(values) else None

@@ -630,7 +630,7 @@ def calcIntangibleAssetDetail(company, *, basePeriod: str | None = None) -> dict
     items = []
     if rawRows:
         for row in rawRows:
-            item = str(row.get("항목", "")).strip()
+            item = str(row.get("계정명", row.get("항목", ""))).strip()
             if not item or any(kw in item for kw in ("합계", "총계", "소계")):
                 continue
             v = parseNumStr(row.get(str(latestCol)))

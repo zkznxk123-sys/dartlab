@@ -180,7 +180,7 @@ def _buildTableDf(
 
     rows = []
     for name, vals in itemData.items():
-        row: dict[str, object] = {"항목": name}
+        row: dict[str, object] = {"계정명": name}
         for col in colOrder:
             raw = vals.get(col, "")
             amount = parseAmount(raw)
@@ -191,7 +191,7 @@ def _buildTableDf(
             row[col] = amount
         rows.append(row)
 
-    schema: dict[str, type] = {"항목": pl.Utf8}
+    schema: dict[str, type] = {"계정명": pl.Utf8}
     for col in colOrder:
         schema[col] = pl.Float64
     return pl.DataFrame(rows, schema=schema)

@@ -2202,8 +2202,8 @@ class Company:
             import logging
 
             dupes = df.group_by("계정명").len().filter(pl.col("len") > 1)
-            logging.getLogger(__name__).debug(
-                "%s: 동의어 계정 %d건 병합 (먼저 나온 값 우선): %s",
+            logging.getLogger(__name__).warning(
+                "%s: 동의어 계정 %d건 병합 (먼저 나온 값 우선, snakeId 유실 가능): %s",
                 sjDiv,
                 dupes.height,
                 dupes["계정명"].to_list()[:5],
@@ -2269,7 +2269,7 @@ class Company:
             if hDf is None or hDf.is_empty():
                 continue
 
-            itemCol = "항목" if "항목" in hDf.columns else None
+            itemCol = "계정명" if "계정명" in hDf.columns else "항목" if "항목" in hDf.columns else None
             if itemCol is None:
                 for c in hDf.columns:
                     if not _isPeriodColumn(c):
@@ -3080,12 +3080,19 @@ class Company:
         if parsed is None:
             return None
         if period is not None and parsed.df is not None:
-            periodCols = [c for c in parsed.df.columns if c != "항목"]
+            labelCol = (
+                "계정명"
+                if "계정명" in parsed.df.columns
+                else "항목"
+                if "항목" in parsed.df.columns
+                else parsed.df.columns[0]
+            )
+            periodCols = [c for c in parsed.df.columns if c != labelCol]
             matchedCols = [c for c in periodCols if period in c]
             if matchedCols:
                 from dataclasses import replace
 
-                filteredDf = parsed.df.select(["항목", *matchedCols])
+                filteredDf = parsed.df.select([labelCol, *matchedCols])
                 return replace(parsed, df=filteredDf)
         return parsed
 

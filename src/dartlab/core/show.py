@@ -32,8 +32,13 @@ def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame 
     for p in periods:
         if p in periodCols:
             matched.append(p)
-        elif "Q" not in p and f"{p}Q4" in periodCols:
-            matched.append(f"{p}Q4")
+        elif "Q" not in p:
+            # 연도만 지정 시 Q4→Q3→Q2→Q1 순서로 fallback
+            for q in ("Q4", "Q3", "Q2", "Q1"):
+                candidate = f"{p}{q}"
+                if candidate in periodCols:
+                    matched.append(candidate)
+                    break
     if not matched:
         return None
     return wide.select(metaCols + matched)

@@ -663,7 +663,7 @@ def calcDilutionTrend(company, *, basePeriod: str | None = None) -> dict | None:
     basicRow = None
     dilutedRow = None
     for row in epsDf:
-        item = str(row.get("항목", "")).strip()
+        item = str(row.get("계정명", row.get("항목", ""))).strip()
         if "희석" in item:
             dilutedRow = row
         elif "기본" in item or "주당" in item:
@@ -674,7 +674,7 @@ def calcDilutionTrend(company, *, basePeriod: str | None = None) -> dict | None:
         return None
 
     # 기간 컬럼 추출
-    periodCols = [k for k in basicRow if k != "항목" and k.isdigit()]
+    periodCols = [k for k in basicRow if k not in ("계정명", "항목") and k.isdigit()]
     periodCols.sort(reverse=True)
     if not periodCols:
         return None

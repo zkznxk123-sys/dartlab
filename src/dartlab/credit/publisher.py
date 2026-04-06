@@ -411,7 +411,7 @@ def _renderBorrowingStructure(result: dict, mainNum: int) -> list[str]:
     }
     _UNIT = 1_000_000  # 백만원 → 원
     yearCols = sorted(
-        [k for k in rows[0] if k not in ("항목", "name", "구분") and isinstance(k, (str, int))],
+        [k for k in rows[0] if k not in ("항목", "계정명", "name", "구분") and isinstance(k, (str, int))],
         key=lambda x: str(x),
         reverse=True,
     )
@@ -419,7 +419,7 @@ def _renderBorrowingStructure(result: dict, mainNum: int) -> list[str]:
     items: list[tuple[str, float]] = []
     total = 0.0
     for row in rows:
-        name = row.get("항목", row.get("name", row.get("구분", "")))
+        name = row.get("계정명", row.get("항목", row.get("name", row.get("구분", ""))))
         if not name or any(exc in str(name) for exc in _EXCLUDE):
             continue
         # 최신 non-null 값 추출

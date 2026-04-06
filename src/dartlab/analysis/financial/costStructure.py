@@ -305,7 +305,7 @@ def calcCostByNatureAnalysis(company, *, basePeriod: str | None = None) -> dict 
     # 기간 컬럼 추출
     sampleRow = rawRows[0]
     periodCols = sorted(
-        [k for k in sampleRow if k != "항목" and str(k).replace("-", "").isdigit()],
+        [k for k in sampleRow if k not in ("계정명", "항목") and str(k).replace("-", "").isdigit()],
         reverse=True,
     )
     if not periodCols:
@@ -317,7 +317,7 @@ def calcCostByNatureAnalysis(company, *, basePeriod: str | None = None) -> dict 
     totalRow = None
     detailRows = []
     for row in rawRows:
-        item = str(row.get("항목", "")).strip()
+        item = str(row.get("계정명", row.get("항목", ""))).strip()
         if any(kw in item for kw in ("합계", "총계", "계")):
             if totalRow is None:
                 totalRow = row
@@ -339,7 +339,7 @@ def calcCostByNatureAnalysis(company, *, basePeriod: str | None = None) -> dict 
 
     categories: dict[str, dict[str, float]] = {}  # {catName: {period: amount}}
     for row in detailRows:
-        item = str(row.get("항목", "")).strip()
+        item = str(row.get("계정명", row.get("항목", ""))).strip()
         if not item:
             continue
 
@@ -444,7 +444,7 @@ def calcRawMaterialBreakdown(company, *, basePeriod: str | None = None) -> dict 
     import polars as pl
 
     df = result if isinstance(result, pl.DataFrame) else getattr(result, "df", None)
-    if df is None or "항목" not in df.columns:
+    if df is None or "계정명" not in df.columns and "항목" not in df.columns:
         return None
 
     from dartlab.analysis.financial._helpers import periodCols
@@ -457,7 +457,7 @@ def calcRawMaterialBreakdown(company, *, basePeriod: str | None = None) -> dict 
     annuals = annualColsFromPeriods(pCols, basePeriod, 1)
     latestCol = annuals[0] if annuals else pCols[0]
 
-    items = df["항목"].to_list()
+    items = df["계정명"] if "계정명" in df.columns else df["항목"].to_list()
     vals = df[latestCol].to_list()
 
     # 총계 행 찾기

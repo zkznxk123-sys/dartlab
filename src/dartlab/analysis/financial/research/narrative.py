@@ -453,7 +453,7 @@ def _analyzeSegmentGrowth(segDf: object) -> list[str]:
 
     cols = segDf.columns
     # 숫자 컬럼 = 기간 (연도)
-    numCols = [c for c in cols if c not in ("부문", "segment", "항목", "구분") and not c.startswith("__")]
+    numCols = [c for c in cols if c not in ("부문", "segment", "항목", "계정명", "구분") and not c.startswith("__")]
     if len(numCols) < 2:
         return []
 
@@ -674,7 +674,7 @@ def _analyzeSegments(inp: _Input) -> NarrativeParagraph | None:
         return None
 
     cols = segDf.columns
-    numCols = [c for c in cols if c not in ("부문", "segment", "항목", "구분") and not c.startswith("__")]
+    numCols = [c for c in cols if c not in ("부문", "segment", "항목", "계정명", "구분") and not c.startswith("__")]
     if not numCols:
         return None
 
