@@ -12,6 +12,7 @@ from dartlab.core.env import loadEnv as _loadEnv
 from dartlab.core.select import ChartResult, SelectResult
 from dartlab.gather.fred import Fred
 from dartlab.gather.listing import codeToName, fuzzySearch, getKindList, nameToCode  # noqa: F401
+from dartlab.listing import listing  # noqa: F401 — 목록 조회 단일 진입점
 from dartlab.providers.dart.company import Company as _DartEngineCompany
 from dartlab.providers.dart.openapi.dart import OpenDart
 from dartlab.providers.edgar.openapi.edgar import OpenEdgar
@@ -79,6 +80,12 @@ def search(
         dartlab.search("대표이사 변경", corp="005930")
         dartlab.search("전환사채", start="20240101", topK=5)
     """
+    # R33-1: 빈 query 거부
+    if not query or not query.strip():
+        raise ValueError(
+            "search 의 query 가 비어 있습니다. 검색어를 1자 이상 전달하세요. "
+            "예: dartlab.search('유상증자')"
+        )
     from dartlab.core.search import search as _search
 
     return _search(query, corp=corp, start=start, end=end, topK=topK)
@@ -98,6 +105,12 @@ def searchName(keyword: str):
         dartlab.searchName("삼성전자")
         dartlab.searchName("AAPL")
     """
+    # R33-2: 빈 keyword 거부
+    if not keyword or not keyword.strip():
+        raise ValueError(
+            "searchName 의 keyword 가 비어 있습니다. 종목명/코드를 1자 이상 전달하세요. "
+            "예: dartlab.searchName('삼성전자') 또는 dartlab.searchName('AAPL')"
+        )
     if any("\uac00" <= ch <= "\ud7a3" for ch in keyword):
         return _DartEngineCompany.search(keyword)
     if keyword.isascii() and keyword.isalpha():
@@ -108,51 +121,6 @@ def searchName(keyword: str):
         except (ImportError, AttributeError, NotImplementedError):
             pass
     return _DartEngineCompany.search(keyword)
-
-
-def listing(market: str | None = None):
-    """전체 상장법인 목록.
-
-    Capabilities:
-        - KR 전체 상장법인 목록 (KOSPI + KOSDAQ)
-        - 종목코드, 종목명, 시장구분, 업종 포함
-        - US listing은 향후 지원 예정
-
-    Requires:
-        데이터: listing (자동 다운로드)
-
-    AIContext:
-        전종목 대상 필터링/통계에 사용. scan()과 조합하여 시장 전체 분석.
-
-    Guide:
-        - "상장된 회사 몇 개야?" -> listing()으로 전체 목록 조회 후 개수
-        - "코스닥 회사 목록?" -> listing()에서 market 필터
-        - API 키 불필요.
-
-    SeeAlso:
-        - search: 키워드로 특정 종목 검색
-        - scan: 전종목 횡단 비교 분석
-
-    Args:
-        market: "KR" 또는 "US". None이면 KR 기본.
-
-    Returns:
-        pl.DataFrame — 전체 상장법인 (code, name, market, sector 등).
-
-    Example::
-
-        import dartlab
-        dartlab.listing()          # KR 전체
-        dartlab.listing("US")      # US 전체 (향후)
-    """
-    if market and market.upper() == "US":
-        try:
-            from dartlab.providers.edgar.company import Company as _US
-
-            return _US.listing()
-        except (ImportError, AttributeError, NotImplementedError):
-            raise NotImplementedError("US listing은 아직 지원되지 않습니다")
-    return _DartEngineCompany.listing()
 
 
 def collect(
@@ -852,6 +820,12 @@ class _Module(sys.modules[__name__].__class__):
             instance = Macro()
             setattr(self, name, instance)
             return instance
+        if name == "topdown":
+            from dartlab.topdown import _TopdownEntry
+
+            instance = _TopdownEntry()
+            setattr(self, name, instance)
+            return instance
         if name == "viz":
             import dartlab.viz as _viz
 
@@ -886,6 +860,11 @@ from dartlab.gather.entry import GatherEntry as _GatherEntry
 
 sys.modules[__name__].gather = _GatherEntry()
 
+# topdown도 같은 문제 — 모듈 import가 __getattr__보다 우선이라 callable로 덮어쓴다
+from dartlab.topdown import _TopdownEntry as _TopdownEntry
+
+sys.modules[__name__].topdown = _TopdownEntry()
+
 
 __all__ = [
     "Company",
@@ -907,6 +886,7 @@ __all__ = [
     "quant",
     "credit",
     "macro",
+    "topdown",
     "verbose",
     "dataDir",
     "codeToName",
