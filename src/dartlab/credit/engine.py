@@ -677,7 +677,18 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
     if metrics is None or not metrics.get("history"):
         return None
 
-    latest = metrics["history"][0]
+    # R25-1: 손익/현금흐름 metric 이 모두 None 인 partial period 행은 건너뛰고
+    # 핵심 metric 이 채워진 가장 최근 행을 선택. EDGAR 회계연도 경계 (예: AAPL 2026Q1)
+    # 처럼 BS-only 행이 첫 번째로 오면 채무상환능력/현금흐름 축이 통째로 None 가 되어
+    # 자본구조만 반영된 잘못된 등급이 산출되던 문제 방지.
+    _CORE_METRIC_KEYS = ("ebitda", "ocf", "netIncome", "interestExpense")
+    history = metrics["history"]
+    latest = history[0]
+    if all(latest.get(k) is None for k in _CORE_METRIC_KEYS) and len(history) > 1:
+        for row in history[1:]:
+            if any(row.get(k) is not None for k in _CORE_METRIC_KEYS):
+                latest = row
+                break
     holding = _isHolding(company)
     captive = _isCaptiveFinance(
         latest.get("totalBorrowing") or 0,
