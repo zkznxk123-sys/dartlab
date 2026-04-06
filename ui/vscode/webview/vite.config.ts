@@ -12,9 +12,12 @@ export default defineConfig({
     outDir: "../dist/webview",
     emptyOutDir: true,
     rollupOptions: {
-      input: "src/main.ts",
+      input: {
+        main: "src/main.ts",
+        dev: "dev/devEntry.ts",
+      },
       output: {
-        entryFileNames: "main.js",
+        entryFileNames: "[name].js",
         chunkFileNames: "[name].js",
         assetFileNames: "[name][extname]",
       },

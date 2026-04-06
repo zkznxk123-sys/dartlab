@@ -1,0 +1,13 @@
+{"event":"chunk","data":{"text":"## 삼성전자 수익성 요약\n\n"},"delay":40}
+{"event":"chunk","data":{"text":"최근 3년간 마진 변화는 다음과 같다.\n\n"},"delay":50}
+{"event":"chunk","data":{"text":"| 연도 | 매출총이익률 | 영업이익률 | 순이익률 |\n"},"delay":40}
+{"event":"chunk","data":{"text":"| --- | --- | --- | --- |\n"},"delay":40}
+{"event":"chunk","data":{"text":"| 2022 | 36.7% | 14.4% | 17.5% |\n"},"delay":40}
+{"event":"chunk","data":{"text":"| 2023 | 30.1% | 2.5% | 9.3% |\n"},"delay":40}
+{"event":"chunk","data":{"text":"| 2024 | 35.4% | 13.1% | 13.5% |\n\n"},"delay":40}
+{"event":"chunk","data":{"text":"2023년 메모리 사이클 저점에서 영업이익률이 2.5%까지 떨어졌다가 2024년 회복.\n\n"},"delay":50}
+{"event":"chart","data":{"charts":[{"chartType":"line","title":"삼성전자 영업이익률 추이","categories":["2022","2023","2024"],"series":[{"name":"영업이익률","data":[14.4,2.5,13.1],"color":"#60a5fa"}]}]},"delay":80}
+{"event":"chunk","data":{"text":"\n핵심 포인트:\n\n"},"delay":40}
+{"event":"chunk","data":{"text":"- **사이클 진폭이 매우 크다** — 14.4% → 2.5% → 13.1%\n"},"delay":40}
+{"event":"chunk","data":{"text":"- 매출총이익률은 30~37%로 상대적으로 안정\n"},"delay":40}
+{"event":"chunk","data":{"text":"- 따라서 사이클 템플릿 적용이 적합하다."},"delay":50}

@@ -1,0 +1,6 @@
+{"event":"chunk","data":{"text":"analysis 엔진별 세부 항목 수를 막대 차트로 보면 축별 복잡도가 한눈에 들어온다.\n\n"},"delay":50}
+{"event":"code_round","data":{"round":1,"maxRounds":3,"status":"executing","code":"import dartlab\nguide = dartlab.analysis()\nemit_chart({\n    \"chartType\": \"bar\",\n    \"title\": \"analysis 엔진별 세부 항목 수\",\n    \"categories\": guide[\"axis\"].to_list(),\n    \"series\": [{\"name\": \"items\", \"data\": guide[\"items\"].to_list()}]\n})"},"delay":200}
+{"event":"chart","data":{"charts":[{"chartType":"bar","title":"analysis 엔진별 세부 항목 수","categories":["수익구조","자금조달","자산구조","현금흐름","수익성","성장성","안정성","효율성","종합평가","이익품질","비용구조","자본배분","투자효율","재무정합성","가치평가"],"series":[{"name":"items","data":[8,9,4,4,6,5,6,2,3,6,5,7,5,6,9]}]}]},"delay":80}
+{"event":"code_round","data":{"round":1,"maxRounds":3,"status":"done","code":"import dartlab\nguide = dartlab.analysis()\nemit_chart({\n    \"chartType\": \"bar\",\n    \"title\": \"analysis 엔진별 세부 항목 수\",\n    \"categories\": guide[\"axis\"].to_list(),\n    \"series\": [{\"name\": \"items\", \"data\": guide[\"items\"].to_list()}]\n})","result":""},"delay":40}
+{"event":"chunk","data":{"text":"\n\": \"items\", \"data\": guide[\"items\"].to_list()}\n]\n})\n\n"},"delay":60}
+{"event":"chunk","data":{"text":"가치평가(9)와 자금조달(9)이 가장 항목이 많다."},"delay":40}
