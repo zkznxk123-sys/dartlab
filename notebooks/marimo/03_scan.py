@@ -11,18 +11,21 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
+    # dartlab 임포트
     import dartlab
     return (dartlab,)
 
 
 @app.cell
 def _(dartlab):
+    # scan 가이드 — 사용 가능한 축 확인
     dartlab.scan()
     return
 
 
 @app.cell
 def _(dartlab):
+    # 전종목 수익성 횡단 분석
     dartlab.scan("profitability")
     return
 

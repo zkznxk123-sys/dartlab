@@ -11,18 +11,21 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
+    # dartlab 임포트
     import dartlab
     return (dartlab,)
 
 
 @app.cell
 def _(dartlab):
+    # gather 가이드 — 사용 가능한 축 확인
     dartlab.gather()
     return
 
 
 @app.cell
 def _(dartlab):
+    # 삼성전자 주가 수집
     dartlab.gather("price", "005930")
     return
 

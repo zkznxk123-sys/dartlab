@@ -11,19 +11,15 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
+    # dartlab 임포트
     import dartlab
     return (dartlab,)
 
 
 @app.cell
 def _(dartlab):
+    # 공시 원문 시맨틱 검색
     dartlab.search("유상증자")
-    return
-
-
-@app.cell
-def _(dartlab):
-    dartlab.searchName("삼성")
     return
 
 

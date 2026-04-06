@@ -11,12 +11,14 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
+    # dartlab 임포트
     import dartlab
     return (dartlab,)
 
 
 @app.cell
 def _(dartlab):
+    # 전체 종목 리스트 조회
     dartlab.listing()
     return
 
