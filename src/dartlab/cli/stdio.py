@@ -132,6 +132,43 @@ def _handleAsk(msg: dict[str, Any]) -> None:
         _emit({"id": reqId, "event": "done", "data": {}})
 
 
+def _handleWarmup(_msg: dict[str, Any]) -> None:
+    """첫 ask 의 cold-start 비용을 사전 지불.
+
+    extension activate 직후 호출되도록 설계. 다음을 미리 수행:
+    - dartlab.ai.runtime.core 모듈 import (lazy 비용)
+    - dartlab.ai.providers 모듈 import
+    - KnowledgeDB 싱글톤 init + migrate_from_legacy + auto_pull (150~500ms)
+    - few_shot 모듈 import (skill DB connect)
+    - dartlab.viz.extract import
+
+    실패 항목은 무시 — 워밍업은 best-effort.
+    """
+    diag: dict[str, Any] = {"warmed": [], "skipped": []}
+
+    def _try(name: str, fn) -> None:
+        try:
+            fn()
+            diag["warmed"].append(name)
+        except (ImportError, OSError, RuntimeError) as exc:
+            diag["skipped"].append(f"{name}: {exc.__class__.__name__}")
+
+    _try("core", lambda: __import__("dartlab.ai.runtime.core", fromlist=["analyze"]))
+    _try("providers", lambda: __import__("dartlab.ai.providers", fromlist=["create_provider"]))
+    _try("viz_extract", lambda: __import__("dartlab.viz.extract", fromlist=["extract_viz_specs"]))
+    _try("few_shot", lambda: __import__("dartlab.ai.selfai.few_shot", fromlist=["getFewShots"]))
+    _try("router", lambda: __import__("dartlab.ai.selfai.router", fromlist=["route"]))
+
+    def _initKnowledgeDb() -> None:
+        from dartlab.ai.selfai.knowledge_db import KnowledgeDB
+
+        KnowledgeDB.get()  # 싱글톤 init + migrate + auto_pull
+
+    _try("knowledge_db", _initKnowledgeDb)
+
+    _emit({"event": "warmup_done", "data": diag})
+
+
 def _handleStatus(_msg: dict[str, Any]) -> None:
     """Return provider status with available providers list."""
     try:
@@ -450,6 +487,8 @@ def run() -> None:
 
         if msgType == "ask":
             _handleAsk(msg)
+        elif msgType == "warmup":
+            _handleWarmup(msg)
         elif msgType == "status":
             _handleStatus(msg)
         elif msgType == "ping":

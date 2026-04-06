@@ -11,8 +11,11 @@ dartlab.ask(), server UI, CLI가 모두 이 코어를 소비한다.
 
 from __future__ import annotations
 
+import concurrent.futures
+import os
 import re
 import sqlite3
+import time
 from difflib import SequenceMatcher
 from typing import Any, Generator
 
@@ -131,6 +134,55 @@ def _preGroundDisclosure(stockCode: str | None = None) -> str:
         f"- 특이사항: {row['rare_text']}\n"
         "</external-data>"
     )
+
+
+def _gatherInsightHints(stock_id: str, company: Any | None) -> str:
+    """KnowledgeDB 인사이트 + 동종업계 패턴 → 단일 텍스트 블록.
+
+    P1-1 백그라운드 thread 에서 호출 가능. 실패 시 빈 문자열.
+    """
+    try:
+        from dartlab.ai.selfai.knowledge_db import KnowledgeDB
+
+        db = KnowledgeDB.get()
+        insight = db.get_insight(stock_id)
+    except (ImportError, OSError):
+        return ""
+
+    if insight:
+        try:
+            import time as _t
+
+            expired_tag = ""
+            if insight.expires_at and _t.time() > insight.expires_at:
+                expired_tag = " (90일+ 전 분석, 업데이트 필요)"
+            strengths_str = ", ".join(insight.strengths[:3]) if insight.strengths else ""
+            weaknesses_str = ", ".join(insight.weaknesses[:3]) if insight.weaknesses else ""
+            text = f"## 이전 심층 분석 인사이트{expired_tag}\n서사: {insight.narrative[:300]}\n"
+            if strengths_str:
+                text += f"강점: {strengths_str}\n"
+            if weaknesses_str:
+                text += f"약점: {weaknesses_str}\n"
+            text += "이전 분석과 일관성을 유지하되, 새 데이터로 업데이트하라."
+            return text
+        except (AttributeError, TypeError):
+            return ""
+
+    if company is None:
+        return ""
+    sector = getattr(company, "sector", None) or getattr(company, "sectorName", None) or ""
+    if not sector:
+        return ""
+    try:
+        sector_insights = db.get_sector_insights(sector, limit=2)
+    except (OSError, sqlite3.Error):
+        return ""
+    if not sector_insights:
+        return ""
+    lines = [f"## 동종업계 분석 패턴 참고 ({sector})"]
+    for si in sector_insights:
+        lines.append(f"- {si.stock_code}: {si.narrative[:150]}")
+    return "\n".join(lines)
 
 
 def _preGroundSearch(
@@ -437,17 +489,33 @@ _LOOP_SIMILARITY_THRESHOLD = 0.85
 _MAX_RESULT_CHARS = 8000  # LLM 피드백용 결과 상한 (사용자 UI에는 전체 표시)
 
 
+def _record_skill_safe(question: str, code: str, result: str, *, mode: str = "analysis") -> None:
+    """성공한 코드를 스킬로 안전하게 저장."""
+    try:
+        from dartlab.ai.selfai.few_shot import recordSkillFromExecution
+
+        recordSkillFromExecution(question, code, result, is_error=False, mode=mode)
+    except (ImportError, OSError):
+        pass
+
+
 def _streamWithCodeExecution(
     llm: Any,
     messages: list[dict],
     stockCode: str | None,
     *,
     maxRounds: int = 3,
+    mode: str = "analysis",
+    question_text: str = "",
 ) -> Generator[str | AnalysisEvent, None, None]:
     """LLM 스트리밍 + 코드블록 자동 감지/실행 루프.
 
     LLM이 ```python 블록을 생성하면 자동 실행하고
     결과를 LLM에 피드백하여 해석을 이어간다.
+
+    mode:
+        - "analysis": 결과 해석을 이어감 (기본)
+        - "coding": 실행 성공 확인만 하고, 완전한 코드 제공을 유도
 
     Yields:
         str: 텍스트 청크 (chunk 이벤트로 변환됨)
@@ -554,11 +622,22 @@ def _streamWithCodeExecution(
                     "에러를 읽고 원인을 진단하세요. 같은 코드를 반복하지 마세요.\n"
                     "API를 모르겠으면 `dartlab.capabilities(search='키워드')`로 검색하세요."
                 )
+        elif mode == "coding":
+            # 코딩 모드: 실행 성공 확인 → 완전한 코드 제공 유도
+            _record_skill_safe(question_text, code, result, mode=mode)
+            feedback = (
+                f"코드 실행 성공. 결과:\n```\n{result[:2000]}\n```\n\n"
+                "코드가 정상 동작합니다. 사용자에게 이 코드와 결과를 제공하세요.\n"
+                "`import dartlab` 포함 복사-붙여넣기 가능한 완전한 코드를 최종 답변에 포함하세요.\n"
+                "커스터마이즈 포인트(종목코드 변경, 조건 변경 등)도 안내하세요."
+            )
         else:
+            _record_skill_safe(question_text, code, result, mode=mode)
             feedback = (
                 "코드 실행 결과:\n\n"
                 f"```\n{result}\n```\n\n"
                 "이 결과를 바탕으로 해석하세요. "
+                "**수치는 위 결과에서 정확히 인용하라. 기억으로 수치를 만들지 마라.** "
                 "결과가 잘렸으면 .head()/.filter()로 범위를 좁혀 재실행하세요."
             )
         messages.append({"role": "user", "content": feedback})
@@ -589,6 +668,72 @@ def _buildHistoryMessages(
     return build_history_messages(compressed)
 
 
+# ── 모드 감지 ────────────────────────────────────────────
+
+_CODING_KEYWORDS = re.compile(
+    r"코드\s*(짜|만들|작성|생성|줘)|코딩|스크립트|함수\s*(만들|작성)|"
+    r"자동화\s*(코드|스크립트)|프로그램\s*(짜|만들)|"
+    r"(write|generate|create)\s*(code|script|function)|"
+    r"dartlab\s*(으로|로)\s*.*(코드|짜|만들)",
+    re.IGNORECASE,
+)
+_CODING_EXCLUDE = re.compile(r"종목코드|코드번호|코드(가|는|를)\s*뭐", re.IGNORECASE)
+
+
+def _detectMode(question: str) -> str:
+    """'analysis' 또는 'coding' 반환."""
+    if _CODING_EXCLUDE.search(question):
+        return "analysis"
+    if _CODING_KEYWORDS.search(question):
+        return "coding"
+    return "analysis"
+
+
+# ── 코딩 모드 시스템 프롬프트 ─────────────────────────────
+
+_CODING_SYSTEM_PROMPT = """\
+dartlab 코드 생성 전문가. 사용자가 복사해서 바로 실행할 수 있는 Python 코드를 생성한다.
+
+## 핵심 원칙
+- **완전한 독립 실행 코드** 생성: `import dartlab`부터 결과 출력까지
+- 종목코드를 변수화: `stock_code = "005930"` (상단에 설정 가능하게)
+- Polars 문법 (pandas 아님)
+- 에러 핸들링 포함 (None 체크)
+- 코드 내 한글 주석으로 각 단계 설명
+
+## 실행 환경
+이미 준비됨 — **import 금지, 재선언 금지:**
+- `dartlab`, `polars`(pl), `re`
+{env_block}
+
+## 출력 형식
+1. 코드의 목적 1줄 설명
+2. ```python 블록 (완전한 독립 실행 코드)
+3. 실행 결과를 확인한 후 코드가 정상 동작함을 알려준다
+4. 커스터마이즈 포인트 (변수 변경으로 다른 종목/조건 적용 방법)
+
+## dartlab 주요 API
+```python
+c = dartlab.Company("005930")    # 기업 객체
+c.show("IS")                     # 손익계산서
+c.select("IS", ["매출액", "영업이익"])  # 행 필터
+c.analysis("financial", "수익성")      # 분석
+c.gather("price")                      # 주가
+dartlab.scan("profitability")          # 전종목 스캔
+dartlab.macro("사이클")                # 매크로
+c.credit()                             # 신용등급
+c.quant()                              # 기술적 분석
+dartlab.search("유상증자")             # 공시 검색
+```
+
+## 금지
+- import dartlab, polars 재선언 (이미 있음)
+- review()/reviewer() 사용 (분석에는 analysis 사용)
+- c.sections 접근 (메모리 위험)
+- scan DataFrame join (타임아웃)
+"""
+
+
 # ── 시스템 프롬프트 ───────────────────────────────────────
 
 _SYSTEM_PROMPT = """\
@@ -611,31 +756,47 @@ revenue(c)  # 도메인 차트를 먼저 사용 — 1줄로 자동 생성
 ```
 커스텀: emit_chart({{"chartType": "combo|bar|line|radar|waterfall|heatmap|pie|sparkline", "title": "...", "series": [...], "categories": [...]}}).
 
+## 엔진 self-discovery — 어떤 축이 있는지 모를 때
+
+**모든 분석 엔진은 무인자 호출 시 가이드 DataFrame을 반환한다.** 첫 번째로 이걸 시도하라.
+
+```python
+print(c.analysis())     # 14축 가이드 (수익성/성장성/안정성 등)
+print(c.quant())        # 30축 가이드 (모멘텀/베타/팩터 등)
+print(c.credit())       # 7축 가이드 (채무상환/유동성 등)
+print(dartlab.macro())  # 11축 가이드 (사이클/금리/심리 등)
+print(dartlab.scan())   # 20축 가이드 (전종목 횡단)
+```
+
+각 가이드 DataFrame은 `axis | label | description | example` 컬럼이 통일되어 있다.
+사용자가 "어떤 분석이 있어?"라고 물으면 위 5개 중 적절한 가이드를 print하라.
+
 ## 도구 선택 — 질문 유형으로 라우팅
 
 | 질문 유형 | 도구 | 호출 패턴 |
 |----------|------|----------|
-| 기업 분석/수익성/부채 등 | **analysis** | `c.analysis("financial", "수익성")` → dict |
-| 신용등급/건전도 | **credit** | `c.credit(detail=True)` → dict |
+| 기업 분석/수익성/부채 등 | **analysis** | `c.analysis("financial", "수익성")` 또는 `c.analysis("수익성")` → dict |
+| 신용등급/건전도 | **credit** | `c.credit("등급")` → dict (종합), `c.credit("채무상환")` → 축별 |
 | 시장비교/순위/TOP N | **scan** | `dartlab.scan("profitability")` → DataFrame |
 | 경제사이클/금리방향/시장심리 | **macro** | `dartlab.macro("사이클")` → dict (Company 불필요) |
 | 주가/수급/뉴스 | **gather** | `c.gather("price")` → DataFrame |
-| 기술적분석/매매신호 | **quant** | `c.quant()` → 종합 판단 |
+| 기술적분석/매매신호 | **quant** | `c.quant("종합")` → dict (verdict, RSI, ADX 등) |
 | 특정 계정 조회 | **show/select** | `c.select("IS", ["매출액"])` → DataFrame |
 | "보고서 뽑아줘" 명시 요청 | **review** | `c.review("수익성").toMarkdown()` (최대 2개) |
 | 공시 원문 검색 | **search** | `dartlab.search("유상증자", corp="005930")` → DataFrame |
 | 실시간 뉴스/이슈 | **검색** | `newsSearch("키워드")` |
-| 모르겠으면 | **capabilities** | `dartlab.capabilities(search="키워드")` |
+| 모르겠으면 | **self-discovery** | `print(c.analysis())` 등 무인자 호출 |
 
 ### 핵심 원칙
 - **analysis가 기본 도구.** dict 반환 → 핵심 수치를 마크다운 테이블로 정리. print(dict) 금지.
+- **무인자 호출은 가이드 반환.** `c.quant()`, `c.credit()` 무인자는 dict가 아닌 가이드 DataFrame이다. 분석 결과를 원하면 `c.quant("종합")`, `c.credit("등급")`을 사용.
 - **review() 사용 금지** — 사용자가 "보고서"를 명시적으로 요청한 경우만 예외. 분석 질문에는 반드시 analysis를 써라.
 - **scan은 횡단 비교용.** `print(df.head(3))`으로 컬럼 확인 후 사용. join 금지(타임아웃).
 - **gather는 None 가능** — 반드시 None 체크. 축: price/flow/news/peers/sector/insider/ownership.
 - **macro는 독립 엔진** — `dartlab.macro("사이클"|"금리"|"자산"|"심리"|"유동성"|"종합")`. Company 불필요. market="US"|"KR". 반환 dict → `print(result.keys())`로 키 확인 후 사용.
 - **search는 corp 없이도 전체 검색 가능** — `dartlab.search("대표이사 변경")` → 전 상장사 공시 검색.
 - **c.sections 접근 금지** (409MB). show(topic)으로 개별 조회.
-- **구조 모르면** print(result.keys()) 또는 capabilities(search=).
+- **구조 모르면** print(result.keys()) 또는 print(엔진()) self-discovery.
 
 ### 종합 분석 ("분석해줘", "어때?")
 analysis 3축(수익성+성장성+안정성) 1라운드 수집 → **6막 인과 서사**로 해석:
@@ -689,6 +850,7 @@ c.quant("divergence")  # 재무-기술적 괴리 진단
 
 ## 해석 원칙
 - 숫자 나열 금지. **원인과 맥락**을 붙여라. 마진 변동 → 매출/비용/믹스 분해.
+- **수치 인용은 코드 실행 결과에서만.** 실행 결과에 "13.1%"가 있으면 "13.1%"로 인용. 기억이나 추측으로 수치를 만들지 마라.
 - **추세** 3~5년, **교차 검증** IS-CF-BS 일관성, **비교**는 동종업계 상대 위치(scan).
 - profitabilityFlags 경고 있으면 반드시 반영.
 - marginTrend에 ROE 없음 → returnTrend 사용. ROIC → analysis("financial", "투자효율").
@@ -698,6 +860,11 @@ c.quant("divergence")  # 재무-기술적 괴리 진단
 1. 코드 실행 → 2. **핵심 판단** 1~2문장 → 3. **근거 수치** 테이블 → 4. **원인** 1~2줄.
 되묻기 절대 금지 ("~해드릴까요?", "원하시면", "~해드릴게요" 등 모두 금지).
 원본 수치를 그대로 보여준 뒤 해석. 다음 단계 안내는 코드 1줄로.
+
+## 테이블 출력 규칙
+- **DataFrame은 `print(df)` 또는 `print(df.head(N))`로 직접 출력.** 자동으로 마크다운 테이블이 된다.
+- 수동 마크다운 파이프 테이블(`| 컬럼 | 값 |`)도 가능하지만, DataFrame이 있으면 `print(df)`가 우선.
+- dict 결과는 핵심 키만 파이프 테이블로 정리. **코드 실행 결과에 있는 수치만 인용하라.**
 
 ## 규칙
 - 기업/시장 질문 → 무조건 코드 실행. 코드 불필요(인사 등)면 3줄 이내.
@@ -960,6 +1127,9 @@ def _analyze_inner(
 ) -> Generator[AnalysisEvent, None, None]:
     """analyze() 본체 — 3단계 순수 스트리밍."""
 
+    # ── 0. 모드 감지 ──
+    mode = _detectMode(question)
+
     # ── 1. Config 해석 + Meta 이벤트 ──
     config_ = _resolveAnalysisConfig(provider, role, model, api_key, base_url, **kwargs)
 
@@ -977,6 +1147,27 @@ def _analyze_inner(
             meta.setdefault("dataDate", _dataDate)
     yield AnalysisEvent("meta", meta)
 
+    # ── P1-1: ground 데이터 백그라운드 fire ──
+    # 3개 호출 (disclosure / 외부검색 / KnowledgeDB 인사이트) 을 병렬 thread 로 시작.
+    # 동기 작업 (provider/prompt/few-shot/route 등) 과 오버랩 → 첫 토큰 지연 단축.
+    # DARTLAB_AI_PREGROUND_SYNC=1 로 동기 모드 fallback.
+    _sync_mode = os.environ.get("DARTLAB_AI_PREGROUND_SYNC") == "1"
+    _ground_executor: concurrent.futures.ThreadPoolExecutor | None = None
+    _f_disclosure: concurrent.futures.Future | None = None
+    _f_search: concurrent.futures.Future | None = None
+    _f_insight: concurrent.futures.Future | None = None
+
+    if not _sync_mode and stock_id:
+        _ground_executor = concurrent.futures.ThreadPoolExecutor(
+            max_workers=3, thread_name_prefix="dl-ground"
+        )
+        _f_disclosure = _ground_executor.submit(_preGroundDisclosure, stockCode=stock_id)
+        if _needsExternalSearch(question):
+            _f_search = _ground_executor.submit(
+                _preGroundSearch, question, stockCode=stock_id, corpName=corp_name
+            )
+        _f_insight = _ground_executor.submit(_gatherInsightHints, stock_id, company)
+
     # ── 2. LLM provider 생성 (캐시 경계 판단에 필요) ──
     from dartlab.ai.providers import create_provider
 
@@ -990,20 +1181,33 @@ def _analyze_inner(
 
         _templateText = get_template(_templateName)
 
-    static_prompt, dynamic_prompt = _buildSystemPromptParts(
-        config_,
-        market=company_market,
-        hasCompany=company is not None,
-        stockCode=stock_id,
-        corpName=corp_name,
-        templateText=_templateText,
-    )
+    if mode == "coding":
+        # 코딩 모드 전용 프롬프트
+        if company is not None and stock_id:
+            label = f"{corp_name}({stock_id})" if corp_name else stock_id
+            coding_env = (
+                f"- `c` — {label} Company 객체 (이미 생성됨. c.analysis(), c.show() 등 바로 사용)\n"
+                f'- 사용자가 "이 회사" 등으로 질문하면 {label}을 가리킨다.'
+            )
+        else:
+            coding_env = "- 종목 분석이 필요하면 `c = dartlab.Company('종목코드')`로 생성하세요"
+        static_prompt = _CODING_SYSTEM_PROMPT.replace("{env_block}", coding_env)
+        dynamic_prompt = ""
+    else:
+        static_prompt, dynamic_prompt = _buildSystemPromptParts(
+            config_,
+            market=company_market,
+            hasCompany=company is not None,
+            stockCode=stock_id,
+            corpName=corp_name,
+            templateText=_templateText,
+        )
 
     # Self-AI Phase 2: 유사 질문의 성공 코드를 few-shot으로 동적 주입
     try:
         from dartlab.ai.selfai.few_shot import getFewShots
 
-        _fewShotBlock = getFewShots(question, limit=2)
+        _fewShotBlock = getFewShots(question, limit=2, mode=mode)
         if _fewShotBlock:
             dynamic_prompt += _fewShotBlock
     except ImportError:
@@ -1072,33 +1276,61 @@ def _analyze_inner(
     if prefetchText:
         userParts.append(prefetchText)
 
-    # 공시 프로필 주입 (disclosure brief — companyProfile에서 ~300자)
-    disclosureBrief = _preGroundDisclosure(stockCode=stock_id)
+    # ── P1-1: 백그라운드 ground future 회수 (deadline 기반) ──
+    # 동기 fallback 모드면 직접 호출, 아니면 future.result(timeout=remaining).
+    _ground_timeout = float(os.environ.get("DARTLAB_PREGROUND_TIMEOUT", "1.5"))
+
+    def _safe_future_result(fut: concurrent.futures.Future | None, deadline: float) -> Any:
+        if fut is None:
+            return None
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return None
+        try:
+            return fut.result(timeout=remaining)
+        except (concurrent.futures.TimeoutError, Exception):  # noqa: BLE001
+            return None
+
+    if _sync_mode:
+        # 동기 fallback (회귀 시 escape hatch)
+        disclosureBrief = _preGroundDisclosure(stockCode=stock_id) if stock_id else ""
+        if _needsExternalSearch(question) and stock_id:
+            groundingText = _preGroundSearch(question, stockCode=stock_id, corpName=corp_name)
+        else:
+            groundingText = ""
+        insightHints = _gatherInsightHints(stock_id, company) if stock_id else ""
+    else:
+        _deadline = time.monotonic() + _ground_timeout
+        disclosureBrief = _safe_future_result(_f_disclosure, _deadline) or ""
+        groundingText = _safe_future_result(_f_search, _deadline) or ""
+        insightHints = _safe_future_result(_f_insight, _deadline) or ""
+        # executor 정리 — wait=False 로 timeout 된 future 는 백그라운드에서 계속 진행
+        if _ground_executor is not None:
+            _ground_executor.shutdown(wait=False)
+
     if disclosureBrief:
         userParts.append(disclosureBrief)
-
-    # 자동 외부 검색 (pre-grounding)
-    if _needsExternalSearch(question):
-        groundingText = _preGroundSearch(question, stockCode=stock_id, corpName=corp_name)
-        if groundingText:
-            userParts.append(groundingText)
-
+    if groundingText:
+        userParts.append(groundingText)
     if memoryHints:
         userParts.append(memoryHints)
+    if insightHints:
+        userParts.append(insightHints)
     userParts.append(f"질문: {question}")
     userContent = "\n\n---\n\n".join(userParts)
     messages.append({"role": "user", "content": userContent})
 
     # ── 4. LLM 스트리밍 + 코드블록 자동 실행 ──
-    for item in _streamWithCodeExecution(llm, messages, stockCode=stock_id):
+    for item in _streamWithCodeExecution(llm, messages, stockCode=stock_id, mode=mode, question_text=question):
         if isinstance(item, AnalysisEvent):
             yield item
         else:
             _full_response_parts.append(item)
             yield AnalysisEvent("chunk", {"text": item})
 
-    # ── 분석 메모리 저장 ──
-    if stock_id and _full_response_parts:
+    # ── 분석 메모리 저장 + 인사이트 갱신 ──
+    # R21-4: stock_id 없는 general 질문도 executions 에 저장 (general 추적용)
+    if _full_response_parts:
         try:
             from dartlab.ai.memory.store import getMemory
             from dartlab.ai.memory.summarizer import extractGrade, summarizeResponse
@@ -1106,11 +1338,80 @@ def _analyze_inner(
             _fullText = "".join(_full_response_parts)
             _mem = getMemory()
             _mem.saveAnalysis(
-                stockCode=stock_id,
+                stockCode=stock_id or "",  # general 질문은 빈 문자열
                 question=question[:200],
-                questionType="",
+                questionType=mode,
                 resultSummary=summarizeResponse(_fullText),
                 grade=extractGrade(_fullText),
             )
         except (ImportError, OSError, sqlite3.Error):
             pass
+
+        # 자기성장: 분석 모드 + stock_id 있을 때만 인사이트 갱신 (sector 학습용)
+        # R21-5: silent fail 방지 — broad except (자기성장은 best-effort)
+        if stock_id and mode == "analysis" and len("".join(_full_response_parts)) > 500:
+            try:
+                _updateInsightFromResponse(stock_id, "".join(_full_response_parts), company)
+            except (ImportError, OSError, sqlite3.Error, AttributeError, ValueError):
+                pass
+
+
+# ── 자기성장 인사이트 갱신 ────────────────────────────────
+
+# R21-5: regex 광범위화 — audit 응답 패턴이 "강점:", "약점:" 명시 적음.
+# - 명시 키워드 (강점/약점/리스크 등) + 부드러운 표현 (개선/회복/우수/탄탄/감소/취약 등) 추가
+# - 키워드 뒤에 콜론 없어도 그 줄 또는 그 다음 절을 매치
+_STRENGTH_RE = re.compile(
+    r"(?:강점|장점|긍정|양호|우수|탄탄|회복|개선|성장|확대|증가|상승|반등)[:\s은는이가\.]+([^\n]{5,120})",
+)
+_WEAKNESS_RE = re.compile(
+    r"(?:약점|리스크|위험|부정|주의|훼손|악화|하락|감소|취약|부진|침체|압박|우려)[:\s은는이가\.]+([^\n]{5,120})",
+)
+_NARRATIVE_RE = re.compile(r"(?:결론|종합|요약|핵심|핵심 판단)[:\s]*(.+?)(?:\n\n|\Z)", re.DOTALL)
+
+
+def _updateInsightFromResponse(
+    stock_code: str,
+    response_text: str,
+    company: Any | None,
+) -> None:
+    """AI 분석 응답에서 인사이트를 추출하여 KnowledgeDB에 갱신.
+
+    규칙 기반 regex 추출 — LLM 호출 없이 결정론적.
+    """
+    from dartlab.ai.selfai.knowledge_db import KnowledgeDB
+
+    # 강점/약점 추출
+    strengths = _STRENGTH_RE.findall(response_text)
+    weaknesses = _WEAKNESS_RE.findall(response_text)
+
+    # 서사 추출
+    narrative = ""
+    match = _NARRATIVE_RE.search(response_text)
+    if match:
+        narrative = match.group(1).strip()[:500]
+
+    # 서사가 없으면 응답 첫 200자를 서사로
+    if not narrative:
+        clean = re.sub(r"```[\s\S]*?```", "", response_text)  # 코드블록 제거
+        clean = re.sub(r"\|.*\|", "", clean)  # 테이블 제거
+        clean = clean.strip()
+        if clean:
+            narrative = clean[:200]
+
+    if not narrative:
+        return
+
+    sector = ""
+    if company is not None:
+        sector = getattr(company, "sector", None) or getattr(company, "sectorName", None) or ""
+
+    db = KnowledgeDB.get()
+    db.save_insight(
+        stock_code=stock_code,
+        narrative=narrative,
+        strengths=strengths[:5],
+        weaknesses=weaknesses[:5],
+        sector=str(sector),
+        source="live",
+    )

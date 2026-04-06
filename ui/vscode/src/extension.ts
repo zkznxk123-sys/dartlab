@@ -38,6 +38,8 @@ export async function activate(
         const prov = diag.aiProvider && diag.aiProvider !== "none" ? `, ${diag.aiProvider}` : "";
         statusBarItem.tooltip = `DartLab: Ready (v${stdioProxy.currentVersion}${pyVer}${prov})`;
         checkForUpdate(context, stdioProxy.currentVersion);
+        // P1-2: 첫 ask 의 cold-start 비용을 사전 지불 (fire-and-forget)
+        stdioProxy.warmup();
         break;
       }
       case "error":

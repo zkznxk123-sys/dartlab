@@ -603,6 +603,37 @@ def _blendOFS(consolidated: float | None, separate: float | None) -> float | Non
 
 
 # ═══════════════════════════════════════════════════════════
+# R21-1: metrics 출력 정규화 — tuple/dict 둘 다 지원, value 노출
+# ═══════════════════════════════════════════════════════════
+
+
+def _normalizeMetricsForOutput(metric_items: list) -> list[dict]:
+    """축의 metric 항목을 출력용 dict 로 정규화.
+
+    - dict 입력 (R21-1 신규): {"name", "value", "score"} 그대로 유지 (None score 포함, value 표시 위해)
+    - tuple 입력 (legacy): (name, score) → {"name", "score"}, value 없음
+    - score=None 인 항목도 포함 (value 가 있으면 표시 가치 있음)
+    """
+    out: list[dict] = []
+    for item in metric_items:
+        if isinstance(item, dict):
+            entry = {"name": item.get("name", "")}
+            if "value" in item:
+                entry["value"] = item.get("value")
+            entry["score"] = item.get("score")
+            # 둘 다 None 이면 의미 없음 → 제외
+            if entry.get("value") is None and entry["score"] is None:
+                continue
+            out.append(entry)
+        else:
+            name, score = item
+            if score is None:
+                continue
+            out.append({"name": name, "score": score})
+    return out
+
+
+# ═══════════════════════════════════════════════════════════
 # 메인 진입점
 # ═══════════════════════════════════════════════════════════
 
@@ -662,24 +693,34 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
         sectorLabel = getSectorLabel(sector)
 
     # ── 축 1: 채무상환능력 ──
+    # R21-1: metrics 에 raw value + score 둘 다 노출 (AI/사용자 score=0 오해 방지)
+    def _entry(name: str, value, threshold: dict) -> dict:
+        return {
+            "name": name,
+            "value": value,
+            "score": scoreMetric(value, threshold),
+        }
+
     # FOCF/Debt: FCF가 음수(CAPEX > OCF)면 구조적으로 나쁜 값 → 스킵
-    focfScore = scoreMetric(latest.get("focfToDebt"), thresholds["focf_to_debt"])
+    _focfVal = latest.get("focfToDebt")
     if latest.get("fcf") is not None and (latest.get("fcf") or 0) < 0:
-        focfScore = None  # FCF 음수 기업은 FOCF/Debt 무의미 — 다른 지표로 평가
+        _focfEntry = {"name": "FOCF/Debt", "value": _focfVal, "score": None}
+    else:
+        _focfEntry = _entry("FOCF/Debt", _focfVal, thresholds["focf_to_debt"])
 
     axis1_scores = [
-        ("FFO/총차입금", scoreMetric(latest.get("ffoToDebt"), thresholds["ffo_to_debt"])),
-        ("Debt/EBITDA", scoreMetric(latest.get("debtToEbitda"), thresholds["debt_to_ebitda"])),
-        ("FOCF/Debt", focfScore),
-        ("EBITDA/이자비용", scoreMetric(latest.get("ebitdaInterestCoverage"), thresholds["ebitda_interest_coverage"])),
+        _entry("FFO/총차입금", latest.get("ffoToDebt"), thresholds["ffo_to_debt"]),
+        _entry("Debt/EBITDA", latest.get("debtToEbitda"), thresholds["debt_to_ebitda"]),
+        _focfEntry,
+        _entry("EBITDA/이자비용", latest.get("ebitdaInterestCoverage"), thresholds["ebitda_interest_coverage"]),
     ]
     axis1 = axisScore(axis1_scores)
 
     # ── 축 2: 자본 구조 ──
     axis2_scores = [
-        ("부채비율", scoreMetric(latest.get("debtRatio"), thresholds["debt_ratio"])),
-        ("차입금의존도", scoreMetric(latest.get("borrowingDependency"), thresholds["borrowing_dependency"])),
-        ("순차입금/EBITDA", scoreMetric(latest.get("netDebtToEbitda"), thresholds["net_debt_to_ebitda"])),
+        _entry("부채비율", latest.get("debtRatio"), thresholds["debt_ratio"]),
+        _entry("차입금의존도", latest.get("borrowingDependency"), thresholds["borrowing_dependency"]),
+        _entry("순차입금/EBITDA", latest.get("netDebtToEbitda"), thresholds["net_debt_to_ebitda"]),
     ]
     axis2 = axisScore(axis2_scores)
 
@@ -693,18 +734,15 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
         if sepMetrics is not None:
             # 축1: 별도 D/EBITDA 블렌딩
             sep_axis1_scores = [
-                ("별도D/EBITDA", scoreMetric(sepMetrics.get("separateDebtToEbitda"), thresholds["debt_to_ebitda"])),
+                _entry("별도D/EBITDA", sepMetrics.get("separateDebtToEbitda"), thresholds["debt_to_ebitda"]),
             ]
             sep1 = axisScore(sep_axis1_scores)
             axis1 = _blendOFS(axis1, sep1)
 
             # 축2: 별도 부채비율 블렌딩
             sep_axis2_scores = [
-                ("별도부채비율", scoreMetric(sepMetrics.get("separateDebtRatio"), thresholds["debt_ratio"])),
-                (
-                    "별도차입금의존도",
-                    scoreMetric(sepMetrics.get("separateBorrowingDep"), thresholds["borrowing_dependency"]),
-                ),
+                _entry("별도부채비율", sepMetrics.get("separateDebtRatio"), thresholds["debt_ratio"]),
+                _entry("별도차입금의존도", sepMetrics.get("separateBorrowingDep"), thresholds["borrowing_dependency"]),
             ]
             sep2 = axisScore(sep_axis2_scores)
             axis2 = _blendOFS(axis2, sep2)
@@ -718,9 +756,9 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
 
     # ── 축 3: 유동성 ──
     axis3_scores = [
-        ("유동비율", scoreMetric(latest.get("currentRatio"), thresholds["current_ratio"])),
-        ("현금비율", scoreMetric(latest.get("cashRatio"), thresholds["cash_ratio"])),
-        ("단기차입금비중", scoreMetric(latest.get("shortTermDebtRatio"), thresholds["short_term_debt_ratio"])),
+        _entry("유동비율", latest.get("currentRatio"), thresholds["current_ratio"]),
+        _entry("현금비율", latest.get("cashRatio"), thresholds["cash_ratio"]),
+        _entry("단기차입금비중", latest.get("shortTermDebtRatio"), thresholds["short_term_debt_ratio"]),
     ]
     axis3 = axisScore(axis3_scores)
 
@@ -838,7 +876,7 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
                 "score": a["score"],
                 "weight": round(a["weight"] * 100),
                 "contribution": a.get("contribution", 0),
-                "metrics": [{"name": n, "score": s} for n, s in a["metrics"] if s is not None],
+                "metrics": _normalizeMetricsForOutput(a["metrics"]),
             }
             for a in axes
         ],
@@ -1249,7 +1287,7 @@ def _evaluateFinancial(
                 "score": a["score"],
                 "weight": round(a["weight"] * 100),
                 "contribution": a.get("contribution", 0),
-                "metrics": [{"name": n, "score": s} for n, s in a["metrics"] if s is not None],
+                "metrics": _normalizeMetricsForOutput(a["metrics"]),
             }
             for a in axes
         ],

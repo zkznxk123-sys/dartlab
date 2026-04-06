@@ -419,6 +419,7 @@ export class StdioProxy {
   }
 
   private _pongCallback: (() => void) | null = null;
+  private _warmupCallback: (() => void) | null = null;
 
   private ping(): void {
     if (this._state !== "ready" || !this.proc?.stdin?.writable) return;
@@ -451,6 +452,14 @@ export class StdioProxy {
     const id = msg.id as string | undefined;
 
     if (event === "pong") { this._pongCallback?.(); this._pongCallback = null; return; }
+    if (event === "warmup_done") {
+      const warmed = (data?.warmed as string[] | undefined) ?? [];
+      const skipped = (data?.skipped as string[] | undefined) ?? [];
+      this.output.appendLine(`[DartLab] warmup done: warmed=${warmed.length} skipped=${skipped.length}`);
+      this._warmupCallback?.();
+      this._warmupCallback = null;
+      return;
+    }
     if (event === "status") { for (const fn of this.statusListeners) fn(data); this.statusListeners = []; return; }
     if (event === "providerChanged") { for (const fn of this.providerListeners) fn(data); this.providerListeners = []; return; }
     if (event === "needCredential") { for (const fn of this.providerListeners) fn({ ...data, _needCredential: true }); this.providerListeners = []; return; }
@@ -506,6 +515,22 @@ export class StdioProxy {
 
   listTemplates(): void {
     this.send({ type: "listTemplates" });
+  }
+
+  /**
+   * 첫 ask 의 cold-start 비용을 사전 지불 (KnowledgeDB init + 모듈 import).
+   * extension activate 직후 fire-and-forget 으로 호출.
+   * 이미 워밍 중이면 무시. 30초 timeout.
+   */
+  warmup(): void {
+    if (this._state !== "ready" || !this.proc?.stdin?.writable) return;
+    if (this._warmupCallback) return; // 이미 진행 중
+    const timeout = setTimeout(() => {
+      this.output.appendLine("[DartLab] warmup timeout (30s) — 무시");
+      this._warmupCallback = null;
+    }, 30_000);
+    this._warmupCallback = () => clearTimeout(timeout);
+    this.send({ type: "warmup" });
   }
 
   cancelCurrent(): void {

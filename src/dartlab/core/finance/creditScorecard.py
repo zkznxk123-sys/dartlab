@@ -219,14 +219,21 @@ def creditOutlook(scoreHistory: list[float]) -> str:
 
 
 def axisScore(
-    metricScores: list[tuple[str, float | None]],
+    metricScores: list,
 ) -> float | None:
     """축 내 개별 지표 점수들의 평균 → 축 점수.
 
-    metricScores: [(지표명, 점수|None), ...]
-    None인 지표는 제외.
+    metricScores: [(지표명, 점수|None), ...] 또는 [{"name", "value", "score"}, ...]
+    None인 지표는 제외. tuple/dict 둘 다 지원 (R21-1: metrics 에 value 포함).
     """
-    valid = [s for _, s in metricScores if s is not None]
+    valid: list[float] = []
+    for item in metricScores:
+        if isinstance(item, dict):
+            s = item.get("score")
+        else:
+            _, s = item
+        if s is not None:
+            valid.append(s)
     if not valid:
         return None
     return round(sum(valid) / len(valid), 2)
