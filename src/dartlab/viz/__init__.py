@@ -88,6 +88,42 @@ from dartlab.viz.spec import VizSpec  # noqa: F401
 _MARKER_START = "<!--DARTLAB_VIZ:"
 _MARKER_END = ":VIZ_END-->"
 
+# dartlab.analysis() 가이드 dataframe 의 axis 컬럼 값 (22 축).
+# 이걸 categories 로 쓴 차트는 메타데이터 차트라 사용자 가치 0 → 거부.
+_GUIDE_AXIS_NAMES = frozenset({
+    "수익구조", "자금조달", "자산구조", "현금흐름",
+    "수익성", "성장성", "안정성", "효율성", "종합평가",
+    "이익품질", "비용구조", "자본배분", "투자효율", "재무정합성",
+    "가치평가", "지배구조", "공시변화", "비교분석",
+    "매출전망", "예측신호", "매크로민감도", "밸류에이션밴드",
+})
+
+
+def _is_meta_guide_chart(spec: dict) -> bool:
+    """analysis() 가이드 dataframe 으로 만든 의미 없는 메타 차트 감지.
+
+    시그널: categories 가 dartlab 22축 이름과 5개 이상 겹치고
+    series data 가 모두 0~25 범위의 작은 값 (= items 컬럼).
+    """
+    cats = spec.get("categories")
+    if not isinstance(cats, list) or len(cats) < 5:
+        return False
+    cat_set = {str(c).strip() for c in cats}
+    overlap = cat_set & _GUIDE_AXIS_NAMES
+    if len(overlap) < 5:
+        return False
+    series = spec.get("series") or []
+    for s in series:
+        if not isinstance(s, dict):
+            continue
+        data = s.get("data")
+        if not isinstance(data, list) or not data:
+            continue
+        nums = [v for v in data if isinstance(v, (int, float))]
+        if nums and all(0 <= v <= 25 for v in nums):
+            return True
+    return False
+
 
 def emit_chart(spec: dict) -> None:
     """AI 코드에서 차트 출력.
@@ -106,6 +142,20 @@ def emit_chart(spec: dict) -> None:
             "categories": ["2022", "2023", "2024"],
         })
     """
+    # 메타 가이드 차트 거부 — AI 가 dartlab.analysis() 가이드 dataframe 의
+    # items 컬럼을 막대로 그리는 패턴 차단. 사용자 가치 0.
+    if _is_meta_guide_chart(spec):
+        print(
+            "[차트 거부] analysis() 가이드 dataframe 의 'items' 컬럼은 사용자에게 "
+            "가치 없는 메타데이터입니다. 차트를 그리지 말고, 진짜 종목 데이터로 "
+            "다시 시각화하세요. 예시:\n"
+            "  hist = c.analysis('financial', '수익성')['marginTrend']['history']\n"
+            "  emit_chart({'chartType':'line', 'title':'영업이익률 추이',\n"
+            "              'categories':[h['period'] for h in hist],\n"
+            "              'series':[{'name':'영업이익률',\n"
+            "                         'data':[h['operatingMargin'] for h in hist]}]})"
+        )
+        return
     spec.setdefault("vizType", "chart")
     print(f"{_MARKER_START}{json.dumps(spec, ensure_ascii=False)}{_MARKER_END}")
 

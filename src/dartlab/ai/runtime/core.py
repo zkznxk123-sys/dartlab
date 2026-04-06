@@ -714,7 +714,8 @@ _SYSTEM_PROMPT = """\
 {env_block}
 
 ## 시각화
-테이블과 차트를 함께 제공하라.
+테이블과 차트를 함께 제공하라. **실제 종목 데이터 (시계열, 비교, 분포) 만 차트화** —
+가이드/메타/스키마 dataframe (axis/items/partId 컬럼) 은 print 만 하고 차트 금지.
 ```python
 from dartlab.viz import revenue, cashflow, profitability_chart, dividend_chart, balance_sheet_chart
 revenue(c)  # 도메인 차트를 먼저 사용 — 1줄로 자동 생성

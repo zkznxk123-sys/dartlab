@@ -195,6 +195,63 @@ def test_emit_diagram_default_title(capsys):
     assert parsed["title"] == ""
 
 
+# ── 메타 가이드 차트 거부 (R21 audit 후속 발견) ──
+
+
+def test_emit_chart_rejects_meta_guide_axis_items(capsys):
+    """analysis() 가이드 dataframe 의 axis/items 를 차트화하면 거부."""
+    from dartlab.viz import emit_chart
+
+    spec = {
+        "chartType": "bar",
+        "title": "analysis 엔진 축별 항목 수",
+        "categories": [
+            "수익구조", "자금조달", "자산구조", "현금흐름", "수익성",
+            "성장성", "안정성", "효율성", "이익품질", "비용구조",
+            "자본배분", "투자효율", "재무정합성", "가치평가",
+        ],
+        "series": [{"name": "items", "data": [8, 9, 4, 4, 6, 5, 6, 2, 6, 5, 7, 5, 6, 9]}],
+    }
+    emit_chart(spec)
+    captured = capsys.readouterr().out
+    # 마커 emit 안 되고, 거부 메시지 출력
+    assert "DARTLAB_VIZ" not in captured
+    assert "차트 거부" in captured
+    assert "메타데이터" in captured
+
+
+def test_emit_chart_passes_real_data(capsys):
+    """진짜 종목 시계열 데이터는 통과."""
+    from dartlab.viz import emit_chart
+
+    spec = {
+        "chartType": "line",
+        "title": "삼성전자 매출 추이",
+        "categories": ["2021", "2022", "2023", "2024", "2025"],
+        "series": [{"name": "매출", "data": [279.6, 302.2, 258.9, 300.9, 333.6]}],
+    }
+    emit_chart(spec)
+    captured = capsys.readouterr().out
+    assert "DARTLAB_VIZ" in captured
+    assert "차트 거부" not in captured
+
+
+def test_emit_chart_passes_axis_categories_with_real_values(capsys):
+    """축 이름은 같지만 진짜 분석 값(큰 숫자)은 통과 — false positive 방지."""
+    from dartlab.viz import emit_chart
+
+    spec = {
+        "chartType": "bar",
+        "title": "축별 점수 비교",
+        "categories": ["수익구조", "자금조달", "자산구조", "현금흐름", "수익성"],
+        "series": [{"name": "점수", "data": [85.3, 72.1, 91.4, 68.7, 77.9]}],
+    }
+    emit_chart(spec)
+    captured = capsys.readouterr().out
+    # 데이터가 25 초과라 가이드 패턴 아님 → 통과
+    assert "DARTLAB_VIZ" in captured
+
+
 # ── extract_viz_specs ──
 
 
