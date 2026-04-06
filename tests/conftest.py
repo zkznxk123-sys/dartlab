@@ -63,7 +63,10 @@ AAPL = "AAPL"
 
 # ── 메모리 안전 한계 (MB) ──
 # 이 값을 넘으면 pytest 자체를 안전 종료하여 OOM 방지
-_PYTEST_MEMORY_LIMIT_MB = PRESSURE_CRITICAL_MB
+# CI에서 더 큰 한계 필요 시 PYTEST_MEMORY_LIMIT_MB 환경변수로 override
+_PYTEST_MEMORY_LIMIT_MB = float(
+    os.environ.get("PYTEST_MEMORY_LIMIT_MB", str(PRESSURE_CRITICAL_MB))
+)
 
 
 def _has_data(code: str, category: str = "docs") -> bool:
