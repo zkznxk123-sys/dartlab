@@ -864,6 +864,24 @@ from dartlab.topdown import _TopdownEntry as _TopdownEntry
 
 sys.modules[__name__].topdown = _TopdownEntry()
 
+# scan/analysis/credit/quant — 어떤 import 체인이 모듈을 먼저 로드하면
+# __getattr__이 동작 안 함 (CI에서 발견된 회귀). 명시적으로 callable instance 부여.
+from dartlab.scan import Scan as _Scan
+
+sys.modules[__name__].scan = _Scan()
+
+from dartlab.analysis.financial import Analysis as _Analysis
+
+sys.modules[__name__].analysis = _Analysis()
+
+from dartlab.credit import credit as _credit_callable
+
+sys.modules[__name__].credit = _credit_callable
+
+from dartlab.quant import Quant as _Quant
+
+sys.modules[__name__].quant = _Quant()
+
 
 __all__ = [
     "Company",
