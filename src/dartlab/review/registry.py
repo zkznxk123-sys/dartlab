@@ -13,6 +13,10 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
 
     keys가 지정되면 해당 블록만 빌드한다 (선택적 빌드).
     keys=None이면 전체 블록을 빌드한다 (기존 동작).
+
+    [최적화] keys=None (전체 빌드) 시 4엔진의 무거운 외부 데이터 calc를
+    ThreadPoolExecutor로 미리 워밍업한다. 결과는 BoundedCache(thread-safe)에
+    저장되어 이후 순차 빌드가 캐시 hit으로 즉시 완료된다.
     """
     # builders와 analysis의 금액 포맷을 company.currency에 맞게 설정 (contextvars — 스레드 안전)
     from dartlab.review.builders import _review_currency
@@ -25,6 +29,13 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         _analysis_currency.set(_currency)
     except ImportError:
         pass
+
+    # [Phase 3 시도 — 워밍업 전략 폐기]
+    # ThreadPoolExecutor로 calc 병렬 워밍업을 시도했으나:
+    # 1. asyncio 코루틴 경고 (quant fetch_async가 thread 내 실행 시 충돌)
+    # 2. scorecard 워밍업이 다른 무거운 calc 트리거 → 메모리 압박 → 캐시 클리어
+    # 3. 결과: 워밍업 비용 > 캐시 hit 이득
+    # 결론: 메모이제이션(Phase 1)만으로 충분. 워밍업은 BoundedCache pressure 한계로 비효율.
 
     def _safe(fn):
         try:
@@ -575,20 +586,26 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         "cashFlowGrade",
         "creditPeerPosition",
         "creditFlags",
+        "creditNarrative",
+        "creditAudit",
     }:
         from dartlab.credit.calcs import (
             calcCashFlowGrade,
+            calcCreditAudit,
             calcCreditFlags,
             calcCreditHistory,
             calcCreditMetrics,
+            calcCreditNarrative,
             calcCreditPeerPosition,
             calcCreditScore,
         )
         from dartlab.review.builders import (
             cashFlowGradeBlock,
+            creditAuditBlock,
             creditFlagsBlock,
             creditHistoryBlock,
             creditMetricsBlock,
+            creditNarrativeBlock,
             creditPeerPositionBlock,
             creditScoreBlock,
         )
@@ -607,6 +624,12 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             )
         if _need("creditFlags"):
             b["creditFlags"] = _safe(lambda: creditFlagsBlock(calcCreditFlags(company, basePeriod=basePeriod)))
+        if _need("creditNarrative"):
+            b["creditNarrative"] = _safe(
+                lambda: creditNarrativeBlock(calcCreditNarrative(company, basePeriod=basePeriod))
+            )
+        if _need("creditAudit"):
+            b["creditAudit"] = _safe(lambda: creditAuditBlock(calcCreditAudit(company, basePeriod=basePeriod)))
 
     # ── 4부: 가치평가 ──
     if keys is None or keys & {
@@ -854,11 +877,19 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         if _need("marketAnalysisFlags"):
             b["marketAnalysisFlags"] = _safe(lambda: marketAnalysisFlagsBlock(calcMarketAnalysisFlags(company)))
 
-    # ── 매크로 (기업-매크로 연결만 — 시장 분석은 dartlab.macro()) ──
-    if keys is None or keys & {"valuationBand"}:
+    # ── 매크로 (시장 환경 + 기업-매크로 연결) ──
+    if keys is None or keys & {"macroCycle", "valuationBand"}:
         from dartlab.analysis.financial.macroExposure import calcValuationBand
-        from dartlab.review.builders import valuationBandBlock
+        from dartlab.review.builders import macroCycleBlock, valuationBandBlock
 
+        if _need("macroCycle"):
+            def _build_macro_cycle():
+                import dartlab as _dl
+
+                market = getattr(company, "market", "KR")
+                return macroCycleBlock(_dl.macro("사이클", market=market))
+
+            b["macroCycle"] = _safe(_build_macro_cycle)
         if _need("valuationBand"):
             b["valuationBand"] = _safe(lambda: valuationBandBlock(calcValuationBand(company, basePeriod=basePeriod)))
 
@@ -958,7 +989,15 @@ def buildReview(
 
         # 템플릿 순서 결정 (블록 빌드 전에 필요한 keys 산출)
         if section is not None:
-            templateKeys = [section] if section in TEMPLATES else []
+            # R31-1: section 이 TEMPLATES 에 없으면 silent 빈 Review 가 아닌 명시적 ValueError
+            if section not in TEMPLATES:
+                available = ", ".join(sorted(TEMPLATES.keys()))
+                raise ValueError(
+                    f"'{section}' 섹션을 찾을 수 없습니다.\n"
+                    f"  사용 가능한 섹션: {available}\n"
+                    f"  사용법: c.review('수익구조') 또는 c.review() 로 전체 보고서"
+                )
+            templateKeys = [section]
         elif ly.sectionOrder is not None:
             templateKeys = [k for k in ly.sectionOrder if k in TEMPLATES]
         else:
@@ -1042,3 +1081,6 @@ def buildReview(
             sec.summary = buildSectionSummary(sec)
 
     return review
+
+
+# [Phase 3 워밍업 함수는 제거됨 — 위 buildBlocks 주석 참조]
