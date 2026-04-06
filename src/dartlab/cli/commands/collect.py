@@ -116,6 +116,16 @@ def configure_parser(subparsers) -> None:
         help="freshness 체크만 (수집 안 함, DART)",
     )
     parser.add_argument(
+        "--repair-cache",
+        action="store_true",
+        help="로컬 캐시 무결성 일괄 검사 + stale 파일 자동 재다운로드 (DART)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="--repair-cache와 함께 — 다운로드 안 하고 stale 통계만 출력",
+    )
+    parser.add_argument(
         "--incremental",
         action="store_true",
         help="누락 공시만 증분 수집 (DART)",
@@ -177,6 +187,9 @@ def run(args) -> int:
         return _runScan(console, args)
 
     # --- DART ---
+    if getattr(args, "repair_cache", False):
+        return _runRepairCache(console, args)
+
     if getattr(args, "check", False):
         return _runCheck(console, args)
 
@@ -231,6 +244,44 @@ def _printHelp(console) -> None:
     console.print("  dartlab collect --tier sp500 --limit 10      10개만 테스트")
     console.print("  dartlab collect --batch --tier all            전체 배치")
     console.print("  dartlab collect --batch --tier all --mode new 미수집만")
+
+
+# ── 캐시 무결성 회복 ────────────────────────────────────
+
+
+def _runRepairCache(console, args) -> int:
+    """로컬 dart 캐시 전수 무결성 검사 + 손상된 파일 자동 재다운로드.
+
+    과거 ETag 사이드카 first-write 버그(2026-04-06 발견)로 영구 stale로 굳어진
+    로컬 parquet들을 일괄 회복한다. ETag + Content-Length 2단계 검증.
+    """
+    from dartlab.core.dataLoader import repairLocalCache
+
+    dryRun = getattr(args, "dry_run", False)
+    catsArg = getattr(args, "categories", None)
+    cats = [c.strip() for c in catsArg.split(",")] if catsArg else ["finance", "report", "docs"]
+
+    console.print(f"[bold]캐시 무결성 회복[/] categories={cats} dryRun={dryRun}")
+    if dryRun:
+        console.print("[yellow]dryRun 모드: 통계만 출력, 다운로드 안 함[/]")
+
+    total = {"checked": 0, "stale": 0, "repaired": 0, "failed": 0, "fresh": 0}
+    for cat in cats:
+        console.print(f"\n[cyan]── {cat} ──[/]")
+        try:
+            stats = repairLocalCache(cat, dryRun=dryRun)
+        except (OSError, RuntimeError) as e:
+            console.print(f"[red]{cat} 실패: {e}[/]")
+            continue
+        for k, v in stats.items():
+            total[k] = total.get(k, 0) + v
+        console.print(
+            f"  checked={stats['checked']}  fresh={stats['fresh']}  "
+            f"stale={stats['stale']}  repaired={stats['repaired']}  failed={stats['failed']}"
+        )
+
+    console.print(f"\n[bold green]총합[/]: {total}")
+    return 0 if total["failed"] == 0 else 2
 
 
 # ── scan 프리빌드 ──────────────────────────────────────

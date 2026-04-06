@@ -193,11 +193,21 @@ class AsyncDartClient:
 
 
 def _buildAllPeriods(startYear: int = START_YEAR) -> list[tuple[str, str]]:
-    """(bsnsYear, reprtCode) 전체 기간 리스트."""
+    """(bsnsYear, reprtCode) 전체 기간 리스트.
+
+    순서: **최신 분기부터 과거 순**.
+    이유: DART API 일일 한도(20,000회) ÷ 종목당 ~32회 ≈ ~600 종목/일.
+    전체 2,500+ 종목을 매일 처리할 수 없으므로 한도 도달 시 잘리는 종목이 발생한다.
+    오래된 분기부터 처리하면 매번 동일한 종목의 **최신 분기**가 잘려서 신규 데이터가
+    영구 누락되는 사례가 발생 (2026-04-06 두산에너빌리티 25Q4 누락 388개 사례).
+    최신부터 처리하면 한도 잘림이 발생해도 옛날 분기만 잘리고, 신규 분기는 항상 우선
+    처리된다.
+    """
     endYear = datetime.now().year
     periods = []
-    for y in range(startYear, endYear + 1):
-        for q in ["Q1", "Q2", "Q3", "Q4"]:
+    # 역순: 최신 연도 → 과거 연도, 각 연도 안에서도 Q4 → Q1
+    for y in range(endYear, startYear - 1, -1):
+        for q in ["Q4", "Q3", "Q2", "Q1"]:
             periods.append((str(y), _QUARTER_TO_CODE[q]))
     return periods
 
@@ -271,18 +281,35 @@ async def _collectFinance(
     *,
     incremental: bool = True,
     onPeriod=None,
+    targetPeriods: list[tuple[str, str]] | None = None,
 ) -> int:
-    """finance 수집 (CFS+OFS). 반환: 저장된 행 수."""
+    """finance 수집 (CFS+OFS). 반환: 저장된 행 수.
+
+    Args:
+        targetPeriods: list.json에서 발견한 정확한 (bsns_year, reprt_code) 리스트.
+            지정하면 88분기 차집합 우회. 누락 검사도 이 리스트로만 한정.
+            None이면 기존 _buildAllPeriods 88분기 전체 + 차집합 (heavy fallback).
+    """
     from dartlab.providers.dart.openapi.saver import enrichFinance, save
 
     path = _dataPath("finance", stockCode)
-    allPeriods = _buildAllPeriods()
 
-    if incremental:
-        existing = _existingFinancePeriods(path)
-        periods = [(y, c) for y, c in allPeriods if (y, c) not in existing]
+    if targetPeriods is not None:
+        # list.json 기반 가벼운 경로: 정확한 (year, code)만 시도.
+        # 그 중에서도 이미 로컬에 있는 건 skip.
+        if incremental:
+            existing = _existingFinancePeriods(path)
+            periods = [(y, c) for y, c in targetPeriods if (y, c) not in existing]
+        else:
+            periods = list(targetPeriods)
     else:
-        periods = allPeriods
+        # 기존 fallback: 88분기 전체 차집합 (heavy)
+        allPeriods = _buildAllPeriods()
+        if incremental:
+            existing = _existingFinancePeriods(path)
+            periods = [(y, c) for y, c in allPeriods if (y, c) not in existing]
+        else:
+            periods = allPeriods
 
     if not periods:
         return 0
@@ -333,12 +360,18 @@ async def _collectReport(
     *,
     incremental: bool = True,
     onPeriod=None,
+    targetPeriods: list[tuple[str, str]] | None = None,
 ) -> int:
-    """report 수집. 반환: 저장된 행 수."""
+    """report 수집. 반환: 저장된 행 수.
+
+    Args:
+        targetPeriods: list.json에서 발견한 정확한 (bsns_year, reprt_code).
+            지정하면 88분기 차집합 우회.
+    """
     from dartlab.providers.dart.openapi.saver import enrichReport, save
 
     path = _dataPath("report", stockCode)
-    allPeriods = _buildAllPeriods()
+    allPeriods = list(targetPeriods) if targetPeriods is not None else _buildAllPeriods()
 
     if incremental:
         existing = _existingReportPeriods(path)
@@ -631,8 +664,16 @@ async def _workerLoop(
     onComplete,
     onStatus,
     onPeriod,
+    failures: dict[str, dict[str, str]] | None = None,
+    targetPeriodsByCode: dict[str, list[tuple[str, str]]] | None = None,
 ) -> None:
-    """워커: 큐에서 종목 꺼내서 수집. 키 소진 시 종료."""
+    """워커: 큐에서 종목 꺼내서 수집. 키 소진 시 종료.
+
+    failures: {stockCode: {category: errorRepr}} 형태로 실패 추적.
+    """
+    import logging
+
+    logger = logging.getLogger("dartlab.collector")
     while not client.exhausted:
         try:
             stockCode = queue.get_nowait()
@@ -651,6 +692,11 @@ async def _workerLoop(
             if onPeriod:
                 onPeriod(workerIndex, corpName, msg)
 
+        # 이 종목의 list.json 기반 정확한 (year, reprt_code) — 있으면 88분기 우회
+        targetPeriods = None
+        if targetPeriodsByCode is not None:
+            targetPeriods = targetPeriodsByCode.get(stockCode)
+
         for cat in categories:
             if client.exhausted:
                 await queue.put(stockCode)
@@ -664,6 +710,7 @@ async def _workerLoop(
                         client,
                         incremental=incremental,
                         onPeriod=_periodCb,
+                        targetPeriods=targetPeriods,
                     )
                 elif cat == "report":
                     count = await _collectReport(
@@ -673,6 +720,7 @@ async def _workerLoop(
                         client,
                         incremental=incremental,
                         onPeriod=_periodCb,
+                        targetPeriods=targetPeriods,
                     )
                 elif cat == "docs":
                     count = await _collectDocs(
@@ -687,8 +735,26 @@ async def _workerLoop(
                 result[cat] = count
             except asyncio.CancelledError:
                 return
-            except (httpx.HTTPError, OSError, ValueError, KeyError, RuntimeError, zipfile.BadZipFile):
+            except (
+                httpx.HTTPError,
+                OSError,
+                ValueError,
+                KeyError,
+                RuntimeError,
+                zipfile.BadZipFile,
+            ) as e:
                 result[cat] = 0
+                # P0 수정 (2026-04-06): 무성한 try/except → 로깅 + 실패 사전 기록.
+                # 과거에는 388개 종목 누락 원인이 추적 불가였음.
+                errMsg = f"{type(e).__name__}: {e!s}"[:200]
+                logger.warning(
+                    "collect.fail stockCode=%s category=%s err=%s",
+                    stockCode,
+                    cat,
+                    errMsg,
+                )
+                if failures is not None:
+                    failures.setdefault(stockCode, {})[cat] = errMsg
 
         if not client.exhausted:
             results[stockCode] = result
@@ -723,10 +789,15 @@ def batchCollect(
     maxWorkers: int | None = None,
     incremental: bool = True,
     showProgress: bool = True,
+    targetPeriodsByCode: dict[str, list[tuple[str, str]]] | None = None,
 ) -> dict[str, dict[str, int]]:
     """병렬 배치 수집. 키 N개 → 워커 N개 → 종목 분배.
 
     Returns: {"005930": {"finance": 120, "report": 450, "docs": 1681}, ...}
+
+    Args:
+        targetPeriodsByCode: list.json에서 발견한 종목별 정확한 (year, reprt_code).
+            지정하면 _collectFinance/_collectReport가 88분기 차집합 우회.
     """
     cats = categories or ["finance", "report", "docs"]
     keys = resolveDartKeys()
@@ -747,11 +818,16 @@ def batchCollect(
             await queue.put(sc)
 
         results: dict[str, dict[str, int]] = {}
+        failures: dict[str, dict[str, str]] = {}
 
         try:
             workers = [
                 asyncio.create_task(
-                    _workerLoop(i, c, queue, cats, results, corpMap, incremental, completeFn, statusFn, periodFn)
+                    _workerLoop(
+                        i, c, queue, cats, results, corpMap, incremental,
+                        completeFn, statusFn, periodFn, failures,
+                        targetPeriodsByCode,
+                    )
                 )
                 for i, c in enumerate(clients)
             ]
@@ -760,11 +836,34 @@ def batchCollect(
             for c in clients:
                 await c.close()
 
-        remaining = queue.qsize()
-        if remaining > 0:
-            from dartlab.core.guidance import emit
+        # P0 수정 (2026-04-06):
+        # 1) 큐에 남은 종목 = exhausted로 잘린 종목 → pending 파일 저장
+        # 2) 실패한 종목 = 에러 발생 종목 → failures 파일 저장
+        # 다음 실행에서 이 두 파일을 읽고 우선 재시도해야 누락 회복 가능.
+        from dartlab.core.guidance import emit
 
-            emit("collect:exhausted")
+        pending: list[str] = []
+        while not queue.empty():
+            try:
+                pending.append(queue.get_nowait())
+            except asyncio.QueueEmpty:
+                break
+
+        if pending or failures:
+            from dartlab import config as _cfg
+
+            stateDir = Path(_cfg.dataDir) / "dart" / "_collect_state"
+            stateDir.mkdir(parents=True, exist_ok=True)
+            if pending:
+                (stateDir / "pending.txt").write_text("\n".join(pending), encoding="utf-8")
+                emit("collect:exhausted")
+            if failures:
+                import json
+
+                (stateDir / "failures.json").write_text(
+                    json.dumps(failures, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
 
         return results
 

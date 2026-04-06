@@ -1,9 +1,17 @@
 name: Data Pipeline
 
 # ──────────────────────────────────────────────────────────────
-# 단일 진입점: 수집 → 프리빌드 → 업로드 → 감사
-# 수동 실행으로 전체 파이프라인을 한번에 돌리거나,
-# 개별 워크플로우 상태를 감사(audit)할 수 있다.
+# Audit + Manual Backup (2026-04-06 통합 후)
+#
+# 자동 cron (KST 05:00):
+#   - audit job만 실행 → monitorPipeline.py → 5개 워크플로우 상태 점검 + Issue 알림
+#   - collect/prebuild는 audit 모드에서 실행되지 않음 (조건: mode == 'full')
+#
+# 수동 (workflow_dispatch):
+#   - mode='audit' (기본): 감사만
+#   - mode='full': 88분기 차집합 수집 → prebuild → audit (heavy backup)
+#
+# 매일 자동 데이터 수집은 dataSync.yml로 이전됨 (KST 03:00 + 15:00 매일 2회).
 # ──────────────────────────────────────────────────────────────
 
 on:

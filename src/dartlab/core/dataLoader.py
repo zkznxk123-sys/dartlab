@@ -29,7 +29,7 @@ _DOWNLOAD_TIMEOUT = 30
 _MAX_RETRIES = 3
 _EDGAR_UNIVERSE_TTL_HOURS = 24
 _EDGAR_DOCS_FRESHNESS_TTL_HOURS = 24
-_DART_FRESHNESS_TTL_HOURS = 24
+_DART_FRESHNESS_TTL_HOURS = 12  # 일일 HF 수집 주기(03:00 KST)에 맞춰 12h — 최대 stale 윈도우 반감
 _SEC_HEADERS = {"User-Agent": "DartLab eddmpython@gmail.com"}
 _LISTED_EXCHANGES = {"Nasdaq", "NYSE", "CBOE"}
 
@@ -77,25 +77,43 @@ def _downloadWithRetry(url: str, dest: Path) -> None:
 
 
 def _checkRemoteFreshness(stockCode: str, localPath: Path, category: str = "docs") -> bool | None:
-    """로컬 파일이 원격보다 오래됐는지 HTTP HEAD ETag로 확인.
+    """로컬 파일이 원격보다 오래됐는지 HTTP HEAD로 확인.
 
-    HF는 Last-Modified 대신 ETag(content hash)를 제공한다.
-    로컬 .etag 사이드카 파일에 마지막 다운로드 시 ETag를 저장해두고 비교.
+    검증 2단계:
+    1. ETag 비교 (HF의 content hash) — 다르면 stale
+    2. Content-Length 비교 (HF가 알려준 파일 크기) — 다르면 stale
+       → ETag만 같고 실제 내용/크기가 다른 손상 케이스 방어
 
     Returns: True=stale, False=fresh, None=판단불가(네트워크 오류 등).
+
+    핵심 안전 규칙:
+    - .etag 사이드카 파일은 **다운로드 성공 직후에만 작성**해야 한다 (_saveEtag).
+    - 여기서 etag 파일이 없는 상태는 "이전에 다운로드 받은 적이 없거나, 외부 경로로
+      복사된 stale 파일"이다. 어느 쪽이든 fresh로 판정하면 안 된다.
+    - 과거 버그: etag 없으면 현재 HF ETag를 저장 + return False(fresh) → parquet은
+      옛날 그대로인데 .etag만 새로 만들어져서 영구적으로 stale 데이터가 고정됨.
+    - 수정: etag 없으면 stale(True) 반환하여 다운로드를 강제. _saveEtag가 다운로드
+      성공 직후 etag를 기록한다.
     """
     hfUrl = f"{hfBaseUrl(category)}/{stockCode}.parquet"
     etagPath = localPath.with_suffix(".parquet.etag")
     try:
-        remoteEtag = _fetchRemoteEtag(hfUrl)
+        remoteEtag, remoteSize = _fetchRemoteEtagAndSize(hfUrl)
         if not remoteEtag:
             return None
+        # 1) Content-Length 손상 검증 — 로컬 parquet 크기와 HF 크기가 다르면 stale
+        if remoteSize > 0 and localPath.exists():
+            try:
+                if localPath.stat().st_size != remoteSize:
+                    return True
+            except OSError:
+                pass
+        # 2) ETag 비교
         if etagPath.exists():
             localEtag = etagPath.read_text(encoding="utf-8").strip()
             return remoteEtag != localEtag
-        # etag 파일 없음 → 최초이므로 현재 ETag 저장 + fresh 취급
-        etagPath.write_text(remoteEtag, encoding="utf-8")
-        return False
+        # etag 파일 없음 → 다운로드 이력 미상. stale로 간주하여 다운로드 강제.
+        return True
     except (URLError, socket.timeout, OSError, ValueError):
         return None
 
@@ -114,10 +132,26 @@ def _saveEtag(stockCode: str, dest: Path, category: str = "docs") -> None:
 
 def _fetchRemoteEtag(url: str) -> str:
     """HTTP HEAD로 원격 ETag 조회. 없으면 빈 문자열."""
+    etag, _ = _fetchRemoteEtagAndSize(url)
+    return etag
+
+
+def _fetchRemoteEtagAndSize(url: str) -> tuple[str, int]:
+    """HTTP HEAD로 원격 ETag + Content-Length 동시 조회.
+
+    HF는 LFS 파일에 대해 X-Linked-Size 헤더로 실제 파일 크기를 제공.
+    일반 파일은 Content-Length. 둘 중 하나라도 있으면 사용.
+    """
     req = Request(url, method="HEAD")
     with _socketTimeout(10):
         resp = urlopen(req)
-    return resp.headers.get("ETag", "").strip('" ')
+    etag = resp.headers.get("ETag", "").strip('" ')
+    sizeStr = resp.headers.get("X-Linked-Size") or resp.headers.get("Content-Length") or "0"
+    try:
+        size = int(sizeStr)
+    except (ValueError, TypeError):
+        size = 0
+    return etag, size
 
 
 def _download(stockCode: str, dest: Path, category: str = "docs") -> None:
@@ -125,6 +159,30 @@ def _download(stockCode: str, dest: Path, category: str = "docs") -> None:
     hfUrl = f"{hfBaseUrl(category)}/{stockCode}.parquet"
     _downloadWithRetry(hfUrl, dest)
     _saveEtag(stockCode, dest, category)
+
+
+_STALE_WARN_DAYS = 7  # 로컬 데이터가 7일 이상 갱신 안 됐을 때 사용자에게 경고
+_staleWarnedPaths: set[str] = set()  # 세션당 경로별 1회만 경고
+
+
+def _maybeWarnStale(path: Path) -> None:
+    """로컬 데이터가 매우 오래됐으면(7일+) 한 번 경고. 같은 세션에서 같은 경로는 중복 안 함."""
+    key = str(path)
+    if key in _staleWarnedPaths:
+        return
+    try:
+        age = time.time() - path.stat().st_mtime
+    except OSError:
+        return
+    ageDays = int(age // 86400)
+    if ageDays >= _STALE_WARN_DAYS:
+        _staleWarnedPaths.add(key)
+        try:
+            from dartlab.core.guidance import emit
+
+            emit("data:stale_warning", ageDays=ageDays)
+        except ImportError:
+            pass
 
 
 def _shouldRefreshDart(path: Path, refresh: str) -> bool:
@@ -139,11 +197,15 @@ def _shouldRefreshDart(path: Path, refresh: str) -> bool:
         # collect로 수집한 데이터도 7일 후 HF 최신본 확인
         try:
             age = time.time() - path.stat().st_mtime
+            if age > _STALE_WARN_DAYS * 86400:
+                _maybeWarnStale(path)
             return age > _DART_FRESHNESS_TTL_HOURS * 3600 * 7
         except OSError:
             return False
     try:
         age = time.time() - etagPath.stat().st_mtime
+        if age > _STALE_WARN_DAYS * 86400:
+            _maybeWarnStale(etagPath)
         return age > _DART_FRESHNESS_TTL_HOURS * 3600
     except OSError:
         return False
@@ -159,6 +221,11 @@ def _refreshFromHf(stockCode: str, path: Path, category: str) -> None:
             etagPath.touch()
         return
     if stale is not True:
+        # fresh — etag mtime touch하여 다음 TTL 동안 skip
+        # (이게 없으면 매 호출마다 HTTP HEAD 요청 발생 → 0.27초 × N개 카테고리)
+        etagPath = path.with_suffix(".parquet.etag")
+        if etagPath.exists():
+            etagPath.touch()
         return
     from dartlab.core.guidance import emit
 
@@ -176,9 +243,58 @@ def _refreshFromHf(stockCode: str, path: Path, category: str) -> None:
     except (URLError, socket.timeout, OSError) as e:
         if tmpPath.exists():
             tmpPath.unlink()
-        from dartlab.core.guidance import progress
+        # 갱신 실패는 사용자가 알아야 함 — progress(verbose-only) → emit으로 승격
+        emit(
+            "download:failed_single",
+            stockCode=stockCode,
+            label=label,
+            error=str(e),
+        )
 
-        progress(f"데이터 갱신 실패 ({stockCode}): {e} — 기존 데이터로 계속 진행")
+
+def repairLocalCache(category: str = "finance", *, dryRun: bool = False) -> dict[str, int]:
+    """로컬 dart 캐시 전수 무결성 검사 + 손상된 파일 자동 재다운로드.
+
+    과거 ETag 사이드카 first-write 버그(_checkRemoteFreshness가 etag 없을 때
+    현재 HF ETag를 그냥 저장하고 fresh 판정)로 인해 영구 stale로 굳어진 로컬
+    parquet들을 전부 회복하기 위한 일괄 도구.
+
+    검사 절차:
+    1. 카테고리 폴더의 모든 *.parquet 순회
+    2. 각각 _checkRemoteFreshness로 stale 판단 (ETag + Content-Length 2단계)
+    3. stale이면 새 코드로 다운로드 (dryRun=True면 통계만)
+
+    Args:
+        category: "finance", "report", "docs" 중 하나
+        dryRun: True면 다운로드 안 하고 통계만 반환
+
+    Returns:
+        {"checked": N, "stale": N, "repaired": N, "failed": N, "fresh": N}
+    """
+    dataDir = _dataDir(category)
+    if not dataDir.exists():
+        return {"checked": 0, "stale": 0, "repaired": 0, "failed": 0, "fresh": 0}
+
+    stats = {"checked": 0, "stale": 0, "repaired": 0, "failed": 0, "fresh": 0}
+    for parquet in sorted(dataDir.glob("*.parquet")):
+        stockCode = parquet.stem
+        stats["checked"] += 1
+        stale = _checkRemoteFreshness(stockCode, parquet, category)
+        if stale is None:
+            stats["failed"] += 1
+            continue
+        if not stale:
+            stats["fresh"] += 1
+            continue
+        stats["stale"] += 1
+        if dryRun:
+            continue
+        try:
+            _refreshFromHf(stockCode, parquet, category)
+            stats["repaired"] += 1
+        except (URLError, socket.timeout, OSError):
+            stats["failed"] += 1
+    return stats
 
 
 def loadData(
