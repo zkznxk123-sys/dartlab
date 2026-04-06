@@ -865,22 +865,70 @@ from dartlab.topdown import _TopdownEntry as _TopdownEntry
 sys.modules[__name__].topdown = _TopdownEntry()
 
 # scan/analysis/credit/quant — 어떤 import 체인이 모듈을 먼저 로드하면
-# __getattr__이 동작 안 함 (CI에서 발견된 회귀). 명시적으로 callable instance 부여.
-from dartlab.scan import Scan as _Scan
+# 모듈 클래스의 __getattr__이 동작 안 함 (CI에서 발견된 회귀).
+# 해결: 모듈 자체를 callable로 패치 — 모듈 객체에 __call__을 직접 부여.
+import types as _types
 
-sys.modules[__name__].scan = _Scan()
 
-from dartlab.analysis.financial import Analysis as _Analysis
+def _makeCallableModule(modName: str, instanceFactory):
+    """이미 로드된 서브모듈에 __call__을 부여하여 callable하게 만든다.
 
-sys.modules[__name__].analysis = _Analysis()
+    서브모듈(rank, _helpers 등)도 그대로 import 가능. instance 메소드는 lazy 호출.
+    """
+    mod = sys.modules.get(modName)
+    if mod is None:
+        return
 
+    class _CallableModule(_types.ModuleType):
+        _instance = None
+
+        def __call__(self, *args, **kwargs):
+            if self._instance is None:
+                self._instance = instanceFactory()
+            return self._instance(*args, **kwargs)
+
+        def __getattr__(self, name):
+            if self._instance is None:
+                self._instance = instanceFactory()
+            try:
+                return getattr(self._instance, name)
+            except AttributeError:
+                raise AttributeError(f"module '{modName}' has no attribute '{name}'") from None
+
+    mod.__class__ = _CallableModule
+
+
+def _scanFactory():
+    from dartlab.scan import Scan
+
+    return Scan()
+
+
+def _analysisFactory():
+    from dartlab.analysis.financial import Analysis
+
+    return Analysis()
+
+
+def _quantFactory():
+    from dartlab.quant import Quant
+
+    return Quant()
+
+
+# scan/analysis/quant — 모듈 자체를 callable로 변환
+import dartlab.analysis.financial as _analysis_mod  # noqa: F401
+import dartlab.quant as _quant_mod  # noqa: F401
+import dartlab.scan as _scan_mod  # noqa: F401
+
+_makeCallableModule("dartlab.scan", _scanFactory)
+_makeCallableModule("dartlab.analysis.financial", _analysisFactory)
+_makeCallableModule("dartlab.quant", _quantFactory)
+
+# credit은 함수형 (이미 callable)
 from dartlab.credit import credit as _credit_callable
 
 sys.modules[__name__].credit = _credit_callable
-
-from dartlab.quant import Quant as _Quant
-
-sys.modules[__name__].quant = _Quant()
 
 
 __all__ = [

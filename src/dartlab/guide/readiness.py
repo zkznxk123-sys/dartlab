@@ -50,10 +50,7 @@ class ReadinessResult:
             lines.append(f"  - {issue.message}")
             lines.append(f"    해결: {issue.fixAction}")
         # R34 회귀 보호: 다음 액션 안내 (checkReady/whatCanIDo 키워드 포함 필수)
-        lines.append(
-            f'\n진단: dartlab.guide.checkReady("{self.feature}")  '
-            f'/ 능력 탐색: dartlab.guide.whatCanIDo()'
-        )
+        lines.append(f'\n진단: dartlab.guide.checkReady("{self.feature}")  / 능력 탐색: dartlab.guide.whatCanIDo()')
         return "\n".join(lines)
 
 
