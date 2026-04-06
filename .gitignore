@@ -49,6 +49,7 @@ ui/vscode/webview/node_modules/
 ui/vscode/*.vsix
 ui/vscode/webview/.vite/
 ui/screenshots/
+ui/vscode/webview/screenshots/
 ui/.svelte-kit/
 
 # Landing page build artifacts
@@ -70,6 +71,13 @@ experiments/055_edgarDocs/batch/
 crates/
 experiments/105_filingSemanticMap/docsStore/stemIndex.npz
 .vscode/
+
+# Temp / debug scripts (root)
+/analyze_coverage.py
+/final_report.py
+/tmp_*.py
+/tmp_*.json
+/test_*.png
 
 # Video production artifacts
 video/
