@@ -28,13 +28,15 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio hypothesis pytest-benchmark
+          pip install pytest pytest-asyncio pytest-xdist hypothesis pytest-benchmark
 
       - name: Install package
         run: pip install -e .[all]
 
-      - name: Run tests
-        run: pytest tests/ -v --tb=short -m "not requires_data and not heavy"
+      - name: Run tests (pytest-xdist parallel)
+        env:
+          PYTEST_MEMORY_LIMIT_MB: "1500"
+        run: pytest tests/ -n 2 --tb=short -m "not requires_data and not heavy" --benchmark-disable
         if: hashFiles('tests/') != ''
 
   build:
