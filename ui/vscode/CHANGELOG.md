@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.3] - 2026-04-07
+
+### Fixed
+
+- Webview: AI streaming first-token latency 단축
+- Webview: streaming 표/코드 조각 깨짐 수정
+- Mobile compatibility: Svelte 5 + lucide Cog icon (Settings deprecated)
+- Mobile responsive: EmptyState/ChatArea full-width, bottom nav fixed
+
+### Changed
+
+- Underlying dartlab dependency aligned with v0.9.2 (channel/devtunnel + dataLoader P0)
+
 ## [0.2.2] - 2026-04-04
 
 ### Changed
