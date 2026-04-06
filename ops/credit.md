@@ -4,13 +4,49 @@ dartlab은 공시 데이터만으로 재현 가능한 독립 신용분석를 수
 신평사의 비공개 면담 없이도, 공시 재무제표 + 주석 + 사업보고서 + 시장 데이터로
 제도권에 준하는 정량 신용등급을 산출하고, 그 과정을 100% 투명하게 공개한다.
 
+## 호출 계약
+
+```python
+import dartlab
+c = dartlab.Company("005930")
+c.credit()                # 가이드 — 7축
+c.credit("등급")           # 종합 등급 + healthScore
+c.credit("채무상환")        # 단일 축 (FFO/Debt 등 metric value+score)
+```
+
+## 노트북
+
+[![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/07_credit.py)
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/07_credit.ipynb)
+
+---
+
 | 항목 | 내용 |
 |------|------|
 | 레이어 | L2 (analysis/scan/notes/gather 소비) |
-| 진입점 | `dartlab.credit("005930")`, `c.credit()` |
+| 진입점 | `c.credit()`, `c.credit("등급")`, `c.credit("채무상환")` |
 | 소비 | Company 전체 (finance, notes, docs, report), scan, gather — analysis와 독립 |
 | 생산 | 신용분석 보고서, 등급 이력, audit 결과, 정례 보고서 |
 | 핵심 | 재현 가능성 + 투명성 + 지속 발전 |
+
+## 호출 계약 (4엔진 통일 패턴)
+
+```python
+c = dartlab.Company("005930")
+
+# 1. 무인자 → 가이드 DataFrame (axis | label | description | example)
+print(c.credit())
+
+# 2. 종합 등급
+c.credit("등급")                # → dict (grade, healthScore, score, ...)
+c.credit("등급", detail=True)   # 7축 narrative + 지표 시계열 포함
+
+# 3. 축별 분석
+c.credit("채무상환")            # 한글 alias
+c.credit("repayment")           # 영문 alias
+```
+
+다른 분석 엔진(analysis/macro/quant/scan)도 동일 패턴: 무인자 → 가이드, "축이름" → 분석.
 
 ## 사상 — 왜 독립 신용분석인가
 
@@ -395,26 +431,27 @@ cr = c.credit()
 cr = c.credit(detail=True)  # 7축 상세 + 서사 + 시계열
 ```
 
-### 보고서 발간
+### 보고서 발간 — review로 단일화
+
+**credit 자체 publisher는 deprecated.** 신용분석 섹션(7축 서사 + 신평사 대조)이 review 5막에 자동 통합되었다.
 
 ```python
-from dartlab.credit.publisher import publishReport
+# 권장: review publisher
+from dartlab.review.publisher import publishReport
+publishReport("005930")  # 6막 보고서, 신용평가 섹션에 narrative + audit 자동 포함
 
-# 단일 기업 보고서 발간 (기계 서사, 재현 가능)
-publishReport("005930")
-
-# AI 해석 포함 발간
-publishReport("005930", useAI=True)
-
-# 배치 발간
-from dartlab.credit.publisher import publishBatch
-publishBatch(["005930", "000660", "035420"])
+# Deprecated (review.publisher로 위임만 함)
+from dartlab.credit.publisher import publishReport  # DeprecationWarning
 ```
 
-보고서는 `blog/04-credit-reports/{순번}-{slug}/index.md`에 생성.
-SvelteKit mdsvex가 자동 렌더링 → GitHub Pages 공개.
+review 5막 신용평가 섹션의 신규 블록:
+- `creditNarrative` — 7축 서사 (severity별 strong/adequate/weak/critical)
+- `creditAudit` — 외부 신평사(KIS/KR/NICE) 등급 + notch 차이 + 동의/비동의 근거
 
-### 보고서 구성 (v5.0, 최대 13섹션)
+기존 16개 credit 보고서는 `blog/04-credit-reports/`에 보존 (아카이브).
+신규 보고서는 `blog/05-company-reports/`에 review 형식으로 발간.
+
+### 신용분석 섹션 구성 (review 5-7 신용평가 섹션)
 
 | # | 섹션 | 핵심 |
 |---|------|------|
@@ -472,8 +509,9 @@ AI는 `useAI=True`일 때만 호출되며, 기본은 재현 가능한 기계 서
 - **정기 발간**: 사업보고서 공시 후 2주 이내
 - **이벤트 발간**: 등급 변경 시 즉시
 - **정례 보고서**: 월 1회 전체 등급 변동 요약 (`data/credit/periodic/`)
-- **저장 경로**: `blog/04-credit-reports/{순번}-{slug}/index.md` (블로그 카테고리)
-- **발간 명령**: `publishReport("005930")` 또는 `publishBatch(["005930", "035420"])`
+- **저장 경로**: `blog/05-company-reports/{순번}-{slug}/index.md` (review publisher)
+- **발간 명령**: `from dartlab.review.publisher import publishReport; publishReport("005930")`
+- **레거시**: `blog/04-credit-reports/`는 아카이브로만 보존 (16개 기존 보고서)
 
 ## 코드 구조
 

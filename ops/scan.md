@@ -2,6 +2,21 @@
 
 전 종목 횡단분석. `scan()` 단일 진입점으로 시장 전체를 한 번에. DART + EDGAR 양쪽 지원.
 
+## 호출 계약
+
+```python
+import dartlab
+dartlab.scan()                    # 가이드 — 13축 + 사용 예시
+dartlab.scan("profitability")     # 전종목 수익성 비교
+```
+
+## 노트북
+
+[![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/03_scan.py)
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/03_scan.ipynb)
+
+---
+
 | 항목 | 내용 |
 |------|------|
 | 레이어 | L1 |
@@ -56,6 +71,7 @@ data/dart/scan/
 - 배포자: `dartlab collect --scan` → HF push
 - 사용자: `downloadAll("scan")` (271MB) → 즉시 횡단 분석
 - scan 파일 없으면 HF 자동 다운로드 시도, 실패 시 종목별 순회 fallback
+- **첫 호출 안내**: 로컬 프리빌드가 없으면 `scan:prebuild_missing` (271MB 안내) → 다운로드 → `scan:prebuild_ready`. 실패 시 `scan:prebuild_failed`. guide.emit `_ALWAYS_SHOW` 카테고리라 verbose=False여도 출력 (자세히는 ops/guide.md)
 
 ## EDGAR scan (11축)
 

@@ -2,6 +2,23 @@
 
 외부 시장 데이터 수집. 공시 데이터와 시장 데이터를 연결.
 
+## 호출 계약
+
+```python
+import dartlab
+dartlab.gather()                       # 가이드 — 어떤 축이 있는지
+dartlab.gather("price", "005930")      # 주가 시계열
+```
+
+## 노트북
+
+[![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/02_gather.py)
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/02_gather.ipynb)
+
+---
+
+> `gather/listing.py`(KRX 종목 매퍼)는 그대로 유지되며, 사용자 진입점은 `dartlab.listing()` 단일 facade로 통일되어 있다 → ops/listing.md.
+
 | 항목 | 내용 |
 |------|------|
 | 레이어 | L1 |

@@ -3,6 +3,22 @@
 dartlab의 **안내 데스크(concierge)이자 교육 안내자**. 사용자 편의성 교차 관심사 총괄.
 단순히 에러를 안내하는 게 아니라, 사용자가 분석 방법 자체를 배울 수 있게 친절하게 안내한다.
 
+## 호출 계약
+
+```python
+import dartlab
+dartlab.guide.checkReady("ai")               # 엔진 준비 상태
+dartlab.guide.whatCanIDo("재무 분석")          # 자연어 질문 → 사용 가능 기능
+dartlab.guide.handleError(err, feature="ai")  # 에러 → 사용자 안내
+```
+
+## 노트북
+
+[![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/13_guide.py)
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/13_guide.ipynb)
+
+---
+
 | 항목 | 내용 |
 |------|------|
 | 레이어 | 교차 관심사 (모든 레이어에서 import 가능) |
@@ -43,6 +59,19 @@ promptKeyIfMissing("dart")      # 대화형 입력 → .env 저장
 - **병목 전략**: 815개 에러를 5개 접점에서 자동 커버
 - **lazy import**: 순환 의존 방지
 - **키 안내 통합**: DART/FRED/ECOS + 9개 AI provider
+- **데이터 수신 침묵 금지**: 모든 다운로드/수집 경로는 `guide.emit`을 통해 시작/완료를 알린다. 271MB scan, EDGAR bulk, search 인덱스같이 시간이 걸리는 작업은 `[dartlab]` 접두어로 항상 보임 (`_ALWAYS_SHOW`: `download:`, `download_all:`, `edgar:`, `scan:prebuild`, `stemindex:`, `data:`)
+
+## 데이터 수신 안내 이벤트 키
+
+긴 작업/네트워크 작업은 `messaging.py::_SIMPLE` dict에 등록된 키로 안내된다. verbose=False여도 출력.
+
+| 카테고리 | 키 | 트리거 |
+|---|---|---|
+| scan 프리빌드 | `scan:prebuild_missing/ready/failed` | `scan/_helpers.py::_ensureScanData` |
+| EDGAR 배치 | `edgar:bulk_start/done/partial/empty/target` | `providers/edgar/openapi/batch.py::batchCollectEdgar(All)` |
+| search 인덱스 | `stemindex:hf_start/done/fail/local` | `core/search/ngramIndex.py::pullStemIndex` |
+| 데이터 stale | `data:stale_warning` | `core/dataLoader.py::_maybeWarnStale` (7일+ 미갱신 시 세션당 1회) |
+| DART 단건 갱신 | `download:start/done_short/failed_single` | `core/dataLoader.py::_refreshFromHf` (TTL 12h) |
 
 ## 교육 원칙
 

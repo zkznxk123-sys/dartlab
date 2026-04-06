@@ -82,21 +82,27 @@ No API key needed. Data auto-downloads from [HuggingFace](https://huggingface.co
 
 ## What DartLab Is
 
-Two engines turn raw filings into one comparable map:
+13 engines, one calling convention. Each engine is callable with `dartlab.engine()` for the guide and `dartlab.engine("axis")` for one example.
 
-| Layer | Engine | What it does | Entry point |
-|-------|--------|--------------|-------------|
-| Data | [Data](ops/data.md) | Pre-built HuggingFace datasets, auto-download | `Company("005930")` |
-| L0/L1 | [Company](ops/company.md) | Sections horizontalization + account standardization | `c.show()`, `c.select()` |
-| L1 | [Scan](ops/scan.md) | Cross-company comparison across 13 axes | `dartlab.scan()` |
-| L1 | [Gather](ops/gather.md) | External market data (price, flow, macro, news) | `dartlab.gather()` |
-| L2 | [Macro](ops/macro.md) | Market-level macro analysis — 11 axes, no Company needed | `dartlab.macro("사이클")` |
-| L2 | [Analysis](ops/analysis.md) | 14-axis financial + valuation + forecast + quant | `c.analysis("financial", "수익성")` |
-| L2 | [Credit](ops/credit.md) | Independent credit rating (dCR 20-grade) | `c.credit()` |
-| L2 | [Review](ops/review.md) | Block composition (analysis + credit) | `c.review()` |
-| L0 | [Search](ops/search.md) | Semantic filing search *(alpha)* | `dartlab.search()` |
-| L3 | [AI](ops/ai.md) | Active analyst — code execution + interpretation | `dartlab.ask()` |
-| L4 | UI | VSCode extension | `dartlab chat --stdio` |
+| Layer | Engine | What it does | Entry point | Notebook |
+|-------|--------|--------------|-------------|----------|
+| Data | [Data](ops/data.md) | Pre-built HuggingFace datasets, auto-download | `Company("005930")` | — |
+| L0/L1 | [Company](ops/company.md) | Sections horizontalization + 4 namespaces | `c.show()`, `c.select()` | [01](notebooks/marimo/01_company.py) |
+| L1 | [Gather](ops/gather.md) | External market data (price, flow, macro, news) | `dartlab.gather()` | [02](notebooks/marimo/02_gather.py) |
+| L1 | [Scan](ops/scan.md) | Cross-company comparison across 13 axes | `dartlab.scan()` | [03](notebooks/marimo/03_scan.py) |
+| L1 | [Quant](ops/quant.md) | Quantitative axes (momentum/factor/pattern) | `c.quant()` | [04](notebooks/marimo/04_quant.py) |
+| L2 | [Analysis](ops/analysis.md) | 14-axis financial + valuation + forecast | `c.analysis("financial", "수익성")` | [05](notebooks/marimo/05_analysis.py) |
+| L2 | [Macro](ops/macro.md) | Market-level macro — 11 axes, no Company needed | `dartlab.macro("사이클")` | [06](notebooks/marimo/06_macro.py) |
+| L2 | [Credit](ops/credit.md) | Independent credit rating (dCR 20-grade) | `c.credit("등급")` | [07](notebooks/marimo/07_credit.py) |
+| L2 | [Review](ops/review.md) | 4-engine composition (analysis + credit + macro + quant) | `c.review("수익성")` | [08](notebooks/marimo/08_review.py) |
+| L3 | [AI](ops/ai.md) | Active analyst — code execution + interpretation | `dartlab.ask()` | [09](notebooks/marimo/09_ai.py) |
+| core | [Search](ops/search.md) | Semantic filing search *(alpha)* | `dartlab.search()` | [10](notebooks/marimo/10_search.py) |
+| facade | [Listing](ops/listing.md) | Catalog API (companies, filings, topics) | `dartlab.listing()` | [11](notebooks/marimo/11_listing.py) |
+| viz | [Viz](ops/viz.md) | Charts and diagrams (emit_chart) | `emit_chart({...})` | [12](notebooks/marimo/12_viz.py) |
+| guide | [Guide](ops/guide.md) | Concierge — readiness, error handling, education | `dartlab.guide.checkReady()` | [13](notebooks/marimo/13_guide.py) |
+| L4 | UI | VSCode extension | `dartlab chat --stdio` | — |
+
+> All notebooks: [marimo](notebooks/marimo/) · [colab](notebooks/colab/) · [![Open in marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo)
 
 ### Company
 
@@ -149,8 +155,9 @@ Revenue structure, profitability, growth, stability, cash flow, capital allocati
 c.analysis("financial", "수익성")       # profitability analysis
 c.analysis("financial", "현금흐름")    # cash flow analysis
 
-c.credit()                                  # dCR-AA, healthScore 93/100
-c.credit(detail=True)                       # 7-axis narrative + metrics
+print(c.credit())                           # 8-axis guide DataFrame (self-discovery)
+c.credit("등급")                            # dCR-AA, healthScore 93/100
+c.credit("등급", detail=True)               # 7-axis narrative + metrics
 ```
 
 ### Credit — Independent Credit Rating
@@ -162,21 +169,22 @@ Independent credit analysis with 3-Track model (general/financial/holding), Notc
 **79-company validation: large-cap 87% (26/30), mid-cap 82% (41/50), full sample 70% (55/79, re-measurement pending after v5.0 overvaluation fix). Samsung AA+ exact match.** See [methodology](docs/methodology.md) for validation details.
 
 ```python
-cr = c.credit()
+print(c.credit())           # self-discovery — 7 axes + grade
+
+cr = c.credit("등급")        # main grade
 print(cr["grade"])          # dCR-AA+
 print(cr["healthScore"])    # 96 (0-100, higher is better)
 print(cr["pdEstimate"])     # 0.01% default probability
 
-cr = c.credit(detail=True)  # 7-axis narrative + metrics + divergence explanation
+cr = c.credit("등급", detail=True)  # 7-axis narrative + metrics + divergence explanation
 print(cr["divergenceExplanation"])  # why it differs from agencies
 ```
 
-Publish credit reports:
+Publish reports (credit narrative + audit are auto-included in review's 5막):
 
 ```python
-from dartlab.credit.publisher import publishReport
-publishReport("005930")     # generates markdown report (13-section)
-publishReport("005930", useAI=True)  # with AI-enhanced analysis
+from dartlab.review.publisher import publishReport
+publishReport("005930")               # 6막 report including credit narrative + audit
 ```
 
 ### Review — Analysis to Report
@@ -226,12 +234,76 @@ L1  providers/   Country-specific data (DART, EDGAR, EDINET)
     scan/        Market-wide analysis — scan("group", "axis")
 L2  analysis/    Financial + forecast + valuation + quant — analysis("group", "axis")
     credit/      Independent credit rating — c.credit()
+    macro/       Market-level macro — dartlab.macro()
     review/      Block composition (analysis + credit)
 L3  ai/          Active analyst — dartlab.ask()
 L4  vscode/      VSCode extension (dartlab chat --stdio)
 ```
 
 Import direction enforced by CI. Adding a new country means one provider package — zero core changes.
+
+#### Layer consumption flow
+
+Who consumes whom across the stack:
+
+```mermaid
+flowchart TB
+    subgraph L4["L4 · User interface"]
+        UI["vscode / CLI / web"]
+    end
+    subgraph L3["L3 · LLM analyst"]
+        AI["ai<br/>dartlab.ask()"]
+    end
+    subgraph L2["L2 · Analysis"]
+        ANA["analysis<br/>14-axis financial + forecast + valuation"]
+        CRD["credit<br/>dCR 20-grade"]
+        MAC["macro<br/>11-axis market reading"]
+        REV["review<br/>block-composed report"]
+    end
+    subgraph L1["L1 · Data ingestion"]
+        PRV["providers<br/>DART / EDGAR / EDINET"]
+        GAT["gather<br/>FRED / ECOS / Naver / Yahoo"]
+        SCN["scan<br/>cross-market"]
+        QNT["quant<br/>25 technical indicators"]
+    end
+    subgraph L0["L0 · Infrastructure"]
+        CORE["core<br/>protocols + finance + docs + search"]
+    end
+
+    UI --> AI
+    AI --> REV
+    AI --> ANA
+    AI --> MAC
+    AI --> SCN
+    REV --> ANA
+    REV --> CRD
+    ANA --> PRV
+    ANA --> GAT
+    CRD --> PRV
+    MAC --> GAT
+    SCN --> PRV
+    QNT --> GAT
+    PRV --> CORE
+    GAT --> CORE
+    SCN --> CORE
+    QNT --> CORE
+
+    classDef l0 fill:#f5f5f5,stroke:#999
+    classDef l1 fill:#e8f4ff,stroke:#4a90e2
+    classDef l2 fill:#fff4e6,stroke:#e67e22
+    classDef l3 fill:#f0e6ff,stroke:#8e44ad
+    classDef l4 fill:#e6ffe6,stroke:#27ae60
+    class CORE l0
+    class PRV,GAT,SCN,QNT l1
+    class ANA,CRD,MAC,REV l2
+    class AI l3
+    class UI l4
+```
+
+**Core rules**:
+- Arrows always flow top → bottom (L4→L3→L2→L1→L0). Reverse imports forbidden (CI-enforced)
+- L2 engines never import each other — analysis ↛ credit, macro ↛ analysis. Composition is review's or ai's job
+- When adding a feature, pick the right layer first and let data flow in one direction only
 
 ## EDGAR (US)
 

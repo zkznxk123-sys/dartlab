@@ -6,6 +6,21 @@ AI는 이 도구를 조합해 질문에 최적화된 분석 흐름을 스스로 
 실행 과정(코드 + 결과)을 사용자에게 투명하게 보여줘서
 사용자가 분석 방법 자체를 학습할 수 있게 돕는다.
 
+## 호출 계약
+
+```python
+import dartlab
+dartlab.ask("삼성전자 수익성 분석해줘")    # 자연어 → AI 가 도구 자동 선택
+dartlab.chat("005930", "배당 추세는?")     # Company-bound
+```
+
+## 노트북
+
+[![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/09_ai.py)
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/09_ai.ipynb)
+
+---
+
 | 항목 | 내용 |
 |------|------|
 | 레이어 | L3 |

@@ -2,13 +2,46 @@
 
 시장 레벨 매크로 분석 엔진. Company 없이 경제 환경을 해석한다.
 
+## 호출 계약
+
+```python
+import dartlab
+dartlab.macro()                          # 가이드 — 11축
+dartlab.macro("사이클", market="KR")      # 한국 사이클
+dartlab.macro("금리", market="US")        # 미국 금리
+```
+
+## 노트북
+
+[![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/06_macro.py)
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/06_macro.ipynb)
+
+---
+
 | 항목 | 내용 |
 |------|------|
 | 레이어 | L2 |
-| 진입점 | `dartlab.macro()` |
+| 진입점 | `dartlab.macro()`, `dartlab.macro("사이클")` |
 | 소비 | gather(L1) — FRED/ECOS, scan finance.parquet |
-| 생산 | ai(L3)가 매크로 환경 판단에 소비 |
+| 생산 | ai(L3)가 매크로 환경 판단에 소비, review 6막에 macroCycle 블록으로 소비 |
 | 축 | 11축: 사이클, 금리, 자산, 심리, 유동성, 예측, 위기, 재고, 기업집계, 교역, 종합 |
+
+## 호출 계약 (4엔진 통일 패턴)
+
+```python
+import dartlab
+
+# 1. 무인자 → 가이드 DataFrame (axis | label | description | example)
+print(dartlab.macro())
+
+# 2. 축별 분석
+dartlab.macro("사이클")                  # 4국면 + 신뢰도 + 섹터 전략
+dartlab.macro("사이클", market="KR")     # KR 시장
+dartlab.macro("금리")
+dartlab.macro("종합")
+```
+
+다른 분석 엔진(analysis/quant/credit/scan)도 동일 패턴: 무인자 → 가이드, "축이름" → 분석.
 
 ## 설계 원칙
 

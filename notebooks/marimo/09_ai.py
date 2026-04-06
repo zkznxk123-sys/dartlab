@@ -2,11 +2,6 @@
 # requires-python = ">=3.12"
 # dependencies = ["dartlab", "marimo"]
 # ///
-"""DartLab -- Ask (AI).
-
-ask() -- natural language analysis with LLM.
-Setup: dartlab setup gemini / openai / ollama
-"""
 
 import marimo
 
@@ -17,18 +12,12 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import dartlab
-
     return (dartlab,)
 
 
 @app.cell
 def _(dartlab):
-    dartlab.ask('최근 매출액이 많이 오른 기업들 상위 10개 뽑아줘')
-    return
-
-
-@app.cell
-def _():
+    dartlab.ask("삼성전자 수익성 분석해줘")
     return
 
 

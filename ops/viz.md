@@ -2,6 +2,27 @@
 
 통합 시각화 엔진. 차트·다이어그램을 하나의 패키지에서 관리한다.
 
+## 호출 계약
+
+```python
+from dartlab.viz import emit_chart, emit_diagram
+
+emit_chart({
+    "chartType": "line",
+    "title": "삼성전자 매출",
+    "categories": ["2022", "2023", "2024"],
+    "series": [{"name": "매출", "data": [302.2, 258.9, 300.9]}],
+})
+emit_diagram("mermaid", "graph LR\n  매출-->영업이익-->FCF")
+```
+
+## 노트북
+
+[![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/12_viz.py)
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/12_viz.ipynb)
+
+---
+
 | 항목 | 내용 |
 |------|------|
 | 레이어 | 교차 관심사 (guide/와 동일 위치) |

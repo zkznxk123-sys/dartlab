@@ -2,13 +2,50 @@
 
 종목 레벨 정량분석 엔진. 기술적 지표부터 팩터 모델, 텍스트 감성, 포트폴리오 최적화까지.
 
+## 호출 계약
+
+```python
+import dartlab
+c = dartlab.Company("005930")
+c.quant()                # 가이드 — 30축
+c.quant("모멘텀")         # 단일 축 분석
+```
+
+## 노트북
+
+[![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/04_quant.py)
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/04_quant.ipynb)
+
+---
+
 | 항목 | 내용 |
 |------|------|
 | 레이어 | L1 |
-| 진입점 | `dartlab.quant("축명", "종목코드")` |
+| 진입점 | `c.quant()`, `c.quant("종합")`, `dartlab.quant("축", "종목")` |
 | 소비 | gather(price, flow), scan 프리빌드 parquet, docs/changes parquet |
 | 생산 | ai(L3)가 정량 판단에 소비, review가 기술적 섹션에 소비 |
-| 축 | 29축 7그룹 |
+| 축 | 30축 7그룹 |
+
+## 호출 계약 (4엔진 통일 패턴)
+
+```python
+c = dartlab.Company("005930")
+
+# 1. 무인자 → 가이드 DataFrame (axis | label | description | example | group)
+print(c.quant())
+
+# 2. 종합 기술 판단
+c.quant("종합")          # → dict (verdict, score, rsi, adx, sma20/60, ...)
+c.quant("verdict")       # 영문 alias
+
+# 3. 축별 분석
+c.quant("지표")          # 45개 기술 지표 DataFrame
+c.quant("모멘텀")        # 모멘텀 분석
+c.quant("베타")          # 시장 베타 + CAPM
+c.quant("팩터")          # Fama-French 5
+```
+
+다른 분석 엔진(analysis/macro/credit/scan)도 동일 패턴: 무인자 → 가이드, "축이름" → 분석.
 
 ## 설계 원칙
 
@@ -62,10 +99,10 @@ dartlab.quant.verdict("005930")
 
 | 축 | key | 설명 | 상태 |
 |---|---|---|---|
-| 베타 | beta | 시장 베타 + CAPM | 구현 |
-| 팩터 | factor | FF5 + q-factor 분해 | stub |
-| 꼬리위험 | tailrisk | CVaR, 최대낙폭, Sortino | 구현 |
-| 잔여수익 | residual | 팩터 제거 후 잔여 모멘텀 | stub |
+| 베타 | beta | CAPM β + α + R² + t-stat | ✅ OK (Phase 2C 보완 완료) |
+| 팩터 | factor | FF5(MKT+SMB+HML+RMW+CMA) — book-based 진짜 횡단면 회귀 | ✅ 재구현 완료 (Phase 2B). size proxy = bookEquity (시총 미수집), Phase 2A1 후 진짜 시총 교체 |
+| 꼬리위험 | tailrisk | CVaR/MDD/Sortino + riskFree 파라미터 | ✅ OK (Phase 2C 보완 완료) |
+| 잔여수익 | residual | 팩터 제거 후 잔여 모멘텀 | ✅ factor 재구현으로 자동 정상화 |
 
 ### C. 미시구조 (microstructure) — 가격 + 거래량/수급
 
@@ -80,8 +117,8 @@ dartlab.quant.verdict("005930")
 | 축 | key | 설명 | 상태 |
 |---|---|---|---|
 | 괴리 | divergence | 재무-기술적 괴리 진단 | 구현 |
-| 퀄리티 | quality | Asness 퀄리티 팩터 복합 | stub |
-| 가치 | value | PBR/PER/PSR 가치 신호 | stub |
+| 퀄리티 | quality | Asness 퀄리티 — 횡단면 z, 금융주 sector skip, CIS+IS 강건 추출 | ✅ Phase 2C 보완 완료 (성공률 6/15 → 10/15) |
+| 가치 | value | book-based 수익성/효율성 횡단면 z (시총 미수집으로 PBR/PER/PSR 미산출) | ✅ 재구현 완료 (Phase 2B). 한계 명시 — Phase 2A1 후 진짜 가치 팩터로 교체 |
 | 이익모멘텀 | earnings | SUE, PEAD, 수정 모멘텀 | stub |
 
 ### E. 텍스트/공시 (text) — dartlab 고유
@@ -106,9 +143,9 @@ dartlab.quant.verdict("005930")
 
 | 축 | key | 설명 | 상태 |
 |---|---|---|---|
-| 평균분산 | meanvar | Markowitz 최적화 | stub |
-| 리스크패리티 | riskparity | HRP (Lopez de Prado) | stub |
-| 자산배분 | allocation | Black-Litterman | stub |
+| 평균분산 | meanvar | Markowitz long-only (active-set QP) + Ledoit-Wolf 옵션 + riskFree | ✅ Phase 2C 완료 (clip+renorm → active-set 교체) |
+| 리스크패리티 | riskparity | HRP (Lopez de Prado) — 진짜 single-linkage clustering | ✅ Phase 2C 완료 |
+| 자산배분 | allocation | Equal Risk Contribution (Maillard 2010) | ✅ description 정정 + alias 정리 완료 |
 
 ## 학술 근거
 
@@ -169,6 +206,43 @@ Elder Ray, TRIX, DPO, Pivot Points, Linear Regression, Zigzag
 ## 하위호환
 
 기존 `dartlab.quant("005930", "indicators")` 호출은 DeprecationWarning + 자동 swap.
+
+## Audit 결과 (Phase 1 — 2026-04-06)
+
+quant risk/portfolio/fundamental 9축에 대한 실측 audit 완료. 개별 보고서: `data/dart/auditQuant/{factor,meanvar,riskparity,allocation,value,p2_bundle}.md`.
+
+| 등급 | 축 | 핵심 |
+|---|---|---|
+| ❌ 치명 | factor | FF5 SMB/HML이 진짜와 음의 상관(−0.51), alpha 부호 반대(real +81% vs proxy −22%). 가짜 프록시 폐기 대상 |
+| ❌ 치명 | value | 60% 종목 deep_value, KB금융 growth, 시가총액 미사용. 실은 ROE+자본비율의 평균, 가치 팩터 아님 |
+| ❌ 치명 | residual | factor 의존 — factor 재구현으로 자동 해결 |
+| ⚠️ 보완 | meanvar | clip+renorm Min-Var 5종목 무해(0.02% 손실), Tangency 6%p 차이, rf=0 가정 미명시 |
+| ⚠️ 보완 | riskparity | "Single-linkage" docstring 거짓(평균거리 정렬), 결과는 max 1.78%p 차이로 가까움 |
+| ⚠️ 보완 | allocation | description "Black-Litterman" 거짓 — 실제 ERC. ERC 알고리즘 자체는 Newton 표준과 0 차이 |
+| ⚠️ 보완 | quality | 분포 정상, prof 추출 9/15 실패, 금융주 자동 D, Asness 4축 중 2축만 |
+| ✅ OK | beta | 1.5% 이내 정확. r²/alpha/t-stat 결측만 |
+| ✅ OK | tailrisk | CVaR/MDD/Sortino/skew/kurt 모두 학술 정의 일치 |
+
+**Phase 2 작업 (2026-04-06 완료)**:
+- **A2 강건 추출 헬퍼** (`quant/_helpers.py:extract_account`) — IS/CIS 양쪽, alias 패턴
+- **B1 factor 재구현** (`quant/factorBuild.py` 신설 + `factor.py` 회귀부 교체) — book-based 진짜 횡단면 SMB/HML/RMW/CMA 5분위, 가짜 변동성 합성 폐기
+- **B2 value 재구현** — 시총 부재 한계 명시, book-based 횡단면 z (이전 60% deep_value → 분포 정상화)
+- **B3 residual** — factor 수정으로 자동 정상화 (005930 alpha 부호 반전 해소)
+- **C1 meanvar** — clip+renorm → active-set QP (n≤12 enumeration, n>12 iterative), Ledoit-Wolf 공분산 수축 옵션, riskFree 파라미터
+- **C2 riskparity** — 평균거리 정렬 → 진짜 single-linkage agglomerative clustering
+- **C3 allocation** — description Black-Litterman→ERC 정정, alias 정리
+- **C4 quality** — 추출 성공률 6/15 → 10/15, 횡단면 z, 금융주 sector skip
+- **C5 beta** — t-stat 추가 (r²/alpha는 이미 있었음)
+- **C6 tailrisk** — riskFree 파라미터, tailRiskGrade에 medium-fat 등급 추가
+- **D1 손절매** (`signals.py`) — `vAtrTrailingStop` (Chandelier), `vVolatilityScaledStop` 신설
+- **D2 사이징** (`sizing.py` 신설) — kelly_fraction, kelly_continuous, inverse_volatility_weights, volatility_target_leverage, sharpe_based_size, risk_budget_leverage
+- **D3 성과귀속** (`attribution.py` 신설) — Brinson-Hood-Beebower 분해, timing_effect
+- **D4 팩터 한도/헤지** (`factor.py`) — `factor_exposure_limits`, `hedge_ratio`
+
+**Phase 2 미완 (별도 작업)**:
+- **A1 시가총액 인프라** — KRX/pykrx 모두 직접 호출 차단됨. dartlab.collect에 stockTotal apiType 추가가 정공법. 이게 들어와야 진짜 시총 기반 SMB/HML/PBR/PER/PSR 가능. 메모리 `quant_audit.md` 참조.
+
+진행 상태는 메모리 `quant_audit.md` 참조.
 
 ## review 연동
 

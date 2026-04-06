@@ -17,19 +17,7 @@ def _():
 
 @app.cell
 def _(dartlab):
-    c = dartlab.Company("005930")
-    return (c,)
-
-
-@app.cell
-def _(c):
-    c.analysis()
-    return
-
-
-@app.cell
-def _(c):
-    c.analysis("financial", "수익성")
+    dartlab.listing()
     return
 
 

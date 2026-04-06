@@ -1,20 +1,47 @@
 # Review
 
-analysis 결과와 credit 블록을 블록-템플릿으로 조립한 6막 서사 보고서.
-analysis/credit 품질이 올라가면 review 품질도 올라간다.
+**4엔진(analysis + credit + macro + quant) 조립 보고서.** 6막 서사 구조.
+각 엔진 품질이 올라가면 review 품질도 올라간다.
+
+## 호출 계약
+
+```python
+import dartlab
+c = dartlab.Company("005930")
+c.review("수익성")          # 단일 섹션 (메모리 안전 — 추천)
+c.reviewer(guide="...")     # AI 종합의견 포함
+```
+
+## 노트북
+
+[![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/08_review.py)
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/08_review.ipynb)
+
+---
 
 | 항목 | 내용 |
 |------|------|
 | 레이어 | L2 |
 | 진입점 | `c.review()`, `c.reviewer()` |
-| 소비 | analysis + credit (블록식 조합) |
+| 소비 | **analysis + credit + macro + quant** (블록식 조합) |
 | 생산 | ai(reviewer), 사용자(터미널/HTML/마크다운/JSON), 블로그 보고서 |
 | 출력 | rich, html, markdown, json |
+
+## 4엔진 조합 매핑
+
+| 막 | 섹션 | 소비 엔진 | 핵심 블록 |
+|---|------|---------|---------|
+| 1막 사업이해 | 수익구조, 성장성 | analysis | profile, segmentComposition, growth |
+| 2막 수익성 | 수익성, 비용구조 | analysis | marginTrend, returnTrend, costBreakdown |
+| 3막 현금전환 | 현금흐름, 이익품질 | analysis | cashFlowOverview, cashQuality |
+| 4막 안정성 | 자금조달, 안정성 | analysis | leverage, distress |
+| 5막 자본배분 | 자산구조 ~ 신용평가 | analysis + **credit** | capitalAllocation, **creditScore** |
+| 6막 전망 | 가치평가 ~ 매크로 | analysis + **quant** + **macro** | valuation, **technicalVerdict**, **macroCycle** |
 
 ## 단일 진입점
 
 - **`c.review()` / `c.reviewer()`** 로 접근한다 (Company-bound)
-- review는 analysis 결과와 credit 블록을 소비하여 보고서로 조립한다
+- review는 analysis + credit + macro + quant 결과를 소비하여 보고서로 조립한다
 
 ## API
 
@@ -241,11 +268,15 @@ credit 보고서 링크 (있으면)
 | 이벤트 보고서 | 수시 | 실적 서프라이즈, 등급 변동 | 해당 종목 |
 | 신규 커버리지 | 수시 | 사용자 요청 또는 신규 상장 | 개별 |
 
-### credit과의 관계
+### credit 통합 (단일 보고서 단일화)
 
-- review 보고서에서 credit은 5막(안정성) 안의 **한 섹션**
-- 상세 12섹션 분석은 credit 독립 보고서(04-credit-reports)로 링크
-- 두 보고서는 독립 발간. credit publisher ≠ review publisher
+review 5-7 신용평가 섹션이 credit의 모든 정보를 흡수한다:
+- creditMetrics, creditScore, creditHistory, cashFlowGrade, creditPeerPosition, creditFlags (수치)
+- **creditNarrative** — 7축 서사 (severity별 strong/adequate/weak/critical) ← 신규
+- **creditAudit** — 외부 신평사(KIS/KR/NICE) 등급 + notch 차이 + 동의/비동의 ← 신규
+
+**credit 자체 publisher는 deprecated.** review.publisher가 단일 진입점.
+기존 16개 credit 보고서는 `blog/04-credit-reports/`에 아카이브로 보존.
 
 ### _registry.json
 

@@ -1,7 +1,23 @@
 # Company
 
 Company는 dartlab의 facade. 종목코드 하나로 모든 데이터에 접근한다.
-dartlab의 모든 방향성은 Company에서 시작하고, Company로 돌아온다.
+
+## 호출 계약
+
+```python
+import dartlab
+c = dartlab.Company("005930")    # 종목코드 하나면 끝
+c.topics                          # 사용 가능한 topic 목록
+c.show("IS")                      # topic 데이터
+c.select("IS", ["매출액"])         # 행/열 필터
+```
+
+## 노트북
+
+[![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/01_company.py)
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_company.ipynb)
+
+---
 
 | 항목 | 내용 |
 |------|------|
@@ -109,7 +125,7 @@ c.timeseries                      # 시계열
 ### 메타
 ```python
 c.sections / c.topics             # sections 지도
-c.filings()                       # 공시 목록
+c.filings()                       # 공시 목록 (= dartlab.listing("filings", corp=...) → ops/listing.md)
 c.insights                        # 등급 카드
 c.market / c.currency             # 시장 정보
 ```

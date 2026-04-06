@@ -82,21 +82,27 @@ API 키 불필요. [HuggingFace](https://huggingface.co/datasets/eddmpython/dart
 
 ## DartLab은 무엇인가
 
-두 가지 엔진으로 원본 공시를 하나의 비교 가능한 맵으로 바꾼다:
+13개 엔진, 하나의 호출 계약. 모든 엔진은 `dartlab.엔진()` 으로 가이드 보고 `dartlab.엔진("축")` 으로 1개 예시 받는 방식.
 
-| 레이어 | 엔진 | 하는 일 | 진입점 |
-|--------|------|---------|--------|
-| Data | [Data](ops/data.md) | HuggingFace 사전 구축 데이터, 자동 다운로드 | `Company("005930")` |
-| L0/L1 | [Company](ops/company.md) | 섹션 수평화 + 계정 표준화 | `c.show()`, `c.select()` |
-| L1 | [Scan](ops/scan.md) | 전 종목 횡단 비교, 13축 | `dartlab.scan()` |
-| L1 | [Gather](ops/gather.md) | 외부 시장 데이터 (주가, 수급, 매크로, 뉴스) | `dartlab.gather()` |
-| L2 | [Macro](ops/macro.md) | 시장 레벨 매크로 분석 — 11축, Company 불필요 | `dartlab.macro("사이클")` |
-| L2 | [Analysis](ops/analysis.md) | 14축 재무 + 가치평가 + 전망 + 기술적 | `c.analysis("financial", "수익성")` |
-| L2 | [Credit](ops/credit.md) | 독립 신용평가 엔진 (dCR 20단계) | `c.credit()` |
-| L2 | [Review](ops/review.md) | 블록식 조합 보고서 (analysis + credit) | `c.review()` |
-| L0 | [Search](ops/search.md) | 공시 시맨틱 검색 *(alpha)* | `dartlab.search()` |
-| L3 | [AI](ops/ai.md) | 적극적 분석가 — 코드 실행 + 해석 | `dartlab.ask()` |
-| L4 | UI | VSCode 확장 | `dartlab chat --stdio` |
+| 레이어 | 엔진 | 하는 일 | 진입점 | 노트북 |
+|--------|------|---------|--------|--------|
+| Data | [Data](ops/data.md) | HuggingFace 사전 구축, 자동 다운로드 | `Company("005930")` | — |
+| L0/L1 | [Company](ops/company.md) | 섹션 수평화 + 4 namespace | `c.show()`, `c.select()` | [01](notebooks/marimo/01_company.py) |
+| L1 | [Gather](ops/gather.md) | 외부 시장 데이터 (주가/수급/매크로/뉴스) | `dartlab.gather()` | [02](notebooks/marimo/02_gather.py) |
+| L1 | [Scan](ops/scan.md) | 전 종목 횡단 비교, 13축 | `dartlab.scan()` | [03](notebooks/marimo/03_scan.py) |
+| L1 | [Quant](ops/quant.md) | 정량 (모멘텀/팩터/패턴) | `c.quant()` | [04](notebooks/marimo/04_quant.py) |
+| L2 | [Analysis](ops/analysis.md) | 14축 재무 + 가치평가 + 전망 | `c.analysis("financial", "수익성")` | [05](notebooks/marimo/05_analysis.py) |
+| L2 | [Macro](ops/macro.md) | 시장 레벨 매크로 — 11축, Company 불필요 | `dartlab.macro("사이클")` | [06](notebooks/marimo/06_macro.py) |
+| L2 | [Credit](ops/credit.md) | 독립 신용평가 (dCR 20단계) | `c.credit("등급")` | [07](notebooks/marimo/07_credit.py) |
+| L2 | [Review](ops/review.md) | 4엔진 조합 보고서 (analysis + credit + macro + quant) | `c.review("수익성")` | [08](notebooks/marimo/08_review.py) |
+| L3 | [AI](ops/ai.md) | 적극적 분석가 — 코드 실행 + 해석 | `dartlab.ask()` | [09](notebooks/marimo/09_ai.py) |
+| core | [Search](ops/search.md) | 공시 시맨틱 검색 *(alpha)* | `dartlab.search()` | [10](notebooks/marimo/10_search.py) |
+| facade | [Listing](ops/listing.md) | 카탈로그 API (종목/공시/topic) | `dartlab.listing()` | [11](notebooks/marimo/11_listing.py) |
+| viz | [Viz](ops/viz.md) | 차트/다이어그램 (emit_chart) | `emit_chart({...})` | [12](notebooks/marimo/12_viz.py) |
+| guide | [Guide](ops/guide.md) | 안내 데스크 — readiness/에러/교육 | `dartlab.guide.checkReady()` | [13](notebooks/marimo/13_guide.py) |
+| L4 | UI | VSCode 확장 | `dartlab chat --stdio` | — |
+
+> 모든 노트북: [marimo](notebooks/marimo/) · [colab](notebooks/colab/) · [![Open in marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo)
 
 ### Company
 
@@ -147,10 +153,11 @@ dartlab.gather("news", "삼성전자")             # Google News RSS
 
 ```python
 c.analysis("financial", "수익성")       # 수익성 분석
-c.analysis("financial", "현금흐름")    # 현금흐름 분석
+c.analysis("수익성")                     # 단축형 (financial 자동)
 
-c.credit()                                  # dCR-AA, 건전도 93/100
-c.credit(detail=True)                       # 7축 서사 + 지표 시계열
+print(c.credit())                            # 8축 가이드 DataFrame (self-discovery)
+c.credit("등급")                             # dCR-AA, 건전도 93/100
+c.credit("등급", detail=True)                # 7축 서사 + 지표 시계열
 ```
 
 ### Credit — 독립 신용분석
@@ -162,21 +169,22 @@ c.credit(detail=True)                       # 7축 서사 + 지표 시계열
 **79개사 검증: 대기업 87% (26/30), 중대형 82% (41/50), 전체 70% (55/79, v5.0 과대평가 수정 후 재측정 예정). 삼성전자 AA+ 정확 일치.** 검증 방법론은 [methodology](docs/methodology.md) 참조.
 
 ```python
-cr = c.credit()
+print(c.credit())            # self-discovery — 7축 + 종합 등급
+
+cr = c.credit("등급")        # 종합 등급
 print(cr["grade"])          # dCR-AA+
 print(cr["healthScore"])    # 96 (0-100, 높을수록 건전)
 print(cr["pdEstimate"])     # 0.01% 부도확률
 
-cr = c.credit(detail=True)  # 7축 서사 + 지표 + 괴리 설명
+cr = c.credit("등급", detail=True)  # 7축 서사 + 지표 + 괴리 설명
 print(cr["divergenceExplanation"])  # 신평사와 왜 다른지
 ```
 
-신용분석 보고서 발간:
+신용분석 보고서 발간 (credit 서사 + 신평사 대조가 review 5막에 자동 통합):
 
 ```python
-from dartlab.credit.publisher import publishReport
-publishReport("005930")     # 마크다운 보고서 (13섹션)
-publishReport("005930", useAI=True)  # AI 해석 포함
+from dartlab.review.publisher import publishReport
+publishReport("005930")               # 6막 보고서 (credit narrative + audit 포함)
 ```
 
 ### Review — 분석을 보고서로
@@ -226,12 +234,76 @@ L1  providers/   국가별 데이터 (DART, EDGAR, EDINET)
     scan/        시장 횡단분석 — scan("그룹", "축")
 L2  analysis/    재무 + 전망 + 가치평가 + 기술적 — analysis("그룹", "축")
     credit/      독립 신용평가 — c.credit()
+    macro/       시장 레벨 매크로 — dartlab.macro()
     review/      블록식 조합 보고서 (analysis + credit)
 L3  ai/          적극적 분석가 — dartlab.ask()
 L4  vscode/      VSCode 확장 (dartlab chat --stdio)
 ```
 
 import 방향은 CI 강제. 새 국가 추가 = provider 패키지 하나, core 수정 0줄.
+
+#### 레이어 간 소비 흐름
+
+각 레이어가 누구를 소비하고 누구에게 소비되는지:
+
+```mermaid
+flowchart TB
+    subgraph L4["L4 · 사용자 인터페이스"]
+        UI["vscode / CLI / web"]
+    end
+    subgraph L3["L3 · LLM 분석가"]
+        AI["ai<br/>dartlab.ask()"]
+    end
+    subgraph L2["L2 · 분석"]
+        ANA["analysis<br/>14축 재무 + 전망 + 가치평가"]
+        CRD["credit<br/>dCR 20단계"]
+        MAC["macro<br/>11축 시장 해석"]
+        REV["review<br/>블록식 보고서"]
+    end
+    subgraph L1["L1 · 데이터 수집"]
+        PRV["providers<br/>DART / EDGAR / EDINET"]
+        GAT["gather<br/>FRED / ECOS / Naver / Yahoo"]
+        SCN["scan<br/>전종목 횡단"]
+        QNT["quant<br/>기술적 25지표"]
+    end
+    subgraph L0["L0 · 인프라"]
+        CORE["core<br/>protocols + finance + docs + search"]
+    end
+
+    UI --> AI
+    AI --> REV
+    AI --> ANA
+    AI --> MAC
+    AI --> SCN
+    REV --> ANA
+    REV --> CRD
+    ANA --> PRV
+    ANA --> GAT
+    CRD --> PRV
+    MAC --> GAT
+    SCN --> PRV
+    QNT --> GAT
+    PRV --> CORE
+    GAT --> CORE
+    SCN --> CORE
+    QNT --> CORE
+
+    classDef l0 fill:#f5f5f5,stroke:#999
+    classDef l1 fill:#e8f4ff,stroke:#4a90e2
+    classDef l2 fill:#fff4e6,stroke:#e67e22
+    classDef l3 fill:#f0e6ff,stroke:#8e44ad
+    classDef l4 fill:#e6ffe6,stroke:#27ae60
+    class CORE l0
+    class PRV,GAT,SCN,QNT l1
+    class ANA,CRD,MAC,REV l2
+    class AI l3
+    class UI l4
+```
+
+**핵심 규칙**:
+- 화살표는 항상 위→아래 (L4→L3→L2→L1→L0). 역방향 import 금지 (CI 검증)
+- L2 엔진끼리는 서로 import 금지 — analysis ↛ credit, macro ↛ analysis. 조합은 review 또는 ai의 몫
+- 새 기능 추가 시 적합한 레이어를 먼저 결정한 뒤 한 방향으로만 데이터가 흐르게 한다
 
 ## EDGAR (미국)
 

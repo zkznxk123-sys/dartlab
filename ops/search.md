@@ -2,6 +2,24 @@
 
 전체 공시 원문 검색 엔진. 모델 불필요, cold start 0ms, precision 95%.
 
+## 호출 계약
+
+```python
+import dartlab
+dartlab.search("유상증자")                    # 공시 원문 검색
+dartlab.search("대표이사 변경", corp="005930")  # 종목 필터
+dartlab.searchName("삼성")                    # 종목명/티커 → 종목 매칭
+```
+
+## 노트북
+
+[![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/10_search.py)
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/10_search.ipynb)
+
+---
+
+> **search vs listing**: search는 "내용 안에서 찾기"(원문 역인덱스 매칭). 카탈로그성 "뭐가 있는지"(종목/공시메타/토픽) 조회는 `dartlab.listing()` → ops/listing.md.
+
 | 항목 | 내용 |
 |------|------|
 | 레이어 | L0 (core/search/) |

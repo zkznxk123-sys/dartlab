@@ -23,13 +23,7 @@ def _(dartlab):
 
 @app.cell
 def _(c):
-    c.analysis()
-    return
-
-
-@app.cell
-def _(c):
-    c.analysis("financial", "수익성")
+    c.review("수익성")
     return
 
 

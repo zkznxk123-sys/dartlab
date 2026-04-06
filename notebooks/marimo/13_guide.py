@@ -1,11 +1,7 @@
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["dartlab[vector]", "marimo"]
+# dependencies = ["dartlab", "marimo"]
 # ///
-"""DartLab -- Search (alpha).
-
-공시 원문 시맨틱 검색.
-"""
 
 import marimo
 
@@ -16,14 +12,18 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import dartlab
-
-    dartlab.search("유상증자 결정", topK=5)
     return (dartlab,)
 
 
 @app.cell
 def _(dartlab):
-    dartlab.search("기술이전", topK=5)
+    dartlab.guide.checkReady("ai")
+    return
+
+
+@app.cell
+def _(dartlab):
+    dartlab.guide.whatCanIDo("재무 분석")
     return
 
 

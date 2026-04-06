@@ -23,13 +23,13 @@ def _(dartlab):
 
 @app.cell
 def _(c):
-    c.analysis()
+    c.quant()
     return
 
 
 @app.cell
 def _(c):
-    c.analysis("financial", "수익성")
+    c.quant("모멘텀")
     return
 
 
