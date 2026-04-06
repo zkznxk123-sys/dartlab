@@ -179,6 +179,37 @@ reportUnknownVariableType = false
 exclude_dirs = ["experiments", "tests"]
 skips = ["B101"]
 
+[tool.deptry]
+# 옵셔널 통합 의존성 — 사용자가 별도 설치할 때만 동작 (런타임 ImportError 가드 있음)
+extend_exclude = [
+    "src/dartlab/.*/_reference/.*",  # 학습/실험 코드, 런타임 미사용
+]
+[tool.deptry.per_rule_ignores]
+DEP001 = [
+    # ── channel 어댑터 (외부 메신저 옵셔널) ──
+    "discord", "slack_bolt", "telegram", "pyngrok",
+    # ── CLI 인터랙티브 옵셔널 ──
+    "prompt_toolkit",
+    # ── display 옵셔널 ──
+    "great_tables", "itables", "IPython",
+    # ── gather 옵셔널 ──
+    "FinanceDataReader", "tavily",
+    # ── _reference 학습/실험 ──
+    "agents", "owlready2", "rapidfuzz", "edgar",
+    # ── transitive deps (다른 패키지가 끌어옴) ──
+    "dotenv",      # python-dotenv
+    "google",      # google-genai
+    "yaml",        # pyyaml
+    "bs4",         # beautifulsoup4
+    "starlette",   # fastapi가 끌어옴
+    "pydantic",    # fastapi가 끌어옴
+]
+DEP002 = [
+    "beautifulsoup4",  # bs4 직접 import
+    "google-genai",    # google.genai 사용 (gemini provider)
+    "marimo",          # 노트북 컴파일/배포 도구
+]
+
 [dependency-groups]
 dev = [
     "build>=1.4.0",
