@@ -258,6 +258,8 @@ def fitPanel(
                 meanX[j] += vec[j]
             meanY += o.revenueGrowth
         cnt = len(oList)
+        if cnt == 0:
+            continue
         meanX = [v / cnt for v in meanX]
         meanY /= cnt
 

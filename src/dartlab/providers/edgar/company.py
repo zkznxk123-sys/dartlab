@@ -573,35 +573,33 @@ class Company:
         return "USD"
 
     def quant(self, metric=None, **kwargs):
-        """주가 기술적 분석.
-
-        Capabilities:
-            - 종합 판단 (강세/중립/약세) + RSI/SMA/BB
-            - 25개 기술적 지표 DataFrame
-            - 최근 매매 신호 이벤트
-            - 시장 베타 + CAPM + 해석
-            - 재무-기술적 괴리 진단
-            - 기술적 경고/기회 플래그
+        """주가 기술적 분석 — self-discovery 패턴.
 
         Args:
-            metric: "indicators", "signals", "beta", "divergence", "flags".
-                    None이면 종합 판단(verdict).
-            **kwargs: gather("price")에 전달할 추가 인자.
+            metric: 축 이름. None이면 30축 가이드 DataFrame.
+                    "종합"/"verdict" → 종합 기술 판단
+                    "지표"/"indicators" → 45개 기술적 지표
+                    "신호"/"signals" → 매매 신호
+                    "베타"/"beta" → 시장 베타 + CAPM
+                    기타 30축 (모멘텀, 변동성, 팩터 등)
 
         Returns:
-            dict, list, 또는 pl.DataFrame — metric에 따른 분석 결과.
+            metric=None → DataFrame (30축 가이드)
+            metric="종합" → dict (verdict, RSI, ADX, SMA 등)
 
         Example::
 
             c = Company("AAPL")
-            c.quant()                # 종합 판단
-            c.quant("indicators")    # 25개 지표
-            c.quant("beta")          # 시장 베타
+            print(c.quant())            # 30축 가이드 (self-discovery)
+            c.quant("종합")              # 종합 판단
+            c.quant("베타")              # 시장 베타
         """
         from dartlab.quant import Quant
 
         q = Quant()
-        return q(self.stockCode, metric, **kwargs)
+        if metric is None:
+            return q()  # 가이드 DataFrame
+        return q(metric, self.stockCode, **kwargs)
 
     def view(self, *, port: int = 8400) -> None:
         """브라우저에서 공시 뷰어를 열어 sections/index를 시각화.
@@ -1530,6 +1528,7 @@ class Company:
         block: int | None = None,
         *,
         period: str | list[str] | None = None,
+        raw: bool = False,
         **_kw: Any,
     ) -> pl.DataFrame | None:
         """topic 데이터 조회 — sections 사상의 핵심 소비 경로.
