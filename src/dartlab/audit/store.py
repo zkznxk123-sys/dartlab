@@ -11,10 +11,15 @@ import polars as pl
 
 
 def _defaultDataDir() -> Path:
-    """프로젝트 data/audit/ (레포 내부 저장)."""
-    # src/dartlab/audit/store.py → 5단계 상위 = 프로젝트 루트
-    repoRoot = Path(__file__).resolve().parents[3]
-    return repoRoot / "data" / "audit"
+    """config.dataDir / audit/ — 데이터 루트 설정을 따른다."""
+    try:
+        from dartlab.core.dataLoader import _getDataRoot
+
+        return Path(_getDataRoot()) / "audit"
+    except (ImportError, RuntimeError):
+        # fallback: 레포 상대경로
+        repoRoot = Path(__file__).resolve().parents[3]
+        return repoRoot / "data" / "audit"
 
 
 # ── SQLite 스키마 ──
