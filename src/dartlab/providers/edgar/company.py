@@ -1584,11 +1584,24 @@ class Company:
 
         sec = self.sections
         if sec is None:
-            return None
+            # R26-1: silent None → 명시적 ValueError
+            raise ValueError(
+                f"sections 데이터를 가져올 수 없습니다 (ticker={getattr(self, 'ticker', '?')}). "
+                f"네트워크 또는 SEC EDGAR API 상태를 확인하세요."
+            )
 
         topicRows = sec.filter(pl.col("topic") == topic)
         if topicRows.is_empty():
-            return None
+            # R26-1: silent None → 명시적 ValueError. 가용 topic 일부 안내.
+            try:
+                available = sec["topic"].unique().to_list()[:20]
+            except (AttributeError, KeyError):
+                available = []
+            hint = f"\n  사용 가능한 topic 일부: {', '.join(available)}" if available else ""
+            raise ValueError(
+                f"'{topic}' topic 을 찾을 수 없습니다 (EDGAR).{hint}\n"
+                f"  전체 목록: c.topics 또는 c.index 로 확인하세요."
+            )
 
         if block is None:
             blockIndex = self._buildBlockIndex(topicRows)
@@ -1703,16 +1716,41 @@ class Company:
         from dartlab.core.select import SelectResult
         from dartlab.core.show import selectFromShow
 
+        # R26-3: show() 가 ValueError 발생하면 그대로 propagate
         df = self.show(topic)
         if df is None or not isinstance(df, pl.DataFrame):
-            return None
+            raise ValueError(
+                f"'{topic}' topic 의 데이터를 가져올 수 없습니다 (EDGAR). "
+                f"topic 이름을 확인하거나 c.show('{topic}') 로 직접 호출해보세요."
+            )
         if isinstance(indList, str):
             indList = [indList]
         if isinstance(colList, str):
             colList = [colList]
+
+        # R26-4: 빈 indList → 명시적 안내
+        if indList is not None and len(indList) == 0:
+            raise ValueError(
+                "select 의 indList (행 필터) 가 비어 있습니다. "
+                "필터링할 계정명을 1개 이상 전달하세요. 예: c.select('IS', ['Revenue'])"
+            )
+
         filtered = selectFromShow(df, indList, colList)
         if filtered is None:
-            return None
+            # R26-2: silent None → 명시적 ValueError
+            available = []
+            try:
+                if df.width > 0:
+                    first_col = df.columns[0]
+                    available = df[first_col].drop_nulls().to_list()[:15]
+            except (AttributeError, IndexError, TypeError):
+                pass
+            ind_str = indList if indList else colList
+            hint = f"\n  사용 가능한 행 일부: {', '.join(str(a) for a in available)}" if available else ""
+            raise ValueError(
+                f"'{topic}' topic 에서 {ind_str} 를 찾을 수 없습니다 (EDGAR).{hint}\n"
+                f"  c.show('{topic}') 로 전체 행을 확인하세요."
+            )
         return SelectResult(
             filtered,
             topic,

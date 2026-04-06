@@ -2107,13 +2107,11 @@ class Company:
                 direct = self._showDirectTopic(topic, period=period, raw=raw)
                 if direct is not None:
                     return direct
-            import warnings
-
-            warnings.warn(
-                f"'{topic}' topic을 찾을 수 없습니다. 전체 목록은 c.topics 또는 c.index로 확인하세요.",
-                stacklevel=2,
+            # R26-1: silent None → 명시적 ValueError.
+            raise ValueError(
+                f"'{topic}' topic 을 찾을 수 없습니다.\n"
+                f"  전체 목록: c.topics 또는 c.index 로 확인하세요."
             )
-            return None
 
         topicRows = sec.filter(pl.col("topic") == topic)
         if topicRows.is_empty():
@@ -2437,13 +2435,25 @@ class Company:
         from dartlab.core.select import SelectResult
         from dartlab.core.show import selectFromShow
 
+        # R26-3: show() 가 ValueError 발생하면 그대로 propagate (silent None X)
         df = self.show(topic)
         if df is None or not isinstance(df, pl.DataFrame):
-            return None
+            # show 가 정상 None 반환한 경우 (raw 모드 등) — ValueError 대신 명확한 안내
+            raise ValueError(
+                f"'{topic}' topic 의 데이터를 가져올 수 없습니다. "
+                f"topic 이름을 확인하거나 c.show('{topic}') 로 직접 호출해보세요."
+            )
         if isinstance(indList, str):
             indList = [indList]
         if isinstance(colList, str):
             colList = [colList]
+
+        # R26-4: 빈 indList → 명시적 안내
+        if indList is not None and len(indList) == 0:
+            raise ValueError(
+                "select 의 indList (행 필터) 가 비어 있습니다. "
+                "필터링할 계정명을 1개 이상 전달하세요. 예: c.select('IS', ['매출액'])"
+            )
 
         # multi-block docs topic 감지 → 역인덱스 경로
         isBlockIndex = (
@@ -2458,7 +2468,21 @@ class Company:
         else:
             filtered = selectFromShow(df, indList, colList)
         if filtered is None:
-            return None
+            # R26-2: indList 가 dataframe 에 매치 안 되면 silent None → 명시적 에러
+            available = []
+            try:
+                # 첫 컬럼이 보통 계정명
+                if df.width > 0:
+                    first_col = df.columns[0]
+                    available = df[first_col].drop_nulls().to_list()[:15]
+            except (AttributeError, IndexError, TypeError):
+                pass
+            ind_str = indList if indList else colList
+            hint = f"\n  사용 가능한 행 일부: {', '.join(str(a) for a in available)}" if available else ""
+            raise ValueError(
+                f"'{topic}' topic 에서 {ind_str} 를 찾을 수 없습니다.{hint}\n"
+                f"  c.show('{topic}') 로 전체 행을 확인하세요."
+            )
         return SelectResult(
             filtered,
             topic,
@@ -4677,36 +4701,36 @@ class Company:
         return df_with_market.group_by("시장").agg(aggs).sort("종목수", descending=True)
 
     def quant(self, metric=None, **kwargs):
-        """주가 기술적 분석.
-
-        Capabilities:
-            - 종합 판단 (강세/중립/약세) + RSI/SMA/BB
-            - 25개 기술적 지표 DataFrame
-            - 최근 매매 신호 이벤트
-            - 시장 베타 + CAPM + 해석
-            - 재무-기술적 괴리 진단
-            - 기술적 경고/기회 플래그
+        """주가 기술적 분석 — self-discovery 패턴.
 
         Args:
-            metric: "indicators", "signals", "beta", "divergence", "flags".
-                    None이면 종합 판단(verdict).
-            **kwargs: gather("price")에 전달할 추가 인자.
+            metric: 축 이름. None이면 30축 가이드 DataFrame.
+                    "종합"/"verdict" → 종합 기술 판단
+                    "지표"/"indicators" → 45개 기술적 지표
+                    "신호"/"signals" → 매매 신호
+                    "베타"/"beta" → 시장 베타 + CAPM
+                    기타 30축 (모멘텀, 변동성, 팩터 등)
+            **kwargs: 축별 추가 파라미터.
 
         Returns:
-            dict, list, 또는 pl.DataFrame — metric에 따른 분석 결과.
+            metric=None → DataFrame (30축 가이드)
+            metric="종합" → dict (verdict, RSI, ADX, SMA 등)
+            metric="지표" → DataFrame (45개 지표)
 
         Example::
 
             c = Company("005930")
-            c.quant()                # 종합 판단
-            c.quant("indicators")    # 25개 지표
-            c.quant("signals")       # 매매 신호
-            c.quant("beta")          # 시장 베타
+            print(c.quant())            # 30축 가이드 (self-discovery)
+            c.quant("종합")              # 종합 판단 dict
+            c.quant("지표")              # 45개 지표 DataFrame
+            c.quant("모멘텀")            # 모멘텀 분석
         """
         from dartlab.quant import Quant
 
         q = Quant()
-        return q(self.stockCode, metric, **kwargs)
+        if metric is None:
+            return q()  # 가이드 DataFrame
+        return q(metric, self.stockCode, **kwargs)
 
     def view(self, *, port: int = 8400) -> None:
         """브라우저에서 공시 뷰어를 엽니다.
