@@ -197,6 +197,14 @@ class Macro:
         if axis is None:
             return self._guide()
 
+        # R29-1: 잘못된 market 을 silent 로 처리하지 않고 명시적 ValueError.
+        # 이전엔 'XX' 같은 값도 fallback 동작해서 사용자가 잘못된 결과를 받음.
+        if market not in ("US", "KR"):
+            raise ValueError(
+                f"market 은 'US' 또는 'KR' 만 지원합니다. 받은 값: '{market}'\n"
+                f"  사용법: dartlab.macro('{axis}', market='KR') 또는 market='US'"
+            )
+
         key = _resolve(axis)
         entry = _AXIS_REGISTRY[key]
         mod = importlib.import_module(entry.module)
@@ -204,15 +212,15 @@ class Macro:
         return fn(market=market, **kwargs)
 
     def _guide(self) -> pl.DataFrame:
-        """축 목록 + 사용법 가이드."""
+        """축 목록 + 사용법 가이드 (통일 컬럼)."""
         rows = []
         for key, entry in _AXIS_REGISTRY.items():
             rows.append(
                 {
-                    "축": entry.label,
-                    "key": key,
-                    "설명": entry.description,
-                    "예시": entry.example,
+                    "axis": key,
+                    "label": entry.label,
+                    "description": entry.description,
+                    "example": entry.example,
                 }
             )
         return pl.DataFrame(rows)
