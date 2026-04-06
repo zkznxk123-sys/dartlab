@@ -163,6 +163,20 @@ class GuideDesk:
         errStr = str(error)
         errLow = errStr.lower()
 
+        # share/channel 에러 (cloudflared, tunnel)
+        if feature == "share" or "cloudflared" in errLow or "tunnel" in errLow:
+            from dartlab.guide.hints import (
+                onCloudflaredMissing,
+                onCloudflareLoginRequired,
+                onTunnelStartFailed,
+            )
+            if "cloudflared" in errLow and ("not found" in errLow or "missing" in errLow or "찾을" in errStr):
+                import platform
+                return onCloudflaredMissing(platform.system())
+            if "cert" in errLow or "login" in errLow or "unauthenticated" in errLow:
+                return onCloudflareLoginRequired()
+            return onTunnelStartFailed(errStr[-500:])
+
         # 파일 미존재 → 데이터 안내
         if isinstance(error, FileNotFoundError):
             return (
@@ -222,8 +236,17 @@ class GuideDesk:
         if any(kw in errLow for kw in ("context", "token limit", "too long", "max_tokens")):
             return f"입력이 너무 깁니다: {errStr}\n  --exclude 옵션으로 컨텍스트를 줄여보세요."
 
-        # 3) 일반 폴백
-        return f"오류: {errStr}"
+        # 3) 일반 폴백 — feature 정보가 있으면 prefix 추가
+        # R34-1: 이전엔 feature='ai' 같이 명시적으로 줘도 fallback 메시지가
+        # "오류: test" 만 나와서 사용자에게 어떤 feature 의 에러인지 알려주지
+        # 않았다.
+        if feature:
+            return (
+                f"[{feature}] {errType}: {errStr}\n"
+                f"  dartlab.guide.checkReady('{feature}') 로 준비 상태를 확인하거나, "
+                f"dartlab.guide.whatCanIDo('{feature}') 로 사용 가능한 기능을 확인하세요."
+            )
+        return f"{errType}: {errStr}"
 
     # ── 6. 메타 ──
 
