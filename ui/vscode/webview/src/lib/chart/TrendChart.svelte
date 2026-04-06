@@ -22,8 +22,26 @@
     return () => ro.disconnect();
   });
 
-  const HEIGHT = 280;
-  const MARGIN = { top: 32, right: 16, bottom: 40, left: 64 };
+  const HEIGHT_BASE = 280;
+  // 라벨 회전 시 추가 높이
+  let labelLen = $derived(
+    Math.max(...(spec?.categories ?? []).map((c) => String(c).length), 1),
+  );
+  let needsRotate = $derived.by(() => {
+    const cats = spec?.categories ?? [];
+    // 카테고리 5개 미만이면 회전 안 함 (분기 데이터 등)
+    if (cats.length < 5) return false;
+    const w = containerWidth - 64 - 16; // pre-rotate plotW estimate
+    // 라벨이 차지하는 가로폭이 가용 공간의 60% 초과 시 회전
+    return cats.length * labelLen * 7 > w * 0.6;
+  });
+  let MARGIN = $derived({
+    top: 32,
+    right: 16,
+    bottom: needsRotate ? 64 : 40,
+    left: 64,
+  });
+  let HEIGHT = $derived(HEIGHT_BASE + (needsRotate ? 24 : 0));
   let plotW = $derived(containerWidth - MARGIN.left - MARGIN.right);
   let plotH = $derived(HEIGHT - MARGIN.top - MARGIN.bottom);
 
@@ -334,18 +352,21 @@
         {/each}
       {/each}
 
-      <!-- X axis labels -->
+      <!-- X axis labels (라벨 회전 + 축약) -->
       {#each categories as cat, i}
+        {@const cx = xScale(cat) + xScale.bandwidth() / 2}
+        {@const display = needsRotate && String(cat).length > 8 ? String(cat).slice(0, 7) + '…' : cat}
         <text
-          x={xScale(cat) + xScale.bandwidth() / 2}
-          y={plotH + 20}
-          text-anchor="middle"
+          x={cx}
+          y={plotH + (needsRotate ? 8 : 20)}
+          text-anchor={needsRotate ? 'end' : 'middle'}
+          transform={needsRotate ? `rotate(-45, ${cx}, ${plotH + 8})` : ''}
           fill={hoverIndex === i ? '#e5e7eb' : '#9ca3af'}
           font-size="11"
           font-weight={hoverIndex === i ? '600' : '400'}
           class="transition-all duration-150"
         >
-          {cat}
+          {display}
         </text>
       {/each}
     </g>

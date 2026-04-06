@@ -5,9 +5,26 @@
    * @type {{ spec: object, class?: string }}
    */
   let { spec, class: className = '' } = $props();
+
+  /**
+   * 스트리밍 중 partial spec 으로 들어오거나 필수 필드 누락 시
+   * skeleton 표시. 차트 라이브러리가 깨진 spec 으로 NaN 그리는 걸 방지.
+   */
+  function isValidSpec(s) {
+    if (!s || typeof s !== 'object') return false;
+    if (s.vizType === 'diagram') return !!s.source;
+    if (!s.chartType) return false;
+    if (!Array.isArray(s.categories) || s.categories.length === 0) return false;
+    if (!Array.isArray(s.series) || s.series.length === 0) return false;
+    return s.series.every((ss) => ss && Array.isArray(ss.data));
+  }
 </script>
 
-{#if spec}
+{#if spec && !isValidSpec(spec)}
+  <div class="dl-chart-container {className}">
+    <p class="chart-skeleton">차트 데이터 수신 중...</p>
+  </div>
+{:else if spec}
   <div class="dl-chart-container {className}">
     {#if spec.vizType === 'diagram' && spec.diagramType === 'mermaid'}
       <div class="mermaid-block">
@@ -55,9 +72,13 @@
     min-height: 200px;
     margin: 8px 0;
   }
-  .chart-unsupported {
+  .chart-unsupported,
+  .chart-skeleton {
     font-size: 12px;
     color: var(--vscode-descriptionForeground, #888);
+    padding: 16px;
+    text-align: center;
+    font-style: italic;
   }
   .mermaid-block {
     position: relative;

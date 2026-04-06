@@ -215,30 +215,38 @@ export function renderMarkdown(md: string): string {
   return highlightNumbers(html);
 }
 
-/** Incremental renderer for streaming. Caches completed blocks. */
-export function createIncrementalRenderer() {
-  let lastCompleteIndex = 0;
-  let cachedHtml = "";
+/**
+ * 스트리밍-aware incremental renderer.
+ *
+ * 기존 구현은 메시지 1개당 1 closure 를 5곳(text block / tool result /
+ * error msg / error guide)에서 공유해서 cache state(`lastCompleteIndex`)가
+ * 서로 다른 텍스트 사이에서 오염됐다 → 사용자가 본 raw markdown 노출의 원인.
+ *
+ * 새 구현:
+ * - state 없음 (stateless) — 캐시 충돌 클래스 자체를 제거
+ * - contentSplitter 로 스트리밍 중 partial table/code fence 분리
+ * - committed 부분만 marked 에 넘기고, draft 는 escape 해서 placeholder 표시
+ * - loading=false 면 splitter 가 전체를 commit 하므로 자연 정착
+ */
+import { createStreamSplitter } from "./contentSplitter";
 
-  return function render(fullText: string): string {
-    // Find last complete block boundary (double newline)
-    const lastBreak = fullText.lastIndexOf("\n\n");
-    if (lastBreak <= lastCompleteIndex) {
-      // No new complete blocks — render everything
+export function createIncrementalRenderer() {
+  // splitter 는 streaming text 한 흐름에 한정. 같은 closure 가 여러 텍스트에
+  // 호출돼도 splitter state 는 매번 reset 되도록 stateless 시그니처.
+  return function render(fullText: string, loading: boolean = false): string {
+    if (!fullText) return "";
+    if (!loading) {
+      // 완료 상태: 전체를 그냥 렌더
       return renderMarkdown(fullText);
     }
-
-    // Cache completed portion
-    const completePart = fullText.slice(0, lastBreak);
-    const remainder = fullText.slice(lastBreak);
-
-    if (lastBreak > lastCompleteIndex) {
-      cachedHtml = renderMarkdown(completePart);
-      lastCompleteIndex = lastBreak;
-    }
-
-    // Render only the trailing portion
-    const trailingHtml = renderMarkdown(remainder);
-    return cachedHtml + trailingHtml;
+    // 스트리밍 중: stateless splitter (매 호출마다 새 인스턴스)
+    const splitter = createStreamSplitter();
+    const { committed, draft, draftType } = splitter.split(fullText, true);
+    const committedHtml = committed ? renderMarkdown(committed) : "";
+    if (!draft) return committedHtml;
+    return (
+      committedHtml +
+      `<div class="dl-stream-draft dl-stream-${draftType}">${escapeHtml(draft)}</div>`
+    );
   };
 }

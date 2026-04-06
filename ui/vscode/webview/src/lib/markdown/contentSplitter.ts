@@ -5,6 +5,7 @@
  */
 
 const TABLE_LINE_RE = /^\s*\|.+\|\s*$/;
+const TABLE_SEP_RE = /^\s*\|[\s\-:|]+\|\s*$/;
 const CODE_FENCE_RE = /^```[\w-]*$/;
 
 type DraftType = "none" | "text" | "table" | "code";
@@ -33,18 +34,32 @@ function computeSplit(text: string) {
     safeIndex = Math.min(safeIndex, lastFenceLine);
   }
 
+  // trailing table 처리:
+  // - separator row 가 trailing 안에 있고 그 뒤 데이터 row 가 1개 이상이면
+  //   마지막 한 row(=incomplete 가능성) 만 draft
+  // - separator 못 찾으면(아직 header/separator 만 있음) 전체 trailing 을 draft
   let trailingTableStart = -1;
+  let hasSeparator = false;
   for (let i = lines.length - 1; i >= 0; i--) {
     const line = lines[i];
     if (!line.trim()) break;
-    if (TABLE_LINE_RE.test(line)) trailingTableStart = i;
-    else {
+    if (TABLE_LINE_RE.test(line)) {
+      trailingTableStart = i;
+      if (TABLE_SEP_RE.test(line)) hasSeparator = true;
+    } else {
       trailingTableStart = -1;
+      hasSeparator = false;
       break;
     }
   }
   if (trailingTableStart >= 0) {
-    safeIndex = Math.min(safeIndex, trailingTableStart);
+    if (hasSeparator && lines.length - trailingTableStart >= 3) {
+      // separator + 데이터 행 1+ 있음 → 마지막 행만 draft (incomplete 가능)
+      safeIndex = Math.min(safeIndex, lines.length - 1);
+    } else {
+      // header 만 있거나 separator 가 아직 안 옴 → 전체 trailing 을 draft
+      safeIndex = Math.min(safeIndex, trailingTableStart);
+    }
   }
 
   let draftType: DraftType = "text";
@@ -117,17 +132,26 @@ export function createStreamSplitter(): StreamSplitter {
       }
 
       let trailingTableStart = -1;
+      let hasSeparator = false;
       for (let i = lines.length - 1; i >= 0; i--) {
         const line = lines[i];
         if (!line.trim()) break;
-        if (TABLE_LINE_RE.test(line)) trailingTableStart = i;
-        else {
+        if (TABLE_LINE_RE.test(line)) {
+          trailingTableStart = i;
+          if (TABLE_SEP_RE.test(line)) hasSeparator = true;
+        } else {
           trailingTableStart = -1;
+          hasSeparator = false;
           break;
         }
       }
       if (trailingTableStart >= 0) {
-        safeIndex = Math.min(safeIndex, trailingTableStart);
+        if (hasSeparator && lines.length - trailingTableStart >= 3) {
+          // separator + 데이터 행 1+ → 마지막 행만 draft (incomplete 가능)
+          safeIndex = Math.min(safeIndex, lines.length - 1);
+        } else {
+          safeIndex = Math.min(safeIndex, trailingTableStart);
+        }
       }
 
       let draftType: DraftType = "text";

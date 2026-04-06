@@ -247,9 +247,18 @@
           .replace(/```python\s*\n[\s\S]*?```\s*\n*/g, "")
           .replace(/```python\s*\n[\s\S]*$/g, "")
           .replace(/\n*\[실행 결과\][\s\S]*?(?=\n##|\n\n[A-Za-z가-힣]|$)/g, "")
+          // emit_chart() 함수 호출의 잔존 dict literal 파편 정리
+          // (LLM이 코드블록 안에 stray ``` 를 출력해서 일부 코드가 새어나온 경우)
+          .replace(/^\s*emit_(?:chart|diagram)\s*\([^\n]*$/gm, "")
+          // dict 항목 라인 — `"` 로 시작하고 `}` 나 `]` 로 끝나는 잔존 fragment
+          .replace(/^\s*"[^\n]*[}\])][)\s,]*$/gm, "")
+          // 닫는 괄호만 있는 라인
+          .replace(/^\s*[}\])]+[)\s,]*$/gm, "")
+          // 연속 빈 라인 collapse
+          .replace(/\n{3,}/g, "\n\n")
           .trim()}
         {#if cleanText}
-          <div class="content" onclick={copyCode}>{@html wrapCodeBlocks(render(cleanText))}</div>
+          <div class="content" onclick={copyCode}>{@html wrapCodeBlocks(render(cleanText, message.loading))}</div>
         {/if}
       {/if}
 
@@ -661,6 +670,36 @@
     font-size: 10px;
     background: var(--vscode-textCodeBlock-background);
     color: var(--vscode-descriptionForeground);
+  }
+
+  /* === Streaming draft (P0-1) === */
+  /* contentSplitter 가 partial table/code fence 를 안전하게 escape 해서
+     보여주는 placeholder. loading=false 가 되면 자동으로 사라진다. */
+  :global(.dl-stream-draft) {
+    opacity: 0.55;
+    font-family: var(--vscode-editor-font-family, monospace);
+    font-size: 11.5px;
+    white-space: pre-wrap;
+    color: var(--vscode-descriptionForeground, #888);
+    border-left: 2px solid var(--vscode-panel-border, #333);
+    padding: 4px 8px;
+    margin: 4px 0;
+  }
+  :global(.dl-stream-table::before) {
+    content: "표 수신 중...";
+    display: block;
+    font-size: 10px;
+    color: var(--vscode-descriptionForeground);
+    margin-bottom: 2px;
+    opacity: 0.7;
+  }
+  :global(.dl-stream-code::before) {
+    content: "코드 수신 중...";
+    display: block;
+    font-size: 10px;
+    color: var(--vscode-descriptionForeground);
+    margin-bottom: 2px;
+    opacity: 0.7;
   }
 
   /* === Loading block (Claude Code spinner style) === */
