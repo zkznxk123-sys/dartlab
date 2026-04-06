@@ -247,6 +247,8 @@ def test_ai_no_build():
 
 
 def test_share_reset(tmp_path):
+    # share.py는 channel 엔진 작업 중 deprecated/제거됨 → 미존재 시 skip
+    pytest.importorskip("dartlab.cli.commands.share")
     from dartlab.cli.commands.share import run
 
     with patch("dartlab.cli.commands.share._load_config", return_value={}):
