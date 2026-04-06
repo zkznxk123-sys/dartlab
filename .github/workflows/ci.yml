@@ -29,10 +29,17 @@ jobs:
       - name: Install package
         run: pip install -e .[all]
 
-      - name: Run tests (fixture data available)
+      # 메모리 안전: unit / 일반 / heavy 그룹별 분리 실행 (CLAUDE.md 정책)
+      # Polars 네이티브 메모리는 GC 회수 불가, 한 프로세스에 다 돌리면 1200MB 초과
+      - name: Run unit tests
         env:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
-        run: pytest tests/ -v --tb=short -m "not requires_data and not heavy" --benchmark-disable --cov=dartlab --cov-report=term-missing --cov-report=html --cov-report=xml
+        run: pytest tests/ -v --tb=short -m "unit and not requires_data and not heavy" --benchmark-disable --cov=dartlab --cov-report=xml --cov-append
+
+      - name: Run integration tests
+        env:
+          DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
+        run: pytest tests/ -v --tb=short -m "not unit and not requires_data and not heavy" --benchmark-disable --cov=dartlab --cov-report=term-missing --cov-report=html --cov-report=xml --cov-append
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.12'
