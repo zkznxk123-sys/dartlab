@@ -13,6 +13,7 @@ pytestmark = pytest.mark.unit
 
 def test_server_security_whitelist_loads():
     """server security 모듈 import + whitelist 함수 호출 가능."""
+    pytest.importorskip("dartlab.server.security")  # 모듈 폐기됨 → skip
     from dartlab.server.security import _is_whitelisted
 
     assert callable(_is_whitelisted)
@@ -23,6 +24,7 @@ def test_server_security_whitelist_loads():
 
 def test_server_security_blocks_unknown_paths():
     """알려지지 않은 경로 차단."""
+    pytest.importorskip("dartlab.server.security")  # 모듈 폐기됨 → skip
     from dartlab.server.security import _is_whitelisted
 
     assert _is_whitelisted("/api/없는경로") is False
