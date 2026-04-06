@@ -197,9 +197,7 @@ def credit(
     return result
 
 
-def creditCompany(
-    company, axis: str | None = None, *, detail: bool = False, basePeriod: str | None = None
-):
+def creditCompany(company, axis: str | None = None, *, detail: bool = False, basePeriod: str | None = None):
     """Company 객체로 신용등급 산출 (Company-bound용).
 
     axis=None → 가이드 DataFrame (self-discovery)

@@ -16,7 +16,8 @@ DartCompany ↔ EdgarCompany 인터페이스 동기화의 단일 규칙 문서.
 | 안정성 | beta (DART core stable 이후) |
 | Provider | `providers/edgar/` — CompanyProtocol 완전 구현 |
 | 방어막 | `test_protocol.py::test_edgar_has_all_dart_public_methods` |
-| 데이터 | HuggingFace `eddmpython/dartlab-data` (edgar/finance, edgar/docs, edgar/scan) |
+| 데이터 | HuggingFace `eddmpython/dartlab-data` (`edgar/docs`, `edgar/scan` 프리빌드). `edgar/finance`는 SEC companyfacts on-demand로 충분하므로 HF 미러링 제외 |
+| 안내 | EDGAR 배치(`batchCollectEdgar`)는 `edgar:bulk_start/done/partial` 이벤트로 시작·완료를 알린다. 자세히 ops/guide.md |
 
 ## 핵심 규칙: DartCompany ↔ EdgarCompany 동기화
 

@@ -35,6 +35,8 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 # 터널 모드에서 허용되는 경로 패턴 (정규식)
+# 사용자가 자기 PC를 자기 폰에서 쓰는 게 주 시나리오라, SPA가 호출하는 모든 API를
+# 통과시키는 게 우선. 보안은 토큰 인증 + Kill Switch + Rate Limit + 감사 로그로 충분.
 _WHITELIST_PATTERNS: list[re.Pattern[str]] = [
     # 상태/검색/스펙
     re.compile(r"^/api/status$"),
@@ -59,22 +61,47 @@ _WHITELIST_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"^/api/company/[A-Za-z0-9]+/summary/[a-zA-Z][a-zA-Z0-9_]*$"),
     re.compile(r"^/api/data/sources/[A-Za-z0-9]+$"),
     re.compile(r"^/api/data/preview/[A-Za-z0-9]+/[a-zA-Z][a-zA-Z0-9_]*$"),
-    # AI 프로필 (GET — SPA 초기 로딩용, secrets 제외)
+    # AI 프로필/모델/프로바이더 (SPA 설정 패널 전체)
     re.compile(r"^/api/ai/profile$"),
-    # AI 질문 (POST — full-access 토큰만)
+    re.compile(r"^/api/ai/profile/secrets$"),
+    re.compile(r"^/api/ai/profile/events$"),
+    re.compile(r"^/api/models/[A-Za-z0-9_-]+$"),
+    re.compile(r"^/api/provider/validate$"),
+    re.compile(r"^/api/ollama/pull$"),
+    re.compile(r"^/api/codex/(login|logout|status)$"),
+    re.compile(r"^/api/oauth/(authorize|status|logout|callback)$"),
+    re.compile(r"^/api/openapi/dart-key(/validate)?$"),
+    re.compile(r"^/api/channels/[A-Za-z0-9_-]+/(start|stop|status)$"),
+    # AI 질문 (POST + SSE)
     re.compile(r"^/api/ask$"),
-    # 협업 세션 (GET: stream/state, POST: join/leave/heartbeat/ask/navigate/chat/react)
+    # Excel/Export
+    re.compile(r"^/api/export/(modules|sources|templates)(/.*)?$"),
+    re.compile(r"^/api/export/excel/[A-Za-z0-9]+$"),
+    # 협업 세션
     re.compile(r"^/api/room/(stream|state)$"),
     re.compile(r"^/api/room/(join|leave|heartbeat|ask|navigate|chat|react)$"),
-    # 뷰어 배치 (POST)
+    # 뷰어 배치
     re.compile(r"^/api/company/[A-Za-z0-9]+/viewer/batch$"),
 ]
 
-# POST 허용 경로 (full-access 토큰 필수)
-_POST_WHITELIST: set[str] = {"/api/ask"}
+# POST/PUT/DELETE 허용 경로 (full-access 토큰 필수)
+_POST_WHITELIST: set[str] = {
+    "/api/ask",
+    "/api/provider/validate",
+    "/api/ai/profile",
+    "/api/ai/profile/secrets",
+    "/api/ollama/pull",
+    "/api/codex/logout",
+    "/api/codex/login",
+    "/api/oauth/logout",
+    "/api/openapi/dart-key",
+    "/api/openapi/dart-key/validate",
+}
 _POST_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"^/api/company/[A-Za-z0-9]+/viewer/batch$"),
     re.compile(r"^/api/room/(ask|navigate)$"),  # full-access only
+    re.compile(r"^/api/channels/[A-Za-z0-9_-]+/(start|stop)$"),
+    re.compile(r"^/api/export/templates(/.*)?$"),
 ]
 
 # POST 허용 경로 (readonly 토큰도 가능)
@@ -391,8 +418,8 @@ class TunnelSecurityMiddleware(BaseHTTPMiddleware):
                 status_code=403,
             )
 
-        # --- Readonly 토큰의 POST 차단 (room join/leave/heartbeat/chat/react는 허용) ---
-        if method == "POST" and access_level == "readonly":
+        # --- Readonly 토큰의 쓰기 메서드 차단 (room read 5종은 허용) ---
+        if method in ("POST", "PUT", "DELETE", "PATCH") and access_level == "readonly":
             if not any(p.match(path) for p in _POST_READONLY_PATTERNS):
                 return JSONResponse(
                     {"error": "읽기 전용 토큰으로는 이 작업을 수행할 수 없습니다."},

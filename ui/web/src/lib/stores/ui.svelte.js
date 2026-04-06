@@ -83,14 +83,21 @@ export function createUiStore() {
 	let deleteConfirmMode = $state("single");
 
 	// ── Provider / Model ──
-	let providers = $state({});
-	let activeProvider = $state(null);
-	let activeModel = $state(null);
-	let availableModels = $state([]);
-	let expandedProvider = $state(null);
+	// 핵심 원칙: 스피너에 직접 영향을 주는 상태(_core.statusLoading + _core.providers + _core.activeProvider + _core.activeModel)는
+	// 단일 $state 객체로 묶는다. Svelte 5에서 개별 let + getter 노출 패턴이 일부 모바일 브라우저에서
+	// reactivity가 끊기는 사례가 있어, proxy 객체 방식이 가장 안전하다.
+	const _core = $state({
+		statusLoading: true,
+		providers: {},
+		activeProvider: null,
+		activeModel: null,
+		availableModels: [],
+		expandedProvider: null,
+		lastError: "",
+		debugStep: "init",
+	});
 	let providerModels = $state({});
 	let modelsLoading = $state({});
-	let statusLoading = $state(true);
 	let appVersion = $state("");
 	let openDart = $state({});
 	let channels = $state({});
@@ -131,7 +138,7 @@ export function createUiStore() {
 	// ── Provider logic ──
 	function providerSupportsRole(provider, role) {
 		const normalized = normalizeProvider(provider);
-		const supportedRoles = providers[normalized]?.supportedRoles;
+		const supportedRoles = _core.providers[normalized]?.supportedRoles;
 		return !Array.isArray(supportedRoles) || supportedRoles.length === 0 || supportedRoles.includes(role);
 	}
 
@@ -139,13 +146,13 @@ export function createUiStore() {
 		const result = await validateProviderApi(provider, model, apiKey);
 		if (result?.provider) {
 			const name = normalizeProvider(result.provider);
-			providers = {
-				...providers,
+			_core.providers = {
+				..._core.providers,
 				[name]: {
-					...(providers[name] || {}),
+					...(_core.providers[name] || {}),
 					checked: true,
 					available: !!result.available,
-					model: result.model || providers[name]?.model || model || null,
+					model: result.model || _core.providers[name]?.model || model || null,
 				},
 			};
 		}
@@ -154,8 +161,8 @@ export function createUiStore() {
 
 	async function refreshProviderStatus(provider = null, probe = true) {
 		const data = await fetchStatus(provider, probe);
-		if (data.profile) providers = applyProfileSnapshot(providers, data.profile);
-		providers = mergeProviderStatus(providers, data.providers || {});
+		if (data.profile) _core.providers = applyProfileSnapshot(_core.providers, data.profile);
+		_core.providers = mergeProviderStatus(_core.providers, data.providers || {});
 		if (data.ollama) ollamaDetail = mergeProviderDetail(ollamaDetail, data.ollama, { preserveChecked: true });
 		if (data.codex) codexDetail = mergeProviderDetail(codexDetail, data.codex);
 		if (data.oauthCodex) oauthCodexDetail = mergeProviderDetail(oauthCodexDetail, data.oauthCodex, { preserveChecked: true });
@@ -166,57 +173,95 @@ export function createUiStore() {
 	}
 
 	async function handleProfileChanged(profile) {
-		providers = applyProfileSnapshot(providers, profile);
-		const nextProvider = normalizeProvider(profile?.defaultProvider || activeProvider || "codex");
-		activeProvider = nextProvider;
-		expandedProvider = nextProvider;
+		_core.providers = applyProfileSnapshot(_core.providers, profile);
+		const nextProvider = normalizeProvider(profile?.defaultProvider || _core.activeProvider || "codex");
+		_core.activeProvider = nextProvider;
+		_core.expandedProvider = nextProvider;
 		apiKeyInput = "";
 		apiKeyResult = null;
 		await loadModelsFor(nextProvider);
-		availableModels = providerModels[nextProvider] || [];
-		const nextModel = profile?.providers?.[nextProvider]?.model || providers[nextProvider]?.model || availableModels[0] || null;
-		activeModel = nextModel;
+		_core.availableModels = providerModels[nextProvider] || [];
+		const nextModel = profile?.providers?.[nextProvider]?.model || _core.providers[nextProvider]?.model || _core.availableModels[0] || null;
+		_core.activeModel = nextModel;
 		if (nextModel && !profile?.providers?.[nextProvider]?.model) {
 			try { await updateAiProfile({ provider: nextProvider, model: nextModel }); } catch {}
 		}
 		await refreshProviderStatus(nextProvider, true);
 	}
 
-	async function loadStatus() {
-		statusLoading = true;
+	function _setStep(s) {
+		_core.debugStep = s;
+		// 폰에서 reactivity와 무관하게 진짜로 단계가 진행 중인지 확인하기 위해
+		// document.title에 직접 박는다. JS가 실행되면 무조건 탭 제목이 바뀜.
 		try {
-			const profile = await fetchAiProfile();
-			providers = applyProfileSnapshot(providers, profile);
-			const preferredProvider = normalizeProvider(profile?.defaultProvider || "codex");
+			if (typeof document !== "undefined") document.title = "[" + s + "] DartLab";
+		} catch (_) {}
+	}
+
+	async function loadStatus() {
+		_setStep("loadStatus:start");
+		_core.statusLoading = true;
+		// 핵심 원칙: statusLoading은 "프로바이더 목록이 있는가"만 의미한다.
+		let profile = null;
+		try {
+			_setStep("fetchAiProfile:awaiting");
+			profile = await fetchAiProfile();
+			_setStep("fetchAiProfile:got");
+			const merged = applyProfileSnapshot(_core.providers, profile);
+			_setStep("applyProfile:keys=" + Object.keys(merged).length);
+			_core.providers = merged;
+		} catch (e) {
+			_setStep("fetchAiProfile:err:" + String(e).slice(0, 60));
+			_core.lastError = String(e).slice(0, 100);
+			console.warn("[loadStatus] fetchAiProfile:", e);
+		}
+		const preferredProvider = normalizeProvider(profile?.defaultProvider || "codex");
+		try {
+			_setStep("refreshProviderStatus:awaiting");
 			await refreshProviderStatus(preferredProvider, true);
-			activeProvider = preferredProvider;
-			expandedProvider = preferredProvider;
-			apiKeyInput = "";
-			await loadModelsFor(preferredProvider);
+			_setStep("refreshProviderStatus:done:keys=" + Object.keys(_core.providers).length);
+		} catch (e) {
+			_setStep("refreshProviderStatus:err:" + String(e).slice(0, 60));
+			_core.lastError = String(e).slice(0, 100);
+			console.warn("[loadStatus] refreshProviderStatus:", e);
+		}
+		_core.activeProvider = preferredProvider;
+		_core.expandedProvider = preferredProvider;
+		apiKeyInput = "";
+		// ★ 여기서 스피너 풀림 — provider 목록은 이미 채워졌다
+		_core.statusLoading = false;
+		_setStep("done:L0:P" + Object.keys(_core.providers).length);
+
+		// 이하 백그라운드: 실패해도 UI는 동작 (모델 선택/SSE는 사용자가 설정 패널 열 때 다시 시도)
+		(async () => {
+			try { await loadModelsFor(preferredProvider); } catch (e) { console.warn("[loadStatus.bg] loadModelsFor:", e); }
 			const models = providerModels[preferredProvider] || [];
-			availableModels = models;
-			const savedModel = profile?.providers?.[preferredProvider]?.model || providers[preferredProvider]?.model || null;
+			_core.availableModels = models;
+			const savedModel = profile?.providers?.[preferredProvider]?.model || _core.providers[preferredProvider]?.model || null;
 			if (savedModel && (models.length === 0 || models.includes(savedModel))) {
-				activeModel = savedModel;
+				_core.activeModel = savedModel;
 			} else if (models.length > 0) {
-				activeModel = models[0];
-				await updateAiProfile({ provider: preferredProvider, model: activeModel });
+				_core.activeModel = models[0];
+				try { await updateAiProfile({ provider: preferredProvider, model: _core.activeModel }); } catch (e) { console.warn("[loadStatus.bg] updateAiProfile:", e); }
 			} else {
-				activeModel = null;
+				_core.activeModel = null;
 			}
-			if (!providers[preferredProvider]?.checked || providers[preferredProvider]?.available !== true) {
-				try { await validateProvider(preferredProvider, activeModel || null, null); } catch (e) { console.warn("validateProvider:", e); }
+			if (!_core.providers[preferredProvider]?.checked || _core.providers[preferredProvider]?.available !== true) {
+				try { await validateProvider(preferredProvider, _core.activeModel || null, null); } catch (e) { console.warn("[loadStatus.bg] validateProvider:", e); }
 			}
 			if (!profileEvents) {
-				profileEvents = subscribeAiProfileEvents({
-					onProfileChanged(profilePayload) {
-						handleProfileChanged(profilePayload).catch((e) => console.warn("profile_changed:", e));
-					},
-					onError(err) { console.warn("profile events:", err); },
-				});
+				try {
+					profileEvents = subscribeAiProfileEvents({
+						onProfileChanged(profilePayload) {
+							handleProfileChanged(profilePayload).catch((e) => console.warn("profile_changed:", e));
+						},
+						onError(err) { console.warn("profile events:", err); },
+					});
+				} catch (e) {
+					console.warn("[loadStatus.bg] subscribeAiProfileEvents:", e);
+				}
 			}
-		} catch (e) { console.error("loadStatus:", e); }
-		statusLoading = false;
+		})();
 	}
 
 	function cleanupProfileEvents() {
@@ -241,64 +286,64 @@ export function createUiStore() {
 
 	async function selectProvider(name) {
 		name = normalizeProvider(name);
-		activeProvider = name;
-		activeModel = null;
-		expandedProvider = name;
+		_core.activeProvider = name;
+		_core.activeModel = null;
+		_core.expandedProvider = name;
 		apiKeyInput = "";
 		apiKeyResult = null;
 		await updateAiProfile({ provider: name });
 		await refreshProviderStatus(name, true);
 		await loadModelsFor(name);
 		const models = providerModels[name] || [];
-		availableModels = models;
-		const savedModel = providers[name]?.model || null;
+		_core.availableModels = models;
+		const savedModel = _core.providers[name]?.model || null;
 		if (savedModel && (models.length === 0 || models.includes(savedModel))) {
-			activeModel = savedModel;
+			_core.activeModel = savedModel;
 		} else if (models.length > 0) {
-			activeModel = models[0];
-			await updateAiProfile({ provider: name, model: activeModel });
+			_core.activeModel = models[0];
+			await updateAiProfile({ provider: name, model: _core.activeModel });
 		}
 		if (!providerSupportsRole(name, CHAT_ROLE)) {
 			showToast("Codex CLI는 코드 작업용입니다. GUI 대화/분석은 `GPT (ChatGPT 구독 계정)`을 권장합니다.", "error", 4500);
 		}
-		try { await validateProvider(name, activeModel, null); } catch {}
+		try { await validateProvider(name, _core.activeModel, null); } catch {}
 	}
 
 	async function selectModel(model) {
-		activeModel = model;
-		await updateAiProfile({ provider: normalizeProvider(activeProvider), model });
-		const configured = providers[activeProvider]?.secretConfigured;
-		if (configured || activeProvider === "codex" || activeProvider === "oauth-codex" || activeProvider === "ollama") {
-			try { await validateProvider(normalizeProvider(activeProvider), model, null); } catch {}
+		_core.activeModel = model;
+		await updateAiProfile({ provider: normalizeProvider(_core.activeProvider), model });
+		const configured = _core.providers[_core.activeProvider]?.secretConfigured;
+		if (configured || _core.activeProvider === "codex" || _core.activeProvider === "oauth-codex" || _core.activeProvider === "ollama") {
+			try { await validateProvider(normalizeProvider(_core.activeProvider), model, null); } catch {}
 		}
 	}
 
 	function toggleExpandProvider(name) {
 		name = normalizeProvider(name);
-		if (expandedProvider === name) {
-			expandedProvider = null;
+		if (_core.expandedProvider === name) {
+			_core.expandedProvider = null;
 		} else {
-			expandedProvider = name;
+			_core.expandedProvider = name;
 			loadModelsFor(name);
 		}
 	}
 
 	async function submitApiKey() {
 		const key = apiKeyInput.trim();
-		if (!key || !activeProvider) return;
+		if (!key || !_core.activeProvider) return;
 		apiKeyVerifying = true;
 		apiKeyResult = null;
 		try {
-			const result = await validateProvider(normalizeProvider(activeProvider), activeModel, key);
+			const result = await validateProvider(normalizeProvider(_core.activeProvider), _core.activeModel, key);
 			if (result.available) {
-				await updateAiSecret(activeProvider, key, false);
+				await updateAiSecret(_core.activeProvider, key, false);
 				apiKeyResult = "success";
-				if (!activeModel && result.model) {
-					activeModel = result.model;
-					await updateAiProfile({ provider: activeProvider, model: activeModel });
+				if (!_core.activeModel && result.model) {
+					_core.activeModel = result.model;
+					await updateAiProfile({ provider: _core.activeProvider, model: _core.activeModel });
 				}
-				await loadModelsFor(activeProvider);
-				availableModels = providerModels[activeProvider] || [];
+				await loadModelsFor(_core.activeProvider);
+				_core.availableModels = providerModels[_core.activeProvider] || [];
 				apiKeyInput = "";
 				showToast("API 키 인증 성공", "success");
 			} else {
@@ -313,8 +358,8 @@ export function createUiStore() {
 	async function handleCodexLogout() {
 		try {
 			await codexLogout();
-			if (activeProvider === "codex") {
-				providers = { ...providers, codex: { ...providers.codex, available: false } };
+			if (_core.activeProvider === "codex") {
+				_core.providers = { ..._core.providers, codex: { ..._core.providers.codex, available: false } };
 			}
 			showToast("Codex 계정 로그아웃 완료", "success");
 			await loadStatus();
@@ -386,8 +431,8 @@ export function createUiStore() {
 				pullPercent = 0;
 				showToast(`${name} 다운로드 완료`, "success");
 				await loadModelsFor("ollama");
-				availableModels = providerModels["ollama"] || [];
-				if (availableModels.includes(name)) {
+				_core.availableModels = providerModels["ollama"] || [];
+				if (_core.availableModels.includes(name)) {
 					await selectModel(name);
 				}
 			},
@@ -411,24 +456,24 @@ export function createUiStore() {
 
 	// ── Chat provider resolution ──
 	async function resolveChatProvider() {
-		const normalized = normalizeProvider(activeProvider);
+		const normalized = normalizeProvider(_core.activeProvider);
 		if (!normalized) return null;
 		if (providerSupportsRole(normalized, CHAT_ROLE)) {
-			return { provider: normalized, model: activeModel };
+			return { provider: normalized, model: _core.activeModel };
 		}
-		if (!providers["oauth-codex"]?.available) {
+		if (!_core.providers["oauth-codex"]?.available) {
 			showToast("Codex CLI는 GUI 일반 대화용이 아니라 코딩용입니다. 설정에서 `GPT (ChatGPT 구독 계정)` 또는 다른 분석용 provider를 선택하세요.");
 			return null;
 		}
 		await loadModelsFor("oauth-codex");
 		const models = providerModels["oauth-codex"] || [];
-		const nextModel = activeModel && (models.length === 0 || models.includes(activeModel))
-			? activeModel
-			: providers["oauth-codex"]?.model || models[0] || null;
-		activeProvider = "oauth-codex";
-		expandedProvider = "oauth-codex";
-		availableModels = models;
-		activeModel = nextModel;
+		const nextModel = _core.activeModel && (models.length === 0 || models.includes(_core.activeModel))
+			? _core.activeModel
+			: _core.providers["oauth-codex"]?.model || models[0] || null;
+		_core.activeProvider = "oauth-codex";
+		_core.expandedProvider = "oauth-codex";
+		_core.availableModels = models;
+		_core.activeModel = nextModel;
 		try {
 			if (nextModel) await updateAiProfile({ provider: "oauth-codex", model: nextModel });
 			else await updateAiProfile({ provider: "oauth-codex" });
@@ -470,20 +515,20 @@ export function createUiStore() {
 	}
 
 	// ── Settings open ──
-	function openSettings(section = "providers") {
+	function openSettings(section = "_core.providers") {
 		apiKeyInput = "";
 		apiKeyResult = null;
 		dartKeyInput = "";
 		dartKeyResult = null;
-		settingsSection = section || "providers";
-		if (activeProvider) {
-			expandedProvider = activeProvider;
+		settingsSection = section || "_core.providers";
+		if (_core.activeProvider) {
+			_core.expandedProvider = _core.activeProvider;
 		} else {
-			const names = Object.keys(providers);
-			expandedProvider = names.length > 0 ? names[0] : null;
+			const names = Object.keys(_core.providers);
+			_core.expandedProvider = names.length > 0 ? names[0] : null;
 		}
 		settingsOpen = true;
-		if (expandedProvider) loadModelsFor(expandedProvider);
+		if (_core.expandedProvider) loadModelsFor(_core.expandedProvider);
 	}
 
 	function setChannelInput(platform, key, value) {
@@ -592,7 +637,7 @@ export function createUiStore() {
 			showToast(action.message || action.text || "", action.level || "info");
 		} else if (name === "update" && action.target === "settings") {
 			if (action.message) showToast(action.message, "info", 4500);
-			openSettings(action.section || "providers");
+			openSettings(action.section || "_core.providers");
 			if (action.open === false) settingsOpen = false;
 		}
 	}
@@ -628,14 +673,16 @@ export function createUiStore() {
 		openSettings,
 
 		// provider
-		get providers() { return providers; },
-		get activeProvider() { return activeProvider; },
-		get activeModel() { return activeModel; },
-		get availableModels() { return availableModels; },
-		get expandedProvider() { return expandedProvider; },
+		get providers() { return _core.providers; },
+		get activeProvider() { return _core.activeProvider; },
+		get activeModel() { return _core.activeModel; },
+		get availableModels() { return _core.availableModels; },
+		get expandedProvider() { return _core.expandedProvider; },
 		get providerModels() { return providerModels; },
 		get modelsLoading() { return modelsLoading; },
-		get statusLoading() { return statusLoading; },
+		get statusLoading() { return _core.statusLoading; },
+		get debugStep() { return _core.debugStep; },
+		get lastError() { return _core.lastError; },
 		get appVersion() { return appVersion; },
 		get openDart() { return openDart; },
 		get channels() { return channels; },
@@ -702,4 +749,24 @@ export function createUiStore() {
 		// AI action
 		applyAiAction,
 	};
+}
+
+// 모듈 싱글톤 — props 전달 시 reactive 추적이 끊기는 문제를 우회하기 위해
+// 모든 컴포넌트가 같은 인스턴스를 직접 import할 수 있게 노출.
+let _singleton = null;
+let _autoLoadStarted = false;
+export function getUiStore() {
+	if (!_singleton) {
+		_singleton = createUiStore();
+	}
+	// 첫 호출 시 자동으로 loadStatus 실행 — onMount/$effect 발화에 의존하지 않음.
+	// 일부 모바일 브라우저에서 lifecycle hook 미발화 케이스를 우회.
+	if (!_autoLoadStarted) {
+		_autoLoadStarted = true;
+		try {
+			// 비동기지만 await 안 함 — 호출 직후 store 반환
+			_singleton.loadStatus();
+		} catch (_) {}
+	}
+	return _singleton;
 }

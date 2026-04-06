@@ -7,6 +7,7 @@ from dartlab.core.finance.sentiment import calcFearGreedProxy
 from dartlab.macro._helpers import (
     apply_overrides,
     collect_timeseries,
+    fetch_change_pct,
     fetch_latest,
     fetch_series_list,
     get_gather,
@@ -36,6 +37,11 @@ def _fetch_sentiment_data(market: str, as_of: str | None = None) -> dict[str, fl
     if gold is not None and sp is not None and sp > 0:
         data["gold_equity_ratio"] = gold / sp
 
+    # BTC 90일 모멘텀 — 위험자산 선호도의 극단 지표
+    btc_chg = fetch_change_pct(g, "CBBTCUSD", 90)
+    if btc_chg is not None:
+        data["crypto_momentum"] = btc_chg
+
     return data
 
 
@@ -50,7 +56,13 @@ def analyze_sentiment(*, market: str = "US", as_of: str | None = None, overrides
     sp_ratio = data.get("sp500_vs_ma125")
     hy = data.get("hy_spread")
     if vix is not None and sp_ratio is not None and hy is not None:
-        fg = calcFearGreedProxy(vix, sp_ratio, hy, data.get("gold_equity_ratio"))
+        fg = calcFearGreedProxy(
+            vix,
+            sp_ratio,
+            hy,
+            gold_equity_ratio=data.get("gold_equity_ratio"),
+            crypto_momentum=data.get("crypto_momentum"),
+        )
         result["fearGreed"] = {
             "score": fg.score,
             "zone": fg.zone,

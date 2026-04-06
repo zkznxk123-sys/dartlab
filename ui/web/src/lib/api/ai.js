@@ -1,17 +1,21 @@
-import { BASE } from "./http.js";
+import { BASE, authedFetch, xhrFetch } from "./http.js";
+import { withTokenQuery } from "./token.js";
+
+// 폰 호환성을 위해 authedFetch 대신 xhrFetch 사용 (fetch zombie 우회)
+const _fetch = xhrFetch;
 
 export async function fetchStatus(provider = null, probe = true) {
 	const params = new URLSearchParams();
 	if (provider) params.set("provider", provider);
 	if (!probe) params.set("probe", "0");
 	const qs = params.toString();
-	const res = await fetch(`${BASE}/api/status${qs ? `?${qs}` : ""}`);
+	const res = await _fetch(`${BASE}/api/status${qs ? `?${qs}` : ""}`);
 	if (!res.ok) throw new Error("상태 확인 실패");
 	return res.json();
 }
 
 export async function fetchAiSuggestions(stockCode) {
-	const res = await fetch(`${BASE}/api/suggest?stockCode=${encodeURIComponent(stockCode)}`);
+	const res = await authedFetch(`${BASE}/api/suggest?stockCode=${encodeURIComponent(stockCode)}`);
 	if (!res.ok) {
 		const err = await res.json().catch(() => ({}));
 		throw new Error(err.detail || "추천 질문 조회 실패");
@@ -23,7 +27,7 @@ export async function validateProvider(provider, model = null, apiKey = null) {
 	const body = { provider };
 	if (model) body.model = model;
 	if (apiKey) body.api_key = apiKey;
-	const res = await fetch(`${BASE}/api/provider/validate`, {
+	const res = await authedFetch(`${BASE}/api/provider/validate`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(body),
@@ -35,13 +39,13 @@ export async function validateProvider(provider, model = null, apiKey = null) {
 export const configure = validateProvider;
 
 export async function fetchAiProfile() {
-	const res = await fetch(`${BASE}/api/ai/profile`);
+	const res = await _fetch(`${BASE}/api/ai/profile`);
 	if (!res.ok) throw new Error("AI profile 조회 실패");
 	return res.json();
 }
 
 export async function updateAiProfile(patch) {
-	const res = await fetch(`${BASE}/api/ai/profile`, {
+	const res = await authedFetch(`${BASE}/api/ai/profile`, {
 		method: "PUT",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(patch),
@@ -51,7 +55,7 @@ export async function updateAiProfile(patch) {
 }
 
 export async function updateAiSecret(provider, apiKey = null, clear = false) {
-	const res = await fetch(`${BASE}/api/ai/profile/secrets`, {
+	const res = await authedFetch(`${BASE}/api/ai/profile/secrets`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ provider, api_key: apiKey, clear }),
@@ -64,7 +68,7 @@ export async function updateAiSecret(provider, apiKey = null, clear = false) {
 }
 
 export async function validateDartKey(apiKey) {
-	const res = await fetch(`${BASE}/api/openapi/dart-key/validate`, {
+	const res = await authedFetch(`${BASE}/api/openapi/dart-key/validate`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ api_key: apiKey }),
@@ -77,7 +81,7 @@ export async function validateDartKey(apiKey) {
 }
 
 export async function saveDartKey(apiKey) {
-	const res = await fetch(`${BASE}/api/openapi/dart-key`, {
+	const res = await authedFetch(`${BASE}/api/openapi/dart-key`, {
 		method: "PUT",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ api_key: apiKey }),
@@ -90,7 +94,7 @@ export async function saveDartKey(apiKey) {
 }
 
 export async function deleteDartKey() {
-	const res = await fetch(`${BASE}/api/openapi/dart-key`, { method: "DELETE" });
+	const res = await authedFetch(`${BASE}/api/openapi/dart-key`, { method: "DELETE" });
 	if (!res.ok) {
 		const err = await res.json().catch(() => ({}));
 		throw new Error(err.detail || "OpenDART 키 삭제 실패");
@@ -99,7 +103,7 @@ export async function deleteDartKey() {
 }
 
 export function subscribeAiProfileEvents({ onProfileChanged, onError } = {}) {
-	const es = new EventSource(`${BASE}/api/ai/profile/events`);
+	const es = new EventSource(withTokenQuery(`${BASE}/api/ai/profile/events`));
 	es.addEventListener("profile_changed", (event) => {
 		try {
 			const payload = JSON.parse(event.data);
@@ -117,14 +121,14 @@ export function subscribeAiProfileEvents({ onProfileChanged, onError } = {}) {
 }
 
 export async function fetchModels(provider) {
-	const res = await fetch(`${BASE}/api/models/${encodeURIComponent(provider)}`);
+	const res = await _fetch(`${BASE}/api/models/${encodeURIComponent(provider)}`);
 	if (!res.ok) return { models: [] };
 	return res.json();
 }
 
 export function pullOllamaModel(modelName, { onProgress, onDone, onError }) {
 	const controller = new AbortController();
-	fetch(`${BASE}/api/ollama/pull`, {
+	authedFetch(`${BASE}/api/ollama/pull`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ model: modelName }),
@@ -163,31 +167,31 @@ export function pullOllamaModel(modelName, { onProgress, onDone, onError }) {
 }
 
 export async function codexLogout() {
-	const res = await fetch(`${BASE}/api/codex/logout`, { method: "POST" });
+	const res = await authedFetch(`${BASE}/api/codex/logout`, { method: "POST" });
 	if (!res.ok) throw new Error("Codex 로그아웃 실패");
 	return res.json();
 }
 
 export async function oauthAuthorize() {
-	const res = await fetch(`${BASE}/api/oauth/authorize`);
+	const res = await authedFetch(`${BASE}/api/oauth/authorize`);
 	if (!res.ok) throw new Error("OAuth 로그인 시작 실패");
 	return res.json();
 }
 
 export async function oauthStatus() {
-	const res = await fetch(`${BASE}/api/oauth/status`);
+	const res = await authedFetch(`${BASE}/api/oauth/status`);
 	if (!res.ok) throw new Error("OAuth 상태 확인 실패");
 	return res.json();
 }
 
 export async function oauthLogout() {
-	const res = await fetch(`${BASE}/api/oauth/logout`, { method: "POST" });
+	const res = await authedFetch(`${BASE}/api/oauth/logout`, { method: "POST" });
 	if (!res.ok) throw new Error("OAuth 로그아웃 실패");
 	return res.json();
 }
 
 export async function startChannelConnection(platform, payload = {}) {
-	const res = await fetch(`${BASE}/api/channels/${encodeURIComponent(platform)}/start`, {
+	const res = await authedFetch(`${BASE}/api/channels/${encodeURIComponent(platform)}/start`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(payload),
@@ -200,7 +204,7 @@ export async function startChannelConnection(platform, payload = {}) {
 }
 
 export async function stopChannelConnection(platform) {
-	const res = await fetch(`${BASE}/api/channels/${encodeURIComponent(platform)}/stop`, {
+	const res = await authedFetch(`${BASE}/api/channels/${encodeURIComponent(platform)}/stop`, {
 		method: "POST",
 	});
 	if (!res.ok) {

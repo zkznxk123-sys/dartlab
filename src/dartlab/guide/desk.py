@@ -170,8 +170,10 @@ class GuideDesk:
                 onCloudflareLoginRequired,
                 onTunnelStartFailed,
             )
+
             if "cloudflared" in errLow and ("not found" in errLow or "missing" in errLow or "찾을" in errStr):
                 import platform
+
                 return onCloudflaredMissing(platform.system())
             if "cert" in errLow or "login" in errLow or "unauthenticated" in errLow:
                 return onCloudflareLoginRequired()

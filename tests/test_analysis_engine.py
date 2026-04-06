@@ -201,7 +201,8 @@ def test_analysis_guide_has_columns():
     a = Analysis()
     result = a()
     cols = set(result.columns)
-    assert {"축", "설명"}.issubset(cols)
+    # 4엔진 통일 컬럼 (axis, label, description, example)
+    assert {"axis", "label", "description", "example"}.issubset(cols)
 
 
 def test_analysis_guide_has_all_registry_axes():
@@ -209,7 +210,7 @@ def test_analysis_guide_has_all_registry_axes():
 
     a = Analysis()
     result = a()
-    guide_axes = set(result["축"].to_list())
+    guide_axes = set(result["axis"].to_list())
     for key in _AXIS_REGISTRY:
         assert key in guide_axes, f"가이드에 '{key}' 축 누락"
 

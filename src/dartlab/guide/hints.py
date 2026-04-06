@@ -173,6 +173,102 @@ def onKeyRequired(service: str) -> str:
     return f"\n  '{service}' 서비스의 API 키가 필요합니다.\n  dartlab.setup()으로 설정하세요.\n"
 
 
+# ── 외부 공유(channel) 안내 ──
+
+
+def onCloudflaredMissing(os_name: str = "") -> str:
+    """cloudflared 자동 설치 실패 시 수동 설치 안내."""
+    lines = ["\n  cloudflared 바이너리를 찾을 수 없습니다."]
+    if os_name == "Windows":
+        lines.append("  설치(택1):")
+        lines.append("    a) winget install --id Cloudflare.cloudflared -e")
+        lines.append(
+            "    b) https://github.com/cloudflare/cloudflared/releases 에서 cloudflared-windows-amd64.exe 다운로드"
+        )
+        lines.append("       → ~/.dartlab/bin/cloudflared.exe 로 저장")
+    elif os_name == "Darwin":
+        lines.append("  설치(택1):")
+        lines.append("    a) brew install cloudflared")
+        lines.append("    b) https://github.com/cloudflare/cloudflared/releases 에서 darwin 빌드 다운로드")
+    elif os_name == "Linux":
+        lines.append("  설치(택1):")
+        lines.append("    a) https://pkg.cloudflare.com 의 apt/yum 저장소 등록")
+        lines.append("    b) https://github.com/cloudflare/cloudflared/releases 에서 linux 빌드 다운로드")
+    else:
+        lines.append("  https://github.com/cloudflare/cloudflared/releases 에서 OS에 맞는 빌드를 받으세요")
+    lines.append("\n  설치 후 다시 실행: dartlab channel --persistent")
+    return "\n".join(lines)
+
+
+def onCloudflareLoginRequired() -> str:
+    """최초 1회 Cloudflare 인증 안내."""
+    return (
+        "\n  영구 URL 모드는 Cloudflare 계정 인증이 1회 필요합니다.\n"
+        "  잠시 후 브라우저가 자동으로 열립니다.\n"
+        "  → Cloudflare 로그인 → 사용할 도메인(zone) 선택 → Authorize 클릭\n"
+        "  (도메인이 없다면 https://dash.cloudflare.com 에서 무료로 도메인 1개를 추가하세요)\n"
+        "  인증 후에는 다시 묻지 않습니다."
+    )
+
+
+# cloudflared 흔한 에러 매핑
+_CLOUDFLARED_ERROR_HINTS: list[tuple[str, str]] = [
+    ("1033", "DNS 전파 대기 중. 1~2분 후 다시 시도하세요."),
+    ("1034", "Argo 터널이 활성화되지 않았습니다. cloudflared service start 또는 다시 실행해보세요."),
+    (
+        "530",
+        "DNS route가 이 tunnel을 가리키지 않습니다. cloudflared tunnel route dns <id> <hostname>를 다시 실행하세요.",
+    ),
+    ("502", "로컬 서버가 응답하지 않습니다. dartlab 서버가 켜져 있는지 확인하세요."),
+    ("certificate", "cert.pem이 없거나 만료되었습니다. cloudflared tunnel login으로 재인증하세요."),
+    ("permission", "credentials 파일 권한 문제. ~/.cloudflared/*.json 의 권한을 확인하세요."),
+]
+
+
+def onTunnelStartFailed(stderr_excerpt: str) -> str:
+    """cloudflared 시작 실패 시 stderr를 분석해 안내."""
+    lines = ["\n  cloudflared 터널 시작에 실패했습니다."]
+    matched = []
+    for needle, hint in _CLOUDFLARED_ERROR_HINTS:
+        if needle.lower() in stderr_excerpt.lower():
+            matched.append(f"    • {hint}")
+    if matched:
+        lines.append("  추정 원인:")
+        lines.extend(matched)
+    else:
+        lines.append("  원본 에러:")
+        for line in stderr_excerpt.strip().splitlines()[-5:]:
+            lines.append(f"    {line}")
+    lines.append("\n  추가 점검:")
+    lines.append("    • dartlab channel --persistent --dry-run 으로 단계 확인")
+    lines.append("    • ~/.cloudflared/cert.pem 존재 확인")
+    lines.append("    • cloudflared tunnel list 로 tunnel 상태 확인")
+    return "\n".join(lines)
+
+
+def onShareSecurityWarning(*, mode: str, hostname: str, readonly: bool) -> str:
+    """share 첫 실행 시 보안 요약 패널."""
+    mode_labels = {
+        "cloudflare": "Quick Tunnel (임시 URL, 데모용)",
+        "cloudflare-named": "Named Tunnel (영구 URL, 1인 SaaS 표준)",
+        "tailscale": "Tailscale Funnel (본인/지인용 ts.net)",
+        "ngrok": "ngrok",
+        "ssh": "SSH (localhost.run)",
+    }
+    label = mode_labels.get(mode, mode)
+    rw = "읽기 전용 (POST 차단)" if readonly else "읽기/쓰기 (POST /api/ask 허용)"
+    return (
+        f"\n  ── 외부 공유 보안 요약 ──\n"
+        f"  모드        : {label}\n"
+        f"  호스트      : {hostname}\n"
+        f"  권한        : {rw}\n"
+        f"  방어 계층   : 토큰 + 화이트리스트 + Rate Limit + 감사 로그 + Kill Switch\n"
+        f"  감사 로그   : ~/.dartlab/audit.jsonl\n"
+        f"  종료        : Ctrl+C (포그라운드) / cloudflared service uninstall (서비스 모드)\n"
+        f"  주의        : 토큰이 들어간 URL은 노출 = 접근 허용. 토큰 회수는 서버 재시작.\n"
+    )
+
+
 def promptKeyIfMissing(service: str) -> str | None:
     """키가 없으면 안내 출력 + 대화형 입력 시도. 반환: 키 또는 None.
 

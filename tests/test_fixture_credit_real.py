@@ -89,20 +89,28 @@ def test_evaluateCompany_with_detail(samsung):
 
 
 def test_company_credit(samsung):
-    """c.credit() — dict 또는 None."""
+    """c.credit() — 가이드 DataFrame, c.credit("등급") — dict."""
+    import polars as pl
+
     samsung._cache.clear()
+    # 무인자 → 가이드
+    guide = samsung.credit()
+    assert isinstance(guide, pl.DataFrame)
+    assert {"axis", "label", "description", "example"}.issubset(set(guide.columns))
+
+    # "등급" → 종합 등급 dict
     try:
-        result = samsung.credit()
+        result = samsung.credit("등급")
         assert result is None or isinstance(result, dict)
     except _SAFE_EXCEPTIONS:
         pass
 
 
 def test_company_credit_detail(samsung):
-    """c.credit(detail=True) — 확장 결과."""
+    """c.credit("등급", detail=True) — 확장 결과."""
     samsung._cache.clear()
     try:
-        result = samsung.credit(detail=True)
+        result = samsung.credit("등급", detail=True)
         assert result is None or isinstance(result, dict)
     except _SAFE_EXCEPTIONS:
         pass

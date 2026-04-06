@@ -45,6 +45,14 @@ CATALOG: dict[str, list[CatalogEntry]] = {
         CatalogEntry("BAMLH0A0HYM2", "하이일드 스프레드", "rates", "Daily", "Percent", "ICE BofA 하이일드 OAS"),
         CatalogEntry("BAMLC0A0CM", "IG 스프레드", "rates", "Daily", "Percent", "ICE BofA 투자등급 OAS"),
         CatalogEntry("DFII10", "실질금리 10년", "rates", "Daily", "Percent", "10년 TIPS 실질금리"),
+        CatalogEntry(
+            "THREEFYTP10",
+            "ACM 기간프리미엄 10년",
+            "rates",
+            "Monthly",
+            "Percent",
+            "Adrian-Crump-Moench 10년 기간프리미엄 (NY Fed)",
+        ),
     ],
     "employment": [
         CatalogEntry("UNRATE", "실업률", "employment", "Monthly", "Percent", "미국 실업률 (U-3)"),
@@ -66,6 +74,22 @@ CATALOG: dict[str, list[CatalogEntry]] = {
         CatalogEntry("DCOILWTICO", "WTI 유가", "markets", "Daily", "Dollars per Barrel", "WTI 원유 현물 가격"),
         CatalogEntry(
             "GOLDAMGBD228NLBM", "금 가격", "markets", "Daily", "U.S. Dollars per Troy Ounce", "런던 금 현물 (오전)"
+        ),
+        CatalogEntry(
+            "WILL5000PRFC",
+            "Wilshire 5000 시가총액",
+            "markets",
+            "Quarterly",
+            "Billions of Dollars",
+            "Wilshire 5000 전체 시가총액 (Buffett Indicator용)",
+        ),
+        CatalogEntry(
+            "CBBTCUSD",
+            "비트코인",
+            "markets",
+            "Daily",
+            "U.S. Dollars",
+            "Coinbase 비트코인 가격 (위험자산 선호도 지표)",
         ),
     ],
     "housing": [

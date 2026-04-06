@@ -2108,10 +2108,7 @@ class Company:
                 if direct is not None:
                     return direct
             # R26-1: silent None → 명시적 ValueError.
-            raise ValueError(
-                f"'{topic}' topic 을 찾을 수 없습니다.\n"
-                f"  전체 목록: c.topics 또는 c.index 로 확인하세요."
-            )
+            raise ValueError(f"'{topic}' topic 을 찾을 수 없습니다.\n  전체 목록: c.topics 또는 c.index 로 확인하세요.")
 
         topicRows = sec.filter(pl.col("topic") == topic)
         if topicRows.is_empty():

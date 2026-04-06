@@ -10,8 +10,16 @@ _scanDownloaded = False
 
 
 def _ensureScanData() -> Path:
-    """scan 프리빌드 디렉토리 확인. 없으면 HF에서 자동 다운로드."""
+    """scan 프리빌드 디렉토리 확인. 없으면 HF에서 자동 다운로드.
+
+    [주의] '하나라도 있으면 skip' 패턴 금지.
+    누락된 apiType이 있으면 종목별 순회 fallback이 발동(4초+/file).
+    snapshot_download는 이미 있는 파일을 자동 skip하므로 비용 0.
+
+    안내: guide.emit으로 사용자에게 다운로드 시작/완료를 알린다. 271MB 침묵 방지.
+    """
     from dartlab.core.dataLoader import _dataDir
+    from dartlab.guide.messaging import emit
 
     scanDir = Path(_dataDir("scan"))
 
@@ -19,17 +27,26 @@ def _ensureScanData() -> Path:
     if _scanDownloaded:
         return scanDir
 
-    if scanDir.exists() and any(scanDir.rglob("*.parquet")):
-        _scanDownloaded = True
-        return scanDir
+    # 로컬에 이미 파일이 있는지 사전 확인 — 신규 사용자에게만 "다운로드 시작" 안내
+    hadLocal = scanDir.exists() and any(scanDir.rglob("*.parquet"))
+    if not hadLocal:
+        emit("scan:prebuild_missing")
 
     try:
         from dartlab.core.dataLoader import downloadAll
 
+        # 항상 시도 — snapshot_download가 누락 파일만 받음 (이미 있는 건 skip)
         downloadAll("scan")
         _scanDownloaded = True
-    except (ImportError, RuntimeError, ValueError):
-        pass
+        if not hadLocal:
+            fileCount = sum(1 for _ in scanDir.rglob("*.parquet"))
+            emit("scan:prebuild_ready", fileCount=fileCount)
+    except (ImportError, RuntimeError, ValueError) as e:
+        # 다운로드 실패해도 기존 파일은 사용 가능
+        if hadLocal:
+            _scanDownloaded = True
+        else:
+            emit("scan:prebuild_failed", error=str(e))
 
     return scanDir
 

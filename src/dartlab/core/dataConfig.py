@@ -67,6 +67,11 @@ DATA_RELEASES: dict[str, dict] = {
         "label": "EDINET 재무 데이터 (일본)",
         "public": False,
     },
+    "aiKnowledge": {
+        "dir": "ai/knowledge",
+        "label": "AI 분석 지식 (인사이트/스킬/에러패턴)",
+        "public": False,
+    },
 }
 
 

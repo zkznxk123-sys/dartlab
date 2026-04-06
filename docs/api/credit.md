@@ -70,16 +70,21 @@ dartlab.ask("삼성전자 신용평가 분석해줘")
 # → AI가 c.credit(detail=True) 호출 → 신용분석가 수준 해석
 ```
 
-## 보고서 발간
+## 보고서 발간 — review로 단일화
+
+**`credit.publisher.publishReport`는 deprecated.** `review.publisher.publishReport`가 단일 진입점이다.
 
 ```python
-from dartlab.credit.publisher import publishReport
-
-publishReport("005930")             # blog/04-credit-reports/에 저장
-publishBatch(["005930", "000660"])   # 배치 발간
+from dartlab.review.publisher import publishReport
+publishReport("005930")  # 신용평가 섹션에 7축 서사 + 신평사 대조 자동 포함
 ```
 
-발간 보고서: `blog/04-credit-reports/{순번}-{slug}/index.md` (블로그 카테고리)
+review 5-7 신용평가 섹션의 신규 블록:
+- `creditNarrative` — 7축 서사
+- `creditAudit` — 외부 신평사 대조
+
+발간 보고서: `blog/05-company-reports/{순번}-{slug}/index.md`
+기존 16개 credit 보고서는 `blog/04-credit-reports/`에 아카이브로 보존.
 
 ## 업종별 차등
 

@@ -48,13 +48,19 @@ def _loadQuestions(filterId: str | None = None) -> list[dict]:
 
 
 def _summarize(answer: str, durationSec: float) -> dict:
-    """실행 결과 메타데이터 수집. 판정은 사람이 직접."""
+    """실행 결과 메타데이터 수집. 판정은 사람이 직접.
+
+    codeRounds: 응답에 등장한 ```python 코드블록 수.
+    이전엔 "[실행 결과]" 마커로 셌지만 stream=False 응답 형식과 안 맞아
+    실제 실행이 있어도 0으로 잘못 잡혔다 (R23 발견).
+    """
+    codeBlocks = re.findall(r"```python\s*\n(.*?)```", answer, re.DOTALL)
     return {
         "answerLength": len(answer),
         "durationSec": round(durationSec, 1),
-        "hasCode": "```python" in answer,
-        "hasError": "[실행 오류]" in answer,
-        "codeRounds": answer.count("[실행 결과]"),
+        "hasCode": len(codeBlocks) > 0,
+        "hasError": "[실행 오류]" in answer or "Traceback" in answer,
+        "codeRounds": len(codeBlocks),
     }
 
 

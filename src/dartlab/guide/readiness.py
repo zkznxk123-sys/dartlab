@@ -336,6 +336,65 @@ def _checkQuant(**_kw: Any) -> ReadinessResult:
     return ReadinessResult(feature="quant", status=ReadyStatus.READY)
 
 
+@registerChecker("share")
+def _checkShare(*, persistent: bool = False, **_kw: Any) -> ReadinessResult:
+    """외부 공유(터널) 점검 — server 의존성 + (persistent시) cloudflared/cert.pem."""
+    import shutil
+    from pathlib import Path
+
+    issues: list[ReadinessIssue] = []
+
+    # 서버 의존성
+    for pkg, label in [("fastapi", "FastAPI"), ("uvicorn", "Uvicorn")]:
+        try:
+            __import__(pkg)
+        except ImportError:
+            issues.append(
+                ReadinessIssue(
+                    kind=f"missing_{pkg}",
+                    message=f"{label} 미설치",
+                    fixAction="pip install dartlab[server]",
+                )
+            )
+
+    if persistent:
+        # cloudflared 바이너리 (PATH 또는 ~/.dartlab/bin)
+        local_bin_win = Path.home() / ".dartlab" / "bin" / "cloudflared.exe"
+        local_bin_unix = Path.home() / ".dartlab" / "bin" / "cloudflared"
+        if not shutil.which("cloudflared") and not local_bin_win.exists() and not local_bin_unix.exists():
+            issues.append(
+                ReadinessIssue(
+                    kind="missing_cloudflared",
+                    message="cloudflared 미설치 (영구 URL 모드 필요)",
+                    fixAction="dartlab channel --persistent 가 자동 설치를 시도합니다",
+                    severity="warning",
+                )
+            )
+
+        # cert.pem (CF 인증)
+        cert = Path.home() / ".cloudflared" / "cert.pem"
+        if not cert.exists():
+            issues.append(
+                ReadinessIssue(
+                    kind="missing_cf_login",
+                    message="Cloudflare 미인증 (영구 URL 모드 필요)",
+                    fixAction="최초 1회 브라우저 로그인 — dartlab channel --persistent 실행 시 자동",
+                    severity="warning",
+                )
+            )
+
+    # 서버 의존성 누락은 NOT_READY, 그 외 warning만 있으면 PARTIAL
+    has_blocker = any(i.severity == "error" for i in issues)
+    if has_blocker:
+        status = ReadyStatus.NOT_READY
+    elif issues:
+        status = ReadyStatus.PARTIAL
+    else:
+        status = ReadyStatus.READY
+
+    return ReadinessResult(feature="share", status=status, issues=issues)
+
+
 @registerChecker("gather")
 def _checkGather(*, axis: str | None = None, **_kw: Any) -> ReadinessResult:
     """외부 데이터 수집 점검."""

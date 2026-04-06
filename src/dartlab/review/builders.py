@@ -3297,6 +3297,97 @@ def creditFlagsBlock(data: dict) -> list:
     return blocks
 
 
+def creditNarrativeBlock(data: dict) -> list:
+    """calcCreditNarrative 결과 → 7축 신용 서사 (severity별)."""
+    if not data:
+        return []
+
+    axes = data.get("axes", [])
+    if not axes:
+        return []
+
+    grade = data.get("grade", "?")
+    grade_desc = data.get("gradeDescription", "")
+
+    blocks: list = [
+        HeadingBlock(
+            _meta("creditNarrative").label,
+            level=2,
+            helper=f"등급 {grade} ({grade_desc}) — 7축 서사",
+        ),
+    ]
+
+    severity_label = {
+        "strong": "🟢 우수",
+        "adequate": "🟡 양호",
+        "weak": "🟠 주의",
+        "critical": "🔴 위험",
+    }
+
+    for axis in axes:
+        label = severity_label.get(axis.get("severity", ""), "")
+        title = f"{axis.get('axisName', '?')} {label}".strip()
+        summary = axis.get("summary", "")
+        details = axis.get("details", [])
+
+        text = f"**{title}** — {summary}"
+        if details:
+            details_text = " · ".join(d for d in details[:3] if d)
+            if details_text:
+                text += f"\n  {details_text}"
+        blocks.append(TextBlock(text))
+
+    return blocks
+
+
+def creditAuditBlock(data: dict) -> list:
+    """calcCreditAudit 결과 → 외부 신평사 대조."""
+    if not data:
+        return []
+
+    external = data.get("externalGrades", {})
+    notch_diffs = data.get("notchDifferences", {})
+    avg_diff = data.get("avgNotchDiff", 0.0)
+    agreements = data.get("agreements", [])
+    disagreements = data.get("disagreements", [])
+
+    if not external:
+        # 외부 등급 데이터 없으면 블록 생략
+        return []
+
+    dcr_grade = data.get("dcrGrade", "?")
+
+    blocks: list = [
+        HeadingBlock(
+            _meta("creditAudit").label,
+            level=2,
+            helper=f"dCR {dcr_grade} vs 신평사 평균 notch 차이 {avg_diff:+.1f}",
+        ),
+    ]
+
+    # 외부 등급 비교 테이블
+    rows = []
+    for agency, grade in external.items():
+        diff = notch_diffs.get(agency, 0)
+        rows.append(
+            {
+                "신평사": agency,
+                "등급": grade,
+                "notch 차이": f"{diff:+d}" if diff != 99 else "비교불가",
+            }
+        )
+    if rows:
+        blocks.append(TableBlock("외부 신평사 대조", pl.DataFrame(rows)))
+
+    # 동의/비동의 근거
+    if agreements:
+        blocks.append(TextBlock("**동의 근거**:\n" + "\n".join(f"- {a}" for a in agreements[:3])))
+    if disagreements:
+        blocks.append(TextBlock("**비동의 근거**:\n" + "\n".join(f"- {d}" for d in disagreements[:3])))
+
+    return blocks
+
+
 # ── 시장분석 (technicalAnalysis) 빌더 ──
 
 
@@ -3577,6 +3668,51 @@ def assetSignalsBlock(data: dict) -> list:
             line += f" → {relevance}"
         blocks.append(TextBlock(line))
 
+    return blocks
+
+
+def macroCycleBlock(data: dict) -> list:
+    """dartlab.macro("사이클") 결과 → 경기 사이클 + 섹터 전략."""
+    if not data:
+        return []
+
+    phase = data.get("phase", "")
+    phase_label = data.get("phaseLabel", "")
+    confidence = data.get("confidence", "")
+    signals = data.get("signals", []) or []
+    sector_strategy = data.get("sectorStrategy", {}) or {}
+
+    if not phase:
+        return []
+
+    metrics = [
+        ("경기 국면", f"{phase_label or phase}"),
+        ("판정 신뢰도", confidence or "?"),
+    ]
+    if signals:
+        metrics.append(("핵심 신호", ", ".join(signals[:3])))
+
+    sector_lines = []
+    for k_label, k in [
+        ("경기민감 (high)", "high"),
+        ("중간민감 (moderate)", "moderate"),
+        ("방어주 (defensive)", "defensive"),
+        ("저민감 (low)", "low"),
+    ]:
+        v = sector_strategy.get(k)
+        if v:
+            sector_lines.append((k_label, v))
+
+    blocks = [
+        HeadingBlock(
+            _meta("macroCycle").label,
+            level=2,
+            helper="회복/확장/둔화/침체 4국면 + 섹터별 전략 권고",
+        ),
+        MetricBlock(metrics),
+    ]
+    if sector_lines:
+        blocks.append(MetricBlock(sector_lines))
     return blocks
 
 

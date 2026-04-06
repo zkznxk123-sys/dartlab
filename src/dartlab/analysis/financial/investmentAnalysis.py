@@ -36,45 +36,62 @@ def _yoy(cur, prev) -> float | None:
 
 
 def _estimateWacc(company) -> float | None:
-    """company에서 WACC 추정 (compute_company_wacc 래퍼)."""
+    """company에서 WACC 추정 (compute_company_wacc 래퍼).
+
+    [성능] 자체 캐시 (None 결과도 캐싱) — review에서 5개 calc가 각자 호출하는데
+    매번 fetch_price + fetchBeta 외부 API 호출 발생 (각 ~2.6s = 13s).
+    None 결과도 캐시해야 외부 API 재호출 방지.
+    memoized_calc은 None 결과를 캐시 안 함 → 자체 sentinel 캐시 사용.
+    """
+    cache = getattr(company, "_cache", None)
+    _KEY = "_estimateWacc_v2"
+    _SENTINEL = "__NONE__"
+    if cache is not None and _KEY in cache:
+        cached = cache[_KEY]
+        return None if cached == _SENTINEL else cached
+
+    result: float | None = None
     try:
         from dartlab.core.finance.proforma import compute_company_wacc
 
         annual = company.finance.annual
-        if annual is None:
-            return None
-        series, _ = annual
-        sectorParams = getattr(company, "sectorParams", None)
-        # 시총: gather.price 경유 (beta 감쇠에 필요)
-        marketCap = None
-        try:
-            from dartlab.gather.http import run_async
-            from dartlab.gather.price import fetch
+        if annual is not None:
+            series, _ = annual
+            sectorParams = getattr(company, "sectorParams", None)
+            # 시총: gather.price 경유 (beta 감쇠에 필요)
+            marketCap = None
+            try:
+                from dartlab.gather.http import run_async
+                from dartlab.gather.price import fetch
 
-            stockCode = getattr(company, "stockCode", "")
-            snapshot = run_async(fetch(stockCode, market="KR")) if stockCode else None
-            if snapshot:
-                marketCap = snapshot.market_cap
-        except (ImportError, OSError, RuntimeError):
-            pass
-        # 개별 beta
-        betaCalc = None
-        try:
-            from dartlab.core.finance.proforma import _fetchBeta
+                stockCode = getattr(company, "stockCode", "")
+                snapshot = run_async(fetch(stockCode, market="KR")) if stockCode else None
+                if snapshot:
+                    marketCap = snapshot.market_cap
+            except (ImportError, OSError, RuntimeError):
+                pass
+            # 개별 beta
+            betaCalc = None
+            try:
+                from dartlab.core.finance.proforma import _fetchBeta
 
-            betaCalc = _fetchBeta(getattr(company, "stockCode", ""), getattr(company, "currency", "KRW"))
-        except (ImportError, OSError, RuntimeError):
-            pass
-        wacc, _ = compute_company_wacc(
-            series,
-            sector_params=sectorParams,
-            market_cap=marketCap,
-            currency=getattr(company, "currency", "KRW"),
-            beta_override=betaCalc,
-        )
-        return round(wacc, 2)
+                betaCalc = _fetchBeta(getattr(company, "stockCode", ""), getattr(company, "currency", "KRW"))
+            except (ImportError, OSError, RuntimeError):
+                pass
+            wacc, _ = compute_company_wacc(
+                series,
+                sector_params=sectorParams,
+                market_cap=marketCap,
+                currency=getattr(company, "currency", "KRW"),
+                beta_override=betaCalc,
+            )
+            result = round(wacc, 2)
     except (ImportError, AttributeError, TypeError, ValueError):
-        return None
+        result = None
+
+    if cache is not None:
+        cache[_KEY] = result if result is not None else _SENTINEL
+    return result
 
 
 # ── ROIC (NOPAT / 투하자본) ──

@@ -1,14 +1,22 @@
-"""신용분석 보고서 생성 + 블로그 발간.
+"""신용분석 보고서 생성 + 블로그 발간 — DEPRECATED.
 
-narrative.py의 서사 + audit.py의 대조 결과를 조합하여
-신평사 수준의 마크다운 보고서를 생성하고 blog/04-credit-reports/에 저장한다.
-블로그 카테고리로 GitHub Pages 공개.
+이 모듈의 publishReport/publishBatch/publishAll은 deprecated.
+review.publisher.publishReport를 사용하세요.
+
+신용분석 섹션(7축 서사 + 신평사 대조)이 review 5막에 자동 통합되어 있습니다:
+- creditNarrative 블록 — 7축 서사 (severity별)
+- creditAudit 블록 — 외부 신평사 대조
+
+기존 16개 credit 보고서는 blog/04-credit-reports/에 그대로 보존됩니다.
+
+레거시 helper 함수(generateReportMarkdown, _fetchBusinessSummary 등)는
+DeprecationWarning을 띄우는 publisher 함수 내부에서만 사용됩니다.
 """
 
 from __future__ import annotations
 
-import gc
 import json
+import warnings
 from datetime import datetime
 from pathlib import Path
 
@@ -16,75 +24,59 @@ _BLOG_DIR = Path("blog/04-credit-reports")
 _REGISTRY_PATH = _BLOG_DIR / "_registry.json"
 
 
-def publishReport(stockCode: str, *, basePeriod: str | None = None, useAI: bool = False) -> Path:
-    """보고서 생성 + 저장. 반환: 저장된 파일 경로."""
-    from dartlab import Company
+_DEPRECATION_MESSAGE = (
+    "credit.publisher.{name}는 deprecated. "
+    "review.publisher.{name}를 사용하세요. "
+    "신용분석 섹션(7축 서사 + 신평사 대조)이 review 5막에 자동 통합됩니다."
+)
 
-    company = Company(stockCode)
-    path = publishReportFromCompany(company, basePeriod=basePeriod, useAI=useAI)
-    del company
-    gc.collect()
-    return path
+
+def publishReport(stockCode: str, *, basePeriod: str | None = None, useAI: bool = False) -> Path:
+    """[DEPRECATED] review.publisher.publishReport로 위임.
+
+    useAI 파라미터는 무시됨 (review는 결정론적 빌드).
+    """
+    warnings.warn(
+        _DEPRECATION_MESSAGE.format(name="publishReport"),
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    from dartlab.review.publisher import publishReport as _review_publish
+
+    return _review_publish(stockCode, basePeriod=basePeriod)
 
 
 def publishReportFromCompany(company, *, basePeriod: str | None = None, useAI: bool = False) -> Path:
-    """Company 객체로 보고서 생성 + 블로그 포스트 저장."""
-    from dartlab.credit.engine import evaluateCompany
+    """[DEPRECATED] review.publisher.publishReportFromCompany로 위임."""
+    warnings.warn(
+        _DEPRECATION_MESSAGE.format(name="publishReportFromCompany"),
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    from dartlab.review.publisher import publishReportFromCompany as _review_publish
 
-    result = evaluateCompany(company, detail=True, basePeriod=basePeriod)
-    if result is None:
-        raise ValueError("등급 산출 실패: 데이터 부족")
-
-    corpName = getattr(company, "corpName", "") or ""
-    stockCode = getattr(company, "stockCode", "") or ""
-
-    # 정성 분석용 데이터 주입 (Company 호출은 publisher에서만)
-    result["_businessSummary"] = _fetchBusinessSummary(company)
-    result["_keyChanges"] = _fetchKeyChanges(company)
-
-    md = generateReportMarkdown(corpName, stockCode, result, useAI=useAI)
-
-    # 블로그 포스트로 저장
-    order, slug = _resolveSlug(stockCode, corpName)
-    postDir = _BLOG_DIR / f"{order:02d}-{slug}"
-    postDir.mkdir(parents=True, exist_ok=True)
-    path = postDir / "index.md"
-    path.write_text(md, encoding="utf-8")
-
-    # 등급 이력 기록
-    from dartlab.credit.history import recordGrade
-
-    recordGrade(stockCode, result)
-
-    return path
+    return _review_publish(company, basePeriod=basePeriod)
 
 
 def publishBatch(stockCodes: list[str], *, basePeriod: str | None = None) -> list[Path]:
-    """복수 기업 보고서 순차 발간 (메모리 안전)."""
-    paths = []
-    for i, code in enumerate(stockCodes):
-        try:
-            path = publishReport(code, basePeriod=basePeriod)
-            paths.append(path)
-            if (i + 1) % 10 == 0:
-                print(f"[credit] {i + 1}/{len(stockCodes)} 발간 완료")
-        except (ValueError, KeyError, TypeError, FileNotFoundError) as e:
-            print(f"[credit] {code} 발간 실패: {e}")
-        gc.collect()
-    print(f"[credit] 배치 완료: {len(paths)}/{len(stockCodes)} 성공")
-    return paths
+    """[DEPRECATED] review.publisher.publishBatch로 위임."""
+    warnings.warn(
+        _DEPRECATION_MESSAGE.format(name="publishBatch"),
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    from dartlab.review.publisher import publishBatch as _review_batch
+
+    return _review_batch(stockCodes, basePeriod=basePeriod)
 
 
 def publishAll(*, basePeriod: str | None = None) -> list[Path]:
-    """한국 전 상장사 신용분석 보고서 배치 발간.
-
-    blog/04-credit-reports/에 종목별 블로그 포스트 저장.
-    메모리 안전: 기업별 순차 처리 + gc.collect().
-    finance 데이터가 있는 종목만 발간.
-
-    주의: 2700+ 포스트는 SvelteKit 빌드 시간에 영향.
-    당분간 수동 선택 발간(publishBatch) 권장.
-    """
+    """[DEPRECATED] 전종목 발간 — review.publisher.publishBatch + listing()로 대체."""
+    warnings.warn(
+        _DEPRECATION_MESSAGE.format(name="publishAll"),
+        DeprecationWarning,
+        stacklevel=2,
+    )
     try:
         from dartlab.gather.listing import listing
 
@@ -102,8 +94,9 @@ def publishAll(*, basePeriod: str | None = None) -> list[Path]:
         print("[credit] 종목 목록을 가져올 수 없습니다.")
         return []
 
-    print(f"[credit] 전종목 발간 시작: {len(codes)}개사")
-    return publishBatch(codes, basePeriod=basePeriod)
+    from dartlab.review.publisher import publishBatch as _review_batch
+
+    return _review_batch(codes, basePeriod=basePeriod)
 
 
 def _loadRegistry() -> dict:

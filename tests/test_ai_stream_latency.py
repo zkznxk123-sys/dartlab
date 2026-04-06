@@ -18,6 +18,7 @@ pytestmark = pytest.mark.unit
 
 def _make_mock_company():
     """최소한의 Company stub."""
+
     class MockCompany:
         corpName = "TestCorp"
         stockCode = "000000"
@@ -32,6 +33,7 @@ def _make_mock_company():
 
 def _make_mock_provider():
     """즉시 chunk yield 하는 mock LLM provider."""
+
     class MockProvider:
         supports_cache_control = False
         config = None
@@ -111,9 +113,7 @@ def test_parallel_ground_total_under_2s(patch_runtime, monkeypatch):
 
     elapsed = time.monotonic() - start
     assert chunks_received, "첫 chunk 받지 못함"
-    assert elapsed < 2.5, (
-        f"병렬 fire 가 작동하지 않음. 첫 chunk 까지 {elapsed:.2f}초 (목표 < 2.5초)"
-    )
+    assert elapsed < 2.5, f"병렬 fire 가 작동하지 않음. 첫 chunk 까지 {elapsed:.2f}초 (목표 < 2.5초)"
 
 
 def test_sync_mode_falls_back_to_sequential(patch_runtime, monkeypatch):
@@ -130,15 +130,13 @@ def test_sync_mode_falls_back_to_sequential(patch_runtime, monkeypatch):
 
     elapsed = time.monotonic() - start
     # 동기 모드 = 1+1+1 = 약 3초 이상이어야 함 (병렬 아니므로)
-    assert elapsed >= 2.5, (
-        f"sync 모드가 동기적으로 동작하지 않음. {elapsed:.2f}초 (>= 2.5초 기대)"
-    )
+    assert elapsed >= 2.5, f"sync 모드가 동기적으로 동작하지 않음. {elapsed:.2f}초 (>= 2.5초 기대)"
 
 
 def test_ground_timeout_does_not_block(patch_runtime, monkeypatch):
     """timeout 환경변수로 ground 가 늦게 와도 첫 chunk 는 빨리 나옴."""
-    from dartlab.ai.runtime.core import analyze
     from dartlab.ai.runtime import core
+    from dartlab.ai.runtime.core import analyze
 
     # ground 를 5초 sleep 으로 교체
     def very_slow(*a, **k):
@@ -158,6 +156,4 @@ def test_ground_timeout_does_not_block(patch_runtime, monkeypatch):
             break
 
     elapsed = time.monotonic() - start
-    assert elapsed < 1.5, (
-        f"timeout 후에도 첫 chunk 가 늦음. {elapsed:.2f}초 (< 1.5초 기대)"
-    )
+    assert elapsed < 1.5, f"timeout 후에도 첫 chunk 가 늦음. {elapsed:.2f}초 (< 1.5초 기대)"

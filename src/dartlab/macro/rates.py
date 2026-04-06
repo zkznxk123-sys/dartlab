@@ -18,6 +18,26 @@ from dartlab.macro._helpers import (
 )
 
 
+def _fetch_payrolls_3m_avg(g) -> float | None:
+    """PAYEMS(비농업고용) 최근 3개월 평균 변화(천명).
+
+    PAYEMS는 누적 고용 수준(천명). 월간 변화 = 당월 - 전월.
+    최근 3개월 변화의 평균을 반환.
+    """
+    try:
+        df = g.macro("PAYEMS")
+        if df is None or len(df) < 4:
+            return None
+        vals = df.get_column("value").drop_nulls()
+        if len(vals) < 4:
+            return None
+        recent = [float(v) for v in vals[-4:]]
+        changes = [recent[i] - recent[i - 1] for i in range(1, 4)]
+        return sum(changes) / 3.0
+    except (KeyError, ValueError, TypeError, AttributeError):
+        return None
+
+
 def _fetch_rate_data(market: str, as_of: str | None = None) -> dict[str, float | None]:
     """gather에서 금리 관련 지표 수집."""
     g = get_gather(as_of)
@@ -37,6 +57,7 @@ def _fetch_rate_data(market: str, as_of: str | None = None) -> dict[str, float |
 
         data["cpi_yoy"] = fetch_yoy(g, "CPIAUCSL")
         data["core_cpi"] = fetch_yoy(g, "CPILFESL")
+        data["payrolls_3m_avg"] = _fetch_payrolls_3m_avg(g)
 
     elif market.upper() == "KR":
         data["base_rate"] = fetch_latest(g, "BASE_RATE")
@@ -83,18 +104,20 @@ def analyze_rates(*, market: str = "US", as_of: str | None = None, overrides: di
     # DKW 분해 (US만)
     result["decomposition"] = None
     if market.upper() == "US" and dgs10 and data.get("t10yie") and data.get("dfii10"):
-        decomp = decomposeLongRate(dgs10, data["t10yie"], data["dfii10"], ff)
+        acm_tp = fetch_latest(get_gather(as_of), "THREEFYTP10")
+        decomp = decomposeLongRate(dgs10, data["t10yie"], data["dfii10"], ff, acm_term_premium=acm_tp)
         result["decomposition"] = {
             "nominal": decomp.nominal,
             "expectedInflation": decomp.expectedInflation,
             "realRate": decomp.realRate,
             "termPremium": decomp.termPremium,
+            "termPremiumSource": "ACM" if acm_tp is not None else "residual",
         }
 
     # 고용 해석
     unrate = data.get("unrate")
     if unrate is not None:
-        emp = interpretEmployment(unrate)
+        emp = interpretEmployment(unrate, payrolls_3m_avg=data.get("payrolls_3m_avg"))
         result["employment"] = {"state": emp.state, "stateLabel": emp.stateLabel, "reasoning": list(emp.reasoning)}
     else:
         result["employment"] = None

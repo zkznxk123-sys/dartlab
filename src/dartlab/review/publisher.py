@@ -146,17 +146,8 @@ def _buildFullReport(
     header += f"> 데이터: {periodLabel} 연결 | 엔진: dartlab review\n"
     header += "\n---\n"
 
-    # 본문
+    # 본문 — 신용평가 섹션에 creditNarrative + creditAudit 자동 포함됨
     body = review.toMarkdown()
-
-    # credit 보고서 링크 (있으면)
-    creditLink = ""
-    creditPostDir = Path("blog/04-credit-reports")
-    if creditPostDir.exists():
-        for d in creditPostDir.iterdir():
-            if d.is_dir() and stockCode in d.name:
-                creditLink = f"\n\n---\n\n> 상세 신용분석: [{corpName} dCR 보고서](/blog/credit-reports/{stockCode})\n"
-                break
 
     # 면책
     disclaimer = (
@@ -166,7 +157,7 @@ def _buildFullReport(
         "모든 수치는 공시 기준이며, 실제 투자 시 추가 검증이 필요합니다.*"
     )
 
-    return fm + header + "\n" + body + creditLink + disclaimer
+    return fm + header + "\n" + body + disclaimer
 
 
 def _makeTitle(templateName: str, corpName: str) -> str:

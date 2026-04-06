@@ -167,6 +167,10 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("cashFlowGrade", "현금흐름등급", "신용평가", "eCR-1~6 현금흐름창출능력 별도 평가"),
     BlockMeta("creditPeerPosition", "업종 내 신용 순위", "신용평가", "동종업계 대비 핵심 지표 위치"),
     BlockMeta("creditFlags", "신용 플래그", "신용평가", "신용 등급 하방/상방 신호"),
+    BlockMeta("creditNarrative", "신용 서사", "신용평가", "7축 서사 — 왜 이 등급인가 (인과 체인)"),
+    BlockMeta(
+        "creditAudit", "신평사 대조", "신용평가", "외부 신평사(KIS/KR/NICE) 등급과 notch 차이 + 동의/비동의 근거"
+    ),
     # ── 4-1 가치평가 ──
     BlockMeta("dcfValuation", "DCF 밸류에이션", "가치평가", "현금흐름 할인 모델 적정가치"),
     BlockMeta("ddmValuation", "DDM 밸류에이션", "가치평가", "배당 할인 모델 적정가치"),
@@ -206,7 +210,8 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("marketBeta", "시장 베타", "시장분석", "실측 베타, 알파, CAPM 기대수익률"),
     BlockMeta("fundamentalDivergence", "재무-시장 괴리", "시장분석", "재무 스코어 vs 기술적 판단 교차검증"),
     BlockMeta("marketAnalysisFlags", "시장분석 플래그", "시장분석", "기술적 신호 경고/기회"),
-    # ── 매크로 (기업-매크로 연결만 — 시장 분석은 dartlab.macro()) ──
+    # ── 매크로 (시장 환경 + 기업-매크로 연결) ──
+    BlockMeta("macroCycle", "경기 사이클", "매크로", "회복/확장/둔화/침체 4국면 + 신뢰도 + 섹터 전략"),
     BlockMeta("valuationBand", "밸류에이션 밴드", "매크로", "PER/PBR 과거 정규분포 대비 현재 위치"),
 ]
 

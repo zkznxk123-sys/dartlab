@@ -93,6 +93,9 @@ def _cors_origins() -> list[str]:
         if raw == "*":
             return ["*"]
         return [item.strip() for item in raw.split(",") if item.strip()]
+    # devtunnel 모드 등 외부 접근 시 CORS가 막혀서 fetch hang — 터널 모드면 전체 허용
+    if os.environ.get("DARTLAB_CHANNEL") == "1" or os.environ.get("DARTLAB_TUNNEL") == "1":
+        return ["*"]
     return [
         "http://127.0.0.1:8400",
         "http://localhost:8400",
@@ -135,8 +138,8 @@ if _origins == ["*"]:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_origins,
-    allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "X-Room-Member"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-Room-Member", "X-Tunnel-Skip-AntiPhishing-Page-Redirect", "*"],
 )
 
 app.include_router(ai_router)

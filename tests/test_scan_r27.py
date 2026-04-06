@@ -14,21 +14,25 @@ pytestmark = pytest.mark.unit
 def test_scan_unknown_axis_raises_value_error():
     """없는 축은 ValueError. silent None 이면 회귀."""
     import dartlab
+
     with pytest.raises(ValueError, match="알 수 없는 scan 축"):
-        dartlab.scan('없는축')
+        dartlab.scan("없는축")
 
 
 def test_scan_empty_string_raises_value_error():
     """빈 문자열도 ValueError."""
     import dartlab
+
     with pytest.raises(ValueError, match="알 수 없는 scan 축"):
-        dartlab.scan('')
+        dartlab.scan("")
 
 
 def test_scan_none_returns_guide():
     """None 입력 = 무인자 = 가이드 DataFrame."""
-    import dartlab
     import polars as pl
+
+    import dartlab
+
     r = dartlab.scan(None)
     assert isinstance(r, pl.DataFrame)
     assert "axis" in r.columns
@@ -40,8 +44,10 @@ def test_scan_none_returns_guide():
 
 def test_scan_no_args_returns_guide():
     """무인자 호출 = 가이드 DataFrame."""
-    import dartlab
     import polars as pl
+
+    import dartlab
+
     r = dartlab.scan()
     assert isinstance(r, pl.DataFrame)
     assert len(r) >= 15

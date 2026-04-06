@@ -10,7 +10,9 @@ from dartlab.core.finance.macroCycle import (
     classifyVixRegime,
     copperGoldRatio,
     interpretAssets,
+    interpretFxDrivers,
     interpretGoldDrivers,
+    marketLevelValuation,
 )
 
 
@@ -142,6 +144,35 @@ def analyze_assets(*, market: str = "US", as_of: str | None = None, overrides: d
     else:
         result["vixRegime"] = None
 
+    # 환율 3요인 분해 — 금리차 + 무역수지 + 위험선호도
+    result["fxDrivers"] = None
+    fx_chg = data.get("fx_change_pct")
+    if fx_chg is not None:
+        trade_yoy = None
+        try:
+            from dartlab.macro._helpers import fetch_yoy as _fy
+            from dartlab.macro._helpers import get_gather as _gg
+
+            _g = _gg(as_of)
+            trade_yoy = _fy(_g, "EXPORT") if market.upper() == "KR" else _fy(_g, "BOPGSTB")
+        except (KeyError, ValueError, TypeError, AttributeError, ImportError):
+            pass
+
+        fd = interpretFxDrivers(
+            fx_change_pct=fx_chg,
+            rate_diff_change=asset_input.get("rate_diff_change"),
+            trade_balance_yoy=trade_yoy,
+            vix=data.get("vix"),
+            vix_change=data.get("vix_change"),
+        )
+        result["fxDrivers"] = {
+            "rateDiffEffect": fd.rateDiffEffect,
+            "tradeEffect": fd.tradeEffect,
+            "riskEffect": fd.riskEffect,
+            "dominant": fd.dominant,
+            "divergence": fd.divergence,
+        }
+
     # Copper/Gold Ratio
     result["copperGold"] = None
     try:
@@ -169,5 +200,26 @@ def analyze_assets(*, market: str = "US", as_of: str | None = None, overrides: d
                 }
     except (KeyError, ValueError, TypeError, AttributeError):
         pass
+
+    # Buffett Indicator (US만) — 시장 레벨 밸류에이션
+    result["marketValuation"] = None
+    if market.upper() == "US":
+        try:
+            from dartlab.macro._helpers import fetch_latest as _fl
+            from dartlab.macro._helpers import get_gather as _gg
+
+            _g = _gg(as_of)
+            mcap = _fl(_g, "WILL5000PRFC")
+            gdp = _fl(_g, "GDP")
+            if mcap is not None and gdp is not None:
+                mv = marketLevelValuation(mcap, gdp)
+                result["marketValuation"] = {
+                    "buffettIndicator": mv.buffettIndicator,
+                    "zone": mv.zone,
+                    "zoneLabel": mv.zoneLabel,
+                    "description": mv.description,
+                }
+        except (KeyError, ValueError, TypeError, AttributeError, ImportError):
+            pass
 
     return result

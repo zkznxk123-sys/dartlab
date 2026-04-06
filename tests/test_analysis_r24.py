@@ -16,6 +16,7 @@ def test_analysis_rejects_axis_outside_group():
     from dartlab.analysis.financial import Analysis
 
     a = Analysis()
+
     # company 없이도 검증 발생해야 함 (그룹 검증은 sub 해석 직후)
     # 단 company 없이는 listCalcs 까지 가므로 company 동봉
     class _MockCompany:
@@ -63,8 +64,9 @@ def test_analysis_unknown_axis_explicit_error():
 
 def test_analysis_guide_returns_dataframe():
     """무인자 → 가이드 DataFrame (회귀 0 확인)."""
-    from dartlab.analysis.financial import Analysis
     import polars as pl
+
+    from dartlab.analysis.financial import Analysis
 
     a = Analysis()
     guide = a()

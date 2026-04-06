@@ -352,22 +352,25 @@
         {/each}
       {/each}
 
-      <!-- X axis labels (라벨 회전 + 축약) -->
+      <!-- X axis labels (라벨 회전 + 축약 + 카테고리 10+ 면 odd index 만) -->
       {#each categories as cat, i}
         {@const cx = xScale(cat) + xScale.bandwidth() / 2}
         {@const display = needsRotate && String(cat).length > 8 ? String(cat).slice(0, 7) + '…' : cat}
-        <text
-          x={cx}
-          y={plotH + (needsRotate ? 8 : 20)}
-          text-anchor={needsRotate ? 'end' : 'middle'}
-          transform={needsRotate ? `rotate(-45, ${cx}, ${plotH + 8})` : ''}
-          fill={hoverIndex === i ? '#e5e7eb' : '#9ca3af'}
-          font-size="11"
-          font-weight={hoverIndex === i ? '600' : '400'}
-          class="transition-all duration-150"
-        >
-          {display}
-        </text>
+        {@const skip = categories.length > 10 && needsRotate && i % 2 !== 0 && hoverIndex !== i}
+        {#if !skip}
+          <text
+            x={cx}
+            y={plotH + (needsRotate ? 8 : 20)}
+            text-anchor={needsRotate ? 'end' : 'middle'}
+            transform={needsRotate ? `rotate(-45, ${cx}, ${plotH + 8})` : ''}
+            fill={hoverIndex === i ? '#e5e7eb' : '#9ca3af'}
+            font-size={needsRotate ? '10' : '11'}
+            font-weight={hoverIndex === i ? '600' : '400'}
+            class="transition-all duration-150"
+          >
+            {display}
+          </text>
+        {/if}
       {/each}
     </g>
 

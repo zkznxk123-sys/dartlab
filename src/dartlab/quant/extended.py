@@ -11,6 +11,8 @@ from typing import Any
 import numpy as np
 import polars as pl
 
+from dartlab.analysis.financial._memoize import memoized_calc as _memoized_calc
+
 # ── OHLCV 캐싱 헬퍼 ──
 
 
@@ -90,6 +92,7 @@ def _isUSD(company: Any) -> bool:
 # ── 독립 함수 (Company 또는 raw OHLCV 모두 지원) ──
 
 
+@_memoized_calc
 def calcTechnicalVerdict(company) -> dict | None:
     """기술적 종합 판단 — 강세/중립/약세 + 주요 지표.
 
@@ -112,6 +115,7 @@ def calcTechnicalVerdict(company) -> dict | None:
     return verdict
 
 
+@_memoized_calc
 def calcTechnicalSignals(company) -> dict | None:
     """최근 20일 매매 신호 요약.
 
@@ -178,6 +182,7 @@ def calcTechnicalSignals(company) -> dict | None:
     }
 
 
+@_memoized_calc
 def calcMarketBeta(company) -> dict | None:
     """시장 베타 + CAPM 기대수익률 + 해석.
 
@@ -223,6 +228,7 @@ def calcMarketBeta(company) -> dict | None:
     }
 
 
+@_memoized_calc
 def calcFundamentalDivergence(company, *, basePeriod: str | None = None) -> dict | None:
     """재무-시장 괴리 진단 — 교차검증의 핵심.
 
@@ -306,6 +312,7 @@ def calcFundamentalDivergence(company, *, basePeriod: str | None = None) -> dict
     }
 
 
+@_memoized_calc
 def calcMarketRisk(company) -> dict | None:
     """시장 리스크 — ATR 변동성 등급 + 베타 + 상대강도.
 
@@ -359,6 +366,7 @@ def calcMarketRisk(company) -> dict | None:
     }
 
 
+@_memoized_calc
 def calcMarketAnalysisFlags(company) -> list[str]:
     """시장분석 플래그 — 기술적 신호 기반 경고/기회.
 

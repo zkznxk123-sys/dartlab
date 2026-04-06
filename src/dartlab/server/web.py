@@ -40,12 +40,17 @@ def serve_spa(path: str = ""):
             return HTMLResponse("Not found", status_code=404)
         return FileResponse(file)
 
+    # 옛 hash bundle 요청을 index.html로 fallback하면 폰 Chrome이 옛 캐시를 영원히 들고 있음.
+    # 존재하지 않는 /assets/* 는 명시적으로 404로 응답해야 캐시가 무효화됨.
+    if path.startswith("assets/") or path.endswith((".js", ".css", ".map")):
+        return HTMLResponse("Not found", status_code=404)
+
     index = _UI_DIR / "index.html"
     if index.exists():
         return FileResponse(
             index,
             media_type="text/html",
-            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate, max-age=0"},
         )
 
     return HTMLResponse("<h2>index.html not found</h2>", status_code=404)

@@ -10,6 +10,7 @@ from dartlab.macro._helpers import (
     fetch_latest,
     fetch_yoy,
     get_gather,
+    recent_timeseries,
 )
 
 
@@ -43,6 +44,33 @@ def _fetch_indicators(market: str, as_of: str | None = None) -> dict[str, float 
     return {k: v for k, v in indicators.items() if v is not None}
 
 
+def _build_signal_history(market: str, as_of: str | None = None) -> dict[str, list[tuple[str, float]]] | None:
+    """전환 시퀀스 순서 검증을 위한 시계열 이력 구축.
+
+    최근 12개월 데이터를 [(날짜, 값)] 형태로 반환.
+    """
+    if market.upper() != "US":
+        return None
+    g = get_gather(as_of)
+    history: dict[str, list[tuple[str, float]]] = {}
+
+    # 신호 → FRED 시리즈 매핑
+    series_map = {
+        "hy_spread_3m_change": "BAMLH0A0HYM2",
+        "gold_yoy": "GOLDAMGBD228NLBM",
+        "long_rate_change": "DGS10",
+        "vix": "VIXCLS",
+        "term_spread": "T10Y2Y",
+        "bei_10y": "T10YIE",
+    }
+    for key, sid in series_map.items():
+        ts = recent_timeseries(g.macro(sid), months=12)
+        if ts:
+            history[key] = [(entry["date"], entry["value"]) for entry in ts if entry["value"] is not None]
+
+    return history if history else None
+
+
 def analyze_cycle(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """경제 사이클 분석."""
     indicators = _fetch_indicators(market, as_of=as_of)
@@ -50,7 +78,10 @@ def analyze_cycle(*, market: str = "US", as_of: str | None = None, overrides: di
         indicators = apply_overrides(indicators, overrides)
 
     cycle = classifyCycle(indicators)
-    transition = detectTransitionSequence(cycle.phase, indicators)
+
+    # 시계열 이력 구축 — 전환 시퀀스 순서 검증용
+    history = _build_signal_history(market, as_of)
+    transition = detectTransitionSequence(cycle.phase, indicators, history=history)
 
     result: dict = {
         "market": market.upper(),
@@ -63,13 +94,18 @@ def analyze_cycle(*, market: str = "US", as_of: str | None = None, overrides: di
     }
 
     if transition is not None:
-        result["transition"] = {
+        t_dict: dict = {
             "from": transition.fromPhase,
             "to": transition.toPhase,
             "progress": transition.progress,
             "triggered": list(transition.triggered),
             "pending": list(transition.pending),
         }
+        if transition.sequenceOrder:
+            t_dict["sequenceOrder"] = [{"signal": sig, "firstTriggered": dt} for sig, dt in transition.sequenceOrder]
+        if transition.orderValid is not None:
+            t_dict["orderValid"] = transition.orderValid
+        result["transition"] = t_dict
 
     g = get_gather(as_of)
     result["timeseries"] = collect_timeseries(

@@ -4,7 +4,7 @@ date: 2026-04-02
 description: 증권사 HTS에서 종목을 하나씩 클릭하던 시대는 끝났다. dartlab.scan은 전 상장사의 매출액, ROE, 거버넌스를 1초 만에 테이블 하나로 펼친다.
 category: dartlab-news
 series: dartlab-news
-seriesOrder: 2
+seriesOrder: 3
 thumbnail: /avatar-chart.png
 keywords:
   - dartlab scan

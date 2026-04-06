@@ -12,12 +12,14 @@
 | [gather.md](gather.md) | L1 | gather/ | 외부 시장 데이터 (주가/수급/매크로/뉴스) |
 | [quant.md](quant.md) | L1 | quant/ | 기술적 분석 독립 엔진 — c.quant(), dartlab.quant() |
 | [search.md](search.md) | L0 | core/search/ | 공시 시맨틱 검색 *(alpha)* |
+| [listing.md](listing.md) | facade | listing.py | 목록 조회 단일 진입점 — `dartlab.listing(kind, ...)` |
 | [analysis.md](analysis.md) | L2 | analysis/ | 재무 심층분석 + 전망 + 가치평가, 6막 인과 구조 |
 | [macro.md](macro.md) | L2 | macro/ | 시장 레벨 매크로 분석 — Company 불필요 |
 | [review.md](review.md) | L2 | review/ | 블록-템플릿 보고서 렌더링, 4 출력 형식 |
 | [credit.md](credit.md) | L2 | credit/ | 독립 신용평가 (dCR 20단계, 7축, 투명 공개) |
 | [ai.md](ai.md) | L3 | ai/ | 적극적 분석가, 5 provider |
 | [guide.md](guide.md) | 교차 | guide/ | 안내 데스크 + 교육 안내자, 4층위 |
+| [channel.md](channel.md) | L4 | channel/ | 외부 공유 — 터널 백엔드 + 메시징 어댑터, `dartlab share` |
 | [experiments.md](experiments.md) | — | experiments/ | 실험 규칙, 흡수 판단 |
 | [edgar.md](edgar.md) | L1 | providers/edgar/ | EDGAR 동기화 규칙, EXEMPT 관리 (데이터/분석 동작은 각 엔진 문서에 통합) |
 | [code.md](code.md) | — | 전체 | camelCase, 독스트링 9섹션, 릴리즈, Git |

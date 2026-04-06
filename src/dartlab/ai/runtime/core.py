@@ -577,6 +577,14 @@ def _streamWithCodeExecution(
 
         # LLM 피드백: 결과 크기 제한 (컨텍스트 화폐 절약)
         isError = "실행 오류" in result or "Error" in result or "Traceback" in result
+        # 빈 결과 감지 — Polars (0, 0) shape, 빈 dict, None 단독 등은 "분석 실패 신호"
+        # exception 은 아니지만 도구 선택/대상 오류일 가능성이 높음 → error 와 동일 처리
+        _resultStripped = result.strip()
+        isEmpty = not isError and (
+            "shape: (0, 0)" in result
+            or "shape: (0," in result
+            or _resultStripped in ("", "{}", "None", "[]", "shape: (0, 0)\n┌┐\n╞╡\n└┘")
+        )
         if len(result) > _MAX_RESULT_CHARS and not isError:
             feedback = (
                 f"코드 실행 결과 (처음 {_MAX_RESULT_CHARS}자, 전체 {len(result)}자):\n\n"
@@ -589,6 +597,21 @@ def _streamWithCodeExecution(
                 f"```\n{result}\n```\n\n"
                 "에러를 읽고 원인을 진단하세요. 같은 코드를 반복하지 마세요.\n"
                 "API를 모르겠으면 `dartlab.capabilities(search='키워드')`로 검색하세요."
+            )
+        elif isEmpty:
+            feedback = (
+                "코드 실행 결과가 비어 있습니다 (빈 DataFrame / 빈 dict / None):\n\n"
+                f"```\n{result}\n```\n\n"
+                "**이건 분석 실패 신호다.** 같은 도구를 다른 인자로 재시도하지 마세요.\n"
+                "원인 진단 체크리스트:\n"
+                "1. **질문이 메타 지식인가?** (예: 'X와 Y 비교', 'X 엔진은 뭐 하는가') "
+                "→ 도구 호출 자체가 잘못. 코드 없이 ops/ 지식으로 직접 답변하세요.\n"
+                "2. **Company `c` 가 바인딩됐는가?** `print(type(c), getattr(c, 'stockCode', None))` 로 확인.\n"
+                "3. **무인자 가이드 호출인가?** `c.analysis()` 가 (0,0)이면 Company 가 비정상. "
+                "정상이면 `axis|label|description` 컬럼이 나와야 함.\n"
+                "4. **존재하지 않는 topic/축인가?** `print(c.topics)` / `print(c.analysis())` 로 유효 키 확인.\n"
+                "빈 결과 2회 연속이면 **도구 선택을 바꾸거나 사용자에게 컨텍스트를 명시적으로 답변에 알리세요** "
+                "(되묻기 금지 — '이 질문은 도구 호출 없이 답변합니다' 식으로 선언)."
             )
         elif mode == "coding":
             feedback = (
@@ -753,9 +776,11 @@ print(dartlab.scan())   # 20축 가이드 (전종목 횡단)
 | "보고서 뽑아줘" 명시 요청 | **review** | `c.review("수익성").toMarkdown()` (최대 2개) |
 | 공시 원문 검색 | **search** | `dartlab.search("유상증자", corp="005930")` → DataFrame |
 | 실시간 뉴스/이슈 | **검색** | `newsSearch("키워드")` |
+| "X vs Y 비교"/"X 엔진은 뭐야"/도구·기능 메타 지식 | **답변 직접** | 코드 호출 금지. ops/ 지식으로 직접 설명. 회사 데이터 조회 아님. |
 | 모르겠으면 | **self-discovery** | `print(c.analysis())` 등 무인자 호출 |
 
 ### 핵심 원칙
+- **[최우선] 메타 지식 질문에는 코드 절대 금지.** "X vs Y 차이/비교", "X 엔진은 뭐 하는가", "어느 걸 먼저 써야 해", "왜 Company 없이 호출해" 같은 **도구·엔진·기능 자체에 대한 질문**은 ops/ 지식으로 직접 답한다. `c.analysis()`, `c.credit()`, `c.review()`, `dartlab.macro()`, `dartlab.capabilities()` **모두 호출 금지**. 특정 회사(삼성전자 등) 데이터 인용 금지. 답변은 마크다운 표 + 한 줄 요약. 회사 분석을 끌어오면 **틀린 답이다**.
 - **analysis가 기본 도구.** dict 반환 → 핵심 수치를 마크다운 테이블로 정리. print(dict) 금지.
 - **무인자 호출은 가이드 반환.** `c.quant()`, `c.credit()` 무인자는 dict가 아닌 가이드 DataFrame이다. 분석 결과를 원하면 `c.quant("종합")`, `c.credit("등급")`을 사용.
 - **review() 사용 금지** — 사용자가 "보고서"를 명시적으로 요청한 경우만 예외. 분석 질문에는 반드시 analysis를 써라.
@@ -1126,14 +1151,10 @@ def _analyze_inner(
     _f_insight: concurrent.futures.Future | None = None
 
     if not _sync_mode and stock_id:
-        _ground_executor = concurrent.futures.ThreadPoolExecutor(
-            max_workers=3, thread_name_prefix="dl-ground"
-        )
+        _ground_executor = concurrent.futures.ThreadPoolExecutor(max_workers=3, thread_name_prefix="dl-ground")
         _f_disclosure = _ground_executor.submit(_preGroundDisclosure, stockCode=stock_id)
         if _needsExternalSearch(question):
-            _f_search = _ground_executor.submit(
-                _preGroundSearch, question, stockCode=stock_id, corpName=corp_name
-            )
+            _f_search = _ground_executor.submit(_preGroundSearch, question, stockCode=stock_id, corpName=corp_name)
         _f_insight = _ground_executor.submit(_gatherInsightHints, stock_id, company)
 
     # ── 2. LLM provider 생성 (캐시 경계 판단에 필요) ──

@@ -72,6 +72,23 @@ _SIMPLE: dict[str, str] = {
     # scan
     "scan:signal_start": "서술형 시그널 스캔: {count}사",
     "scan:network_health": "그룹 건전성 분석 중...",
+    "scan:prebuild_check": "scan 프리빌드 데이터 확인 중... ({dir})",
+    "scan:prebuild_missing": "scan 프리빌드 데이터 없음 \u2192 HuggingFace에서 다운로드 (약 271MB, 시간이 걸릴 수 있습니다)",
+    "scan:prebuild_ready": "\u2713 scan 프리빌드 준비 완료 ({fileCount}개 파일)",
+    "scan:prebuild_failed": "\u26a0 scan 프리빌드 다운로드 실패: {error} \u2014 종목별 fallback 사용 (느림)",
+    # EDGAR bulk batch (finance/docs 공통)
+    "edgar:bulk_start": "EDGAR {kind} 배치 수집 시작 \u2014 {total}종목 (시간이 걸릴 수 있습니다)",
+    "edgar:bulk_done": "\u2713 EDGAR {kind} 배치 완료 (성공 {success} / 실패 {failed} / {elapsedSec:.0f}초)",
+    "edgar:bulk_partial": "\u26a0 EDGAR {kind} 배치 부분 완료 ({done}/{total}, 오류 {errors})",
+    "edgar:bulk_empty": "EDGAR 배치: 수집할 ticker가 없습니다",
+    "edgar:bulk_target": "EDGAR 배치 대상: {count}종목 ({tier}, mode={mode})",
+    # search 인덱스 (stemIndex)
+    "stemindex:hf_start": "검색 인덱스 다운로드 중... HuggingFace ({repo})",
+    "stemindex:hf_done": "\u2713 검색 인덱스 준비 완료 ({sizeStr})",
+    "stemindex:hf_fail": "\u26a0 검색 인덱스 다운로드 실패: {error}",
+    "stemindex:local": "\u2713 검색 인덱스 로컬 사용 ({path})",
+    # data stale 경고
+    "data:stale_warning": "\u26a0 로컬 데이터가 {ageDays}일째 갱신되지 않았습니다. 네트워크 또는 HuggingFace 접근을 확인하세요.",
     # 전사 분석 데이터 필요 안내
     "hint:market_data_needed": (
         "\u26a0 {category} 데이터가 로컬에 없습니다. {fn}은 전체 시장 데이터가 필요합니다.\n"
@@ -267,7 +284,17 @@ def emit(key: str, *, raise_as: type | None = None, **kwargs: Any) -> str:
         raise raise_as(text)
 
     # structured 메시지(hint/error) + collect/download 안내는 항상 출력
-    _ALWAYS_SHOW = ("hint:", "error:", "collect:", "download:", "edgar:")
+    _ALWAYS_SHOW = (
+        "hint:",
+        "error:",
+        "collect:",
+        "download:",
+        "download_all:",
+        "edgar:",
+        "scan:prebuild",
+        "stemindex:",
+        "data:",
+    )
     if key in _STRUCTURED or any(key.startswith(p) for p in _ALWAYS_SHOW):
         print(f"{_PREFIX} {text}")
     else:

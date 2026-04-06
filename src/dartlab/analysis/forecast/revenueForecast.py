@@ -26,6 +26,7 @@ v3→v4 변경 (실험 098 기반):
 
 from __future__ import annotations
 
+import functools
 import logging
 import math
 from dataclasses import dataclass, field
@@ -209,11 +210,17 @@ class RevenueForecastResult:
 # ══════════════════════════════════════
 
 
+@functools.lru_cache(maxsize=64)
 def _fetchConsensusRevenue(
     stockCode: str,
     market: str = "KR",
-) -> list[tuple[int, float, str]]:
-    """gather에서 매출 컨센서스를 가져온다."""
+) -> tuple[tuple[int, float, str], ...]:
+    """gather에서 매출 컨센서스를 가져온다.
+
+    [성능] @lru_cache — review에서 4번 호출되는데 매번 외부 API.
+    같은 stockCode 입력은 첫 호출 후 즉시 반환.
+    Return type은 tuple (lru_cache는 hashable result 권장).
+    """
     try:
         from dartlab.gather import Gather
 
@@ -223,10 +230,10 @@ def _fetchConsensusRevenue(
             g.close()
         except RuntimeError:
             pass  # event loop already closed
-        return [(item.fiscal_year, item.revenue_est, item.source) for item in items if item.revenue_est > 0]
+        return tuple((item.fiscal_year, item.revenue_est, item.source) for item in items if item.revenue_est > 0)
     except (ImportError, OSError) as exc:
         log.debug("컨센서스 수집 실패: %s", exc)
-        return []
+        return ()
 
 
 # ══════════════════════════════════════

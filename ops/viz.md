@@ -16,10 +16,7 @@ emit_chart({
 emit_diagram("mermaid", "graph LR\n  매출-->영업이익-->FCF")
 ```
 
-## 노트북
-
-[![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/12_viz.py)
-[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/12_viz.ipynb)
+> viz 는 헬퍼 엔진. 별도 노트북 없이 다른 분석 노트북 내에서 emit_chart 호출.
 
 ---
 

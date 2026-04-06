@@ -229,6 +229,122 @@ def load_allfilings_for_stock(stockCode: str):
 # ── OHLCV → numpy 변환 ──────────────────────────────────
 
 
+# ── 강건한 계정 추출 (DART finance.parquet) ──────────────
+
+
+# 표준 키 → DART account_nm 정규식 패턴 (우선순위 순서, 첫 매치 사용)
+_ACCOUNT_PATTERNS: dict[str, list[str]] = {
+    "sales": [
+        r"^매출액$",
+        r"^수익\(매출액\)$",
+        r"^수익$",
+        r"^영업수익$",
+        r"^매출$",
+        r"매출액",
+    ],
+    "operating_profit": [
+        r"^영업이익$",
+        r"^영업이익\(손실\)$",
+        r"^영업손익$",
+        r"영업이익",
+    ],
+    "net_income": [
+        r"^당기순이익$",
+        r"^당기순이익\(손실\)$",
+        r"^당기순손익$",
+        r"^연결당기순이익$",
+        r"^지배기업소유주지분순이익$",
+        r"^지배기업의?\s*소유주에?\s*귀속되는?\s*당기순이익$",
+        r"당기순이익",
+    ],
+    "total_assets": [r"^자산총계$"],
+    "total_liabilities": [r"^부채총계$"],
+    "total_equity": [
+        r"^자본총계$",
+        r"^지배기업소유주지분$",
+    ],
+    "operating_cf": [
+        r"^영업활동현금흐름$",
+        r"^영업활동으로?\s*인한?\s*현금흐름$",
+        r"영업활동.*현금흐름",
+    ],
+    "investing_cf": [
+        r"^투자활동현금흐름$",
+        r"투자활동.*현금흐름",
+    ],
+    "financing_cf": [
+        r"^재무활동현금흐름$",
+        r"재무활동.*현금흐름",
+    ],
+}
+
+# 표준 키 → 후보 sj_div 리스트
+# IS = 별개 손익계산서, CIS = 포괄손익계산서 단일 양식. 일부 기업(SK하이닉스 등)은 CIS만 사용.
+_ACCOUNT_SJ: dict[str, list[str]] = {
+    "sales": ["IS", "CIS"],
+    "operating_profit": ["IS", "CIS"],
+    "net_income": ["IS", "CIS"],
+    "total_assets": ["BS"],
+    "total_liabilities": ["BS"],
+    "total_equity": ["BS"],
+    "operating_cf": ["CF"],
+    "investing_cf": ["CF"],
+    "financing_cf": ["CF"],
+}
+
+
+def _parse_amount(val) -> float | None:
+    if val is None:
+        return None
+    try:
+        return float(str(val).replace(",", ""))
+    except (ValueError, TypeError):
+        return None
+
+
+def extract_account(df, key: str) -> float | None:
+    """DART finance.parquet의 단일 종목/단일 기간 DataFrame에서 표준 계정 추출.
+
+    Args:
+        df: pl.DataFrame — sj_div, account_nm, thstrm_amount 컬럼 보유
+        key: 표준 키 ("sales", "operating_profit", "net_income", "total_assets", ...)
+
+    Returns:
+        float 또는 None. 우선순위 패턴 순회하며 첫 매치 사용.
+    """
+    import polars as pl
+
+    patterns = _ACCOUNT_PATTERNS.get(key)
+    sj_list = _ACCOUNT_SJ.get(key)
+    if patterns is None or sj_list is None:
+        return None
+    if df is None or df.is_empty():
+        return None
+
+    for sj in sj_list:
+        base = df.filter(pl.col("sj_div") == sj)
+        if base.is_empty():
+            continue
+        for pat in patterns:
+            try:
+                rows = base.filter(pl.col("account_nm").str.contains(pat))
+            except (pl.exceptions.ComputeError, AttributeError):
+                continue
+            if len(rows) == 0:
+                continue
+            amounts = rows.get_column("thstrm_amount").to_list()
+            for amt in amounts:
+                v = _parse_amount(amt)
+                if v is not None:
+                    return v
+    return None
+
+
+def extract_accounts(df, keys: list[str]) -> dict[str, float | None]:
+    """여러 표준 계정 일괄 추출."""
+    return {k: extract_account(df, k) for k in keys}
+
+
 def ohlcv_to_arrays(df):
     """Polars OHLCV DataFrame → numpy 배열 dict.
 

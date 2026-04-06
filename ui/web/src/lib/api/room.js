@@ -1,11 +1,12 @@
 /**
  * Room 협업 세션 API 클라이언트 — 서버 /api/room/* 엔드포인트 1:1 래핑.
  */
-import { BASE } from "./http.js";
+import { BASE, authedFetch } from "./http.js";
+import { withTokenQuery } from "./token.js";
 
 /** 현재 룸 상태 조회. 룸이 없으면 null 반환. */
 export async function roomState() {
-	const res = await fetch(`${BASE}/api/room/state`);
+	const res = await authedFetch(`${BASE}/api/room/state`);
 	if (res.status === 404) return null;
 	if (!res.ok) throw new Error(`room/state 실패: ${res.status}`);
 	return res.json();
@@ -13,7 +14,7 @@ export async function roomState() {
 
 /** 룸 참여. { memberId, roomId, state } 반환. */
 export async function roomJoin(name) {
-	const res = await fetch(`${BASE}/api/room/join`, {
+	const res = await authedFetch(`${BASE}/api/room/join`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ name }),
@@ -24,7 +25,7 @@ export async function roomJoin(name) {
 
 /** 룸 퇴장. */
 export async function roomLeave(memberId) {
-	const res = await fetch(`${BASE}/api/room/leave`, {
+	const res = await authedFetch(`${BASE}/api/room/leave`, {
 		method: "POST",
 		headers: _memberHeaders(memberId),
 	});
@@ -34,7 +35,7 @@ export async function roomLeave(memberId) {
 
 /** 프레즌스 heartbeat (15초 간격). */
 export async function roomHeartbeat(memberId) {
-	const res = await fetch(`${BASE}/api/room/heartbeat`, {
+	const res = await authedFetch(`${BASE}/api/room/heartbeat`, {
 		method: "POST",
 		headers: _memberHeaders(memberId),
 	});
@@ -44,14 +45,14 @@ export async function roomHeartbeat(memberId) {
 
 /** SSE 브로드캐스트 스트림. EventSource 반환. */
 export function roomStream(memberId) {
-	return new EventSource(`${BASE}/api/room/stream?member=${encodeURIComponent(memberId)}`);
+	return new EventSource(withTokenQuery(`${BASE}/api/room/stream?member=${encodeURIComponent(memberId)}`));
 }
 
 /** AI 질문 → 전체 브로드캐스트. */
 export async function roomAsk(memberId, question, company) {
 	const body = { question };
 	if (company) body.company = company;
-	const res = await fetch(`${BASE}/api/room/ask`, {
+	const res = await authedFetch(`${BASE}/api/room/ask`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json", "x-room-member": memberId },
 		body: JSON.stringify(body),
@@ -62,7 +63,7 @@ export async function roomAsk(memberId, question, company) {
 
 /** 네비게이션 동기화. */
 export async function roomNavigate(memberId, nav) {
-	const res = await fetch(`${BASE}/api/room/navigate`, {
+	const res = await authedFetch(`${BASE}/api/room/navigate`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json", "x-room-member": memberId },
 		body: JSON.stringify(nav),
@@ -73,7 +74,7 @@ export async function roomNavigate(memberId, nav) {
 
 /** 채팅 메시지 전송. */
 export async function roomChat(memberId, text) {
-	const res = await fetch(`${BASE}/api/room/chat`, {
+	const res = await authedFetch(`${BASE}/api/room/chat`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json", "x-room-member": memberId },
 		body: JSON.stringify({ text }),
@@ -86,7 +87,7 @@ export async function roomChat(memberId, text) {
 export async function roomReact(memberId, emoji, targetEvent) {
 	const body = { emoji };
 	if (targetEvent) body.targetEvent = targetEvent;
-	const res = await fetch(`${BASE}/api/room/react`, {
+	const res = await authedFetch(`${BASE}/api/room/react`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json", "x-room-member": memberId },
 		body: JSON.stringify(body),

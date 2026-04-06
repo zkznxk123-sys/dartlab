@@ -49,13 +49,15 @@
 | 39 | data-quality-validation | data-pipeline |
 | 40 | dart-edgar-unified-structure | data-pipeline |
 
-### 02 DartLab 소식 (3편, 사용자 관리)
+### 02 DartLab 소식 (5편, 사용자 관리)
 
 | # | slug |
 |---|------|
 | 01 | dartlab-easy-start |
-| 02 | scan-market-finance |
-| 03 | company-one-stock-code |
+| 02 | vscode-extension-install |
+| 03 | scan-market-finance |
+| 04 | company-one-stock-code |
+| 05 | search-without-embeddings |
 
 ### 03 실전기업분석 (3편, 사용자 관리)
 

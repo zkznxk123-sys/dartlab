@@ -84,12 +84,6 @@
 				</div>
 			{/if}
 
-			<div class="mb-5 max-w-[520px] rounded-xl border border-dl-border/40 bg-dl-bg-card/40 px-3.5 py-2.5 text-left">
-				<div class="text-[10px] font-semibold uppercase tracking-[0.18em] text-dl-text-dim">Evidence First</div>
-				<div class="mt-1.5 text-[12px] leading-relaxed text-dl-text-muted">
-					재무 수치와 원문 근거를 동시에 확인합니다. DART/EDGAR 40개+ 모듈을 AI가 자동으로 조합합니다.
-				</div>
-			</div>
 		{/if}
 
 		<div class="w-full">

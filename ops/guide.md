@@ -12,10 +12,7 @@ dartlab.guide.whatCanIDo("재무 분석")          # 자연어 질문 → 사용
 dartlab.guide.handleError(err, feature="ai")  # 에러 → 사용자 안내
 ```
 
-## 노트북
-
-[![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/13_guide.py)
-[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/13_guide.ipynb)
+> guide 는 헬퍼 엔진. 별도 노트북 없이 다른 노트북에서 필요할 때 호출.
 
 ---
 

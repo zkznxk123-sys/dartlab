@@ -606,7 +606,40 @@ def _fetchDisclosureRisk(company) -> dict | None:
 
 
 def _fetchAuditOpinion(company) -> str | None:
-    """감사의견 추출 — 적정/한정/부적정/의견거절."""
+    """감사의견 추출 — 적정/한정/부적정/의견거절.
+
+    [성능] show("audit") 직접 파싱이 0.04s 수준이므로 1순위로 사용.
+    company.governance() 호출은 전종목 scan(12s+)을 트리거하므로 마지막 fallback으로만.
+    """
+    # 1순위: docs 원문 직접 파싱 (0.04~1s, 단일 종목만 처리)
+    try:
+        show = getattr(company, "show", None)
+        if show is not None:
+            idx = show("audit")
+            if idx is not None and hasattr(idx, "to_dicts"):
+                blocks = idx.to_dicts()
+                for b in blocks:
+                    blk = b.get("block")
+                    data = show("audit", block=blk, period="latest")
+                    if data is None:
+                        continue
+                    if hasattr(data, "to_dicts"):
+                        for row in data.to_dicts():
+                            for v in row.values():
+                                if not isinstance(v, str):
+                                    continue
+                                if "부적정" in v:
+                                    return "부적정"
+                                if "의견거절" in v:
+                                    return "의견거절"
+                                if "한정" in v and "한정" not in ("한정되지", "한정하지"):
+                                    return "한정"
+                # 명시적 위반 키워드 없으면 적정
+                return "적정"
+    except (AttributeError, ValueError, KeyError, TypeError):
+        pass
+
+    # 2순위: scorer 직접 호출 (있으면)
     try:
         from dartlab.scan.governance.scorer import _extractAuditOpinion
 
@@ -616,7 +649,8 @@ def _fetchAuditOpinion(company) -> str | None:
     except (ImportError, AttributeError):
         pass
 
-    # fallback 1: scan governance에서
+    # 마지막 fallback: governance() — 전종목 scan을 트리거하므로 매우 느림
+    # 위 두 경로가 모두 실패한 경우만 사용
     try:
         gov = getattr(company, "governance", None)
         if gov is not None and callable(gov):
@@ -630,35 +664,6 @@ def _fetchAuditOpinion(company) -> str | None:
     except (AttributeError, ValueError, KeyError, TypeError):
         pass
 
-    # fallback 2: docs 원문에서 감사의견 직접 파싱
-    try:
-        show = getattr(company, "show", None)
-        if show is None:
-            return None
-        idx = show("audit")
-        if idx is None or not hasattr(idx, "to_dicts"):
-            return None
-        blocks = idx.to_dicts()
-        for b in blocks:
-            blk = b.get("block")
-            data = show("audit", block=blk, period="latest")
-            if data is None:
-                continue
-            if hasattr(data, "to_dicts"):
-                for row in data.to_dicts():
-                    for v in row.values():
-                        if not isinstance(v, str):
-                            continue
-                        if "부적정" in v:
-                            return "부적정"
-                        if "의견거절" in v:
-                            return "의견거절"
-                        if "한정" in v and "한정" not in ("한정되지", "한정하지"):
-                            return "한정"
-                        if "적정" in v and "부적정" not in v and "한정" not in v:
-                            return "적정"
-    except (AttributeError, ValueError, KeyError, TypeError):
-        pass
     return None
 
 

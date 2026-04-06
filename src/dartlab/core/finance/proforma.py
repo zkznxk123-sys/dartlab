@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+import functools
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -525,8 +526,13 @@ def extract_historical_ratios(
 # ══════════════════════════════════════
 
 
+@functools.lru_cache(maxsize=128)
 def _fetchBeta(stockCode: str, currency: str = "KRW") -> float | None:
-    """1년 일별 수익률 vs 시장 지수 회귀로 Beta 산출. 캐시 적용."""
+    """1년 일별 수익률 vs 시장 지수 회귀로 Beta 산출.
+
+    [성능] @lru_cache 적용 — review에서 6번 호출되는데 매번 외부 API.
+    같은 stockCode 입력은 첫 호출 후 즉시 반환.
+    """
     try:
         import httpx
 

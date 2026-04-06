@@ -4,7 +4,7 @@ date: 2026-04-02
 description: 삼성전자 005930. 이 여섯 자리만 넣으면 재무제표, 사업보고서, 비율, 주석, 변경 이력까지 전부 나온다. dartlab.Company가 하나의 기업을 여는 방법.
 category: dartlab-news
 series: dartlab-news
-seriesOrder: 3
+seriesOrder: 4
 thumbnail: /avatar-study.png
 keywords:
   - dartlab Company

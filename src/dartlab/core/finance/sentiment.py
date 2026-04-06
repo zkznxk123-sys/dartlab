@@ -70,14 +70,17 @@ def calcFearGreedProxy(
     sp500_vs_ma125: float,
     hy_spread: float,
     gold_equity_ratio: float | None = None,
+    crypto_momentum: float | None = None,
 ) -> SentimentScore:
-    """FRED 4요소로 CNN Fear & Greed Index 근사.
+    """FRED 4~5요소로 CNN Fear & Greed Index 근사.
 
     Args:
         vix: CBOE VIX (낮을수록 탐욕)
         sp500_vs_ma125: S&P500 현재가 / 125일 이동평균 비율 (1.0 = 평균, >1 = 탐욕)
         hy_spread: HY 스프레드 bps (낮을수록 탐욕)
         gold_equity_ratio: 금/S&P500 비율 (높을수록 공포). None이면 제외.
+        crypto_momentum: BTC 90일 변화율 (%). 유동성 과잉/긴축의 극단 지표.
+            양수=위험선호(탐욕), 음수=위험회피(공포). None이면 제외.
 
     Returns:
         SentimentScore (0=극단공포, 100=극단탐욕)
@@ -96,6 +99,11 @@ def calcFearGreedProxy(
     # 금/주식 비율 (선택): 높으면 공포
     if gold_equity_ratio is not None:
         components["safe_haven"] = 100 - _normalize(gold_equity_ratio, 0.3, 0.6)
+
+    # 비트코인 모멘텀 (선택): 유동성 과잉/긴축의 극단 지표
+    # -30%(공포) ~ +50%(탐욕) 범위 정규화
+    if crypto_momentum is not None:
+        components["crypto"] = _normalize(crypto_momentum, -30, 50)
 
     score = sum(components.values()) / len(components)
     score = max(0, min(100, score))

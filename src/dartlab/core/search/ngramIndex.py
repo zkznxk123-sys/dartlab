@@ -668,6 +668,7 @@ def pullStemIndex(*, token: str | None = None, force: bool = False) -> Path:
     from huggingface_hub import snapshot_download
 
     from dartlab.core.dataConfig import HF_REPO
+    from dartlab.guide.messaging import emit
 
     outDir = _stemIndexDir()
     hfDir = DATA_RELEASES["stemIndex"]["dir"]
@@ -677,22 +678,27 @@ def pullStemIndex(*, token: str | None = None, force: bool = False) -> Path:
         if npzPath.exists():
             stats = ngramStats()
             if stats["documents"] > 0:
-                print(f"[stemIndex] 인덱스 이미 존재 ({stats['documents']:,}문서)")
+                emit("stemindex:local", path=str(outDir))
                 return outDir
 
-    print("[stemIndex] HuggingFace에서 다운로드 중...")
-    snapshot_download(
-        repo_id=HF_REPO,
-        repo_type="dataset",
-        allow_patterns=f"{hfDir}/**",
-        local_dir=str(outDir.parent.parent.parent),
-        token=token,
-    )
+    emit("stemindex:hf_start", repo=HF_REPO)
+    try:
+        snapshot_download(
+            repo_id=HF_REPO,
+            repo_type="dataset",
+            allow_patterns=f"{hfDir}/**",
+            local_dir=str(outDir.parent.parent.parent),
+            token=token,
+        )
+    except (OSError, RuntimeError, ValueError) as e:
+        emit("stemindex:hf_fail", error=str(e))
+        raise
 
     global _cachedIndex, _cachedMeta
     _cachedIndex = None
     _cachedMeta = None
 
     stats = ngramStats()
-    print(f"[stemIndex] 완료: {stats['documents']:,}문서, {stats['sizeMb']}MB")
+    sizeStr = f"{stats['sizeMb']}MB ({stats['documents']:,}문서)"
+    emit("stemindex:hf_done", sizeStr=sizeStr)
     return outDir

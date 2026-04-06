@@ -12,15 +12,22 @@ import numpy as np
 from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 
 
-def analyze_tailrisk(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
+def analyze_tailrisk(stockCode: str, *, market: str = "auto", riskFree: float = 0.0, **kwargs) -> dict:
     """꼬리위험 종합 분석.
 
     Args:
         stockCode: 종목코드 또는 ticker.
         market: "KR" | "US" | "auto".
+        riskFree: 연환산 무위험수익률 (기본 0.0). Sortino/Sharpe 계산에 사용.
 
     Returns:
         dict with cvar95, maxDrawdown, sortino, downsideDev 등.
+
+    Note:
+        - VaR/CVaR: 역사적 시뮬레이션 (Artzner et al. 1999)
+        - Sortino: (annualReturn - riskFree) / downsideDev
+        - Sharpe: (annualReturn - riskFree) / volatility
+        - annualReturn = mean(daily log return) × 252 (산술평균 연환산, CAGR 아님)
     """
     market = resolve_market(stockCode, market)
     ohlcv = fetch_ohlcv(stockCode, **kwargs)
@@ -77,19 +84,21 @@ def analyze_tailrisk(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     result["downsideDev"] = round(downside_dev * np.sqrt(252), 4)
 
     # ── Sortino Ratio ──
-    # (연간수익률 - 0) / 하방편차
+    # (annualReturn - riskFree) / 하방편차
     annual_return = float(np.mean(daily_returns) * 252)
+    excess = annual_return - riskFree
     if downside_dev > 0:
-        sortino = annual_return / (downside_dev * np.sqrt(252))
+        sortino = excess / (downside_dev * np.sqrt(252))
     else:
         sortino = 0.0
     result["sortino"] = round(float(sortino), 4)
     result["annualReturn"] = round(annual_return, 4)
+    result["riskFree"] = round(float(riskFree), 4)
 
     # ── Calmar Ratio ──
-    # 연간수익률 / |최대낙폭|
+    # 초과수익률 / |최대낙폭|
     if abs(max_dd) > 0:
-        calmar = annual_return / abs(max_dd)
+        calmar = excess / abs(max_dd)
     else:
         calmar = 0.0
     result["calmar"] = round(float(calmar), 4)
@@ -98,9 +107,9 @@ def analyze_tailrisk(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     vol = float(np.std(daily_returns) * np.sqrt(252))
     result["volatility"] = round(vol, 4)
 
-    # ── Sharpe Ratio (무위험수익률 0 가정) ──
+    # ── Sharpe Ratio ──
     if vol > 0:
-        sharpe = annual_return / vol
+        sharpe = excess / vol
     else:
         sharpe = 0.0
     result["sharpe"] = round(float(sharpe), 4)
@@ -111,11 +120,17 @@ def analyze_tailrisk(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         kurtosis = float(_kurtosis(daily_returns))
         result["skewness"] = round(skewness, 4)
         result["kurtosis"] = round(kurtosis, 4)
-        # 음의 왜도 + 높은 첨도 = 꼬리위험 높음
+        # 꼬리위험 등급:
+        # - high: 음의 왜도 + 높은 첨도(좌측 두꺼운 꼬리, 손실 편중)
+        # - medium-loss: 음의 왜도, 정상 첨도
+        # - medium-fat: 양의 왜도지만 매우 높은 첨도(양측 꼬리 모두 두꺼움)
+        # - low: 그 외
         if skewness < -0.5 and kurtosis > 4:
             result["tailRiskGrade"] = "high"
         elif skewness < 0 and kurtosis > 3:
-            result["tailRiskGrade"] = "medium"
+            result["tailRiskGrade"] = "medium-loss"
+        elif kurtosis > 5:
+            result["tailRiskGrade"] = "medium-fat"
         else:
             result["tailRiskGrade"] = "low"
 

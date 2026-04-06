@@ -111,6 +111,85 @@ def vbreakoutSignal(
     return signals
 
 
+def vAtrTrailingStop(
+    close: NDArray[np.float64],
+    high: NDArray[np.float64],
+    low: NDArray[np.float64],
+    atrPeriod: int = 14,
+    multiplier: float = 3.0,
+) -> NDArray[np.float64]:
+    """ATR 기반 trailing stop level 시계열.
+
+    매수 포지션 진입 후 추적용 stop level. close가 stop 아래로 떨어지면 손절.
+    학술 근거: Wilder (1978) New Concepts in Technical Trading Systems — ATR.
+    실무: Chandelier Exit (LeBeau & Lucas 1999).
+
+    Args:
+        close, high, low: OHLC 시계열
+        atrPeriod: ATR 계산 기간 (기본 14)
+        multiplier: ATR 배수 (기본 3.0 — Chandelier 표준)
+
+    Returns:
+        각 시점의 trailing stop price (np.nan = stop 미정)
+    """
+    n = len(close)
+    stop = np.full(n, np.nan)
+    if n < atrPeriod + 1:
+        return stop
+
+    # True Range
+    prev_close = np.roll(close, 1)
+    tr = np.maximum(high - low, np.maximum(np.abs(high - prev_close), np.abs(low - prev_close)))
+    tr[0] = high[0] - low[0]
+
+    # Wilder smoothing
+    atr = np.full(n, np.nan)
+    atr[atrPeriod - 1] = float(np.mean(tr[:atrPeriod]))
+    for i in range(atrPeriod, n):
+        atr[i] = (atr[i - 1] * (atrPeriod - 1) + tr[i]) / atrPeriod
+
+    # Chandelier: highest high since entry − multiplier × ATR
+    for i in range(atrPeriod, n):
+        hh = float(np.max(high[max(0, i - atrPeriod) : i + 1]))
+        candidate = hh - multiplier * atr[i]
+        if i == atrPeriod or np.isnan(stop[i - 1]):
+            stop[i] = candidate
+        else:
+            # trailing: stop은 한 방향으로만 (위로) 움직임
+            stop[i] = max(stop[i - 1], candidate) if close[i] > stop[i - 1] else candidate
+
+    return stop
+
+
+def vVolatilityScaledStop(
+    close: NDArray[np.float64],
+    lookback: int = 20,
+    multiplier: float = 2.0,
+) -> NDArray[np.float64]:
+    """변동성 기반 stop distance — close에서 multiplier × σ 만큼 아래.
+
+    sigma는 lookback일 일별 log return 표준편차. 학술: Carver (2015) Systematic
+    Trading. 보유 자산 변동성에 따라 stop 거리를 동적 조정.
+
+    Args:
+        close: 종가 시계열
+        lookback: 변동성 lookback (기본 20일)
+        multiplier: σ 배수 (기본 2.0)
+
+    Returns:
+        stop level price 시계열
+    """
+    n = len(close)
+    stop = np.full(n, np.nan)
+    if n < lookback + 1:
+        return stop
+    log_ret = np.diff(np.log(close))
+    for i in range(lookback, n):
+        sigma = float(np.std(log_ret[i - lookback : i], ddof=1))
+        stop[i] = float(close[i] * (1 - multiplier * sigma))
+    return stop
+
+
 def vTrendFilter(
     close: NDArray[np.float64],
     sma: NDArray[np.float64],

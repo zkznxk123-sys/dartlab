@@ -824,8 +824,17 @@ def batchCollect(
             workers = [
                 asyncio.create_task(
                     _workerLoop(
-                        i, c, queue, cats, results, corpMap, incremental,
-                        completeFn, statusFn, periodFn, failures,
+                        i,
+                        c,
+                        queue,
+                        cats,
+                        results,
+                        corpMap,
+                        incremental,
+                        completeFn,
+                        statusFn,
+                        periodFn,
+                        failures,
                         targetPeriodsByCode,
                     )
                 )

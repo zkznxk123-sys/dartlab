@@ -12,8 +12,10 @@ pytestmark = pytest.mark.unit
 
 def test_review_buildreview_validates_section():
     """R31-1: buildReview 에 section 검증 코드가 있는지 source check."""
-    from dartlab.review.registry import buildReview
     import inspect
+
+    from dartlab.review.registry import buildReview
+
     src = inspect.getsource(buildReview)
     assert "section not in TEMPLATES" in src
     assert "ValueError" in src
@@ -23,6 +25,7 @@ def test_review_buildreview_validates_section():
 def test_review_templates_registry_has_keys():
     """TEMPLATES 가 비어 있지 않음."""
     from dartlab.review.registry import TEMPLATES
+
     assert isinstance(TEMPLATES, dict)
     assert len(TEMPLATES) >= 5
     assert "수익성" in TEMPLATES or "수익구조" in TEMPLATES
@@ -30,7 +33,9 @@ def test_review_templates_registry_has_keys():
 
 def test_review_unknown_preset_raises():
     """기존 동작 — 없는 preset 은 ValueError (회귀 보호)."""
-    from dartlab.review.registry import buildReview
     import inspect
+
+    from dartlab.review.registry import buildReview
+
     src = inspect.getsource(buildReview)
     assert "알 수 없는 프리셋" in src

@@ -298,3 +298,77 @@ def calcCreditFlags(company, *, basePeriod: str | None = None) -> dict | None:
         )
 
     return {"flags": flags}
+
+
+@_memoized_calc
+def calcCreditNarrative(company, *, basePeriod: str | None = None) -> dict | None:
+    """credit publisher의 7축 서사를 review 블록용으로 변환.
+
+    credit/narrative.py::buildNarratives() 결과를 그대로 반환.
+    review가 5-7 신용평가 섹션에서 소비.
+    """
+    result = _evaluate(company, basePeriod)
+    if result is None:
+        return None
+
+    from dartlab.credit.narrative import buildNarratives
+
+    try:
+        narratives = buildNarratives(result)
+    except (KeyError, AttributeError, TypeError):
+        return None
+
+    if not narratives:
+        return None
+
+    return {
+        "axes": [
+            {
+                "axisName": n.axisName,
+                "summary": n.summary,
+                "details": n.details,
+                "severity": n.severity,
+            }
+            for n in narratives
+        ],
+        "grade": result.get("grade", ""),
+        "gradeDescription": result.get("gradeDescription", ""),
+    }
+
+
+@_memoized_calc
+def calcCreditAudit(company, *, basePeriod: str | None = None) -> dict | None:
+    """credit publisher의 외부 신평사 대조를 review 블록용으로 변환.
+
+    credit/audit.py::auditCredit() 결과를 그대로 반환.
+    """
+    result = _evaluate(company, basePeriod)
+    if result is None:
+        return None
+
+    stockCode = getattr(company, "stockCode", None) or getattr(company, "ticker", "")
+    corpName = getattr(company, "corpName", "") or ""
+    if not stockCode:
+        return None
+
+    from dartlab.credit.audit import auditCredit
+
+    try:
+        audit = auditCredit(stockCode, corpName, result=result)
+    except (KeyError, AttributeError, TypeError, OSError):
+        return None
+
+    if audit is None:
+        return None
+
+    return {
+        "stockCode": audit.stockCode,
+        "corpName": audit.corpName,
+        "dcrGrade": audit.dcrGrade,
+        "dcrScore": audit.dcrScore,
+        "externalGrades": dict(audit.externalGrades),
+        "notchDifferences": dict(audit.notchDifferences),
+        "avgNotchDiff": audit.avgNotchDiff,
+        "agreements": list(audit.agreements),
+        "disagreements": list(audit.disagreements),
+    }

@@ -307,12 +307,20 @@ def batchCollectEdgar(
 
     Returns: {"AAPL": {"finance": 12000, "docs": 450}, ...}
     """
+    import time as _time
+
+    from dartlab.guide.messaging import emit
+
     cats = categories or ["finance", "docs"]
     numWorkers = min(maxWorkers or _MAX_WORKERS, _MAX_WORKERS)
 
     # ticker → cik/title 맵 사전 로드
     tickerMap = _resolveTickerMap(tickers)
     total = len(tickers)
+
+    kindLabel = "+".join(cats)
+    emit("edgar:bulk_start", kind=kindLabel, total=total)
+    _bulkStart = _time.time()
 
     async def _run(completeFn, statusFn, periodFn) -> dict[str, dict[str, int]]:
         clients = [AsyncEdgarClient() for _ in range(numWorkers)]
@@ -344,9 +352,31 @@ def batchCollectEdgar(
 
         return results
 
+    def _emitDone(res: dict[str, dict[str, int]]) -> None:
+        success = sum(1 for v in res.values() if any(c > 0 for c in v.values()))
+        failed = total - success
+        elapsedSec = _time.time() - _bulkStart
+        if failed > 0 and success > 0:
+            emit(
+                "edgar:bulk_partial",
+                kind=kindLabel,
+                done=success,
+                total=total,
+                errors=failed,
+            )
+        emit(
+            "edgar:bulk_done",
+            kind=kindLabel,
+            success=success,
+            failed=failed,
+            elapsedSec=elapsedSec,
+        )
+
     if not showProgress:
         try:
-            return _runAsync(_run(None, None, None))
+            res = _runAsync(_run(None, None, None))
+            _emitDone(res)
+            return res
         except KeyboardInterrupt:
             print("\n[EDGAR 배치] 사용자 중단.")
             return {}
@@ -422,6 +452,7 @@ def batchCollectEdgar(
     if runError and not isinstance(runError[0], KeyboardInterrupt):
         raise runError[0]
 
+    _emitDone(result)
     return result
 
 
@@ -464,11 +495,13 @@ def batchCollectEdgarAll(
     else:
         targetTickers = allTickers
 
+    from dartlab.guide.messaging import emit
+
     if not targetTickers:
-        print("[EDGAR 배치] 수집할 ticker가 없습니다.")
+        emit("edgar:bulk_empty")
         return {}
 
-    print(f"[EDGAR 배치] {mode} 모드: {len(targetTickers)}개 ticker ({tier})")
+    emit("edgar:bulk_target", count=len(targetTickers), tier=tier, mode=mode)
     return batchCollectEdgar(
         targetTickers,
         categories=categories,

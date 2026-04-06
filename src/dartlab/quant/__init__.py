@@ -107,6 +107,14 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         example='quant("패턴", "005930")',
         group="technical",
     ),
+    "chartPatterns": _AxisEntry(
+        module="dartlab.quant.chartPatterns",
+        fn="analyze_chartPatterns",
+        label="차트패턴",
+        description="거시 차트 패턴 — W/M/H&S/삼중/원형 (자동 인식 + 목표가)",
+        example='quant("차트패턴", "005930")',
+        group="technical",
+    ),
     # ── B: 리스크 (risk) — 가격 + 벤치마크 ────────────────
     "beta": _AxisEntry(
         module="dartlab.quant._ax_technical",
@@ -290,7 +298,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         module="dartlab.quant.portfolio",
         fn="analyze_allocation",
         label="자산배분",
-        description="Black-Litterman + 리스크 버짓팅",
+        description="Equal Risk Contribution (Maillard 2010) — 종목별 위험 기여도 균등 배분",
         example='quant("자산배분", ["005930","000660"])',
         group="portfolio",
         multiStock=True,
@@ -306,6 +314,7 @@ _ALIASES: dict[str, str] = {
     "신호": "signals",
     "매매신호": "signals",
     "판단": "verdict",
+    "종합": "verdict",
     "종합판단": "verdict",
     "기술판단": "verdict",
     "모멘텀": "momentum",
@@ -316,7 +325,12 @@ _ALIASES: dict[str, str] = {
     "국면": "regime",
     "패턴": "pattern",
     "캔들": "pattern",
-    "차트패턴": "pattern",
+    "캔들패턴": "pattern",
+    "차트패턴": "chartPatterns",
+    "거시패턴": "chartPatterns",
+    "쌍바닥": "chartPatterns",
+    "쌍봉": "chartPatterns",
+    "헤드앤숄더": "chartPatterns",
     # B: 리스크
     "베타": "beta",
     "시장베타": "beta",
@@ -371,7 +385,8 @@ _ALIASES: dict[str, str] = {
     "리스크패리티": "riskparity",
     "HRP": "riskparity",
     "자산배분": "allocation",
-    "블랙리터만": "allocation",
+    "ERC": "allocation",
+    "리스크균등": "allocation",
 }
 
 # 기존 metric 이름 (하위호환용)
@@ -518,7 +533,7 @@ class Quant:
             return fn(**kwargs)
 
     def _guide(self) -> pl.DataFrame:
-        """축 카탈로그 — 그룹별 정리."""
+        """축 카탈로그 — 통일 컬럼 (axis, label, description, example, group)."""
         rows = []
         for key, entry in _AXIS_REGISTRY.items():
             group_label = _GROUPS.get(entry.group, entry.group)
@@ -529,11 +544,11 @@ class Quant:
                 stock_note = " (종목 리스트)"
             rows.append(
                 {
-                    "그룹": group_label,
-                    "축": entry.label,
-                    "key": key,
-                    "설명": entry.description + stock_note,
-                    "예시": entry.example,
+                    "axis": key,
+                    "label": entry.label,
+                    "description": entry.description + stock_note,
+                    "example": entry.example,
+                    "group": group_label,
                 }
             )
         return pl.DataFrame(rows)

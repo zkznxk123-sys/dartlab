@@ -72,6 +72,8 @@ server = [
     "uvicorn[standard]>=0.30.0,<1",
     "sse-starlette>=2.0.0,<3",
     "mcp[cli]>=1.0",
+    "qrcode>=7.0,<9",
+    "pycloudflared>=0.3,<1",
 ]
 viz = ["plotly>=5.0.0,<6"]
 all = ["dartlab[ai,server,viz]"]

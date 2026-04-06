@@ -883,6 +883,7 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         from dartlab.review.builders import macroCycleBlock, valuationBandBlock
 
         if _need("macroCycle"):
+
             def _build_macro_cycle():
                 import dartlab as _dl
 

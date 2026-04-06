@@ -255,6 +255,15 @@ def _calcBeta(stock_df: pl.DataFrame, market_df: pl.DataFrame) -> dict | None:
     ss_tot = np.sum((sr - ym) ** 2)
     r_sq = 1 - ss_res / ss_tot if ss_tot > 0 else 0
 
+    # 베타 t-stat: SE(β) = √(MSE / Σ(mr-x̄)²)
+    n = len(sr)
+    t_beta = None
+    if n > 2 and var > 0:
+        mse = ss_res / (n - 2)
+        se_beta = np.sqrt(mse / var)
+        if se_beta > 0:
+            t_beta = float(beta / se_beta)
+
     # CAPM
     rf = 0.035
     mrp = 0.065
@@ -264,6 +273,7 @@ def _calcBeta(stock_df: pl.DataFrame, market_df: pl.DataFrame) -> dict | None:
         "value": round(beta, 3),
         "alpha": round(alpha * 252 * 100, 2),
         "rSquared": round(r_sq, 4),
+        "tStat": round(t_beta, 2) if t_beta is not None else None,
         "nObs": len(sr),
         "capm": capm,
     }

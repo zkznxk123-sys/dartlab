@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720">
+  <title>VSCode 마켓플레이스에서 DartLab 검색</title>
+  <desc>VSCode 확장 사이드바에서 dartlab을 검색하면 게시자 eddmpython의 DartLab 카드가 나오고 Install 버튼으로 설치할 수 있다</desc>
+  <defs>
+    <linearGradient id="bg141m" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0e1a"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="720" fill="url(#bg141m)" rx="16"/>
+
+  <text x="600" y="58" text-anchor="middle" fill="#e2e8f0" font-family="system-ui, sans-serif" font-size="22" font-weight="700">VSCode 확장 사이드바에서 검색하기</text>
+  <text x="600" y="86" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="14">Ctrl + Shift + X → "dartlab"</text>
+
+  <!-- VSCode 윈도우 mockup -->
+  <rect x="100" y="120" width="1000" height="560" rx="10" fill="#1e1e1e" stroke="#0e0e0e"/>
+
+  <!-- Title bar -->
+  <rect x="100" y="120" width="1000" height="32" rx="10" fill="#3c3c3c"/>
+  <circle cx="124" cy="136" r="6" fill="#ff5f57"/>
+  <circle cx="144" cy="136" r="6" fill="#febc2e"/>
+  <circle cx="164" cy="136" r="6" fill="#28c840"/>
+  <text x="600" y="141" text-anchor="middle" fill="#cccccc" font-family="system-ui, sans-serif" font-size="11">Visual Studio Code — Extensions</text>
+
+  <!-- Activity bar -->
+  <rect x="100" y="152" width="56" height="528" fill="#333333"/>
+  <g font-family="system-ui, sans-serif" font-size="11" fill="#858585">
+    <rect x="112" y="170" width="32" height="32" rx="3" fill="#252526"/>
+    <text x="128" y="190" text-anchor="middle">📁</text>
+    <rect x="112" y="210" width="32" height="32" rx="3" fill="#252526"/>
+    <text x="128" y="230" text-anchor="middle">🔍</text>
+    <rect x="112" y="250" width="32" height="32" rx="3" fill="#252526"/>
+    <text x="128" y="270" text-anchor="middle">⎇</text>
+    <rect x="108" y="290" width="40" height="36" rx="3" fill="#37373d" stroke="#fb923c" stroke-width="2"/>
+    <text x="128" y="313" text-anchor="middle" fill="#fdba74" font-size="14">▤</text>
+    <text x="128" y="345" text-anchor="middle" font-size="9" fill="#fdba74">Extensions</text>
+  </g>
+
+  <!-- Sidebar (Extensions panel) -->
+  <rect x="156" y="152" width="320" height="528" fill="#252526"/>
+
+  <text x="172" y="180" fill="#cccccc" font-family="system-ui, sans-serif" font-size="11" font-weight="700">EXTENSIONS: MARKETPLACE</text>
+
+  <!-- Search box -->
+  <rect x="172" y="196" width="288" height="30" rx="3" fill="#3c3c3c" stroke="#fb923c" stroke-width="1.5"/>
+  <text x="184" y="216" fill="#fdba74" font-family="monospace" font-size="13">dartlab</text>
+  <line x1="232" y1="204" x2="232" y2="220" stroke="#fdba74" stroke-width="1.5">
+    <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Result card 1: DartLab -->
+  <rect x="172" y="244" width="288" height="106" rx="4" fill="#37373d" stroke="#fb923c" stroke-width="2"/>
+  <rect x="184" y="256" width="48" height="48" rx="6" fill="#0f172a" stroke="#fb923c"/>
+  <text x="208" y="287" text-anchor="middle" fill="#fdba74" font-family="system-ui, sans-serif" font-size="22" font-weight="700">D</text>
+
+  <text x="244" y="270" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700">DartLab</text>
+  <text x="244" y="288" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">eddmpython</text>
+  <text x="244" y="306" fill="#cccccc" font-family="system-ui, sans-serif" font-size="10">DART · EDGAR AI 기업분석</text>
+
+  <rect x="184" y="316" width="60" height="22" rx="3" fill="#fb923c"/>
+  <text x="214" y="332" text-anchor="middle" fill="#0a0e1a" font-family="system-ui, sans-serif" font-size="11" font-weight="700">Install</text>
+  <text x="260" y="332" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="10">v0.2.2 · MIT</text>
+
+  <!-- Result card 2: gray placeholder -->
+  <rect x="172" y="362" width="288" height="80" rx="4" fill="#2d2d30"/>
+  <rect x="184" y="374" width="40" height="40" rx="4" fill="#3c3c3c"/>
+  <rect x="232" y="378" width="120" height="10" rx="2" fill="#3c3c3c"/>
+  <rect x="232" y="394" width="80" height="8" rx="2" fill="#3c3c3c"/>
+  <rect x="232" y="408" width="180" height="8" rx="2" fill="#3c3c3c"/>
+
+  <rect x="172" y="450" width="288" height="80" rx="4" fill="#2d2d30"/>
+  <rect x="184" y="462" width="40" height="40" rx="4" fill="#3c3c3c"/>
+  <rect x="232" y="466" width="120" height="10" rx="2" fill="#3c3c3c"/>
+  <rect x="232" y="482" width="80" height="8" rx="2" fill="#3c3c3c"/>
+  <rect x="232" y="496" width="160" height="8" rx="2" fill="#3c3c3c"/>
+
+  <!-- Editor area: extension detail -->
+  <rect x="476" y="152" width="624" height="528" fill="#1e1e1e"/>
+
+  <!-- Tab -->
+  <rect x="476" y="152" width="220" height="32" fill="#2d2d30"/>
+  <rect x="476" y="152" width="220" height="2" fill="#fb923c"/>
+  <text x="496" y="173" fill="#cccccc" font-family="system-ui, sans-serif" font-size="11">Extension: DartLab ×</text>
+
+  <!-- Detail header -->
+  <rect x="510" y="208" width="80" height="80" rx="10" fill="#0f172a" stroke="#fb923c" stroke-width="2"/>
+  <text x="550" y="260" text-anchor="middle" fill="#fdba74" font-family="system-ui, sans-serif" font-size="40" font-weight="700">D</text>
+
+  <text x="610" y="232" fill="#ffffff" font-family="system-ui, sans-serif" font-size="22" font-weight="700">DartLab</text>
+  <text x="610" y="256" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="13">eddmpython</text>
+  <text x="610" y="280" fill="#cccccc" font-family="system-ui, sans-serif" font-size="12">DART 전자공시 · EDGAR AI 기업분석</text>
+
+  <rect x="610" y="296" width="100" height="28" rx="3" fill="#fb923c"/>
+  <text x="660" y="315" text-anchor="middle" fill="#0a0e1a" font-family="system-ui, sans-serif" font-size="13" font-weight="700">Install</text>
+  <rect x="720" y="296" width="80" height="28" rx="3" fill="#3c3c3c"/>
+  <text x="760" y="315" text-anchor="middle" fill="#cccccc" font-family="system-ui, sans-serif" font-size="12">⚙</text>
+
+  <!-- Stats -->
+  <g font-family="system-ui, sans-serif" font-size="11" fill="#9d9d9d">
+    <text x="510" y="360">v0.2.2</text>
+    <text x="580" y="360">·  MIT License</text>
+    <text x="700" y="360">·  Python 3.12+</text>
+    <text x="510" y="382" fill="#cccccc">Categories:</text>
+    <rect x="588" y="370" width="86" height="18" rx="9" fill="#37373d"/>
+    <text x="631" y="383" text-anchor="middle">Data Science</text>
+    <rect x="682" y="370" width="48" height="18" rx="9" fill="#37373d"/>
+    <text x="706" y="383" text-anchor="middle">Other</text>
+  </g>
+
+  <!-- Description block -->
+  <rect x="510" y="412" width="560" height="240" rx="6" fill="#252526"/>
+  <text x="528" y="438" fill="#ffffff" font-family="system-ui, sans-serif" font-size="13" font-weight="700">주요 기능</text>
+  <g font-family="system-ui, sans-serif" font-size="12" fill="#cccccc">
+    <text x="528" y="464">▸ 종목코드 하나로 재무·공시·시장 데이터 자동 수집</text>
+    <text x="528" y="486">▸ AI가 Python 코드 작성하고 실행 → 표·차트 렌더링</text>
+    <text x="528" y="508">▸ 14축 재무분석: 수익성 · 안정성 · 현금흐름 · 신용평가</text>
+    <text x="528" y="530">▸ 7개 AI Provider (Gemini · Groq · Cerebras · OpenAI…)</text>
+    <text x="528" y="552">▸ MCP 자동 등록 → Claude Code · GitHub Copilot 공유</text>
+    <text x="528" y="574">▸ 슬래시 커맨드 · 단축키 · 대화 관리 · 워치리스트</text>
+  </g>
+
+  <text x="528" y="618" fill="#9d9d9d" font-family="system-ui, sans-serif" font-size="11">Requirement:</text>
+  <text x="610" y="618" fill="#fdba74" font-family="monospace" font-size="11">pip install dartlab  (Python 3.12+)</text>
+</svg>

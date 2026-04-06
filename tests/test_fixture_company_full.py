@@ -184,8 +184,14 @@ class TestCreditBasic:
         import polars as pl
 
         samsung._cache.clear()
+        # 무인자 → 가이드 DataFrame
+        guide = samsung.credit()
+        assert isinstance(guide, pl.DataFrame)
+        assert {"axis", "label", "description", "example"}.issubset(set(guide.columns))
+
+        # "등급" → 종합 등급 dict
         try:
-            result = samsung.credit()
+            result = samsung.credit("등급")
             assert result is None or isinstance(result, dict)
         except (
             RuntimeError,
@@ -205,9 +211,16 @@ class TestCreditBasic:
 
 class TestQuantBasic:
     def test_quant(self, samsung):
+        import polars as pl
+
+        # 무인자 → 가이드 DataFrame
+        guide = samsung.quant()
+        assert isinstance(guide, pl.DataFrame)
+        assert {"axis", "label", "description", "example"}.issubset(set(guide.columns))
+
+        # "종합" → verdict dict (주가 데이터 필요 — 없을 수 있음)
         try:
-            result = samsung.quant()
+            result = samsung.quant("종합")
             assert result is None or isinstance(result, dict)
         except (RuntimeError, ValueError, KeyError):
-            # 주가 데이터 필요 — fixture에 없을 수 있음
             pass

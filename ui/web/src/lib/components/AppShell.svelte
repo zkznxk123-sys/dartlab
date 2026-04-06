@@ -60,14 +60,20 @@
 	let rightPanelOpen = $state(true);
 	let rightPanelTab = $state("chat"); // "chat" | "data" | "history"
 	let sidebarOpen = $state(false); // 모바일용
-	let isMobile = $state(false);
+	// $effect가 일부 모바일 브라우저에서 미발화. 모듈 평가 시점에 즉시 + matchMedia listener.
+	let isMobile = $state(typeof window !== "undefined" && window.innerWidth < 768);
 
-	$effect(() => {
-		const check = () => { isMobile = window.innerWidth < 768; };
-		check();
-		window.addEventListener("resize", check);
-		return () => window.removeEventListener("resize", check);
-	});
+	if (typeof window !== "undefined") {
+		const mq = window.matchMedia("(max-width: 767px)");
+		const update = () => { isMobile = mq.matches; };
+		update();
+		try {
+			mq.addEventListener("change", update);
+		} catch (_) {
+			// Safari 13 이하 fallback
+			mq.addListener && mq.addListener(update);
+		}
+	}
 
 	// 대화가 있는지
 	let hasMessages = $derived(store?.messages?.length > 0);

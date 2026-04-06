@@ -14,16 +14,16 @@ pytestmark = pytest.mark.unit
 def test_cli_parser_has_15_commands():
     """공개 CLI 명령 15개 보호."""
     from dartlab.cli.parser import build_parser
+
     parser = build_parser()
     subparsers_action = None
     for action in parser._actions:
-        if hasattr(action, 'choices') and isinstance(action.choices, dict):
+        if hasattr(action, "choices") and isinstance(action.choices, dict):
             subparsers_action = action
             break
     assert subparsers_action is not None
     commands = list(subparsers_action.choices.keys())
-    expected = ['show', 'search', 'statement', 'profile', 'modules',
-                'ask', 'chat', 'collect', 'status', 'setup', 'mcp']
+    expected = ["show", "search", "statement", "profile", "modules", "ask", "chat", "collect", "status", "setup", "mcp"]
     for cmd in expected:
         assert cmd in commands, f"CLI 명령 누락: {cmd}"
 
@@ -31,4 +31,5 @@ def test_cli_parser_has_15_commands():
 def test_cli_main_entry_callable():
     """dartlab.cli.main.main 진입점 존재 보호."""
     from dartlab.cli.main import main
+
     assert callable(main)

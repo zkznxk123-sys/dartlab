@@ -20,7 +20,112 @@ _PRESETS = {
     "dividend": {"desc": "배당주: DPS > 0 (배당 지급 종목)"},
     "momentum": {"desc": "모멘텀: 가격 데이터 필요 — dartlab.quant('모멘텀', code) 사용", "price_only": True},
     "lowvol": {"desc": "저변동: 가격 데이터 필요 — dartlab.quant('변동성', code) 사용", "price_only": True},
+    "breakout_240w": {
+        "desc": "주봉 240SMA 상향 돌파 (장기 추세 전환)",
+        "price_based": True,
+        "sma_period": 240,
+        "freq": "W",
+    },
+    "breakout_60d": {"desc": "일봉 60SMA 상향 돌파", "price_based": True, "sma_period": 60, "freq": "D"},
+    "golden_cross": {"desc": "골든크로스 (5SMA > 20SMA)", "price_based": True, "sma_short": 5, "sma_long": 20},
+    "ma_aligned": {"desc": "이평선 정배열 (5>20>60>120)", "price_based": True, "ma_align": True},
 }
+
+
+def _screen_price_based(preset: str, market: str, universe: list[str] | None = None) -> dict:
+    """가격 기반 프리셋 — 종목 풀에 대해 SMA 계산.
+
+    universe가 None이면 시총 상위 100종목으로 제한 (성능).
+    """
+    cfg = _PRESETS[preset]
+    result: dict = {"market": market, "preset": preset, "criteria": cfg["desc"]}
+
+    # 종목 풀 결정
+    if universe is None:
+        try:
+            from dartlab.gather.listing import getTopStocks
+
+            universe = getTopStocks(market=market, limit=100)
+        except (ImportError, AttributeError):
+            try:
+                from dartlab import listing
+
+                df = listing(market=market) if callable(listing) else None
+                universe = df.head(100)["stockCode"].to_list() if df is not None else []
+            except (ImportError, AttributeError, KeyError):
+                universe = []
+
+    if not universe:
+        return {**result, "error": "종목 풀 로드 실패", "stocks": []}
+
+    from dartlab.quant._helpers import fetch_ohlcv
+
+    passed = []
+    for code in universe:
+        try:
+            ohlcv = fetch_ohlcv(code)
+            if ohlcv is None or ohlcv.is_empty():
+                continue
+            closes = ohlcv.get_column("close").to_list()
+            if cfg.get("ma_align"):
+                if len(closes) < 120:
+                    continue
+                sma5 = sum(closes[-5:]) / 5
+                sma20 = sum(closes[-20:]) / 20
+                sma60 = sum(closes[-60:]) / 60
+                sma120 = sum(closes[-120:]) / 120
+                if sma5 > sma20 > sma60 > sma120:
+                    passed.append(
+                        {
+                            "stockCode": code,
+                            "currentPrice": closes[-1],
+                            "sma5": round(sma5, 2),
+                            "sma20": round(sma20, 2),
+                            "sma60": round(sma60, 2),
+                            "sma120": round(sma120, 2),
+                        }
+                    )
+            elif "sma_short" in cfg:
+                short_p = cfg["sma_short"]
+                long_p = cfg["sma_long"]
+                if len(closes) < long_p + 1:
+                    continue
+                sma_s_now = sum(closes[-short_p:]) / short_p
+                sma_l_now = sum(closes[-long_p:]) / long_p
+                sma_s_prev = sum(closes[-short_p - 1 : -1]) / short_p
+                sma_l_prev = sum(closes[-long_p - 1 : -1]) / long_p
+                if sma_s_now > sma_l_now and sma_s_prev <= sma_l_prev:
+                    passed.append(
+                        {
+                            "stockCode": code,
+                            "currentPrice": closes[-1],
+                            f"sma{short_p}": round(sma_s_now, 2),
+                            f"sma{long_p}": round(sma_l_now, 2),
+                        }
+                    )
+            else:
+                period = cfg["sma_period"]
+                # 주봉 변환은 단순화: 일봉의 5배 윈도우
+                window = period * 5 if cfg.get("freq") == "W" else period
+                if len(closes) < window + 1:
+                    continue
+                sma_now = sum(closes[-window:]) / window
+                sma_prev = sum(closes[-window - 1 : -1]) / window
+                # 돌파: 어제 종가 ≤ SMA, 오늘 종가 > SMA
+                if closes[-1] > sma_now and closes[-2] <= sma_prev:
+                    passed.append(
+                        {
+                            "stockCode": code,
+                            "currentPrice": closes[-1],
+                            f"sma{period}{cfg.get('freq', 'D')}": round(sma_now, 2),
+                        }
+                    )
+        except (KeyError, ValueError, TypeError, AttributeError, IndexError):
+            continue
+
+    result["stocks"] = passed
+    result["count"] = len(passed)
+    return result
 
 
 def _parse(val) -> float | None:
@@ -42,6 +147,9 @@ def analyze_screen(*, market: str = "KR", preset: str = "quality", stockCode: st
 
     if cfg.get("price_only"):
         return {**result, "info": cfg["desc"]}
+
+    if cfg.get("price_based"):
+        return _screen_price_based(preset, market)
 
     if preset == "dividend":
         return _screen_dividend(result, market, stockCode)

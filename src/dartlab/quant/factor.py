@@ -1,13 +1,21 @@
-"""팩터 분해 — Fama-French 5 + q-factor 프록시.
-
-scan 공개 API(dartlab.scan)로 전종목 횡단면 데이터를 가져와 팩터 프록시를 구성하고,
-단일 종목의 수익률을 팩터에 회귀하여 로딩과 알파를 분해한다.
+"""팩터 분해 — book-based 횡단면 SMB/HML/RMW/CMA로 회귀.
 
 학술 근거:
 - Fama & French (2015): 5-factor model (MKT, SMB, HML, RMW, CMA)
-- Hou, Xue, Zhang (2015): q-factor model (ROE, I/A)
+- Hou, Xue, Zhang (2015): q-factor model (별도 구현 예정, 현재는 FF5만)
 
-데이터 접근: dartlab.scan() 공개 API만 사용. 엔진 내부 import 금지.
+데이터 흐름:
+1. factorBuild.build_factors(market) — scan finance.parquet에서 5분위 포트폴리오
+   구성, 동일가중 평균 일별 log return → SMB/HML/RMW/CMA 시계열
+2. analyze_factor — 단일 종목 vs (MKT + 빌드된 팩터) 다변수 OLS
+
+이전 버전(2026-04-06 이전)은 변동성 합성 가짜 프록시를 사용했고 audit에서 진짜
+SMB와 음의 상관(−0.51)이 발견됨. 이번 재구현으로 폐기. 자세한 내용은
+data/dart/auditQuant/factor.md 참조.
+
+⚠️ 한계:
+- size proxy = book equity (시가총액 데이터 미수집). 시총 인프라 추가 후 진짜 시총으로 교체.
+- BM proxy = equity/assets. 시총 부재로 진짜 BM 불가.
 """
 
 from __future__ import annotations
@@ -23,72 +31,85 @@ log = logging.getLogger(__name__)
 
 
 def analyze_factor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> dict:
-    """Fama-French 5팩터 + q-factor 분해.
+    """진짜 횡단면 팩터 시계열로 단일 종목 회귀.
 
     Args:
         stockCode: 종목코드 또는 ticker.
         market: "KR" | "US" | "auto".
 
     Returns:
-        dict with MKT/SMB/HML/RMW/CMA 로딩, 알파, R², 횡단면 위치.
+        dict — MKT/SMB/HML/RMW/CMA 로딩 + alpha + R² + 데이터 적정성 + 한계 명시.
     """
     market = resolve_market(stockCode, market)
 
     ohlcv = fetch_ohlcv(stockCode, **kwargs)
     if ohlcv is None or ohlcv.is_empty():
         return {"error": f"{stockCode} 주가 데이터 없음"}
-
     arr = ohlcv_to_arrays(ohlcv)
     close = arr.get("close")
     if close is None or len(close) < 60:
         return {"error": f"{stockCode} 데이터 부족 (최소 60일)"}
+    stock_ret = np.diff(np.log(close))
 
-    stock_returns = np.diff(np.log(close))
-
-    # 벤치마크 (MKT factor)
     bench = fetch_benchmark(market)
     if bench is None or bench.is_empty():
         return {"error": "벤치마크 데이터 없음"}
     bench_close = ohlcv_to_arrays(bench).get("close")
     if bench_close is None:
         return {"error": "벤치마크 close 없음"}
+    bench_ret = np.diff(np.log(bench_close))
 
-    bench_returns = np.diff(np.log(bench_close))
-    min_len = min(len(stock_returns), len(bench_returns))
-    if min_len < 30:
-        return {"error": "공통 기간 부족"}
+    # 진짜 횡단면 팩터 시계열 빌드/로드
+    if market == "KR":
+        from dartlab.quant.factorBuild import build_factors
 
-    stock_ret = stock_returns[-min_len:]
-    mkt_ret = bench_returns[-min_len:]
+        factors = build_factors(market)
+    else:
+        factors = None  # US는 후순위
 
-    result: dict = {"stockCode": stockCode, "market": market, "dataPoints": min_len}
+    if factors is None:
+        # fallback: 1-factor CAPM (MKT만)
+        return _capm_fallback(stockCode, market, stock_ret, bench_ret)
 
-    # scan 공개 API로 횡단면 팩터 위치 수집
-    exposures = _get_cross_sectional_position(stockCode, market)
+    smb = factors["smb"]
+    hml = factors["hml"]
+    rmw = factors.get("rmw")
+    cma = factors.get("cma")
 
-    # 조건부 팩터 프록시 구성
-    vol_20 = _rolling_std(mkt_ret, 20)
-    med_vol = np.nanmedian(vol_20)
-    high_vol = vol_20 > med_vol
-    up = mkt_ret > 0
+    # 길이 정렬
+    ml = min(len(stock_ret), len(bench_ret), len(smb), len(hml))
+    if rmw is not None:
+        ml = min(ml, len(rmw))
+    if cma is not None:
+        ml = min(ml, len(cma))
+    if ml < 30:
+        return {"error": f"공통 기간 부족 ({ml}일)"}
 
-    # SMB: 고변동성 날 소형주 프리미엄 강화
-    smb = np.where(high_vol, mkt_ret * 0.3, mkt_ret * (-0.1))
-    # HML: 하방 시장에서 가치 방어
-    hml = np.where(up, mkt_ret * (-0.1), mkt_ret * 0.2)
-    # RMW: 하방에서 퀄리티 방어
-    rmw = np.where(up, mkt_ret * 0.05, mkt_ret * (-0.3))
-    # CMA: 저변동에서 보수적 투자 아웃퍼폼
-    cma = np.where(high_vol, mkt_ret * (-0.15), mkt_ret * 0.1)
+    y = stock_ret[-ml:]
+    cols = [bench_ret[-ml:], smb[-ml:], hml[-ml:]]
+    names = ["MKT", "SMB", "HML"]
+    if rmw is not None:
+        cols.append(rmw[-ml:])
+        names.append("RMW")
+    if cma is not None:
+        cols.append(cma[-ml:])
+        names.append("CMA")
 
-    X = np.column_stack([mkt_ret, smb, hml, rmw, cma])
-    names = ["MKT", "SMB", "HML", "RMW", "CMA"]
+    X = np.column_stack(cols)
+    betas, alpha_val, r2, t_stats = _multi_ols(y, X)
 
-    betas, alpha_val, r2, t_stats = _multi_ols(stock_ret, X)
-
-    result["model"] = "FF5-proxy"
-    result["alpha"] = round(float(alpha_val * 252), 4)
-    result["rSquared"] = round(float(r2), 4)
+    result: dict = {
+        "stockCode": stockCode,
+        "market": market,
+        "model": f"FF{len(names)}-real" if rmw is not None and cma is not None else f"FF{len(names)}",
+        "dataPoints": int(ml),
+        "dataAdequacy": "low" if ml < 252 else "ok",
+        "alpha": round(float(alpha_val * 252), 4),
+        "rSquared": round(float(r2), 4),
+        "factorYear": factors["year"],
+        "factorUniverse": factors["universe"],
+        "factorNotes": factors.get("notes"),
+    }
 
     for i, name in enumerate(names):
         result[name] = {
@@ -102,54 +123,83 @@ def analyze_factor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> di
         contributions[name] = round(float(betas[i] * np.mean(X[:, i]) * 252), 4)
     result["contributions"] = contributions
 
-    # 횡단면 위치
-    if exposures:
-        result["crossSectionalPosition"] = exposures
-
-    # 해석
     result["interpretation"] = _interpret(result, names)
 
     return result
 
 
-def _get_cross_sectional_position(stockCode: str, market: str) -> dict:
-    """scan 프리빌드 parquet에서 이 종목의 횡단면 위치 (백분위) 산출.
+def factor_exposure_limits(loadings: dict, *, limits: dict | None = None) -> dict:
+    """팩터 익스포저 한도 체크 (책 7장 — 팩터 리스크 관리).
 
-    dartlab.scan() 호출 없음 — 데이터 파일만 직접 읽음.
+    Args:
+        loadings: {factor_name: loading_value} (analyze_factor 결과의 항목)
+        limits: {factor_name: max_abs}. None이면 기본값 사용.
+
+    Returns:
+        dict — 각 팩터의 |loading|, 한도 초과 여부, 권장 헤지비율.
     """
-    from dartlab.quant._helpers import load_scan_parquet, stock_percentile
+    if limits is None:
+        # 기본: MKT 1.5, 나머지 0.5 (보수적)
+        limits = {"MKT": 1.5, "SMB": 0.5, "HML": 0.5, "RMW": 0.5, "CMA": 0.5}
 
-    exposures = {}
-
-    # RMW: ROE 백분위 — scan/report/ 하위에서 탐색
-    prof_lf = load_scan_parquet("finance", market)
-    if prof_lf is not None:
-        # finance.parquet에서 ROE 직접 계산은 복잡 — report parquet 사용
-        pass
-
-    # 가용한 report parquet에서 횡단면 위치 추출
-    for parquet_name, col_name, factor_key, label, reverse in [
-        ("dividend", "DPS", "HML", "배당가치", False),
-        ("employee", "평균급여", "SMB", "기업규모", False),
-    ]:
-        lf = load_scan_parquet(parquet_name, market)
-        if lf is not None:
-            val, pct = stock_percentile(lf, stockCode, col_name)
-            if val is not None and pct is not None:
-                exposures[factor_key] = {
-                    "value": round(val, 2),
-                    "percentile": pct,
-                    "label": label,
+    breaches = []
+    for name, lim in limits.items():
+        info = loadings.get(name)
+        if not isinstance(info, dict):
+            continue
+        ld = float(info.get("loading", 0))
+        if abs(ld) > lim:
+            # 헤지: 초과분만큼 반대 방향
+            hedge_size = -(ld - np.sign(ld) * lim)
+            breaches.append(
+                {
+                    "factor": name,
+                    "loading": ld,
+                    "limit": lim,
+                    "excess": round(ld - np.sign(ld) * lim, 4),
+                    "hedgeSize": round(float(hedge_size), 4),
                 }
+            )
 
-    return exposures
+    return {"limits": limits, "breaches": breaches, "compliant": len(breaches) == 0}
 
 
-def _rolling_std(arr: np.ndarray, window: int) -> np.ndarray:
-    result = np.full(len(arr), np.nan)
-    for i in range(window - 1, len(arr)):
-        result[i] = np.std(arr[i - window + 1 : i + 1])
-    return result
+def hedge_ratio(target_loading: float, hedge_loading: float) -> float:
+    """단일 팩터 헤지비율 — target / hedge.
+
+    예: 포트의 SMB loading +0.8을 헤지하려면 SMB-vehicle의 SMB loading이
+    +1.0인 경우 hedge_ratio = -0.8 (포트 1당 hedge -0.8).
+    """
+    if hedge_loading == 0:
+        return 0.0
+    return float(-target_loading / hedge_loading)
+
+
+def _capm_fallback(stockCode: str, market: str, sr: np.ndarray, br: np.ndarray) -> dict:
+    """팩터 빌드 실패 시 1-factor CAPM."""
+    ml = min(len(sr), len(br))
+    if ml < 30:
+        return {"error": "공통 기간 부족"}
+    y = sr[-ml:]
+    x = br[-ml:]
+    cov = float(np.cov(y, x, ddof=1)[0, 1])
+    var = float(np.var(x, ddof=1))
+    beta = cov / var if var > 0 else 0
+    alpha = float(np.mean(y) - beta * np.mean(x))
+    yhat = alpha + beta * x
+    ss_res = float(np.sum((y - yhat) ** 2))
+    ss_tot = float(np.sum((y - np.mean(y)) ** 2))
+    r2 = 1 - ss_res / ss_tot if ss_tot > 0 else 0
+    return {
+        "stockCode": stockCode,
+        "market": market,
+        "model": "CAPM-fallback",
+        "info": "factorBuild 실패 → 1-factor CAPM으로 fallback",
+        "dataPoints": int(ml),
+        "MKT": {"loading": round(beta, 4), "tstat": None},
+        "alpha": round(alpha * 252, 4),
+        "rSquared": round(r2, 4),
+    }
 
 
 def _multi_ols(y, X):
@@ -198,9 +248,9 @@ def _interpret(result: dict, names: list[str]) -> list[str]:
         elif sig:
             labels = {
                 "SMB": ("소형주 특성", "대형주 특성"),
-                "HML": ("가치주", "성장주"),
-                "RMW": ("고수익성", "저수익성"),
-                "CMA": ("보수적 투자", "공격적 투자"),
+                "HML": ("고BM(가치)", "저BM(성장)"),
+                "RMW": ("고수익성(profitable)", "저수익성(weak)"),
+                "CMA": ("보수적 투자(conservative)", "공격적 투자(aggressive)"),
             }
             pos, neg = labels.get(name, ("양", "음"))
             interp.append(pos if ld > 0 else neg)

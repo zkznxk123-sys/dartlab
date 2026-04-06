@@ -1599,8 +1599,7 @@ class Company:
                 available = []
             hint = f"\n  사용 가능한 topic 일부: {', '.join(available)}" if available else ""
             raise ValueError(
-                f"'{topic}' topic 을 찾을 수 없습니다 (EDGAR).{hint}\n"
-                f"  전체 목록: c.topics 또는 c.index 로 확인하세요."
+                f"'{topic}' topic 을 찾을 수 없습니다 (EDGAR).{hint}\n  전체 목록: c.topics 또는 c.index 로 확인하세요."
             )
 
         if block is None:

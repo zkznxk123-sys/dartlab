@@ -15,6 +15,9 @@
 -->
 <script>
 	import "./app.css";
+	import { onMount } from "svelte";
+	import { isDebugEnabled } from "$lib/debug.js";
+	import DebugOverlay from "$lib/components/DebugOverlay.svelte";
 	import { askStream, fetchAiSuggestions } from "$lib/api.js";
 	import {
 		buildConversationHistory,
@@ -25,7 +28,7 @@
 	import { createSwipeHandler } from "$lib/utils.js";
 	import { createConversationsStore } from "$lib/stores/conversations.svelte.js";
 	import { createWorkspaceStore } from "$lib/stores/workspace.svelte.js";
-	import { createUiStore } from "$lib/stores/ui.svelte.js";
+	import { getUiStore } from "$lib/stores/ui.svelte.js";
 	import Sidebar from "$lib/components/Sidebar.svelte";
 	import EmptyState from "$lib/components/EmptyState.svelte";
 	import ChatArea from "$lib/components/ChatArea.svelte";
@@ -40,7 +43,7 @@
 	import { isVSCode } from "$lib/api/transport.js";
 
 	// ── Stores ──
-	const ui = createUiStore();
+	const ui = getUiStore();
 	const store = createConversationsStore();
 	const workspace = createWorkspaceStore();
 
@@ -106,8 +109,12 @@
 	// provider 유효성은 ProviderDropdown과 sendMessage에서 개별 판단
 
 	// ── Init ──
-	let statusLoaded = false;
-	$effect(() => { if (!statusLoaded) { statusLoaded = true; ui.loadStatus(); } });
+	// onMount: 컴포넌트가 DOM에 부착된 직후 1회만 실행. iOS Safari에서도 안정적.
+	// 기존 $effect 패턴은 의존성 추적 컨텍스트가 모호해 일부 모바일 브라우저에서 첫 발화가 누락되는 사례 보고.
+	const isDebug = isDebugEnabled();
+	onMount(() => {
+		ui.loadStatus();
+	});
 
 	$effect(() => {
 		ui.checkMobile();
@@ -502,3 +509,6 @@
 />
 <DeleteDialog {ui} onConfirm={confirmDelete} />
 <ToastNotification {ui} />
+{#if isDebug}
+	<DebugOverlay {ui} />
+{/if}

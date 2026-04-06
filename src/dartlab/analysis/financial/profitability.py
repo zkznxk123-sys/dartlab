@@ -6,6 +6,8 @@ select()로 IS/BS 원본 계정을 가져와서
 
 from __future__ import annotations
 
+from typing import Any
+
 from dartlab.analysis.financial._helpers import (
     MAX_RATIO_YEARS,
     annualColsFromPeriods,
@@ -131,16 +133,17 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
 
         history.append(row)
 
-    result = {"history": history} if history else None
-    if result and isFinancial:
+    if not history:
+        return None
+    result: dict[str, Any] = {"history": history}
+    if isFinancial:
         result["isFinancial"] = True
-    if result:
-        # R22-2: AI 가 표 만들 때 핵심 컬럼을 빠뜨리지 않도록 명시.
-        # 사용자가 "수익성" 물었으면 마진율 (operatingMargin/netMargin/grossMargin) 이 핵심.
-        result["displayHints"] = {
-            "core": ["period", "revenue", "operatingMargin", "netMargin", "grossMargin"],
-            "note": "수익성 응답 시 operatingMargin/netMargin/grossMargin 컬럼을 표에 반드시 포함",
-        }
+    # R22-2: AI 가 표 만들 때 핵심 컬럼을 빠뜨리지 않도록 명시.
+    # 사용자가 "수익성" 물었으면 마진율 (operatingMargin/netMargin/grossMargin) 이 핵심.
+    result["displayHints"] = {
+        "core": ["period", "revenue", "operatingMargin", "netMargin", "grossMargin"],
+        "note": "수익성 응답 시 operatingMargin/netMargin/grossMargin 컬럼을 표에 반드시 포함",
+    }
     return result
 
 

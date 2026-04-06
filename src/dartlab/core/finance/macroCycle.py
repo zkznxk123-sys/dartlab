@@ -40,9 +40,12 @@ class TransitionSignal:
     progress: int  # 0-100 (발현된 신호 비율)
     triggered: tuple[str, ...]  # 이미 발현된 신호
     pending: tuple[str, ...]  # 아직 발현 안 된 신호
+    sequenceOrder: tuple[tuple[str, str | None], ...] = ()  # (신호명, 최초발현일) 발현 순서대로
+    orderValid: bool | None = None  # 시퀀스 순서 준수 여부 (None=시계열 없어 판단 불가)
 
     def __repr__(self) -> str:
-        return f"{PHASE_LABELS.get(self.fromPhase, self.fromPhase)}→{PHASE_LABELS.get(self.toPhase, self.toPhase)} {self.progress}%"
+        order_mark = "" if self.orderValid is None else (" ✓순서" if self.orderValid else " ✗역전")
+        return f"{PHASE_LABELS.get(self.fromPhase, self.fromPhase)}→{PHASE_LABELS.get(self.toPhase, self.toPhase)} {self.progress}%{order_mark}"
 
 
 @dataclass(frozen=True)
@@ -63,6 +66,27 @@ class GoldDrivers:
     dollarEffect: str  # "상승압력" | "하락압력" | "중립"
     safeHavenEffect: str  # "상승압력" | "중립"
     dominant: str  # 지배적 요인
+
+
+@dataclass(frozen=True)
+class FxDrivers:
+    """환율 3요인 분해 해석."""
+
+    rateDiffEffect: str  # "원화약세" | "원화강세" | "중립"
+    tradeEffect: str  # "원화강세" | "원화약세" | "중립"
+    riskEffect: str  # "원화약세" | "원화강세" | "중립"
+    dominant: str  # 지배적 요인
+    divergence: str | None  # 금리차-환율 방향 불일치 시 설명, 없으면 None
+
+
+@dataclass(frozen=True)
+class MarketValuation:
+    """시장 레벨 밸류에이션."""
+
+    buffettIndicator: float  # 시가총액/GDP (%)
+    zone: str  # "deep_value" | "undervalued" | "fair" | "overvalued" | "extreme"
+    zoneLabel: str  # "극단저평가" | "저평가" | "적정" | "고평가" | "극단고평가"
+    description: str
 
 
 @dataclass(frozen=True)
@@ -623,6 +647,7 @@ _TRANSITION_SEQUENCES: dict[tuple[str, str], tuple[str, ...]] = {
 def detectTransitionSequence(
     currentPhase: str,
     indicators: dict[str, float | None],
+    history: dict[str, list[tuple[str, float]]] | None = None,
 ) -> TransitionSignal | None:
     """현재 국면에서 다음 국면으로의 전환 시퀀스를 감지.
 
@@ -634,6 +659,10 @@ def detectTransitionSequence(
             - long_rate_change: 장기금리 3개월 변화 (%p)
             - vix: VIX 수준
             - term_spread: 장단기 스프레드 (%)
+        history: 시계열 이력 — {시리즈명: [(날짜str, 값), ...]} 형태.
+            시퀀스 순서 검증에 사용. None이면 순서 검증 생략.
+            예: {"hy_spread": [("2025-01", 450), ("2025-02", 420), ...],
+                 "gold_yoy": [("2025-01", 5.2), ...]}
 
     Returns:
         TransitionSignal 또는 전환 징후 없으면 None
@@ -688,13 +717,80 @@ def detectTransitionSequence(
         return None
 
     progress = round(len(triggered) / len(sequence) * 100)
+
+    # 시계열 이력이 있으면 각 신호의 최초 발현 시점 추적 + 순서 검증
+    sequence_order: list[tuple[str, str | None]] = []
+    order_valid: bool | None = None
+
+    if history and len(triggered) >= 2:
+        first_dates = _find_first_trigger_dates(sequence, signal_checks, history)
+        sequence_order = [(sig, first_dates.get(sig)) for sig in triggered]
+        # 발현 시점이 있는 신호들만 순서 검증
+        dated = [(sig, d) for sig, d in sequence_order if d is not None]
+        if len(dated) >= 2:
+            order_valid = all(dated[i][1] <= dated[i + 1][1] for i in range(len(dated) - 1))
+
     return TransitionSignal(
         fromPhase=currentPhase,
         toPhase=nextPhase,
         progress=progress,
         triggered=tuple(triggered),
         pending=tuple(pending),
+        sequenceOrder=tuple(sequence_order),
+        orderValid=order_valid,
     )
+
+
+# 신호→시계열 매핑: 어떤 시계열에서 어떤 조건을 찾아야 하는지
+_SIGNAL_SERIES_MAP: dict[str, tuple[str, str, float]] = {
+    # signal_name: (series_key, comparison, threshold)
+    # comparison: "lt" (less than) / "gt" (greater than) / "abs_lt"
+    "hy_spread_declining": ("hy_spread_3m_change", "lt", -30),
+    "hy_spread_widening": ("hy_spread_3m_change", "gt", 50),
+    "hy_spread_stable": ("hy_spread_3m_change", "abs_lt", 30),
+    "gold_declining": ("gold_yoy", "lt", -3),
+    "gold_surging": ("gold_yoy", "gt", 15),
+    "long_rate_rising": ("long_rate_change", "gt", 0.2),
+    "vix_stable": ("vix", "lt", 18),
+    "vix_rising": ("vix", "gt", 22),
+    "vix_spiking": ("vix", "gt", 30),
+    "term_spread_normalizing": ("term_spread", "gt", 0.5),
+    "term_spread_flattening": ("term_spread", "gt", 0),  # 0 < ts < 0.5 — gt 0만 체크
+    "term_spread_inverted": ("term_spread", "lt", 0),
+    "bei_rising": ("bei_10y", "gt", 2.3),
+    "bei_overheating": ("bei_10y", "gt", 2.8),
+}
+
+
+def _find_first_trigger_dates(
+    sequence: tuple[str, ...],
+    signal_checks: dict[str, bool],
+    history: dict[str, list[tuple[str, float]]],
+) -> dict[str, str]:
+    """발현된 신호의 최초 트리거 날짜를 시계열에서 역추적."""
+    result: dict[str, str] = {}
+    for signal_name in sequence:
+        if not signal_checks.get(signal_name, False):
+            continue
+        mapping = _SIGNAL_SERIES_MAP.get(signal_name)
+        if mapping is None:
+            continue
+        series_key, comparison, threshold = mapping
+        ts_data = history.get(series_key)
+        if not ts_data:
+            continue
+        # 시계열을 순방향으로 탐색하여 조건이 처음 충족된 날짜 찾기
+        for date_str, value in ts_data:
+            if comparison == "lt" and value < threshold:
+                result[signal_name] = date_str
+                break
+            elif comparison == "gt" and value > threshold:
+                result[signal_name] = date_str
+                break
+            elif comparison == "abs_lt" and abs(value) < threshold:
+                result[signal_name] = date_str
+                break
+    return result
 
 
 # ══════════════════════════════════════
@@ -707,6 +803,7 @@ def decomposeLongRate(
     bei: float,
     tips: float,
     fed_funds: float | None = None,
+    acm_term_premium: float | None = None,
 ) -> RateDecomposition:
     """10년 명목금리를 3요소로 분해 (DKW 모델 근사).
 
@@ -715,12 +812,18 @@ def decomposeLongRate(
         bei: 10년 BEI T10YIE (%)  — 기대인플레이션
         tips: 10년 TIPS DFII10 (%) — 실질금리
         fed_funds: 정책금리 (%) — 기간프리미엄 보정용 (optional)
+        acm_term_premium: Adrian-Crump-Moench 10년 기간프리미엄 (%).
+            FRED THREEFYTP10에서 수집. None이면 잔차 근사.
 
     Returns:
         RateDecomposition
     """
-    # 기간프리미엄 = 명목 - BEI - TIPS 실질금리의 잔차 근사
-    term_premium = nominal - bei - tips
+    if acm_term_premium is not None:
+        # ACM 모델 기간프리미엄 사용 (NY Fed 추정치)
+        term_premium = acm_term_premium
+    else:
+        # 잔차 근사: 명목 - BEI - TIPS
+        term_premium = nominal - bei - tips
     return RateDecomposition(
         nominal=round(nominal, 3),
         expectedInflation=round(bei, 3),
@@ -875,6 +978,144 @@ def copperGoldRatio(
         return CopperGoldSignal(
             round(ratio, 4), "stable", "안정", "neutral", f"Cu/Au {ratio:.4f} ({change_pct:+.1f}%) — 안정"
         )
+
+
+# ══════════════════════════════════════
+# 환율 3요인 분해
+# ══════════════════════════════════════
+
+
+def interpretFxDrivers(
+    fx_change_pct: float,
+    rate_diff_change: float | None = None,
+    trade_balance_yoy: float | None = None,
+    vix: float | None = None,
+    vix_change: float | None = None,
+) -> FxDrivers:
+    """환율 변동의 3요인 분해 해석.
+
+    환율 = f(양국금리차, 무역수지, 위험선호도)
+    금리차 확대 → 자본유출 → 원화약세
+    무역흑자 확대 → 달러유입 → 원화강세
+    VIX 상승 → 위험회피 → 원화약세 (EM 통화 특성)
+
+    Args:
+        fx_change_pct: 환율 변화율 (%, 양수=원화약세)
+        rate_diff_change: 한미 금리차 변화 (%p, 양수=미국금리상대상승)
+        trade_balance_yoy: 무역수지 YoY 변화 (%, 양수=흑자확대)
+        vix: VIX 수준
+        vix_change: VIX 변화 (pts)
+
+    Returns:
+        FxDrivers
+    """
+    # 1) 금리차 요인
+    if rate_diff_change is not None and rate_diff_change > 0.2:
+        rd_effect = "원화약세"
+    elif rate_diff_change is not None and rate_diff_change < -0.2:
+        rd_effect = "원화강세"
+    else:
+        rd_effect = "중립"
+
+    # 2) 무역수지 요인
+    if trade_balance_yoy is not None and trade_balance_yoy > 10:
+        trade_effect = "원화강세"
+    elif trade_balance_yoy is not None and trade_balance_yoy < -10:
+        trade_effect = "원화약세"
+    else:
+        trade_effect = "중립"
+
+    # 3) 위험선호도 요인 (VIX 기반)
+    if vix is not None and vix > 25:
+        risk_effect = "원화약세"
+    elif vix is not None and vix < 15:
+        risk_effect = "원화강세"
+    else:
+        risk_effect = "중립"
+
+    # 지배적 요인 판별
+    effects = {"금리차": rd_effect, "무역수지": trade_effect, "위험선호도": risk_effect}
+    # fx_change_pct가 양수(약세)인데 어느 요인이 약세 방향인지
+    fx_direction = "원화약세" if fx_change_pct > 0 else "원화강세"
+    matching = [name for name, eff in effects.items() if eff == fx_direction and eff != "중립"]
+    if matching:
+        dominant = matching[0]  # 일치하는 첫 요인
+    elif any(v != "중립" for v in effects.values()):
+        dominant = next(name for name, eff in effects.items() if eff != "중립")
+    else:
+        dominant = "미확인"
+
+    # 금리차-환율 방향 불일치 감지
+    divergence = None
+    if rate_diff_change is not None and abs(fx_change_pct) > 2:
+        rd_implied = "원화약세" if rate_diff_change > 0.2 else ("원화강세" if rate_diff_change < -0.2 else "중립")
+        if rd_implied != "중립" and rd_implied != fx_direction:
+            divergence = f"금리차는 {rd_implied} 방향이나 환율은 {fx_direction} → 비금리 요인(무역수지, 자본유입) 지배"
+
+    return FxDrivers(
+        rateDiffEffect=rd_effect,
+        tradeEffect=trade_effect,
+        riskEffect=risk_effect,
+        dominant=dominant,
+        divergence=divergence,
+    )
+
+
+# ══════════════════════════════════════
+# 시장 레벨 밸��에이션 (Buffett Indicator)
+# ══════════════════════════════════════
+
+
+def marketLevelValuation(
+    total_market_cap: float,
+    gdp: float,
+) -> MarketValuation:
+    """Buffett Indicator: 시가총액/GDP 비율로 시장 전체 밸류에이션 판정.
+
+    Warren Buffett이 "가장 좋은 단일 지표"라고 언급한 시장 레벨 척도.
+    WILL5000PRFC(Wilshire 5000 시가총액) / GDP(명목).
+
+    역사적 범위 (미국):
+    - <70%: 극단 저평가 (2009, 2020 바닥)
+    - 70-100%: 저평가 (장기 평균 수준)
+    - 100-140%: 적정 (현대 평균)
+    - 140-180%: 고평가
+    - >180%: 극단 고평가 (닷컴, 2021)
+
+    Args:
+        total_market_cap: 전체 시가총액 (Billions $) — WILL5000PRFC
+        gdp: 명목 GDP (Billions $) — GDP
+
+    Returns:
+        MarketValuation
+    """
+    if gdp <= 0:
+        return MarketValuation(0, "fair", "판별불가", "GDP 데이터 없음")
+
+    ratio = (total_market_cap / gdp) * 100
+
+    if ratio < 70:
+        zone, label = "deep_value", "극단저평가"
+        desc = f"Buffett Indicator {ratio:.0f}% — 시장 극단 저평가 (역사적 바닥 수준)"
+    elif ratio < 100:
+        zone, label = "undervalued", "저평가"
+        desc = f"Buffett Indicator {ratio:.0f}% — 시장 저평가 (장기 평균 하회)"
+    elif ratio < 140:
+        zone, label = "fair", "적정"
+        desc = f"Buffett Indicator {ratio:.0f}% — 시장 적정 수준"
+    elif ratio < 180:
+        zone, label = "overvalued", "고평가"
+        desc = f"Buffett Indicator {ratio:.0f}% — 시장 고평가 (조정 위험 상승)"
+    else:
+        zone, label = "extreme", "극단고평가"
+        desc = f"Buffett Indicator {ratio:.0f}% — 시장 극단 고평가 (버블 경고)"
+
+    return MarketValuation(
+        buffettIndicator=round(ratio, 1),
+        zone=zone,
+        zoneLabel=label,
+        description=desc,
+    )
 
 
 # ══════════════════════════════════════

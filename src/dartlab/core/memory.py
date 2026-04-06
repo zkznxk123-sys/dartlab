@@ -140,54 +140,109 @@ def check_memory_and_gc(label: str = "") -> float:
 
 
 class BoundedCache:
-    """메모리 압박 감지 LRU 캐시.
+    """메모리 압박 감지 LRU 캐시 (thread-safe + pinned 키 보호).
 
     dict와 동일한 인터페이스(`in`, `[]`, `[]=`)를 제공하되,
     max_entries 초과 시 가장 오래된 항목을 제거하고
     주기적으로 프로세스 RSS를 체크하여 메모리 압박 시 용량을 축소한다.
 
+    [thread-safety] threading.RLock으로 모든 mutation 보호.
+    review/buildBlocks의 ThreadPoolExecutor 병렬 호출 안전.
+
+    [pinned] 외부 API 결과(_quant_ohlcv, _quant_benchmark 등)는 evict 면제.
+    작은 dict이고 재로드 비용이 크므로 메모리 압박 시에도 보존.
+
     ⚠ pressure_mb 기본값 800MB — Polars Company 2개 수준에서 이미 경고.
     """
 
-    __slots__ = ("_store", "_max", "_default_max", "_pressure_mb", "_put_count")
+    __slots__ = ("_store", "_max", "_default_max", "_pressure_mb", "_put_count", "_lock", "_pinned_prefixes")
 
     def __init__(self, max_entries: int = 30, pressure_mb: float = 800.0):
+        import threading
+
         self._store: OrderedDict[str, Any] = OrderedDict()
         self._max = max_entries
         self._default_max = max_entries
         self._pressure_mb = pressure_mb
         self._put_count = 0
+        self._lock = threading.RLock()
+        # pinned: 이 prefix로 시작하는 키는 evict하지 않음 (외부 API + 무거운 계산 결과 보호)
+        # review에서 여러 calc가 공유하는 핵심 캐시. 작은 dict이고 재로드 비용 큼.
+        self._pinned_prefixes: tuple[str, ...] = (
+            # 외부 API / 데이터 로드
+            "_quant_ohlcv",
+            "_quant_benchmark",
+            "_priceContext",
+            "_diffResult",
+            "_peerRanking",
+            "_estimateWacc",
+            "_estimateWacc_v2",
+            "_fetchBeta",
+            # 무거운 calc 결과 (review 안 다중 호출)
+            "_calcMarketBeta",
+            "_calcTechnicalVerdict",
+            "_calcTechnicalSignals",
+            "_calcMarketRisk",
+            "_calcMarketAnalysisFlags",
+            "_calcFundamentalDivergence",
+            "_calcRoicTimeline",
+            "_calcCreditMetrics",
+            "_calcCreditScore",
+            "_calcScorecard",
+            "_calcPeerRanking",
+            "_calcDisclosureChangeSummary",
+            "_calcKeyTopicChanges",
+        )
+
+    def _is_pinned(self, key: str) -> bool:
+        return any(key.startswith(p) for p in self._pinned_prefixes)
 
     def __contains__(self, key: str) -> bool:
-        return key in self._store
+        with self._lock:
+            return key in self._store
 
     def __getitem__(self, key: str) -> Any:
-        self._store.move_to_end(key)
-        return self._store[key]
+        with self._lock:
+            self._store.move_to_end(key)
+            return self._store[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
-        if key in self._store:
-            self._store.move_to_end(key)
+        with self._lock:
+            if key in self._store:
+                self._store.move_to_end(key)
+                self._store[key] = value
+                return
             self._store[key] = value
-            return
-        self._store[key] = value
-        self._put_count += 1
-        if self._put_count % 5 == 0:
-            self._check_pressure()
-        while len(self._store) > self._max:
-            self._store.popitem(last=False)
+            self._put_count += 1
+            if self._put_count % 5 == 0:
+                self._check_pressure()
+            # LRU evict — pinned 키는 건너뜀
+            while len(self._store) > self._max:
+                # 가장 오래된 unpinned 키 찾기
+                evicted = False
+                for k in list(self._store.keys()):
+                    if not self._is_pinned(k):
+                        del self._store[k]
+                        evicted = True
+                        break
+                if not evicted:
+                    break  # 모두 pinned면 그냥 초과 허용
 
     def __len__(self) -> int:
-        return len(self._store)
+        with self._lock:
+            return len(self._store)
 
     def _check_pressure(self) -> None:
+        # caller already holds _lock (called from __setitem__)
         mem = get_memory_mb()
         if mem <= 0:
             return
         if mem > PRESSURE_FATAL_MB:
-            # 치명: 캐시 전체 비우기
-            log.warning("[BoundedCache] FATAL: %.0fMB — clearing all entries", mem)
-            self._store.clear()
+            # 치명: pinned 제외 모두 비우기
+            log.warning("[BoundedCache] FATAL: %.0fMB — clearing unpinned entries", mem)
+            for k in list(self._store.keys()):
+                if not self._is_pinned(k):
+                    del self._store[k]
             self._max = max(self._default_max // 4, 2)
             gc.collect()
         elif mem > PRESSURE_CRITICAL_MB:
@@ -201,22 +256,35 @@ class BoundedCache:
             self._max = self._default_max
 
     def _evict(self) -> None:
+        # caller already holds _lock — pinned 키 건너뜀
         while len(self._store) > self._max:
-            self._store.popitem(last=False)
+            evicted = False
+            for k in list(self._store.keys()):
+                if not self._is_pinned(k):
+                    del self._store[k]
+                    evicted = True
+                    break
+            if not evicted:
+                break  # 모두 pinned면 초과 허용
 
     def clear(self) -> None:
-        self._store.clear()
-        self._max = self._default_max
-        self._put_count = 0
+        with self._lock:
+            self._store.clear()
+            self._max = self._default_max
+            self._put_count = 0
 
     def get(self, key: str, default: Any = None) -> Any:
-        if key in self._store:
-            self._store.move_to_end(key)
-            return self._store[key]
-        return default
+        with self._lock:
+            if key in self._store:
+                self._store.move_to_end(key)
+                return self._store[key]
+            return default
 
     def __del__(self) -> None:
-        self._store.clear()
+        try:
+            self._store.clear()
+        except (AttributeError, TypeError):
+            pass
 
 
 def memory_guard(threshold_pct: float = 60) -> Callable[[F], F]:

@@ -29,7 +29,7 @@ COMMAND_SPECS = (
     CommandSpec("update", "dartlab.cli.commands.update", "로컬 데이터를 HuggingFace 최신으로 갱신"),
     # 서버 / 설정
     CommandSpec("ai", "dartlab.cli.commands.ai", "AI 분석 웹 인터페이스 실행"),
-    CommandSpec("share", "dartlab.cli.commands.share", "터널로 로컬 서버 외부 공유"),
+    CommandSpec("channel", "dartlab.cli.commands.channel", "외부 공유 채널 (DevTunnels 기본, 모바일 호환)"),
     CommandSpec("status", "dartlab.cli.commands.status", "LLM 연결 상태 확인"),
     CommandSpec("setup", "dartlab.cli.commands.setup", "LLM provider/API 키 설정"),
     # MCP
