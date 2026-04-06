@@ -142,6 +142,15 @@ def emit_chart(spec: dict) -> None:
             "categories": ["2022", "2023", "2024"],
         })
     """
+    # R32-1: 빈 spec 거부 — chartType 없으면 webview 가 렌더 못 함
+    if not spec or "chartType" not in spec and "vizType" not in spec:
+        print(
+            "[차트 거부] emit_chart 에 chartType 이 필요합니다. "
+            "예: emit_chart({'chartType': 'line', 'title': '...', "
+            "'categories': [...], 'series': [{'name': '...', 'data': [...]}]})"
+        )
+        return
+
     # 메타 가이드 차트 거부 — AI 가 dartlab.analysis() 가이드 dataframe 의
     # items 컬럼을 막대로 그리는 패턴 차단. 사용자 가치 0.
     if _is_meta_guide_chart(spec):
