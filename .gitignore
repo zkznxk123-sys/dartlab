@@ -24,8 +24,14 @@ Desktop.ini
 CLAUDE.md
 AGENTS.md
 PLAN.md
+TODO.md
 .agent/
 .claude/
+
+# Misc local files (not for repo)
+/main.py
+/skills-lock.json
+/BROKEN_LINKS_REPORT.txt
 # Data
 data/
 # data/credit/은 git 추적 (신용평가 보고서 발간용)
