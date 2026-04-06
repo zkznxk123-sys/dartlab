@@ -85,15 +85,81 @@ dartlab.chat("005930", "배당 추세를 분석하고 이상 징후를 찾아줘
 - **scan 결과 AI 판단**: 하드코딩 필터 없이 기저효과/이상치를 해석으로 설명
 - **교차 검증**: 재무 + 뉴스, IS + CF + BS, notes + analysis 조합
 
+## KnowledgeDB — 자기성장형 단일 DB
+
+AI가 분석할수록 똑똑해지는 영속성 지식 저장소.
+
+| 항목 | 내용 |
+|------|------|
+| DB 위치 | `~/.dartlab/dartlab_knowledge.db` (SQLite, WAL) |
+| 공유 경로 | `data/ai/knowledge/*.json` → HF `ai/knowledge/` |
+| 프라이버시 | executions(개인 질문 이력)는 push/pull 대상 아님 |
+
+### 5테이블 구조
+
+| 테이블 | 용도 | 공유 | 소스 |
+|--------|------|:----:|------|
+| executions | 모든 AI 실행 기록 (질문, 결과, 등급) | X | 실시간 축적 |
+| skills | 성공한 코드 패턴 (few-shot) | O | 코드 실행 성공 시 |
+| error_patterns | 에러 패턴 + 복구 코드 | O | 코드 실행 에러 시 |
+| insights | 기업별 심층 분석 서사 | O | audit + 실시간 분석 |
+| meta | DB 버전, 마이그레이션 상태 | - | 내부 |
+
+### 자기성장 루프
+
+```
+분석 질문 →
+  1. 인사이트 주입 (get_insight → 이전 분석 경험)
+     └→ 없으면 동종업계 교차 학습 (get_sector_insights)
+  2. Few-shot 주입 (skills 테이블 → 성공 코드 예시)
+  3. LLM + 코드 실행
+  4. 에러 시 → error_patterns 검색 → 복구 힌트 피드백
+  5. 성공 시 → skills에 코드 패턴 저장
+  6. 분석 완료 → insights 갱신 (강점/약점/서사 자동 추출)
+```
+
+### 코딩 모드
+
+"코드 짜줘" 감지 시 전용 시스템 프롬프트 적용:
+- 분석 모드: 코드 실행 → 결과 해석 → 서사
+- 코딩 모드: 완전한 독립 실행 코드 → 실행 검증 → 복사-붙여넣기 코드 제공
+
+### HF 동기화
+
+```python
+from dartlab.ai.persistence import KnowledgeDB
+
+db = KnowledgeDB.get()
+db.push(token="hf_xxx")  # insights/skills/errors → HF
+db.pull()                  # HF → 로컬 DB merge (upsert)
+```
+
+- push: `data/ai/knowledge/*.json`에 export → HF upload
+- pull: HF → `data/ai/knowledge/` → 로컬 DB merge
+- 자동 pull: DB 비어있으면 싱글턴 초기화 시 자동 시도
+- 실패 시 무시 (AI 기본 동작에 영향 없음)
+
+### 안전장치
+
+- 모든 KnowledgeDB 접근은 `try/except (ImportError, OSError)` 래핑
+- DB 접근 실패 시 AI는 인사이트 없이 정상 동작 (graceful degradation)
+- insightHints 최대 500자 (프롬프트 토큰 절약)
+- 인사이트 90일 만료 시 경고 태그 부착
+- HF pull 실패 시 로컬 JSON fallback → 그것도 없으면 무시
+
 ## Audit
 
 - 저장: `data/dart/auditAi/`
 - AI audit = dartlab 최종 레이어 품질 검증
 - 모든 하위 엔진(Company, sections, notes, analysis, scan, gather) 문제가 여기서 표면화
 - 실행 → 분류(P/T/C/V) → 수정 → 재실행 → 기록
+- auditAnalysis 마크다운 → KnowledgeDB insights 테이블로 자동 파싱 (마이그레이션 시)
 
 ## 관련 코드
 
 - `src/dartlab/ai/` — providers, tools, runtime, memory, conversation
-- `src/dartlab/ai/runtime/core.py` — 시스템 프롬프트, 코드 실행, 마크다운 변환
+- `src/dartlab/ai/runtime/core.py` — 시스템 프롬프트, 코드 실행, 마크다운 변환, 인사이트 주입
+- `src/dartlab/ai/selfai/knowledge_db.py` — 단일 DB (CRUD + 마이그레이션 + HF push/pull)
+- `src/dartlab/ai/selfai/few_shot.py` — 스킬 검색 → few-shot 주입
+- `src/dartlab/ai/selfai/reflexion.py` — 에러 복구 피드백
 - `src/dartlab/analysis/financial/_memoize.py` — calc 캐시 데코레이터

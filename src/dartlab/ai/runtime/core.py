@@ -142,7 +142,7 @@ def _gatherInsightHints(stock_id: str, company: Any | None) -> str:
     P1-1 백그라운드 thread 에서 호출 가능. 실패 시 빈 문자열.
     """
     try:
-        from dartlab.ai.selfai.knowledge_db import KnowledgeDB
+        from dartlab.ai.persistence import KnowledgeDB
 
         db = KnowledgeDB.get()
         insight = db.get_insight(stock_id)
@@ -489,16 +489,6 @@ _LOOP_SIMILARITY_THRESHOLD = 0.85
 _MAX_RESULT_CHARS = 8000  # LLM 피드백용 결과 상한 (사용자 UI에는 전체 표시)
 
 
-def _record_skill_safe(question: str, code: str, result: str, *, mode: str = "analysis") -> None:
-    """성공한 코드를 스킬로 안전하게 저장."""
-    try:
-        from dartlab.ai.selfai.few_shot import recordSkillFromExecution
-
-        recordSkillFromExecution(question, code, result, is_error=False, mode=mode)
-    except (ImportError, OSError):
-        pass
-
-
 def _streamWithCodeExecution(
     llm: Any,
     messages: list[dict],
@@ -536,21 +526,6 @@ def _streamWithCodeExecution(
 
         # 마지막 코드블록 실행
         code = codeBlocks[-1]
-
-        # Self-AI Phase 2: 실행 전 정적 의미 검증
-        try:
-            from dartlab.ai.selfai.output_validator import validate
-
-            validation = validate(code)
-            if not validation.passed:
-                _vFeedback = validation.feedback()
-                # ���고를 LLM에 피드백하여 코드 수정 유도
-                messages.append({"role": "assistant", "content": buffer})
-                messages.append({"role": "user", "content": _vFeedback})
-                prevCode = code
-                continue  # 다음 라운드에서 수정 코드 생성
-        except ImportError:
-            pass
 
         # 반복 루프 감지 — 이전 코드와 유사하면 조기 종료
         if prevCode is not None:
@@ -609,22 +584,13 @@ def _streamWithCodeExecution(
                 "결과가 잘렸습니다. .head()/.filter()로 범위를 좁혀 필요한 부분만 재조회하세요."
             )
         elif isError:
-            # Self-AI Reflexion: 에러 패턴 DB에서 복구 힌트 검색 + 자동 기록
-            try:
-                from dartlab.ai.selfai.reflexion import enrich_error_feedback, record_execution
-
-                record_execution(code, result, is_error=True, stock_code=stockCode)
-                feedback = enrich_error_feedback(result, code, stock_code=stockCode)
-            except ImportError:
-                feedback = (
-                    "코드 실행 결과:\n\n"
-                    f"```\n{result}\n```\n\n"
-                    "에러를 읽고 원인을 진단하세요. 같은 코드를 반복하지 마세요.\n"
-                    "API를 모르겠으면 `dartlab.capabilities(search='키워드')`로 검색하세요."
-                )
+            feedback = (
+                "코드 실행 결과:\n\n"
+                f"```\n{result}\n```\n\n"
+                "에러를 읽고 원인을 진단하세요. 같은 코드를 반복하지 마세요.\n"
+                "API를 모르겠으면 `dartlab.capabilities(search='키워드')`로 검색하세요."
+            )
         elif mode == "coding":
-            # 코딩 모드: 실행 성공 확인 → 완전한 코드 제공 유도
-            _record_skill_safe(question_text, code, result, mode=mode)
             feedback = (
                 f"코드 실행 성공. 결과:\n```\n{result[:2000]}\n```\n\n"
                 "코드가 정상 동작합니다. 사용자에게 이 코드와 결과를 제공하세요.\n"
@@ -632,7 +598,6 @@ def _streamWithCodeExecution(
                 "커스터마이즈 포인트(종목코드 변경, 조건 변경 등)도 안내하세요."
             )
         else:
-            _record_skill_safe(question_text, code, result, mode=mode)
             feedback = (
                 "코드 실행 결과:\n\n"
                 f"```\n{result}\n```\n\n"
@@ -1203,26 +1168,6 @@ def _analyze_inner(
             templateText=_templateText,
         )
 
-    # Self-AI Phase 2: 유사 질문의 성공 코드를 few-shot으로 동적 주입
-    try:
-        from dartlab.ai.selfai.few_shot import getFewShots
-
-        _fewShotBlock = getFewShots(question, limit=2, mode=mode)
-        if _fewShotBlock:
-            dynamic_prompt += _fewShotBlock
-    except ImportError:
-        pass
-
-    # Self-AI Phase 3: 도구 라우터 — 질문에 맞는 도구+코드를 자동 선택하여 주입
-    try:
-        from dartlab.ai.selfai.router import route
-
-        _routeResult = route(question, stock_code=stock_id, mode="hybrid")
-        if _routeResult and _routeResult.confidence >= 0.75:
-            dynamic_prompt += _routeResult.to_few_shot()
-    except ImportError:
-        pass
-
     # 캐시 경계: 정적 부분에 cache_control 마커 삽입 (Claude 네이티브만)
     if llm.supports_cache_control and static_prompt:
         system_content: str | list[dict] = [
@@ -1379,7 +1324,7 @@ def _updateInsightFromResponse(
 
     규칙 기반 regex 추출 — LLM 호출 없이 결정론적.
     """
-    from dartlab.ai.selfai.knowledge_db import KnowledgeDB
+    from dartlab.ai.persistence import KnowledgeDB
 
     # 강점/약점 추출
     strengths = _STRENGTH_RE.findall(response_text)

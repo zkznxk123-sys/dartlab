@@ -156,11 +156,9 @@ def _handleWarmup(_msg: dict[str, Any]) -> None:
     _try("core", lambda: __import__("dartlab.ai.runtime.core", fromlist=["analyze"]))
     _try("providers", lambda: __import__("dartlab.ai.providers", fromlist=["create_provider"]))
     _try("viz_extract", lambda: __import__("dartlab.viz.extract", fromlist=["extract_viz_specs"]))
-    _try("few_shot", lambda: __import__("dartlab.ai.selfai.few_shot", fromlist=["getFewShots"]))
-    _try("router", lambda: __import__("dartlab.ai.selfai.router", fromlist=["route"]))
 
     def _initKnowledgeDb() -> None:
-        from dartlab.ai.selfai.knowledge_db import KnowledgeDB
+        from dartlab.ai.persistence import KnowledgeDB
 
         KnowledgeDB.get()  # 싱글톤 init + migrate + auto_pull
 

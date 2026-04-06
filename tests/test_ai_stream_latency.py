@@ -88,19 +88,7 @@ def patch_runtime(monkeypatch):
         lambda *a, **k: ("static", "dynamic"),
     )
 
-    # few_shot / route 비활성
-    import sys
-    fake_few_shot = type(sys)("dartlab.ai.selfai.few_shot")
-    fake_few_shot.getFewShots = lambda *a, **k: ""
-    monkeypatch.setitem(sys.modules, "dartlab.ai.selfai.few_shot", fake_few_shot)
-
-    fake_router = type(sys)("dartlab.ai.selfai.router")
-
-    class FakeRoute:
-        confidence = 0.0
-
-    fake_router.route = lambda *a, **k: FakeRoute()
-    monkeypatch.setitem(sys.modules, "dartlab.ai.selfai.router", fake_router)
+    # selfai 폐기 — few_shot / router mock 불필요
 
 
 def test_parallel_ground_total_under_2s(patch_runtime, monkeypatch):
