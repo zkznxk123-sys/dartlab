@@ -1356,7 +1356,7 @@ ROIC 9.9%, WACC 대비 Spread -0.0%p — 투자 자본이 가치를 파괴하고
 
 ---
 
-> 상세 신용분석: [삼성전자 dCR 보고서](/blog/credit-reports/005930)
+<!-- 상세 신용분석 링크 제거 (credit-reports 페이지 미존재) -->
 
 
 ---
