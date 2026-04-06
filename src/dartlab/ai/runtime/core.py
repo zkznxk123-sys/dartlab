@@ -485,7 +485,7 @@ def _formatResultForUser(result: str) -> str:
     return f"\n\n```\n[실행 결과]\n{result}\n```\n\n"
 
 
-_LOOP_SIMILARITY_THRESHOLD = 0.85
+_LOOP_SIMILARITY_THRESHOLD = 0.75  # R22-7: 0.85 → 0.75. 동일 코드 변형 반복 더 적극적 차단
 _MAX_RESULT_CHARS = 8000  # LLM 피드백용 결과 상한 (사용자 UI에는 전체 표시)
 
 
@@ -736,6 +736,8 @@ print(dartlab.scan())   # 20축 가이드 (전종목 횡단)
 
 각 가이드 DataFrame은 `axis | label | description | example` 컬럼이 통일되어 있다.
 사용자가 "어떤 분석이 있어?"라고 물으면 위 5개 중 적절한 가이드를 print하라.
+가이드는 축마다 한 행이라 `group_by("axis").len()` 은 무조건 1 — items 컬럼을 직접 보라.
+계산 결과 dict 에 `displayHints` 가 있으면 그 `core` 컬럼을 표에 우선 포함하라.
 
 ## 도구 선택 — 질문 유형으로 라우팅
 

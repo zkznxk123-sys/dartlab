@@ -134,6 +134,13 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
     result = {"history": history} if history else None
     if result and isFinancial:
         result["isFinancial"] = True
+    if result:
+        # R22-2: AI 가 표 만들 때 핵심 컬럼을 빠뜨리지 않도록 명시.
+        # 사용자가 "수익성" 물었으면 마진율 (operatingMargin/netMargin/grossMargin) 이 핵심.
+        result["displayHints"] = {
+            "core": ["period", "revenue", "operatingMargin", "netMargin", "grossMargin"],
+            "note": "수익성 응답 시 operatingMargin/netMargin/grossMargin 컬럼을 표에 반드시 포함",
+        }
     return result
 
 

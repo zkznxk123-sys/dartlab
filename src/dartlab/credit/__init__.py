@@ -38,6 +38,58 @@ _CREDIT_AXES: dict[str, str] = {
     "공시리스크": "공시리스크",
 }
 
+# 가이드 메타: axis(영문) | label(한글) | description | example
+_AXIS_META: list[dict[str, str]] = [
+    {
+        "axis": "grade",
+        "label": "등급",
+        "description": "dCR 종합 등급 + 점수 + 7축 가중평균 (default)",
+        "example": 'c.credit("등급")',
+    },
+    {
+        "axis": "repayment",
+        "label": "채무상환",
+        "description": "이자보상배율, 부채상환능력",
+        "example": 'c.credit("채무상환")',
+    },
+    {
+        "axis": "leverage",
+        "label": "자본구조",
+        "description": "부채비율, 자본 안정성",
+        "example": 'c.credit("자본구조")',
+    },
+    {
+        "axis": "liquidity",
+        "label": "유동성",
+        "description": "유동비율, 단기 상환 여력",
+        "example": 'c.credit("유동성")',
+    },
+    {
+        "axis": "cashflow",
+        "label": "현금흐름",
+        "description": "OCF, FCF 안정성",
+        "example": 'c.credit("현금흐름")',
+    },
+    {
+        "axis": "business",
+        "label": "사업안정성",
+        "description": "매출 변동성, 사업 지속성",
+        "example": 'c.credit("사업안정성")',
+    },
+    {
+        "axis": "reliability",
+        "label": "재무신뢰성",
+        "description": "감사의견, 회계 일관성",
+        "example": 'c.credit("재무신뢰성")',
+    },
+    {
+        "axis": "disclosure",
+        "label": "공시리스크",
+        "description": "공시 변경, 정정 빈도",
+        "example": 'c.credit("공시리스크")',
+    },
+]
+
 _ALIASES: dict[str, str] = {
     "repayment": "채무상환",
     "leverage": "자본구조",
@@ -53,6 +105,20 @@ _ALIASES: dict[str, str] = {
     "신뢰성": "재무신뢰성",
     "공시": "공시리스크",
 }
+
+# 종합 등급 alias (가이드 무인자 호출과 구분)
+_GRADE_ALIASES = {"등급", "grade", "종합", "종합등급", "credit", "신용등급"}
+
+
+def guide():
+    """credit 엔진 7축 + 종합 가이드 DataFrame.
+
+    Returns:
+        polars DataFrame (axis, label, description, example)
+    """
+    import polars as pl
+
+    return pl.DataFrame(_AXIS_META)
 
 
 def _resolveAxis(axis: str) -> str | None:
@@ -87,28 +153,39 @@ def _filterAxis(result: dict, axis: str) -> dict | None:
                 "metrics": a.get("metrics", []),
                 "grade": result.get("grade"),
                 "overallScore": result.get("score"),
+                # R22-1: 단일 축 추출에도 score 의미 안내 전달
+                "_scoreMeaning": result.get("_scoreMeaning"),
             }
     return None
 
 
 def credit(
-    stockCode: str, axis: str | None = None, *, detail: bool = False, basePeriod: str | None = None
-) -> dict | None:
+    stockCode: str | None = None, axis: str | None = None, *, detail: bool = False, basePeriod: str | None = None
+):
     """신용등급 산출 단일 진입점.
 
     Parameters
     ----------
-    stockCode : 종목코드 또는 ticker
-    axis : 축 이름 (None이면 전체, "채무상환" 등이면 해당 축만)
+    stockCode : 종목코드 또는 ticker. None이면 7축 가이드 DataFrame 반환.
+    axis : 축 이름 ("등급" → 종합, "채무상환" 등 → 해당 축만)
     detail : True이면 7축 상세 + 모든 지표 포함
     basePeriod : 분석 기준 기간 (None이면 최신)
 
     Returns
     -------
-    dict | None
-        등급 결과. axis 지정 시 해당 축만 반환.
+    DataFrame | dict | None
+        - stockCode=None → 가이드 DataFrame
+        - axis="등급" 또는 None+stockCode → 종합 등급 dict
+        - axis=축이름 → 해당 축 dict
     """
+    if stockCode is None:
+        return guide()
+
     from dartlab.credit.engine import evaluate
+
+    # "등급"/"grade" 등 종합 alias는 axis로 처리하지 않음 (전체 결과)
+    if axis is not None and axis in _GRADE_ALIASES:
+        axis = None
 
     result = evaluate(stockCode, detail=detail or (axis is not None), basePeriod=basePeriod)
     if result is None:
@@ -122,16 +199,30 @@ def credit(
 
 def creditCompany(
     company, axis: str | None = None, *, detail: bool = False, basePeriod: str | None = None
-) -> dict | None:
-    """Company 객체로 신용등급 산출 (Company-bound용)."""
+):
+    """Company 객체로 신용등급 산출 (Company-bound용).
+
+    axis=None → 가이드 DataFrame (self-discovery)
+    axis="등급" → 종합 등급 dict
+    axis="채무상환" → 해당 축 dict
+    """
+    if axis is None:
+        return guide()
+
     from dartlab.credit.engine import evaluateCompany
 
-    result = evaluateCompany(company, detail=detail or (axis is not None), basePeriod=basePeriod)
+    # "등급"/"grade" 등 종합 alias는 axis로 처리하지 않음
+    if axis in _GRADE_ALIASES:
+        axis_filter: str | None = None
+    else:
+        axis_filter = axis
+
+    result = evaluateCompany(company, detail=detail or (axis_filter is not None), basePeriod=basePeriod)
     if result is None:
         return None
 
-    if axis is not None:
-        return _filterAxis(result, axis)
+    if axis_filter is not None:
+        return _filterAxis(result, axis_filter)
 
     return result
 

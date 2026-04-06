@@ -613,6 +613,10 @@ def _normalizeMetricsForOutput(metric_items: list) -> list[dict]:
     - dict 입력 (R21-1 신규): {"name", "value", "score"} 그대로 유지 (None score 포함, value 표시 위해)
     - tuple 입력 (legacy): (name, score) → {"name", "score"}, value 없음
     - score=None 인 항목도 포함 (value 가 있으면 표시 가치 있음)
+
+    R22-1: score 와 value 의미 차이를 AI/사용자가 헷갈리지 않도록
+    - value: 실제 metric 측정값 (예: FFO/Debt 354.67%, Debt/EBITDA 0.55배)
+    - score: 위험 점수 (0=최우량, 100=최위험) — 절대 metric value 아님
     """
     out: list[dict] = []
     for item in metric_items:
@@ -631,6 +635,14 @@ def _normalizeMetricsForOutput(metric_items: list) -> list[dict]:
                 continue
             out.append({"name": name, "score": score})
     return out
+
+
+# R22-1: credit 결과 dict 의 score 의미 안내 (AI/사용자 혼동 방지)
+_CREDIT_SCORE_LEGEND = (
+    "score 는 위험 점수 (0=최우량, 100=최위험) 입니다. "
+    "metric 의 실제 측정값은 'value' 필드를 보세요. "
+    "예: Debt/EBITDA value=0.55배 (실측), score=1.65 (위험점수, 거의 AAA)."
+)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -870,6 +882,7 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
         "notchAdjustment": notchAdj if notchAdj["totalNotch"] != 0 else None,
         "divergenceExplanation": divExpl,
         "methodologyVersion": "v4.0",
+        "_scoreMeaning": _CREDIT_SCORE_LEGEND,
         "axes": [
             {
                 "name": a["name"],
