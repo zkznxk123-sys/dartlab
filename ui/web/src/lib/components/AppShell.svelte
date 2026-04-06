@@ -17,7 +17,7 @@
 	import AutocompleteInput from "./AutocompleteInput.svelte";
 	import {
 		MessageSquare, PanelRightClose, PanelRightOpen,
-		Database, FileText, Download, Settings, Menu,
+		Database, FileText, Download, Cog, Menu,
 		PanelLeftClose, X, Github
 	} from "lucide-svelte";
 
@@ -57,7 +57,8 @@
 	} = $props();
 
 	// ── 패널 상태 ──
-	let rightPanelOpen = $state(true);
+	// 모바일에선 기본으로 닫혀 있어야 콘텐츠 영역을 가리지 않음
+	let rightPanelOpen = $state(typeof window !== "undefined" && window.innerWidth >= 768);
 	let rightPanelTab = $state("chat"); // "chat" | "data" | "history"
 	let sidebarOpen = $state(false); // 모바일용
 	// $effect가 일부 모바일 브라우저에서 미발화. 모듈 평가 시점에 즉시 + matchMedia listener.
@@ -148,7 +149,7 @@
 			</button>
 
 			<button class="dl-icon-btn" aria-label="설정" onclick={() => showSettings = true}>
-				<Settings size={16} />
+				<Cog size={16} />
 			</button>
 		</div>
 	</header>
@@ -203,8 +204,8 @@
 			</div>
 		</main>
 
-		<!-- ── 우측: AI + 데이터 패널 ── -->
-		{#if rightPanelOpen}
+		<!-- ── 우측: AI + 데이터 패널 (모바일에선 항상 숨김) ── -->
+		{#if rightPanelOpen && !isMobile}
 			<aside class="dl-right-panel" aria-label="분석 패널">
 				{#if rightPanelTab === "chat"}
 					<!-- AI 대화 -->

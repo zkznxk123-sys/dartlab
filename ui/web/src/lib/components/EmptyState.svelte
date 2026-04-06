@@ -33,8 +33,8 @@
 	let promptChips = $derived(selectedCompany ? (suggestions.length > 0 ? suggestions : DEFAULT_COMPANY_PROMPTS) : STARTERS);
 </script>
 
-<div class="flex-1 flex flex-col items-center justify-center px-5">
-	<div class="w-full max-w-[640px] flex flex-col items-center">
+<div class="flex-1 flex flex-col items-center justify-center px-3 sm:px-5">
+	<div class="w-full sm:max-w-[640px] flex flex-col items-center">
 		<div class="relative mb-6">
 			<div class="absolute inset-0 rounded-full blur-2xl opacity-30" style="background: radial-gradient(circle, rgba(234,70,71,0.5) 0%, rgba(251,146,60,0.2) 50%, transparent 70%); transform: scale(1.8);"></div>
 			<img src="/avatar.png" alt="DartLab" class="relative w-14 h-14 rounded-full" />

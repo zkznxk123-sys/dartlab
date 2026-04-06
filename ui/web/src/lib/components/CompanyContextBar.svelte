@@ -5,7 +5,7 @@
 <script>
 	import {
 		Search, FileText, Coffee, Github, X, ChevronDown,
-		Loader2, AlertCircle, Settings, Building2, Clock,
+		Loader2, AlertCircle, Building2, Clock,
 	} from "lucide-svelte";
 
 	let {

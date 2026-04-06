@@ -82,25 +82,25 @@ No API key needed. Data auto-downloads from [HuggingFace](https://huggingface.co
 
 ## What DartLab Is
 
-13 engines, one calling convention. Each engine is callable with `dartlab.engine()` for the guide and `dartlab.engine("axis")` for one example.
+One calling convention. Each engine: `dartlab.engine()` for the guide, `dartlab.engine("axis")` to run.
 
 | Layer | Engine | What it does | Entry point | Notebook |
 |-------|--------|--------------|-------------|----------|
 | Data | [Data](ops/data.md) | Pre-built HuggingFace datasets, auto-download | `Company("005930")` | — |
-| L0/L1 | [Company](ops/company.md) | Sections horizontalization + 4 namespaces | `c.show()`, `c.select()` | [01](notebooks/marimo/01_company.py) |
+| L0/L1 | [Company](ops/company.md) | Filings + financials + structured data unified by ticker | `c.show()`, `c.select()` | [01](notebooks/marimo/01_company.py) |
 | L1 | [Gather](ops/gather.md) | External market data (price, flow, macro, news) | `dartlab.gather()` | [02](notebooks/marimo/02_gather.py) |
-| L1 | [Scan](ops/scan.md) | Cross-company comparison across 13 axes | `dartlab.scan()` | [03](notebooks/marimo/03_scan.py) |
-| L1 | [Quant](ops/quant.md) | Quantitative axes (momentum/factor/pattern) | `c.quant()` | [04](notebooks/marimo/04_quant.py) |
-| L2 | [Analysis](ops/analysis.md) | 14-axis financial + valuation + forecast | `c.analysis("financial", "수익성")` | [05](notebooks/marimo/05_analysis.py) |
-| L2 | [Macro](ops/macro.md) | Market-level macro — 11 axes, no Company needed | `dartlab.macro("사이클")` | [06](notebooks/marimo/06_macro.py) |
-| L2 | [Credit](ops/credit.md) | Independent credit rating (dCR 20-grade) | `c.credit("등급")` | [07](notebooks/marimo/07_credit.py) |
-| L2 | [Review](ops/review.md) | 4-engine composition (analysis + credit + macro + quant) | `c.review("수익성")` | [08](notebooks/marimo/08_review.py) |
+| L1 | [Scan](ops/scan.md) | Cross-company comparison (governance, ratios, cashflow, ...) | `dartlab.scan()` | [03](notebooks/marimo/03_scan.py) |
+| L1 | [Quant](ops/quant.md) | Technical & quantitative analysis (momentum/factor/pattern) | `c.quant()` | [04](notebooks/marimo/04_quant.py) |
+| L2 | [Analysis](ops/analysis.md) | Profitability/stability/cashflow causal analysis + valuation + forecast | `c.analysis("financial", "수익성")` | [05](notebooks/marimo/05_analysis.py) |
+| L2 | [Macro](ops/macro.md) | Market-level macro (cycle/rates/liquidity/sentiment/assets) | `dartlab.macro("사이클")` | [06](notebooks/marimo/06_macro.py) |
+| L2 | [Credit](ops/credit.md) | Independent credit rating (dCR grade, default probability, health) | `c.credit("등급")` | [07](notebooks/marimo/07_credit.py) |
+| L2 | [Review](ops/review.md) | Composes analysis engines into a report (rich/html/markdown/json) | `c.review("수익성")` | [08](notebooks/marimo/08_review.py) |
 | L3 | [AI](ops/ai.md) | Active analyst — code execution + interpretation | `dartlab.ask()` | [09](notebooks/marimo/09_ai.py) |
+| L4 | [Channel](ops/channel.md) | External sharing — `dartlab channel` brings PC dartlab to your phone | `dartlab channel` | — |
 | core | [Search](ops/search.md) | Semantic filing search *(alpha)* | `dartlab.search()` | [10](notebooks/marimo/10_search.py) |
 | facade | [Listing](ops/listing.md) | Catalog API (companies, filings, topics) | `dartlab.listing()` | [11](notebooks/marimo/11_listing.py) |
-| viz | [Viz](ops/viz.md) | Charts and diagrams (emit_chart) | `emit_chart({...})` | [12](notebooks/marimo/12_viz.py) |
-| guide | [Guide](ops/guide.md) | Concierge — readiness, error handling, education | `dartlab.guide.checkReady()` | [13](notebooks/marimo/13_guide.py) |
-| L4 | UI | VSCode extension | `dartlab chat --stdio` | — |
+| viz | [Viz](ops/viz.md) | Charts and diagrams (`emit_chart`) | `emit_chart({...})` | — |
+| guide | [Guide](ops/guide.md) | Concierge — readiness, error handling, education | `dartlab.guide.checkReady()` | — |
 
 > All notebooks: [marimo](notebooks/marimo/) · [colab](notebooks/colab/) · [![Open in marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo)
 
@@ -124,7 +124,7 @@ c.diff()                        # what changed -- text changes across periods
 
 > Design: [ops/scan.md](ops/scan.md)
 
-13 axes across 2,700+ companies. Governance, workforce, capital, debt, cashflow, audit, insider, quality, liquidity, digest, network, account, ratio.
+Cross-company analysis across all listed firms. Governance, workforce, capital, debt, cashflow, audit, insider, quality, liquidity, network, account/ratio comparison, and more.
 
 ```python
 dartlab.scan("governance")            # governance across all firms
@@ -149,15 +149,15 @@ dartlab.gather("news", "삼성전자")             # Google News RSS
 
 > Design: [ops/analysis.md](ops/analysis.md)
 
-Revenue structure, profitability, growth, stability, cash flow, capital allocation — 14 axes that turn raw statements into a causal narrative. Each axis feeds into Review (reports), AI (interpretation), and humans (direct reading).
+Revenue structure → profitability → growth → stability → cash flow → capital allocation → valuation → forecast. Turns raw statements into a causal narrative that feeds Review, AI, and direct human reading.
 
 ```python
 c.analysis("financial", "수익성")       # profitability analysis
 c.analysis("financial", "현금흐름")    # cash flow analysis
 
-print(c.credit())                           # 8-axis guide DataFrame (self-discovery)
+print(c.credit())                           # available-axes guide DataFrame (self-discovery)
 c.credit("등급")                            # dCR-AA, healthScore 93/100
-c.credit("등급", detail=True)               # 7-axis narrative + metrics
+c.credit("등급", detail=True)               # grade + narrative + metrics
 ```
 
 ### Credit — Independent Credit Rating
@@ -169,14 +169,14 @@ Independent credit analysis with 3-Track model (general/financial/holding), Notc
 **79-company validation: large-cap 87% (26/30), mid-cap 82% (41/50), full sample 70% (55/79, re-measurement pending after v5.0 overvaluation fix). Samsung AA+ exact match.** See [methodology](docs/methodology.md) for validation details.
 
 ```python
-print(c.credit())           # self-discovery — 7 axes + grade
+print(c.credit())           # self-discovery — available axes + grade
 
 cr = c.credit("등급")        # main grade
 print(cr["grade"])          # dCR-AA+
 print(cr["healthScore"])    # 96 (0-100, higher is better)
 print(cr["pdEstimate"])     # 0.01% default probability
 
-cr = c.credit("등급", detail=True)  # 7-axis narrative + metrics + divergence explanation
+cr = c.credit("등급", detail=True)  # grade + narrative + metrics + divergence explanation
 print(cr["divergenceExplanation"])  # why it differs from agencies
 ```
 
@@ -225,6 +225,24 @@ dartlab.ask("Samsung analysis", provider="gemini")  # free providers available
 
 Providers: `gemini` (free), `groq` (free), `cerebras` (free), `oauth-codex` (ChatGPT subscription), `openai`, `ollama` (local), and more. Auto-fallback across providers when rate-limited.
 
+### Channel — Use your PC dartlab from anywhere
+
+> Design: [ops/channel.md](ops/channel.md)
+
+One command on your PC and dartlab UI works on your phone. Microsoft DevTunnels auto-setup.
+
+```bash
+dartlab channel
+```
+
+Flow:
+1. winget auto-installs the devtunnel CLI (one-time)
+2. GitHub OAuth (one-time, browser opens automatically)
+3. Permanent URL + QR code (`https://<id>-8400.<region>.devtunnels.ms`)
+4. Open the URL/QR on your phone Chrome → dartlab UI just works
+
+Zero domains, zero token tricks. Same infrastructure as VS Code Remote Tunnels — verified mobile compatibility. Optional messaging bots: `--telegram/slack/discord`.
+
 ### Architecture
 
 ```
@@ -255,9 +273,9 @@ flowchart TB
         AI["ai<br/>dartlab.ask()"]
     end
     subgraph L2["L2 · Analysis"]
-        ANA["analysis<br/>14-axis financial + forecast + valuation"]
-        CRD["credit<br/>dCR 20-grade"]
-        MAC["macro<br/>11-axis market reading"]
+        ANA["analysis<br/>causal financial + forecast + valuation"]
+        CRD["credit<br/>independent rating"]
+        MAC["macro<br/>market reading"]
         REV["review<br/>block-composed report"]
     end
     subgraph L1["L1 · Data ingestion"]
@@ -331,7 +349,7 @@ dartlab.macro("금리")            # Rates + Nelson-Siegel yield curve
 dartlab.macro("예측")            # LEI + Cleveland Fed probit + Hamilton RS + GDP Nowcast
 dartlab.macro("위기")            # Credit-to-GDP gap + Minsky + Koo + Fisher
 dartlab.macro("기업집계")        # Bottom-up: earnings cycle, Ponzi ratio, leverage
-dartlab.macro("종합")            # All 10 axes + 40 strategies + portfolio allocation
+dartlab.macro("종합")            # Macro summary + investment strategies + portfolio allocation
 
 # Scenario
 dartlab.macro("사이클", overrides={"hy_spread": 600})
@@ -340,7 +358,7 @@ dartlab.macro("사이클", overrides={"hy_spread": 600})
 dartlab.macro("금리", as_of="2022-01-01")
 ```
 
-11 axes (cycle / rates / assets / sentiment / liquidity / forecast / crisis / inventory / corporate / trade / summary), 12 methods (Hamilton EM, Kalman DFM, Nelson-Siegel, Cleveland Fed probit, Sahm Rule, BIS Credit-to-GDP, GHS, Minsky, Koo, Fisher, Cu/Au, FCI), 40 investment strategies with strength/confidence — all implemented in **numpy only** (zero statsmodels/scipy).
+Cycle, rates, assets, sentiment, liquidity, forecast, crisis, inventory, corporate, trade signals — global macro methods (Hamilton EM, Kalman DFM, Nelson-Siegel, Cleveland Fed probit, Sahm Rule, BIS Credit-to-GDP, GHS, Minsky, Koo, Fisher, Cu/Au, FCI) implemented in **numpy only** (zero statsmodels/scipy).
 
 Backtest result (2000-2024, FRED): Cleveland Fed probit detected **3/3 US recessions** with 2-16 month lead time, recall 90% at threshold 0.20.
 

@@ -82,25 +82,25 @@ API 키 불필요. [HuggingFace](https://huggingface.co/datasets/eddmpython/dart
 
 ## DartLab은 무엇인가
 
-13개 엔진, 하나의 호출 계약. 모든 엔진은 `dartlab.엔진()` 으로 가이드 보고 `dartlab.엔진("축")` 으로 1개 예시 받는 방식.
+하나의 호출 계약. `dartlab.엔진()` 으로 가이드 보고 `dartlab.엔진("축")` 으로 실행.
 
 | 레이어 | 엔진 | 하는 일 | 진입점 | 노트북 |
 |--------|------|---------|--------|--------|
 | Data | [Data](ops/data.md) | HuggingFace 사전 구축, 자동 다운로드 | `Company("005930")` | — |
-| L0/L1 | [Company](ops/company.md) | 섹션 수평화 + 4 namespace | `c.show()`, `c.select()` | [01](notebooks/marimo/01_company.py) |
+| L0/L1 | [Company](ops/company.md) | 공시 + 재무제표 + 정형 데이터를 종목코드 하나로 통합 | `c.show()`, `c.select()` | [01](notebooks/marimo/01_company.py) |
 | L1 | [Gather](ops/gather.md) | 외부 시장 데이터 (주가/수급/매크로/뉴스) | `dartlab.gather()` | [02](notebooks/marimo/02_gather.py) |
-| L1 | [Scan](ops/scan.md) | 전 종목 횡단 비교, 13축 | `dartlab.scan()` | [03](notebooks/marimo/03_scan.py) |
-| L1 | [Quant](ops/quant.md) | 정량 (모멘텀/팩터/패턴) | `c.quant()` | [04](notebooks/marimo/04_quant.py) |
-| L2 | [Analysis](ops/analysis.md) | 14축 재무 + 가치평가 + 전망 | `c.analysis("financial", "수익성")` | [05](notebooks/marimo/05_analysis.py) |
-| L2 | [Macro](ops/macro.md) | 시장 레벨 매크로 — 11축, Company 불필요 | `dartlab.macro("사이클")` | [06](notebooks/marimo/06_macro.py) |
-| L2 | [Credit](ops/credit.md) | 독립 신용평가 (dCR 20단계) | `c.credit("등급")` | [07](notebooks/marimo/07_credit.py) |
-| L2 | [Review](ops/review.md) | 4엔진 조합 보고서 (analysis + credit + macro + quant) | `c.review("수익성")` | [08](notebooks/marimo/08_review.py) |
+| L1 | [Scan](ops/scan.md) | 전 종목 횡단 비교 (거버넌스/비율/현금흐름 등) | `dartlab.scan()` | [03](notebooks/marimo/03_scan.py) |
+| L1 | [Quant](ops/quant.md) | 기술적·정량 분석 (모멘텀/팩터/패턴) | `c.quant()` | [04](notebooks/marimo/04_quant.py) |
+| L2 | [Analysis](ops/analysis.md) | 수익성/안정성/현금흐름 등 재무 인과 분석 + 가치평가 + 전망 | `c.analysis("financial", "수익성")` | [05](notebooks/marimo/05_analysis.py) |
+| L2 | [Macro](ops/macro.md) | 시장 레벨 매크로 (사이클/금리/유동성/심리/자산) | `dartlab.macro("사이클")` | [06](notebooks/marimo/06_macro.py) |
+| L2 | [Credit](ops/credit.md) | 독립 신용평가 (dCR 등급, 부도확률, 건전도) | `c.credit("등급")` | [07](notebooks/marimo/07_credit.py) |
+| L2 | [Review](ops/review.md) | 분석 엔진을 조합한 보고서 (rich/html/markdown/json) | `c.review("수익성")` | [08](notebooks/marimo/08_review.py) |
 | L3 | [AI](ops/ai.md) | 적극적 분석가 — 코드 실행 + 해석 | `dartlab.ask()` | [09](notebooks/marimo/09_ai.py) |
+| L4 | [Channel](ops/channel.md) | 외부 공유 — `dartlab channel` 한 줄로 폰에서 PC dartlab 사용 | `dartlab channel` | — |
 | core | [Search](ops/search.md) | 공시 시맨틱 검색 *(alpha)* | `dartlab.search()` | [10](notebooks/marimo/10_search.py) |
-| facade | [Listing](ops/listing.md) | 카탈로그 API (종목/공시/topic) | `dartlab.listing()` | [11](notebooks/marimo/11_listing.py) |
-| viz | [Viz](ops/viz.md) | 차트/다이어그램 (emit_chart) | `emit_chart({...})` | [12](notebooks/marimo/12_viz.py) |
-| guide | [Guide](ops/guide.md) | 안내 데스크 — readiness/에러/교육 | `dartlab.guide.checkReady()` | [13](notebooks/marimo/13_guide.py) |
-| L4 | UI | VSCode 확장 | `dartlab chat --stdio` | — |
+| facade | [Listing](ops/listing.md) | 종목/공시/topic 카탈로그 API | `dartlab.listing()` | [11](notebooks/marimo/11_listing.py) |
+| viz | [Viz](ops/viz.md) | 차트/다이어그램 (`emit_chart`) | `emit_chart({...})` | — |
+| guide | [Guide](ops/guide.md) | 안내 데스크 — readiness/에러/교육 | `dartlab.guide.checkReady()` | — |
 
 > 모든 노트북: [marimo](notebooks/marimo/) · [colab](notebooks/colab/) · [![Open in marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo)
 
@@ -124,7 +124,7 @@ c.diff()                        # 뭐가 바뀌었는지 -- 기간 간 텍스트
 
 > 설계: [ops/scan.md](ops/scan.md)
 
-2,700+ 종목 대상 13축 횡단 분석. 거버넌스, 인력, 주주환원, 부채, 현금흐름, 감사, 내부자, 이익의질, 유동성, 다이제스트, 네트워크, 계정, 비율.
+전 종목 대상 횡단 분석. 거버넌스, 인력, 주주환원, 부채, 현금흐름, 감사, 내부자, 이익의 질, 유동성, 네트워크, 계정/비율 비교 등.
 
 ```python
 dartlab.scan("governance")            # 전종목 지배구조
@@ -145,19 +145,19 @@ dartlab.gather("macro", "FEDFUNDS")           # 자동 US 감지
 dartlab.gather("news", "삼성전자")             # Google News RSS
 ```
 
-### Analysis — 14축 재무분석
+### Analysis — 재무 인과 분석
 
 > 설계: [ops/analysis.md](ops/analysis.md)
 
-수익구조, 수익성, 성장성, 안정성, 현금흐름, 자본배분 — 14축이 원본 재무제표를 인과 서사로 가공한다.
+수익구조 → 수익성 → 성장성 → 안정성 → 현금흐름 → 자본배분 → 가치평가 → 전망. 원본 재무제표를 인과 서사로 가공한다.
 
 ```python
 c.analysis("financial", "수익성")       # 수익성 분석
 c.analysis("수익성")                     # 단축형 (financial 자동)
 
-print(c.credit())                            # 8축 가이드 DataFrame (self-discovery)
+print(c.credit())                            # 사용 가능한 축 가이드 DataFrame (self-discovery)
 c.credit("등급")                             # dCR-AA, 건전도 93/100
-c.credit("등급", detail=True)                # 7축 서사 + 지표 시계열
+c.credit("등급", detail=True)                # 등급 + 서사 + 지표 시계열
 ```
 
 ### Credit — 독립 신용분석
@@ -169,14 +169,14 @@ c.credit("등급", detail=True)                # 7축 서사 + 지표 시계열
 **79개사 검증: 대기업 87% (26/30), 중대형 82% (41/50), 전체 70% (55/79, v5.0 과대평가 수정 후 재측정 예정). 삼성전자 AA+ 정확 일치.** 검증 방법론은 [methodology](docs/methodology.md) 참조.
 
 ```python
-print(c.credit())            # self-discovery — 7축 + 종합 등급
+print(c.credit())            # self-discovery — 사용 가능한 축 + 종합 등급
 
 cr = c.credit("등급")        # 종합 등급
 print(cr["grade"])          # dCR-AA+
 print(cr["healthScore"])    # 96 (0-100, 높을수록 건전)
 print(cr["pdEstimate"])     # 0.01% 부도확률
 
-cr = c.credit("등급", detail=True)  # 7축 서사 + 지표 + 괴리 설명
+cr = c.credit("등급", detail=True)  # 등급 + 서사 + 지표 + 괴리 설명
 print(cr["divergenceExplanation"])  # 신평사와 왜 다른지
 ```
 
@@ -225,6 +225,24 @@ dartlab.ask("삼성전자 분석", provider="gemini")  # 무료 provider 사용 
 
 Provider: `gemini`(무료), `groq`(무료), `cerebras`(무료), `oauth-codex`(ChatGPT 구독), `openai`, `ollama`(로컬) 등. Rate limit 시 자동 대체.
 
+### Channel — 외부에서 내 PC dartlab 접근
+
+> 설계: [ops/channel.md](ops/channel.md)
+
+PC에서 한 줄이면 폰에서 dartlab UI 그대로 사용. Microsoft DevTunnels 자동 셋업.
+
+```bash
+dartlab channel
+```
+
+흐름:
+1. winget으로 devtunnel CLI 자동 설치 (최초 1회)
+2. GitHub OAuth 1회 인증 (브라우저 자동 오픈)
+3. 영구 URL + QR 발급 (`https://<id>-8400.<region>.devtunnels.ms`)
+4. 폰 Chrome에 URL/QR 입력 → dartlab UI 그대로 동작
+
+도메인 0개, 토큰 트릭 0개. VS Code Remote Tunnels와 동일 인프라라 모바일 호환성 검증됨. 메시징 봇 옵션 (`--telegram/slack/discord`) 도 지원.
+
 ### 아키텍처
 
 ```
@@ -255,9 +273,9 @@ flowchart TB
         AI["ai<br/>dartlab.ask()"]
     end
     subgraph L2["L2 · 분석"]
-        ANA["analysis<br/>14축 재무 + 전망 + 가치평가"]
-        CRD["credit<br/>dCR 20단계"]
-        MAC["macro<br/>11축 시장 해석"]
+        ANA["analysis<br/>재무 인과 + 전망 + 가치평가"]
+        CRD["credit<br/>독립 신용평가"]
+        MAC["macro<br/>시장 해석"]
         REV["review<br/>블록식 보고서"]
     end
     subgraph L1["L1 · 데이터 수집"]
@@ -331,7 +349,7 @@ dartlab.macro("금리")            # 금리 + Nelson-Siegel 수익률곡선
 dartlab.macro("예측")            # LEI + 침체확률 + Hamilton RS + GDP Nowcast
 dartlab.macro("위기")            # Credit-to-GDP + Minsky + Koo + Fisher
 dartlab.macro("기업집계")        # 전종목 이익사이클, Ponzi비율, 레버리지
-dartlab.macro("종합")            # 10축 + 40전략 + 포트폴리오 매핑
+dartlab.macro("종합")            # 매크로 종합 + 투자전략 + 포트폴리오 매핑
 
 # 시나리오
 dartlab.macro("사이클", overrides={"hy_spread": 600})
@@ -340,7 +358,7 @@ dartlab.macro("사이클", overrides={"hy_spread": 600})
 dartlab.macro("금리", as_of="2022-01-01")
 ```
 
-11축, 12개 방법론(Hamilton EM, Kalman DFM, Nelson-Siegel, Cleveland Fed 프로빗, Sahm Rule, BIS Credit-to-GDP, GHS, Minsky, Koo, Fisher, Cu/Au, FCI), 40개 투자전략 — 전부 **numpy만으로 직접 구현** (statsmodels/scipy 0).
+시장 사이클·금리·유동성·심리·자산 신호와 글로벌 거시 분석 방법론(Hamilton EM, Kalman DFM, Nelson-Siegel, Cleveland Fed 프로빗, Sahm Rule, BIS Credit-to-GDP, GHS, Minsky, Koo, Fisher, Cu/Au, FCI)을 **numpy만으로 직접 구현** (statsmodels/scipy 0).
 
 백테스트 실증 (2000-2024, FRED): Cleveland Fed 프로빗이 **미국 3/3 침체를 2-16개월 전에 사전 감지**, recall 90%.
 

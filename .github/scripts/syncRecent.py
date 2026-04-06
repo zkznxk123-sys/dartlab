@@ -95,6 +95,10 @@ def _existingFinanceReprts(financeDir: Path, stockCode: str) -> set[tuple[str, s
     if not path.exists():
         return set()
     try:
+        # placeholder/stub parquet 가드 — collect_status 만 있고 reprt_code 없는 케이스
+        cols = pl.scan_parquet(path).collect_schema().names()
+        if "reprt_code" not in cols or "bsns_year" not in cols:
+            return set()
         df = (
             pl.scan_parquet(path)
             .select("bsns_year", "reprt_code")
@@ -108,7 +112,7 @@ def _existingFinanceReprts(financeDir: Path, stockCode: str) -> set[tuple[str, s
                 df["reprt_code"].cast(pl.Utf8).to_list(),
             )
         )
-    except (pl.exceptions.ComputeError, OSError):
+    except (pl.exceptions.ComputeError, pl.exceptions.ColumnNotFoundError, OSError):
         return set()
 
 

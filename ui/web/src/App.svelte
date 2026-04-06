@@ -16,8 +16,6 @@
 <script>
 	import "./app.css";
 	import { onMount } from "svelte";
-	import { isDebugEnabled } from "$lib/debug.js";
-	import DebugOverlay from "$lib/components/DebugOverlay.svelte";
 	import { askStream, fetchAiSuggestions } from "$lib/api.js";
 	import {
 		buildConversationHistory,
@@ -37,7 +35,7 @@
 	import ToastNotification from "$lib/components/ToastNotification.svelte";
 	import PanelResizer from "$lib/components/PanelResizer.svelte";
 	import {
-		Menu, PanelLeftClose, Coffee, Github, FileText, Search,
+		Menu, PanelLeftClose, Coffee, Github, FileText, Search, Cog,
 	} from "lucide-svelte";
 	import ProviderDropdown from "$lib/components/ProviderDropdown.svelte";
 	import { isVSCode } from "$lib/api/transport.js";
@@ -109,9 +107,7 @@
 	// provider 유효성은 ProviderDropdown과 sendMessage에서 개별 판단
 
 	// ── Init ──
-	// onMount: 컴포넌트가 DOM에 부착된 직후 1회만 실행. iOS Safari에서도 안정적.
-	// 기존 $effect 패턴은 의존성 추적 컨텍스트가 모호해 일부 모바일 브라우저에서 첫 발화가 누락되는 사례 보고.
-	const isDebug = isDebugEnabled();
+	// onMount: 컴포넌트가 DOM에 부착된 직후 1회만 실행. 모바일 호환.
 	onMount(() => {
 		ui.loadStatus();
 	});
@@ -391,15 +387,17 @@
 			</div>
 		{/if}
 
-		<!-- Top-right controls -->
+		<!-- Top-right controls — 모바일에선 검색만 숨김 (하단 탭바에 있음) -->
 		<div class="absolute top-2 right-3 z-20 flex items-center gap-1 pointer-events-auto">
-			<button
-				class="p-1.5 rounded-lg text-dl-text-dim hover:text-dl-text-muted hover:bg-white/5 transition-colors"
-				onclick={() => { showSearchModal = true; }}
-				title="종목 검색 (Ctrl+K)"
-			>
-				<Search size={14} />
-			</button>
+			{#if !ui.isMobile}
+				<button
+					class="p-1.5 rounded-lg text-dl-text-dim hover:text-dl-text-muted hover:bg-white/5 transition-colors"
+					onclick={() => { showSearchModal = true; }}
+					title="종목 검색 (Ctrl+K)"
+				>
+					<Search size={14} />
+				</button>
+			{/if}
 			{#if !isVSCode}
 				<a href="https://eddmpython.github.io/dartlab/" target="_blank" rel="noopener noreferrer"
 					class="p-1.5 rounded-lg text-dl-text-dim hover:text-dl-text-muted hover:bg-white/5 transition-colors" title="Documentation">
@@ -463,9 +461,9 @@
 		</div>
 	</div>
 
-	<!-- 모바일 하단 탭 바 (브라우저에서만) -->
+	<!-- 모바일 하단 탭 바 (화면 하단 고정) -->
 	{#if ui.isMobile && !isVSCode}
-		<nav class="flex items-center justify-around h-12 border-t border-dl-border/30 bg-dl-bg-darker/95 backdrop-blur-sm flex-shrink-0 safe-area-bottom" aria-label="메인 탐색">
+		<nav class="fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around h-12 border-t border-dl-border/30 bg-dl-bg-darker/95 backdrop-blur-sm safe-area-bottom" aria-label="메인 탐색">
 			<button
 				class="flex flex-col items-center gap-0.5 flex-1 py-1.5 transition-colors text-dl-text-dim"
 				onclick={() => ui.toggleSidebar()}
@@ -484,7 +482,7 @@
 				class="flex flex-col items-center gap-0.5 flex-1 py-1.5 transition-colors text-dl-text-dim"
 				onclick={() => ui.openSettings()}
 			>
-				<Settings size={18} />
+				<Cog size={18} />
 				<span class="text-[9px] font-medium">설정</span>
 			</button>
 		</nav>
@@ -509,6 +507,3 @@
 />
 <DeleteDialog {ui} onConfirm={confirmDelete} />
 <ToastNotification {ui} />
-{#if isDebug}
-	<DebugOverlay {ui} />
-{/if}

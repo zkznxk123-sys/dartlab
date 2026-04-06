@@ -1,59 +1,20 @@
 <script>
 	import { cn } from "$lib/utils.js";
-	import { onMount } from "svelte";
-	import { ChevronDown, Settings, Loader2, AlertCircle, Check } from "lucide-svelte";
+	import { ChevronDown, Cog, Loader2, AlertCircle, Check } from "lucide-svelte";
 	import { getUiStore } from "$lib/stores/ui.svelte.js";
 
 	let { onOpenSettings } = $props();
 	const ui = getUiStore();
 	let open = $state(false);
 
-	// 단일 $state 객체 — 개별 let보다 proxy 추적이 확실함
-	let snap = $state({
-		isLoading: true,
-		activeProv: null,
-		activeMod: null,
-		provs: {},
-		dbgStep: "init",
-		diag: "init",
-		tick: 0,
-	});
-
-	function syncFromStore() {
-		try {
-			const isL = ui.statusLoading;
-			const pv = ui.providers || {};
-			// 전체 객체를 새로 할당 — 부분 할당보다 reactivity 트리거 확실
-			snap = {
-				isLoading: isL,
-				activeProv: ui.activeProvider,
-				activeMod: ui.activeModel,
-				provs: pv,
-				dbgStep: ui.debugStep || "?",
-				diag: (ui.debugStep || "?") + " L" + (isL ? 1 : 0) + "P" + Object.keys(pv).length,
-				tick: snap.tick + 1,
-			};
-		} catch (e) {
-			snap = { ...snap, diag: "syncErr:" + String(e).slice(0, 30) };
-		}
-	}
-
-	// 폴링 — lifecycle hook 없이 즉시
-	if (typeof window !== "undefined") {
-		try { syncFromStore(); } catch (_) {}
-		setInterval(syncFromStore, 250);
-	}
-	onMount(() => syncFromStore());
-
-	// 각 값 derived — 템플릿이 읽을 때마다 snap에서 재평가
-	let isLoading = $derived(snap.isLoading);
-	let activeProv = $derived(snap.activeProv);
-	let activeMod = $derived(snap.activeMod);
-	let provs = $derived(snap.provs);
-	let _diag = $derived(snap.diag);
+	// store 값 derived — props 통과 시 reactivity 끊김 우회
+	let isLoading = $derived(ui.statusLoading);
+	let activeProv = $derived(ui.activeProvider);
+	let activeMod = $derived(ui.activeModel);
+	let provs = $derived(ui.providers || {});
 
 	let providerList = $derived.by(() => {
-		const entries = Object.entries(provs || {});
+		const entries = Object.entries(provs);
 		return entries
 			.filter(([, v]) => v.label)
 			.map(([id, v]) => ({
@@ -70,12 +31,11 @@
 		open = false;
 	}
 
-	// Svelte 5 이벤트 위임 + stopPropagation 충돌 우회 — document에 직접 붙임
-	function handleDocClick(e) {
-		if (!e.target.closest(".provider-dropdown")) open = false;
-	}
+	// Svelte 5 이벤트 위임 우회 — document에 직접 click 리스너
 	if (typeof document !== "undefined") {
-		document.addEventListener("click", handleDocClick);
+		document.addEventListener("click", (e) => {
+			if (!e.target.closest(".provider-dropdown")) open = false;
+		});
 	}
 </script>
 
@@ -95,7 +55,7 @@
 	>
 		{#if isLoading}
 			<Loader2 size={12} class="animate-spin" />
-			<span id="_dl_diag_span">확인 중 [{_diag}]</span>
+			<span>확인 중...</span>
 		{:else if !activeProv || !provs[activeProv]?.available}
 			<AlertCircle size={12} />
 			<span>설정 필요</span>
@@ -136,7 +96,7 @@
 					class="w-full flex items-center gap-2 px-3 py-2 text-left text-[12px] text-dl-text-dim hover:text-dl-text hover:bg-white/5 transition-colors"
 					onclick={() => { open = false; onOpenSettings?.(); }}
 				>
-					<Settings size={12} />
+					<Cog size={12} />
 					<span>프로바이더 설정</span>
 				</button>
 			</div>

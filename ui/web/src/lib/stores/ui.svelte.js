@@ -83,9 +83,9 @@ export function createUiStore() {
 	let deleteConfirmMode = $state("single");
 
 	// ── Provider / Model ──
-	// 핵심 원칙: 스피너에 직접 영향을 주는 상태(_core.statusLoading + _core.providers + _core.activeProvider + _core.activeModel)는
-	// 단일 $state 객체로 묶는다. Svelte 5에서 개별 let + getter 노출 패턴이 일부 모바일 브라우저에서
-	// reactivity가 끊기는 사례가 있어, proxy 객체 방식이 가장 안전하다.
+	// 핵심 원칙: 스피너에 직접 영향을 주는 상태는 단일 $state 객체로 묶는다.
+	// 개별 let + getter 노출 패턴이 일부 모바일 브라우저에서 reactivity가 끊기는 사례가
+	// 보고되어 proxy 객체 방식이 가장 안전하다.
 	const _core = $state({
 		statusLoading: true,
 		providers: {},
@@ -93,8 +93,6 @@ export function createUiStore() {
 		activeModel: null,
 		availableModels: [],
 		expandedProvider: null,
-		lastError: "",
-		debugStep: "init",
 	});
 	let providerModels = $state({});
 	let modelsLoading = $state({});
@@ -189,48 +187,27 @@ export function createUiStore() {
 		await refreshProviderStatus(nextProvider, true);
 	}
 
-	function _setStep(s) {
-		_core.debugStep = s;
-		// 폰에서 reactivity와 무관하게 진짜로 단계가 진행 중인지 확인하기 위해
-		// document.title에 직접 박는다. JS가 실행되면 무조건 탭 제목이 바뀜.
-		try {
-			if (typeof document !== "undefined") document.title = "[" + s + "] DartLab";
-		} catch (_) {}
-	}
-
 	async function loadStatus() {
-		_setStep("loadStatus:start");
 		_core.statusLoading = true;
 		// 핵심 원칙: statusLoading은 "프로바이더 목록이 있는가"만 의미한다.
+		// /api/status 응답 오는 순간 풀리고, 나머지(모델 로드/검증/SSE)는 백그라운드.
 		let profile = null;
 		try {
-			_setStep("fetchAiProfile:awaiting");
 			profile = await fetchAiProfile();
-			_setStep("fetchAiProfile:got");
-			const merged = applyProfileSnapshot(_core.providers, profile);
-			_setStep("applyProfile:keys=" + Object.keys(merged).length);
-			_core.providers = merged;
+			_core.providers = applyProfileSnapshot(_core.providers, profile);
 		} catch (e) {
-			_setStep("fetchAiProfile:err:" + String(e).slice(0, 60));
-			_core.lastError = String(e).slice(0, 100);
 			console.warn("[loadStatus] fetchAiProfile:", e);
 		}
 		const preferredProvider = normalizeProvider(profile?.defaultProvider || "codex");
 		try {
-			_setStep("refreshProviderStatus:awaiting");
 			await refreshProviderStatus(preferredProvider, true);
-			_setStep("refreshProviderStatus:done:keys=" + Object.keys(_core.providers).length);
 		} catch (e) {
-			_setStep("refreshProviderStatus:err:" + String(e).slice(0, 60));
-			_core.lastError = String(e).slice(0, 100);
 			console.warn("[loadStatus] refreshProviderStatus:", e);
 		}
 		_core.activeProvider = preferredProvider;
 		_core.expandedProvider = preferredProvider;
 		apiKeyInput = "";
-		// ★ 여기서 스피너 풀림 — provider 목록은 이미 채워졌다
 		_core.statusLoading = false;
-		_setStep("done:L0:P" + Object.keys(_core.providers).length);
 
 		// 이하 백그라운드: 실패해도 UI는 동작 (모델 선택/SSE는 사용자가 설정 패널 열 때 다시 시도)
 		(async () => {
@@ -681,8 +658,6 @@ export function createUiStore() {
 		get providerModels() { return providerModels; },
 		get modelsLoading() { return modelsLoading; },
 		get statusLoading() { return _core.statusLoading; },
-		get debugStep() { return _core.debugStep; },
-		get lastError() { return _core.lastError; },
 		get appVersion() { return appVersion; },
 		get openDart() { return openDart; },
 		get channels() { return channels; },

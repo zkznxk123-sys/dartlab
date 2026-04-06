@@ -19,7 +19,7 @@
 | [credit.md](credit.md) | L2 | credit/ | 독립 신용평가 (dCR 20단계, 7축, 투명 공개) |
 | [ai.md](ai.md) | L3 | ai/ | 적극적 분석가, 5 provider |
 | [guide.md](guide.md) | 교차 | guide/ | 안내 데스크 + 교육 안내자, 4층위 |
-| [channel.md](channel.md) | L4 | channel/ | 외부 공유 — 터널 백엔드 + 메시징 어댑터, `dartlab share` |
+| [channel.md](channel.md) | L4 | channel/ | 외부 공유 — Microsoft DevTunnels 자동 셋업, `dartlab channel` |
 | [experiments.md](experiments.md) | — | experiments/ | 실험 규칙, 흡수 판단 |
 | [edgar.md](edgar.md) | L1 | providers/edgar/ | EDGAR 동기화 규칙, EXEMPT 관리 (데이터/분석 동작은 각 엔진 문서에 통합) |
 | [code.md](code.md) | — | 전체 | camelCase, 독스트링 9섹션, 릴리즈, Git |

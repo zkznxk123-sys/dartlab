@@ -8,7 +8,7 @@
 	import {
 		X, Loader2, Check, ExternalLink,
 		Key, AlertCircle, CheckCircle2, Terminal, LogOut,
-		Download, MessageSquare, Radio
+		Download, Radio
 	} from "lucide-svelte";
 
 	const { ui } = $props();
@@ -37,13 +37,7 @@
 	const TABS = [
 		{ id: "providers", label: "AI 모델", icon: Radio },
 		{ id: "openDart", label: "공시 API", icon: Key },
-		{ id: "channels", label: "채널", icon: MessageSquare },
 	];
-
-	function activeChannelCount() {
-		if (!ui.channels) return 0;
-		return Object.values(ui.channels).filter(c => c.running).length;
-	}
 </script>
 
 {#if ui.settingsOpen}
@@ -83,7 +77,6 @@
 				<div class="w-[140px] flex-shrink-0 border-r border-dl-border/40 bg-dl-bg-darker/50 py-3 px-2 flex flex-col gap-1">
 					{#each TABS as tab}
 						{@const isActive = ui.settingsSection === tab.id}
-						{@const channelCount = tab.id === "channels" ? activeChannelCount() : 0}
 						<button
 							class={cn(
 								"flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-left text-[12px] transition-all",
@@ -95,9 +88,6 @@
 						>
 							<tab.icon size={14} class={isActive ? "text-dl-primary-light" : "text-dl-text-dim"} />
 							<span class="flex-1">{tab.label}</span>
-							{#if channelCount > 0}
-								<span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-dl-success/20 text-dl-success min-w-[18px] text-center">{channelCount}</span>
-							{/if}
 							{#if tab.id === "openDart" && ui.openDart.configured}
 								<span class="w-1.5 h-1.5 rounded-full bg-dl-success flex-shrink-0"></span>
 							{/if}
@@ -661,188 +651,6 @@
 							</div>
 						</div>
 
-					<!-- ━━━ TAB: 채널 ━━━ -->
-					{:else if ui.settingsSection === "channels"}
-						<div class="space-y-4">
-							<div>
-								<div class="flex items-center gap-2">
-									<span class="text-[13px] font-medium text-dl-text">외부 채널 연결</span>
-									<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-dl-bg-darker text-dl-text-dim">세션 전용</span>
-								</div>
-								<div class="mt-1.5 text-[11px] text-dl-text-dim">
-									Telegram / Slack / Discord 봇을 현재 <code class="px-1 py-0.5 rounded bg-dl-bg-darker text-dl-text-muted">dartlab ai</code> 서버 세션에 바로 연결합니다. 토큰은 UI에 저장하지 않습니다.
-								</div>
-							</div>
-
-							<div class="space-y-3">
-								{#each Object.entries(ui.channels) as [platform, info]}
-									{@const isSlack = platform === "slack"}
-									<div class="rounded-xl border border-dl-border/60 bg-dl-bg-darker/80 px-4 py-4">
-										<div class="flex items-start justify-between gap-3">
-											<div>
-												<div class="flex items-center gap-2">
-													<span class="text-[12px] font-medium text-dl-text">{info.label}</span>
-													<span class={cn(
-														"px-1.5 py-0.5 rounded text-[9px] font-semibold",
-														info.running
-															? "bg-dl-success/15 text-dl-success"
-															: "bg-dl-border/40 text-dl-text-dim"
-													)}>
-														{info.running ? "연결됨" : "미연결"}
-													</span>
-												</div>
-												<div class="mt-1 text-[10px] text-dl-text-dim">{info.description}</div>
-												{#if info.error}
-													<div class="mt-1 text-[10px] text-dl-primary-light">{info.error}</div>
-												{/if}
-											</div>
-											<div class="text-[10px] text-dl-text-dim">
-												{#if info.startedAt}
-													실행 중
-												{:else}
-													대기
-												{/if}
-											</div>
-										</div>
-
-										<!-- 플랫폼별 토큰 발급 가이드 -->
-										{#if !info.running}
-											{#if platform === "telegram"}
-												<div class="mt-3 rounded-lg border border-dl-primary/20 bg-dl-primary/[0.03] px-3 py-3">
-													<div class="flex items-center gap-1.5 mb-2">
-														<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-dl-success/15 text-dl-success">1분 완료</span>
-														<span class="text-[11px] font-medium text-dl-text">가장 쉬운 방법</span>
-													</div>
-													<div class="space-y-2.5 text-[11px] text-dl-text-dim leading-relaxed">
-														<div class="flex gap-2">
-															<span class="text-dl-primary-light font-semibold flex-shrink-0">1</span>
-															<div>
-																휴대폰이나 PC에서 텔레그램을 열고, 상단 검색창에 <code class="px-1 py-0.5 rounded bg-dl-bg-darker text-dl-text-muted">BotFather</code>를 검색해서 대화를 시작하세요.
-																<a href="https://t.me/BotFather" target="_blank" rel="noreferrer" class="ml-1 text-dl-primary-light hover:underline">바로가기</a>
-															</div>
-														</div>
-														<div class="flex gap-2">
-															<span class="text-dl-primary-light font-semibold flex-shrink-0">2</span>
-															<div>
-																채팅창에 <code class="px-1.5 py-0.5 rounded bg-dl-bg-darker text-dl-text-muted font-mono">/newbot</code>을 보내세요. BotFather가 봇 이름과 아이디를 물어봅니다. 아무거나 입력하면 됩니다.
-															</div>
-														</div>
-														<div class="flex gap-2">
-															<span class="text-dl-primary-light font-semibold flex-shrink-0">3</span>
-															<div>
-																완료되면 BotFather가 긴 문자열을 하나 보내줍니다.<br />
-																<code class="px-1.5 py-0.5 rounded bg-dl-bg-darker text-dl-text-muted font-mono text-[10px]">123456789:ABCdefGHIjklMNOpqrsTUVwxyz</code><br />
-																이게 토큰입니다. 복사해서 아래에 붙여넣고 <strong class="text-dl-text">연결</strong>을 누르세요.
-															</div>
-														</div>
-													</div>
-												</div>
-											{:else if platform === "slack"}
-												<div class="mt-3 rounded-lg border border-dl-border/40 bg-dl-bg-dark/50 px-3 py-3">
-													<div class="text-[11px] font-medium text-dl-text mb-2">설정 방법 (5분)</div>
-													<div class="space-y-2.5 text-[11px] text-dl-text-dim leading-relaxed">
-														<div class="flex gap-2">
-															<span class="text-dl-text font-semibold flex-shrink-0">1</span>
-															<div>
-																<a href="https://api.slack.com/apps" target="_blank" rel="noreferrer" class="text-dl-primary-light hover:underline">api.slack.com/apps</a>에 접속 → <strong class="text-dl-text">Create New App</strong> → From scratch 선택 → 앱 이름과 워크스페이스를 고릅니다.
-															</div>
-														</div>
-														<div class="flex gap-2">
-															<span class="text-dl-text font-semibold flex-shrink-0">2</span>
-															<div>
-																왼쪽 메뉴 <strong class="text-dl-text">Socket Mode</strong> → Enable 켜기 → 토큰 이름 아무거나 입력하면 <code class="px-1 py-0.5 rounded bg-dl-bg-darker text-dl-text-muted font-mono">xapp-...</code>으로 시작하는 App 토큰이 나옵니다. 복사하세요.
-															</div>
-														</div>
-														<div class="flex gap-2">
-															<span class="text-dl-text font-semibold flex-shrink-0">3</span>
-															<div>
-																왼쪽 메뉴 <strong class="text-dl-text">OAuth & Permissions</strong> → Scopes에서 <code class="px-1 py-0.5 rounded bg-dl-bg-darker text-dl-text-muted">chat:write</code>, <code class="px-1 py-0.5 rounded bg-dl-bg-darker text-dl-text-muted">app_mentions:read</code> 추가 → 상단 <strong class="text-dl-text">Install to Workspace</strong> → <code class="px-1 py-0.5 rounded bg-dl-bg-darker text-dl-text-muted font-mono">xoxb-...</code>로 시작하는 Bot 토큰을 복사하세요.
-															</div>
-														</div>
-														<div class="flex gap-2">
-															<span class="text-dl-text font-semibold flex-shrink-0">4</span>
-															<div>아래 두 칸에 각각 붙여넣고 <strong class="text-dl-text">연결</strong>을 누르세요.</div>
-														</div>
-													</div>
-												</div>
-											{:else if platform === "discord"}
-												<div class="mt-3 rounded-lg border border-dl-border/40 bg-dl-bg-dark/50 px-3 py-3">
-													<div class="text-[11px] font-medium text-dl-text mb-2">설정 방법 (5분)</div>
-													<div class="space-y-2.5 text-[11px] text-dl-text-dim leading-relaxed">
-														<div class="flex gap-2">
-															<span class="text-dl-text font-semibold flex-shrink-0">1</span>
-															<div>
-																<a href="https://discord.com/developers/applications" target="_blank" rel="noreferrer" class="text-dl-primary-light hover:underline">discord.com/developers</a>에 접속 → <strong class="text-dl-text">New Application</strong> → 이름을 정합니다.
-															</div>
-														</div>
-														<div class="flex gap-2">
-															<span class="text-dl-text font-semibold flex-shrink-0">2</span>
-															<div>
-																왼쪽 메뉴 <strong class="text-dl-text">Bot</strong> → <strong class="text-dl-text">Reset Token</strong> 클릭 → 나온 토큰을 복사하세요. 같은 페이지 아래쪽 <strong class="text-dl-text">Message Content Intent</strong>를 켜 주세요.
-															</div>
-														</div>
-														<div class="flex gap-2">
-															<span class="text-dl-text font-semibold flex-shrink-0">3</span>
-															<div>
-																왼쪽 메뉴 <strong class="text-dl-text">OAuth2</strong> → URL Generator에서 <code class="px-1 py-0.5 rounded bg-dl-bg-darker text-dl-text-muted">bot</code> 체크 → Permissions에서 <code class="px-1 py-0.5 rounded bg-dl-bg-darker text-dl-text-muted">Send Messages</code> 체크 → 생성된 URL로 접속해서 서버에 봇을 추가하세요.
-															</div>
-														</div>
-														<div class="flex gap-2">
-															<span class="text-dl-text font-semibold flex-shrink-0">4</span>
-															<div>아래에 토큰을 붙여넣고 <strong class="text-dl-text">연결</strong>을 누르세요.</div>
-														</div>
-													</div>
-												</div>
-											{/if}
-										{/if}
-
-										<div class="mt-3 grid gap-2">
-											{#if isSlack}
-												<input
-													type="password"
-													value={ui.channelInputs.slack?.botToken || ""}
-													placeholder="Bot token (xoxb-...)"
-													class="w-full bg-dl-bg-dark border border-dl-border rounded-lg px-3 py-2 text-[12px] text-dl-text placeholder:text-dl-text-dim outline-none focus:border-dl-primary/50 transition-colors"
-													oninput={(e) => ui.setChannelInput("slack", "botToken", e.currentTarget.value)}
-												/>
-												<input
-													type="password"
-													value={ui.channelInputs.slack?.appToken || ""}
-													placeholder="App token (xapp-...)"
-													class="w-full bg-dl-bg-dark border border-dl-border rounded-lg px-3 py-2 text-[12px] text-dl-text placeholder:text-dl-text-dim outline-none focus:border-dl-primary/50 transition-colors"
-													oninput={(e) => ui.setChannelInput("slack", "appToken", e.currentTarget.value)}
-												/>
-											{:else}
-												<input
-													type="password"
-													value={ui.channelInputs[platform]?.token || ""}
-													placeholder={platform === "telegram" ? "BotFather 토큰 (123456:ABC-DEF...)" : platform === "discord" ? "Bot token" : `${info.label} token`}
-													class="w-full bg-dl-bg-dark border border-dl-border rounded-lg px-3 py-2 text-[12px] text-dl-text placeholder:text-dl-text-dim outline-none focus:border-dl-primary/50 transition-colors"
-													oninput={(e) => ui.setChannelInput(platform, "token", e.currentTarget.value)}
-												/>
-											{/if}
-										</div>
-
-										<div class="mt-3 flex items-center justify-end gap-2">
-											<button
-												class="px-3 py-2 rounded-lg border border-dl-border text-[11px] text-dl-text-dim hover:text-dl-text hover:border-dl-primary/30 transition-colors disabled:opacity-40"
-												onclick={() => ui.stopChannel(platform)}
-												disabled={!info.running || ui.channelBusy[platform]}
-											>
-												{#if ui.channelBusy[platform]}<Loader2 size={12} class="animate-spin inline-block mr-1" />{/if}종료
-											</button>
-											<button
-												class="px-3 py-2 rounded-lg bg-dl-primary/20 text-dl-primary-light text-[11px] font-medium hover:bg-dl-primary/30 transition-colors disabled:opacity-40"
-												onclick={() => ui.startChannel(platform)}
-												disabled={ui.channelBusy[platform]}
-											>
-												{#if ui.channelBusy[platform]}<Loader2 size={12} class="animate-spin inline-block mr-1" />{/if}연결
-											</button>
-										</div>
-									</div>
-								{/each}
-							</div>
-						</div>
 					{/if}
 				</div>
 			</div>

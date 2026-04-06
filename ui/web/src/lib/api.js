@@ -3,7 +3,7 @@
  * 브라우저: HTTP/SSE 직접 통신
  * VSCode webview: postMessage 브릿지 (Extension Host 경유)
  */
-import { BASE, fetchPack, authedFetch } from "./api/http.js";
+import { BASE, fetchPack } from "./api/http.js";
 import { isVSCode } from "./api/transport.js";
 import { askStreamVSCode } from "./api/vscodeTransport.js";
 
@@ -38,28 +38,28 @@ export {
 
 /** Excel 내보내기 가능한 모듈 목록 */
 export async function fetchExportModules(stockCode) {
-	const res = await authedFetch(`${BASE}/api/export/modules/${encodeURIComponent(stockCode)}`);
+	const res = await fetch(`${BASE}/api/export/modules/${encodeURIComponent(stockCode)}`);
 	if (!res.ok) throw new Error("모듈 목록 조회 실패");
 	return res.json();
 }
 
 /** 데이터 소스 트리 (registry 기반 전체 소스) */
 export async function fetchExportSources(stockCode) {
-	const res = await authedFetch(`${BASE}/api/export/sources/${encodeURIComponent(stockCode)}`);
+	const res = await fetch(`${BASE}/api/export/sources/${encodeURIComponent(stockCode)}`);
 	if (!res.ok) throw new Error("소스 목록 조회 실패");
 	return res.json();
 }
 
 /** 템플릿 목록 (프리셋 + 커스텀) */
 export async function fetchTemplates() {
-	const res = await authedFetch(`${BASE}/api/export/templates`);
+	const res = await fetch(`${BASE}/api/export/templates`);
 	if (!res.ok) throw new Error("템플릿 조회 실패");
 	return res.json();
 }
 
 /** 템플릿 저장 */
 export async function saveTemplate(template) {
-	const res = await authedFetch(`${BASE}/api/export/templates`, {
+	const res = await fetch(`${BASE}/api/export/templates`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(template),
@@ -70,7 +70,7 @@ export async function saveTemplate(template) {
 
 /** 템플릿 삭제 */
 export async function deleteTemplate(templateId) {
-	const res = await authedFetch(`${BASE}/api/export/templates/${encodeURIComponent(templateId)}`, {
+	const res = await fetch(`${BASE}/api/export/templates/${encodeURIComponent(templateId)}`, {
 		method: "DELETE",
 	});
 	if (!res.ok) {
@@ -91,7 +91,7 @@ export async function downloadExcel(stockCode, modules = null, templateId = null
 	}
 	const qs = params.toString();
 	if (qs) url += `?${qs}`;
-	const res = await authedFetch(url);
+	const res = await fetch(url);
 	if (!res.ok) {
 		const err = await res.json().catch(() => ({}));
 		throw new Error(err.detail || "Excel 다운로드 실패");
@@ -110,7 +110,7 @@ export async function downloadExcel(stockCode, modules = null, templateId = null
 
 /** 경량 데이터 소스 목록 (빠름 — registry 메타만 확인) */
 export async function fetchDataSources(stockCode) {
-	const res = await authedFetch(`${BASE}/api/data/sources/${encodeURIComponent(stockCode)}`);
+	const res = await fetch(`${BASE}/api/data/sources/${encodeURIComponent(stockCode)}`);
 	if (!res.ok) throw new Error("소스 목록 조회 실패");
 	return res.json();
 }
@@ -121,7 +121,7 @@ export async function fetchDataPreview(stockCode, module, maxRows = 50) {
 	if (maxRows !== 50) params.set("max_rows", String(maxRows));
 	const qs = params.toString();
 	const url = `${BASE}/api/data/preview/${encodeURIComponent(stockCode)}/${encodeURIComponent(module)}${qs ? "?" + qs : ""}`;
-	const res = await authedFetch(url);
+	const res = await fetch(url);
 	if (!res.ok) {
 		const err = await res.json().catch(() => ({}));
 		throw new Error(err.detail || "미리보기 실패");
@@ -131,21 +131,21 @@ export async function fetchDataPreview(stockCode, module, maxRows = 50) {
 
 /** 종목 검색 */
 export async function searchCompany(query) {
-	const res = await authedFetch(`${BASE}/api/search?q=${encodeURIComponent(query)}`);
+	const res = await fetch(`${BASE}/api/search?q=${encodeURIComponent(query)}`);
 	if (!res.ok) throw new Error("검색 실패");
 	return res.json();
 }
 
 /** 기업 기본 정보 + surface 안내 */
 export async function fetchCompany(code) {
-	const res = await authedFetch(`${BASE}/api/company/${code}`);
+	const res = await fetch(`${BASE}/api/company/${code}`);
 	if (!res.ok) throw new Error("기업 정보 조회 실패");
 	return res.json();
 }
 
 /** company index */
 export async function fetchCompanyIndex(code) {
-	const res = await authedFetch(`${BASE}/api/company/${code}/index`);
+	const res = await fetch(`${BASE}/api/company/${code}/index`);
 	if (!res.ok) throw new Error("company index 조회 실패");
 	return res.json();
 }
@@ -156,21 +156,21 @@ export async function fetchCompanyShow(code, topic, block = null, raw = false) {
 	if (block !== null) params.set("block", block);
 	if (raw) params.set("raw", "true");
 	const qs = params.toString() ? `?${params}` : "";
-	const res = await authedFetch(`${BASE}/api/company/${code}/show/${encodeURIComponent(topic)}${qs}`);
+	const res = await fetch(`${BASE}/api/company/${code}/show/${encodeURIComponent(topic)}${qs}`);
 	if (!res.ok) throw new Error("company topic 조회 실패");
 	return res.json();
 }
 
 /** company topic 전체 블록 일괄 조회 — N+1 호출 제거 */
 export async function fetchCompanyShowAll(code, topic) {
-	const res = await authedFetch(`${BASE}/api/company/${code}/show/${encodeURIComponent(topic)}/all`);
+	const res = await fetch(`${BASE}/api/company/${code}/show/${encodeURIComponent(topic)}/all`);
 	if (!res.ok) throw new Error("company topic 일괄 조회 실패");
 	return res.json();
 }
 
 /** company topic provenance */
 export async function fetchCompanyTrace(code, topic) {
-	const res = await authedFetch(`${BASE}/api/company/${code}/trace/${encodeURIComponent(topic)}`);
+	const res = await fetch(`${BASE}/api/company/${code}/trace/${encodeURIComponent(topic)}`);
 	if (!res.ok) throw new Error("company trace 조회 실패");
 	return res.json();
 }
@@ -182,7 +182,7 @@ export async function fetchCompanySections(code) {
 
 /** company diff 요약 */
 export async function fetchCompanyDiff(code) {
-	const res = await authedFetch(`${BASE}/api/company/${code}/diff`);
+	const res = await fetch(`${BASE}/api/company/${code}/diff`);
 	if (!res.ok) throw new Error("diff 조회 실패");
 	return res.json();
 }
@@ -194,7 +194,7 @@ export async function fetchCompanyInit(code) {
 
 /** 뷰어용 목차 — chapter/topic 트리 */
 export async function fetchCompanyToc(code) {
-	const res = await authedFetch(`${BASE}/api/company/${code}/toc`);
+	const res = await fetch(`${BASE}/api/company/${code}/toc`);
 	if (!res.ok) throw new Error("목차 조회 실패");
 	return res.json();
 }
@@ -207,7 +207,7 @@ export async function fetchCompanyViewer(code, topic, period = null) {
 
 /** 여러 topic의 viewer 데이터를 한 번에 반환 — chapter 확장 시 N+1 제거 */
 export async function fetchCompanyViewerBatch(code, topics) {
-	const res = await authedFetch(`${BASE}/api/company/${encodeURIComponent(code)}/viewer/batch`, {
+	const res = await fetch(`${BASE}/api/company/${encodeURIComponent(code)}/viewer/batch`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ topics }),
@@ -223,14 +223,14 @@ export async function fetchViewer(code, topic, base = null, compare = null) {
 	if (compare) params.set("compare", compare);
 	const qs = params.toString();
 	const url = `${BASE}/api/company/${encodeURIComponent(code)}/viewer2/${encodeURIComponent(topic)}${qs ? "?" + qs : ""}`;
-	const res = await authedFetch(url);
+	const res = await fetch(url);
 	if (!res.ok) throw new Error("viewer 조회 실패");
 	return res.json();
 }
 
 /** diff 요약 — changeRate + added/removed 미리보기 */
 export async function fetchCompanyDiffSummary(code, topic) {
-	const res = await authedFetch(`${BASE}/api/company/${code}/diff/${encodeURIComponent(topic)}/summary`);
+	const res = await fetch(`${BASE}/api/company/${code}/diff/${encodeURIComponent(topic)}/summary`);
 	if (!res.ok) throw new Error("diff summary 조회 실패");
 	return res.json();
 }
@@ -238,7 +238,7 @@ export async function fetchCompanyDiffSummary(code, topic) {
 /** company topic diff (줄 단위) */
 export async function fetchCompanyTopicDiff(code, topic, fromPeriod, toPeriod) {
 	const params = new URLSearchParams({ from: fromPeriod, to: toPeriod });
-	const res = await authedFetch(`${BASE}/api/company/${code}/diff/${encodeURIComponent(topic)}?${params}`);
+	const res = await fetch(`${BASE}/api/company/${code}/diff/${encodeURIComponent(topic)}?${params}`);
 	if (!res.ok) throw new Error("topic diff 조회 실패");
 	return res.json();
 }
@@ -246,7 +246,7 @@ export async function fetchCompanyTopicDiff(code, topic, fromPeriod, toPeriod) {
 /** 뷰어 내 텍스트 검색 — sections 전체에서 substring 검색 */
 export async function fetchCompanySearch(code, query) {
 	const params = new URLSearchParams({ q: query });
-	const res = await authedFetch(`${BASE}/api/company/${encodeURIComponent(code)}/search?${params}`);
+	const res = await fetch(`${BASE}/api/company/${encodeURIComponent(code)}/search?${params}`);
 	if (!res.ok) throw new Error("검색 실패");
 	return res.json();
 }
@@ -258,14 +258,14 @@ export async function fetchSearchIndex(code) {
 
 /** 7영역 인사이트 등급 + 이상치 분석 */
 export async function fetchCompanyInsights(code) {
-	const res = await authedFetch(`${BASE}/api/company/${encodeURIComponent(code)}/insights`);
+	const res = await fetch(`${BASE}/api/company/${encodeURIComponent(code)}/insights`);
 	if (!res.ok) throw new Error("인사이트 조회 실패");
 	return res.json();
 }
 
 /** Ego network — 회사 중심 관계 그래프 */
 export async function fetchCompanyNetwork(code) {
-	const res = await authedFetch(`${BASE}/api/company/${encodeURIComponent(code)}/network`);
+	const res = await fetch(`${BASE}/api/company/${encodeURIComponent(code)}/network`);
 	if (!res.ok) throw new Error("네트워크 조회 실패");
 	return res.json();
 }
@@ -278,7 +278,7 @@ export function streamTopicSummary(code, topic, { onContext, onChunk, onDone, on
 	if (model) params.set("model", model);
 	const qs = params.toString();
 	const url = `${BASE}/api/company/${encodeURIComponent(code)}/summary/${encodeURIComponent(topic)}${qs ? `?${qs}` : ""}`;
-	authedFetch(url, {
+	fetch(url, {
 		signal: controller.signal,
 	})
 		.then(async (res) => {
@@ -324,7 +324,7 @@ export function streamTopicSummary(code, topic, { onContext, onChunk, onDone, on
 /** LLM 질문 (동기) */
 export async function ask(company, question, options = {}) {
 	const body = { company, question, stream: false, ...options };
-	const res = await authedFetch(`${BASE}/api/ask`, {
+	const res = await fetch(`${BASE}/api/ask`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(body),
@@ -366,7 +366,7 @@ export function askStream(company, question, options = {}, { onMeta, onSnapshot,
 
 	const controller = new AbortController();
 
-	authedFetch(`${BASE}/api/ask`, {
+	fetch(`${BASE}/api/ask`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(body),
