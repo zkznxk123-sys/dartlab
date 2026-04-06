@@ -239,8 +239,17 @@ class GatherEntry:
         if axis == "price":
             # 시장 지수 심볼이면 네이버 차트 API 직접 수집
             if target and target in _INDEX_SYMBOLS:
-                return _fetchNaverIndex(_INDEX_SYMBOLS[target])
-            return g.price(target, market=market, start=start, end=end)
+                result = _fetchNaverIndex(_INDEX_SYMBOLS[target])
+            else:
+                result = g.price(target, market=market, start=start, end=end)
+            # R30-1: 빈 DataFrame silent → 명시적 ValueError
+            if result is None or (hasattr(result, "shape") and result.shape == (0, 0)):
+                raise ValueError(
+                    f"gather('price', '{target}') 결과가 비어 있습니다. "
+                    f"종목코드/티커를 확인하세요 (market={market}). "
+                    f"네트워크 또는 외부 API 일시적 오류일 수도 있습니다."
+                )
+            return result
         if axis == "flow":
             return g.flow(target, market=market)
         if axis == "macro":
