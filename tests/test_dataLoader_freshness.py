@@ -9,9 +9,10 @@ P0 버그 (2026-04-06): etag 사이드카가 없을 때 현재 HF ETag를 그대
 
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
 from unittest.mock import patch
+
+import pytest
 
 from dartlab.core.dataLoader import _checkRemoteFreshness
 
@@ -115,6 +116,7 @@ def test_remote_etag_unavailable_returns_none(tmp_path):
 def test_reportNm_to_finance_key():
     """syncRecent의 _reportNmToFinanceKey: 보고서명 → (year, reprt_code) 매핑."""
     import importlib.util
+
     spec = importlib.util.spec_from_file_location(
         "syncRecent",
         Path(__file__).parent.parent / ".github" / "scripts" / "syncRecent.py",
@@ -146,7 +148,8 @@ def test_collectFinance_targetPeriods_skips_88_diff():
     P0 회귀 (Phase 5): list.json 기반 가벼운 경로가 무거운 경로로 회귀하는 것을 방지.
     """
     import inspect
-    from dartlab.providers.dart.openapi.batch import _collectFinance, _collectReport, batchCollect, _workerLoop
+
+    from dartlab.providers.dart.openapi.batch import _collectFinance, _collectReport, _workerLoop, batchCollect
 
     # 새 인자 등록 검증
     sig_finance = inspect.signature(_collectFinance)
@@ -169,8 +172,9 @@ def test_buildAllPeriods_newest_first():
     P0 회귀: 옛날 분기부터 처리하면 API 한도 도달 시 매번 최신 분기가 잘려서
     신규 데이터가 영구 누락된다 (2026-04-06 388개 종목 누락 사례).
     """
-    from dartlab.providers.dart.openapi.batch import _buildAllPeriods
     from datetime import datetime
+
+    from dartlab.providers.dart.openapi.batch import _buildAllPeriods
 
     periods = _buildAllPeriods()
     currentYear = datetime.now().year
