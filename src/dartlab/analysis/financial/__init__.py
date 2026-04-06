@@ -913,6 +913,18 @@ class Analysis:
             if sub is None:
                 return self._groupGuide(group)
             resolved = _resolveAxis(sub)
+            # R24-1: 축이 그룹에 속하는지 명시적 검증.
+            # 이전엔 `analysis("valuation", "수익성")` 같은 그룹/축 mismatch 가
+            # silent 로 잘못된 그룹의 결과를 반환했다.
+            if resolved not in _GROUPS.get(group, []):
+                group_axes = _GROUPS.get(group, [])
+                axes_str = ", ".join(group_axes) if group_axes else "(없음)"
+                raise ValueError(
+                    f"'{resolved}' 축은 '{group}' 그룹에 속하지 않습니다. "
+                    f"'{group}' 그룹의 가용 축: {axes_str}\n"
+                    f"  사용법: c.analysis('{group}') 로 그룹의 축 목록을 확인하거나, "
+                    f"c.analysis('{resolved}') 로 축만 직접 호출하세요."
+                )
             entry = _AXIS_REGISTRY[resolved]
             if company is None:
                 return self._listCalcs(resolved, entry)
@@ -940,16 +952,17 @@ class Analysis:
         return pl.DataFrame(rows)
 
     def _guide(self) -> pl.DataFrame:
-        """15축 가이드."""
+        """축 가이드 — 통일 컬럼 (axis, label, description, example, partId, items)."""
         rows = []
         for key, entry in _AXIS_REGISTRY.items():
             rows.append(
                 {
-                    "축": key,
+                    "axis": key,
+                    "label": getattr(entry, "label", key),
+                    "description": entry.description,
+                    "example": entry.example,
                     "partId": entry.partId,
-                    "설명": entry.description,
-                    "항목수": len(entry.calcs),
-                    "예시": entry.example,
+                    "items": len(entry.calcs),
                 }
             )
         return pl.DataFrame(rows)
