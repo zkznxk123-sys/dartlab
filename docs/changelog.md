@@ -9,6 +9,37 @@ All notable changes to DartLab will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.2] - 2026-04-07
+
+### Added
+
+#### channel 엔진 — 외부 공유 정식 엔진 (DevTunnels)
+- **`dartlab channel`**: 한 줄로 PC dartlab을 폰에서 사용. Microsoft DevTunnels 기반 (VS Code Remote Tunnels와 동일 인프라).
+- **자동화 파이프라인 7단계**: winget 자동 설치 → GitHub OAuth → tunnel 생성 → anonymous access → port mapping → host 시작 → URL/QR 출력
+- **영구 URL**: `https://<id>-8400.<region>.devtunnels.ms` — 재실행해도 동일
+- **모바일 호환 검증**: Android Chrome (2026-04-07)
+- **메시징 봇 옵션**: `--telegram/slack/discord` (channel/adapters/)
+- **ops/channel.md**: 기술 스택, 자동화 파이프라인, 검증된 진단 사례 전부 문서화
+
+### Removed
+
+- **share 명령 → channel 통합**: `dartlab share` deprecated 별칭 제거
+- **Cloudflare Quick/Named Tunnel 백엔드 삭제**: 모바일 fetch hang / 도메인 필수 사유. devtunnel만 정식
+- **ngrok / ssh / Tailscale 백엔드 삭제**
+- **`server/security.py` 삭제**: TokenManager/Whitelist/Ratelimit/AuditLog/AnomalyDetector. devtunnel은 미들웨어 비활성
+
+### Fixed
+
+- **모바일 hydration 실패**: lucide-svelte deprecated `<Settings>` → `<Cog>` 일괄 교체
+- **Svelte 5 버전**: `vite-plugin-svelte 5.0 → 6.2.4` + `svelte 5.0 → 5.55.1`
+- **모바일 반응형**: EmptyState/ChatArea 풀너비, 하단 nav fixed
+- **레거시 폴리필**: `@vitejs/plugin-legacy` + es2020 target
+- **dataLoader ETag fresh 판정 P0**: 사이드카 미존재 시 무조건 stale + Content-Length 2단계 검증
+- **collector 88분기 차집합 우회**: list.json 기반 신규 공시만 수집 (`targetPeriodsByCode`)
+- **dataSync 워크플로우 통합**: KST 03:00 + 15:00 매일 2회, 14배 단축
+- **channel/adapters/slack**: send_text → asyncio.to_thread (이벤트 루프 블록 방지)
+- **channel/devtunnel**: Linux curl 자동 설치는 명시 동의(`DARTLAB_DEVTUNNEL_AUTOINSTALL=1`) 필요
+
 ## [0.9.1] - 2026-04-06
 
 ### Added
