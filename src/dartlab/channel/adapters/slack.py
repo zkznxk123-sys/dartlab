@@ -88,9 +88,17 @@ class SlackAdapter(ChannelAdapter):
                 await result
 
     async def send_text(self, channel_id: str, text: str) -> None:
-        """Slack 채널에 텍스트 메시지 전송."""
+        """Slack 채널에 텍스트 메시지 전송.
+
+        slack_bolt 동기 클라이언트는 내부 HTTP 호출이라 이벤트 루프 블록.
+        asyncio.to_thread로 워커 풀에서 실행 (Discord/Telegram과 동일 패턴).
+        """
         if self._client:
-            self._client.chat_postMessage(channel=channel_id, text=text)
+            await asyncio.to_thread(
+                self._client.chat_postMessage,
+                channel=channel_id,
+                text=text,
+            )
 
 
 def create(*, bot_token: str, app_token: str, **kwargs) -> SlackAdapter:

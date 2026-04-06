@@ -203,8 +203,18 @@ def install_devtunnel(auto_yes: bool = False) -> str:
             raise DevTunnelSetupError(f"devtunnel 설치 실패: {exc}") from exc
 
     elif os_name == "Linux":
+        # 보안: curl | bash 같은 임의 원격 코드 실행은 사용자 명시 동의 필요.
+        # 환경변수 DARTLAB_DEVTUNNEL_AUTOINSTALL=1 또는 대화식 prompt 동의 시만 진행.
+        autoinstall = os.environ.get("DARTLAB_DEVTUNNEL_AUTOINSTALL", "").strip() == "1"
+        if not autoinstall:
+            raise DevTunnelSetupError(
+                "Linux 자동 설치는 'curl ... | bash' 원격 스크립트를 실행합니다.\n"
+                "  명시 동의가 필요합니다.\n"
+                "  진행하려면: DARTLAB_DEVTUNNEL_AUTOINSTALL=1 환경변수 설정 후 재시도\n"
+                "  수동 설치: https://learn.microsoft.com/azure/developer/dev-tunnels/get-started"
+            )
         try:
-            print("  curl로 devtunnel 설치 중...")
+            print("  curl로 devtunnel 설치 중... (사용자 동의 OK)")
             result = subprocess.run(
                 ["sh", "-c", "curl -sL https://aka.ms/DevTunnelCliInstall | bash"],
                 capture_output=True,

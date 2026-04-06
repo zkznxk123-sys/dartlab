@@ -24,25 +24,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio pytest-cov hypothesis pytest-benchmark
+          pip install pytest pytest-asyncio pytest-cov hypothesis pytest-benchmark pytest-xdist
 
       - name: Install package
         run: pip install -e .[all]
 
-      # 메모리 안전: unit / 일반 / heavy 그룹별 분리 실행 (CLAUDE.md 정책)
-      # Polars 네이티브 메모리는 GC 회수 불가, 한 프로세스에 다 돌리면 1200MB 초과
-      # CI runner는 7GB+ 여유라 한계를 1800MB로 완화 (로컬은 1200MB 유지)
-      - name: Run unit tests
+      # 메모리 안전: pytest-xdist -n 2 로 worker 프로세스 분리
+      # 각 worker가 별도 프로세스라 Polars 네이티브 메모리가 격리됨
+      # CI runner 7GB+ 여유 → worker당 1500MB 한계 (안전 마진)
+      - name: Run tests (pytest-xdist parallel)
         env:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
-          PYTEST_MEMORY_LIMIT_MB: "1800"
-        run: pytest tests/ -v --tb=short -m "unit and not requires_data and not heavy" --benchmark-disable --cov=dartlab --cov-report=xml --cov-append
-
-      - name: Run integration tests
-        env:
-          DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
-          PYTEST_MEMORY_LIMIT_MB: "1800"
-        run: pytest tests/ -v --tb=short -m "not unit and not requires_data and not heavy" --benchmark-disable --cov=dartlab --cov-report=term-missing --cov-report=html --cov-report=xml --cov-append
+          PYTEST_MEMORY_LIMIT_MB: "1500"
+        run: pytest tests/ -n 2 --tb=short -m "not requires_data and not heavy" --benchmark-disable --cov=dartlab --cov-report=term-missing --cov-report=html --cov-report=xml
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.12'
