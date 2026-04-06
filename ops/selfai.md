@@ -1,4 +1,16 @@
-# Self-AI — dartlab 자체 AI 진화 엔진
+# Self-AI — dartlab 자체 AI 진화 엔진 *(2026-04-06 폐기)*
+
+> ⚠️ **이 엔진은 폐기되었습니다.** transformers 의존성 (router 의 device_map="auto" →
+> accelerate 요구) 으로 인한 web 서버 SQLite thread 충돌 + 기능 대비 유지 부담이
+> 커서 폐기 결정. 영속성 (KnowledgeDB) 만 `src/dartlab/ai/persistence/` 로 분리하여
+> 보존. executions/insights/skills/error_patterns 테이블의 schema 와 데이터는 그대로
+> 유지되며 사용자 DB 는 자동 마이그레이션됨.
+>
+> **대체 경로**: `from dartlab.ai.persistence import KnowledgeDB`
+>
+> 이 문서는 selfai 가 무엇을 했는지의 역사적 기록으로만 남깁니다. 새 코드를 만들 때
+> 참고하지 마세요. 폐기된 모듈: `few_shot`, `router`, `output_validator`,
+> `reflexion`, `skill_library`, `error_patterns`, `apigen`, `audit_analyzer`.
 
 dartlab의 AI가 외부 LLM 의존에서 벗어나 자체 금융분석 전문 AI로 진화하는 시스템.
 코드를 생성하고, sandbox에서 실행하고, 실행 결과로 학습하는 ACG(Action Code Generation) 폐쇄 루프.

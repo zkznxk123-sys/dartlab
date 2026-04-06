@@ -157,9 +157,13 @@ db.pull()                  # HF → 로컬 DB merge (upsert)
 
 ## 관련 코드
 
-- `src/dartlab/ai/` — providers, tools, runtime, memory, conversation
-- `src/dartlab/ai/runtime/core.py` — 시스템 프롬프트, 코드 실행, 마크다운 변환, 인사이트 주입
-- `src/dartlab/ai/selfai/knowledge_db.py` — 단일 DB (CRUD + 마이그레이션 + HF push/pull)
-- `src/dartlab/ai/selfai/few_shot.py` — 스킬 검색 → few-shot 주입
-- `src/dartlab/ai/selfai/reflexion.py` — 에러 복구 피드백
+- `src/dartlab/ai/` — providers, tools, runtime, memory, persistence, conversation
+- `src/dartlab/ai/runtime/core.py` — 시스템 프롬프트, 코드 실행, 마크다운 변환, 인사이트 주입, preGround 백그라운드 thread
+- `src/dartlab/ai/persistence/knowledge_db.py` — 단일 영속 DB (CRUD + 마이그레이션 + HF push/pull). selfai 폐기 후 영속성만 분리 보존
+- `src/dartlab/ai/persistence/__init__.py` — KnowledgeDB re-export
+- `src/dartlab/ai/memory/store.py` — analyze() 결과 저장 wrapper (KnowledgeDB 위임)
+- `src/dartlab/cli/stdio.py` — `_handleWarmup` 으로 KnowledgeDB init 사전 지불
 - `src/dartlab/analysis/financial/_memoize.py` — calc 캐시 데코레이터
+
+> selfai 엔진 (few_shot/router/reflexion/output_validator) 은 2026-04-06 폐기됨.
+> KnowledgeDB 영속성만 `ai/persistence/` 로 분리하여 보존.
