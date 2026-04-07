@@ -2244,8 +2244,12 @@ def sensitivityBlock(data: dict) -> list:
     return blocks
 
 
-def valuationSynthesisBlock(data: dict) -> list:
-    """calcValuationSynthesis 결과 -> MetricBlock + TextBlock."""
+def valuationSynthesisBlock(data: dict, priceTargetData: dict | None = None) -> list:
+    """calcValuationSynthesis 결과 -> MetricBlock + TextBlock.
+
+    Plan v6 P2 (C4): priceTargetData 인자 받아 두 모델 (synthesis 보수적 vs
+    priceTarget 시나리오 가중) 차이 narration 자동 추가. 사용자 혼란 해소.
+    """
     if not data:
         return []
     blocks: list = [
@@ -2274,6 +2278,42 @@ def valuationSynthesisBlock(data: dict) -> list:
     if estimates:
         rows = [{"모델": e["method"], "적정가(원)": f"{e['value']:,.0f}"} for e in estimates]
         blocks.append(TableBlock("모델별 적정가", pl.DataFrame(rows)))
+
+    # Plan v6 C4: 두 모델 통합 narration
+    if priceTargetData:
+        synthFair = data.get("weightedFairValue")
+        ptFair = priceTargetData.get("weightedTarget")
+        currentPrice = data.get("currentPrice") or priceTargetData.get("currentPrice")
+        if synthFair and ptFair and synthFair > 0 and ptFair > 0:
+            divergence = abs(ptFair - synthFair) / synthFair * 100
+            ratio = ptFair / synthFair
+            if divergence > 30:
+                if ptFair > synthFair:
+                    direction = (
+                        f"시장 기대가 모델 평균보다 **{ratio:.1f}배 낙관적**. "
+                        f"확률가중 목표가 ({ptFair:,.0f}원) 가 모델 종합 적정가 ({synthFair:,.0f}원) 를 크게 상회"
+                    )
+                else:
+                    direction = (
+                        f"시장 기대가 모델 평균보다 **{1 / ratio:.1f}배 보수적**. "
+                        f"확률가중 목표가 ({ptFair:,.0f}원) 가 모델 종합 적정가 ({synthFair:,.0f}원) 보다 낮음"
+                    )
+                blocks.append(
+                    TextBlock(
+                        f"두 모델 차이 {divergence:.0f}%: {direction}. "
+                        f"종합 적정가는 DCF/DDM/RIM/상대가치 모델 평균(보수적), "
+                        f"확률가중 목표가는 5개 거시 시나리오 시뮬레이션(시장 기대 기반)."
+                    )
+                )
+            else:
+                blocks.append(
+                    TextBlock(
+                        f"두 모델 수렴 (차이 {divergence:.0f}%): "
+                        f"종합 적정가 {synthFair:,.0f}원 vs 확률가중 목표가 {ptFair:,.0f}원. "
+                        f"보수적 모델 평균과 시장 기대 시나리오가 일치 — 신뢰도 높음."
+                    )
+                )
+
     return blocks
 
 

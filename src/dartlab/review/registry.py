@@ -678,15 +678,27 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             b["relativeValuation"] = _safe(lambda: relativeValuationBlock(calcRelVal(company, basePeriod=basePeriod)))
         if _need("residualIncome"):
             b["residualIncome"] = _safe(lambda: residualIncomeBlock(calcRim(company, basePeriod=basePeriod)))
+        # Plan v6 P2 C4: priceTarget 결과를 valuationSynthesis 에 전달
+        # → 두 모델 차이 narration 자동 추가 (사용자 혼란 해소)
+        _ptCache: dict = {}
+
+        def _getPt():
+            if "v" not in _ptCache:
+                _ptCache["v"] = calcPriceTarget(company, basePeriod=basePeriod)
+            return _ptCache["v"]
+
         if _need("priceTarget"):
-            b["priceTarget"] = _safe(lambda: priceTargetBlock(calcPriceTarget(company, basePeriod=basePeriod)))
+            b["priceTarget"] = _safe(lambda: priceTargetBlock(_getPt()))
         if _need("reverseImplied"):
             b["reverseImplied"] = _safe(lambda: reverseImpliedBlock(calcReverseImplied(company, basePeriod=basePeriod)))
         if _need("sensitivity"):
             b["sensitivity"] = _safe(lambda: sensitivityBlock(calcSensitivity(company, basePeriod=basePeriod)))
         if _need("valuationSynthesis"):
             b["valuationSynthesis"] = _safe(
-                lambda: valuationSynthesisBlock(calcValuationSynthesis(company, basePeriod=basePeriod))
+                lambda: valuationSynthesisBlock(
+                    calcValuationSynthesis(company, basePeriod=basePeriod),
+                    priceTargetData=_getPt(),
+                )
             )
         if _need("valuationFlags"):
             b["valuationFlags"] = _safe(lambda: valuationFlagsBlock(calcValuationFlags(company, basePeriod=basePeriod)))
