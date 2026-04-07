@@ -211,8 +211,7 @@ def calcBeneishTimeline(company, *, basePeriod: str | None = None) -> dict | Non
             "threshold": float,
         }
     """
-    from dartlab.analysis.financial._helpers import toDictBySnakeId
-
+    # Plan v5 P6: snakeId 단일 패턴 (B alias 양방향이 EDGAR↔DART 변형 자동 처리)
     isResult = company.select(
         "IS",
         ["매출액", "매출원가", "판매비와관리비", "당기순이익"],
@@ -223,8 +222,8 @@ def calcBeneishTimeline(company, *, basePeriod: str | None = None) -> dict | Non
     )
     cfResult = company.select("CF", ["operating_cashflow"])
 
-    isParsed = toDict(isResult)
-    bsParsed = toDict(bsResult)
+    isParsed = toDictBySnakeId(isResult)
+    bsParsed = toDictBySnakeId(bsResult)
     cfParsed = toDictBySnakeId(cfResult)
     if isParsed is None or bsParsed is None:
         return None
@@ -233,16 +232,16 @@ def calcBeneishTimeline(company, *, basePeriod: str | None = None) -> dict | Non
     bsData, _ = bsParsed
     cfData = cfParsed[0] if cfParsed else {}
 
-    revRow = isData.get("매출액", {})
-    cogsRow = isData.get("매출원가", {})
-    sgaRow = isData.get("판매비와관리비", {})
-    niRow = isData.get("당기순이익", {})
-    recRow = bsData.get("매출채권및기타채권", {})
-    caRow = bsData.get("유동자산", {})
-    ppeRow = bsData.get("유형자산", {})
-    taRow = bsData.get("자산총계", {})
-    clRow = bsData.get("유동부채", {})
-    tlRow = bsData.get("부채총계", {})
+    revRow = isData.get("sales", {})
+    cogsRow = isData.get("cost_of_sales", {})
+    sgaRow = isData.get("selling_and_administrative_expenses", {})
+    niRow = isData.get("net_profit", {})
+    recRow = bsData.get("trade_and_other_receivables", {})
+    caRow = bsData.get("current_assets", {})
+    ppeRow = bsData.get("tangible_assets", {})
+    taRow = bsData.get("assets", {})
+    clRow = bsData.get("current_liabilities", {})
+    tlRow = bsData.get("liabilities", {})
     ocfRow = cfData.get("operating_cashflow", {})
 
     yCols = annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS + 1)  # 전년 대비 필요 → 1년 더

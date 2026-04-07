@@ -7,7 +7,8 @@ from __future__ import annotations
 
 from dartlab.analysis.financial._helpers import (
     annualColsFromPeriods,
-            toDict,
+    toDict,
+    toDictBySnakeId,
 )
 from dartlab.analysis.financial._memoize import memoized_calc
 
@@ -173,15 +174,16 @@ def calcDeferredTax(company, *, basePeriod: str | None = None) -> dict | None:
             ],
         }
     """
+    # Plan v5 P6: snakeId 단일
     bsResult = company.select("BS", ["이연법인세자산", "이연법인세부채", "자산총계"])
-    bsParsed = toDict(bsResult)
+    bsParsed = toDictBySnakeId(bsResult)
     if bsParsed is None:
         return None
 
     bsData, bsPeriods = bsParsed
-    dtaRow = bsData.get("이연법인세자산", {})
-    dtlRow = bsData.get("이연법인세부채", {})
-    taRow = bsData.get("자산총계", {})
+    dtaRow = bsData.get("deferred_tax_assets", {})
+    dtlRow = bsData.get("deferred_tax_liabilities", {})
+    taRow = bsData.get("assets", {})
 
     yCols = annualColsFromPeriods(bsPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:

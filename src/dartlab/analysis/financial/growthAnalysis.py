@@ -8,7 +8,8 @@ from __future__ import annotations
 
 from dartlab.analysis.financial._helpers import (
     MAX_RATIO_YEARS,
-            toDict,
+    toDict,
+    toDictBySnakeId,
 )
 from dartlab.analysis.financial._helpers import (
     annualColsFromPeriods as _annualColsFromPeriods,
@@ -185,26 +186,24 @@ def calcSustainableGrowthRate(company, *, basePeriod: str | None = None) -> dict
     - gap > 0: 외부 자본 필요 (성장이 내부 역량 초과)
     - gap < 0: 여유 (자사주/배당 확대 여력)
     """
+    # Plan v5 P6: snakeId 단일 패턴
     isResult = company.select("IS", ["매출액", "당기순이익"])
     bsResult = company.select("BS", ["자본총계"])
+    cfResult = company.select("CF", ["dividends_paid"])
 
-    isParsed = toDict(isResult)
-    bsParsed = toDict(bsResult)
+    isParsed = toDictBySnakeId(isResult)
+    bsParsed = toDictBySnakeId(bsResult)
+    cfParsed = toDictBySnakeId(cfResult)
     if isParsed is None or bsParsed is None:
         return None
 
     isData, isPeriods = isParsed
     bsData, _ = bsParsed
 
-    rev = isData.get("매출액", {})
-    ni = isData.get("당기순이익", {})
-    eq = bsData.get("자본총계", {})
+    rev = isData.get("sales", {})
+    ni = isData.get("net_profit", {})
+    eq = bsData.get("stockholders_equity", {})
 
-    # 배당성향: CF 배당금지급 / 당기순이익
-    from dartlab.analysis.financial._helpers import toDictBySnakeId
-
-    cfResult = company.select("CF", ["dividends_paid"])
-    cfParsed = toDictBySnakeId(cfResult)
     divRow = cfParsed[0].get("dividends_paid", {}) if cfParsed else {}
 
     yCols = _annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS + 1)
