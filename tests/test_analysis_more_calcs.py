@@ -38,20 +38,11 @@ _PERIODS = ["2024", "2023", "2022", "2021", "2020", "2019"]
 
 
 def _krToSnakeId() -> dict[str, str]:
-    """한국어 계정명 → snakeId reverse map (Plan v4 Layer J: toDictBySnakeId 호환).
-
-    mapper.labelMap reverse 와 calc 가 사용하는 EDGAR-style snakeId 를 합쳐서
-    fallback 매핑 제공.
-    """
-    from dartlab.providers.dart.finance.mapper import AccountMapper
-
-    mapper = AccountMapper.get()
-    labels = mapper.labelMap()
-    base = {v: k for k, v in labels.items()}
-    calcOverride = {
-        "부채총계": "total_liabilities",
-        "자본총계": "total_stockholders_equity",
-        "자산총계": "total_assets",
+    """한국어 계정명 → dartlab 표준 snakeId (Plan v5 P4: alias 양방향 자동)."""
+    return {
+        "부채총계": "liabilities",
+        "자본총계": "stockholders_equity",
+        "자산총계": "assets",
         "유동자산": "current_assets",
         "유동부채": "current_liabilities",
         "비유동부채": "noncurrent_liabilities",
@@ -68,12 +59,16 @@ def _krToSnakeId() -> dict[str, str]:
         "금융비용": "finance_costs",
         "금융수익": "finance_income",
         "법인세비용": "income_taxes",
-        "이자비용": "interest_expense",
+        "이자비용": "finance_costs",
         "감가상각비": "depreciation",
         "영업활동현금흐름": "operating_cashflow",
         "유형자산의취득": "purchase_of_property_plant_and_equipment",
+        "단기차입금": "shortterm_borrowings",
+        "장기차입금": "longterm_borrowings",
+        "현금및현금성자산": "cash_and_cash_equivalents",
+        "매출채권및기타채권": "trade_and_other_receivables",
+        "매입채무": "trade_and_other_payables",
     }
-    return {**base, **calcOverride}
 
 
 def _make_df(accounts: dict[str, list[float | None]], col_name: str = "계정명") -> pl.DataFrame:
