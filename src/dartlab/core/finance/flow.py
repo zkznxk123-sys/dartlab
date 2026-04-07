@@ -84,16 +84,13 @@ def annualSumFlow(
 
 
 def annualizeFlowRows(rows: dict[str, dict], periods: list[str]) -> dict[str, dict]:
-    """flow rows dict 의 Q4 컬럼을 그 해 연간 합으로 교체 (review narrative 용).
+    """flow rows dict 의 Q4 컬럼을 그 해 연간 합으로 교체.
 
-    `_annualizeFlow` 위임 대상. row 는 그대로 두고 dict 복사 + Q4 컬럼만 교체.
+    Plan v4 Layer A 후 dartlab `c.IS / c.CIS / c.CF` 는 이미 annual 컬럼 (`{year}`)
+    을 노출하므로 detector 가 `_annualCols` 로 4자리 연도 우선 잡고 그것을 직접
+    read 하면 됨. 이 함수는 사용처 0 (deprecated).
 
-    Args:
-        rows: {row_name: {col: value}} 형태 (예: {"매출액": {"2025Q4": 32.8조, ...}})
-        periods: 사용 가능한 모든 컬럼 list
-
-    Returns:
-        같은 schema, Q4 컬럼이 연간 합으로 교체된 dict
+    호환 유지를 위해 함수 자체는 보존. 새 코드는 사용 금지.
     """
     if not rows or not periods:
         return rows

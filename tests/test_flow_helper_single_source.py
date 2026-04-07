@@ -40,15 +40,17 @@ def test_credit_ttmSum_delegates_to_annualSumFlow():
     assert a == b == 52.0
 
 
-def test_annualizeFlow_delegates_to_annualizeFlowRows():
+def test_annualizeFlowRows_standalone():
+    """annualizeFlowRows: dict 단위 wrapper. Plan v4 Layer C 후 deprecated.
+
+    review/narrative._annualizeFlow 는 제거됨 (Layer A pivot annual 컬럼 흡수).
+    annualizeFlowRows 자체는 보존 — 호환성 유지.
+    """
     from dartlab.core.finance.flow import annualizeFlowRows
-    from dartlab.review.narrative import _annualizeFlow
 
     rows = {"매출액": _DATA_FULL.copy()}
-    a = _annualizeFlow(rows, _PERIODS)
-    b = annualizeFlowRows(rows, _PERIODS)
-    assert a == b
-    assert a["매출액"]["2025Q4"] == 52.0  # Q4 가 연간 합으로 교체됨
+    out = annualizeFlowRows(rows, _PERIODS)
+    assert out["매출액"]["2025Q4"] == 52.0  # Q4 가 연간 합으로 교체됨
 
 
 def test_ttmSum_fallback_pattern():
