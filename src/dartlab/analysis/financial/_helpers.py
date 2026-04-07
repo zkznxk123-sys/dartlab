@@ -242,6 +242,48 @@ _BORROWING_KEYS = (
 )
 _BOND_KEYS = ("debentures", "bonds_payable", "current_portion_of_debentures")
 
+# 매출원가 분리 키 (제품/상품/공사/용역원가)
+_COGS_KEYS = (
+    "cost_of_sales",
+    "cost_of_goods_sold",
+    "product_cost_of_sales",
+    "merchandise_cost_of_sales",
+    "construction_cost_of_sales",
+    "service_cost_of_sales",
+)
+
+# 판관비 분리 키 (판매비/관리비)
+_SGA_KEYS = (
+    "selling_and_administrative_expenses",
+    "selling_expenses",
+    "administrative_expenses",
+    "sga",
+)
+
+# 법인세 분리 키 (당기/이연)
+_INCOME_TAX_KEYS = (
+    "income_taxes",
+    "income_tax_expense",
+    "current_income_tax_expense",
+    "deferred_income_tax_expense",
+)
+
+
+def _sumWithFallback(snakeData: dict, col: str, separateKeys: tuple, fallbackKey: str) -> float:
+    """분리 키 우선 합산, 모두 결손이면 통합 키 fallback. None vs 0 구분."""
+    parts = []
+    for sid in separateKeys:
+        if sid == fallbackKey:
+            continue
+        v = snakeData.get(sid, {}).get(col)
+        if v is not None and v != 0:
+            parts.append(v)
+    if not parts:
+        v = snakeData.get(fallbackKey, {}).get(col)
+        if v is not None:
+            parts.append(v)
+    return sum(parts)
+
 
 def sumBorrowings(snakeData: dict, col: str) -> float:
     """차입금 합산 — 회사 키 패턴 무관.
@@ -271,6 +313,21 @@ def sumBorrowings(snakeData: dict, col: str) -> float:
             parts.append(v)
 
     return sum(parts)
+
+
+def sumCostOfSales(snakeData: dict, col: str) -> float:
+    """매출원가 합산 — 제품/상품/공사/용역원가 분리 키 fallback (Plan v4 G1)."""
+    return _sumWithFallback(snakeData, col, _COGS_KEYS, "cost_of_sales")
+
+
+def sumSGA(snakeData: dict, col: str) -> float:
+    """판매관리비 합산 — 판매비/관리비 분리 키 fallback (Plan v4 G1)."""
+    return _sumWithFallback(snakeData, col, _SGA_KEYS, "selling_and_administrative_expenses")
+
+
+def sumIncomeTax(snakeData: dict, col: str) -> float:
+    """법인세 합산 — 당기/이연 분리 키 fallback (Plan v4 G1)."""
+    return _sumWithFallback(snakeData, col, _INCOME_TAX_KEYS, "income_taxes")
 
 
 

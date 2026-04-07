@@ -67,3 +67,30 @@ def test_no_raw_unit_multiply_in_enforced():
                     violations.append(f"{name}:{node.lineno} `*= unit` (헬퍼 경유 필요)")
 
     assert not violations, "raw 단위 곱셈 금지 (normalizeFromUnitScale 사용):\n" + "\n".join(violations)
+
+
+def test_no_global_raw_unit_multiply():
+    """전역 lint: 모든 docs/finance parser + sections 에서 `val *= unit` 패턴 금지.
+
+    Plan v4 P4: 32 sections parser 의 단위 처리 일관성. 새 parser 추가 시 raw
+    `*= unit` 패턴은 normalizeFromUnitScale 또는 normalizeFinanceAmount 로 교체 강제.
+    """
+    docs_root = Path(__file__).resolve().parent.parent / "src" / "dartlab" / "providers" / "dart" / "docs"
+    if not docs_root.exists():
+        return
+
+    violations = []
+    for path in docs_root.rglob("parser.py"):
+        if "_reference" in path.parts:
+            continue
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+        except (SyntaxError, UnicodeDecodeError):
+            continue
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.AugAssign) and isinstance(node.op, ast.Mult):
+                if isinstance(node.value, ast.Name) and node.value.id == "unit":
+                    violations.append(f"{path.relative_to(docs_root)}:{node.lineno} `*= unit`")
+
+    assert not violations, "raw 단위 곱셈 금지 (normalize 헬퍼 경유):\n" + "\n".join(violations)
