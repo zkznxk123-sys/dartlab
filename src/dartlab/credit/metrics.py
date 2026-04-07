@@ -88,20 +88,12 @@ def _isQuarterlyFallback(cols: list[str]) -> bool:
 def _ttmSum(flowData: dict, qCol: str, allPeriods: list[str]) -> float | None:
     """Q4 컬럼 기준 최근 4분기 합산(TTM).
 
-    qCol이 "2025Q4"이면 2025Q4+Q3+Q2+Q1 합산.
-    분기 데이터가 부족하면 가용 분기만 연환산.
+    `core/finance/flow.py::annualSumFlow` 의 credit 모드 위임 (withFallback=False).
+    1~2 분기도 부분 데이터로 연환산 (부정확하지만 0보다 낫다).
     """
-    year = qCol[:4]
-    quarters = [f"{year}Q{q}" for q in (4, 3, 2, 1)]
-    vals = [flowData.get(q) for q in quarters if q in allPeriods]
-    valid = [v for v in vals if v is not None]
-    if not valid:
-        return None
-    if len(valid) >= 3:
-        # 3~4분기 있으면 4분기로 연환산
-        return sum(valid) / len(valid) * 4
-    # 2분기 이하면 단순 합산 (부정확하지만 0보다 나음)
-    return sum(valid) / len(valid) * 4
+    from dartlab.core.finance.flow import annualSumFlow
+
+    return annualSumFlow(flowData, qCol, allPeriods, withFallback=False)
 
 
 def _getRatios(company):

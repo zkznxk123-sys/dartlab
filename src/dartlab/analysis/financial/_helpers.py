@@ -240,29 +240,12 @@ def isQuarterlyFallback(cols: list[str]) -> bool:
 def ttmSum(flowData: dict, qCol: str, allPeriods: set) -> float | None:
     """Q4 컬럼 기준 최근 4분기 합산(TTM).
 
-    qCol이 "2025Q4"이면 2025Q4+Q3+Q2+Q1 합산.
-    3분기 이상 있으면 4분기로 연환산.
-
-    Fallback (DART 누적공시 패턴):
-        - Q1·Q2가 모두 None이면서 Q4 단독값이 있으면, Q4를 연간 누적값으로 간주해 그대로 반환.
-        - 배당금지급 등 1년 1~2회 발생 이벤트에서 분기 차분이 안 됨 (audit 04 #A).
+    `core/finance/flow.py::annualSumFlow` 의 analysis 모드 위임 (withFallback=True).
+    누적공시 fallback: Q1·Q2 None + Q4 단독 → Q4 그대로 (배당금/자사주 같은 1~2회 이벤트).
     """
-    if "Q" not in qCol:
-        return flowData.get(qCol)
-    year = qCol[:4]
-    quarters = [f"{year}Q{q}" for q in (4, 3, 2, 1)]
-    vals = [flowData.get(q) for q in quarters if q in allPeriods]
-    valid = [v for v in vals if v is not None]
-    if len(valid) >= 3:
-        return sum(valid) / len(valid) * 4
-    # Fallback: Q1·Q2 모두 None인데 Q4 단독값이 존재 → 누적공시 패턴
-    q4 = flowData.get(f"{year}Q4")
-    if q4 is not None:
-        q1 = flowData.get(f"{year}Q1")
-        q2 = flowData.get(f"{year}Q2")
-        if q1 is None and q2 is None:
-            return q4
-    return None
+    from dartlab.core.finance.flow import annualSumFlow
+
+    return annualSumFlow(flowData, qCol, allPeriods, withFallback=True)
 
 
 # 차입금 snakeId 후보 리스트 — 회사마다 다른 변형 모두 합산

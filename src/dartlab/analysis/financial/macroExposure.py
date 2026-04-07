@@ -103,19 +103,32 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
     if stockCode is None:
         return None
 
-    # 매출 성장률 시계열
+    # 매출 성장률 시계열 — flow 헬퍼 경유 (Q4 분기 단독값 함정 차단)
+    from dartlab.analysis.financial._helpers import (
+        annualColsFromPeriods,
+        getFlowValue,
+        isQuarterlyFallback,
+        toDict,
+    )
+
     rev_result = company.select("IS", ["매출액"])
     if rev_result is None:
         return None
 
-    df = rev_result._df if hasattr(rev_result, "_df") else rev_result
-    period_cols = [c for c in df.columns if c.endswith("Q4") or c.endswith("A")]
-    if len(period_cols) < 4:
+    parsed = toDict(rev_result)
+    if parsed is None:
         return None
+    isData, isPeriods = parsed
+    revRow = isData.get("매출액", {})
+    yCols = annualColsFromPeriods(isPeriods)
+    if len(yCols) < 4:
+        return None
+    quarterlyMode = isQuarterlyFallback(yCols)
+    periodsSet = set(isPeriods)
 
     rev_data = []
-    for col in sorted(period_cols):
-        val = df[col][0]
+    for col in sorted(yCols):
+        val = getFlowValue(revRow, col, quarterlyMode, periodsSet)
         year_str = col.replace("Q4", "").replace("A", "")
         try:
             year = int(year_str)

@@ -46,6 +46,18 @@ def _get(row: dict, col: str) -> float:
     return v if v is not None else 0
 
 
+def _annualizeFlow(rows: dict[str, dict], periods: list[str]) -> dict[str, dict]:
+    """flow account rows(IS/CF)의 Q4 컬럼을 그 해 연간 합으로 교체.
+
+    `core/finance/flow.py::annualizeFlowRows` 위임. detector 가 IS/CF dict 를
+    이 헬퍼로 먼저 annualize 한 뒤 _get 을 호출해야 한다. BS(stock)는
+    Q4=연말이라 그대로 둔다.
+    """
+    from dartlab.core.finance.flow import annualizeFlowRows
+
+    return annualizeFlowRows(rows, periods)
+
+
 def _yoy(cur: float, prev: float) -> float | None:
     """YoY 변화율(%). prev가 0이면 None."""
     if prev == 0:
@@ -81,7 +93,9 @@ def _detectRevenueDeclineChain(company, blockMap) -> NarrativeThread | None:
         return None
 
     isData, isPeriods = isParsed
-    cfData, _ = cfParsed
+    cfData, cfPeriods = cfParsed
+    isData = _annualizeFlow(isData, isPeriods)
+    cfData = _annualizeFlow(cfData, cfPeriods)
 
     revRow = isData.get("매출액", {})
     opRow = isData.get("영업이익", {})
@@ -143,7 +157,8 @@ def _detectDebtBurdenChain(company, blockMap) -> NarrativeThread | None:
         return None
 
     bsData, bsPeriods = bsParsed
-    isData, _ = isParsed
+    isData, isPeriods = isParsed
+    isData = _annualizeFlow(isData, isPeriods)
 
     tlRow = bsData.get("부채총계", {})
     eqRow = bsData.get("자본총계", {})
@@ -214,8 +229,10 @@ def _detectWorkingCapitalStrain(company, blockMap) -> NarrativeThread | None:
         return None
 
     bsData, bsPeriods = bsParsed
-    isData, _ = isParsed
-    cfData, _ = cfParsed
+    isData, isPeriods = isParsed
+    cfData, cfPeriods = cfParsed
+    isData = _annualizeFlow(isData, isPeriods)
+    cfData = _annualizeFlow(cfData, cfPeriods)
 
     recRow = bsData.get("매출채권및기타채권", {})
     invRow = bsData.get("재고자산", {})
@@ -299,8 +316,10 @@ def _detectOverinvestment(company, blockMap) -> NarrativeThread | None:
         return None
 
     cfData, cfPeriods = cfParsed
-    isData, _ = isParsed
+    isData, isPeriods = isParsed
     bsData, _ = bsParsed
+    cfData = _annualizeFlow(cfData, cfPeriods)
+    isData = _annualizeFlow(isData, isPeriods)
 
     capexRow = cfData.get("유형자산의취득", {})
     depRow = isData.get("감가상각비", {})
@@ -381,8 +400,10 @@ def _detectEarningsManipulation(company, blockMap) -> NarrativeThread | None:
         return None
 
     isData, isPeriods = isParsed
-    cfData, _ = cfParsed
+    cfData, cfPeriods = cfParsed
     bsData, _ = bsParsed
+    isData = _annualizeFlow(isData, isPeriods)
+    cfData = _annualizeFlow(cfData, cfPeriods)
 
     niRow = isData.get("당기순이익", {})
     revRow = isData.get("매출액", {})
@@ -466,7 +487,9 @@ def _detectGrowthProfitability(company, blockMap) -> NarrativeThread | None:
         return None
 
     isData, isPeriods = isParsed
-    cfData, _ = cfParsed
+    cfData, cfPeriods = cfParsed
+    isData = _annualizeFlow(isData, isPeriods)
+    cfData = _annualizeFlow(cfData, cfPeriods)
 
     revRow = isData.get("매출액", {})
     opRow = isData.get("영업이익", {})
@@ -532,6 +555,7 @@ def _detectStructuralEfficiency(company, blockMap) -> NarrativeThread | None:
 
     isData, isPeriods = isParsed
     bsData, _ = bsParsed
+    isData = _annualizeFlow(isData, isPeriods)
 
     revRow = isData.get("매출액", {})
     cogsRow = isData.get("매출원가", {})

@@ -15,7 +15,12 @@ from __future__ import annotations
 import logging
 import math
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict
+from dartlab.analysis.financial._helpers import (
+    annualColsFromPeriods,
+    getFlowValue,
+    isQuarterlyFallback,
+    toDict,
+)
 from dartlab.analysis.financial._memoize import memoized_calc
 
 log = logging.getLogger(__name__)
@@ -155,7 +160,7 @@ def calcEarningsMomentum(company, *, basePeriod: str | None = None) -> dict | No
     if isParsed is None or cfParsed is None or bsParsed is None:
         return None
 
-    isData, _ = isParsed
+    isData, isPeriods = isParsed
     cfData, cfPeriods = cfParsed
     bsData, _ = bsParsed
 
@@ -169,16 +174,20 @@ def calcEarningsMomentum(company, *, basePeriod: str | None = None) -> dict | No
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if len(yCols) < 3:
         return None
+    quarterlyMode = isQuarterlyFallback(yCols)
+    isPeriodsSet = set(isPeriods)
+    cfPeriodsSet = set(cfPeriods)
 
     # Sloan 분해 시계열
     history = []
     for col in yCols:
-        ni = _get(niRow, col)
-        ocf = _get(ocfRow, col)
-        ta = _get(taRow, col)
-        rev = _get(revRow, col)
-        oi = _get(oiRow, col)
-        te = _get(teRow, col)
+        # IS/CF 는 flow → annualSumFlow 경유. BS 는 stock → 직접
+        ni = getFlowValue(niRow, col, quarterlyMode, isPeriodsSet) or 0
+        ocf = getFlowValue(ocfRow, col, quarterlyMode, cfPeriodsSet) or 0
+        ta = _get(taRow, col)  # BS stock — Q4 가 연말잔액이라 그대로 OK
+        rev = getFlowValue(revRow, col, quarterlyMode, isPeriodsSet) or 0
+        oi = getFlowValue(oiRow, col, quarterlyMode, isPeriodsSet) or 0
+        te = _get(teRow, col)  # BS stock
         accrual = ni - ocf
 
         margin = _safe(oi, rev) if rev != 0 else None

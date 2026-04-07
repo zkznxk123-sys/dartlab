@@ -5,7 +5,12 @@
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict
+from dartlab.analysis.financial._helpers import (
+    annualColsFromPeriods,
+    getFlowValue,
+    isQuarterlyFallback,
+    toDict,
+)
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = 8
@@ -58,14 +63,16 @@ def calcEffectiveTaxRate(company, *, basePeriod: str | None = None) -> dict | No
     yCols = annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+    quarterlyMode = isQuarterlyFallback(yCols)
+    periodsSet = set(isPeriods)
 
     # 법정세율 (한국 기준, 2023~)
     statutoryRate = 24.0  # 과세표준 구간에 따라 다르나 대기업 근사
 
     history = []
     for col in yCols:
-        ptIncome = _get(ptRow, col)
-        taxExpense = _get(taxRow, col)
+        ptIncome = getFlowValue(ptRow, col, quarterlyMode, periodsSet) or 0
+        taxExpense = getFlowValue(taxRow, col, quarterlyMode, periodsSet) or 0
 
         effectiveTaxRate = None
         taxGap = None
@@ -127,11 +134,13 @@ def calcTaxCashConversion(company, *, basePeriod: str | None = None) -> dict | N
     yCols = annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+    quarterlyMode = isQuarterlyFallback(yCols)
+    periodsSet = set(isPeriods)
 
     history = []
     for col in yCols:
-        taxExpense = abs(_get(taxExpRow, col))
-        taxPaidVal = taxPaidRow.get(col) if taxPaidRow else None
+        taxExpense = abs(getFlowValue(taxExpRow, col, quarterlyMode, periodsSet) or 0)
+        taxPaidVal = getFlowValue(taxPaidRow, col, quarterlyMode, periodsSet) if taxPaidRow else None
         taxPaid = abs(taxPaidVal) if taxPaidVal is not None else None
 
         taxCashRatio = None

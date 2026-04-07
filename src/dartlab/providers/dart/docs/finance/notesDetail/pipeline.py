@@ -146,7 +146,10 @@ def _buildTableDf(
 
     각 연도에서 당기 블록만 선택하여 연도 컬럼으로 정렬.
     전기 블록은 이전 연도 당기와 중복이므로 제외.
-    단위가 다른 연도는 백만원 기준으로 정규화.
+
+    단위 정규화: 모든 값을 **원 단위(KRW)** 로 변환.
+    `core/constants.py::UNIT_SCALE` 은 백만원=1.0 이라 colUnit 곱셈 후 백만원이 된다.
+    여기서 추가로 ×1_000_000 하여 c.IS/c.BS/c.CF 와 동일한 원 단위로 노출.
     """
     itemData: dict[str, dict[str, str]] = {}
     colOrder: list[str] = []
@@ -178,17 +181,16 @@ def _buildTableDf(
     if not itemData:
         return None
 
+    from dartlab.core.finance.unitNormalize import normalizeFromUnitScale
+
     rows = []
     for name, vals in itemData.items():
         row: dict[str, object] = {"계정명": name}
         for col in colOrder:
             raw = vals.get(col, "")
-            amount = parseAmount(raw)
-            if amount is not None:
-                unit = colUnit.get(col, 1.0)
-                if unit != 1.0:
-                    amount = amount * unit
-            row[col] = amount
+            parsed = parseAmount(raw)
+            unit = colUnit.get(col, 1.0)
+            row[col] = normalizeFromUnitScale(parsed, unit)
         rows.append(row)
 
     schema: dict[str, type] = {"계정명": pl.Utf8}

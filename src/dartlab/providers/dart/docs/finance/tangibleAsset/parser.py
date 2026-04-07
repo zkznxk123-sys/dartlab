@@ -8,6 +8,7 @@
 
 import re
 
+from dartlab.core.finance.unitNormalize import normalizeFromUnitScale
 from dartlab.core.tableParser import detectUnit, parseAmount
 
 LABEL_MAP = {
@@ -393,10 +394,7 @@ def parseMovementBlock(block: str, period: str):
         valIdx = 0
         for cat in headerCategories:
             if valIdx < len(valueCells):
-                val = parseAmount(valueCells[valIdx])
-                if val is not None and unit != 1.0:
-                    val = val * unit
-                values[cat] = val
+                values[cat] = normalizeFromUnitScale(parseAmount(valueCells[valIdx]), unit)
             else:
                 values[cat] = None
             valIdx += 1
@@ -500,10 +498,7 @@ def parseTransposedBlock(block: str, period: str):
         for j, header in enumerate(movementHeaders):
             normHeader = normalizeLabel(header)
             if j < len(valueCells):
-                val = parseAmount(valueCells[j])
-                if val is not None and unit != 1.0:
-                    val = val * unit
-                values[normHeader] = val
+                values[normHeader] = normalizeFromUnitScale(parseAmount(valueCells[j]), unit)
             else:
                 values[normHeader] = None
 

@@ -6,6 +6,7 @@
 
 import re
 
+from dartlab.core.finance.unitNormalize import normalizeFinanceAmount
 from dartlab.core.tableParser import parseAmount
 from dartlab.providers.dart.docs.finance.segment.types import SegmentTable
 
@@ -237,7 +238,8 @@ def parseSegmentTables(text: str) -> list[SegmentTable]:
                 currentColumns = merged[1:] if merged else []
                 hasData = True
 
-            vals = [parseAmount(c) for c in cells[1:]]
+            # segment parser 는 detectUnit 호출 없이 백만원 raw 가정 (DART 공시 표준)
+            vals = [normalizeFinanceAmount(parseAmount(c), "백만원") for c in cells[1:]]
             currentRows[cleanName] = vals
             rowOrder.append(cleanName)
         elif isHeaderRow(cells):

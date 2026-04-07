@@ -2,6 +2,7 @@
 
 import re
 
+from dartlab.core.finance.unitNormalize import normalizeFromUnitScale
 from dartlab.core.tableParser import detectUnit, parseAmount
 
 NORMALIZE_MAP = [
@@ -216,15 +217,9 @@ def _tryParseInlineTable(text):
         if not name or _isSkipRow(name):
             continue
         if danggiIdx is not None and danggiIdx < len(cells):
-            val = parseAmount(cells[danggiIdx])
-            if val is not None and unit != 1.0:
-                val *= unit
-            danggiData[name] = val
+            danggiData[name] = normalizeFromUnitScale(parseAmount(cells[danggiIdx]), unit)
         if jeongiIdx is not None and jeongiIdx < len(cells):
-            val = parseAmount(cells[jeongiIdx])
-            if val is not None and unit != 1.0:
-                val *= unit
-            jeongiData[name] = val
+            jeongiData[name] = normalizeFromUnitScale(parseAmount(cells[jeongiIdx]), unit)
         if name not in order:
             order.append(name)
 
@@ -288,9 +283,7 @@ def _parseSimpleRows(tableLines, unit):
         name = _cleanAccountName(cells[0])
         if not name or _isSkipRow(name):
             continue
-        val = parseAmount(cells[-1])
-        if val is not None and unit != 1.0:
-            val *= unit
+        val = normalizeFromUnitScale(parseAmount(cells[-1]), unit)
         if name:
             accounts[name] = val
     return accounts
@@ -346,9 +339,7 @@ def _parseMultiColRows(tableLines, unit):
         name = _cleanAccountName(cells[0])
         if not name or _isSkipRow(name) or "단위" in name:
             continue
-        val = parseAmount(cells[-1])
-        if val is not None and unit != 1.0:
-            val *= unit
+        val = normalizeFromUnitScale(parseAmount(cells[-1]), unit)
         if name:
             accounts[name] = val
     return accounts
