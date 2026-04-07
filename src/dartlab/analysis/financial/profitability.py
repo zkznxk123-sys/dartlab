@@ -14,6 +14,7 @@ from dartlab.analysis.financial._helpers import (
     getFlowValue,
     isQuarterlyFallback,
     toDict,
+    toDictBySnakeId,
 )
 from dartlab.analysis.financial._memoize import memoized_calc
 
@@ -490,37 +491,39 @@ def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict |
             "계약부채",
             "단기차입금",
             "장기차입금",
+            "차입부채",
             "사채",
             "현금및현금성자산",
         ],
     )
 
-    isParsed = toDict(isResult)
-    bsParsed = toDict(bsResult)
+    isParsed = toDictBySnakeId(isResult)
+    bsParsed = toDictBySnakeId(bsResult)
     if isParsed is None or bsParsed is None:
         return None
 
     isData, isPeriods = isParsed
     bsData, _ = bsParsed
 
-    opRow = isData.get("영업이익", {})
-    taxRow = isData.get("법인세비용", {})
-    ptRow = isData.get("법인세차감전순이익", {})
-    finIncRow = isData.get("금융이익", {})
-    finCostRow = isData.get("금융비용", {})
+    opRow = isData.get("operating_profit", {})
+    taxRow = isData.get("income_tax_expense") or isData.get("income_taxes", {})
+    ptRow = isData.get("profit_before_tax", {})
+    finIncRow = isData.get("finance_income", {})
+    finCostRow = isData.get("finance_costs", {})
 
-    eqRow = bsData.get("자본총계", {})
-    recRow = bsData.get("매출채권및기타채권", {})
-    invRow = bsData.get("재고자산", {})
-    ppeRow = bsData.get("유형자산", {})
-    intRow = bsData.get("무형자산", {})
-    apRow = bsData.get("매입채무", {})
-    advRow = bsData.get("선수금", {})
-    contRow = bsData.get("계약부채", {})
-    stRow = bsData.get("단기차입금", {})
-    ltRow = bsData.get("장기차입금", {})
-    bondRow = bsData.get("사채", {})
-    cashRow = bsData.get("현금및현금성자산", {})
+    eqRow = bsData.get("total_stockholders_equity", {})
+    recRow = bsData.get("trade_and_other_receivables", {})
+    invRow = bsData.get("inventories", {})
+    ppeRow = bsData.get("tangible_assets", {})
+    intRow = bsData.get("intangible_assets", {})
+    apRow = bsData.get("trade_and_other_payables", {})
+    advRow = bsData.get("advance_from_customers", {})
+    contRow = bsData.get("contract_liabilities", {})
+    stRow = bsData.get("shortterm_borrowings", {})
+    ltRow = bsData.get("longterm_borrowings", {})
+    unifiedBorrowRow = bsData.get("borrowings", {})  # 통합 차입금 fallback
+    bondRow = bsData.get("debentures", {})
+    cashRow = bsData.get("cash_and_cash_equivalents", {})
 
     yCols = annualColsFromPeriods(isPeriods, maxYears=_MAX_YEARS, basePeriod=basePeriod)
     if len(yCols) < 2:
@@ -549,7 +552,12 @@ def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict |
         noa = opAssets - opLiab if opAssets > 0 else None
 
         # NFO = 금융부채 - 금융자산(현금)
-        finDebt = _get(stRow, col) + _get(ltRow, col) + _get(bondRow, col)
+        # 차입금: 분리 키 우선, 둘 다 0 이면 통합 borrowings 키 fallback
+        stbVal = _get(stRow, col)
+        ltbVal = _get(ltRow, col)
+        if stbVal == 0 and ltbVal == 0:
+            stbVal = _get(unifiedBorrowRow, col)
+        finDebt = stbVal + ltbVal + _get(bondRow, col)
         cash = _get(cashRow, col)
         nfo = finDebt - cash
 
@@ -641,36 +649,38 @@ def calcRoicTree(company, *, basePeriod: str | None = None) -> dict | None:
             "자본총계",
             "단기차입금",
             "장기차입금",
+            "차입부채",
             "사채",
             "현금및현금성자산",
         ],
     )
 
-    isParsed = toDict(isResult)
-    bsParsed = toDict(bsResult)
+    isParsed = toDictBySnakeId(isResult)
+    bsParsed = toDictBySnakeId(bsResult)
     if isParsed is None or bsParsed is None:
         return None
 
     isData, isPeriods = isParsed
     bsData, _ = bsParsed
 
-    revRow = isData.get("매출액", {})
-    cogsRow = isData.get("매출원가", {})
-    sgaRow = isData.get("판매비와관리비", {})
-    opRow = isData.get("영업이익", {})
-    taxRow = isData.get("법인세비용", {})
-    ptRow = isData.get("법인세차감전순이익", {})
+    revRow = isData.get("sales", {})
+    cogsRow = isData.get("cost_of_sales", {})
+    sgaRow = isData.get("selling_and_administrative_expenses", {})
+    opRow = isData.get("operating_profit", {})
+    taxRow = isData.get("income_tax_expense") or isData.get("income_taxes", {})
+    ptRow = isData.get("profit_before_tax", {})
 
-    arRow = bsData.get("매출채권및기타채권", {})
-    invRow = bsData.get("재고자산", {})
-    apRow = bsData.get("매입채무", {})
-    ppeRow = bsData.get("유형자산", {})
-    intRow = bsData.get("무형자산", {})
-    eqRow = bsData.get("자본총계", {})
-    stRow = bsData.get("단기차입금", {})
-    ltRow = bsData.get("장기차입금", {})
-    bondRow = bsData.get("사채", {})
-    cashRow = bsData.get("현금및현금성자산", {})
+    arRow = bsData.get("trade_and_other_receivables", {})
+    invRow = bsData.get("inventories", {})
+    apRow = bsData.get("trade_and_other_payables", {})
+    ppeRow = bsData.get("tangible_assets", {})
+    intRow = bsData.get("intangible_assets", {})
+    eqRow = bsData.get("total_stockholders_equity", {})
+    stRow = bsData.get("shortterm_borrowings", {})
+    ltRow = bsData.get("longterm_borrowings", {})
+    unifiedBorrowRow = bsData.get("borrowings", {})  # 통합 차입금 fallback
+    bondRow = bsData.get("debentures", {})
+    cashRow = bsData.get("cash_and_cash_equivalents", {})
 
     yCols = annualColsFromPeriods(isPeriods, basePeriod, _MAX_YEARS)
     if not yCols:

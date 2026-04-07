@@ -135,6 +135,8 @@ def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
             "현금및현금성자산",
             "단기차입금",
             "장기차입금",
+            "차입부채",  # Fallback: 통합 차입금만 공시하는 회사 (audit 04 #B)
+            "차입금",     # Fallback: 추가 변형
             "사채",
             "재고자산",
             "이익잉여금",
@@ -186,6 +188,9 @@ def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
     cash = bsData.get("현금및현금성자산", {})
     stb = bsData.get("단기차입금", {})
     ltb = bsData.get("장기차입금", {})
+    # Fallback: 단/장기 분리 없이 통합 차입금만 공시하는 회사 (예: SK하이닉스 borrowings)
+    # audit 04 #B: 분리 키만 보면 통합 키만 있는 회사의 차입금이 0으로 처리됨
+    unifiedBorrow = bsData.get("차입부채", {}) or bsData.get("차입금", {})
     bonds = bsData.get("사채", {})
     re = bsData.get("이익잉여금", {})
 
@@ -223,6 +228,11 @@ def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
         stBorrow = stb.get(col) or 0
         ltBorrow = ltb.get(col) or 0
         bondsVal = bonds.get(col) or 0
+        # Fallback: stb/ltb 분리 없는 회사 → unifiedBorrow를 stb 위치로 (1번만 합산)
+        if stBorrow == 0 and ltBorrow == 0 and unifiedBorrow:
+            uVal = unifiedBorrow.get(col) or 0
+            if uVal > 0:
+                stBorrow = uVal
         totalBorrowing = stBorrow + ltBorrow + bondsVal
 
         # IS/CF 플로우 변수: Q4 fallback이면 TTM 합산

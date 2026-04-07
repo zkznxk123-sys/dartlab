@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict
+from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_QUARTERS = 5
@@ -100,6 +100,7 @@ def calcFundingSources(company, *, basePeriod: str | None = None) -> dict | None
         "부채총계",
         "단기차입금",
         "장기차입금",
+        "차입부채",  # 통합 차입금 (단/장기 분리 안 한 회사 — SK하이닉스 등)
         "사채",
         "매입채무",
         "선수금",
@@ -107,29 +108,30 @@ def calcFundingSources(company, *, basePeriod: str | None = None) -> dict | None
         "선수수익",
     ]
     result = company.select("BS", accounts)
-    parsed = toDict(result)
+    parsed = toDictBySnakeId(result)
     if parsed is None:
         return None
 
     data, allPeriods = parsed
-    taRow = data.get("자산총계")
+    taRow = data.get("total_assets")
     if taRow is None:
         return None
 
     from dartlab.analysis.financial._helpers import mergeRows
 
-    reRow = mergeRows(data.get("이익잉여금"), data.get("미처분이익잉여금(결손금)"))
-    pcRow = data.get("자본금", {})
-    csRow = data.get("자본잉여금", {})
-    eqRow = data.get("자본총계", {})
-    liabRow = data.get("부채총계", {})
-    stbRow = data.get("단기차입금", {})
-    ltbRow = data.get("장기차입금", {})
-    bondRow = data.get("사채", {})
-    apRow = data.get("매입채무", {})
-    advRow = data.get("선수금", {})
-    clRow = data.get("계약부채", {})
-    diRow = data.get("선수수익", {})
+    reRow = mergeRows(data.get("retained_earnings"), data.get("unappropriated_retained_earnings_deficit"))
+    pcRow = data.get("paidin_capital", {})
+    csRow = data.get("capital_surplus", {})
+    eqRow = data.get("total_stockholders_equity", {})
+    liabRow = data.get("total_liabilities", {})
+    stbRow = data.get("shortterm_borrowings", {})
+    ltbRow = data.get("longterm_borrowings", {})
+    unifiedBorrowRow = data.get("borrowings", {})  # 통합 차입금 (분리 없는 회사)
+    bondRow = data.get("debentures", {})
+    apRow = data.get("trade_and_other_payables", {})
+    advRow = data.get("advance_from_customers", {})
+    clRow = data.get("contract_liabilities", {})
+    diRow = data.get("deferred_income", {})
 
     yCols = annualColsFromPeriods(allPeriods, basePeriod, _MAX_YEARS)
     if not yCols:
@@ -147,7 +149,12 @@ def calcFundingSources(company, *, basePeriod: str | None = None) -> dict | None
 
         retained = reRow.get(col) or 0
         paidIn = (pcRow.get(col) or 0) + (csRow.get(col) or 0)
-        finDebt = (stbRow.get(col) or 0) + (ltbRow.get(col) or 0) + (bondRow.get(col) or 0)
+        # 차입금: 단기 + 장기 분리 키 우선, 둘 다 0 이면 통합 borrowings 키 fallback
+        stbVal = stbRow.get(col) or 0
+        ltbVal = ltbRow.get(col) or 0
+        if stbVal == 0 and ltbVal == 0:
+            stbVal = unifiedBorrowRow.get(col) or 0
+        finDebt = stbVal + ltbVal + (bondRow.get(col) or 0)
         opFunding = (apRow.get(col) or 0) + (advRow.get(col) or 0) + (clRow.get(col) or 0) + (diRow.get(col) or 0)
 
         equity = eqRow.get(col) or 0
@@ -235,8 +242,14 @@ def calcFundingSources(company, *, basePeriod: str | None = None) -> dict | None
 
 
 def _latestAnnualVal(company, stmt: str, accountName: str) -> float | None:
-    """select(stmt, [accountName])에서 최신 연도 값을 꺼낸다."""
-    result = company.select(stmt, [accountName])
+    """select(stmt, [accountName])에서 최신 연도 값을 꺼낸다.
+
+    회사마다 한국어 변형이 달라서 accountName 매칭 실패 가능 → None 반환.
+    """
+    try:
+        result = company.select(stmt, [accountName])
+    except (ValueError, KeyError):
+        return None
     parsed = toDict(result)
     if parsed is None:
         return None
@@ -332,15 +345,15 @@ def calcCapitalTimeline(company, *, basePeriod: str | None = None) -> dict | Non
         {"tables": [(label, rows, cols), ...]}
     """
     result = company.select("BS", ["자본총계", "이익잉여금", "미처분이익잉여금(결손금)"])
-    parsed = toDict(result)
-    if parsed is None or "자본총계" not in parsed[0]:
+    parsed = toDictBySnakeId(result)
+    if parsed is None or "total_stockholders_equity" not in parsed[0]:
         return None
 
     data, allPeriods = parsed
     from dartlab.analysis.financial._helpers import mergeRows
 
-    equityRow = data["자본총계"]
-    retainedRow = mergeRows(data.get("이익잉여금"), data.get("미처분이익잉여금(결손금)"))
+    equityRow = data["total_stockholders_equity"]
+    retainedRow = mergeRows(data.get("retained_earnings"), data.get("unappropriated_retained_earnings_deficit"))
 
     tables = []
     yCols = annualColsFromPeriods(allPeriods, basePeriod, _MAX_YEARS)
@@ -400,16 +413,20 @@ def calcDebtTimeline(company, *, basePeriod: str | None = None) -> dict | None:
 
         {"tables": [(label, rows, cols), ...]}
     """
-    result = company.select("BS", ["부채총계", "단기차입금", "장기차입금", "사채"])
-    parsed = toDict(result)
-    if parsed is None or "부채총계" not in parsed[0]:
+    result = company.select("BS", ["부채총계", "단기차입금", "장기차입금", "차입부채", "사채"])
+    parsed = toDictBySnakeId(result)
+    if parsed is None or "total_liabilities" not in parsed[0]:
         return None
 
     data, allPeriods = parsed
-    liabRow = data["부채총계"]
-    stbRow = data.get("단기차입금")
-    ltbRow = data.get("장기차입금")
-    bondRow = data.get("사채")
+    liabRow = data["total_liabilities"]
+    stbRow = data.get("shortterm_borrowings")
+    ltbRow = data.get("longterm_borrowings")
+    unifiedBorrowRow = data.get("borrowings")  # 통합 차입금 fallback
+    bondRow = data.get("debentures")
+    # stb/ltb 둘 다 없는 회사 → unifiedBorrow 를 stb 위치로
+    if stbRow is None and ltbRow is None and unifiedBorrowRow is not None:
+        stbRow = unifiedBorrowRow
 
     tables = []
     yCols = annualColsFromPeriods(allPeriods, basePeriod, _MAX_YEARS)
@@ -563,17 +580,17 @@ def calcCashFlowStructure(company, *, basePeriod: str | None = None) -> dict | N
         "CF",
         ["영업활동현금흐름", "투자활동현금흐름", "재무활동으로인한현금흐름", "유형자산의취득"],
     )
-    parsed = toDict(result)
+    parsed = toDictBySnakeId(result)
     if parsed is None:
         return None
 
     data, allPeriods = parsed
-    ocfRow = data.get("영업활동현금흐름") or data.get("영업활동으로인한현금흐름")
+    ocfRow = data.get("operating_cashflow") or data.get("cash_flows_from_operating_activities")
     if ocfRow is None:
         return None
-    icfRow = data.get("투자활동현금흐름") or data.get("투자활동으로인한현금흐름")
-    fcfRow = data.get("재무활동으로인한현금흐름") or data.get("재무활동현금흐름")
-    capexRow = data.get("유형자산의취득")
+    icfRow = data.get("investing_cashflow") or data.get("cash_flows_from_investing_activities")
+    fcfRow = data.get("cash_flows_from_financing_activities") or data.get("financing_cashflow")
+    capexRow = data.get("purchase_of_property_plant_and_equipment")
 
     qCols = _quarterlyCols(allPeriods, _MAX_QUARTERS)
     if not qCols:
@@ -792,23 +809,27 @@ def calcCapitalFlags(company, *, basePeriod: str | None = None) -> list[tuple[st
 
     # 금융부채 비중 (BS에서 직접 계산)
     flagResult = company.select(
-        "BS", ["부채총계", "단기차입금", "장기차입금", "사채", "자본총계", "이익잉여금", "미처분이익잉여금(결손금)"]
+        "BS", ["부채총계", "단기차입금", "장기차입금", "차입부채", "사채", "자본총계", "이익잉여금", "미처분이익잉여금(결손금)"]
     )
-    flagParsed = toDict(flagResult)
-    if flagParsed is not None and "부채총계" in flagParsed[0]:
+    flagParsed = toDictBySnakeId(flagResult)
+    if flagParsed is not None and "total_liabilities" in flagParsed[0]:
         data = flagParsed[0]
-        liabRow = data["부채총계"]
-        stbRow = data.get("단기차입금")
-        ltbRow = data.get("장기차입금")
-        bondRow = data.get("사채")
+        liabRow = data["total_liabilities"]
+        stbRow = data.get("shortterm_borrowings")
+        ltbRow = data.get("longterm_borrowings")
+        unifiedBorrowRow = data.get("borrowings")  # 통합 차입금 fallback
+        bondRow = data.get("debentures")
+        # stb/ltb 둘 다 None → unifiedBorrow 를 stb 위치로
+        if stbRow is None and ltbRow is None and unifiedBorrowRow is not None:
+            stbRow = unifiedBorrowRow
         finDebtPct = _calcFinDebtPct(liabRow, stbRow, ltbRow, bondRow)
         if finDebtPct is not None and finDebtPct > 50:
             flags.append((f"금융부채 비중 {finDebtPct:.0f}% — 이자 부담 부채 높음", "warning"))
 
-        equityRow = data.get("자본총계")
+        equityRow = data.get("total_stockholders_equity")
         from dartlab.analysis.financial._helpers import mergeRows
 
-        retainedRow = mergeRows(data.get("이익잉여금"), data.get("미처분이익잉여금(결손금)"))
+        retainedRow = mergeRows(data.get("retained_earnings"), data.get("unappropriated_retained_earnings_deficit"))
         retainedPct = _calcRetainedPct(equityRow, retainedRow)
         if retainedPct is not None and retainedPct > 70:
             flags.append((f"내부유보 비중 {retainedPct:.0f}% — 자기 힘으로 성장", "opportunity"))

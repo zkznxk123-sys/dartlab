@@ -314,6 +314,7 @@ def calcFcfUsage(company, *, basePeriod: str | None = None) -> dict | None:
             "repayment_of_longterm_borrowings",
             "redemption_of_current_portion_of_longterm_borrowings",
             "repayment_of_bonds_and_longterm_borrowings",
+            "repayment_of_borrowings",  # Fallback: 단/장기 분리 안 된 통합 차입금 상환 (audit 04 #B 같은 패턴)
         ],
     )
     cfParsed = toDictBySnakeId(cfResult)
@@ -328,6 +329,7 @@ def calcFcfUsage(company, *, basePeriod: str | None = None) -> dict | None:
     repayRow1 = cfData.get("repayment_of_longterm_borrowings", {})
     repayRow2 = cfData.get("redemption_of_current_portion_of_longterm_borrowings", {})
     repayRow3 = cfData.get("repayment_of_bonds_and_longterm_borrowings", {})
+    repayRow4 = cfData.get("repayment_of_borrowings", {})  # 통합 차입금 상환
 
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
@@ -346,7 +348,10 @@ def calcFcfUsage(company, *, basePeriod: str | None = None) -> dict | None:
         capex = abs(_getF4(capexRow, col)) + abs(_getF4(intCapexRow, col))
         fcf = ocf - capex
         divPaid = abs(_getF4(divRow, col))
-        debtRepaid = abs(_getF4(repayRow1, col)) + abs(_getF4(repayRow2, col)) + abs(_getF4(repayRow3, col))
+        # 분리 키 + 통합 키 fallback. 어느 한쪽이 모두 0이면 다른 쪽이 활성됨
+        debtRepaidSplit = abs(_getF4(repayRow1, col)) + abs(_getF4(repayRow2, col)) + abs(_getF4(repayRow3, col))
+        debtRepaidUnified = abs(_getF4(repayRow4, col))
+        debtRepaid = debtRepaidSplit if debtRepaidSplit > 0 else debtRepaidUnified
         residual = fcf - divPaid - debtRepaid
 
         history.append(

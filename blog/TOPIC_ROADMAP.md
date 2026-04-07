@@ -75,6 +75,19 @@
 
 현재 발간: 삼성전자, SK하이닉스, NAVER, LG (4개사)
 
+### 05 기업분석 보고서 (audit + 블로그 + 영상 한 세트)
+
+`memory/feedback_company_report_pipeline.md` 강제 규칙 적용. **기업 한 건 = audit + 블로그 + 영상 한 세트**. 셋 중 하나만 만드는 것 금지.
+
+현재 발간:
+- 01 SK하이닉스 (000660) — 2026-04-07 (audit 04 fix 후 재작성, 11,000자, SVG 6장) — [audit](https://github.com/eddmpython/dartlab/blob/master/.claude/audits/04-skhynix-anomalies.md), [영상](https://github.com/eddmpython/dartlab/tree/master/video/output/011-skhynix)
+- 02 삼양식품 (003230) — 2026-04-07 (audit 02 신규, 9,500자, SVG 5장) — [audit](https://github.com/eddmpython/dartlab/blob/master/.claude/audits/02-samyang-anomalies.md), [영상](https://github.com/eddmpython/dartlab/tree/master/video/output/009-samyang-buldak)
+- 03 두산에너빌리티 (034020) — 2026-04-07 (audit 010 갱신, 9,500자, SVG 3장) — [audit](https://github.com/eddmpython/dartlab/blob/master/.claude/audits/010-doosan-anomalies.md), [영상](https://github.com/eddmpython/dartlab/tree/master/video/output/010-doosan-enerbility)
+
+이전 글들 (LG화학/KT&G/대한항공/삼성전자) 은 audit·영상 동반 없이 작성되어 2026-04-07 정리됨. 새 시리즈는 SK하이닉스부터 시작.
+
+다음 후보: 한화에어로스페이스 / 두산에너빌리티 / HMM / 하이브 / 롯데케미칼
+
 ## 정리 이력
 
 128편 → 47편 → 44편 → 45편

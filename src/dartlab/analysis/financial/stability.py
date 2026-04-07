@@ -62,20 +62,21 @@ def calcLeverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """
     bsResult = company.select(
         "BS",
-        ["부채총계", "자본총계", "자산총계", "현금및현금성자산", "단기차입금", "장기차입금", "사채"],
+        ["부채총계", "자본총계", "자산총계", "현금및현금성자산", "단기차입금", "장기차입금", "차입부채", "사채"],
     )
-    parsed = toDict(bsResult)
+    parsed = toDictBySnakeId(bsResult)
     if parsed is None:
         return None
 
     data, periods = parsed
-    debt = data.get("부채총계", {})
-    equity = data.get("자본총계", {})
-    ta = data.get("자산총계", {})
-    cash = data.get("현금및현금성자산", {})
-    stBorrow = data.get("단기차입금", {})
-    ltBorrow = data.get("장기차입금", {})
-    bonds = data.get("사채", {})
+    debt = data.get("total_liabilities", {})
+    equity = data.get("total_stockholders_equity", {})
+    ta = data.get("total_assets", {})
+    cash = data.get("cash_and_cash_equivalents", {})
+    stBorrow = data.get("shortterm_borrowings", {})
+    ltBorrow = data.get("longterm_borrowings", {})
+    unifiedBorrow = data.get("borrowings", {})  # 통합 차입금 fallback
+    bonds = data.get("debentures", {})
 
     yCols = annualColsFromPeriods(periods, basePeriod, _MAX_YEARS + 1)
     if len(yCols) < 2:
@@ -89,7 +90,12 @@ def calcLeverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
         a = ta.get(col)
         c = cash.get(col)
 
-        totalBorrowing = (stBorrow.get(col) or 0) + (ltBorrow.get(col) or 0) + (bonds.get(col) or 0)
+        # 차입금: 분리 키 우선, 둘 다 0 이면 통합 borrowings fallback
+        stbVal = stBorrow.get(col) or 0
+        ltbVal = ltBorrow.get(col) or 0
+        if stbVal == 0 and ltbVal == 0:
+            stbVal = unifiedBorrow.get(col) or 0
+        totalBorrowing = stbVal + ltbVal + (bonds.get(col) or 0)
         netDebt = totalBorrowing - (c or 0) if totalBorrowing > 0 else None
 
         debtRatio = _pctOf(d, e)
@@ -140,14 +146,14 @@ def calcCoverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
     금융비용은 외환손실·파생상품 등 비이자 항목 포함하여 과대계상 위험.
     """
     isResult = company.select("IS", ["영업이익", "금융비용", "이자비용"])
-    parsed = toDict(isResult)
+    parsed = toDictBySnakeId(isResult)
     if parsed is None:
         return None
 
     data, periods = parsed
-    op = data.get("영업이익", {})
-    finCost = data.get("금융비용", {})
-    intCost = data.get("이자비용", {})
+    op = data.get("operating_profit", {})
+    finCost = data.get("finance_costs", {})
+    intCost = data.get("interest_expense", {})
 
     # CF interest_paid (실제 현금 이자 지급액)
     cfIntPaid: dict = {}
@@ -226,23 +232,23 @@ def calcDistressScore(company, *, basePeriod: str | None = None) -> dict | None:
     )
     isResult = company.select("IS", ["영업이익", "매출액"])
 
-    bsParsed = toDict(bsResult)
-    isParsed = toDict(isResult)
+    bsParsed = toDictBySnakeId(bsResult)
+    isParsed = toDictBySnakeId(isResult)
     if bsParsed is None or isParsed is None:
         return None
 
     bsData, bsPeriods = bsParsed
     isData, _ = isParsed
 
-    taRow = bsData.get("자산총계", {})
-    caRow = bsData.get("유동자산", {})
-    clRow = bsData.get("유동부채", {})
-    tlRow = bsData.get("부채총계", {})
+    taRow = bsData.get("total_assets", {})
+    caRow = bsData.get("current_assets", {})
+    clRow = bsData.get("current_liabilities", {})
+    tlRow = bsData.get("total_liabilities", {})
     from dartlab.analysis.financial._helpers import mergeRows
 
-    reRow = mergeRows(bsData.get("이익잉여금"), bsData.get("미처분이익잉여금(결손금)"))
-    opRow = isData.get("영업이익", {})
-    revRow = isData.get("매출액", {})
+    reRow = mergeRows(bsData.get("retained_earnings"), bsData.get("unappropriated_retained_earnings_deficit"))
+    opRow = isData.get("operating_profit", {})
+    revRow = isData.get("sales", {})
 
     # 시가총액 (X4용) -- ratios에서 가져옴
     ratios = getRatios(company)

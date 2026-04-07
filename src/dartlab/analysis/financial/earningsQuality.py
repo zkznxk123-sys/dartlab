@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import math
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, getFlowValue, isQuarterlyFallback, toDict
+from dartlab.analysis.financial._helpers import annualColsFromPeriods, getFlowValue, isQuarterlyFallback, toDict, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = 8
@@ -453,25 +453,31 @@ def calcRichardsonAccrual(company, *, basePeriod: str | None = None) -> dict | N
             "현금및현금성자산",
             "단기차입금",
             "장기차입금",
+            "차입부채",
             "사채",
             "자산총계",
         ],
     )
 
-    bsParsed = toDict(bsResult)
+    bsParsed = toDictBySnakeId(bsResult)
     if bsParsed is None:
         return None
 
     bsData, bsPeriods = bsParsed
-    caRow = bsData.get("유동자산", {})
-    ncaRow = bsData.get("비유동자산", {})
-    clRow = bsData.get("유동부채", {})
-    nclRow = bsData.get("비유동부채", {})
-    cashRow = bsData.get("현금및현금성자산", {})
-    stRow = bsData.get("단기차입금", {})
-    ltRow = bsData.get("장기차입금", {})
-    bondRow = bsData.get("사채", {})
-    taRow = bsData.get("자산총계", {})
+    caRow = bsData.get("current_assets", {})
+    ncaRow = bsData.get("noncurrent_assets", {})
+    clRow = bsData.get("current_liabilities", {})
+    nclRow = bsData.get("noncurrent_liabilities", {})
+    cashRow = bsData.get("cash_and_cash_equivalents", {})
+    stRow = bsData.get("shortterm_borrowings", {})
+    ltRow = bsData.get("longterm_borrowings", {})
+    unifiedBorrowRow = bsData.get("borrowings", {})  # 통합 차입금 fallback
+    bondRow = bsData.get("debentures", {})
+    taRow = bsData.get("total_assets", {})
+
+    # stRow/ltRow 가 모두 비어있으면 unifiedBorrow 를 stRow 로 사용
+    if not stRow and not ltRow and unifiedBorrowRow:
+        stRow = unifiedBorrowRow
 
     yCols = annualColsFromPeriods(bsPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS + 1)
     if len(yCols) < 2:

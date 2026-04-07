@@ -187,7 +187,7 @@ c = dartlab.Company("002380")
 c.show("IS")    # 손익 5년 분기 시계열
 c.show("ratios") # 비율 50개
 c.notes.borrowings  # 차입금 분해
-c.review("수익성")  # 6막 서사 보고서
+c.review("수익성")  # 사업·마진·현금·안정성을 인과로 잇는 보고서
 
 # 3. 발견한 함정으로 스크리너를 즉시 보정한다
 cleaner = df.filter((pl.col("순이익률")/pl.col("영업이익률")).abs() < 1.5)
@@ -205,7 +205,7 @@ cleaner = df.filter((pl.col("순이익률")/pl.col("영업이익률")).abs() < 1
 2. **1줄 보정 후 진짜 1위 선진** — 정상 마진 격차
 3. **dartlab.scan + Company의 콤보** — 시장 횡단과 단일 기업 심층이 같은 줄에서 만난다
 
-이게 한 종목을 사는 데 충분한 분석인가? **아니다.** 선진의 경우 라면용 사료의 사이클성, 부채 구조, 경쟁사 비교, 가족경영 리스크가 다 남아 있다. 그건 [c.review() 6막 보고서](/blog/company-one-stock-code)와 [scan 전종목 비교](/blog/scan-market-finance), [공시 검색](/blog/search-without-embeddings)이 다음 단계로 받는다.
+이게 한 종목을 사는 데 충분한 분석인가? **아니다.** 선진의 경우 라면용 사료의 사이클성, 부채 구조, 경쟁사 비교, 가족경영 리스크가 다 남아 있다. 그건 [c.review() 종합 보고서](/blog/company-one-stock-code)와 [scan 전종목 비교](/blog/scan-market-finance), [공시 검색](/blog/search-without-embeddings)이 다음 단계로 받는다.
 
 스크리너는 답을 주지 않는다. **답을 찾기 위한 후보를 5분 만에 30개로 좁혀줄 뿐이다.** 마법공식이 KCC를 1위로 뽑은 게 잘못이 아니다 — 검증 없이 그걸 매수하는 게 잘못이다. dartlab은 그 검증을 1줄로 가능하게 만든다.
 

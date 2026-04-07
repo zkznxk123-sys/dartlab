@@ -253,20 +253,34 @@ def selectFromShow(
     result = df
 
     # 행 필터 — indList (cascade 매칭)
+    # audit 04 #C: 다중 인자 partial-match 누락 방지 —
+    # _cascadeFilterRows가 한 컬럼에서 일부만 잡고 break 하면 다른 컬럼의 행이 누락됨.
+    # 모든 메타 컬럼을 돌면서 매칭 행 인덱스를 union.
     if indList is not None:
         metaCols = [c for c in result.columns if not isPeriodColumn(c)]
-        # 한국어 쿼리는 한국어 컬럼(계정명)에서 먼저 매칭 — snakeId bridge 오류 방지
         if "계정명" in metaCols:
             metaCols.remove("계정명")
             metaCols.insert(0, "계정명")
-        matched = None
+        target = len(indList)
+        collectedIdx: set[int] = set()
         for mc in metaCols:
-            matched = _cascadeFilterRows(result, mc, indList)
-            if matched is not None:
-                result = matched
+            sub = _cascadeFilterRows(result, mc, indList)
+            if sub is None or sub.is_empty():
+                continue
+            # sub의 메타값 → 원본 result에서 해당 행 인덱스 찾기
+            subSigs: set[tuple] = set()
+            for r in sub.iter_rows(named=True):
+                subSigs.add(tuple(r.get(c) for c in metaCols))
+            for i, r in enumerate(result.iter_rows(named=True)):
+                if i in collectedIdx:
+                    continue
+                if tuple(r.get(c) for c in metaCols) in subSigs:
+                    collectedIdx.add(i)
+            if len(collectedIdx) >= target:
                 break
-        if matched is None:
+        if not collectedIdx:
             return None
+        result = result[sorted(collectedIdx)]
 
     # 열 필터 — colList
     if colList is not None:

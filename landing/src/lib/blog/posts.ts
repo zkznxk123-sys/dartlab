@@ -206,6 +206,7 @@ export interface PostMeta {
 	series?: SeriesId;
 	seriesLabel?: string;
 	seriesOrder?: number;
+	youtubeId?: string;
 }
 
 type BlogModule = { metadata?: Record<string, string | number> };
@@ -258,6 +259,7 @@ function buildPosts(): PostMeta[] {
 		const series = metadata.series ? (String(metadata.series).trim() as SeriesId) : undefined;
 		const rawSeriesOrder = metadata.seriesOrder === undefined ? undefined : String(metadata.seriesOrder).trim();
 		const seriesOrder = rawSeriesOrder ? Number.parseInt(rawSeriesOrder, 10) : undefined;
+		const youtubeId = metadata.youtubeId ? String(metadata.youtubeId).trim() || undefined : undefined;
 		const rawMarkdown = rawModules[path] ?? '';
 		const readingMinutes = estimateReadingMinutes(rawMarkdown);
 		const previewAsset = findPreviewAsset(path, rawMarkdown);
@@ -281,7 +283,8 @@ function buildPosts(): PostMeta[] {
 			order: parsed.order,
 			series,
 			seriesLabel: series ? seriesDefinitions[series]?.label ?? series : undefined,
-			seriesOrder: Number.isNaN(seriesOrder) ? undefined : seriesOrder
+			seriesOrder: Number.isNaN(seriesOrder) ? undefined : seriesOrder,
+			youtubeId
 		});
 	}
 
