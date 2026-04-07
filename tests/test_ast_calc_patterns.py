@@ -120,3 +120,72 @@ def test_no_or_zero_in_return_dict():
         "calc 함수 return dict 의 `or 0` 금지 (None 결손 보존):\n" + "\n".join(violations) +
         "\n\n분모 가드면 라인 끝에 `# noqa: zero-guard` 주석 추가."
     )
+
+
+def test_no_or_zero_in_dict_assignment():
+    """Plan v5 K — calc 의 dict 변수 할당에서도 `or 0` 금지 (false negative 강화).
+
+    예: ``d = {"x": val or 0}`` 같은 변수 할당의 dict literal 도 잡음.
+    Phase 1 (현실적 강화) — 변수 할당의 dict literal 까지 일반화.
+    """
+    violations: list[str] = []
+
+    def _isOrZero(node: ast.expr) -> bool:
+        if not isinstance(node, ast.BoolOp) or not isinstance(node.op, ast.Or):
+            return False
+        if len(node.values) < 2:
+            return False
+        last = node.values[-1]
+        return isinstance(last, ast.Constant) and last.value in (0, 0.0)
+
+    for path in _collectPyFiles():
+        try:
+            source = path.read_text(encoding="utf-8")
+            tree = ast.parse(source)
+        except (SyntaxError, UnicodeDecodeError):
+            continue
+        srcLines = source.splitlines()
+
+        for node in ast.walk(tree):
+            # Assign + AnnAssign 의 dict literal
+            target_dicts = []
+            if isinstance(node, ast.Assign) and isinstance(node.value, ast.Dict):
+                target_dicts.append(node.value)
+            elif isinstance(node, ast.AnnAssign) and isinstance(node.value, ast.Dict):
+                target_dicts.append(node.value)
+
+            for d in target_dicts:
+                for v in d.values:
+                    if _isOrZero(v):
+                        line = srcLines[v.lineno - 1] if v.lineno <= len(srcLines) else ""
+                        if "noqa: zero-guard" not in line:
+                            violations.append(f"{path.name}:{v.lineno} 변수 할당 dict 의 `or 0`")
+
+    assert not violations, (
+        "변수 할당 dict 의 `or 0` 금지 (None 결손 보존):\n" + "\n".join(violations) +
+        "\n\n분모 가드면 라인 끝에 `# noqa: zero-guard` 주석 추가."
+    )
+
+
+def test_no_q4_literal_assigned_to_var():
+    """Plan v5 K — Q4 literal 을 변수에 할당해서 우회하는 패턴 금지.
+
+    예: ``col = "2025Q4"; row[col]`` 같은 우회. 변수 할당 시점에 검출.
+    """
+    import re
+
+    violations: list[str] = []
+    _Q4_LITERAL_RE_LOCAL = re.compile(r"^[12]\d{3}Q[1-4]$")
+
+    for path in _collectPyFiles():
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+        except (SyntaxError, UnicodeDecodeError):
+            continue
+        for node in ast.walk(tree):
+            # Assign: col = "2025Q4"
+            if isinstance(node, ast.Assign) and isinstance(node.value, ast.Constant):
+                if isinstance(node.value.value, str) and _Q4_LITERAL_RE_LOCAL.match(node.value.value):
+                    violations.append(f"{path.name}:{node.lineno} {node.value.value!r} 할당")
+
+    assert not violations, "Q4 literal 변수 할당 금지 (annual 컬럼 사용):\n" + "\n".join(violations)
