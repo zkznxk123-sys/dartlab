@@ -79,5 +79,3 @@ def annualSumFlow(
     if valid:
         return sum(valid) / len(valid) * 4
     return None
-
-

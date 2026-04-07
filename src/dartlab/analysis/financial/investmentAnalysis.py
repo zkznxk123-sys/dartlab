@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dartlab.analysis.financial._helpers import (
     annualColsFromPeriods,
-            sumBorrowings,
+    sumBorrowings,
     toDictBySnakeId,
 )
 from dartlab.analysis.financial._memoize import memoized_calc
@@ -105,11 +105,19 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     isResult = company.select("IS", ["영업이익", "법인세비용", "법인세차감전순이익"])
     bsResult = company.select(
         "BS",
-        ["자본총계",
-         "단기차입금", "장기차입금", "차입금단기",
-         "long_term_borrowings", "short_term_borrowings",
-         "차입부채", "장기차입부채", "유동성장기차입금",
-         "사채", "현금및현금성자산"],
+        [
+            "자본총계",
+            "단기차입금",
+            "장기차입금",
+            "차입금단기",
+            "long_term_borrowings",
+            "short_term_borrowings",
+            "차입부채",
+            "장기차입부채",
+            "유동성장기차입금",
+            "사채",
+            "현금및현금성자산",
+        ],
     )
 
     isParsed = toDictBySnakeId(isResult)
@@ -133,6 +141,7 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(isPeriods, maxYears=_MAX_YEARS + 1, basePeriod=basePeriod)
     if len(yCols) < 2:
         return None
+
     def _getF(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0
@@ -230,6 +239,7 @@ def calcInvestmentIntensity(company, *, basePeriod: str | None = None) -> dict |
     yCols = annualColsFromPeriods(isPeriods, maxYears=_MAX_YEARS, basePeriod=basePeriod)
     if not yCols:
         return None
+
     def _getF2(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0
@@ -271,11 +281,19 @@ def calcEvaTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     isResult = company.select("IS", ["영업이익", "법인세비용", "법인세차감전순이익"])
     bsResult = company.select(
         "BS",
-        ["자본총계",
-         "단기차입금", "장기차입금", "차입금단기",
-         "long_term_borrowings", "short_term_borrowings",
-         "차입부채", "장기차입부채", "유동성장기차입금",
-         "사채", "현금및현금성자산"],
+        [
+            "자본총계",
+            "단기차입금",
+            "장기차입금",
+            "차입금단기",
+            "long_term_borrowings",
+            "short_term_borrowings",
+            "차입부채",
+            "장기차입부채",
+            "유동성장기차입금",
+            "사채",
+            "현금및현금성자산",
+        ],
     )
 
     isParsed = toDictBySnakeId(isResult)
@@ -299,6 +317,7 @@ def calcEvaTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(isPeriods, maxYears=_MAX_YEARS, basePeriod=basePeriod)
     if not yCols:
         return None
+
     def _getF3(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0

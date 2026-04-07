@@ -10,8 +10,8 @@ from __future__ import annotations
 from dartlab.analysis.financial._helpers import (
     MAX_RATIO_YEARS,
     annualColsFromPeriods,
-        getRatios,
-        sumBorrowings,
+    getRatios,
+    sumBorrowings,
     toDict,
     toDictBySnakeId,
 )
@@ -61,10 +61,21 @@ def calcLeverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """
     bsResult = company.select(
         "BS",
-        ["부채총계", "자본총계", "자산총계", "현금및현금성자산",
-         "단기차입금", "장기차입금", "차입금단기",
-         "long_term_borrowings", "short_term_borrowings",
-         "차입부채", "장기차입부채", "유동성장기차입금", "사채"],
+        [
+            "부채총계",
+            "자본총계",
+            "자산총계",
+            "현금및현금성자산",
+            "단기차입금",
+            "장기차입금",
+            "차입금단기",
+            "long_term_borrowings",
+            "short_term_borrowings",
+            "차입부채",
+            "장기차입부채",
+            "유동성장기차입금",
+            "사채",
+        ],
     )
     parsed = toDictBySnakeId(bsResult)
     if parsed is None:

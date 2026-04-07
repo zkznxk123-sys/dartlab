@@ -412,8 +412,6 @@ def sumBorrowingsKorean(bsData: dict, col: str) -> tuple[float, float, float]:
     return stb, ltb, total
 
 
-
-
 def annualLabels(periods: list[str]) -> dict[str, str]:
     """연간 기간 컬럼 → 표시 라벨 매핑. 테이블 렌더링에서 헤더 치환용."""
     return {p: annualLabel(p) for p in periods}

@@ -17,7 +17,7 @@ import math
 
 from dartlab.analysis.financial._helpers import (
     annualColsFromPeriods,
-            toDict,
+    toDict,
 )
 from dartlab.analysis.financial._memoize import memoized_calc
 

@@ -106,7 +106,7 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
     # 매출 성장률 시계열 — flow 헬퍼 경유 (Q4 분기 단독값 함정 차단)
     from dartlab.analysis.financial._helpers import (
         annualColsFromPeriods,
-                        toDict,
+        toDict,
     )
 
     rev_result = company.select("IS", ["매출액"])

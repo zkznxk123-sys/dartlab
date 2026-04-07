@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dartlab.analysis.financial._helpers import (
     annualColsFromPeriods,
-            toDictBySnakeId,
+    toDictBySnakeId,
 )
 from dartlab.analysis.financial._memoize import memoized_calc
 
@@ -68,6 +68,7 @@ def calcDividendPolicy(company, *, basePeriod: str | None = None) -> dict | None
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+
     def _getF(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0
@@ -162,6 +163,7 @@ def calcShareholderReturn(company, *, basePeriod: str | None = None) -> dict | N
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+
     def _getF2(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0
@@ -239,6 +241,7 @@ def calcReinvestment(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+
     def _getF3(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0
@@ -323,6 +326,7 @@ def calcFcfUsage(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+
     def _getF4(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0

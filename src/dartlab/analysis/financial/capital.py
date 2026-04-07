@@ -806,7 +806,17 @@ def calcCapitalFlags(company, *, basePeriod: str | None = None) -> list[tuple[st
 
     # 금융부채 비중 (BS에서 직접 계산)
     flagResult = company.select(
-        "BS", ["부채총계", "단기차입금", "장기차입금", "차입부채", "사채", "자본총계", "이익잉여금", "미처분이익잉여금(결손금)"]
+        "BS",
+        [
+            "부채총계",
+            "단기차입금",
+            "장기차입금",
+            "차입부채",
+            "사채",
+            "자본총계",
+            "이익잉여금",
+            "미처분이익잉여금(결손금)",
+        ],
     )
     flagParsed = toDictBySnakeId(flagResult)
     if flagParsed is not None and "total_liabilities" in flagParsed[0]:

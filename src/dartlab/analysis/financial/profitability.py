@@ -11,7 +11,7 @@ from typing import Any
 from dartlab.analysis.financial._helpers import (
     MAX_RATIO_YEARS,
     annualColsFromPeriods,
-            sumBorrowings,
+    sumBorrowings,
     toDict,
     toDictBySnakeId,
 )
@@ -263,6 +263,7 @@ def calcMarginWaterfall(company, *, basePeriod: str | None = None) -> dict | Non
     yCols = annualColsFromPeriods(periods, basePeriod, _MAX_YEARS)
     if not yCols:
         return None
+
     def _pct(val, r):
         if val is None or r is None or r == 0:
             return None
@@ -520,6 +521,7 @@ def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict |
     yCols = annualColsFromPeriods(isPeriods, maxYears=_MAX_YEARS, basePeriod=basePeriod)
     if len(yCols) < 2:
         return None
+
     def _getF(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0
@@ -674,6 +676,7 @@ def calcRoicTree(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(isPeriods, basePeriod, _MAX_YEARS)
     if not yCols:
         return None
+
     def _getF(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0

@@ -99,6 +99,7 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
     yCols = annualColsFromPeriods(allPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+
     def _getF(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0
@@ -167,6 +168,7 @@ def calcCashQuality(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+
     def _getF2(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0
@@ -301,6 +303,7 @@ def calcOcfDecomposition(company, *, basePeriod: str | None = None) -> dict | No
     yCols = annualColsFromPeriods(cfPeriods, basePeriod, 9)
     if len(yCols) < 2:
         return None
+
     def _getF3(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0

@@ -320,6 +320,7 @@ def calcWorkingCapital(company, *, basePeriod: str | None = None) -> dict | None
     yCols = annualColsFromPeriods(bsPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+
     def _getFlow(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0
@@ -423,6 +424,7 @@ def calcCapexPattern(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(bsPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+
     def _getFlow2(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0

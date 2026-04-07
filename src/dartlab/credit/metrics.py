@@ -131,7 +131,7 @@ def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
             "long_term_borrowings",  # 영문만 있는 회사
             "short_term_borrowings",
             "차입부채",  # Fallback: 통합 차입금만 공시하는 회사 (audit 04 #B)
-            "차입금",     # Fallback: 추가 변형
+            "차입금",  # Fallback: 추가 변형
             "장기차입부채",  # noncurrent_borrowings (LG에솔)
             "유동성장기차입금",  # current_portion_of_longterm_borrowings
             "사채",

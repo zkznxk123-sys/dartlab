@@ -59,7 +59,11 @@ def test_no_q4_literal_in_subscript():
 
         for node in ast.walk(tree):
             # Subscript: row["2025Q4"]
-            if isinstance(node, ast.Subscript) and isinstance(node.slice, ast.Constant) and isinstance(node.slice.value, str):
+            if (
+                isinstance(node, ast.Subscript)
+                and isinstance(node.slice, ast.Constant)
+                and isinstance(node.slice.value, str)
+            ):
                 if _Q4_LITERAL_RE.match(node.slice.value):
                     violations.append(f"{path.name}:{node.lineno} subscript {node.slice.value!r}")
             # Call: data.get("2025Q4") / row.get("2025Q4")
@@ -117,8 +121,9 @@ def test_no_or_zero_in_return_dict():
                             violations.append(f"{path.name}:{v.lineno} return dict 의 `or 0`")
 
     assert not violations, (
-        "calc 함수 return dict 의 `or 0` 금지 (None 결손 보존):\n" + "\n".join(violations) +
-        "\n\n분모 가드면 라인 끝에 `# noqa: zero-guard` 주석 추가."
+        "calc 함수 return dict 의 `or 0` 금지 (None 결손 보존):\n"
+        + "\n".join(violations)
+        + "\n\n분모 가드면 라인 끝에 `# noqa: zero-guard` 주석 추가."
     )
 
 
@@ -162,8 +167,9 @@ def test_no_or_zero_in_dict_assignment():
                             violations.append(f"{path.name}:{v.lineno} 변수 할당 dict 의 `or 0`")
 
     assert not violations, (
-        "변수 할당 dict 의 `or 0` 금지 (None 결손 보존):\n" + "\n".join(violations) +
-        "\n\n분모 가드면 라인 끝에 `# noqa: zero-guard` 주석 추가."
+        "변수 할당 dict 의 `or 0` 금지 (None 결손 보존):\n"
+        + "\n".join(violations)
+        + "\n\n분모 가드면 라인 끝에 `# noqa: zero-guard` 주석 추가."
     )
 
 

@@ -69,6 +69,7 @@ def calcIsCfDivergence(company, *, basePeriod: str | None = None) -> dict | None
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+
     def _getF(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0
@@ -152,6 +153,7 @@ def calcIsBsDivergence(company, *, basePeriod: str | None = None) -> dict | None
     yCols = annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+
     def _getF2(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0
@@ -396,6 +398,7 @@ def calcArticulationCheck(company, *, basePeriod: str | None = None) -> dict | N
     yCols = annualColsFromPeriods(bsPeriods, basePeriod, _MAX_YEARS + 1)
     if len(yCols) < 2:
         return None
+
     def _getF3(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0

@@ -32,10 +32,10 @@ def _maxAbsLog(df, col: str) -> float | None:
     "stockCode,notesKey,refLog,tolerance",
     [
         # SK하이닉스 — Phase A2 검증된 ground truth (Layer 1 fix 후)
-        ("000660", "costByNature", 13.1, 1.0),       # IS 매출원가와 ±1
-        ("000660", "tangibleAsset", 13.9, 1.0),      # BS 유형자산과 ±1
-        ("000660", "inventory", 13.2, 1.0),          # BS 재고자산과 ±1
-        ("000660", "borrowings", 13.4, 1.0),         # 통합 차입금과 ±1
+        ("000660", "costByNature", 13.1, 1.0),  # IS 매출원가와 ±1
+        ("000660", "tangibleAsset", 13.9, 1.0),  # BS 유형자산과 ±1
+        ("000660", "inventory", 13.2, 1.0),  # BS 재고자산과 ±1
+        ("000660", "borrowings", 13.4, 1.0),  # 통합 차입금과 ±1
         # 삼성전자 — 더 큰 회사
         ("005930", "costByNature", 14.0, 1.0),
         ("005930", "tangibleAsset", 14.3, 1.0),

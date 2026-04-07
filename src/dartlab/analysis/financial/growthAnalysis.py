@@ -331,6 +331,7 @@ def calcCagrComparison(company, *, basePeriod: str | None = None) -> dict | None
     yCols = _annualColsFromPeriods(isPeriods, basePeriod, _MAX_YEARS + 1)
     if len(yCols) < 3:
         return None
+
     def _v(row, col):
         v = row.get(col) if row else None
         return v if v is not None else 0

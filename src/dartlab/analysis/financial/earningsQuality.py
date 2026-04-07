@@ -73,6 +73,7 @@ def calcAccrualAnalysis(company, *, basePeriod: str | None = None) -> dict | Non
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+
     def _getF(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0
@@ -151,6 +152,7 @@ def calcEarningsPersistence(company, *, basePeriod: str | None = None) -> dict |
     yCols = annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+
     def _getF2(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0
@@ -247,6 +249,7 @@ def calcBeneishTimeline(company, *, basePeriod: str | None = None) -> dict | Non
     yCols = annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS + 1)  # 전년 대비 필요 → 1년 더
     if len(yCols) < 2:
         return None
+
     def _getF3(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0
@@ -571,6 +574,7 @@ def calcNonOperatingBreakdown(company, *, basePeriod: str | None = None) -> dict
     yCols = annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+
     def _getF4(row: dict, col: str) -> float:
         v = row.get(col)
         return v if v is not None else 0
