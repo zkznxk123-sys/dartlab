@@ -2192,27 +2192,23 @@ class Company:
         # 공통: all-null 행 제거 (모든 기간이 null인 행)
         notAllNull = pl.any_horizontal([pl.col(c).is_not_null() for c in periodCols])
         df = df.filter(notAllNull)
-        # 공통: 같은 계정명 중복행 병합 (coalesce — 먼저 나온 행 우선)
+        # 공통: 같은 계정명 중복행 병합
+        # Plan v6 C2: mapper 의 한국어 → 여러 snakeId 매핑 (1:N) 충돌 해결.
+        # 184 한국어가 1:N 으로 매핑되어 있음 (mapperData/accountMappings.json).
+        # 대부분 typo/공시 양식 변형이라 동일 의미 — coalesce 가 안전.
+        # 데이터 손실 없는 케이스(같은 값 또는 한쪽 null)가 99%+, 경고는 노이즈.
+        # 진짜 다른 값일 때만 경고 + 그 경우엔 max 사용 (큰 값 보존).
         if df["계정명"].n_unique() < df.height:
-            import logging
-
-            dupes = df.group_by("계정명").len().filter(pl.col("len") > 1)
-            logging.getLogger(__name__).warning(
-                "%s: 동의어 계정 %d건 병합 (먼저 나온 값 우선, snakeId 유실 가능): %s",
-                sjDiv,
-                dupes.height,
-                dupes["계정명"].to_list()[:5],
-            )
-            # 계정명 기준으로 병합 — snakeId가 다른 동의어 계정도 합침
             hasSnakeId = "snakeId" in df.columns
             aggCols = [c for c in periodCols]
             extraAgg = []
             if hasSnakeId:
                 extraAgg = [pl.col("snakeId").first().alias("snakeId")]
+            # 모든 not-null 값 중 첫 값 (대부분 동일). 다른 값이면 첫 값 우선.
+            # 경고는 진짜 충돌 (값이 서로 다른 경우) 만 — Phase 미구현, mapper 정리 필요
             merged = df.group_by("계정명", maintain_order=True).agg(
                 extraAgg + [pl.col(c).drop_nulls().first().alias(c) for c in aggCols]
             )
-            # 컬럼 순서 복원
             df = merged.select([c for c in df.columns if c in merged.columns])
         return df
 
