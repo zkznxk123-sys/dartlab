@@ -52,8 +52,10 @@ class TestEdgarMapper:
     def test_commonTagMapping(self):
         from dartlab.providers.edgar.finance.mapper import EdgarMapper
 
-        assert EdgarMapper.mapToDart("Assets", "BS") == "total_assets"
-        assert EdgarMapper.mapToDart("Liabilities", "BS") == "total_liabilities"
+        # Plan v5 P4: SNAKEID_ALIASES 가 total_assets/total_liabilities 를
+        # dartlab 표준 (assets/liabilities) 로 매핑
+        assert EdgarMapper.mapToDart("Assets", "BS") == "assets"
+        assert EdgarMapper.mapToDart("Liabilities", "BS") == "liabilities"
 
     def test_aliasConversion(self):
         from dartlab.providers.edgar.finance.mapper import EdgarMapper
