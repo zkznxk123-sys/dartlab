@@ -4253,6 +4253,18 @@ class Company:
         return "KR"
 
     @property
+    def fiscalYearEnd(self) -> str:
+        """회계연도 종료 월-일 (한국 종목은 12-31 표준).
+
+        Plan v5 Z3: EDGAR 와의 fiscal year-end 비교를 위한 metadata.
+        한국 회계 관습 상 거의 모든 상장사가 12월말 결산 — 상수 반환.
+
+        Returns:
+            "12-31".
+        """
+        return "12-31"
+
+    @property
     def currency(self) -> str:
         """통화 코드 (DART 제공자는 항상 KRW).
 

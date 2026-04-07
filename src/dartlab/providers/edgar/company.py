@@ -480,6 +480,71 @@ class Company:
             return f"Company('{self.ticker}', {self.corpName})"
 
     @property
+    def fiscalYearEnd(self) -> str | None:
+        """회계연도 종료 월-일 (예: AAPL → '09-26', MSFT → '06-30').
+
+        XBRL companyfacts 의 fp='FY' end 날짜에서 가장 자주 등장하는 month-day 추출.
+        DART 종목은 12-31 표준 (한국 회계 관습).
+
+        Plan v5 Z3: calendar year vs fiscal year 매칭 명시. 회사 간 연도 비교
+        시 fiscal year-end 가 다른 회사를 calendar year 로 매칭하면 잘못된 비교.
+
+        Returns:
+            "MM-DD" 형식 문자열, 데이터 없으면 None.
+
+        Example::
+
+            c = Company("AAPL")
+            c.fiscalYearEnd  # "09-26" (마지막 토요일 변형 가능)
+        """
+        cacheKey = "_fiscalYearEnd"
+        if cacheKey in self._cache:
+            return self._cache[cacheKey]
+        try:
+            from pathlib import Path
+
+            import polars as pl
+
+            cik = str(self.cik).zfill(10)
+            path = Path(f"data/edgar/finance/{cik}.parquet")
+            if not path.exists():
+                self._cache[cacheKey] = None
+                return None
+            # fy 별 mode (가장 많이 등장하는) end 가 진짜 FY 종료일.
+            # 그 중에서 가장 흔한 month-day 가 fiscal year-end.
+            lf = pl.scan_parquet(str(path))
+            modeEnds = (
+                lf.filter(pl.col("fp") == "FY")
+                .filter(pl.col("end").is_not_null())
+                .filter(pl.col("fy").is_not_null())
+                .group_by(["fy", "end"])
+                .len()
+                .sort(["fy", "len"], descending=[False, True])
+                .group_by("fy")
+                .head(1)
+            )
+            df = (
+                modeEnds.with_columns(
+                    (pl.col("end").dt.month().cast(pl.Int32) * 100 + pl.col("end").dt.day().cast(pl.Int32)).alias("md")
+                )
+                .group_by("md")
+                .len()
+                .sort("len", descending=True)
+                .head(1)
+                .collect()
+            )
+            if df.height == 0:
+                self._cache[cacheKey] = None
+                return None
+            md = df.row(0)[0]
+            result = f"{md // 100:02d}-{md % 100:02d}"
+            self._cache[cacheKey] = result
+            return result
+        except (FileNotFoundError, OSError, ValueError):
+            self._cache[cacheKey] = None
+            return None
+
+    @property
     def stockCode(self) -> str:
         """서버 API 호환용 ticker 식별자.
 
