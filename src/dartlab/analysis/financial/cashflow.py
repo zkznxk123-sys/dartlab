@@ -6,7 +6,7 @@ CF 3구간(영업/투자/재무) + FCF + 이익의 현금 뒷받침 + CF 패턴.
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict
+from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = 8
@@ -71,6 +71,7 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
             ],
         }
     """
+    # Plan v6 C5: snakeId 단일 패턴 (alias 양방향 자동 매핑)
     cfAccounts = [
         "영업활동현금흐름",
         "투자활동현금흐름",
@@ -79,18 +80,21 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
         "무형자산의취득",
     ]
     result = company.select("CF", cfAccounts)
-    parsed = toDict(result)
+    parsed = toDictBySnakeId(result)
     if parsed is None:
         return None
 
     data, allPeriods = parsed
-    ocfRow = data.get("영업활동현금흐름") or data.get("영업활동으로인한현금흐름")
-    if ocfRow is None:
+    ocfRow = data.get("operating_cashflow", {})
+    if not ocfRow:
         return None
-    icfRow = data.get("투자활동현금흐름") or data.get("투자활동으로인한현금흐름") or {}
-    finRow = data.get("재무활동으로인한현금흐름") or data.get("재무활동현금흐름") or {}
-    capexRow = data.get("유형자산의취득", {})
-    intCapexRow = data.get("무형자산의취득", {})
+    icfRow = data.get("investing_cashflow", {})
+    finRow = data.get("cash_flows_from_financing_activities", {})
+    capexRow = data.get("purchase_of_property_plant_and_equipment", {})
+    intCapexRow = data.get("purchase_of_intangible_assets", {})
+    # Note: SK하이닉스 2025Q4 같이 raw 데이터에 결손이면 None — calc 결과도 None.
+    # `c.CF` 의 dartlab derived row (`financing_cashflow`) 는 별도 데이터 소스라
+    # select 가 안 가져옴. 별도 fix 필요 (Plan v7).
 
     yCols = annualColsFromPeriods(allPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:

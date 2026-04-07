@@ -180,16 +180,35 @@ def toDictBySnakeId(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict],
     if not data:
         return None
 
-    # Plan v5 B: SNAKEID_ALIASES 양방향 자동 노출
-    # alias → canonical (예: total_liabilities → liabilities) 와
-    # canonical → alias 둘 다 지원. 한 방향이 data 에 있으면 다른 방향도 노출.
+    # Plan v5 B + v6 C5: SNAKEID_ALIASES 양방향 + 값 병합
+    # alias 와 canonical 둘 다 dict 에 있을 수도 있음 (예: cash_flows_from_financing_activities
+    # 가 mapper labels 에서 있고, financing_cashflow 가 dartlab derived row 에서 별도 존재).
+    # 양쪽 다 있으면 col 별로 not-null 우선 병합 (한쪽이 None 이고 다른 쪽이 값 있으면 값 사용).
     from dartlab.core.finance.labels import SNAKEID_ALIASES
 
+    def _mergeAliasRows(canonRow: dict, aliasRow: dict) -> dict:
+        """col 별 not-null 우선 병합."""
+        merged = {}
+        allCols = set(canonRow.keys()) | set(aliasRow.keys())
+        for col in allCols:
+            v = canonRow.get(col)
+            if v is None:
+                v = aliasRow.get(col)
+            merged[col] = v
+        return merged
+
     for alias, canonical in SNAKEID_ALIASES.items():
-        if canonical in data and alias not in data:
-            data[alias] = data[canonical]
-        elif alias in data and canonical not in data:
-            data[canonical] = data[alias]
+        canonRow = data.get(canonical)
+        aliasRow = data.get(alias)
+        if canonRow is not None and aliasRow is not None and canonRow is not aliasRow:
+            # 둘 다 별도 row 존재 → 병합 (Plan v6 C5)
+            merged = _mergeAliasRows(canonRow, aliasRow)
+            data[canonical] = merged
+            data[alias] = merged
+        elif canonRow is not None and aliasRow is None:
+            data[alias] = canonRow
+        elif aliasRow is not None and canonRow is None:
+            data[canonical] = aliasRow
 
     return (data, periods)
 

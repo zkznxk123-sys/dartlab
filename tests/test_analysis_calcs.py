@@ -62,7 +62,10 @@ def _krToSnakeId() -> dict[str, str]:
         "이자비용": "finance_costs",  # SNAKEID_ALIASES 양방향: interest_expense → finance_costs
         "감가상각비": "depreciation",
         "영업활동현금흐름": "operating_cashflow",
+        "투자활동현금흐름": "investing_cashflow",
+        "재무활동으로인한현금흐름": "cash_flows_from_financing_activities",
         "유형자산의취득": "purchase_of_property_plant_and_equipment",
+        "무형자산의취득": "purchase_of_intangible_assets",
         "단기차입금": "shortterm_borrowings",
         "장기차입금": "longterm_borrowings",
         "현금및현금성자산": "cash_and_cash_equivalents",

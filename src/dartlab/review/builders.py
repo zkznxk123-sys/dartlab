@@ -2123,15 +2123,15 @@ def residualIncomeBlock(data: dict) -> list:
         HeadingBlock(
             _meta("residualIncome").label,
             level=2,
-            helper="BPS + 초과이익 현가 -- ���기자본비용 대비 초과수익 평가",
+            helper="BPS + 초과이익 현가 -- 자기자본비용 대비 초과수익 평가",
         ),
     ]
     metrics: list[tuple[str, str]] = []
     if data.get("bps"):
-        metrics.append(("BPS", f"{data['bps']:,.0f}"))
+        metrics.append(("BPS", f"{data['bps']:,.0f}원"))
     metrics.append(("자기자본비용", f"{data.get('coe', 0):.1f}%"))
     if data.get("intrinsicValue") is not None:
-        metrics.append(("적정가", f"{data['intrinsicValue']:,.0f}"))
+        metrics.append(("적정가", f"{data['intrinsicValue']:,.0f}원"))
     if data.get("upside") is not None:
         metrics.append(("업사이드", f"{data['upside']:+.1f}%"))
     if metrics:
@@ -2150,9 +2150,9 @@ def priceTargetBlock(data: dict) -> list:
             helper="5개 거시 시나리오 x DCF + Monte Carlo 분포",
         ),
     ]
-    metrics: list[tuple[str, str]] = [("가중 목표가", f"{data.get('weightedTarget', 0):,.0f}")]
+    metrics: list[tuple[str, str]] = [("가중 목표가", f"{data.get('weightedTarget', 0):,.0f}원")]
     if data.get("currentPrice"):
-        metrics.append(("현재가", f"{data['currentPrice']:,.0f}"))
+        metrics.append(("현재가", f"{data['currentPrice']:,.0f}원"))
     if data.get("upside") is not None:
         metrics.append(("업사이드", f"{data['upside']:+.1f}%"))
     metrics.append(("투자 신호", data.get("signal", "-")))
@@ -2168,15 +2168,15 @@ def priceTargetBlock(data: dict) -> list:
                 {
                     "시나리오": s["name"],
                     "확률": f"{s['probability'] * 100:.0f}%",
-                    "목표가": f"{s['perShareValue']:,.0f}",
+                    "목표가(원)": f"{s['perShareValue']:,.0f}",
                 }
             )
-        blocks.append(TableBlock("시나��오별 목표가", pl.DataFrame(rows)))
+        blocks.append(TableBlock("시나리오별 목표가", pl.DataFrame(rows)))
 
     # Monte Carlo 백분위
     pctls = data.get("percentiles", {})
     if pctls:
-        rows = [{"백분위": k, "주가": f"{v:,.0f}"} for k, v in sorted(pctls.items())]
+        rows = [{"백분위": k, "주가(원)": f"{v:,.0f}"} for k, v in sorted(pctls.items())]
         blocks.append(TableBlock("Monte Carlo 분포", pl.DataFrame(rows)))
     return blocks
 
@@ -2232,7 +2232,7 @@ def sensitivityBlock(data: dict) -> list:
         for tg in growthVals:
             val = lookup.get((wacc, tg))
             colName = f"g={tg:.1f}%"
-            row[colName] = f"{val:,.0f}" if val is not None else "-"
+            row[colName] = f"{val:,.0f}원" if val is not None else "-"
         rows.append(row)
 
     if rows:
@@ -2240,7 +2240,7 @@ def sensitivityBlock(data: dict) -> list:
 
     baseVal = data.get("baseValue")
     if baseVal is not None:
-        blocks.append(MetricBlock([("기준 적정가", f"{baseVal:,.0f}")]))
+        blocks.append(MetricBlock([("기준 적정가", f"{baseVal:,.0f}원")]))
     return blocks
 
 
@@ -2263,16 +2263,16 @@ def valuationSynthesisBlock(data: dict) -> list:
     fvr = data.get("fairValueRange")
     metrics: list[tuple[str, str]] = []
     if fvr:
-        metrics.append(("적정가 범위", f"{fvr[0]:,.0f} ~ {fvr[1]:,.0f}"))
+        metrics.append(("적정가 범위", f"{fvr[0]:,.0f}원 ~ {fvr[1]:,.0f}원"))
     if data.get("currentPrice"):
-        metrics.append(("현재가", f"{data['currentPrice']:,.0f}"))
+        metrics.append(("현재가", f"{data['currentPrice']:,.0f}원"))
     metrics.append(("판정", data.get("verdict", "-")))
     blocks.append(MetricBlock(metrics))
 
     # 모델별 추정치
     estimates = data.get("estimates", [])
     if estimates:
-        rows = [{"모델": e["method"], "적정가": f"{e['value']:,.0f}"} for e in estimates]
+        rows = [{"모델": e["method"], "적정가(원)": f"{e['value']:,.0f}"} for e in estimates]
         blocks.append(TableBlock("모델별 적정가", pl.DataFrame(rows)))
     return blocks
 
