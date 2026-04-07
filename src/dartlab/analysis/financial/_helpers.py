@@ -229,25 +229,6 @@ def annualLabel(period: str) -> str:
     return period
 
 
-# ── TTM (Trailing Twelve Months) 헬퍼 ──────────────────
-
-
-def isQuarterlyFallback(cols: list[str]) -> bool:
-    """annualColsFromPeriods 결과가 Q4 fallback인지 판별."""
-    return bool(cols) and "Q" in cols[0]
-
-
-def ttmSum(flowData: dict, qCol: str, allPeriods: set) -> float | None:
-    """Q4 컬럼 기준 최근 4분기 합산(TTM).
-
-    `core/finance/flow.py::annualSumFlow` 의 analysis 모드 위임 (withFallback=True).
-    누적공시 fallback: Q1·Q2 None + Q4 단독 → Q4 그대로 (배당금/자사주 같은 1~2회 이벤트).
-    """
-    from dartlab.core.finance.flow import annualSumFlow
-
-    return annualSumFlow(flowData, qCol, allPeriods, withFallback=True)
-
-
 # 차입금 snakeId 후보 리스트 — 회사마다 다른 변형 모두 합산
 # 분리 키 (단/장기) + 통합 키 (borrowings) + alias 변형 (언더스코어/noncurrent)
 _BORROWING_KEYS = (
@@ -292,16 +273,6 @@ def sumBorrowings(snakeData: dict, col: str) -> float:
     return sum(parts)
 
 
-def getFlowValue(
-    flowData: dict,
-    col: str,
-    quarterlyMode: bool,
-    allPeriods: set,
-) -> float | None:
-    """플로우 변수 값 추출. quarterlyMode면 TTM 환산, 아니면 직접 반환."""
-    if quarterlyMode:
-        return ttmSum(flowData, col, allPeriods)
-    return flowData.get(col)
 
 
 def annualLabels(periods: list[str]) -> dict[str, str]:

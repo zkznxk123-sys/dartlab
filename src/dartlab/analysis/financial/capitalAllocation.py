@@ -7,9 +7,7 @@ from __future__ import annotations
 
 from dartlab.analysis.financial._helpers import (
     annualColsFromPeriods,
-    getFlowValue,
-    isQuarterlyFallback,
-    toDictBySnakeId,
+            toDictBySnakeId,
 )
 from dartlab.analysis.financial._memoize import memoized_calc
 
@@ -70,12 +68,8 @@ def calcDividendPolicy(company, *, basePeriod: str | None = None) -> dict | None
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode = isQuarterlyFallback(yCols)
-    _allP = set(cfPeriods)
-
     def _getF(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode, _allP)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []
@@ -165,12 +159,8 @@ def calcShareholderReturn(company, *, basePeriod: str | None = None) -> dict | N
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode2 = isQuarterlyFallback(yCols)
-    _allP2 = set(cfPeriods)
-
     def _getF2(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode2, _allP2)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []
@@ -246,12 +236,8 @@ def calcReinvestment(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode3 = isQuarterlyFallback(yCols)
-    _allP3 = set(cfPeriods)
-
     def _getF3(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode3, _allP3)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []
@@ -334,12 +320,8 @@ def calcFcfUsage(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode4 = isQuarterlyFallback(yCols)
-    _allP4 = set(cfPeriods)
-
     def _getF4(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode4, _allP4)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []

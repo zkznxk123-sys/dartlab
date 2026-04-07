@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import math
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, getFlowValue, isQuarterlyFallback, toDict, toDictBySnakeId
+from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = 8
@@ -73,12 +73,8 @@ def calcAccrualAnalysis(company, *, basePeriod: str | None = None) -> dict | Non
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode = isQuarterlyFallback(yCols)
-    _allP = set(cfPeriods)
-
     def _getF(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode, _allP)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []
@@ -155,12 +151,8 @@ def calcEarningsPersistence(company, *, basePeriod: str | None = None) -> dict |
     yCols = annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode2 = isQuarterlyFallback(yCols)
-    _allP2 = set(isPeriods)
-
     def _getF2(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode2, _allP2)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []
@@ -256,12 +248,8 @@ def calcBeneishTimeline(company, *, basePeriod: str | None = None) -> dict | Non
     yCols = annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS + 1)  # 전년 대비 필요 → 1년 더
     if len(yCols) < 2:
         return None
-
-    _qMode3 = isQuarterlyFallback(yCols)
-    _allP3 = set(isPeriods)
-
     def _getF3(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode3, _allP3)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []
@@ -584,12 +572,8 @@ def calcNonOperatingBreakdown(company, *, basePeriod: str | None = None) -> dict
     yCols = annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode4 = isQuarterlyFallback(yCols)
-    _allP4 = set(isPeriods)
-
     def _getF4(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode4, _allP4)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []

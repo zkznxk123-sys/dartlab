@@ -25,7 +25,7 @@ def test_sk_hynix_revenue_2025_annual():
     annualColsFromPeriods 가 annual 컬럼 우선 잡음 → calc 가 row['2025'] 직접 read.
     """
     import dartlab
-    from dartlab.analysis.financial._helpers import annualColsFromPeriods, getFlowValue, isQuarterlyFallback, toDict
+    from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict
 
     c = dartlab.Company("000660")
     parsed = toDict(c.select("IS", ["매출액"]))
@@ -36,10 +36,9 @@ def test_sk_hynix_revenue_2025_annual():
     yCols = annualColsFromPeriods(isPeriods)
     # Plan v4 root fix: annual 컬럼이 노출되므로 yCols[0] = "2025" (Q4 fallback 아님)
     assert yCols[0] == "2025", f"annualColsFromPeriods[0] = {yCols[0]} (expected '2025'). Layer A 회귀."
-    assert not isQuarterlyFallback(yCols), "annual 컬럼 노출 시 quarterlyFallback 이 False 여야 함"
+    assert "Q" not in yCols[0], "annual 컬럼 노출 시 Q4 fallback 아님"
 
-    quarterlyMode = isQuarterlyFallback(yCols)
-    val = getFlowValue(revRow, yCols[0], quarterlyMode, set(isPeriods))
+    val = revRow.get(yCols[0])
 
     # SK하이닉스 2025 매출액 ≈ 97.1조
     assert val is not None, "SK하이닉스 2025 매출액 결손"

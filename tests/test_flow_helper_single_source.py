@@ -1,12 +1,8 @@
-"""Sentinel — flow 합산 헬퍼 단일 진실의 원천 (Layer 2).
+"""Sentinel — flow 합산 헬퍼 단일 진실의 원천.
 
-`core/finance/flow.py::annualSumFlow` 가 표준. 4 헬퍼는 모두 위임:
-- `analysis/financial/_helpers.py::ttmSum`
-- `analysis/financial/_helpers.py::getFlowValue`
-- `credit/metrics.py::_ttmSum`
-- `review/narrative.py::_annualizeFlow`
-
-같은 입력 같은 출력 검증.
+`core/finance/flow.py::annualSumFlow` 가 표준. credit `_ttmSum` 만 위임 유지
+(분기 부족 모드 — credit 안정성 보수). 나머지 헬퍼 (ttmSum/getFlowValue/
+_annualizeFlow) 는 Plan v4 에서 제거됨 — pivot annual 컬럼 자동 노출이 흡수.
 """
 
 from __future__ import annotations
@@ -22,16 +18,33 @@ _DATA_PARTIAL = {"2025Q1": 10.0, "2025Q2": 12.0, "2025Q3": 14.0}  # Q4 결손
 _DATA_FALLBACK = {"2025Q1": None, "2025Q2": None, "2025Q3": None, "2025Q4": 50.0}  # 누적공시 패턴
 
 
-def test_ttmSum_delegates_to_annualSumFlow():
-    from dartlab.analysis.financial._helpers import ttmSum
+def test_annualSumFlow_basic():
+    """표준 헬퍼: 4분기 단순 합."""
     from dartlab.core.finance.flow import annualSumFlow
 
-    a = ttmSum(_DATA_FULL, "2025Q4", set(_PERIODS))
-    b = annualSumFlow(_DATA_FULL, "2025Q4", set(_PERIODS), withFallback=True)
-    assert a == b == 52.0
+    assert annualSumFlow(_DATA_FULL, "2025Q4", set(_PERIODS), withFallback=True) == 52.0
+    assert annualSumFlow(_DATA_FULL, "2025Q4", set(_PERIODS), withFallback=False) == 52.0
+
+
+def test_annualSumFlow_fallback_pattern():
+    """analysis 모드 (withFallback=True) 누적공시 fallback."""
+    from dartlab.core.finance.flow import annualSumFlow
+
+    result = annualSumFlow(_DATA_FALLBACK, "2025Q4", set(_PERIODS), withFallback=True)
+    assert result == 50.0
+
+
+def test_annualSumFlow_credit_partial():
+    """credit 모드 (withFallback=False): 1~2 분기 부분 합산."""
+    from dartlab.core.finance.flow import annualSumFlow
+
+    data = {"2025Q4": 50.0}
+    result = annualSumFlow(data, "2025Q4", ["2025Q4"], withFallback=False)
+    assert result == 200.0  # 50 * 4 (부정확)
 
 
 def test_credit_ttmSum_delegates_to_annualSumFlow():
+    """credit `_ttmSum` 가 annualSumFlow 위임."""
     from dartlab.core.finance.flow import annualSumFlow
     from dartlab.credit.metrics import _ttmSum
 
@@ -41,40 +54,18 @@ def test_credit_ttmSum_delegates_to_annualSumFlow():
 
 
 def test_annualizeFlowRows_standalone():
-    """annualizeFlowRows: dict 단위 wrapper. Plan v4 Layer C 후 deprecated.
-
-    review/narrative._annualizeFlow 는 제거됨 (Layer A pivot annual 컬럼 흡수).
-    annualizeFlowRows 자체는 보존 — 호환성 유지.
-    """
+    """annualizeFlowRows: dict 단위 wrapper. Plan v4 후 caller 0 (보존만)."""
     from dartlab.core.finance.flow import annualizeFlowRows
 
     rows = {"매출액": _DATA_FULL.copy()}
     out = annualizeFlowRows(rows, _PERIODS)
-    assert out["매출액"]["2025Q4"] == 52.0  # Q4 가 연간 합으로 교체됨
+    assert out["매출액"]["2025Q4"] == 52.0
 
 
-def test_ttmSum_fallback_pattern():
-    """ttmSum (analysis 모드) 가 누적공시 fallback 인식."""
-    from dartlab.analysis.financial._helpers import ttmSum
+def test_no_legacy_helper_imports():
+    """Plan v4: ttmSum/getFlowValue/isQuarterlyFallback 은 제거됨."""
+    import dartlab.analysis.financial._helpers as h
 
-    # Q1·Q2 None + Q4 단독 → Q4 그대로
-    result = ttmSum(_DATA_FALLBACK, "2025Q4", set(_PERIODS))
-    assert result == 50.0
-
-
-def test_credit_ttmSum_no_fallback():
-    """credit `_ttmSum` 는 fallback 없이 1~2 분기 부분 합산."""
-    from dartlab.credit.metrics import _ttmSum
-
-    # 1 분기만 있는 데이터 → val × 4 (부정확하지만 None 아님)
-    data = {"2025Q4": 50.0}
-    result = _ttmSum(data, "2025Q4", ["2025Q4"])
-    assert result == 200.0  # 50 * 4
-
-
-def test_getFlowValue_quarterlyMode():
-    """getFlowValue: quarterlyMode True → ttmSum 호출, False → 직접 read."""
-    from dartlab.analysis.financial._helpers import getFlowValue
-
-    assert getFlowValue(_DATA_FULL, "2025Q4", True, set(_PERIODS)) == 52.0
-    assert getFlowValue({"2024": 100}, "2024", False, {"2024"}) == 100
+    assert not hasattr(h, "ttmSum"), "ttmSum 은 Plan v4 에서 제거됨"
+    assert not hasattr(h, "getFlowValue"), "getFlowValue 는 Plan v4 에서 제거됨"
+    assert not hasattr(h, "isQuarterlyFallback"), "isQuarterlyFallback 는 Plan v4 에서 제거됨"

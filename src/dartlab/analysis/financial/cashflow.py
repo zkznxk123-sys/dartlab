@@ -6,7 +6,7 @@ CF 3구간(영업/투자/재무) + FCF + 이익의 현금 뒷받침 + CF 패턴.
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, getFlowValue, isQuarterlyFallback, toDict
+from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = 8
@@ -95,12 +95,8 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
     yCols = annualColsFromPeriods(allPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode = isQuarterlyFallback(yCols)
-    _allP = set(allPeriods)
-
     def _getF(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode, _allP)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []
@@ -167,12 +163,8 @@ def calcCashQuality(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode2 = isQuarterlyFallback(yCols)
-    _allP2 = set(cfPeriods)
-
     def _getF2(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode2, _allP2)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []
@@ -305,12 +297,8 @@ def calcOcfDecomposition(company, *, basePeriod: str | None = None) -> dict | No
     yCols = annualColsFromPeriods(cfPeriods, basePeriod, 9)
     if len(yCols) < 2:
         return None
-
-    _qMode3 = isQuarterlyFallback(yCols)
-    _allP3 = set(cfPeriods)
-
     def _getF3(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode3, _allP3)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []

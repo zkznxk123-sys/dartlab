@@ -8,9 +8,7 @@ from __future__ import annotations
 
 from dartlab.analysis.financial._helpers import (
     MAX_RATIO_YEARS,
-    getFlowValue,
-    isQuarterlyFallback,
-    toDict,
+            toDict,
 )
 from dartlab.analysis.financial._helpers import (
     annualColsFromPeriods as _annualColsFromPeriods,
@@ -67,20 +65,16 @@ def calcGrowthTrend(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = _annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS + 1)
     if len(yCols) < 2:
         return None
-
-    _qMode = isQuarterlyFallback(yCols)
-    _allP = set(isPeriods)
-
     history = []
     for i, col in enumerate(yCols[:-1]):
         prevCol = yCols[i + 1] if i + 1 < len(yCols) else None
 
-        _r = getFlowValue(rev, col, _qMode, _allP)
-        _o = getFlowValue(op, col, _qMode, _allP)
-        _n = getFlowValue(ni, col, _qMode, _allP)
-        _rP = getFlowValue(rev, prevCol, _qMode, _allP) if prevCol else None
-        _oP = getFlowValue(op, prevCol, _qMode, _allP) if prevCol else None
-        _nP = getFlowValue(ni, prevCol, _qMode, _allP) if prevCol else None
+        _r = rev.get(col)
+        _o = op.get(col)
+        _n = ni.get(col)
+        _rP = rev.get(prevCol) if prevCol else None
+        _oP = op.get(prevCol) if prevCol else None
+        _nP = ni.get(prevCol) if prevCol else None
 
         history.append(
             {
@@ -97,9 +91,9 @@ def calcGrowthTrend(company, *, basePeriod: str | None = None) -> dict | None:
         )
 
     # CAGR
-    revVals = [getFlowValue(rev, c, _qMode, _allP) for c in reversed(yCols)]
-    opVals = [getFlowValue(op, c, _qMode, _allP) for c in reversed(yCols)]
-    niVals = [getFlowValue(ni, c, _qMode, _allP) for c in reversed(yCols)]
+    revVals = [rev.get(c) for c in reversed(yCols)]
+    opVals = [op.get(c) for c in reversed(yCols)]
+    niVals = [ni.get(c) for c in reversed(yCols)]
     n = len(yCols) - 1
 
     return (
@@ -216,17 +210,13 @@ def calcSustainableGrowthRate(company, *, basePeriod: str | None = None) -> dict
     yCols = _annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS + 1)
     if len(yCols) < 2:
         return None
-
-    _qMode2 = isQuarterlyFallback(yCols)
-    _allP2 = set(isPeriods)
-
     history = []
     for i, col in enumerate(yCols[:-1]):
         prevCol = yCols[i + 1] if i + 1 < len(yCols) else None
-        niVal = getFlowValue(ni, col, _qMode2, _allP2)
+        niVal = ni.get(col)
         eqVal = eq.get(col)
-        revVal = getFlowValue(rev, col, _qMode2, _allP2)
-        revPrev = getFlowValue(rev, prevCol, _qMode2, _allP2) if prevCol else None
+        revVal = rev.get(col)
+        revPrev = rev.get(prevCol) if prevCol else None
 
         roe = round(niVal / eqVal * 100, 2) if niVal is not None and eqVal and eqVal != 0 else None
         actualGrowth = _yoy(revVal, revPrev)
@@ -342,16 +332,12 @@ def calcCagrComparison(company, *, basePeriod: str | None = None) -> dict | None
     yCols = _annualColsFromPeriods(isPeriods, basePeriod, _MAX_YEARS + 1)
     if len(yCols) < 3:
         return None
-
-    _qMode3 = isQuarterlyFallback(yCols)
-    _allP3 = set(isPeriods)
-
     def _v(row, col):
         v = row.get(col) if row else None
         return v if v is not None else 0
 
     def _vF(row, col):
-        v = getFlowValue(row, col, _qMode3, _allP3)
+        v = row.get(col)
         return v if v is not None else 0
 
     latest = yCols[0]

@@ -11,9 +11,7 @@ from typing import Any
 from dartlab.analysis.financial._helpers import (
     MAX_RATIO_YEARS,
     annualColsFromPeriods,
-    getFlowValue,
-    isQuarterlyFallback,
-    sumBorrowings,
+            sumBorrowings,
     toDict,
     toDictBySnakeId,
 )
@@ -95,22 +93,18 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(periods, basePeriod, _MAX_YEARS + 1)
     if len(yCols) < 2:
         return None
-
-    _qMode = isQuarterlyFallback(yCols)
-    _allP = set(periods)
-
     history = []
     for i, col in enumerate(yCols):
         prevCol = yCols[i + 1] if i + 1 < len(yCols) else None
-        r = getFlowValue(rev, col, _qMode, _allP)
+        r = rev.get(col)
         if r is None or r == 0:
             continue
 
-        _op = getFlowValue(op, col, _qMode, _allP)
-        _ni = getFlowValue(ni, col, _qMode, _allP)
-        _opPrev = getFlowValue(op, prevCol, _qMode, _allP) if prevCol else None
-        _niPrev = getFlowValue(ni, prevCol, _qMode, _allP) if prevCol else None
-        _rPrev = getFlowValue(rev, prevCol, _qMode, _allP) if prevCol else None
+        _op = op.get(col)
+        _ni = ni.get(col)
+        _opPrev = op.get(prevCol) if prevCol else None
+        _niPrev = ni.get(prevCol) if prevCol else None
+        _rPrev = rev.get(prevCol) if prevCol else None
 
         row: dict = {
             "period": col,
@@ -126,12 +120,12 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
 
         if isFinancial:
             row["revenueLabel"] = "금융이익"
-            row["financialIncome"] = getFlowValue(finIncome, col, _qMode, _allP)
+            row["financialIncome"] = finIncome.get(col)
         else:
-            row["cogs"] = getFlowValue(cogs, col, _qMode, _allP)
-            row["grossProfit"] = getFlowValue(gp, col, _qMode, _allP)
-            row["grossMargin"] = _pctOf(getFlowValue(gp, col, _qMode, _allP), r)
-            row["sga"] = getFlowValue(sga, col, _qMode, _allP)
+            row["cogs"] = cogs.get(col)
+            row["grossProfit"] = gp.get(col)
+            row["grossMargin"] = _pctOf(gp.get(col), r)
+            row["sga"] = sga.get(col)
 
         history.append(row)
 
@@ -184,16 +178,12 @@ def calcReturnTrend(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(isPeriods, basePeriod, _MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode = isQuarterlyFallback(yCols)
-    _allP = set(isPeriods)
-
     history = []
     for col in yCols:
-        r = getFlowValue(rev, col, _qMode, _allP)
-        o = getFlowValue(opIncome, col, _qMode, _allP)
-        p = getFlowValue(pbt, col, _qMode, _allP)
-        n = getFlowValue(niRow, col, _qMode, _allP)
+        r = rev.get(col)
+        o = opIncome.get(col)
+        p = pbt.get(col)
+        n = niRow.get(col)
         a = ta.get(col)
         e = eq.get(col)
 
@@ -273,10 +263,6 @@ def calcMarginWaterfall(company, *, basePeriod: str | None = None) -> dict | Non
     yCols = annualColsFromPeriods(periods, basePeriod, _MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode = isQuarterlyFallback(yCols)
-    _allP = set(periods)
-
     def _pct(val, r):
         if val is None or r is None or r == 0:
             return None
@@ -284,14 +270,14 @@ def calcMarginWaterfall(company, *, basePeriod: str | None = None) -> dict | Non
 
     history = []
     for col in yCols:
-        r = getFlowValue(rev, col, _qMode, _allP)
+        r = rev.get(col)
         if r is None or r == 0:
             continue
 
         steps = [{"label": "매출", "amount": r, "pct": 100.0, "cumPct": 100.0}]
 
-        cogsV = getFlowValue(cogs, col, _qMode, _allP)
-        gpV = getFlowValue(gp, col, _qMode, _allP)
+        cogsV = cogs.get(col)
+        gpV = gp.get(col)
         if cogsV is not None:
             steps.append(
                 {
@@ -304,8 +290,8 @@ def calcMarginWaterfall(company, *, basePeriod: str | None = None) -> dict | Non
         if gpV is not None:
             steps.append({"label": "매출총이익", "amount": gpV, "pct": _pct(gpV, r), "cumPct": _pct(gpV, r)})
 
-        sgaV = getFlowValue(sgaRow, col, _qMode, _allP)
-        opV = getFlowValue(opRow, col, _qMode, _allP)
+        sgaV = sgaRow.get(col)
+        opV = opRow.get(col)
         if sgaV is not None:
             steps.append(
                 {
@@ -318,8 +304,8 @@ def calcMarginWaterfall(company, *, basePeriod: str | None = None) -> dict | Non
         if opV is not None:
             steps.append({"label": "영업이익", "amount": opV, "pct": _pct(opV, r), "cumPct": _pct(opV, r)})
 
-        fcV = getFlowValue(finCost, col, _qMode, _allP)
-        fiV = getFlowValue(finInc, col, _qMode, _allP)
+        fcV = finCost.get(col)
+        fiV = finInc.get(col)
         opPct = _pct(opV, r) or 0
         if fcV is not None:
             steps.append(
@@ -340,11 +326,11 @@ def calcMarginWaterfall(company, *, basePeriod: str | None = None) -> dict | Non
                 }
             )
 
-        pbtV = getFlowValue(pbt, col, _qMode, _allP)
+        pbtV = pbt.get(col)
         if pbtV is not None:
             steps.append({"label": "세전이익", "amount": pbtV, "pct": _pct(pbtV, r), "cumPct": _pct(pbtV, r)})
 
-        taxV = getFlowValue(tax, col, _qMode, _allP)
+        taxV = tax.get(col)
         if taxV is not None:
             steps.append(
                 {
@@ -355,7 +341,7 @@ def calcMarginWaterfall(company, *, basePeriod: str | None = None) -> dict | Non
                 }
             )
 
-        niV = getFlowValue(ni, col, _qMode, _allP)
+        niV = ni.get(col)
         if niV is not None:
             steps.append({"label": "순이익", "amount": niV, "pct": _pct(niV, r), "cumPct": _pct(niV, r)})
 
@@ -534,12 +520,8 @@ def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict |
     yCols = annualColsFromPeriods(isPeriods, maxYears=_MAX_YEARS, basePeriod=basePeriod)
     if len(yCols) < 2:
         return None
-
-    _qMode = isQuarterlyFallback(yCols)
-    _allP = set(isPeriods)
-
     def _getF(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode, _allP)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []
@@ -692,12 +674,8 @@ def calcRoicTree(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(isPeriods, basePeriod, _MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode = isQuarterlyFallback(yCols)
-    _allP = set(isPeriods)
-
     def _getF(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode, _allP)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []

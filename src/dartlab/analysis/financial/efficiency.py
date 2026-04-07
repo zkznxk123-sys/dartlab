@@ -9,9 +9,7 @@ from __future__ import annotations
 
 from dartlab.analysis.financial._helpers import (
     MAX_RATIO_YEARS,
-    getFlowValue,
-    isQuarterlyFallback,
-    toDict,
+            toDict,
 )
 from dartlab.analysis.financial._helpers import (
     annualColsFromPeriods as _annualColsFromPeriods,
@@ -72,15 +70,11 @@ def calcTurnoverTrend(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = _annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS + 1)
     if len(yCols) < 2:
         return None
-
-    _qMode = isQuarterlyFallback(yCols)
-    _allP = set(isPeriods)
-
     history = []
     for i, col in enumerate(yCols[:-1]):
         prevCol = yCols[i + 1] if i + 1 < len(yCols) else None
-        r = getFlowValue(rev, col, _qMode, _allP)
-        c = getFlowValue(cogs, col, _qMode, _allP)
+        r = rev.get(col)
+        c = cogs.get(col)
 
         arVal = ar.get(col)
         invVal = inv.get(col)

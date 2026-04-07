@@ -73,7 +73,7 @@ def test_dart_bs_annual_equals_q4():
 def test_annual_col_first_in_annualColsFromPeriods():
     """annualColsFromPeriods 가 annual 컬럼 우선 (Q4 fallback 아님)."""
     import dartlab
-    from dartlab.analysis.financial._helpers import annualColsFromPeriods, isQuarterlyFallback, toDict
+    from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict
 
     c = dartlab.Company("000660")
     parsed = toDict(c.select("IS", ["매출액"]))
@@ -82,4 +82,4 @@ def test_annual_col_first_in_annualColsFromPeriods():
 
     yCols = annualColsFromPeriods(periods)
     assert yCols[0].isdigit(), f"annualColsFromPeriods[0] = {yCols[0]} (expected 4자리 연도, Q4 fallback 아님)"
-    assert not isQuarterlyFallback(yCols), "annual 컬럼 노출 시 quarterlyFallback=False"
+    assert "Q" not in yCols[0], "annual 컬럼 노출 시 Q4 fallback 아님"

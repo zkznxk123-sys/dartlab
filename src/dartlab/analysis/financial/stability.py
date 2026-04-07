@@ -10,10 +10,8 @@ from __future__ import annotations
 from dartlab.analysis.financial._helpers import (
     MAX_RATIO_YEARS,
     annualColsFromPeriods,
-    getFlowValue,
-    getRatios,
-    isQuarterlyFallback,
-    sumBorrowings,
+        getRatios,
+        sumBorrowings,
     toDict,
     toDictBySnakeId,
 )
@@ -165,19 +163,15 @@ def calcCoverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(periods, basePeriod, _MAX_YEARS + 1)
     if len(yCols) < 2:
         return None
-
-    _qMode = isQuarterlyFallback(yCols)
-    _allP = set(periods)
-
     history = []
     for i, col in enumerate(yCols[:-1]):
         prevCol = yCols[i + 1] if i + 1 < len(yCols) else None
-        o = getFlowValue(op, col, _qMode, _allP)
+        o = op.get(col)
 
         # 이자비용 우선순위: IS 이자비용 → CF interest_paid → IS 금융비용
-        intVal = getFlowValue(intCost, col, _qMode, _allP)
-        cfVal = getFlowValue(cfIntPaid, col, _qMode, _allP)
-        finVal = getFlowValue(finCost, col, _qMode, _allP)
+        intVal = intCost.get(col)
+        cfVal = cfIntPaid.get(col)
+        finVal = finCost.get(col)
 
         if intVal:
             interest = intVal
@@ -200,7 +194,7 @@ def calcCoverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
             {
                 "period": col,
                 "operatingIncome": o,
-                "operatingIncomeYoy": _yoy(o, getFlowValue(op, prevCol, _qMode, _allP)) if prevCol else None,
+                "operatingIncomeYoy": _yoy(o, op.get(prevCol)) if prevCol else None,
                 "interestExpense": interest,
                 "interestExpenseSource": source,
                 "interestCoverage": coverage,
@@ -253,10 +247,6 @@ def calcDistressScore(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(bsPeriods, basePeriod, _MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode2 = isQuarterlyFallback(yCols)
-    _allP2 = set(bsPeriods)
-
     history = []
     for col in yCols:
         a = taRow.get(col)
@@ -264,8 +254,8 @@ def calcDistressScore(company, *, basePeriod: str | None = None) -> dict | None:
         cl = clRow.get(col)
         tl = tlRow.get(col)
         re = reRow.get(col)
-        ebit = getFlowValue(opRow, col, _qMode2, _allP2)
-        rev = getFlowValue(revRow, col, _qMode2, _allP2)
+        ebit = opRow.get(col)
+        rev = revRow.get(col)
 
         if a is None or a == 0:
             continue
@@ -511,10 +501,6 @@ def calcDebtMaturity(company, *, basePeriod: str | None = None) -> dict | None:
     cfParsed = toDict(cfResult, maxPeriods=5) if cfResult else None
     cfData = cfParsed[0] if cfParsed else {}
     ocfRow = cfData.get("영업활동현금흐름", {})
-
-    _qMode3 = isQuarterlyFallback(annualPeriods)
-    _allP3 = set(periods)
-
     history = []
     for col in annualPeriods:
         # 차입금: 업종별 계정 대응
@@ -541,7 +527,7 @@ def calcDebtMaturity(company, *, basePeriod: str | None = None) -> dict | None:
 
         cl = clRow.get(col) or 0
         tl = tlRow.get(col) or 0
-        ocf = getFlowValue(ocfRow, col, _qMode3, _allP3)
+        ocf = ocfRow.get(col)
 
         shortTermRatio = round(st / totalBorrowing * 100, 2) if totalBorrowing > 0 else None
         currentToTotal = round(cl / tl * 100, 2) if tl > 0 else None

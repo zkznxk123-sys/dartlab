@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, getFlowValue, isQuarterlyFallback, toDict
+from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = 8
@@ -65,12 +65,8 @@ def calcCostBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(isPeriods, basePeriod, _MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode = isQuarterlyFallback(yCols)
-    _allP = set(isPeriods)
-
     def _getF(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode, _allP)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []
@@ -142,12 +138,8 @@ def calcOperatingLeverage(company, *, basePeriod: str | None = None) -> dict | N
     yCols = annualColsFromPeriods(isPeriods, basePeriod, _MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode2 = isQuarterlyFallback(yCols)
-    _allP2 = set(isPeriods)
-
     def _getF2(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode2, _allP2)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []
@@ -227,12 +219,8 @@ def calcBreakevenEstimate(company, *, basePeriod: str | None = None) -> dict | N
     yCols = annualColsFromPeriods(isPeriods, basePeriod, _MAX_YEARS)
     if not yCols:
         return None
-
-    _qMode3 = isQuarterlyFallback(yCols)
-    _allP3 = set(isPeriods)
-
     def _getF3(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode3, _allP3)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []

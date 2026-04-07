@@ -8,10 +8,7 @@ from __future__ import annotations
 
 from dartlab.analysis.financial._helpers import (
     annualColsFromPeriods,
-    getFlowValue,
-    isQuarterlyFallback,
-    sumBorrowings,
-    toDict,
+            sumBorrowings,
     toDictBySnakeId,
 )
 from dartlab.analysis.financial._memoize import memoized_calc
@@ -136,12 +133,8 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(isPeriods, maxYears=_MAX_YEARS + 1, basePeriod=basePeriod)
     if len(yCols) < 2:
         return None
-
-    _qMode = isQuarterlyFallback(yCols)
-    _allP = set(isPeriods)
-
     def _getF(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode, _allP)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []
@@ -237,12 +230,8 @@ def calcInvestmentIntensity(company, *, basePeriod: str | None = None) -> dict |
     yCols = annualColsFromPeriods(isPeriods, maxYears=_MAX_YEARS, basePeriod=basePeriod)
     if not yCols:
         return None
-
-    _qMode2 = isQuarterlyFallback(yCols)
-    _allP2 = set(isPeriods)
-
     def _getF2(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode2, _allP2)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []
@@ -310,12 +299,8 @@ def calcEvaTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(isPeriods, maxYears=_MAX_YEARS, basePeriod=basePeriod)
     if not yCols:
         return None
-
-    _qMode3 = isQuarterlyFallback(yCols)
-    _allP3 = set(isPeriods)
-
     def _getF3(row: dict, col: str) -> float:
-        v = getFlowValue(row, col, _qMode3, _allP3)
+        v = row.get(col)
         return v if v is not None else 0
 
     history = []
