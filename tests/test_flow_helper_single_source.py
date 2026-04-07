@@ -53,19 +53,16 @@ def test_credit_ttmSum_delegates_to_annualSumFlow():
     assert a == b == 52.0
 
 
-def test_annualizeFlowRows_standalone():
-    """annualizeFlowRows: dict 단위 wrapper. Plan v4 후 caller 0 (보존만)."""
-    from dartlab.core.finance.flow import annualizeFlowRows
-
-    rows = {"매출액": _DATA_FULL.copy()}
-    out = annualizeFlowRows(rows, _PERIODS)
-    assert out["매출액"]["2025Q4"] == 52.0
-
-
 def test_no_legacy_helper_imports():
-    """Plan v4: ttmSum/getFlowValue/isQuarterlyFallback 은 제거됨."""
+    """Plan v4/v5: legacy 헬퍼 모두 제거됨.
+
+    - ttmSum/getFlowValue/isQuarterlyFallback (Plan v4 P3 후속)
+    - annualizeFlowRows (Plan v5 F)
+    """
     import dartlab.analysis.financial._helpers as h
+    import dartlab.core.finance.flow as f
 
     assert not hasattr(h, "ttmSum"), "ttmSum 은 Plan v4 에서 제거됨"
     assert not hasattr(h, "getFlowValue"), "getFlowValue 는 Plan v4 에서 제거됨"
     assert not hasattr(h, "isQuarterlyFallback"), "isQuarterlyFallback 는 Plan v4 에서 제거됨"
+    assert not hasattr(f, "annualizeFlowRows"), "annualizeFlowRows 는 Plan v5 F 에서 제거됨"

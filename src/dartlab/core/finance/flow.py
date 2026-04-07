@@ -2,22 +2,20 @@
 
 dartlab finance accessor 의 IS/CIS/CF 컬럼은 분기 단독값
 (`pivot.py::_normalizeQ4` 가 raw 4분기 연간을 standalone 으로 변환).
-calc/narrative 가 연간값을 얻으려면 4분기 합산 필요.
+calc 가 연간값을 얻으려면 4분기 합산 필요.
 
-기존 분산 헬퍼 (모두 다른 시그니처/fallback):
-- `analysis/financial/_helpers.py::ttmSum`         (set, with_fallback, minQ=3)
-- `analysis/financial/_helpers.py::getFlowValue`    (boolean wrapper)
-- `credit/metrics.py::_ttmSum`                     (list, no fallback, 1+ Q OK)
-- `review/narrative.py::_annualizeFlow`            (dict[str,dict] wrapper)
-
-이 모듈이 단일 표준 + 옵션 인자. 4 헬퍼 모두 위임.
+Plan v4 Layer A 이후 `c.IS / c.CIS / c.CF` 는 분기 컬럼 + annual 컬럼
+(`{year}`) 둘 다 자동 노출. 따라서 calc 는 보통 `row['2025']` 직접 read.
+이 모듈은 분기 부족 종목 / fallback 가 필요한 곳에서만 사용:
+- analysis 모드: ttmSum 의 누적공시 fallback (배당금 등 1~2회 이벤트)
+- credit 모드: 1~2 분기 부분합산 (부정확하지만 0보다 낫다)
 
 데이터 계약:
 - 4 분기 (Q4+Q3+Q2+Q1) 모두 있으면 단순 합 (정확)
 - 3 분기 → 평균 × 4 (연환산)
 - 1~2 분기 + with_fallback=False → 평균 × 4 (credit 모드, 부정확)
 - 1~2 분기 + with_fallback=True → None 또는 누적공시 fallback
-- Q1·Q2 None + Q4 단독 → Q4 그대로 (배당금/자사주 같은 1~2회 이벤트, ttmSum 모드)
+- Q1·Q2 None + Q4 단독 → Q4 그대로 (analysis 모드)
 """
 
 from __future__ import annotations
@@ -83,35 +81,3 @@ def annualSumFlow(
     return None
 
 
-def annualizeFlowRows(rows: dict[str, dict], periods: list[str]) -> dict[str, dict]:
-    """flow rows dict 의 Q4 컬럼을 그 해 연간 합으로 교체.
-
-    Plan v4 Layer A 후 dartlab `c.IS / c.CIS / c.CF` 는 이미 annual 컬럼 (`{year}`)
-    을 노출하므로 detector 가 `_annualCols` 로 4자리 연도 우선 잡고 그것을 직접
-    read 하면 됨. 이 함수는 사용처 0 (deprecated).
-
-    호환 유지를 위해 함수 자체는 보존. 새 코드는 사용 금지.
-    """
-    if not rows or not periods:
-        return rows
-    years: set[str] = set()
-    for p in periods:
-        if "Q" in p and len(p) >= 5:
-            years.add(p[:4])
-    if not years:
-        return rows
-
-    periodsSet = set(periods)
-    out: dict[str, dict] = {}
-    for name, row in rows.items():
-        if not row:
-            out[name] = row
-            continue
-        newRow = dict(row)
-        for year in years:
-            qCol = f"{year}Q4"
-            v = annualSumFlow(row, qCol, periodsSet, withFallback=True)
-            if v is not None:
-                newRow[qCol] = v
-        out[name] = newRow
-    return out

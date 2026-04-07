@@ -153,6 +153,10 @@ def toDictBySnakeId(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict],
 
     toDict와 동일하되, 키를 snakeId 컬럼으로 사용한다.
     snakeId로 select한 뒤 .get()도 snakeId로 접근할 때 사용.
+
+    Plan v5 B: ``SNAKEID_ALIASES`` 의 alias key 도 같은 데이터로 자동 노출.
+    예: ``data.get("liabilities")`` 가 있으면 ``data.get("total_liabilities")``
+    도 같은 값 반환. EDGAR↔DART snakeId 차이를 calc 함수가 무시할 수 있다.
     """
     if selectResult is None:
         return None
@@ -172,7 +176,22 @@ def toDictBySnakeId(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict],
     for row in df.iter_rows(named=True):
         sid = str(row.get(idCol, ""))
         data[sid] = {c: row.get(c) for c in periods}
-    return (data, periods) if data else None
+
+    if not data:
+        return None
+
+    # Plan v5 B: SNAKEID_ALIASES 양방향 자동 노출
+    # alias → canonical (예: total_liabilities → liabilities) 와
+    # canonical → alias 둘 다 지원. 한 방향이 data 에 있으면 다른 방향도 노출.
+    from dartlab.core.finance.labels import SNAKEID_ALIASES
+
+    for alias, canonical in SNAKEID_ALIASES.items():
+        if canonical in data and alias not in data:
+            data[alias] = data[canonical]
+        elif alias in data and canonical not in data:
+            data[canonical] = data[alias]
+
+    return (data, periods)
 
 
 # ── basePeriod 인프라 ──
@@ -230,12 +249,13 @@ def annualLabel(period: str) -> str:
 
 
 # 차입금 snakeId 후보 리스트 — 회사마다 다른 변형 모두 합산
-# 분리 키 (단/장기) + 통합 키 (borrowings) + alias 변형 (언더스코어/noncurrent)
+# 분리 키 (단/장기) + 통합 키 (borrowings)
+# Plan v5 B: SNAKEID_ALIASES 가 자동으로 short_term_borrowings/long_term_borrowings
+# 같은 변형을 canonical 키 (shortterm_borrowings/longterm_borrowings) 로 매핑하므로
+# 여기선 canonical 만 나열하면 된다 (변형 키 중복 합산 방지).
 _BORROWING_KEYS = (
     "shortterm_borrowings",
     "longterm_borrowings",
-    "short_term_borrowings",  # 언더스코어 변형 (한화오션)
-    "long_term_borrowings",
     "noncurrent_borrowings",  # 비유동/장기 변형 (LG에솔)
     "current_portion_of_longterm_borrowings",  # 유동성장기차입금
     "borrowings",  # 통합 (SK하이닉스)
