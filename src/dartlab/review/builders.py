@@ -38,6 +38,9 @@ def _notesDetailBlocks(data: dict, keyLabels: dict[str, str]) -> list:
     calc 함수가 notesDetail 필드를 반환했을 때, 주석 테이블로 렌더링.
     notes accessor 는 원 단위로 노출되므로(`pipeline.py::_buildTableDf`에서 정규화)
     추가 단위 변환 불필요.
+
+    Plan v6 P4 (#7): all-null row 제거 — parser 가 sub-row 헤더 (예: "OAT Nego",
+    "Banker's Usance" 등) 를 데이터 row 로 추출한 노이즈 차단.
     """
     notesDetail = data.get("notesDetail")
     if not notesDetail:
@@ -46,10 +49,22 @@ def _notesDetailBlocks(data: dict, keyLabels: dict[str, str]) -> list:
     for key, rows in notesDetail.items():
         if not rows:
             continue
+        # Plan v6 P4 #7: all-null row (계정명/snakeId 외 모든 값 None) 제거
+        cleaned = []
+        for row in rows:
+            hasValue = any(
+                v is not None and v != ""
+                for k, v in row.items()
+                if k not in ("계정명", "snakeId", "account", "tag", "label")
+            )
+            if hasValue:
+                cleaned.append(row)
+        if not cleaned:
+            continue
         label = keyLabels.get(key, key)
         try:
             blocks.append(TextBlock(f"▸ 주석: {label}", style="dim", indent="h2"))
-            blocks.append(TableBlock("", pl.DataFrame(rows)))
+            blocks.append(TableBlock("", pl.DataFrame(cleaned)))
         except (ValueError, TypeError):
             pass
     return blocks
