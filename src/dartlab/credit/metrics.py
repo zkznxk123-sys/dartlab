@@ -135,8 +135,13 @@ def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
             "현금및현금성자산",
             "단기차입금",
             "장기차입금",
+            "차입금단기",  # short_term_borrowings 한국어 변형
+            "long_term_borrowings",  # 영문만 있는 회사
+            "short_term_borrowings",
             "차입부채",  # Fallback: 통합 차입금만 공시하는 회사 (audit 04 #B)
             "차입금",     # Fallback: 추가 변형
+            "장기차입부채",  # noncurrent_borrowings (LG에솔)
+            "유동성장기차입금",  # current_portion_of_longterm_borrowings
             "사채",
             "재고자산",
             "이익잉여금",
@@ -186,11 +191,16 @@ def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
     cl = bsData.get("유동부채", {})
     ncl = bsData.get("비유동부채", {})
     cash = bsData.get("현금및현금성자산", {})
-    stb = bsData.get("단기차입금", {})
-    ltb = bsData.get("장기차입금", {})
+    stb = bsData.get("단기차입금", {}) or bsData.get("차입금단기", {}) or bsData.get("short_term_borrowings", {})
+    ltb = bsData.get("장기차입금", {}) or bsData.get("long_term_borrowings", {})
     # Fallback: 단/장기 분리 없이 통합 차입금만 공시하는 회사 (예: SK하이닉스 borrowings)
     # audit 04 #B: 분리 키만 보면 통합 키만 있는 회사의 차입금이 0으로 처리됨
-    unifiedBorrow = bsData.get("차입부채", {}) or bsData.get("차입금", {})
+    unifiedBorrow = (
+        bsData.get("차입부채", {})
+        or bsData.get("차입금", {})
+        or bsData.get("장기차입부채", {})  # noncurrent_borrowings (LG에솔)
+        or bsData.get("유동성장기차입금", {})  # current_portion_of_longterm_borrowings
+    )
     bonds = bsData.get("사채", {})
     re = bsData.get("이익잉여금", {})
 

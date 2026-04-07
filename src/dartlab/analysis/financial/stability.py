@@ -13,6 +13,7 @@ from dartlab.analysis.financial._helpers import (
     getFlowValue,
     getRatios,
     isQuarterlyFallback,
+    sumBorrowings,
     toDict,
     toDictBySnakeId,
 )
@@ -62,7 +63,10 @@ def calcLeverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """
     bsResult = company.select(
         "BS",
-        ["부채총계", "자본총계", "자산총계", "현금및현금성자산", "단기차입금", "장기차입금", "차입부채", "사채"],
+        ["부채총계", "자본총계", "자산총계", "현금및현금성자산",
+         "단기차입금", "장기차입금", "차입금단기",
+         "long_term_borrowings", "short_term_borrowings",
+         "차입부채", "장기차입부채", "유동성장기차입금", "사채"],
     )
     parsed = toDictBySnakeId(bsResult)
     if parsed is None:
@@ -73,10 +77,6 @@ def calcLeverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
     equity = data.get("total_stockholders_equity", {})
     ta = data.get("total_assets", {})
     cash = data.get("cash_and_cash_equivalents", {})
-    stBorrow = data.get("shortterm_borrowings", {})
-    ltBorrow = data.get("longterm_borrowings", {})
-    unifiedBorrow = data.get("borrowings", {})  # 통합 차입금 fallback
-    bonds = data.get("debentures", {})
 
     yCols = annualColsFromPeriods(periods, basePeriod, _MAX_YEARS + 1)
     if len(yCols) < 2:
@@ -90,12 +90,8 @@ def calcLeverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
         a = ta.get(col)
         c = cash.get(col)
 
-        # 차입금: 분리 키 우선, 둘 다 0 이면 통합 borrowings fallback
-        stbVal = stBorrow.get(col) or 0
-        ltbVal = ltBorrow.get(col) or 0
-        if stbVal == 0 and ltbVal == 0:
-            stbVal = unifiedBorrow.get(col) or 0
-        totalBorrowing = stbVal + ltbVal + (bonds.get(col) or 0)
+        # 차입금: 회사 키 패턴 무관 헬퍼
+        totalBorrowing = sumBorrowings(data, col)
         netDebt = totalBorrowing - (c or 0) if totalBorrowing > 0 else None
 
         debtRatio = _pctOf(d, e)

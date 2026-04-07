@@ -13,6 +13,7 @@ from dartlab.analysis.financial._helpers import (
     annualColsFromPeriods,
     getFlowValue,
     isQuarterlyFallback,
+    sumBorrowings,
     toDict,
     toDictBySnakeId,
 )
@@ -491,7 +492,12 @@ def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict |
             "계약부채",
             "단기차입금",
             "장기차입금",
+            "차입금단기",
+            "long_term_borrowings",
+            "short_term_borrowings",
             "차입부채",
+            "장기차입부채",
+            "유동성장기차입금",
             "사채",
             "현금및현금성자산",
         ],
@@ -552,12 +558,8 @@ def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict |
         noa = opAssets - opLiab if opAssets > 0 else None
 
         # NFO = 금융부채 - 금융자산(현금)
-        # 차입금: 분리 키 우선, 둘 다 0 이면 통합 borrowings 키 fallback
-        stbVal = _get(stRow, col)
-        ltbVal = _get(ltRow, col)
-        if stbVal == 0 and ltbVal == 0:
-            stbVal = _get(unifiedBorrowRow, col)
-        finDebt = stbVal + ltbVal + _get(bondRow, col)
+        # 차입금: 회사 키 패턴 무관 헬퍼
+        finDebt = sumBorrowings(bsData, col)
         cash = _get(cashRow, col)
         nfo = finDebt - cash
 
@@ -649,7 +651,12 @@ def calcRoicTree(company, *, basePeriod: str | None = None) -> dict | None:
             "자본총계",
             "단기차입금",
             "장기차입금",
+            "차입금단기",
+            "long_term_borrowings",
+            "short_term_borrowings",
             "차입부채",
+            "장기차입부채",
+            "유동성장기차입금",
             "사채",
             "현금및현금성자산",
         ],

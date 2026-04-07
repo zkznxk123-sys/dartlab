@@ -265,6 +265,50 @@ def ttmSum(flowData: dict, qCol: str, allPeriods: set) -> float | None:
     return None
 
 
+# 차입금 snakeId 후보 리스트 — 회사마다 다른 변형 모두 합산
+# 분리 키 (단/장기) + 통합 키 (borrowings) + alias 변형 (언더스코어/noncurrent)
+_BORROWING_KEYS = (
+    "shortterm_borrowings",
+    "longterm_borrowings",
+    "short_term_borrowings",  # 언더스코어 변형 (한화오션)
+    "long_term_borrowings",
+    "noncurrent_borrowings",  # 비유동/장기 변형 (LG에솔)
+    "current_portion_of_longterm_borrowings",  # 유동성장기차입금
+    "borrowings",  # 통합 (SK하이닉스)
+)
+_BOND_KEYS = ("debentures", "bonds_payable", "current_portion_of_debentures")
+
+
+def sumBorrowings(snakeData: dict, col: str) -> float:
+    """차입금 합산 — 회사 키 패턴 무관.
+
+    snakeData 는 toDictBySnakeId 결과. 단/장기 분리 키 우선 합산하되,
+    분리 키가 모두 0/None 이면 통합 borrowings 키 fallback.
+    bonds 는 별도로 _BOND_KEYS 에서 추가.
+    """
+    parts = []
+    for sid in _BORROWING_KEYS:
+        if sid == "borrowings":
+            continue  # 통합 키는 fallback 으로만 사용
+        v = snakeData.get(sid, {}).get(col)
+        if v is not None and v != 0:
+            parts.append(v)
+
+    # 분리 키가 모두 비어있으면 통합 borrowings fallback
+    if not parts:
+        v = snakeData.get("borrowings", {}).get(col)
+        if v is not None:
+            parts.append(v)
+
+    # 사채 추가
+    for sid in _BOND_KEYS:
+        v = snakeData.get(sid, {}).get(col)
+        if v is not None and v != 0:
+            parts.append(v)
+
+    return sum(parts)
+
+
 def getFlowValue(
     flowData: dict,
     col: str,

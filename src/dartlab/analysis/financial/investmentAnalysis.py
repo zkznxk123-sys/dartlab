@@ -10,8 +10,8 @@ from dartlab.analysis.financial._helpers import (
     annualColsFromPeriods,
     getFlowValue,
     isQuarterlyFallback,
+    sumBorrowings,
     toDict,
-    toDictBySnakeId,
     toDictBySnakeId,
 )
 from dartlab.analysis.financial._memoize import memoized_calc
@@ -108,7 +108,11 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     isResult = company.select("IS", ["영업이익", "법인세비용", "법인세차감전순이익"])
     bsResult = company.select(
         "BS",
-        ["자본총계", "단기차입금", "장기차입금", "차입부채", "사채", "현금및현금성자산"],
+        ["자본총계",
+         "단기차입금", "장기차입금", "차입금단기",
+         "long_term_borrowings", "short_term_borrowings",
+         "차입부채", "장기차입부채", "유동성장기차입금",
+         "사채", "현금및현금성자산"],
     )
 
     isParsed = toDictBySnakeId(isResult)
@@ -161,12 +165,8 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
                 if adjEq > 0:
                     equity = adjEq
                     break
-        # 차입금: 분리 키 우선, 둘 다 0 이면 통합 borrowings 키 fallback
-        stbVal = _get(stRow, col)
-        ltbVal = _get(ltRow, col)
-        if stbVal == 0 and ltbVal == 0:
-            stbVal = _get(unifiedBorrowRow, col)
-        totalBorrowing = stbVal + ltbVal + _get(bondRow, col)
+        # 차입금: 회사 키 패턴 무관 헬퍼
+        totalBorrowing = sumBorrowings(bsData, col)
         cash = _get(cashRow, col)
         investedCapital = equity + totalBorrowing - cash
 
@@ -282,7 +282,11 @@ def calcEvaTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     isResult = company.select("IS", ["영업이익", "법인세비용", "법인세차감전순이익"])
     bsResult = company.select(
         "BS",
-        ["자본총계", "단기차입금", "장기차입금", "차입부채", "사채", "현금및현금성자산"],
+        ["자본총계",
+         "단기차입금", "장기차입금", "차입금단기",
+         "long_term_borrowings", "short_term_borrowings",
+         "차입부채", "장기차입부채", "유동성장기차입금",
+         "사채", "현금및현금성자산"],
     )
 
     isParsed = toDictBySnakeId(isResult)
@@ -327,12 +331,8 @@ def calcEvaTimeline(company, *, basePeriod: str | None = None) -> dict | None:
         nopat = opIncome * (1 - effectiveTaxRate) if opIncome != 0 else None
 
         equity = _get(eqRow, col)
-        # 차입금: 분리 키 우선, 둘 다 0 이면 통합 borrowings 키 fallback
-        stbVal = _get(stRow, col)
-        ltbVal = _get(ltRow, col)
-        if stbVal == 0 and ltbVal == 0:
-            stbVal = _get(unifiedBorrowRow, col)
-        totalBorrowing = stbVal + ltbVal + _get(bondRow, col)
+        # 차입금: 회사 키 패턴 무관 헬퍼
+        totalBorrowing = sumBorrowings(bsData, col)
         cash = _get(cashRow, col)
         investedCapital = equity + totalBorrowing - cash
 

@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict, toDictBySnakeId
+from dartlab.analysis.financial._helpers import annualColsFromPeriods, sumBorrowings, toDict, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_QUARTERS = 5
@@ -100,7 +100,12 @@ def calcFundingSources(company, *, basePeriod: str | None = None) -> dict | None
         "부채총계",
         "단기차입금",
         "장기차입금",
-        "차입부채",  # 통합 차입금 (단/장기 분리 안 한 회사 — SK하이닉스 등)
+        "차입금단기",  # short_term_borrowings 한국어 변형
+        "long_term_borrowings",  # 영문만 있는 회사 (한화오션)
+        "short_term_borrowings",
+        "차입부채",  # 통합 차입금 (SK하이닉스)
+        "장기차입부채",  # noncurrent_borrowings (LG에솔)
+        "유동성장기차입금",  # current_portion_of_longterm_borrowings
         "사채",
         "매입채무",
         "선수금",
@@ -124,10 +129,6 @@ def calcFundingSources(company, *, basePeriod: str | None = None) -> dict | None
     csRow = data.get("capital_surplus", {})
     eqRow = data.get("total_stockholders_equity", {})
     liabRow = data.get("total_liabilities", {})
-    stbRow = data.get("shortterm_borrowings", {})
-    ltbRow = data.get("longterm_borrowings", {})
-    unifiedBorrowRow = data.get("borrowings", {})  # 통합 차입금 (분리 없는 회사)
-    bondRow = data.get("debentures", {})
     apRow = data.get("trade_and_other_payables", {})
     advRow = data.get("advance_from_customers", {})
     clRow = data.get("contract_liabilities", {})
@@ -149,12 +150,8 @@ def calcFundingSources(company, *, basePeriod: str | None = None) -> dict | None
 
         retained = reRow.get(col) or 0
         paidIn = (pcRow.get(col) or 0) + (csRow.get(col) or 0)
-        # 차입금: 단기 + 장기 분리 키 우선, 둘 다 0 이면 통합 borrowings 키 fallback
-        stbVal = stbRow.get(col) or 0
-        ltbVal = ltbRow.get(col) or 0
-        if stbVal == 0 and ltbVal == 0:
-            stbVal = unifiedBorrowRow.get(col) or 0
-        finDebt = stbVal + ltbVal + (bondRow.get(col) or 0)
+        # 차입금: 회사 키 패턴 무관 헬퍼 (분리/통합/언더스코어/noncurrent 변형 모두 처리)
+        finDebt = sumBorrowings(data, col)
         opFunding = (apRow.get(col) or 0) + (advRow.get(col) or 0) + (clRow.get(col) or 0) + (diRow.get(col) or 0)
 
         equity = eqRow.get(col) or 0
