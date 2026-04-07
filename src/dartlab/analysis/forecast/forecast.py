@@ -409,14 +409,14 @@ def scenarioAnalysis(
         terminalGrowth=max(min(sp.growthRate, 3.0) - 0.5, 0.5),
     )
 
-    def _scenarioDict(dcf: DCFResult) -> dict[str, float]:
+    def _scenarioDict(dcf: DCFResult) -> dict[str, float | None]:
         return {
             "growth": dcf.growthRateInitial,
             "discountRate": dcf.discountRate,
             "terminalGrowth": dcf.terminalGrowth,
             "enterpriseValue": dcf.enterpriseValue,
             "equityValue": dcf.equityValue,
-            "perShareValue": dcf.perShareValue or 0,
+            "perShareValue": dcf.perShareValue,  # None 보존 (DCF 결손 시)
         }
 
     base = _scenarioDict(baseDcf)
