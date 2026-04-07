@@ -227,7 +227,8 @@ def test_saveFinance_writes_companyfacts_parquet_compatible_with_pivot(monkeypat
     assert result is not None
     series, periods = result
     assert periods == ["2024-Q4"]
-    assert series["BS"]["total_assets"] == [364980000000.0]
+    # Plan v5 P4: SNAKEID_ALIASES total_assets → assets dartlab 표준
+    assert series["BS"]["assets"] == [364980000000.0]
 
 
 def test_companyFactsToRows_matches_existing_finance_schema():
