@@ -350,6 +350,49 @@ def sumIncomeTax(snakeData: dict, col: str) -> float:
     return _sumWithFallback(snakeData, col, _INCOME_TAX_KEYS, "income_taxes")
 
 
+# 한국어 키 dict 용 차입금 합산 (credit/metrics.py 호환)
+# Plan v5 E: credit 의 자체 fallback 코드를 위임받음
+_KR_BORROWING_SHORT = ("단기차입금", "차입금단기", "short_term_borrowings")
+_KR_BORROWING_LONG = ("장기차입금", "long_term_borrowings")
+_KR_BORROWING_UNIFIED = ("차입부채", "차입금", "장기차입부채", "유동성장기차입금")
+
+
+def sumBorrowingsKorean(bsData: dict, col: str) -> tuple[float, float, float]:
+    """한국어 키 BS dict 의 차입금 합산.
+
+    credit/metrics.py 처럼 toDict 결과(한국어 키 dict)를 받아
+    (단기차입금, 장기차입금, 통합 fallback) 형태로 분해 반환.
+
+    Returns:
+        (stBorrow, ltBorrow, totalBorrowing) — 분리/통합 fallback 적용 후
+    """
+    stb = 0.0
+    for k in _KR_BORROWING_SHORT:
+        v = bsData.get(k, {}).get(col)
+        if v is not None:
+            stb = float(v)
+            break
+
+    ltb = 0.0
+    for k in _KR_BORROWING_LONG:
+        v = bsData.get(k, {}).get(col)
+        if v is not None:
+            ltb = float(v)
+            break
+
+    # Fallback: 분리 키 모두 0/None → 통합 키 (audit 04 #B)
+    if stb == 0 and ltb == 0:
+        for k in _KR_BORROWING_UNIFIED:
+            v = bsData.get(k, {}).get(col)
+            if v is not None:
+                stb = float(v)  # 통합값을 stb 에 1번만 (credit 호환)
+                break
+
+    bondsVal = bsData.get("사채", {}).get(col) or 0
+    total = stb + ltb + float(bondsVal)
+    return stb, ltb, total
+
+
 
 
 def annualLabels(periods: list[str]) -> dict[str, str]:

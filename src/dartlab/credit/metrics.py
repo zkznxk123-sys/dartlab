@@ -1,10 +1,13 @@
 """7축 신용분석 정량 지표 산출.
 
 모든 지표를 company.select() / company.notes / company.show()에서
-직접 산출한다. 다른 analysis calc 함수를 호출하지 않는다.
+직접 산출한다. 다른 analysis calc 함수를 호출하지 않는다 (단, 차입금
+fallback 같은 공유 헬퍼는 _helpers 에서 위임).
 """
 
 from __future__ import annotations
+
+from dartlab.analysis.financial._helpers import sumBorrowingsKorean
 
 
 def _div(a, b, pct: bool = False) -> float | None:
@@ -180,17 +183,7 @@ def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
     cl = bsData.get("유동부채", {})
     ncl = bsData.get("비유동부채", {})
     cash = bsData.get("현금및현금성자산", {})
-    stb = bsData.get("단기차입금", {}) or bsData.get("차입금단기", {}) or bsData.get("short_term_borrowings", {})
-    ltb = bsData.get("장기차입금", {}) or bsData.get("long_term_borrowings", {})
-    # Fallback: 단/장기 분리 없이 통합 차입금만 공시하는 회사 (예: SK하이닉스 borrowings)
-    # audit 04 #B: 분리 키만 보면 통합 키만 있는 회사의 차입금이 0으로 처리됨
-    unifiedBorrow = (
-        bsData.get("차입부채", {})
-        or bsData.get("차입금", {})
-        or bsData.get("장기차입부채", {})  # noncurrent_borrowings (LG에솔)
-        or bsData.get("유동성장기차입금", {})  # current_portion_of_longterm_borrowings
-    )
-    bonds = bsData.get("사채", {})
+    # Plan v5 E: 차입금 fallback 은 col loop 안에서 sumBorrowingsKorean 위임
     re = bsData.get("이익잉여금", {})
 
     rev = isData.get("매출액", {})
@@ -224,15 +217,9 @@ def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
         curLiab = cl.get(col)
         cashVal = cash.get(col)
 
-        stBorrow = stb.get(col) or 0
-        ltBorrow = ltb.get(col) or 0
-        bondsVal = bonds.get(col) or 0
-        # Fallback: stb/ltb 분리 없는 회사 → unifiedBorrow를 stb 위치로 (1번만 합산)
-        if stBorrow == 0 and ltBorrow == 0 and unifiedBorrow:
-            uVal = unifiedBorrow.get(col) or 0
-            if uVal > 0:
-                stBorrow = uVal
-        totalBorrowing = stBorrow + ltBorrow + bondsVal
+        # Plan v5 E: 차입금 분리/통합 fallback 위임 (analysis/_helpers.py::sumBorrowingsKorean)
+        stBorrow, ltBorrow, totalBorrowing = sumBorrowingsKorean(bsData, col)
+        bondsVal = bsData.get("사채", {}).get(col) or 0  # 사채 별도 노출 (회귀 호환)
 
         # IS/CF 플로우 변수: Q4 fallback이면 TTM 합산
         if _quarterlyMode:
