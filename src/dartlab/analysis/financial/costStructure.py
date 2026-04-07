@@ -7,7 +7,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict
+from dartlab.analysis.financial._helpers import (
+    annualColsFromPeriods,
+    sumCostOfSales,
+    sumSGA,
+    toDict,
+    toDictBySnakeId,
+)
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = 8
@@ -51,29 +57,25 @@ def calcCostBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
             ],
         }
     """
+    # Plan v5 P7: snakeId 단일 + sumCostOfSales/sumSGA 분리 키 fallback
     accounts = ["매출액", "매출원가", "판매비와관리비"]
     isResult = company.select("IS", accounts)
-    isParsed = toDict(isResult)
+    isParsed = toDictBySnakeId(isResult)
     if isParsed is None:
         return None
 
     isData, isPeriods = isParsed
-    revRow = isData.get("매출액", {})
-    cogsRow = isData.get("매출원가", {})
-    sgaRow = isData.get("판매비와관리비", {})
+    revRow = isData.get("sales", {})
 
     yCols = annualColsFromPeriods(isPeriods, basePeriod, _MAX_YEARS)
     if not yCols:
         return None
-    def _getF(row: dict, col: str) -> float:
-        v = row.get(col)
-        return v if v is not None else 0
 
     history = []
     for col in yCols:
-        rev = _getF(revRow, col)
-        cogs = _getF(cogsRow, col)
-        sga = _getF(sgaRow, col)
+        rev = revRow.get(col) or 0
+        cogs = sumCostOfSales(isData, col)  # 분리/통합 키 fallback
+        sga = sumSGA(isData, col)  # 판매비/관리비 분리 키 fallback
 
         history.append(
             {
