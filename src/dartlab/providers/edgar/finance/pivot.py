@@ -227,6 +227,18 @@ def _buildFyMap(
 
 
 def _splitStmtFacts(df: pl.DataFrame) -> dict[str, pl.DataFrame]:
+    """XBRL fact 를 sj_div (BS/IS/CF/CI) 로 분류 + USD only 필터.
+
+    Plan v4 Layer B: XBRL `unit` 컬럼이 USD/USDshare/share/USDxshares/pure 등
+    혼합. 같은 tag 에 다른 unit 의 entry 가 있을 경우 (소수) 잘못된 합산
+    위험. 통화성 stmt (BS/IS/CF/CI) 는 USD only 로 필터링.
+    """
+    # Plan v4 Layer B — XBRL unit 정규화 (USD only)
+    if "unit" in df.columns:
+        df = df.filter(pl.col("unit") == "USD")
+    if df.height == 0:
+        return {}
+
     stmtTags = EdgarMapper.classifyTagsByStmt()
 
     allTags = df.select("tag").unique().to_series().to_list()
