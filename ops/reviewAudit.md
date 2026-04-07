@@ -9,28 +9,58 @@
 3. 진짜 버그면 아래 표에 등록 → 보수적 fix → 재검증
 4. 종목 1개 끝나면 다음 종목으로 커버리지 확장
 
-## 단위 함정 (반복 금지)
+## 단위 함정 (Plan v4 root fix 후 — 회귀 차단됨)
 
-- `c.notes.*` (costByNature, borrowings, tangibleAsset, intangibleAsset, receivables, provisions, inventory, lease, investmentProperty, affiliates) → **백만원**
+- `c.notes.*` 모두 **원 단위** 노출 (Plan v4 P1 후)
+  - 4 분산 parser (costByNature/tangibleAsset/segment/affiliate) 도 `normalizeFromUnitScale` 경유
+  - notes 내부 표준은 백만원이지만 노출 시점에 ×1_000_000
 - `c.IS / c.BS / c.CF` → **원**
-- review/analysis가 두 소스를 섞어 표시·산술할 때 ×1e6 또는 ÷1e6 명시 필수
-- 비화폐성 notes(eps, segments, count) 는 절대 스케일 금지
-- 새 화폐성 notes 키 추가 시 `review/builders.py::_NOTES_MONETARY_KEYS` 에도 등록
+- 새 parser 추가 시 raw `*= unit` 금지 (sentinel `test_no_global_raw_unit_multiply` 차단)
 
-## Q4 컬럼 함정 (반복 금지)
+## Q4 컬럼 함정 (Plan v4 root fix 후 — 자동 해결)
 
-- DART finance의 IS/CF 컬럼은 **분기 단독값**. `2025Q4` 컬럼 = 4분기 한 분기만.
-- 연간 비교가 필요하면 반드시 Q1+Q2+Q3+Q4 합산. calc 함수는 `_helpers.py::ttmSum`, narrative detector는 `narrative.py::_annualizeFlow` 사용.
-- BS는 stock이라 Q4=연말 그대로 OK.
-- 새 detector/calc 추가 시 IS/CF row를 row.get("2025Q4") 직접 호출하지 말 것.
+- Plan v4 Layer A 후 `c.IS / c.CIS / c.CF` 가 분기 컬럼 + **annual 컬럼 (`{year}`)** 자동 노출
+- calc 가 `row['2025']` 직접 read 하면 연간값 (Q1+Q2+Q3+Q4 합)
+- `row['2025Q4']` 는 Q4 단독값 (분기 단독)
+- ttmSum/getFlowValue/_annualizeFlow 헬퍼 모두 제거됨 (Plan v5)
+- 새 calc 작성 시 sentinel `test_no_q4_literal_in_subscript` + `test_no_q4_literal_assigned_to_var` 가 직접 read 차단
 
 ## 종목별 발견 버그
 
 ### 2026-04-07 — SK하이닉스(000660)
 
+#### 1막~2막 (이전 세션)
+
 | # | 위치 | 증상 | 원인 | Fix | 상태 |
 |---|---|---|---|---|---|
-| 1 | `review/builders.py::_notesDetailBlocks` | 비용성격별 "원재료사용 1,210만" (실제 12.1조) | `c.notes.*` 는 백만원 단위, `_fmtAmtShort` 는 원 단위 가정 → 6자리 축소 표시 | 화폐성 키 10개(`_NOTES_MONETARY_KEYS`)에 `_scaleNotesRowsToWon()` ×1e6 적용 | ✅ |
-| 2 | 영업레버리지(DOL) | 2024Q4/2023Q4/2018Q4 None | 부호 전환(음→양) 시 직관적 해석 불가로 의도적 None 가능성 큼. 우선 보류 | — | ⏸ |
-| 3 | 수익성 — 매출총이익률 표 | 본문 60.4% vs 표 57.3%→68.8% | 재현 불가(현재 표 60.4% 정상). 이전 세션 오인 | — | ❌ |
-| 4 | `review/narrative.py::_detectGrowthProfitability` 외 6개 detector | "매출 +66.1% / 영업이익률 40.9%→58.4%" — 표(46.8%/35.5%→48.6%)와 불일치 | `_annualCols`가 Q4 컬럼을 연간값으로 오인. DART IS/CF Q4는 분기 단독값. 7개 detector 모두 영향 | `_annualizeFlow()` 헬퍼 추가 + 7개 detector에서 IS/CF dict annualize 적용 | ✅ |
+| 1 | `review/builders.py::_notesDetailBlocks` | 비용성격별 "원재료사용 1,210만" (실제 12.1조) | `c.notes.*` 는 백만원 단위 노출 → 6자리 축소 표시 | Plan v4 Layer 1: 4 분산 parser 가 `normalizeFromUnitScale` 경유, 모든 notes 원 단위 노출 | ✅ root fix |
+| 2 | 영업레버리지(DOL) | 2024Q4/2023Q4/2018Q4 None | 부호 전환(음→양) 시 직관적 해석 불가로 의도적 None 가능성 큼 | — | ⏸ 보류 |
+| 3 | 수익성 — 매출총이익률 표 | 본문 60.4% vs 표 57.3%→68.8% | 재현 불가 (이전 세션 오인) | — | ❌ 무효 |
+| 4 | `review/narrative.py` 7 detector | "매출 +66.1% / 영업이익률 40.9%→58.4%" — 표 (46.8%/35.5%→48.6%) 와 불일치 | DART IS/CF Q4 컬럼이 분기 단독값인데 detector 가 연간값으로 오인 | Plan v4 Layer A: pivot 결과에 annual 컬럼 자동 노출 → `row['2025']` 직접 read | ✅ root fix |
+
+#### 3막 (현금전환)
+
+| # | 위치 | 증상 | 원인 | 우선순위 |
+|---|---|---|---|---|
+| 5 | `cashflow.calcCashFlowOverview` 재무CF 2025 | `-` (결손) | 재무활동현금흐름 snakeId 매핑 누락 가능 또는 분기 데이터 부족 | 중간 |
+
+#### 4막 (안정성)
+
+| # | 위치 | 증상 | 원인 | 우선순위 |
+|---|---|---|---|---|
+| 6 | `notes.borrowings` 차입금 구성 표 | 2022 이전 모두 `-` (4년만 시계열) | DART notes 시계열 확장 부족 + parser 가 일부 sub-row 헤더를 데이터 row 로 잘못 추출 | 중간 |
+| 7 | `notes.borrowings` 표에 "OAT Nego, Banker's Usance, 일반대출" 등 sub-row 헤더가 데이터 row 로 잘못 노출 | 모든 값 `-` | parser 가 heading row + data row 구분 못 함 | 낮음 |
+| 8 | `notes.lease` 표 | "기말장부금액" 200억 (2025) vs 13억 (2024) 큰 변동, "감가상각 -90억 / 기초 13억" 불일치 | parser 가 분기 데이터 + 연간 데이터 혼합 가능 | 낮음 |
+
+#### 5막 (자본배분)
+
+| # | 위치 | 증상 | 원인 | 우선순위 |
+|---|---|---|---|---|
+| 9 | `capitalAllocation.calcDividendPolicy` 배당성장률 +8600.8% (2022) | 2021 47억 → 2022 4126억 base effect | 작은 base 에서 큰 base 전환 — 통계적 정상이지만 사용자 오인 | 낮음 — cap 또는 표시 보강 |
+
+#### 6막 (가치평가)
+
+| # | 위치 | 증상 | 원인 | 우선순위 |
+|---|---|---|---|---|
+| 10 | 6막 두 모델 결과 큰 괴리 | 종합 적정가 19.7만원 vs 확률가중 목표가 129.7만원 (6배 차이) | 종합 적정가 = DCF/DDM/RIM 평균 (보수적) / 확률가중 목표가 = 시나리오 baseline (낙관적). 두 모델 통합 부재 | **높음** — 사용자 혼란 |
+| 11 | 6막 RIM 적정가 199,304 vs DCF 174,422 | 자릿수 같으나 단위 표시 (원/주당) 불명확 | 사용자가 19.9만원 또는 199,304천원 오인 가능 | 낮음 |
