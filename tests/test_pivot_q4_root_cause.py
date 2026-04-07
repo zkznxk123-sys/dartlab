@@ -19,7 +19,11 @@ pytestmark = [pytest.mark.unit, pytest.mark.requires_data]
 
 
 def test_sk_hynix_revenue_2025_annual():
-    """SK하이닉스 2025 매출 = 97조 (분기 단독값을 합산해서 연간)."""
+    """SK하이닉스 2025 매출 = 97조 (Plan v4: pivot annual 컬럼 자동 노출).
+
+    Layer A 후 c.IS 가 분기 컬럼 + annual 컬럼 둘 다 노출.
+    annualColsFromPeriods 가 annual 컬럼 우선 잡음 → calc 가 row['2025'] 직접 read.
+    """
     import dartlab
     from dartlab.analysis.financial._helpers import annualColsFromPeriods, getFlowValue, isQuarterlyFallback, toDict
 
@@ -30,8 +34,12 @@ def test_sk_hynix_revenue_2025_annual():
     revRow = isData.get("매출액", {})
 
     yCols = annualColsFromPeriods(isPeriods)
+    # Plan v4 root fix: annual 컬럼이 노출되므로 yCols[0] = "2025" (Q4 fallback 아님)
+    assert yCols[0] == "2025", f"annualColsFromPeriods[0] = {yCols[0]} (expected '2025'). Layer A 회귀."
+    assert not isQuarterlyFallback(yCols), "annual 컬럼 노출 시 quarterlyFallback 이 False 여야 함"
+
     quarterlyMode = isQuarterlyFallback(yCols)
-    val = getFlowValue(revRow, "2025Q4", quarterlyMode, set(isPeriods))
+    val = getFlowValue(revRow, yCols[0], quarterlyMode, set(isPeriods))
 
     # SK하이닉스 2025 매출액 ≈ 97.1조
     assert val is not None, "SK하이닉스 2025 매출액 결손"

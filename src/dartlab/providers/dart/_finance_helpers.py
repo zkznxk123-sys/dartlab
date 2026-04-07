@@ -130,7 +130,20 @@ def _financeToDataFrame(
     years: list[str],
     sjDiv: str,
 ) -> pl.DataFrame | None:
-    """finance 연도별 시계열 → 한글 계정명 × 연도 컬럼 DataFrame."""
+    """finance 분기별 시계열 → 한글 계정명 × 기간 컬럼 DataFrame.
+
+    컬럼 schema:
+        - 메타: ``snakeId``, ``계정명``
+        - 분기 컬럼: ``2025Q1, 2025Q2, 2025Q3, 2025Q4, 2024Q1, ...`` (역순)
+        - **연간 컬럼: ``2025, 2024, ...`` (역순)** ← Plan v4 root fix
+
+    연간 컬럼 의미 (Plan v4):
+        - IS/CIS/CF (flow): 그 해 Q1+Q2+Q3+Q4 합 (분기 단독값 합산)
+        - BS (stock): 그 해 Q4 (= 연말잔액) alias
+
+    calc 함수가 연간 비교 필요 시 ``row['2025']`` 만 read 하면 됨.
+    ttmSum / _annualizeFlow / getFlowValue 등의 위층 합산 헬퍼는 불필요.
+    """
     stmtData = series.get(sjDiv)
     if not stmtData:
         return None
@@ -142,14 +155,47 @@ def _financeToDataFrame(
     order = mapper.sortOrder(sjDiv)
     levels = mapper.levelMap(sjDiv)
 
+    # 분기 컬럼에서 연도 추출 (예: "2025Q1" → "2025")
+    quarterYears: dict[str, list[str]] = {}
+    for q in years:
+        if "Q" in q and len(q) >= 5:
+            yr = q[:4]
+            quarterYears.setdefault(yr, []).append(q)
+    annualYears = sorted(quarterYears.keys(), reverse=True)
+
     rows = []
     for snakeId, values in stmtData.items():
         label = labels.get(snakeId, snakeId)
         level = levels.get(snakeId, 2)
         sortKey = order.get(snakeId, 9999)
         row = {"snakeId": snakeId, "계정명": label, "_level": level, "_sort": sortKey}
+
+        # 분기 컬럼
         for i, y in enumerate(years):
             row[y] = values[i] if i < len(values) else None
+
+        # 연간 컬럼 (Plan v4 root fix)
+        for yr in annualYears:
+            qCols = quarterYears[yr]
+            if sjDiv == "BS":
+                # stock: Q4 = 연말잔액. 없으면 그 해 마지막 분기.
+                qCols.sort(reverse=True)  # Q4, Q3, Q2, Q1
+                annualVal = None
+                for qc in qCols:
+                    v = row.get(qc)
+                    if v is not None:
+                        annualVal = v
+                        break
+            else:
+                # flow: 그 해 분기 단독값 합. None-safe.
+                qVals = [row.get(qc) for qc in qCols]
+                validQ = [v for v in qVals if v is not None]
+                if len(validQ) >= 1:
+                    annualVal = sum(validQ)
+                else:
+                    annualVal = None
+            row[yr] = annualVal
+
         rows.append(row)
 
     if not rows:
@@ -158,9 +204,10 @@ def _financeToDataFrame(
     rows.sort(key=lambda r: r["_sort"])
     df = pl.DataFrame(rows)
     df = df.drop(["_level", "_sort"])
-    # 기간 컬럼을 최신 먼저 역순으로 정렬
-    periodCols = [c for c in df.columns if c not in ("snakeId", "계정명")]
-    df = df.select(["snakeId", "계정명"] + periodCols[::-1])
+    # 컬럼 순서: 메타 + 분기 컬럼 역순 + 연간 컬럼 역순
+    quarterCols = sorted([c for c in df.columns if "Q" in c and c not in ("snakeId", "계정명")], reverse=True)
+    annualCols = sorted([c for c in df.columns if c.isdigit() and c not in ("snakeId", "계정명")], reverse=True)
+    df = df.select(["snakeId", "계정명"] + quarterCols + annualCols)
     return df
 
 
