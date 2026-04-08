@@ -168,7 +168,16 @@
 				datePublished: postInfo?.date ?? '',
 				section: postInfo?.categoryLabel ?? '',
 				keywords: allKeywords,
-				isPartOf: postInfo ? `${brand.url}blog/category/${postInfo.category}` : `${brand.url}blog/`
+				isPartOf: postInfo ? `${brand.url}blog/category/${postInfo.category}` : `${brand.url}blog/`,
+				wordCount: wordCount > 0 ? wordCount : undefined,
+				about: (meta as Record<string, unknown>)?.corpName
+					? {
+							name: String((meta as Record<string, unknown>).corpName),
+							identifier: (meta as Record<string, unknown>)?.stockCode
+								? `KRX:${String((meta as Record<string, unknown>).stockCode)}`
+								: undefined
+						}
+					: undefined
 			}),
 			buildBreadcrumbJsonLd([
 				{ name: 'DartLab', url: brand.url },
@@ -249,7 +258,13 @@
 		<meta property="article:published_time" content={postInfo.date} />
 	{/if}
 	<meta property="article:author" content="eddmpython" />
-	<meta name="keywords" content={[postInfo?.categoryLabel, postInfo?.seriesLabel, ...(meta?.keywords ?? []), '전자공시', 'DartLab', 'DART'].filter(Boolean).join(', ')} />
+	{#if postInfo?.categoryLabel}
+		<meta property="article:section" content={postInfo.categoryLabel} />
+	{/if}
+	{#each frontmatterTags as tag (tag)}
+		<meta property="article:tag" content={tag} />
+	{/each}
+	<meta name="keywords" content={allKeywords.join(', ')} />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content={pageTitle} />
 	<meta name="twitter:description" content={pageDesc} />

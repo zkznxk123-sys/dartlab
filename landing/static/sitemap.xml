@@ -665,21 +665,27 @@
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/000660-skhynix</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <lastmod>2026-04-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2026-04-08</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/003230-samyang-foods</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <lastmod>2026-04-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2026-04-08</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/034020-doosan-enerbility</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <lastmod>2026-04-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2026-04-08</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/196170-alteogen</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2026-04-08</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/04-kr</loc>
