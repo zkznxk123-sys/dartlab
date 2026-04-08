@@ -111,7 +111,7 @@ def getRatios(company):
 
 
 def toDict(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict], list[str]] | None:
-    """SelectResult → ({계정명: {period: val}}, periodCols).
+    """SelectResult → ({항목: {period: val}}, periodCols).
 
     ``toDictBySnakeId`` 가 한국어 라벨도 키로 노출하므로 이 함수는 deprecated thin
     wrapper. 신규 코드는 ``toDictBySnakeId`` 사용.
@@ -131,17 +131,13 @@ def toDict(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict], list[str
         return None
 
     labelCol = (
-        "항목"
-        if "항목" in df.columns
-        else "계정명"
-        if "계정명" in df.columns
-        else (df.columns[0] if df.columns else None)
+        "항목" if "항목" in df.columns else "항목" if "항목" in df.columns else (df.columns[0] if df.columns else None)
     )
     if labelCol is None:
         return None
 
     # EDGAR bridge: snakeId 키 → 한국어 라벨 키로 변환 (analysis 함수 호환)
-    needsBridge = labelCol not in ("항목", "계정명")
+    needsBridge = labelCol not in ("항목",)
     krLabels: dict[str, str] | None = None
     if needsBridge:
         from dartlab.core.finance.labels import get_korean_labels
@@ -189,7 +185,7 @@ def toDictBySnakeId(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict],
 
     # 한국어 라벨도 함께 키로 노출 (toDict 와 단일 경로 통합).
     # data.get("매출액") 와 data.get("sales") 둘 다 같은 row 반환.
-    labelCol = "항목" if "항목" in df.columns else "계정명" if "계정명" in df.columns else None
+    labelCol = "항목" if "항목" in df.columns else None
 
     data: dict[str, dict] = {}
     for row in df.iter_rows(named=True):

@@ -381,7 +381,7 @@ def calcDividendDocs(company, *, basePeriod: str | None = None) -> dict | None:
     import polars as pl
 
     df = result if isinstance(result, pl.DataFrame) else getattr(result, "df", None)
-    if df is None or ("항목" not in df.columns and "계정명" not in df.columns):
+    if df is None or "항목" not in df.columns:
         return None
 
     from dartlab.analysis.financial._helpers import periodCols
@@ -391,7 +391,7 @@ def calcDividendDocs(company, *, basePeriod: str | None = None) -> dict | None:
         return None
 
     latestCol = pCols[0]
-    labelCol = "항목" if "항목" in df.columns else "계정명"
+    labelCol = "항목"
     items = df[labelCol].to_list()
     vals = df[latestCol].to_list()
 

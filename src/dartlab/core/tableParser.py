@@ -387,7 +387,7 @@ def parseNotesTable(section: str) -> list[dict] | None:
 
 
 def extractAccounts(content: str) -> tuple[dict[str, list[float | None]], list[str]]:
-    """요약재무정보 테이블에서 {계정명: [당기, 전기, ...]} 추출. 단위 정규화 포함."""
+    """요약재무정보 테이블에서 {항목: [당기, 전기, ...]} 추출. 단위 정규화 포함."""
     unit = detectUnit(content)
     tables = extractTables(content)
 

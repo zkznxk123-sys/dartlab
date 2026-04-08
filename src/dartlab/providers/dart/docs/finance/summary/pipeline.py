@@ -149,7 +149,7 @@ def _buildDataFrameBridge(
 ) -> pl.DataFrame:
     """bridge matching 기반 DataFrame. 연간 시계열용.
 
-    최신 연도 계정명을 기준으로, pairs 체인을 따라가며 과거 연도의
+    최신 연도 항목을 기준으로, pairs 체인을 따라가며 과거 연도의
     당기(idx=0) 금액을 수집한다. 구간(segment)별로 독립 처리.
     """
     nameChains: dict[str, dict[str, float | None]] = {}
@@ -215,9 +215,9 @@ def _buildDataFrameDirect(
     sortedYears: list[str],
     yearData: dict[str, YearAccounts],
 ) -> pl.DataFrame:
-    """계정명 직접 매칭 기반 DataFrame. 분기/반기 시계열용.
+    """항목 직접 매칭 기반 DataFrame. 분기/반기 시계열용.
 
-    최신 기간의 계정명을 기준으로, 동일 계정명의 당기(idx=0)를 수집.
+    최신 기간의 항목을 기준으로, 동일 항목의 당기(idx=0)를 수집.
     DART 분기보고서는 전기=전년연말이므로 bridge matching 대신 사용.
     """
     nameData: dict[str, dict[str, float | None]] = {}
@@ -248,7 +248,7 @@ def _splitBsIs(df: pl.DataFrame) -> tuple[pl.DataFrame, pl.DataFrame]:
 
     자본총계/자본합계 행을 경계로 그 행까지가 BS, 그 이후가 IS.
     """
-    labelCol = "항목" if "항목" in df.columns else "계정명" if "계정명" in df.columns else None
+    labelCol = "항목" if "항목" in df.columns else None
     if df.is_empty() or labelCol is None:
         return df, pl.DataFrame()
 
@@ -271,7 +271,7 @@ def _toDataFrame(
     nameData: dict[str, dict[str, float | None]],
     sortedYears: list[str],
 ) -> pl.DataFrame:
-    """계정명 × 기간 딕셔너리 → polars DataFrame."""
+    """항목 × 기간 딕셔너리 → polars DataFrame."""
     rows = []
     for name in accountOrder:
         row: dict[str, object] = {"항목": name}
@@ -285,6 +285,4 @@ def _toDataFrame(
     schema = {"항목": pl.Utf8}
     for year in sortedYears:
         schema[year] = pl.Float64
-    df = pl.DataFrame(rows, schema=schema)
-    # backward-compat alias
-    return df.with_columns(pl.col("항목").alias("계정명"))
+    return pl.DataFrame(rows, schema=schema)

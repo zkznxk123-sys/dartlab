@@ -390,7 +390,7 @@ def _buildFinanceBlock(company: Company, topic: str) -> ViewerBlock | None:
     if df is None or not isinstance(df, pl.DataFrame):
         return None
 
-    if topic in {"IS", "BS", "CIS", "CF", "SCE"} and "계정명" in df.columns:
+    if topic in {"IS", "BS", "CIS", "CF", "SCE"} and "항목" in df.columns:
         df = company._cleanFinanceDataFrame(df, topic)
 
     periods = _periodCols(df)

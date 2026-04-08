@@ -73,7 +73,7 @@ class TestFinanceAccess:
         result = samsung.IS
         if result is not None:
             assert isinstance(result, pl.DataFrame)
-            assert "계정명" in result.columns
+            assert "항목" in result.columns
 
     def test_BS_returns_dataframe(self, samsung):
         import polars as pl
@@ -81,7 +81,7 @@ class TestFinanceAccess:
         result = samsung.BS
         if result is not None:
             assert isinstance(result, pl.DataFrame)
-            assert "계정명" in result.columns
+            assert "항목" in result.columns
 
     def test_CF_may_be_none(self, samsung):
         import polars as pl

@@ -364,8 +364,7 @@ def _ratioSeriesToDataFrame(
 
     if not rows:
         return None
-    df = pl.DataFrame(rows).drop("_field")
-    return df.with_columns(pl.col("항목").alias("계정명"))
+    return pl.DataFrame(rows).drop("_field")
 
 
 def _isPeriodColumn(col: str) -> bool:
@@ -1578,7 +1577,7 @@ class Company:
         """show() 결과에서 행/열 필터 — 특정 계정 x 특정 기간 추출 (내부 구현).
 
         Capabilities:
-            - show() 결과에서 행(계정명)과 열(기간) 동시 필터
+            - show() 결과에서 행(항목)과 열(기간) 동시 필터
             - SelectResult 객체로 반환하여 체이닝/export 가능
 
         Requires:
@@ -1597,7 +1596,7 @@ class Company:
 
         Args:
             topic: topic 이름 (BS, IS 등).
-            indList: 행 필터 — 계정명 문자열 또는 리스트.
+            indList: 행 필터 — 항목 문자열 또는 리스트.
             colList: 열 필터 — 기간 문자열 또는 리스트.
 
         Returns:
@@ -1628,7 +1627,7 @@ class Company:
         if indList is not None and len(indList) == 0:
             raise ValueError(
                 "select 의 indList (행 필터) 가 비어 있습니다. "
-                "필터링할 계정명을 1개 이상 전달하세요. 예: c.select('IS', ['Revenue'])"
+                "필터링할 항목을 1개 이상 전달하세요. 예: c.select('IS', ['Revenue'])"
             )
 
         filtered = selectFromShow(df, indList, colList)

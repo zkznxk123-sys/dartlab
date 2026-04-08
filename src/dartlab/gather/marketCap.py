@@ -110,10 +110,9 @@ def marketCap(stockCode: str, *, market: str = "auto") -> pl.DataFrame | None:
         [
             pl.col("preferredOutstanding").fill_null(0.0),
             (pl.col("close") * pl.col("commonOutstanding")).alias("marketCap"),
-            (
-                pl.col("close")
-                * (pl.col("commonOutstanding") + pl.col("preferredOutstanding").fill_null(0.0))
-            ).alias("marketCapTotal"),
+            (pl.col("close") * (pl.col("commonOutstanding") + pl.col("preferredOutstanding").fill_null(0.0))).alias(
+                "marketCapTotal"
+            ),
         ]
     )
     return merged.drop("rcept_date") if "rcept_date" in merged.columns else merged

@@ -196,6 +196,4 @@ def _buildTableDf(
     schema: dict[str, type] = {"항목": pl.Utf8}
     for col in colOrder:
         schema[col] = pl.Float64
-    df = pl.DataFrame(rows, schema=schema)
-    # backward-compat alias
-    return df.with_columns(pl.col("항목").alias("계정명"))
+    return pl.DataFrame(rows, schema=schema)

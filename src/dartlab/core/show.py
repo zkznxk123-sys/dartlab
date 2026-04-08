@@ -93,7 +93,7 @@ def _bridgeKoreanSnakeId(
                 return hits
 
     elif hasKoreanQuery and colIsKorean:
-        # 한국어 쿼리 + 한국어 컬럼 — 동의어 확장 (회사마다 계정명이 다름)
+        # 한국어 쿼리 + 한국어 컬럼 — 동의어 확장 (회사마다 항목이 다름)
         # 경로: 한국어 → snakeId → alias 확장 → 한국어 역변환 → 컬럼 매칭
         rev = get_reverse_korean_labels()
         fwd = get_korean_labels()
@@ -110,7 +110,7 @@ def _bridgeKoreanSnakeId(
         # 동의어 + snakeId 양쪽에서 매칭한 결과를 합산
         matchedRows: set[int] = set()
 
-        # (a) 계정명 동의어 매칭
+        # (a) 항목 동의어 매칭
         if len(synonyms) > len(indList):
             colVals = df[mc].to_list()
             for i, val in enumerate(colVals):
@@ -258,12 +258,10 @@ def selectFromShow(
     # 모든 메타 컬럼을 돌면서 매칭 행 인덱스를 union.
     if indList is not None:
         metaCols = [c for c in result.columns if not isPeriodColumn(c)]
-        # "항목" 또는 "계정명" 우선 정렬 (label 컬럼 first)
-        for labelCol in ("항목", "계정명"):
-            if labelCol in metaCols:
-                metaCols.remove(labelCol)
-                metaCols.insert(0, labelCol)
-                break
+        # "항목" 우선 정렬 (label 컬럼 first)
+        if "항목" in metaCols:
+            metaCols.remove("항목")
+            metaCols.insert(0, "항목")
         target = len(indList)
         collectedIdx: set[int] = set()
         for mc in metaCols:

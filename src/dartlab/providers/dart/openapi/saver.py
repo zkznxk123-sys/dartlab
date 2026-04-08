@@ -95,7 +95,7 @@ _FINANCE_KR: dict[str, str] = {
     "sj_div": "재무제표종류",
     "sj_nm": "재무제표종류명",
     "account_id": "계정ID",
-    "account_nm": "계정명",
+    "account_nm": "항목",
     "account_detail": "계정상세",
     "thstrm_nm": "당기명",
     "thstrm_dt": "당기일자",

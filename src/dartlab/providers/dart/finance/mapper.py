@@ -1,4 +1,4 @@
-"""계정명 → snakeId 매핑.
+"""항목 → snakeId 매핑.
 
 eddmpython v6+v8 매핑 파이프라인:
 1. account_id prefix 제거 → normalizedId
@@ -200,7 +200,7 @@ def _stripPrefix(accountId: str) -> str:
 
 
 class AccountMapper:
-    """계정명 매핑기 (eddmpython v6+v8 파이프라인).
+    """항목 매핑기 (eddmpython v6+v8 파이프라인).
 
     v6: account_id prefix 제거 + ID_SYNONYMS/ACCOUNT_NAME_SYNONYMS 정규화
     v8: 정규화된 한글명/영문ID → accountMappings.json → standardAccounts snakeId

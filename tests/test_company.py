@@ -464,9 +464,9 @@ class TestCompany:
 
         assert isinstance(exactQ4, pl.DataFrame)
         assert isinstance(annualAlias, pl.DataFrame)
-        assert exactQ4.columns == ["계정명", "2024Q4"]
-        assert annualAlias.columns == ["계정명", "2024"]
-        assert exactQ4["계정명"].to_list() == annualAlias["계정명"].to_list()
+        assert exactQ4.columns == ["항목", "2024Q4"]
+        assert annualAlias.columns == ["항목", "2024"]
+        assert exactQ4["항목"].to_list() == annualAlias["항목"].to_list()
 
     def test_profile_facts_include_docs_source(self):
         c = self.c

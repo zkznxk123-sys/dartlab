@@ -132,10 +132,10 @@ def _financeToDataFrame(
     *,
     includeAnnual: bool = False,
 ) -> pl.DataFrame | None:
-    """finance 분기별 시계열 → 한글 계정명 × 기간 컬럼 DataFrame.
+    """finance 분기별 시계열 → 한글 항목 × 기간 컬럼 DataFrame.
 
     컬럼 schema:
-        - 메타: ``snakeId``, ``계정명``
+        - 메타: ``snakeId``, ``항목``
         - 분기 컬럼: ``2025Q1, 2025Q2, 2025Q3, 2025Q4, 2024Q1, ...`` (역순)
         - 연간 컬럼: ``2025, 2024, ...`` ← ``includeAnnual=True`` 일 때만
 
@@ -163,7 +163,7 @@ def _financeToDataFrame(
         label = labels.get(snakeId, snakeId)
         level = levels.get(snakeId, 2)
         sortKey = order.get(snakeId, 9999)
-        # 컬럼명 표준: "항목" (sections 사상 정합). "계정명" 은 backward-compat alias.
+        # 컬럼명 표준: "항목" (sections 사상 정합)
         row = {"snakeId": snakeId, "항목": label, "_level": level, "_sort": sortKey}
         for i, y in enumerate(years):
             row[y] = values[i] if i < len(values) else None
@@ -194,8 +194,6 @@ def _financeToDataFrame(
     quarterCols = sorted([c for c in df.columns if "Q" in c and c not in ("snakeId", "항목")], reverse=True)
     annualCols = sorted([c for c in df.columns if c.isdigit() and c not in ("snakeId", "항목")], reverse=True)
     df = df.select(["snakeId", "항목"] + quarterCols + annualCols)
-    # backward-compat alias: "계정명" 컬럼도 노출 (Phase B 마이그레이션 후 제거).
-    df = df.with_columns(pl.col("항목").alias("계정명"))
     return df
 
 
@@ -295,10 +293,7 @@ def _ratioSeriesToDataFrame(
     if not rows:
         return None
 
-    df = pl.DataFrame(rows).drop("_field")
-    # backward-compat alias
-    df = df.with_columns(pl.col("항목").alias("계정명"))
-    return df
+    return pl.DataFrame(rows).drop("_field")
 
 
 def _sceToDataFrame(
@@ -337,10 +332,7 @@ def _sceToDataFrame(
         return None
 
     rows.sort(key=lambda r: (r["_cause"], r["_detail"], r["_sort"]))
-    df = pl.DataFrame(rows).drop(["_cause", "_detail", "_sort"])
-    # backward-compat alias
-    df = df.with_columns(pl.col("항목").alias("계정명"))
-    return df
+    return pl.DataFrame(rows).drop(["_cause", "_detail", "_sort"])
 
 
 def _buildCisSeries(df: pl.DataFrame, periods: list[str], formatPeriod) -> dict[str, list[Any | None]]:

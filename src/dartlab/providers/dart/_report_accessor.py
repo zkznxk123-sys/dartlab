@@ -205,7 +205,6 @@ def reportPivotBySe(df: pl.DataFrame, *, raw: bool = False) -> pl.DataFrame | No
     result = pivoted.select(["se"] + periodCols)
     if not raw:
         result = result.rename({"se": "항목"})
-        result = result.with_columns(pl.col("항목").alias("계정명"))
     return result
 
 

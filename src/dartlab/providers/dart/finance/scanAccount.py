@@ -229,7 +229,7 @@ class _FileProcessor:
 
 
 def _resolveSnakeId(nameOrId: str) -> str:
-    """한글 계정명/영문 snakeId → 정규 snakeId 변환."""
+    """한글 항목/영문 snakeId → 정규 snakeId 변환."""
     # 이미 snakeId면 그대로
     if nameOrId.isascii() and "_" in nameOrId:
         return nameOrId
@@ -579,7 +579,7 @@ def scanAccountList() -> list[dict[str, str]]:
 
     data = _ensureLoaded()
 
-    # 한글명 역매핑: snakeId → 한글 계정명
+    # 한글명 역매핑: snakeId → 한글 항목
     mapper = AccountMapper.get()
     idToKr: dict[str, str] = {}
     if mapper._mappings:

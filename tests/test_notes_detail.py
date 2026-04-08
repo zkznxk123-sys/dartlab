@@ -26,7 +26,7 @@ class TestNotesDetail:
         assert r is not None
         assert r.tableDf is not None
         assert isinstance(r.tableDf, pl.DataFrame)
-        assert "계정명" in r.tableDf.columns
+        assert "항목" in r.tableDf.columns
         assert len(r.tableDf) >= 1
 
     @pytest.mark.parametrize(

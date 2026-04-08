@@ -484,7 +484,7 @@ def _fetchSegmentComposition(company) -> dict | None:
         # 부문명 컬럼: 첫 번째 문자열 타입 컬럼
         nameCol = None
         for c in df.columns:
-            if c in ("부문", "항목", "계정명"):
+            if c in ("부문", "항목"):
                 nameCol = c
                 break
         if nameCol is None:

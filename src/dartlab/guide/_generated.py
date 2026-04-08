@@ -21,7 +21,7 @@ CAPABILITIES: dict[str, dict] = {
         "kind": "property",
         "requires": "데이터: finance 또는 docs (자동 다운로드)",
         "seeAlso": "IS: 손익계산서 (수익성 분석)\nCF: 현금흐름표 (현금창출력)\nratios: 재무비율 (BS 기반 안정성 비율 포함)\nselect: 특정 계정만 추출 + 시각화",
-        "summary": "재무상태표 (Balance Sheet) — 계정명 × 기간 DataFrame.",
+        "summary": "재무상태표 (Balance Sheet) — 항목 × 기간 DataFrame.",
     },
     "Company.CF": {
         "aicontext": "ask()/chat()에서 현금창출력/투자/재무활동 분석 컨텍스트",
@@ -30,7 +30,7 @@ CAPABILITIES: dict[str, dict] = {
         "kind": "property",
         "requires": "데이터: finance 또는 docs (자동 다운로드)",
         "seeAlso": "IS: 손익계산서 (발생주의 vs 현금주의 비교)\nBS: 재무상태표 (현금성자산 확인)\nratios: 재무비율 (현금흐름 관련 비율 포함)",
-        "summary": "현금흐름표 (Cash Flow Statement) — 계정명 × 기간 DataFrame.",
+        "summary": "현금흐름표 (Cash Flow Statement) — 항목 × 기간 DataFrame.",
     },
     "Company.CIS": {
         "aicontext": "ask()/chat()에서 기타포괄손익/총포괄이익 분석 컨텍스트",
@@ -39,7 +39,7 @@ CAPABILITIES: dict[str, dict] = {
         "kind": "property",
         "requires": "데이터: finance 또는 docs (자동 다운로드)",
         "seeAlso": "IS: 일반 손익계산서 (당기순이익까지)\nSCE: 자본변동표 (포괄손익이 자본에 미치는 영향)",
-        "summary": "포괄손익계산서 (Comprehensive Income Statement) — 계정명 × 기간 DataFrame.",
+        "summary": "포괄손익계산서 (Comprehensive Income Statement) — 항목 × 기간 DataFrame.",
     },
     "Company.IS": {
         "aicontext": "ask()/chat()에서 수익성/매출 구조 분석 컨텍스트",
@@ -48,7 +48,7 @@ CAPABILITIES: dict[str, dict] = {
         "kind": "property",
         "requires": "데이터: finance 또는 docs (자동 다운로드)",
         "seeAlso": "BS: 재무상태표 (자산/부채 구조)\nCF: 현금흐름표 (실제 현금 기반)\nCIS: 포괄손익계산서 (기타포괄손익 포함)\nselect: 특정 계정 추출 + 시각화",
-        "summary": "손익계산서 (Income Statement) — 계정명 × 기간 DataFrame.",
+        "summary": "손익계산서 (Income Statement) — 항목 × 기간 DataFrame.",
     },
     "Company.SCE": {
         "aicontext": "ask()/chat()에서 자본 구조 변동 분석 컨텍스트",
@@ -57,7 +57,7 @@ CAPABILITIES: dict[str, dict] = {
         "kind": "property",
         "requires": "데이터: finance (자동 다운로드)",
         "seeAlso": "sceMatrix: 3차원 매트릭스 형태 (원인별 상세 추적)\nCIS: 포괄손익계산서 (자본변동의 원천)\nBS: 재무상태표 (자본 잔액)",
-        "summary": "자본변동표 (Statement of Changes in Equity) — 계정명 × 연도 DataFrame.",
+        "summary": "자본변동표 (Statement of Changes in Equity) — 항목 × 연도 DataFrame.",
     },
     "Company.analysis": {
         "aicontext": "ask()/chat()에서 분석 결과를 컨텍스트로 주입\nreview/reviewer가 내부적으로 analysis 결과를 소비",
@@ -408,7 +408,7 @@ CAPABILITIES: dict[str, dict] = {
     },
     "Company.select": {
         "aicontext": "특정 계정의 시계열 추출 — 추세 분석 및 차트 생성의 기본 도구\n.chart() 체이닝으로 시각화까지 한 번에",
-        "capabilities": "show() 결과에서 특정 계정/항목만 추출\n기간 필터링 (특정 연도만)\n.chart() 체이닝으로 바로 시각화\n한글/영문 계정명 모두 지원",
+        "capabilities": "show() 결과에서 특정 계정/항목만 추출\n기간 필터링 (특정 연도만)\n.chart() 체이닝으로 바로 시각화\n한글/영문 항목 모두 지원",
         "guide": '"매출액 추이 그래프" → c.select("IS", ["매출액"]).chart()\n"영업이익만 뽑아줘" → c.select("IS", ["영업이익"])\n"2023-2024 자본 비교" → c.select("BS", ["자본총계"], ["2024", "2023"])',
         "kind": "method",
         "requires": "데이터: docs (자동 다운로드)",

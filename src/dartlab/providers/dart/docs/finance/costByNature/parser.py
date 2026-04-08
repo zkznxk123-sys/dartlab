@@ -169,7 +169,7 @@ def parseCostByNature(sectionText: str) -> dict | None:
     """비용의 성격별 분류 섹션 파싱.
 
     Returns:
-        {"당기": {계정명: 금액}, "전기": {계정명: 금액}, "order": [계정명]} 또는 None
+        {"당기": {항목: 금액}, "전기": {항목: 금액}, "order": [항목]} 또는 None
     """
     for fn in [_tryParseInlineTable, _tryParseSplitTable, _tryParseMultiColTable]:
         result = fn(sectionText)

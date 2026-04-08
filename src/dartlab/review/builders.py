@@ -49,13 +49,13 @@ def _notesDetailBlocks(data: dict, keyLabels: dict[str, str]) -> list:
     for key, rows in notesDetail.items():
         if not rows:
             continue
-        # all-null row (계정명/snakeId 외 모든 값 None) 제거
+        # all-null row (항목/snakeId 외 모든 값 None) 제거
         cleaned = []
         for row in rows:
             hasValue = any(
                 v is not None and v != ""
                 for k, v in row.items()
-                if k not in ("계정명", "snakeId", "account", "tag", "label")
+                if k not in ("항목", "snakeId", "account", "tag", "label")
             )
             if hasValue:
                 cleaned.append(row)
@@ -282,7 +282,7 @@ def _quarterlyRevenueTable(selectResult) -> TableBlock | None:
     if not periodCols:
         return None
 
-    labelCol = "항목" if "항목" in df.columns else "계정명" if "계정명" in df.columns else df.columns[0]
+    labelCol = "항목" if "항목" in df.columns else df.columns[0]
     keepCols = [labelCol] + periodCols
 
     rows = []

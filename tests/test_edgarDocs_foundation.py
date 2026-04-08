@@ -1289,7 +1289,7 @@ class TestEdgarCompanyInterface:
         df = c.show("ratios")
         assert isinstance(df, pl.DataFrame)
         assert "분류" in df.columns
-        assert "계정명" in df.columns
+        assert "항목" in df.columns
         # block=0 명시도 동일 결과
         df2 = c.show("ratios", 0)
         assert isinstance(df2, pl.DataFrame)

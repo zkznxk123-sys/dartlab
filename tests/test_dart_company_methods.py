@@ -20,7 +20,7 @@ class TestShow:
     def test_show_is_returns_dataframe(self, mock_company):
         result = mock_company.show("IS")
         assert isinstance(result, pl.DataFrame)
-        assert "계정명" in result.columns
+        assert "항목" in result.columns
         assert "2024Q4" in result.columns
 
     def test_show_bs_returns_dataframe(self, mock_company):
@@ -51,7 +51,7 @@ class TestSelect:
     def test_select_multiple_accounts(self, mock_company):
         result = mock_company.select("IS", ["매출액", "영업이익"])
         assert result is not None
-        labels = result.df["계정명"].to_list()
+        labels = result.df["항목"].to_list()
         assert "매출액" in labels
         assert "영업이익" in labels
 
@@ -69,7 +69,7 @@ class TestSelect:
         result = mock_company.select("IS", ["매출액"])
         assert result is not None
         cols = result.df.columns
-        period_cols = [c for c in cols if c != "계정명"]
+        period_cols = [c for c in cols if c != "항목"]
         assert len(period_cols) > 0
         # Q4 분기 컬럼이 존재
         assert any("Q4" in c for c in period_cols)
@@ -85,7 +85,7 @@ class TestSelect:
         result = mock_company.select("IS", ["존재하지않는계정"])
         assert result is not None
         assert result.df.height == 1
-        assert result.df["계정명"][0] == "존재하지않는계정"
+        assert result.df["항목"][0] == "존재하지않는계정"
 
 
 # ══════════════════════════════════════

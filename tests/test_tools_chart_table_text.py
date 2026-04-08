@@ -56,7 +56,7 @@ def test_format_korean():
 
 
 def test_pivot_accounts():
-    df = pl.DataFrame({"계정명": ["매출액", "영업이익"], "2023": [1000, 200], "2024": [1200, 250]})
+    df = pl.DataFrame({"항목": ["매출액", "영업이익"], "2023": [1000, 200], "2024": [1200, 250]})
     result = table.pivot_accounts(df)
 
     assert "year" in result.columns

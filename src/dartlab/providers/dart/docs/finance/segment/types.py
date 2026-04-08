@@ -55,9 +55,7 @@ class SegmentTable:
             for i in range(nCols):
                 data[uniqueCols[i]].append(vals[i] if i < len(vals) else None)
 
-        df = pl.DataFrame(data)
-        # backward-compat alias
-        return df.with_columns(pl.col("항목").alias("계정명"))
+        return pl.DataFrame(data)
 
 
 @dataclass

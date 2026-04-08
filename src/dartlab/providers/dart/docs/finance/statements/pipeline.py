@@ -98,7 +98,7 @@ def _buildDf(
     sortedKeys: list[str],
     data: dict[str, tuple[dict, list]],
 ) -> pl.DataFrame:
-    """계정명 직접 매칭 방식으로 DataFrame 생성."""
+    """항목 직접 매칭 방식으로 DataFrame 생성."""
     nameData: dict[str, dict[str, float | None]] = {}
     accountOrder: list[str] = []
 
@@ -126,6 +126,4 @@ def _buildDf(
     schema = {"항목": pl.Utf8}
     for key in sortedKeys:
         schema[key] = pl.Float64
-    df = pl.DataFrame(rows, schema=schema)
-    # backward-compat alias
-    return df.with_columns(pl.col("항목").alias("계정명"))
+    return pl.DataFrame(rows, schema=schema)

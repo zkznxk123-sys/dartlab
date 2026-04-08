@@ -71,14 +71,14 @@ class TestRatioTable:
     def test_basic_ratios(self):
         bs = pl.DataFrame(
             {
-                "계정명": ["부채총계", "자본총계", "자산총계", "유동자산", "유동부채"],
+                "항목": ["부채총계", "자본총계", "자산총계", "유동자산", "유동부채"],
                 "2023": [5000, 10000, 15000, 8000, 4000],
                 "2022": [4000, 9000, 13000, 7000, 3500],
             }
         )
         is_ = pl.DataFrame(
             {
-                "계정명": ["매출액", "영업이익", "당기순이익"],
+                "항목": ["매출액", "영업이익", "당기순이익"],
                 "2023": [20000, 3000, 2000],
                 "2022": [18000, 2500, 1800],
             }
@@ -93,21 +93,21 @@ class TestRatioTable:
         assert r2023["ROE"] == 20.0  # 2000/10000*100
 
     def test_no_year_cols(self):
-        bs = pl.DataFrame({"계정명": ["부채총계"], "value": [100]})
-        is_ = pl.DataFrame({"계정명": ["매출액"], "value": [200]})
+        bs = pl.DataFrame({"항목": ["부채총계"], "value": [100]})
+        is_ = pl.DataFrame({"항목": ["매출액"], "value": [200]})
         result = ratio_table(bs, is_)
         assert result.height == 0
 
     def test_division_by_zero(self):
         bs = pl.DataFrame(
             {
-                "계정명": ["부채총계", "자본총계"],
+                "항목": ["부채총계", "자본총계"],
                 "2023": [5000, 0],
             }
         )
         is_ = pl.DataFrame(
             {
-                "계정명": ["매출액", "영업이익"],
+                "항목": ["매출액", "영업이익"],
                 "2023": [0, 100],
             }
         )
@@ -186,7 +186,7 @@ class TestPivotAccounts:
     def test_basic(self):
         df = pl.DataFrame(
             {
-                "계정명": ["매출액", "영업이익"],
+                "항목": ["매출액", "영업이익"],
                 "2023": [20000, 3000],
                 "2022": [18000, 2500],
             }

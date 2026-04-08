@@ -179,7 +179,7 @@ def _make_synthetic_df(
 
     rows: list[dict] = []
     for i, acct in enumerate(accounts):
-        row: dict = {"계정명": acct}
+        row: dict = {"항목": acct}
         for j, p in enumerate(periods):
             # 각 계정/기간마다 약간 다른 값
             val = base_value * (len(accounts) - i) * (1 + 0.05 * j)
@@ -358,14 +358,14 @@ class MockCompany:
         if accounts is not None:
             import polars as _pl
 
-            mask = _pl.col("계정명").is_in(accounts)
+            mask = _pl.col("항목").is_in(accounts)
             filtered = df.filter(mask)
             if filtered.height == 0:
                 # 찾지 못한 계정은 0으로 채운 행 생성
-                period_cols = [c for c in df.columns if c != "계정명"]
+                period_cols = [c for c in df.columns if c != "항목"]
                 rows = []
                 for acct in accounts:
-                    row = {"계정명": acct}
+                    row = {"항목": acct}
                     for p in period_cols:
                         row[p] = 0.0
                     rows.append(row)

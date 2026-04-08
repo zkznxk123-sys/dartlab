@@ -3,7 +3,7 @@
 매핑 파이프라인 (DART 7단계 패턴):
 1. prefix 제거 (jpcrp_, jppfs_, jpigp_, jpdei_, ifrs-full_, jpcrp_cor: 등)
 2. ID_SYNONYMS (영문 XBRL element 동의어 통합)
-3. ACCOUNT_NAME_SYNONYMS (일본어 계정명 동의어 통합)
+3. ACCOUNT_NAME_SYNONYMS (일본어 항목 동의어 통합)
 4. CORE_MAP (핵심 계정 오버라이드, DART/EDGAR 공유 snakeId)
 5. accountMappings.json (학습 결과 누적)
 6. 전각/공백 정규화 후 재조회
@@ -227,7 +227,7 @@ ID_SYNONYMS: dict[str, str] = {
     "RepaymentsOfLeaseLiabilities": "RepaymentOfLeaseLiabilities",
 }
 
-# ── 3. ACCOUNT_NAME_SYNONYMS (일본어 계정명 동의어) ──
+# ── 3. ACCOUNT_NAME_SYNONYMS (일본어 항목 동의어) ──
 
 ACCOUNT_NAME_SYNONYMS: dict[str, str] = {
     # ── IS ──
@@ -958,11 +958,11 @@ class EdinetMapper:
         elementId: str,
         accountName: str = "",
     ) -> str | None:
-        """XBRL element ID + 일본어 계정명 → snakeId 매핑.
+        """XBRL element ID + 일본어 항목 → snakeId 매핑.
 
         Args:
             elementId: XBRL 요소 ID (예: "jpcrp_cor:Revenue").
-            accountName: 일본어 계정명 (예: "売上高").
+            accountName: 일본어 항목 (예: "売上高").
 
         Returns:
             snakeId 또는 None (미매핑).
@@ -980,7 +980,7 @@ class EdinetMapper:
         if accountName:
             normalizedName = ACCOUNT_NAME_SYNONYMS.get(accountName, accountName)
 
-        # 4. CORE_MAP (영문 element 우선, 일본어 계정명 fallback)
+        # 4. CORE_MAP (영문 element 우선, 일본어 항목 fallback)
         if cleanId in CORE_MAP:
             return CORE_MAP[cleanId]
         if normalizedName and normalizedName in CORE_MAP:

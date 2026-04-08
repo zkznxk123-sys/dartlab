@@ -38,7 +38,7 @@ _PERIODS = ["2024", "2023", "2022", "2021", "2020", "2019"]
 
 
 def _krToSnakeId() -> dict[str, str]:
-    """한국어 계정명 → dartlab 표준 snakeId (Plan v5 P4: alias 양방향 자동)."""
+    """한국어 항목 → dartlab 표준 snakeId (Plan v5 P4: alias 양방향 자동)."""
     return {
         "부채총계": "liabilities",
         "자본총계": "stockholders_equity",
@@ -74,7 +74,7 @@ def _krToSnakeId() -> dict[str, str]:
     }
 
 
-def _make_df(accounts: dict[str, list[float | None]], col_name: str = "계정명") -> pl.DataFrame:
+def _make_df(accounts: dict[str, list[float | None]], col_name: str = "항목") -> pl.DataFrame:
     """IS/BS/CF 형태 DataFrame 생성. snakeId 컬럼 자동 추가 (toDictBySnakeId 호환)."""
     revMap = _krToSnakeId()
     rows = []
@@ -91,7 +91,7 @@ def _make_snakeid_df(accounts: dict[str, list[float | None]]) -> pl.DataFrame:
     """snakeId 컬럼 기반 DataFrame 생성 (capitalAllocation 등에서 사용)."""
     rows = []
     for name, vals in accounts.items():
-        row: dict = {"계정명": name, "snakeId": name}
+        row: dict = {"항목": name, "snakeId": name}
         for i, p in enumerate(_PERIODS):
             row[p] = vals[i] if i < len(vals) else None
         rows.append(row)

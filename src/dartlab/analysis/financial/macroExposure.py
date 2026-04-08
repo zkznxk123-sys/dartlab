@@ -289,7 +289,7 @@ def calcValuationBand(company, *, basePeriod: str | None = None) -> dict | None:
             if hasattr(ratios, "columns"):
                 import polars as pl
 
-                # snakeId 또는 계정명으로 필터
+                # snakeId 또는 항목으로 필터
                 row = (
                     ratios.filter(pl.col("snakeId").str.to_lowercase() == key) if "snakeId" in ratios.columns else None
                 )
@@ -300,7 +300,7 @@ def calcValuationBand(company, *, basePeriod: str | None = None) -> dict | None:
                 # 기간 컬럼에서 값 추출
                 values = []
                 for col in row.columns:
-                    if col in ("snakeId", "항목", "계정명", "account"):
+                    if col in ("snakeId", "항목", "account"):
                         continue
                     val = row[col][0]
                     if val is not None:

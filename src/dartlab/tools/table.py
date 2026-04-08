@@ -75,8 +75,8 @@ def yoy_change(
 
 
 def _find_row_value(df: pl.DataFrame, keyword: str, year_col: str) -> float | None:
-    """계정명 부분매칭으로 값 추출."""
-    labelCol = "항목" if "항목" in df.columns else "계정명" if "계정명" in df.columns else None
+    """항목 부분매칭으로 값 추출."""
+    labelCol = "항목" if "항목" in df.columns else None
     if labelCol is None:
         return None
     matched = df.filter(pl.col(labelCol).str.contains(keyword))
@@ -221,7 +221,7 @@ def pivot_accounts(
     출력: year | 매출액 | 영업이익 | ...
     """
     if account_col is None:
-        account_col = "항목" if "항목" in df.columns else "계정명"
+        account_col = "항목"
     if account_col not in df.columns:
         return df
 

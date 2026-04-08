@@ -524,7 +524,7 @@ class Scan:
 
     Args:
         axis: 축 이름. None이면 13축 가이드 반환.
-        target: 축별 대상 (종목코드, 계정명, 비율명 등).
+        target: 축별 대상 (종목코드, 항목, 비율명 등).
         **kwargs: 축별 옵션 (annual, fsPref, market 등).
 
     Returns:

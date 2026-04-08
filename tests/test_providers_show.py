@@ -35,7 +35,7 @@ def test_is_period_column_quarter():
 def test_is_period_column_rejects_non_period():
     from dartlab.core.show import isPeriodColumn
 
-    assert isPeriodColumn("계정명") is False
+    assert isPeriodColumn("항목") is False
     assert isPeriodColumn("account") is False
     assert isPeriodColumn("2024Q5") is False
     assert isPeriodColumn("Q4") is False
@@ -101,7 +101,7 @@ def test_transpose_to_vertical_basic():
 
     wide = pl.DataFrame(
         {
-            "계정명": ["매출액", "영업이익"],
+            "항목": ["매출액", "영업이익"],
             "2022": [100, 10],
             "2023": [200, 20],
             "2024": [300, 30],
@@ -109,7 +109,7 @@ def test_transpose_to_vertical_basic():
     )
     result = transposeToVertical(wide, ["2023", "2024"])
     assert result is not None
-    assert result.columns == ["계정명", "2023", "2024"]
+    assert result.columns == ["항목", "2023", "2024"]
     assert result.height == 2
 
 
@@ -119,7 +119,7 @@ def test_transpose_to_vertical_q4_fallback():
 
     wide = pl.DataFrame(
         {
-            "계정명": ["매출액"],
+            "항목": ["매출액"],
             "2023Q4": [100],
             "2024Q4": [200],
         }
@@ -135,7 +135,7 @@ def test_transpose_to_vertical_no_match():
 
     wide = pl.DataFrame(
         {
-            "계정명": ["매출액"],
+            "항목": ["매출액"],
             "2022": [100],
         }
     )
@@ -149,7 +149,7 @@ def test_transpose_to_vertical_preserves_meta():
 
     wide = pl.DataFrame(
         {
-            "계정명": ["매출액"],
+            "항목": ["매출액"],
             "코드": ["S001"],
             "2023": [100],
             "2024": [200],
@@ -157,7 +157,7 @@ def test_transpose_to_vertical_preserves_meta():
     )
     result = transposeToVertical(wide, ["2024"])
     assert result is not None
-    assert "계정명" in result.columns
+    assert "항목" in result.columns
     assert "코드" in result.columns
     assert "2024" in result.columns
     assert "2023" not in result.columns
@@ -171,7 +171,7 @@ def test_select_from_show_row_filter():
 
     df = pl.DataFrame(
         {
-            "계정명": ["매출액", "영업이익", "당기순이익"],
+            "항목": ["매출액", "영업이익", "당기순이익"],
             "2023": [100, 10, 5],
             "2024": [200, 20, 10],
         }
@@ -179,7 +179,7 @@ def test_select_from_show_row_filter():
     result = selectFromShow(df, indList=["매출액", "영업이익"])
     assert result is not None
     assert result.height == 2
-    assert "당기순이익" not in result["계정명"].to_list()
+    assert "당기순이익" not in result["항목"].to_list()
 
 
 def test_select_from_show_col_filter():
@@ -187,7 +187,7 @@ def test_select_from_show_col_filter():
 
     df = pl.DataFrame(
         {
-            "계정명": ["매출액"],
+            "항목": ["매출액"],
             "2022": [50],
             "2023": [100],
             "2024": [200],
@@ -205,7 +205,7 @@ def test_select_from_show_row_and_col():
 
     df = pl.DataFrame(
         {
-            "계정명": ["매출액", "영업이익"],
+            "항목": ["매출액", "영업이익"],
             "2023": [100, 10],
             "2024": [200, 20],
         }
@@ -213,13 +213,13 @@ def test_select_from_show_row_and_col():
     result = selectFromShow(df, indList=["매출액"], colList=["2024"])
     assert result is not None
     assert result.height == 1
-    assert result.columns == ["계정명", "2024"]
+    assert result.columns == ["항목", "2024"]
 
 
 def test_select_from_show_empty_df():
     from dartlab.core.show import selectFromShow
 
-    df = pl.DataFrame({"계정명": [], "2024": []}).cast({"계정명": pl.Utf8, "2024": pl.Int64})
+    df = pl.DataFrame({"항목": [], "2024": []}).cast({"항목": pl.Utf8, "2024": pl.Int64})
     result = selectFromShow(df)
     assert result is None
 
@@ -229,7 +229,7 @@ def test_select_from_show_no_match_rows():
 
     df = pl.DataFrame(
         {
-            "계정명": ["매출액"],
+            "항목": ["매출액"],
             "2024": [100],
         }
     )
@@ -243,7 +243,7 @@ def test_select_from_show_col_q4_fallback():
 
     df = pl.DataFrame(
         {
-            "계정명": ["매출액"],
+            "항목": ["매출액"],
             "2024Q4": [100],
         }
     )
@@ -257,7 +257,7 @@ def test_select_from_show_no_col_match():
 
     df = pl.DataFrame(
         {
-            "계정명": ["매출액"],
+            "항목": ["매출액"],
             "2023": [100],
         }
     )
@@ -271,19 +271,19 @@ def test_select_from_show_no_col_match():
 def test_cascade_exact_match():
     from dartlab.core.show import _cascadeFilterRows
 
-    df = pl.DataFrame({"계정명": ["매출액", "영업이익", "순이익"]})
-    result = _cascadeFilterRows(df, "계정명", ["매출액"])
+    df = pl.DataFrame({"항목": ["매출액", "영업이익", "순이익"]})
+    result = _cascadeFilterRows(df, "항목", ["매출액"])
     assert result is not None
     assert result.height == 1
-    assert result["계정명"][0] == "매출액"
+    assert result["항목"][0] == "매출액"
 
 
 def test_cascade_normalized_match():
     """정규화 매칭 — 공백 차이를 무시한다."""
     from dartlab.core.show import _cascadeFilterRows
 
-    df = pl.DataFrame({"계정명": ["매 출 액", "영업이익"]})
-    result = _cascadeFilterRows(df, "계정명", ["매출액"])
+    df = pl.DataFrame({"항목": ["매 출 액", "영업이익"]})
+    result = _cascadeFilterRows(df, "항목", ["매출액"])
     assert result is not None
     assert result.height == 1
 
@@ -292,8 +292,8 @@ def test_cascade_contains_match():
     """substring 포함 매칭."""
     from dartlab.core.show import _cascadeFilterRows
 
-    df = pl.DataFrame({"계정명": ["연결매출액합계", "영업이익"]})
-    result = _cascadeFilterRows(df, "계정명", ["매출액"])
+    df = pl.DataFrame({"항목": ["연결매출액합계", "영업이익"]})
+    result = _cascadeFilterRows(df, "항목", ["매출액"])
     assert result is not None
     assert result.height == 1
 
@@ -302,17 +302,17 @@ def test_cascade_fuzzy_match():
     """fuzzy 매칭 (유사도 기반)."""
     from dartlab.core.show import _cascadeFilterRows
 
-    df = pl.DataFrame({"계정명": ["매출총이익", "영업이익"]})
+    df = pl.DataFrame({"항목": ["매출총이익", "영업이익"]})
     # "매출총이" is close to "매출총이익"
-    result = _cascadeFilterRows(df, "계정명", ["매출총이"])
+    result = _cascadeFilterRows(df, "항목", ["매출총이"])
     assert result is not None
 
 
 def test_cascade_no_match():
     from dartlab.core.show import _cascadeFilterRows
 
-    df = pl.DataFrame({"계정명": ["매출액"]})
-    result = _cascadeFilterRows(df, "계정명", ["완전히다른계정명임"])
+    df = pl.DataFrame({"항목": ["매출액"]})
+    result = _cascadeFilterRows(df, "항목", ["완전히다른항목임"])
     assert result is None
 
 

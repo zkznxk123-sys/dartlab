@@ -178,5 +178,5 @@ class TestMapperBasic:
         from dartlab.providers.dart.finance.mapper import AccountMapper
 
         m = AccountMapper.get()
-        result = m.map("", "이상한계정명_절대없을거야_abc123")
+        result = m.map("", "이상한항목_절대없을거야_abc123")
         assert result is None

@@ -33,7 +33,7 @@ _PERIODS = ["2024", "2023", "2022", "2021", "2020", "2019"]
 
 
 def _krToSnakeId() -> dict[str, str]:
-    """한국어 계정명 → dartlab 표준 snakeId.
+    """한국어 항목 → dartlab 표준 snakeId.
 
     Plan v5 P4: SNAKEID_ALIASES 의 canonical snakeId (dartlab 표준) 를 사용.
     toDictBySnakeId 의 alias 양방향 자동 매핑이 alias 키도 노출하므로
@@ -75,7 +75,7 @@ def _krToSnakeId() -> dict[str, str]:
 
 
 def _make_is_df(accounts: dict[str, list[float | None]]) -> pl.DataFrame:
-    """IS 형태 DataFrame 생성. accounts: {계정명: [값 per period]}.
+    """IS 형태 DataFrame 생성. accounts: {항목: [값 per period]}.
 
     Plan v4 Layer J: calc 함수가 toDictBySnakeId 호출 시 snakeId 컬럼이 필요하므로
     AccountMapper reverse 로 한국어 → snakeId 자동 매핑.
@@ -84,7 +84,7 @@ def _make_is_df(accounts: dict[str, list[float | None]]) -> pl.DataFrame:
     rows = []
     for name, vals in accounts.items():
         snakeId = revMap.get(name, name)
-        row: dict = {"snakeId": snakeId, "계정명": name}
+        row: dict = {"snakeId": snakeId, "항목": name}
         for i, p in enumerate(_PERIODS):
             row[p] = vals[i] if i < len(vals) else None
         rows.append(row)
@@ -614,7 +614,7 @@ class TestHelpers:
     def test_toDict_valid(self):
         from dartlab.analysis.financial._helpers import toDict
 
-        df = pl.DataFrame({"계정명": ["매출액", "영업이익"], "2024": [100, 50], "2023": [90, 45]})
+        df = pl.DataFrame({"항목": ["매출액", "영업이익"], "2024": [100, 50], "2023": [90, 45]})
         result = toDict(_SelectResult(df))
         assert result is not None
         data, periods = result
@@ -625,7 +625,7 @@ class TestHelpers:
     def test_periodCols(self):
         from dartlab.analysis.financial._helpers import periodCols
 
-        df = pl.DataFrame({"계정명": ["x"], "2024": [1], "2023": [2], "foo": [3]})
+        df = pl.DataFrame({"항목": ["x"], "2024": [1], "2023": [2], "foo": [3]})
         cols = periodCols(df)
         assert "2024" in cols
         assert "2023" in cols

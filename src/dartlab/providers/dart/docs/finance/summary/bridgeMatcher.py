@@ -35,7 +35,7 @@ def _periodGap(cur: str, prev: str) -> int:
 
 
 def nameSimilarity(a: str, b: str) -> float:
-    """두 계정명의 유사도 (0~1). 공통 문자 비율 기반."""
+    """두 항목의 유사도 (0~1). 공통 문자 비율 기반."""
     a = a.replace("[", "").replace("]", "").replace("ㆍ", "").strip()
     b = b.replace("[", "").replace("]", "").replace("ㆍ", "").strip()
     if a == b:

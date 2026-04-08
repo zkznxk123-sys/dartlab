@@ -59,7 +59,7 @@ class LeverageCycleResult:
 # 내부 헬퍼
 # ══════════════════════════════════════
 
-# 계정명 패턴 (DART scan finance.parquet 기준)
+# 항목 패턴 (DART scan finance.parquet 기준)
 _OP_INCOME_NAMES = {"영업이익", "영업이익(손실)", "영업이익 (손실)", "Ⅳ. 영업이익", "Ⅴ.영업이익(손실)", "V. 영업이익"}
 _NET_INCOME_NAMES = {"당기순이익", "당기순이익(손실)"}
 _TOTAL_DEBT_NAMES = {"부채총계"}

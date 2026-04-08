@@ -57,7 +57,7 @@ def _preserveUnmapped(label: str, prefix: str) -> str:
 
 
 # ── 동의어 snakeId 기간별 gap 채우기 ──
-# 기업이 기간에 따라 같은 개념을 다른 계정명으로 제출하는 경우 대응.
+# 기업이 기간에 따라 같은 개념을 다른 항목으로 제출하는 경우 대응.
 # 예: CJ ENM은 2025Q1까지 "매출액"(→sales), 2025Q2부터 "수익"(→revenue).
 _SNAKE_FILL_RULES: list[tuple[str, str, str]] = [
     # (재무제표, primary, fallback) — primary가 null인 기간에 fallback 값 사용

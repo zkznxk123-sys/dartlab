@@ -57,7 +57,7 @@ def test_sk_hynix_q4_standalone_not_annual():
     df = c.select("IS", ["매출액"])
     assert df is not None
     parsedDf = df.df if hasattr(df, "df") else df
-    rev = parsedDf.filter(parsedDf["계정명"] == "매출액")
+    rev = parsedDf.filter(parsedDf["항목"] == "매출액")
     assert rev.height > 0
 
     q4 = rev["2025Q4"][0]

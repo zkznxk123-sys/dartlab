@@ -32,7 +32,7 @@ class TestSceMapper:
     def test_normalizeCauseUnmapped(self):
         from dartlab.providers.dart.finance.sceMapper import normalizeCause
 
-        result = normalizeCause("완전히_알수없는_계정명_XYZABC")
+        result = normalizeCause("완전히_알수없는_항목_XYZABC")
         assert result.startswith("unmapped:")
 
     def test_normalizeDetailBasic(self):

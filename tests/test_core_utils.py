@@ -196,7 +196,7 @@ class TestToDict:
     def test_basic_conversion(self):
         df = pl.DataFrame(
             {
-                "계정명": ["매출액", "영업이익"],
+                "항목": ["매출액", "영업이익"],
                 "2023": [100, 20],
                 "2024": [120, 25],
             }
@@ -213,14 +213,14 @@ class TestToDict:
         assert toDict(None) is None
 
     def test_no_period_cols(self):
-        df = pl.DataFrame({"계정명": ["a"], "note": ["x"]})
+        df = pl.DataFrame({"항목": ["a"], "note": ["x"]})
         sr = self._make_select_result(df)
         assert toDict(sr) is None
 
     def test_max_periods(self):
         df = pl.DataFrame(
             {
-                "계정명": ["매출액"],
+                "항목": ["매출액"],
                 "2020": [80],
                 "2021": [90],
                 "2022": [100],
@@ -243,24 +243,24 @@ class TestToDict:
 
 class TestSelectResult:
     def test_properties(self):
-        df = pl.DataFrame({"계정명": ["a"], "2024": [1]})
+        df = pl.DataFrame({"항목": ["a"], "2024": [1]})
         sr = SelectResult(df=df, topic="BS", meta={"currency": "KRW"})
         assert sr.topic == "BS"
         assert sr.meta["currency"] == "KRW"
         assert sr.df is df
 
     def test_len(self):
-        df = pl.DataFrame({"계정명": ["a", "b"], "2024": [1, 2]})
+        df = pl.DataFrame({"항목": ["a", "b"], "2024": [1, 2]})
         sr = SelectResult(df=df, topic="IS")
         assert len(sr) == 2
 
     def test_is_numeric(self):
-        df = pl.DataFrame({"계정명": ["a"], "2024": [100]})
+        df = pl.DataFrame({"항목": ["a"], "2024": [100]})
         sr = SelectResult(df=df, topic="IS")
         assert sr.isNumeric is True
 
     def test_is_not_numeric(self):
-        df = pl.DataFrame({"계정명": ["a"], "2024": ["text"]})
+        df = pl.DataFrame({"항목": ["a"], "2024": ["text"]})
         sr = SelectResult(df=df, topic="IS")
         assert sr.isNumeric is False
 

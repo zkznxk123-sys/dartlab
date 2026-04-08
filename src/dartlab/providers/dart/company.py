@@ -2065,11 +2065,7 @@ class Company:
                 period=period,
             )
 
-        if (
-            topic in {"IS", "BS", "CIS", "CF", "SCE"}
-            and isinstance(result, pl.DataFrame)
-            and ("항목" in result.columns or "계정명" in result.columns)
-        ):
+        if topic in {"IS", "BS", "CIS", "CF", "SCE"} and isinstance(result, pl.DataFrame) and "항목" in result.columns:
             result = self._cleanFinanceDataFrame(result, topic)
 
         return result if isinstance(result, pl.DataFrame) else None
@@ -2082,15 +2078,11 @@ class Company:
 
     @staticmethod
     def _cleanFinanceDataFrame(df: pl.DataFrame, sjDiv: str) -> pl.DataFrame:
-        """재무제표 DataFrame 후처리: all-null 행 제거, CF 고유 정리.
-
-        label 컬럼은 "항목" 표준이지만 backward-compat 으로 "계정명" alias 도 존재.
-        실제 group_by / filter 는 "항목" 컬럼 기준.
-        """
+        """재무제표 DataFrame 후처리: all-null 행 제거, CF 고유 정리."""
         periodCols = [c for c in df.columns if _isPeriodColumn(c)]
         if not periodCols:
             return df
-        labelCol = "항목" if "항목" in df.columns else "계정명"
+        labelCol = "항목"
         # CF 고유: 당기순이익 제거 (standalone 차분 오류), 영문 항목 제거
         if sjDiv == "CF":
             df = df.filter(~pl.col(labelCol).is_in(["당기순이익", "법인세비용차감전순이익"]))
@@ -2099,20 +2091,13 @@ class Company:
         notAllNull = pl.any_horizontal([pl.col(c).is_not_null() for c in periodCols])
         df = df.filter(notAllNull)
         # 공통: 같은 항목 중복행 병합 — mapper 의 한국어 → 여러 snakeId (1:N) 충돌 해결.
-        # 대부분 typo/공시 양식 변형이라 동일 의미 — coalesce 가 안전.
         if df[labelCol].n_unique() < df.height:
             hasSnakeId = "snakeId" in df.columns
-            aggCols = [c for c in periodCols]
-            extraAgg = []
-            if hasSnakeId:
-                extraAgg = [pl.col("snakeId").first().alias("snakeId")]
+            aggCols = list(periodCols)
+            extraAgg = [pl.col("snakeId").first().alias("snakeId")] if hasSnakeId else []
             merged = df.group_by(labelCol, maintain_order=True).agg(
                 extraAgg + [pl.col(c).drop_nulls().first().alias(c) for c in aggCols]
             )
-            # backward-compat: 다른 alias 컬럼이 있었으면 다시 추가
-            otherLabel = "계정명" if labelCol == "항목" else "항목"
-            if otherLabel in df.columns:
-                merged = merged.with_columns(pl.col(labelCol).alias(otherLabel))
             df = merged.select([c for c in df.columns if c in merged.columns])
         return df
 
@@ -2164,7 +2149,7 @@ class Company:
             if hDf is None or hDf.is_empty():
                 continue
 
-            itemCol = "항목" if "항목" in hDf.columns else "계정명" if "계정명" in hDf.columns else None
+            itemCol = "항목" if "항목" in hDf.columns else None
             if itemCol is None:
                 for c in hDf.columns:
                     if not _isPeriodColumn(c):
@@ -2316,7 +2301,7 @@ class Company:
 
         Args:
             topic: IS, BS, CF, CIS, SCE 또는 docs topic.
-            indList: 행 필터. 한글 계정명/snakeId/항목명. 단일 str 도 가능.
+            indList: 행 필터. 한글 항목/snakeId/항목명. 단일 str 도 가능.
             colList: 열(기간) 필터. 단일 str 도 가능.
             freq: 시계열 주기 — ``"Q"`` (분기, 기본) / ``"Y"`` (연간) / ``"YTD"`` (누적).
             scope: 재무제표 범위 — ``"consolidated"`` (연결, 기본) / ``"separate"`` (별도).
@@ -2351,7 +2336,7 @@ class Company:
         if indList is not None and len(indList) == 0:
             raise ValueError(
                 "select 의 indList (행 필터) 가 비어 있습니다. "
-                "필터링할 계정명을 1개 이상 전달하세요. 예: c.select('IS', ['매출액'])"
+                "필터링할 항목을 1개 이상 전달하세요. 예: c.select('IS', ['매출액'])"
             )
 
         # multi-block docs topic 감지 → 역인덱스 경로
@@ -2370,7 +2355,7 @@ class Company:
             # indList 가 dataframe 에 매치 안 되면 silent None 대신 명시적 에러
             available = []
             try:
-                # 첫 컬럼이 보통 계정명
+                # 첫 컬럼이 보통 항목
                 if df.width > 0:
                     first_col = df.columns[0]
                     available = df[first_col].drop_nulls().to_list()[:15]
@@ -3057,8 +3042,8 @@ class Company:
             labelCol = (
                 "항목"
                 if "항목" in parsed.df.columns
-                else "계정명"
-                if "계정명" in parsed.df.columns
+                else "항목"
+                if "항목" in parsed.df.columns
                 else parsed.df.columns[0]
             )
             periodCols = [c for c in parsed.df.columns if c != labelCol]

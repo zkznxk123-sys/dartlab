@@ -22,7 +22,7 @@ def _get(row: dict, col: str) -> float:
 
 
 def _getFirst(data: dict, keys: list[str], col: str) -> float:
-    """여러 계정명 중 값이 있는 첫 번째를 반환 (fallback 체인)."""
+    """여러 항목 중 값이 있는 첫 번째를 반환 (fallback 체인)."""
     for k in keys:
         row = data.get(k, {})
         v = row.get(col) if row else None
@@ -66,7 +66,7 @@ _NON_OP_ASSET_ACCOUNTS = [
     "기타비유동금융자산",
 ]
 
-# 관계기업 투자: 기업마다 다른 계정명 사용 → fallback 쌍
+# 관계기업 투자: 기업마다 다른 항목 사용 → fallback 쌍
 _ASSOCIATES_FALLBACK = ("관계기업등지분관련투자자산", "지분법적용투자지분")
 
 _OP_LIAB_SIMPLE = [
@@ -624,7 +624,7 @@ def calcIntangibleAssetDetail(company, *, basePeriod: str | None = None) -> dict
     items = []
     if rawRows:
         for row in rawRows:
-            item = str(row.get("항목", row.get("계정명", ""))).strip()
+            item = str(row.get("항목", "")).strip()
             if not item or any(kw in item for kw in ("합계", "총계", "소계")):
                 continue
             v = parseNumStr(row.get(str(latestCol)))

@@ -48,7 +48,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     "pivot": _AxisEntry(
         fn="pivot_accounts",
         label="계정 피벗",
-        description="행=연도, 열=계정명 피벗 테이블",
+        description="행=연도, 열=항목 피벗 테이블",
         example='table("pivot", c.IS)',
         targetName="df",
     ),

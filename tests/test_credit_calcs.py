@@ -35,7 +35,7 @@ _PERIODS = ["2024", "2023", "2022", "2021", "2020", "2019"]
 def _make_df(accounts: dict[str, list[float | None]]) -> pl.DataFrame:
     rows = []
     for name, vals in accounts.items():
-        row: dict = {"계정명": name}
+        row: dict = {"항목": name}
         for i, p in enumerate(_PERIODS):
             row[p] = vals[i] if i < len(vals) else None
         rows.append(row)
