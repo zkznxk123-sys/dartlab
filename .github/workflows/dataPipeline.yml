@@ -88,11 +88,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           SYNC_CATEGORY: ${{ matrix.category }}
 
-      - name: Upload to GitHub Releases
-        run: uv run python .github/scripts/uploadData.py --target gh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SYNC_CATEGORY: ${{ matrix.category }}
+      # GitHub Releases 업로드 폐지 (2026-04-08): HF만 유지.
 
   # ── 2단계: scan 프리빌드 + HF 업로드 (full 모드) ──────────
   prebuild:

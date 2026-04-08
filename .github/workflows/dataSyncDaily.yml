@@ -90,27 +90,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           SYNC_CATEGORY: report
 
-      - name: Upload to GitHub Releases (finance)
-        if: hashFiles('dist/changed_finance.txt') != ''
-        run: |
-          if [ -s dist/changed_finance.txt ]; then
-            cp dist/changed_finance.txt dist/changed.txt
-            uv run python .github/scripts/uploadData.py --target gh
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SYNC_CATEGORY: finance
-
-      - name: Upload to GitHub Releases (report)
-        if: hashFiles('dist/changed_report.txt') != ''
-        run: |
-          if [ -s dist/changed_report.txt ]; then
-            cp dist/changed_report.txt dist/changed.txt
-            uv run python .github/scripts/uploadData.py --target gh
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SYNC_CATEGORY: report
+      # GitHub Releases 업로드 폐지 (2026-04-08): HF만 유지.
 
       - name: Save finance cache
         uses: actions/cache/save@v4
@@ -165,16 +145,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           SYNC_CATEGORY: docs
 
-      - name: Upload to GitHub Releases (docs)
-        if: hashFiles('dist/changed_docs.txt') != ''
-        run: |
-          if [ -s dist/changed_docs.txt ]; then
-            cp dist/changed_docs.txt dist/changed.txt
-            uv run python .github/scripts/uploadData.py --target gh
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SYNC_CATEGORY: docs
+      # GitHub Releases 업로드 폐지 (2026-04-08): HF만 유지.
 
       - name: Save docs cache
         uses: actions/cache/save@v4

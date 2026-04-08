@@ -106,8 +106,15 @@ def _uploadHf(category: str) -> None:
 
 
 def _uploadGh(category: str) -> None:
-    """GitHub Releases에 변경 파일만 업로드 (fallback: 전체)."""
-    from dartlab.core.dataConfig import DATA_RELEASES
+    """[DEPRECATED 2026-04-08] GitHub Releases 업로드는 폐지됨. HF만 유지.
+
+    data-finance/data-report/data-docs 태그는 정리됨.
+    이 함수는 호환을 위해 남겨두지만 항상 no-op.
+    """
+    print(f"[uploadData] GitHub Releases 업로드는 폐지됨 (HF만 유지). category={category} → 스킵")
+    return
+    # 이하 dead code (참고용 보존)
+    from dartlab.core.dataConfig import DATA_RELEASES  # noqa: F401
 
     conf = DATA_RELEASES[category]
 
