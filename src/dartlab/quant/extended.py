@@ -443,3 +443,52 @@ def calcMarketAnalysisFlags(company) -> list[str]:
             flags.append(f"⚠ 일일 변동성 {atrPct:.1f}% — 고변동 종목")
 
     return flags
+
+
+@_memoized_calc
+def calcStrategySnapshot(company) -> dict | None:
+    """전략별 진입 진단 — 8 검증된 스타일 일괄 백테스트.
+
+    Strategy DSL 의 review 6막 (전망) 통합 진입점. 시총 의존 0.
+
+    Args:
+        company: Company 객체.
+
+    Returns:
+        dict {style_key: {sharpe, mdd, dsr, trades, entry_today, exit_today, status}}
+        또는 None (데이터 부족).
+    """
+    ohlcv = _fetchOHLCV(company)
+    if ohlcv is None or ohlcv.is_empty() or len(ohlcv) < 60:
+        return None
+
+    from dartlab.quant._ax_strategy import runEntry, runStyle
+    from dartlab.quant.strategy.presets import STYLE_REGISTRY
+
+    code = getattr(company, "stockCode", None) or getattr(company, "stock_code", None)
+    if not code:
+        return None
+
+    # 1) 백테스트 (8 스타일)
+    bt_results = runStyle(code, name="all")
+    # 2) 진입 진단 (현재 시점)
+    entry_results = runEntry(code, style="all")
+
+    snap: dict = {}
+    for key in STYLE_REGISTRY().keys():
+        bt = bt_results.get(key)
+        ev = entry_results.get(key)
+        if bt is None:
+            continue
+        snap[key] = {
+            "sharpe": float(bt.sharpe),
+            "mdd": float(bt.mdd),
+            "dsr": float(bt.dsr),
+            "trades": int(bt.trades.height) if bt.trades is not None else 0,
+            "entry_today": bool(ev.active) if ev else False,
+            "exit_today": bool(ev.exit_today) if ev else False,
+            "stop_level": float(ev.stop_level) if ev and ev.stop_level else None,
+            "status": bt.status,
+            "reason": bt.reason,
+        }
+    return snap

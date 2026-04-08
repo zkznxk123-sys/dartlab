@@ -395,3 +395,58 @@ def ohlcv_to_arrays(df):
         result["date"] = df.get_column("date").to_list()
 
     return result
+
+
+# ── Strategy DSL 공용 헬퍼 (Phase B) ──────────────────────────────────────────
+
+
+def tom_mask(dates) -> "Any":
+    """Turn-of-the-Month boolean mask — KR 캘린더 시즌신호.
+
+    KOSDAQ 에서 학술 검증된 월말 3거래일 + 월초 3거래일 효과를 boolean 시계열로 반환.
+    학술 근거: Lakonishok-Smidt 1988, Korean Journal of Finance (KOSDAQ TOM, 2018+).
+
+    seasonalKR 스타일 외에 다른 곳에서 만들지 말 것 (SSOT).
+
+    Args:
+        dates: list[date] 또는 polars Series of Date — OHLCV 의 date 컬럼
+
+    Returns:
+        numpy.ndarray[bool] 길이 N — 월말 3일/월초 3일 True
+    """
+    import numpy as np
+
+    days = [d.day for d in dates]
+    return np.array([(d <= 3 or d >= 25) for d in days], dtype=np.bool_)
+
+
+def extractSignalSeries(arr: dict, fn, *, key: str | None = None, **kwargs):
+    """벡터 신호 함수를 OHLCV 배열에 적용해 시계열 반환 (SSOT).
+
+    Strategy DSL 이 dict-only analyze_xxx 함수의 시계열 분기 안에서 호출하는 단일
+    공용 헬퍼. 다른 위치에 비슷한 wrapper 만들지 말 것.
+
+    Args:
+        arr: ohlcv_to_arrays() 결과 dict (close/high/low/volume/date 포함)
+        fn: signals.py / indicators.py 의 v* 함수 (입력 시그니처 자동 감지)
+        key: 결과 컬럼 명. None 이면 fn.__name__
+        **kwargs: fn 에 전달할 추가 인자
+
+    Returns:
+        dict {key: NDArray} — 길이 보존
+    """
+    import inspect
+
+    if not arr or "close" not in arr:
+        return {}
+    sig_params = list(inspect.signature(fn).parameters.keys())
+    inputs = []
+    for p in sig_params:
+        if p in arr:
+            inputs.append(arr[p])
+        elif p in kwargs:
+            inputs.append(kwargs.pop(p))
+        else:
+            break  # 나머지는 kwargs 로 전달
+    out = fn(*inputs, **kwargs)
+    return {key or fn.__name__: out}

@@ -303,6 +303,48 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         group="portfolio",
         multiStock=True,
     ),
+    # ── H: Strategy DSL (사용자 컨트롤 boolean rule + 백테스트 + 검증) ────
+    "strategy": _AxisEntry(
+        module="dartlab.quant._ax_strategy",
+        fn="runStrategy",
+        label="전략",
+        description="사용자 정의 boolean rule 백테스트 (Rule + sizing + stop)",
+        example='quant("strategy", "005930", rule=myRule)',
+        group="strategy",
+    ),
+    "backtest": _AxisEntry(
+        module="dartlab.quant._ax_strategy",
+        fn="runBacktest",
+        label="백테스트",
+        description="스타일명 또는 Rule 백테스트 (cpcv 옵션)",
+        example='quant("backtest", "005930", style="trendFollow")',
+        group="strategy",
+    ),
+    "style": _AxisEntry(
+        module="dartlab.quant._ax_strategy",
+        fn="runStyle",
+        label="스타일",
+        description="8 검증된 스타일 프리셋 일괄/단일 백테스트 (시총 의존 0)",
+        example='quant("style", "005930", name="all")',
+        group="strategy",
+        stockRequired=False,  # name 없이 호출 시 카탈로그
+    ),
+    "entry": _AxisEntry(
+        module="dartlab.quant._ax_strategy",
+        fn="runEntry",
+        label="진입진단",
+        description="현재 시점 진입/청산/스톱 진단 (백테스트 안 돌림)",
+        example='quant("entry", "005930", style="all")',
+        group="strategy",
+    ),
+    "walkforward": _AxisEntry(
+        module="dartlab.quant._ax_strategy",
+        fn="runWalkforward",
+        label="워크포워드",
+        description="Lopez de Prado 슬라이딩 OOS Sharpe + DSR + PBO",
+        example='quant("walkforward", "005930", style="meanReversion")',
+        group="strategy",
+    ),
 }
 
 # ── Alias 테이블 ─────────────────────────────────────────
@@ -387,6 +429,14 @@ _ALIASES: dict[str, str] = {
     "자산배분": "allocation",
     "ERC": "allocation",
     "리스크균등": "allocation",
+    # H: Strategy DSL
+    "전략": "strategy",
+    "백테스트": "backtest",
+    "스타일": "style",
+    "진입": "entry",
+    "진입진단": "entry",
+    "워크포워드": "walkforward",
+    "전진검증": "walkforward",
 }
 
 # 기존 metric 이름 (하위호환용)
@@ -440,6 +490,7 @@ _GROUPS = {
     "text": "텍스트/공시",
     "crossSection": "횡단면",
     "portfolio": "포트폴리오",
+    "strategy": "전략 DSL",
 }
 
 

@@ -3545,6 +3545,94 @@ def technicalSignalsBlock(data: dict) -> list:
     return blocks
 
 
+def strategySnapshotBlock(data: dict) -> list:
+    """calcStrategySnapshot 결과 → 8 검증 스타일 진입 진단 카드.
+
+    Strategy DSL 의 review 6막 (전망) 진입점. 시총 의존 0.
+    """
+    if not data:
+        return []
+
+    style_labels = {
+        "trendFollow": "추세추종",
+        "meanReversion": "평균회귀",
+        "breakout": "돌파",
+        "dipBuy": "눌림목매수",
+        "eventDriven": "이벤트드리븐",
+        "flowFollow": "수급추종(KR)",
+        "lowVolDefensive": "저변동방어",
+        "seasonalKR": "한국캘린더(KR)",
+    }
+
+    rows_label = []
+    rows_sharpe = []
+    rows_mdd = []
+    rows_dsr = []
+    rows_entry = []
+    rows_exit = []
+    rows_trades = []
+    rows_verdict = []
+    for key, label in style_labels.items():
+        snap = data.get(key)
+        if snap is None or snap.get("status") != "ok":
+            continue
+        sharpe = snap.get("sharpe", 0.0)
+        rows_label.append(label)
+        rows_sharpe.append(f"{sharpe:+.2f}")
+        rows_mdd.append(f"{snap.get('mdd', 0.0)*100:+.1f}%")
+        rows_dsr.append(f"{snap.get('dsr', 0.0):.2f}")
+        rows_entry.append("●" if snap.get("entry_today") else "—")
+        rows_exit.append("●" if snap.get("exit_today") else "—")
+        rows_trades.append(str(snap.get("trades", 0)))
+        # 판정
+        if sharpe >= 1.2:
+            rows_verdict.append("강함")
+        elif sharpe >= 0.6:
+            rows_verdict.append("양호")
+        elif sharpe >= 0.2:
+            rows_verdict.append("보통")
+        elif sharpe > -1e-6:
+            rows_verdict.append("약함")
+        else:
+            rows_verdict.append("부정")
+
+    if not rows_label:
+        return []
+
+    table = pl.DataFrame(
+        {
+            "스타일": rows_label,
+            "Sharpe": rows_sharpe,
+            "MDD": rows_mdd,
+            "DSR": rows_dsr,
+            "오늘진입": rows_entry,
+            "오늘청산": rows_exit,
+            "Trades": rows_trades,
+            "판정": rows_verdict,
+        }
+    )
+
+    # 활성 진입 신호 narrate (1줄)
+    active_styles = [
+        style_labels[k] for k, v in data.items() if v.get("entry_today") and v.get("status") == "ok"
+    ]
+    helper = (
+        "8 검증 스타일 백테스트 결과 + 오늘 시점 진입/청산 진단. "
+        "Sharpe ≥ 1.2 강함, ≥ 0.6 양호, < 0.2 약함. DSR (Bailey-Lopez) 가 우연성 검증."
+    )
+    if active_styles:
+        helper += f"\n오늘 진입 신호 활성 스타일: {', '.join(active_styles)}"
+
+    return [
+        HeadingBlock(
+            "전략별 진입 진단",
+            level=2,
+            helper=helper,
+        ),
+        TableBlock("스타일 백테스트 매트릭스", table),
+    ]
+
+
 def marketBetaBlock(data: dict) -> list:
     """calcMarketBeta 결과 → 시장 베타 + CAPM."""
     if not data:

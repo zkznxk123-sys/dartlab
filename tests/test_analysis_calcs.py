@@ -174,7 +174,7 @@ class MockCompany:
     def _notesAccessor(self):
         return _MockNotes()
 
-    def select(self, stmt: str, accounts: list[str]):
+    def select(self, stmt: str, accounts: list[str], *, strict: bool = True, **kwargs):
         if stmt == "IS":
             src = self._is
         elif stmt == "BS":

@@ -67,6 +67,22 @@ _RATIO_FIELD_LABELS: dict[str, str] = {
     "dpo": "매입채무지급기간 (일)",
     "piotroskiFScore": "F-Score (0~9)",
     "altmanZScore": "Z-Score",
+    # 추가 라벨 (P3 후 누락분 보충)
+    "roce": "ROCE (%)",
+    "preTaxMargin": "세전이익률 (%)",
+    "effectiveTaxRate": "유효세율 (%)",
+    "incomeQualityRatio": "이익품질비율 (%)",
+    "cashRatio": "현금비율 (%)",
+    "workingCapital": "운전자본",
+    "fixedAssetTurnover": "유형자산회전율 (x)",
+    "operatingCycle": "영업주기 (일)",
+    "operatingCfToCurrentLiab": "영업CF/유동부채 (%)",
+    "fcfToOcfRatio": "FCF/영업CF (%)",
+    "FCF": "FCF",
+    "ROIC (%)": "ROIC (%)",
+    "Debt/EBITDA (x)": "Debt/EBITDA (x)",
+    "F-Score (0~9)": "F-Score (0~9)",
+    "Z-Score": "Z-Score",
 }
 
 

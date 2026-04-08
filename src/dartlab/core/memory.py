@@ -178,6 +178,14 @@ class BoundedCache:
             "_estimateWacc",
             "_estimateWacc_v2",
             "_fetchBeta",
+            # finance series builders — 매우 무거운 parquet load + pivot
+            # evict 시 14축 calc 가 매번 finance 를 다시 빌드해서 메모리 폭발
+            "_finance_",
+            "_financeStmt_",
+            "_financeCisQuarterly",
+            "_sceDataFrame",
+            "_ratios_",
+            "_insights_analyze",
             # 무거운 calc 결과 (review 안 다중 호출)
             "_calcMarketBeta",
             "_calcTechnicalVerdict",

@@ -1,0 +1,108 @@
+"""Style preset registry — 8 검증된 dartlab 스타일.
+
+각 스타일 파일: quant/strategy/styles/<key>.py — `def build(company, **kw) -> Rule`
++ 한글 docstring (~30줄, [언제 강한가]/[어떤 종목]/[진입 의미]/[청산]/[주의점]/[대표 사례]/[관련 dartlab 축]/[복제 예시]).
+
+KR 전용 스타일은 `STYLE_KR_ONLY` set 에 등록 — EdgarCompany 호출 시 NotApplicable sentinel.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import Any
+
+# 8 스타일 — Phase E 에서 styles/*.py 채워짐. 여기는 lazy import.
+
+STYLE_KR_ONLY: set[str] = {"flowFollow", "seasonalKR"}
+
+# 한글 alias → 영문 key
+STYLE_ALIASES: dict[str, str] = {
+    "추세추종": "trendFollow",
+    "trendfollow": "trendFollow",
+    "평균회귀": "meanReversion",
+    "meanreversion": "meanReversion",
+    "돌파": "breakout",
+    "눌림목매수": "dipBuy",
+    "눌림목": "dipBuy",
+    "dipbuy": "dipBuy",
+    "이벤트드리븐": "eventDriven",
+    "이벤트": "eventDriven",
+    "eventdriven": "eventDriven",
+    "수급추종": "flowFollow",
+    "수급": "flowFollow",
+    "flowfollow": "flowFollow",
+    "저변동방어": "lowVolDefensive",
+    "저변동성": "lowVolDefensive",
+    "lowvol": "lowVolDefensive",
+    "lowvoldefensive": "lowVolDefensive",
+    "한국캘린더": "seasonalKR",
+    "캘린더": "seasonalKR",
+    "seasonalkr": "seasonalKR",
+}
+
+
+def _lazy_styles() -> dict[str, Callable[..., Any]]:
+    """스타일 레지스트리 lazy import — circular import 방지."""
+    from .styles import (
+        breakout,
+        dipBuy,
+        eventDriven,
+        flowFollow,
+        lowVolDefensive,
+        meanReversion,
+        seasonalKR,
+        trendFollow,
+    )
+
+    return {
+        "trendFollow": trendFollow.build,
+        "meanReversion": meanReversion.build,
+        "breakout": breakout.build,
+        "dipBuy": dipBuy.build,
+        "eventDriven": eventDriven.build,
+        "flowFollow": flowFollow.build,
+        "lowVolDefensive": lowVolDefensive.build,
+        "seasonalKR": seasonalKR.build,
+    }
+
+
+# 모듈 레벨 캐시
+_REGISTRY_CACHE: dict[str, Callable[..., Any]] | None = None
+
+
+def STYLE_REGISTRY() -> dict[str, Callable[..., Any]]:  # noqa: N802
+    """스타일 레지스트리 dict (lazy)."""
+    global _REGISTRY_CACHE
+    if _REGISTRY_CACHE is None:
+        _REGISTRY_CACHE = _lazy_styles()
+    return _REGISTRY_CACHE
+
+
+def resolve_style(name: str) -> str:
+    """한글/영문 alias → 정규 키."""
+    if not name:
+        return name
+    s = name.strip()
+    if s in STYLE_ALIASES:
+        return STYLE_ALIASES[s]
+    low = s.lower()
+    if low in STYLE_ALIASES:
+        return STYLE_ALIASES[low]
+    return s
+
+
+def list_styles() -> list[dict]:
+    """가이드 카탈로그 — c.quant("style") (인자 없이) 반환용."""
+    reg = STYLE_REGISTRY()
+    items = []
+    for key, fn in reg.items():
+        doc = (fn.__doc__ or "").strip().split("\n")[0]
+        items.append(
+            {
+                "key": key,
+                "label": doc.split("(")[0].strip() if doc else key,
+                "description": doc,
+                "kr_only": key in STYLE_KR_ONLY,
+            }
+        )
+    return items

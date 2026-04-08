@@ -14,15 +14,35 @@ import numpy as np
 from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 
 
-def analyze_momentum(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
+def _momentumSeries(close: np.ndarray) -> dict:
+    """시계열 모멘텀 계산 — Strategy DSL 입력용 (rolling)."""
+    n = len(close)
+    out = {
+        "ts12_1": np.full(n, np.nan, dtype=np.float64),
+        "ts6_1": np.full(n, np.nan, dtype=np.float64),
+        "ts_high52": np.full(n, np.nan, dtype=np.float64),
+    }
+    for i in range(252, n):
+        out["ts12_1"][i] = close[i - 22] / close[i - 252] - 1
+    for i in range(126, n):
+        out["ts6_1"][i] = close[i - 22] / close[i - 126] - 1
+    for i in range(252, n):
+        h52 = float(np.max(close[i - 252 : i + 1]))
+        out["ts_high52"][i] = close[i] / h52 if h52 > 0 else np.nan
+    return out
+
+
+def analyze_momentum(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
     """모멘텀 종합 분석.
 
     Args:
         stockCode: 종목코드 또는 ticker.
         market: "KR" | "US" | "auto".
+        series: True 면 dict 에 `_series` 키 추가 — Strategy DSL 입력용 시계열.
 
     Returns:
-        dict with momentum12_1, tsMomentum, highRatio52w, crashRisk 등.
+        dict with momentum12_1, tsMomentum, highRatio52w, crashRisk.
+        series=True 시 추가 키: _series = {ts12_1, ts6_1, ts_high52} (각 NDArray, 길이 N).
     """
     market = resolve_market(stockCode, market)
     ohlcv = fetch_ohlcv(stockCode, **kwargs)
@@ -41,6 +61,8 @@ def analyze_momentum(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         "market": market,
         "dataPoints": n,
     }
+    if series:
+        result["_series"] = _momentumSeries(close)
 
     # ── 12-1개월 횡단면 모멘텀 (Jegadeesh-Titman) ──
     # 최근 1개월 제외, 그 이전 11개월 수익률

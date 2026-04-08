@@ -31,8 +31,20 @@ def _classify(report_name: str) -> tuple[str, int]:
     return "routine", 1
 
 
-def analyze_event_signal(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
-    """allFilings 이벤트 기반 신호 분석."""
+def analyze_event_signal(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
+    """allFilings 이벤트 기반 신호 분석.
+
+    Args:
+        stockCode: 종목코드 또는 ticker.
+        market: "KR" | "US" | "auto".
+        series: True 면 dict 에 `_series` 키 추가 — 일자별 high-impact 이벤트 dict
+                {"high_impact_dates": list[str(YYYY-MM-DD)], "pead_window": int}
+                Strategy DSL 측에서 OHLCV date 와 매핑해 boolean 시계열 생성.
+
+    Returns:
+        dict with totalEvents, eventTypes, impactScore, eventVerdict.
+        series=True 시: _series = {high_impact_dates, pead_window}.
+    """
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
@@ -69,4 +81,11 @@ def analyze_event_signal(stockCode: str, *, market: str = "auto", **kwargs) -> d
     high_impact = sum(1 for e in events if e["impact"] >= 4)
     result["highImpactCount"] = high_impact
     result["eventVerdict"] = "high_activity" if high_impact >= 3 else "moderate" if high_impact >= 1 else "quiet"
+
+    if series:
+        # Strategy DSL 입력: high-impact 일자만 전달, OHLCV date 매칭은 호출자가
+        result["_series"] = {
+            "high_impact_dates": [e["date"] for e in events if e.get("impact", 0) >= 4 and e.get("date")],
+            "pead_window": 20,
+        }
     return result

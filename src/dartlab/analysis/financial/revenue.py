@@ -206,7 +206,7 @@ def _parseDocsRevenueResult(
 def _selectDocsOpIncome(company, yCols: list[str]) -> dict[str, dict[str, float]] | None:
     """productService/salesOrder에서 부문별 영업이익 시계열을 추출 (있는 기업만)."""
     for topic in ("productService", "salesOrder"):
-        result = company.select(topic, ["영업이익", "영업손익"])
+        result = company.select(topic, ["영업이익", "영업손익"], strict=False)
         if result is None:
             continue
         df = result.df

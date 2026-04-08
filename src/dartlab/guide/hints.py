@@ -55,13 +55,13 @@ def nextSteps(company: Any) -> list[str]:
     steps: list[str] = []
 
     if hasFinance:
-        steps.append("c.BS / c.IS / c.CF   재무제표")
-        steps.append("c.ratios             재무비율")
+        steps.append("c.show('IS' / 'BS' / 'CF')   재무제표")
+        steps.append("c.show('ratios')             재무비율")
     if hasDocs:
-        steps.append("c.show(topic)        공시 원문 조회")
-        steps.append("c.index              전체 목록")
-    steps.append("c.insights           7영역 등급 요약")
-    steps.append("c.review()           14축 분석 보고서")
+        steps.append("c.show(topic)                공시 원문 조회")
+        steps.append("c.sections                   전체 topic × period 지도")
+    steps.append("c.analysis('수익성')             14축 분석")
+    steps.append("c.review('수익성')               6막 보고서")
 
     return steps
 

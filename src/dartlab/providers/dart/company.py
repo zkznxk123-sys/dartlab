@@ -1262,6 +1262,11 @@ class Company:
             return None
         series, years = result
         df = _sceToDataFrame(series, years)
+        if df is not None:
+            # 컬럼 정렬: 메타 컬럼 + 연도 역순 (최신 → 과거) — IS/BS/CF 와 일관성
+            metaCols = [c for c in df.columns if not (c.isdigit() and len(c) == 4)]
+            yearCols = sorted([c for c in df.columns if c.isdigit() and len(c) == 4], reverse=True)
+            df = df.select(metaCols + yearCols)
         self._cache[cacheKey] = df
         return df
 
@@ -1309,13 +1314,15 @@ class Company:
     def _financeOrDocsStatement(
         self, sjDiv: str, *, freq: str = "Q", scope: str = "consolidated"
     ) -> pl.DataFrame | None:
-        # CIS 의 경우 quarterly 캐시 직접 사용 (freq=Q + scope=consolidated 에 한정)
-        if sjDiv == "CIS" and freq == "Q" and scope == "consolidated":
+        # CIS 는 별도 quarterly 캐시 — annual 은 4분기 합산 합성
+        if sjDiv == "CIS" and scope == "consolidated":
             cisQ = self._financeCisQuarterly() if self._hasFinance else None
             if cisQ is not None:
                 series, periods = cisQ
                 normalizedPeriods = [p.replace("-", "") for p in periods]
                 df = _financeToDataFrame(series, normalizedPeriods, "CIS")
+                if df is not None and freq == "Y":
+                    df = self._aggregateCisAnnual(df)
                 if df is not None:
                     return df
         df = self._financeStmt(sjDiv, freq=freq, scope=scope) if self._hasFinance else None
@@ -1329,6 +1336,30 @@ class Company:
 
     # ── 재무제표 (property) ──
     # finance(XBRL) 우선 → docs fallback
+
+    @staticmethod
+    def _aggregateCisAnnual(qDf: pl.DataFrame) -> pl.DataFrame | None:
+        """CIS 분기 DataFrame → 연간 (4분기 합)."""
+        import re
+
+        quarterRe = re.compile(r"^(\d{4})Q[1-4]$")
+        yearGroups: dict[str, list[str]] = {}
+        for col in qDf.columns:
+            m = quarterRe.match(col)
+            if m:
+                yearGroups.setdefault(m.group(1), []).append(col)
+        if not yearGroups:
+            return None
+        # 4분기 모두 있는 연도만 합산 (strict)
+        years = sorted([y for y, qs in yearGroups.items() if len(qs) == 4], reverse=True)
+        if not years:
+            return None
+        metaCols = [c for c in qDf.columns if not quarterRe.match(c)]
+        exprs = [pl.col(c) for c in metaCols]
+        for year in years:
+            qs = sorted(yearGroups[year])
+            exprs.append(pl.sum_horizontal([pl.col(q) for q in qs]).alias(year))
+        return qDf.select(exprs)
 
     def _financeStmt(self, sjDiv: str, *, freq: str = "Q", scope: str = "consolidated") -> pl.DataFrame | None:
         """finance 시계열에서 sjDiv DataFrame 생성 (캐싱).
@@ -2291,6 +2322,7 @@ class Company:
         *,
         freq: str = "Q",
         scope: str = "consolidated",
+        strict: bool = True,
     ):
         """show() 결과에서 행(indList) + 열(colList) 필터 — 내부 구현.
 
@@ -2317,8 +2349,15 @@ class Company:
         from dartlab.core.show import selectFromShow
 
         # show() 가 ValueError 발생하면 그대로 propagate (silent None X)
-        df = self.show(topic, freq=freq, scope=scope)
+        try:
+            df = self.show(topic, freq=freq, scope=scope)
+        except (ValueError, KeyError):
+            if strict:
+                raise
+            return None
         if df is None or not isinstance(df, pl.DataFrame):
+            if not strict:
+                return None
             # show 가 정상 None 반환한 경우 (raw 모드 등) — ValueError 대신 명확한 안내
             raise ValueError(
                 f"'{topic}' topic 의 데이터를 가져올 수 없습니다. "
@@ -2331,6 +2370,8 @@ class Company:
 
         # 빈 indList → 명시적 안내
         if indList is not None and len(indList) == 0:
+            if not strict:
+                return None
             raise ValueError(
                 "select 의 indList (행 필터) 가 비어 있습니다. "
                 "필터링할 항목을 1개 이상 전달하세요. 예: c.select('IS', ['매출액'])"
@@ -2349,6 +2390,8 @@ class Company:
         else:
             filtered = selectFromShow(df, indList, colList)
         if filtered is None:
+            if not strict:
+                return None
             # indList 가 dataframe 에 매치 안 되면 silent None 대신 명시적 에러
             available = []
             try:

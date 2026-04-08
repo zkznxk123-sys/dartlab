@@ -26,9 +26,9 @@ def _quarterlyCols(periods: list[str], maxQ: int = _MAX_QUARTERS) -> list[str]:
 
 
 def _getRatios(company):
-    """ratios DataFrame — c.show("ratios") 위임."""
+    """RatioResult 객체 — 내부 compute 전용 (attribute access)."""
     try:
-        return company.show("ratios")
+        return company._finance.ratios
     except (ValueError, KeyError, AttributeError):
         return None
 

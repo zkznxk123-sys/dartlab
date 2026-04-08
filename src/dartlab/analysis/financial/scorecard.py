@@ -55,7 +55,20 @@ def calcScorecard(company, *, basePeriod: str | None = None) -> dict | None:
     기존 5영역(수익성/성장성/안정성/효율성/현금흐름)
     + 이익품질/투자효율/재무정합성.
     """
-    insights = getattr(company, "insights", None)
+    # insights — analyze() 직접 호출 (c.insights 는 P3 에서 제거됨)
+    insights = None
+    cacheKey = "_insights_analyze"
+    if hasattr(company, "_cache") and cacheKey in company._cache:
+        insights = company._cache[cacheKey]
+    else:
+        try:
+            from dartlab.analysis.financial.insight.pipeline import analyze
+
+            insights = analyze(company.stockCode, company=company)
+            if hasattr(company, "_cache"):
+                company._cache[cacheKey] = insights
+        except (ImportError, ValueError, KeyError, AttributeError, TypeError):
+            insights = None
 
     # 금융업 판별
     sector = getattr(company, "sector", None)

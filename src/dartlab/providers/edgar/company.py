@@ -1571,6 +1571,8 @@ class Company:
         topic: str,
         indList: str | list[str] | None = None,
         colList: str | list[str] | None = None,
+        *,
+        strict: bool = True,
     ):
         """show() 결과에서 행/열 필터 — 특정 계정 x 특정 기간 추출 (내부 구현).
 
@@ -1610,8 +1612,15 @@ class Company:
         from dartlab.core.show import selectFromShow
 
         # show() 가 ValueError 발생하면 그대로 propagate (silent None 차단)
-        df = self.show(topic)
+        try:
+            df = self.show(topic)
+        except (ValueError, KeyError):
+            if strict:
+                raise
+            return None
         if df is None or not isinstance(df, pl.DataFrame):
+            if not strict:
+                return None
             raise ValueError(
                 f"'{topic}' topic 의 데이터를 가져올 수 없습니다 (EDGAR). "
                 f"topic 이름을 확인하거나 c.show('{topic}') 로 직접 호출해보세요."
@@ -1623,6 +1632,8 @@ class Company:
 
         # 빈 indList → 명시적 안내
         if indList is not None and len(indList) == 0:
+            if not strict:
+                return None
             raise ValueError(
                 "select 의 indList (행 필터) 가 비어 있습니다. "
                 "필터링할 항목을 1개 이상 전달하세요. 예: c.select('IS', ['Revenue'])"
@@ -1630,6 +1641,8 @@ class Company:
 
         filtered = selectFromShow(df, indList, colList)
         if filtered is None:
+            if not strict:
+                return None
             # silent None 대신 명시적 ValueError
             available = []
             try:

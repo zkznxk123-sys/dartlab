@@ -12,15 +12,36 @@ import numpy as np
 from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 
 
-def analyze_volatility(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
+def _volatilitySeries(close: np.ndarray, window: int = 20) -> dict:
+    """rolling 실현 변동성 시계열 — Strategy DSL 입력용."""
+    n = len(close)
+    log_ret = np.diff(np.log(close), prepend=np.log(close[0]))
+    realized = np.full(n, np.nan, dtype=np.float64)
+    for i in range(window, n):
+        realized[i] = float(np.std(log_ret[i - window + 1 : i + 1]) * np.sqrt(252))
+    # GARCH 동적 σ²_t (단순 EWMA σ — 외부 의존 0)
+    lam = 0.94
+    sigma2 = np.full(n, np.nan, dtype=np.float64)
+    sigma2[0] = log_ret[0] ** 2
+    for i in range(1, n):
+        sigma2[i] = lam * sigma2[i - 1] + (1 - lam) * log_ret[i] ** 2
+    return {
+        "realized_vol": realized,
+        "garch_vol": np.sqrt(sigma2 * 252),
+    }
+
+
+def analyze_volatility(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
     """변동성 종합 분석.
 
     Args:
         stockCode: 종목코드 또는 ticker.
         market: "KR" | "US" | "auto".
+        series: True 면 dict 에 `_series` 키 추가 — Strategy DSL 입력용 rolling vol 시계열.
 
     Returns:
         dict with garchVol, harRV, volTermStructure, volRegime.
+        series=True 시: _series = {realized_vol, garch_vol} 길이 N.
     """
     market = resolve_market(stockCode, market)
     ohlcv = fetch_ohlcv(stockCode, **kwargs)
@@ -40,6 +61,8 @@ def analyze_volatility(stockCode: str, *, market: str = "auto", **kwargs) -> dic
         "market": market,
         "dataPoints": n,
     }
+    if series:
+        result["_series"] = _volatilitySeries(close)
 
     # ── 실현 변동성 (다중 기간) ──
     for label, window in [("5d", 5), ("20d", 20), ("60d", 60), ("120d", 120), ("252d", 252)]:

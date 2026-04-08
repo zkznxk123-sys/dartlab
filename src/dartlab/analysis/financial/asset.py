@@ -395,9 +395,9 @@ def calcCapexPattern(company, *, basePeriod: str | None = None) -> dict | None:
     bsAccounts = ["건설중인자산", "유형자산", "자산총계"]
     isAccounts = ["감가상각비"]
 
-    cfResult = company.select("CF", cfAccounts)
-    bsResult = company.select("BS", bsAccounts)
-    isResult = company.select("IS", isAccounts)
+    cfResult = company.select("CF", cfAccounts, strict=False)
+    bsResult = company.select("BS", bsAccounts, strict=False)
+    isResult = company.select("IS", isAccounts, strict=False)
 
     bsParsed = toDictBySnakeId(bsResult)
     if bsParsed is None:

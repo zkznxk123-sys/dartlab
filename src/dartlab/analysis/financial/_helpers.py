@@ -103,9 +103,15 @@ def mergeRows(primary: dict | None, fallback: dict | None) -> dict:
 
 
 def getRatios(company):
-    """ratios DataFrame 을 안전하게 가져온다 — c.show("ratios") 위임."""
+    """RatioResult 객체 (eps/bps/marketCap/altmanZScore 등 attribute 보유) 를
+    안전하게 가져온다.
+
+    사용자 surface ``c.show("ratios")`` 는 DataFrame 을 반환하지만, 내부 compute
+    레이어 (analysis/credit/review/valuation) 는 attribute access 가 필요한
+    RatioResult 객체가 필요하다. 두 형식의 차이로 show() 흡수 불가.
+    """
     try:
-        return company.show("ratios")
+        return company._finance.ratios
     except (ValueError, KeyError, AttributeError):
         return None
 

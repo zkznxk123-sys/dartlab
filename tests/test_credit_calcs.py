@@ -97,7 +97,7 @@ class CreditMockCompany:
     def _notesAccessor(self):
         return _MockNotes()
 
-    def select(self, stmt: str, accounts: list[str]):
+    def select(self, stmt: str, accounts: list[str], *, strict: bool = True, **kwargs):
         data = _BS if stmt == "BS" else (_IS if stmt == "IS" else _CF)
         filtered = {k: v for k, v in data.items() if k in accounts}
         if not filtered:

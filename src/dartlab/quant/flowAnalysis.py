@@ -14,24 +14,30 @@ from dartlab.quant._helpers import resolve_market
 log = logging.getLogger(__name__)
 
 
-def analyze_flow(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
+def analyze_flow(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
     """기관/외국인 수급 분석.
 
     Args:
         stockCode: 종목코드 (KR 전용).
         market: "KR" | "US" | "auto".
+        series: True 면 dict 에 `_series` 키 추가 — Strategy DSL 입력용 누적 시계열.
 
     Returns:
         dict with foreignNetBuy, instNetBuy, flowMomentum, streak.
+        series=True (KR only) 시: _series = {foreign_cum5, foreign_cum20, inst_cum5, inst_cum20}.
+        US 면 _series = None.
     """
     market = resolve_market(stockCode, market)
 
     if market != "KR":
-        return {
+        result_us: dict = {
             "stockCode": stockCode,
             "market": market,
             "error": "수급 데이터는 KR(한국) 시장만 지원합니다.",
         }
+        if series:
+            result_us["_series"] = None
+        return result_us
 
     # gather("flow") 로드
     flow_data = _fetch_flow(stockCode)
@@ -89,6 +95,27 @@ def analyze_flow(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
                 result["flowVerdict"] = "bearish"
             else:
                 result["flowVerdict"] = "neutral"
+
+            if series:
+                # Strategy DSL 입력: 5/20일 누적 시계열
+                def _cum(arr: np.ndarray, win: int) -> np.ndarray:
+                    out = np.full(len(arr), np.nan, dtype=np.float64)
+                    for i in range(win, len(arr)):
+                        out[i] = float(np.sum(arr[i - win + 1 : i + 1]))
+                    return out
+
+                series_data: dict = {}
+                if foreign_col:
+                    series_data["foreign_cum5"] = _cum(foreign, 5)
+                    series_data["foreign_cum20"] = _cum(foreign, 20)
+                if inst_col:
+                    series_data["inst_cum5"] = _cum(inst, 5)
+                    series_data["inst_cum20"] = _cum(inst, 20)
+                # date 컬럼 함께 노출 (OHLCV 매칭용)
+                date_col = _find_col(cols, ["date", "Date", "rcept_dt"])
+                if date_col:
+                    series_data["date"] = flow_data.get_column(date_col).to_list()
+                result["_series"] = series_data
 
     except (ImportError, ValueError, TypeError) as e:
         log.warning("수급 분석 실패: %s — %s", stockCode, e)

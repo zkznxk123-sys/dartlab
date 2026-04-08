@@ -12,15 +12,47 @@ import numpy as np
 from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 
 
-def analyze_regime(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
+def _regimeSeries(close: np.ndarray) -> dict:
+    """레짐 시계열 — EWMA-cross 기반 state (0=bear, 1=side, 2=bull).
+
+    HMM Viterbi 는 비용이 크고 단일 시점만 의미. Strategy DSL 입력은 빠른 EWMA
+    cross + 슬로프 신호를 시계열로 산출 (lookahead 없음).
+    """
+    n = len(close)
+    out = {
+        "state": np.zeros(n, dtype=np.int8),
+        "prob_bull": np.full(n, 0.5, dtype=np.float64),
+    }
+    fast = _ewma(close, 21)
+    slow = _ewma(close, 63)
+    # state: ewma fast vs slow + 슬로프 부호
+    diff = fast - slow
+    slope = np.diff(slow, prepend=slow[0])
+    for i in range(n):
+        if np.isnan(diff[i]) or np.isnan(slope[i]):
+            continue
+        if diff[i] > 0 and slope[i] > 0:
+            out["state"][i] = 2  # bull
+            out["prob_bull"][i] = min(1.0, 0.5 + abs(diff[i]) / max(slow[i], 1.0))
+        elif diff[i] < 0 and slope[i] < 0:
+            out["state"][i] = 0  # bear
+            out["prob_bull"][i] = max(0.0, 0.5 - abs(diff[i]) / max(slow[i], 1.0))
+        else:
+            out["state"][i] = 1  # sideways
+    return out
+
+
+def analyze_regime(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
     """레짐 감지 분석.
 
     Args:
         stockCode: 종목코드 또는 ticker.
         market: "KR" | "US" | "auto".
+        series: True 면 dict 에 `_series` 키 추가 — Strategy DSL 입력용 (state, prob_bull 시계열).
 
     Returns:
         dict with regime, probability, trendSignal.
+        series=True 시: _series = {state(int8 0/1/2), prob_bull(float)} 길이 N.
     """
     market = resolve_market(stockCode, market)
     ohlcv = fetch_ohlcv(stockCode, **kwargs)
@@ -40,6 +72,8 @@ def analyze_regime(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         "market": market,
         "dataPoints": n,
     }
+    if series:
+        result["_series"] = _regimeSeries(close)
 
     # ── Hamilton 2-State HMM (EM 알고리즘) ──
     hmm = _fit_hmm_2state(log_returns)

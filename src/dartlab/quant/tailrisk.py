@@ -12,7 +12,27 @@ import numpy as np
 from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 
 
-def analyze_tailrisk(stockCode: str, *, market: str = "auto", riskFree: float = 0.0, **kwargs) -> dict:
+def _tailriskSeries(close: np.ndarray, window: int = 252) -> dict:
+    """rolling MDD/CVaR 시계열 — Strategy DSL 입력용."""
+    n = len(close)
+    rolling_mdd = np.full(n, np.nan, dtype=np.float64)
+    rolling_cvar = np.full(n, np.nan, dtype=np.float64)
+    log_ret = np.diff(np.log(close), prepend=np.log(close[0]))
+    for i in range(window, n):
+        win = close[i - window + 1 : i + 1]
+        peak = np.maximum.accumulate(win)
+        dd = (win - peak) / peak
+        rolling_mdd[i] = float(np.min(dd))
+        # CVaR 5%
+        rets = log_ret[i - window + 1 : i + 1]
+        q5 = np.quantile(rets, 0.05)
+        rolling_cvar[i] = float(np.mean(rets[rets <= q5])) if (rets <= q5).any() else np.nan
+    return {"rolling_mdd": rolling_mdd, "rolling_cvar": rolling_cvar}
+
+
+def analyze_tailrisk(
+    stockCode: str, *, market: str = "auto", riskFree: float = 0.0, series: bool = False, **kwargs
+) -> dict:
     """꼬리위험 종합 분석.
 
     Args:
@@ -47,6 +67,8 @@ def analyze_tailrisk(stockCode: str, *, market: str = "auto", riskFree: float = 
         "market": market,
         "dataPoints": n,
     }
+    if series:
+        result["_series"] = _tailriskSeries(close)
 
     # ── VaR & CVaR (역사적 시뮬레이션) ──
     for confidence, label in [(0.95, "95"), (0.99, "99")]:
