@@ -1127,21 +1127,29 @@
 
 	@media (max-width: 768px) {
 		.blog-post-layout {
-			max-width: 100%;
+			max-width: 100vw;
+			width: 100%;
 			padding: 0;
 			gap: 1rem;
+			overflow-x: hidden;
 		}
 		.blog-post-col {
 			max-width: 100%;
 			min-width: 0;
 			width: 100%;
+			overflow-x: hidden;
 		}
 		.post-header {
 			max-width: 100%;
+			width: 100%;
+			overflow-x: hidden;
 		}
 		.post-summary {
 			width: 100%;
+			max-width: 100%;
 			padding: 0.85rem 0.95rem;
+			box-sizing: border-box;
+			overflow-x: hidden;
 		}
 		.post-summary p {
 			font-size: 0.92rem;
