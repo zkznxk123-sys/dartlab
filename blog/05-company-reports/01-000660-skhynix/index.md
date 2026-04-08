@@ -23,7 +23,7 @@ youtubeId: ""
 
 > **장기 사이클 + 위기 탈출** | IT > 메모리반도체 | 2026-04-08 dartlab 실측
 > 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: review + analysis + credit + report
-> 같은 시리즈: [삼양식품 (003230)](../02-003230-samyang-foods/) · [두산에너빌리티 (034020)](../03-034020-doosan-enerbility/) · [기업분석 시리즈 전체](/blog/series/company-reports)
+> 같은 시리즈: [삼양식품 (003230)](/blog/003230-samyang-foods) · [두산에너빌리티 (034020)](/blog/034020-doosan-enerbility) · [기업분석 시리즈 전체](/blog/series/company-reports)
 
 ---
 
