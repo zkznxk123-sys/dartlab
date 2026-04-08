@@ -1,0 +1,132 @@
+# Blog Finance Audit
+
+128 mismatches
+
+- {'path': 'blog/05-company-reports/01-000660-skhynix/index.md', 'line': 432, 'topic': 'CF', 'label': '배당금지급', 'year': '2021', 'table': 47.0, 'actual': 47.42, 'diff': 0.42, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출액', 'year': '2019', 'table': 5435.0, 'actual': 5435.81, 'diff': 0.81, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출액', 'year': '2017', 'table': 4584.0, 'actual': 4584.839, 'diff': 0.839, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출원가', 'year': '2025', 'table': 13023.0, 'actual': 12987.566, 'diff': -35.434, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출원가', 'year': '2024', 'table': 10032.0, 'actual': 10047.977, 'diff': 15.977, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출원가', 'year': '2023', 'table': 7847.0, 'actual': 7761.826, 'diff': -85.174, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출원가', 'year': '2022', 'table': 6627.0, 'actual': 6578.14, 'diff': -48.86, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출원가', 'year': '2021', 'table': 4690.0, 'actual': 4713.924, 'diff': 23.924, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출원가', 'year': '2020', 'table': 4608.0, 'actual': 4570.341, 'diff': -37.659, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출원가', 'year': '2019', 'table': 3919.0, 'actual': 3864.39, 'diff': -54.61, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출원가', 'year': '2018', 'table': 3394.0, 'actual': 3437.86, 'diff': 43.86, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출원가', 'year': '2017', 'table': 3372.0, 'actual': 3405.431, 'diff': 33.431, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출총이익', 'year': '2025', 'table': 10495.0, 'actual': 10530.285, 'diff': 35.285, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출총이익', 'year': '2024', 'table': 7248.0, 'actual': 7232.173, 'diff': -15.827, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출총이익', 'year': '2023', 'table': 4082.0, 'actual': 4167.32, 'diff': 85.32, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출총이익', 'year': '2022', 'table': 2463.0, 'actual': 2512.225, 'diff': 49.225, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출총이익', 'year': '2021', 'table': 1730.0, 'actual': 1706.379, 'diff': -23.621, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출총이익', 'year': '2020', 'table': 1877.0, 'actual': 1914.725, 'diff': 37.725, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출총이익', 'year': '2019', 'table': 1516.0, 'actual': 1571.42, 'diff': 55.42, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출총이익', 'year': '2018', 'table': 1299.0, 'actual': 1255.698, 'diff': -43.302, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '매출총이익', 'year': '2017', 'table': 1212.0, 'actual': 1179.408, 'diff': -32.592, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '영업이익', 'year': '2024', 'table': 3475.0, 'actual': 3445.692, 'diff': -29.308, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '영업이익', 'year': '2023', 'table': 1321.0, 'actual': 1475.134, 'diff': 154.134, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '영업이익', 'year': '2021', 'table': 685.0, 'actual': 653.634, 'diff': -31.366, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '영업이익', 'year': '2020', 'table': 844.0, 'actual': 953.379, 'diff': 109.379, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '영업이익', 'year': '2019', 'table': 710.0, 'actual': 782.852, 'diff': 72.852, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '영업이익', 'year': '2018', 'table': 572.0, 'actual': 551.771, 'diff': -20.229, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '영업이익', 'year': '2017', 'table': 485.0, 'actual': 433.204, 'diff': -51.796, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '당기순이익', 'year': '2025', 'table': 3860.0, 'actual': 3886.737, 'diff': 26.737, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '당기순이익', 'year': '2024', 'table': 2679.0, 'actual': 2712.557, 'diff': 33.557, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '당기순이익', 'year': '2023', 'table': 1344.0, 'actual': 1265.912, 'diff': -78.088, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '당기순이익', 'year': '2022', 'table': 772.0, 'actual': 802.711, 'diff': 30.711, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '당기순이익', 'year': '2021', 'table': 617.0, 'actual': 566.576, 'diff': -50.424, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '당기순이익', 'year': '2020', 'table': 732.0, 'actual': 679.737, 'diff': -52.263, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '당기순이익', 'year': '2019', 'table': 594.0, 'actual': 600.288, 'diff': 6.288, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '당기순이익', 'year': '2018', 'table': 390.0, 'actual': 353.045, 'diff': -36.955, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 140, 'topic': 'IS', 'label': '당기순이익', 'year': '2017', 'table': 283.0, 'actual': 223.052, 'diff': -59.948, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자산총계', 'year': '2025', 'table': 22030.0, 'actual': 21964.956, 'diff': -65.044, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자산총계', 'year': '2024', 'table': 15930.0, 'actual': 15947.822, 'diff': 17.822, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자산총계', 'year': '2023', 'table': 11720.0, 'actual': 11703.028, 'diff': -16.972, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자산총계', 'year': '2022', 'table': 9239.0, 'actual': 9249.295, 'diff': 10.295, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자산총계', 'year': '2021', 'table': 7464.0, 'actual': 7530.803, 'diff': 66.803, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자산총계', 'year': '2020', 'table': 5621.0, 'actual': 5562.244, 'diff': -58.756, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자산총계', 'year': '2019', 'table': 4699.0, 'actual': 4703.59, 'diff': 4.59, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자산총계', 'year': '2018', 'table': 4143.0, 'actual': 4121.383, 'diff': -21.617, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자산총계', 'year': '2017', 'table': 4007.0, 'actual': 3981.779, 'diff': -25.221, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '부채총계', 'year': '2025', 'table': 9272.0, 'actual': 9249.556, 'diff': -22.444, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '부채총계', 'year': '2024', 'table': 7711.0, 'actual': 7667.489, 'diff': -43.511, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '부채총계', 'year': '2023', 'table': 5895.0, 'actual': 5935.125, 'diff': 40.125, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '부채총계', 'year': '2022', 'table': 4743.0, 'actual': 4701.657, 'diff': -41.343, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '부채총계', 'year': '2021', 'table': 3615.0, 'actual': 3573.889, 'diff': -41.111, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '부채총계', 'year': '2019', 'table': 1793.0, 'actual': 1827.213, 'diff': 34.213, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '부채총계', 'year': '2018', 'table': 1761.0, 'actual': 1777.177, 'diff': 16.177, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '부채총계', 'year': '2017', 'table': 1981.0, 'actual': 1950.711, 'diff': -30.289, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자본총계', 'year': '2025', 'table': 12758.0, 'actual': 12715.4, 'diff': -42.6, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자본총계', 'year': '2024', 'table': 8219.0, 'actual': 8280.333, 'diff': 61.333, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자본총계', 'year': '2023', 'table': 5825.0, 'actual': 5767.903, 'diff': -57.097, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자본총계', 'year': '2022', 'table': 4496.0, 'actual': 4547.637, 'diff': 51.637, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자본총계', 'year': '2021', 'table': 3949.0, 'actual': 3956.914, 'diff': 7.914, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자본총계', 'year': '2020', 'table': 3531.0, 'actual': 3472.755, 'diff': -58.245, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자본총계', 'year': '2019', 'table': 2906.0, 'actual': 2876.377, 'diff': -29.623, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자본총계', 'year': '2018', 'table': 2381.0, 'actual': 2344.207, 'diff': -36.793, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '자본총계', 'year': '2017', 'table': 2026.0, 'actual': 2031.069, 'diff': 5.069, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '단기금융상품', 'year': '2025', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '단기금융상품', 'year': '2024', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '단기금융상품', 'year': '2023', 'table': 176.0, 'actual': 223.493, 'diff': 47.493, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '단기금융상품', 'year': '2022', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '단기금융상품', 'year': '2021', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '단기금융상품', 'year': '2020', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '단기금융상품', 'year': '2019', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '단기금융상품', 'year': '2018', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 241, 'topic': 'BS', 'label': '단기금융상품', 'year': '2017', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 350, 'topic': 'CF', 'label': '배당금지급', 'year': '2023', 'table': 75.0, 'actual': 74.581, 'diff': -0.419, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 350, 'topic': 'CF', 'label': '배당금지급', 'year': '2022', 'table': 60.0, 'actual': 59.81, 'diff': -0.19, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 350, 'topic': 'CF', 'label': '배당금지급', 'year': '2020', 'table': 60.0, 'actual': 60.261, 'diff': 0.261, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 350, 'topic': 'CF', 'label': '배당금지급', 'year': '2019', 'table': 30.0, 'actual': 30.13, 'diff': 0.13, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 350, 'topic': 'CF', 'label': '배당금지급', 'year': '2018', 'table': 19.0, 'actual': 18.832, 'diff': -0.168, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 350, 'topic': 'CF', 'label': '배당금지급', 'year': '2017', 'table': 11.0, 'actual': 11.299, 'diff': 0.299, 'unit': '억'}
+- {'path': 'blog/05-company-reports/02-003230-samyang-foods/index.md', 'line': 350, 'topic': 'CF', 'label': '배당금지급', 'year': '2016', 'table': 4.0, 'actual': 3.766, 'diff': -0.234, 'unit': '억'}
+- {'path': 'blog/05-company-reports/03-034020-doosan-enerbility/index.md', 'line': 231, 'topic': 'CF', 'label': '배당금지급', 'year': '2024', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/03-034020-doosan-enerbility/index.md', 'line': 231, 'topic': 'CF', 'label': '배당금지급', 'year': '2023', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/03-034020-doosan-enerbility/index.md', 'line': 231, 'topic': 'CF', 'label': '배당금지급', 'year': '2021', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/03-034020-doosan-enerbility/index.md', 'line': 231, 'topic': 'CF', 'label': '배당금지급', 'year': '2020', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/03-034020-doosan-enerbility/index.md', 'line': 231, 'topic': 'CF', 'label': '배당금지급', 'year': '2019', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '매출액', 'year': '2016', 'table': 68.0, 'actual': 68.437, 'diff': 0.437, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '매출원가', 'year': '2016', 'table': 62.0, 'actual': 62.144, 'diff': 0.144, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '매출총이익', 'year': '2022', 'table': 45.0, 'actual': 45.311, 'diff': 0.311, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '매출총이익', 'year': '2021', 'table': 82.0, 'actual': 81.663, 'diff': -0.337, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '매출총이익', 'year': '2018', 'table': 20.0, 'actual': 19.572, 'diff': -0.428, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '매출총이익', 'year': '2017', 'table': 14.0, 'actual': 14.366, 'diff': 0.366, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '매출총이익', 'year': '2016', 'table': 6.0, 'actual': 6.294, 'diff': 0.294, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '영업이익', 'year': '2023', 'table': -97.0, 'actual': -97.368, 'diff': -0.368, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '영업이익', 'year': '2019', 'table': -23.0, 'actual': -22.52, 'diff': 0.48, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '영업이익', 'year': '2018', 'table': -77.0, 'actual': -76.599, 'diff': 0.401, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '영업이익', 'year': '2017', 'table': -58.0, 'actual': -57.718, 'diff': 0.282, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '영업이익', 'year': '2016', 'table': -54.0, 'actual': -54.112, 'diff': -0.112, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '당기순이익', 'year': '2023', 'table': -36.0, 'actual': -35.822, 'diff': 0.178, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '당기순이익', 'year': '2021', 'table': -92.0, 'actual': -91.913, 'diff': 0.087, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '당기순이익', 'year': '2020', 'table': -34.0, 'actual': -34.224, 'diff': -0.224, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '당기순이익', 'year': '2019', 'table': -17.0, 'actual': -17.383, 'diff': -0.383, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '당기순이익', 'year': '2018', 'table': -71.0, 'actual': -70.699, 'diff': 0.301, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '당기순이익', 'year': '2017', 'table': -70.0, 'actual': -70.473, 'diff': -0.473, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 73, 'topic': 'IS', 'label': '당기순이익', 'year': '2016', 'table': -36.0, 'actual': -35.872, 'diff': 0.128, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 180, 'topic': 'BS', 'label': '부채총계', 'year': '2018', 'table': 47.0, 'actual': 46.842, 'diff': -0.158, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 180, 'topic': 'BS', 'label': '부채총계', 'year': '2017', 'table': 32.0, 'actual': 31.683, 'diff': -0.317, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 280, 'topic': 'CF', 'label': '영업활동현금흐름', 'year': '2023', 'table': -78.0, 'actual': -77.656, 'diff': 0.344, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 280, 'topic': 'CF', 'label': '영업활동현금흐름', 'year': '2021', 'table': -94.0, 'actual': -94.195, 'diff': -0.195, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 280, 'topic': 'CF', 'label': '영업활동현금흐름', 'year': '2020', 'table': 17.0, 'actual': 16.766, 'diff': -0.234, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 280, 'topic': 'CF', 'label': '영업활동현금흐름', 'year': '2018', 'table': -91.0, 'actual': -91.126, 'diff': -0.126, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 280, 'topic': 'CF', 'label': '영업활동현금흐름', 'year': '2017', 'table': -43.0, 'actual': -43.469, 'diff': -0.469, 'unit': '억'}
+- {'path': 'blog/05-company-reports/04-196170-alteogen/index.md', 'line': 280, 'topic': 'CF', 'label': '영업활동현금흐름', 'year': '2016', 'table': -32.0, 'actual': -31.586, 'diff': 0.414, 'unit': '억'}
+- {'path': 'blog/05-company-reports/05-011200-hmm/index.md', 'line': 285, 'topic': 'CF', 'label': '배당금지급', 'year': '2025', 'table': 56.0, 'actual': 56.25, 'diff': 0.25, 'unit': '억'}
+- {'path': 'blog/05-company-reports/05-011200-hmm/index.md', 'line': 285, 'topic': 'CF', 'label': '배당금지급', 'year': '2018', 'table': 48.0, 'actual': 47.93, 'diff': -0.07, 'unit': '억'}
+- {'path': 'blog/05-company-reports/06-068270-celltrion/index.md', 'line': 168, 'topic': 'BS', 'label': '무형자산', 'year': '2025', 'table': 13.78, 'actual': 137782.674, 'diff': 137768.894, 'unit': '억'}
+- {'path': 'blog/05-company-reports/06-068270-celltrion/index.md', 'line': 168, 'topic': 'BS', 'label': '무형자산', 'year': '2024', 'table': 13.7, 'actual': 137016.213, 'diff': 137002.513, 'unit': '억'}
+- {'path': 'blog/05-company-reports/06-068270-celltrion/index.md', 'line': 168, 'topic': 'BS', 'label': '무형자산', 'year': '2023', 'table': 13.34, 'actual': 133361.172, 'diff': 133347.832, 'unit': '억'}
+- {'path': 'blog/05-company-reports/06-068270-celltrion/index.md', 'line': 168, 'topic': 'BS', 'label': '무형자산', 'year': '2022', 'table': 1.62, 'actual': 16223.262, 'diff': 16221.642, 'unit': '억'}
+- {'path': 'blog/05-company-reports/06-068270-celltrion/index.md', 'line': 168, 'topic': 'BS', 'label': '무형자산', 'year': '2021', 'table': 1.49, 'actual': 14915.71, 'diff': 14914.22, 'unit': '억'}
+- {'path': 'blog/05-company-reports/06-068270-celltrion/index.md', 'line': 168, 'topic': 'BS', 'label': '무형자산', 'year': '2020', 'table': 1.4, 'actual': 14041.886, 'diff': 14040.486, 'unit': '억'}
+- {'path': 'blog/05-company-reports/06-068270-celltrion/index.md', 'line': 168, 'topic': 'BS', 'label': '무형자산', 'year': '2019', 'table': 1.01, 'actual': 10081.929, 'diff': 10080.919, 'unit': '억'}
+- {'path': 'blog/05-company-reports/06-068270-celltrion/index.md', 'line': 168, 'topic': 'BS', 'label': '무형자산', 'year': '2018', 'table': 0.89, 'actual': 8850.187, 'diff': 8849.297, 'unit': '억'}
+- {'path': 'blog/05-company-reports/06-068270-celltrion/index.md', 'line': 168, 'topic': 'BS', 'label': '무형자산', 'year': '2017', 'table': 0.79, 'actual': 7883.587, 'diff': 7882.797, 'unit': '억'}
+- {'path': 'blog/05-company-reports/06-068270-celltrion/index.md', 'line': 168, 'topic': 'BS', 'label': '무형자산', 'year': '2016', 'table': 0.72, 'actual': 7201.82, 'diff': 7201.1, 'unit': '억'}
+- {'path': 'blog/05-company-reports/06-068270-celltrion/index.md', 'line': 251, 'topic': 'CF', 'label': '배당금지급', 'year': '2020', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/06-068270-celltrion/index.md', 'line': 251, 'topic': 'CF', 'label': '배당금지급', 'year': '2019', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/06-068270-celltrion/index.md', 'line': 251, 'topic': 'CF', 'label': '배당금지급', 'year': '2018', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/06-068270-celltrion/index.md', 'line': 251, 'topic': 'CF', 'label': '배당금지급', 'year': '2017', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}
+- {'path': 'blog/05-company-reports/06-068270-celltrion/index.md', 'line': 251, 'topic': 'CF', 'label': '배당금지급', 'year': '2016', 'table': 0.0, 'actual': None, 'msg': 'actual missing'}

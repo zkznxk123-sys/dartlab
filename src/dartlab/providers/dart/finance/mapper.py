@@ -292,43 +292,10 @@ class AccountMapper:
         return None
 
     def labelMap(self) -> dict[str, str]:
-        """snakeId → 대표 한글명 매핑 (캐싱).
+        """snakeId → 대표 한글명 매핑. SSOT 위임 (core/finance/labels.py)."""
+        from dartlab.core.finance.labels import get_korean_labels
 
-        우선순위:
-        1. standardAccounts의 korName (정본)
-        2. accountMappings.json에서 한글명 중 가장 짧은 것
-        """
-        if hasattr(self, "_labelMap"):
-            return self._labelMap
-
-        result: dict[str, str] = {}
-        usedKorNames: set[str] = set()
-
-        if self._stdAccounts:
-            for snakeId, meta in self._stdAccounts.items():
-                korName = meta["korName"]
-                result[snakeId] = korName
-                usedKorNames.add(korName)
-
-        if self._mappings:
-            reverse: dict[str, list[str]] = {}
-            for name, snakeId in self._mappings.items():
-                if any("\uac00" <= ch <= "\ud7a3" for ch in name):
-                    reverse.setdefault(snakeId, []).append(name)
-            for snakeId, names in reverse.items():
-                if snakeId not in result:
-                    candidate = min(names, key=len)
-                    if candidate in usedKorNames:
-                        # korName 충돌 — 다른 이름 시도, 없으면 snakeId 그대로
-                        alt = sorted(names, key=len)
-                        chosen = next((n for n in alt if n not in usedKorNames), snakeId)
-                        result[snakeId] = chosen
-                    else:
-                        result[snakeId] = candidate
-                    usedKorNames.add(result[snakeId])
-
-        self._labelMap = result
-        return result
+        return get_korean_labels()
 
     def sortOrder(self, sjDiv: str) -> dict[str, int]:
         """sj_div별 snakeId → 표시 순서 (common/finance/ordering 위임)."""

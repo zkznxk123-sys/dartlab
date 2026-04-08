@@ -33,8 +33,14 @@ def _(c):
 
 @app.cell
 def _(c):
+    c.sections
+    return
+
+
+@app.cell
+def _(c):
     # 손익계산서 조회
-    c.show("IS",'annual')
+    c.show("IS")
     return
 
 

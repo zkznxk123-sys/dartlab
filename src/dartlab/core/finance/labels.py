@@ -12,15 +12,19 @@ from pathlib import Path
 
 
 @lru_cache(maxsize=1)
-def _load_standard_accounts() -> dict[str, dict]:
-    """DART mapperData/standardAccounts → {snakeId: {korName, code, level, sj}}."""
+def _load_account_mappings() -> dict:
+    """DART mapperData/accountMappings.json 전체 로드."""
     mapper_path = (
         Path(__file__).resolve().parents[2] / "providers" / "dart" / "finance" / "mapperData" / "accountMappings.json"
     )
     if not mapper_path.exists():
         return {}
-    data = json.loads(mapper_path.read_text(encoding="utf-8"))
-    return data.get("standardAccounts", {})
+    return json.loads(mapper_path.read_text(encoding="utf-8"))
+
+
+def _load_standard_accounts() -> dict[str, dict]:
+    """{snakeId: {korName, code, level, sj}}."""
+    return _load_account_mappings().get("standardAccounts", {})
 
 
 # standardAccounts에 없지만 AI 컨텍스트에서 자주 쓰는 snakeId 보충 매핑
@@ -56,14 +60,52 @@ _KR_SUPPLEMENTS: dict[str, str] = {
 
 @lru_cache(maxsize=1)
 def get_korean_labels() -> dict[str, str]:
-    """snakeId → 한글 라벨. 3,143개 표준계정 + 보충 매핑."""
-    sa = _load_standard_accounts()
-    labels = {sid: meta["korName"] for sid, meta in sa.items() if meta.get("korName")}
-    # 보충 매핑 (standardAccounts에 없는 키만 추가)
+    """snakeId → 한글 라벨 SSOT.
+
+    우선순위:
+    1. standardAccounts.korName (정본, 3,143개)
+    2. mappings 역인덱스 — 한국어 → snakeId 의 가장 짧은 한국어명 (1:N 충돌 시 alt 탐색)
+    3. _KR_SUPPLEMENTS 보충 (자주 쓰는 미등록 snakeId)
+    """
+    data = _load_account_mappings()
+    stdAccounts: dict[str, dict] = data.get("standardAccounts", {})
+    mappings: dict[str, str] = data.get("mappings", {})
+
+    result: dict[str, str] = {}
+    used: set[str] = set()
+
+    # 1. standardAccounts 정본
+    for snakeId, meta in stdAccounts.items():
+        korName = meta.get("korName")
+        if korName:
+            result[snakeId] = korName
+            used.add(korName)
+
+    # 2. mappings 역인덱스 (한국어 → snakeId 를 snakeId → [한국어들]로 뒤집어 짧은 것)
+    if mappings:
+        reverse: dict[str, list[str]] = {}
+        for name, snakeId in mappings.items():
+            if any("\uac00" <= ch <= "\ud7a3" for ch in name):
+                reverse.setdefault(snakeId, []).append(name)
+        for snakeId, names in reverse.items():
+            if snakeId in result:
+                continue
+            candidate = min(names, key=len)
+            if candidate in used:
+                # korName 충돌 — alt 탐색, 없으면 snakeId
+                alt = sorted(names, key=len)
+                chosen = next((n for n in alt if n not in used), snakeId)
+                result[snakeId] = chosen
+            else:
+                result[snakeId] = candidate
+            used.add(result[snakeId])
+
+    # 3. 보충
     for sid, name in _KR_SUPPLEMENTS.items():
-        if sid not in labels:
-            labels[sid] = name
-    return labels
+        if sid not in result:
+            result[sid] = name
+
+    return result
 
 
 def _snake_to_title(snake_id: str) -> str:
