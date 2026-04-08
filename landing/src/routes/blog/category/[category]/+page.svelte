@@ -327,10 +327,11 @@
 
 		.category-post-thumb {
 			width: 100%;
-			max-width: 220px;
+			max-width: 100%;
 			height: auto;
-			aspect-ratio: 1 / 1;
-			justify-self: end;
+			aspect-ratio: 16 / 9;
+			object-fit: cover;
+			justify-self: stretch;
 		}
 	}
 
