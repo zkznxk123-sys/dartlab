@@ -341,7 +341,7 @@ def _extractPeerFeatures(company) -> dict[str, float] | None:
     features: dict[str, float] = {}
 
     try:
-        ratios = company.finance.ratios
+        ratios = company._getRatiosInternal()
         if ratios is None:
             return None
 
@@ -766,9 +766,10 @@ def _predictDirection(betas: dict | None, macroData: dict) -> str | None:
 
 
 def _getFinanceSeries(company):
-    """Company에서 finance series dict 추출."""
+    """Company 에서 finance series-tuple 추출 (private internal)."""
     try:
-        return company.finance._series if hasattr(company.finance, "_series") else None
+        result = company._buildFinanceSeries(freq="Q")
+        return result[0] if result else None
     except (AttributeError, TypeError):
         return None
 

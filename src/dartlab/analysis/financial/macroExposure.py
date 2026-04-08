@@ -275,7 +275,7 @@ def calcValuationBand(company, *, basePeriod: str | None = None) -> dict | None:
 
     # ratioSeries에서 PER/PBR 과거 시계열 추출
     try:
-        ratios = company.ratios
+        ratios = company.show("ratios")
         if ratios is None:
             return None
     except (AttributeError, TypeError):

@@ -231,7 +231,7 @@ class AuditRunner:
 
         # ── 5. ratios ──
         try:
-            ratios = c.ratios
+            ratios = c.show("ratios")
             if ratios is not None:
                 ser = serializeCalcResult("ratioTable", ratios)
                 rows.append(

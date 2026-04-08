@@ -268,7 +268,7 @@ def createSimulation(
 
     # 과거 비율 + 기준연도 비율
     ratios = extract_historical_ratios(series)
-    is_df = company.IS
+    is_df = company.show("IS")
 
     rev_base = sum(_quarterlyValues(is_df, "sales", baseYear))
     gp_base = sum(_quarterlyValues(is_df, "gross_profit", baseYear))

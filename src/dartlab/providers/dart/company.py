@@ -315,11 +315,16 @@ class Company:
 
         self._hintedKeys: set[str] = set()  # 동일 안내 반복 방지
 
+        # Plan v10 P3 (deferred): namespace 제거 별도 commit 예정. 큰 마이그레이션.
         self._notesAccessor = Notes(self) if self._hasDocs else None
         self.docs = _DocsAccessor(self)
         self.finance = _FinanceAccessor(self)
         self.report = _ReportAccessor(self)
         self._profileAccessor = _ProfileAccessor(self)
+        # underscore alias (P3 마이그레이션 시작용)
+        self._docs = self.docs
+        self._finance = self.finance
+        self._report = self.report
 
     def __repr__(self):
         try:
@@ -340,7 +345,7 @@ class Company:
 
     def _financeProperty(self, name: str):
         """finance accessor 위임 + hint."""
-        result = getattr(self.finance, name)
+        result = getattr(self._finance, name)
         if result is None:
             self._hintOnce(name, name, "finance")
         return result
@@ -1081,37 +1086,8 @@ class Company:
         self._cache[cacheKey] = df
         return df
 
-    @property
-    def notes(self):
-        """K-IFRS 주석사항 접근자.
-
-        Capabilities:
-            - K-IFRS 재무제표 주석(notes) 데이터 접근
-            - 주석 항목별 조회
-
-        Returns:
-            NotesAccessor -- 주석사항 조회 객체.
-
-        Requires:
-            데이터: HuggingFace finance parquet (자동 다운로드)
-
-        Example::
-
-            c = Company("005930")
-            c.notes                # 주석사항 접근자
-
-        AIContext:
-            - K-IFRS 주석에서 회계정책, 우발부채, 관계사 거래 등 정성 정보 추출
-
-        Guide:
-            - "주석사항 보여줘" → c.notes
-            - "회계정책 확인" → c.notes에서 해당 항목 조회
-
-        SeeAlso:
-            - BS: 재무상태표 (주석이 보충하는 본문)
-            - rawFinance: 재무 원본 데이터
-        """
-        return self._notesAccessor
+    # c.notes property 제거 (Plan v10 P2) — 12 sub-property 모두 c.show("inventory") 등으로 통합.
+    # Notes 클래스는 _notesAccessor (private) 로 유지, show() topic dispatch 가 호출.
 
     def _docsSectionsFreq(self, freqScope: str, *, includeMixed: bool = True) -> pl.DataFrame | None:
         """→ SectionsAnalyzer.sectionsFreq()."""
@@ -1375,145 +1351,8 @@ class Company:
         self._cache[cacheKey] = df
         return df
 
-    @property
-    def BS(self) -> pl.DataFrame | None:
-        """재무상태표 (Balance Sheet) — 계정명 × 기간 DataFrame.
-
-        Capabilities:
-            - XBRL 정규화 재무상태표 (finance 우선)
-            - docs 서술형 fallback
-            - 최대 10년 분기별 시계열
-
-        AIContext:
-            - ask()/chat()에서 자산/부채/자본 구조 분석 컨텍스트
-
-        Guide:
-            - "재무상태표 보여줘" → c.BS
-            - "자산/부채 구조" → c.BS로 확인
-            - "유동비율은?" → c.ratios 또는 c.BS에서 계산
-
-        SeeAlso:
-            - IS: 손익계산서 (수익성 분석)
-            - CF: 현금흐름표 (현금창출력)
-            - ratios: 재무비율 (BS 기반 안정성 비율 포함)
-            - select: 특정 계정만 추출 + 시각화
-
-        Returns:
-            pl.DataFrame — 계정명 | 2024Q4 | 2024Q3 | ... 또는 None.
-
-        Requires:
-            데이터: finance 또는 docs (자동 다운로드)
-
-        Example::
-
-            c = Company("005930")
-            c.BS  # 재무상태표
-        """
-        return self._financeProperty("BS")
-
-    @property
-    def IS(self) -> pl.DataFrame | None:
-        """손익계산서 (Income Statement) — 계정명 × 기간 DataFrame.
-
-        Capabilities:
-            - XBRL 정규화 손익계산서 (finance 우선)
-            - docs 서술형 fallback
-            - 최대 10년 분기별 시계열
-
-        AIContext:
-            - ask()/chat()에서 수익성/매출 구조 분석 컨텍스트
-
-        Guide:
-            - "손익계산서 보여줘" → c.IS
-            - "매출/영업이익 추이" → c.IS 또는 c.select("IS", ["매출액", "영업이익"])
-            - "수익 구조 분석" → c.IS + c.analysis("financial", "수익구조")
-
-        SeeAlso:
-            - BS: 재무상태표 (자산/부채 구조)
-            - CF: 현금흐름표 (실제 현금 기반)
-            - CIS: 포괄손익계산서 (기타포괄손익 포함)
-            - select: 특정 계정 추출 + 시각화
-
-        Returns:
-            pl.DataFrame — 계정명 | 2024Q4 | 2024Q3 | ... 또는 None.
-
-        Requires:
-            데이터: finance 또는 docs (자동 다운로드)
-
-        Example::
-
-            c = Company("005930")
-            c.IS  # 손익계산서
-        """
-        return self._financeProperty("IS")
-
-    @property
-    def CIS(self) -> pl.DataFrame | None:
-        """포괄손익계산서 (Comprehensive Income Statement) — 계정명 × 기간 DataFrame.
-
-        Capabilities:
-            - XBRL 정규화 포괄손익계산서 (finance 우선)
-            - docs 서술형 fallback
-            - 기타포괄손익 항목 포함
-
-        AIContext:
-            - ask()/chat()에서 기타포괄손익/총포괄이익 분석 컨텍스트
-
-        Guide:
-            - "포괄손익계산서 보여줘" → c.CIS
-            - "기타포괄손익 항목은?" → c.CIS
-
-        SeeAlso:
-            - IS: 일반 손익계산서 (당기순이익까지)
-            - SCE: 자본변동표 (포괄손익이 자본에 미치는 영향)
-
-        Returns:
-            pl.DataFrame — 계정명 | 2024Q4 | 2024Q3 | ... 또는 None.
-
-        Requires:
-            데이터: finance 또는 docs (자동 다운로드)
-
-        Example::
-
-            c = Company("005930")
-            c.CIS  # 포괄손익계산서
-        """
-        return self._financeProperty("CIS")
-
-    @property
-    def CF(self) -> pl.DataFrame | None:
-        """현금흐름표 (Cash Flow Statement) — 계정명 × 기간 DataFrame.
-
-        Capabilities:
-            - XBRL 정규화 현금흐름표 (finance 우선)
-            - docs 서술형 fallback
-            - 영업/투자/재무 활동 분류
-
-        AIContext:
-            - ask()/chat()에서 현금창출력/투자/재무활동 분석 컨텍스트
-
-        Guide:
-            - "현금흐름표 보여줘" → c.CF
-            - "영업현금흐름 추이" → c.select("CF", ["영업활동으로인한현금흐름"])
-            - "FCF 확인" → c.ratios에서 FCF 비율 또는 c.CF에서 직접 계산
-
-        SeeAlso:
-            - IS: 손익계산서 (발생주의 vs 현금주의 비교)
-            - BS: 재무상태표 (현금성자산 확인)
-            - ratios: 재무비율 (현금흐름 관련 비율 포함)
-
-        Returns:
-            pl.DataFrame — 계정명 | 2024Q4 | 2024Q3 | ... 또는 None.
-
-        Requires:
-            데이터: finance 또는 docs (자동 다운로드)
-
-        Example::
-
-            c = Company("005930")
-            c.CF  # 현금흐름표
-        """
-        return self._financeProperty("CF")
+    # c.BS / c.IS / c.CF / c.CIS property 제거 (Plan v10 P0 — api-contract).
+    # 사용자는 c.show("IS") / c.show.IS() / c.show("IS", freq="Y", scope="separate") 사용.
 
     @property
     def sections(self) -> pl.DataFrame | None:
@@ -1559,7 +1398,7 @@ class Company:
         if cacheKey in self._cache:
             return self._cache[cacheKey]
 
-        sectionsSource = self.docs.sections
+        sectionsSource = self._docs.sections
         if sectionsSource is None:
             self._hintOnce("sections", "sections", "docs")
             self._cache[cacheKey] = None
@@ -1597,7 +1436,7 @@ class Company:
 
         if self._hasFinance:
             for ft in ("BS", "IS", "CIS", "CF", "SCE"):
-                if getattr(self.finance, ft, None) is not None:
+                if getattr(self._finance, ft, None) is not None:
                     topicExtras.setdefault(ft, []).append(_baseExtraRow(chapter="III", topic=ft, source="finance"))
             if self._ratioSeries() is not None:
                 topicExtras.setdefault("ratios", []).append(
@@ -1606,7 +1445,7 @@ class Company:
 
         if self.rawReport is not None:
             try:
-                for apiType in self.report.availableApiTypes:
+                for apiType in self._report.availableApiTypes:
                     topic = apiType
                     if topic in _API_TYPE_TO_TOPIC:
                         topic = _API_TYPE_TO_TOPIC[topic]
@@ -1793,27 +1632,26 @@ class Company:
         freq: str = "Q",
         scope: str = "consolidated",
     ) -> pl.DataFrame | None:
-        """finance source topic 의 실제 데이터 반환.
+        """finance source topic 의 실제 데이터 반환 (show 진입점).
 
         ``c.show("IS", freq="Y", scope="separate")`` 같은 사용자 호출이
         여기로 들어와서 freq/scope 에 따라 빌드.
         """
         if topic == "ratios":
-            ratioSeries = self._ratioSeries()
-            if ratioSeries is None:
-                return None
-            series, years = ratioSeries
-            templateKey = _ratioTemplateKeyForIndustryGroup(getattr(self.sector, "industryGroup", None))
-            fieldNames = _RATIO_TEMPLATE_FIELDS.get(templateKey)
-            return self._applyPeriodFilter(_ratioSeriesToDataFrame(series, years, fieldNames=fieldNames), period)
+            return self._applyPeriodFilter(self._buildRatios(), period)
+        if topic == "ratioSeries":
+            # dict 구조 — DataFrame 으로 변환 어려움. None 반환 + 사용자 안내.
+            # 사용자는 c.show("ratios") DataFrame 사용 권장.
+            return None
         if topic in {"BS", "IS", "CF", "CIS"}:
             df = self._financeOrDocsStatement(topic, freq=freq, scope=scope)
             return self._applyPeriodFilter(df, period) if df is not None else None
-        # SCE / sceMatrix 등 — finance accessor 위임 (분기/연결 only)
-        df = getattr(self.finance, topic, None)
-        if df is None:
+        if topic == "SCE":
+            return self._applyPeriodFilter(self._sce(), period)
+        if topic == "sceMatrix":
+            # 3차원 dict — DataFrame 변환 X. 사용자는 SCE topic.
             return None
-        return self._applyPeriodFilter(df, period)
+        return None
 
     def _traceFinanceTopic(self, topic: str, *, period: str | None = None) -> dict[str, Any] | None:
         """finance authoritative topic provenance를 facts 빌드 없이 직접 계산."""
@@ -1899,7 +1737,7 @@ class Company:
         """sections 외 경로에서 직접 회수 가능한 topic fallback."""
         if self._hasReport:
             try:
-                report_api_types = set(getattr(self.report, "apiTypes", []) or [])
+                report_api_types = set(getattr(self._report, "apiTypes", []) or [])
             except (AttributeError, TypeError, ValueError):
                 report_api_types = set()
             if topic in report_api_types:
@@ -1985,11 +1823,11 @@ class Company:
         return self._applyPeriodFilter(df, period)
 
     def _reportFrame(self, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
-        if self.report is None:
+        if self._report is None:
             return None
         apiType = _REPORT_TOPIC_TO_API_TYPE.get(topic, topic)
         try:
-            if apiType not in self.report.apiTypes:
+            if apiType not in self._report.apiTypes:
                 return None
             return self._reportFrameInner(apiType, topic, raw=raw)
         except (
@@ -2139,7 +1977,7 @@ class Company:
         if topic.startswith("segments:"):
             return self._showSegmentsSub(topic.split(":", 1)[1])
 
-        if topic in {"BS", "IS", "CF", "CIS", "SCE", "ratios"}:
+        if topic in {"BS", "IS", "CF", "CIS", "SCE", "ratios", "ratioSeries", "sceMatrix"}:
             if block not in (None, 0):
                 return None
             result = self._showFinanceTopic(topic, period=period, freq=freq, scope=scope)
@@ -2147,11 +1985,17 @@ class Company:
                 result = self._cleanFinanceDataFrame(result, topic)
             return result if isinstance(result, pl.DataFrame) else None
 
+        # Notes 12 항목 — c.notes.X 제거 후 show topic 으로 흡수 (Plan v10 P2)
+        from dartlab.providers.dart.docs.notes import _NOTES_DISPATCH
+
+        if topic in _NOTES_DISPATCH and self._notesAccessor is not None:
+            return self._notesAccessor._get(topic)
+
         # 전체 sections 캐시가 있으면 재사용, 없으면 해당 topic만 부분 빌드
         if "_sections" in self._cache:
             sec = self._cache["_sections"]
         else:
-            docsSections = self.docs.sections
+            docsSections = self._docs.sections
             if docsSections is not None:
                 partialDocs = docsSections.forTopics({topic})
                 if partialDocs is not None and "source" not in partialDocs.columns:
@@ -2286,7 +2130,7 @@ class Company:
         if "_sections" in self._cache:
             sec = self._cache["_sections"]
         else:
-            docsSections = self.docs.sections
+            docsSections = self._docs.sections
             sec = docsSections.forTopics({topic}) if docsSections is not None else None
         if sec is None:
             self._cache[cacheKey] = {}
@@ -2693,7 +2537,7 @@ class Company:
             topicHistoryDataFrame,
         )
 
-        docsSections = self.docs.sections
+        docsSections = self._docs.sections
         if docsSections is None:
             return None
         if topic is not None and fromPeriod is not None and toPeriod is not None:
@@ -2747,7 +2591,7 @@ class Company:
         """
         from dartlab.core.docs.diff import keywordFrequency
 
-        docsSections = self.docs.sections
+        docsSections = self._docs.sections
         if docsSections is None:
             return None
         kws = None
@@ -3680,7 +3524,7 @@ class Company:
         for rIdx, apiType in enumerate(API_TYPES):
             if apiType in existing:
                 continue
-            df = self.report.extract(apiType)
+            df = self._report.extract(apiType)
             if df is None or df.is_empty():
                 continue
             chapter = self._chapterForTopic(apiType)
@@ -3767,7 +3611,7 @@ class Company:
             c = Company("005930")
             c.retrievalBlocks          # 전체 retrieval 블록
         """
-        return self.docs.retrievalBlocks
+        return self._docs.retrievalBlocks
 
     @property
     def contextSlices(self) -> pl.DataFrame | None:
@@ -3801,7 +3645,7 @@ class Company:
             c = Company("005930")
             c.contextSlices            # LLM용 context 슬라이스
         """
-        return self.docs.contextSlices
+        return self._docs.contextSlices
 
     # ── financeEngine (숫자 재무 데이터) ──
 
@@ -3879,48 +3723,18 @@ class Company:
         self._cache[cacheKey] = result
         return result
 
-    @property
-    def ratios(self) -> pl.DataFrame | None:
-        """재무비율 시계열 (분류/항목 x 기간 DataFrame).
+    def _buildRatios(self) -> pl.DataFrame | None:
+        """[INTERNAL] 재무비율 DataFrame 빌더.
 
-        Capabilities:
-            - 수익성/안정성/성장성/효율성/밸류에이션 5대 분류
-            - 분기별 시계열 비율 자동 계산
-            - finance XBRL 기반 정확한 비율
-
-        AIContext:
-            - ask()/chat()에서 재무 건전성/수익성 평가의 핵심 데이터
-            - insights, review가 내부적으로 ratios를 소비
-
-        Guide:
-            - "재무비율 보여줘" → c.ratios
-            - "ROE 추이" → c.ratios에서 ROE 행 확인
-            - "부채비율은?" → c.ratios에서 안정성 분류 확인
-
-        SeeAlso:
-            - ratioSeries: dict 구조 재무비율 (프로그래밍 용도)
-            - insights: 재무비율 기반 등급 + 이상치 분석
-            - select: c.select("ratios", ["ROE"]) 특정 비율 추출
-
-        Returns:
-            pl.DataFrame — 분류 | 항목 | 2025Q3 | 2025Q2 | ... 또는 None.
-
-        Requires:
-            데이터: finance (자동 다운로드)
-
-        Example::
-
-            c = Company("005930")
-            c.ratios  # 분류 | 항목 | 2025Q3 | 2025Q2 | ...
+        사용자는 ``c.show("ratios")`` 호출. show() 가 finance topic dispatch 에서
+        이 빌더를 호출.
         """
         rs = self._ratioSeries()
         if rs is None:
-            self._hintOnce("ratios", "ratios", "finance")
             return None
         series, periods = rs
         df = _ratioSeriesToDataFrame(series, periods)
         if df is not None:
-            # 기간 컬럼 역순 정렬
             metaCols = [c for c in df.columns if not _isPeriodColumn(c)]
             periodCols = [c for c in df.columns if _isPeriodColumn(c)]
             periodCols.sort(key=lambda p: (int(p[:4]), int(p[-1])), reverse=True)
@@ -3953,110 +3767,9 @@ class Company:
         _scopeMap = {"consolidated": "CFS", "separate": "OFS"}
         return self._getFinanceBuild(_periodMap[freq], _scopeMap[scope])
 
-    @property
-    def sceMatrix(self):
-        """자본변동표 연도별 매트릭스 (연결 기준).
-
-        Capabilities:
-            - 원인(cause) x 세부(detail) x 연도 3차원 매트릭스
-            - 자본 구성요소별 변동 원인 추적
-            - finance XBRL 정규화 기반
-
-        AIContext:
-            - 자본 변동 원인 분석 — 배당/자사주/유증 등 자본 이벤트 추적
-
-        Guide:
-            - "자본변동표 매트릭스" → c.sceMatrix
-            - "자본 변동 원인 추적" → matrix, years = c.sceMatrix
-
-        SeeAlso:
-            - SCE: DataFrame 형태 자본변동표 (sceMatrix의 2D 뷰)
-            - BS: 재무상태표 (자본 잔액 확인)
-            - capital: 주주환원 분석 (배당/자사주)
-
-        Returns:
-            (matrix, years) 또는 None.
-            matrix[year][cause][detail] = 금액
-            years = ["2016", ..., "2024"]
-
-        Requires:
-            데이터: finance (자동 다운로드)
-
-        Example::
-
-            c = Company("005930")
-            matrix, years = c.sceMatrix
-            matrix["2024"]["net_income"]["retained_earnings"]
-        """
-        return self._financeProperty("sceMatrix")
-
-    @property
-    def SCE(self):
-        """자본변동표 (Statement of Changes in Equity) — 계정명 × 연도 DataFrame.
-
-        Capabilities:
-            - XBRL 정규화 자본변동표
-            - 연결 기준 자본 구성요소별 변동
-            - 연도별 시계열
-
-        AIContext:
-            - ask()/chat()에서 자본 구조 변동 분석 컨텍스트
-
-        Guide:
-            - "자본변동표 보여줘" → c.SCE
-            - "자본 구성 변화" → c.SCE
-
-        SeeAlso:
-            - sceMatrix: 3차원 매트릭스 형태 (원인별 상세 추적)
-            - CIS: 포괄손익계산서 (자본변동의 원천)
-            - BS: 재무상태표 (자본 잔액)
-
-        Returns:
-            pl.DataFrame — 계정명 | 2024 | 2023 | ... 또는 None.
-
-        Requires:
-            데이터: finance (자동 다운로드)
-
-        Example::
-
-            c = Company("005930")
-            c.SCE  # 자본변동표
-        """
-        return self._financeProperty("SCE")
-
-    @property
-    def ratioSeries(self):
-        """재무비율 연도별 시계열 (IS/BS/CF와 동일한 dict 구조).
-
-        Capabilities:
-            - 수익성/안정성/성장성/효율성/밸류에이션 비율
-            - 연도별 dict 구조 (timeseries/annual과 동일 형태)
-            - finance XBRL 기반 정확한 비율
-
-        AIContext:
-            - 프로그래밍 방식 비율 접근 — insights/analysis 엔진이 내부적으로 소비
-
-        Guide:
-            - "비율 시계열 dict" → c.ratioSeries
-            - "ROE 연도별 리스트" → series, years = c.ratioSeries; series["RATIO"]["roe"]
-
-        SeeAlso:
-            - ratios: DataFrame 형태 재무비율 (사용자 열람용)
-            - annual: 연도별 재무 시계열 (비율이 아닌 원본 금액)
-
-        Returns:
-            ({"RATIO": {snakeId: [v1, v2, ...]}}, years) 또는 None.
-
-        Requires:
-            데이터: finance (자동 다운로드)
-
-        Example::
-
-            c = Company("005930")
-            series, years = c.ratioSeries
-            series["RATIO"]["roe"]  # [8.69, 13.20, 16.55, ...]
-        """
-        return self._financeProperty("ratioSeries")
+    # c.SCE / c.sceMatrix / c.ratios / c.ratioSeries property 제거 (Plan v10 P1).
+    # 사용자는 c.show("SCE") / c.show("sceMatrix") / c.show("ratios") /
+    # c.show("ratioSeries") 사용. ratioSeries 는 dict 구조라 show 에서 dict topic 으로 처리.
 
     # ── 섹터 분류 ──
 

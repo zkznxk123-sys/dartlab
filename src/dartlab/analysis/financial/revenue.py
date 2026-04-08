@@ -43,9 +43,9 @@ _SKIP_KEYWORDS = {"합계", "조정", "내부", "소계", "총계", "부문계",
 
 
 def _getRatios(company):
-    """ratios 객체를 안전하게 가져온다."""
+    """ratios 객체 (RatioResult) 를 안전하게 가져온다 — internal 사용."""
     try:
-        return company.finance.ratios
+        return company._getRatiosInternal()
     except (ValueError, KeyError, AttributeError):
         return None
 
@@ -655,7 +655,7 @@ def calcRevenueQuality(company, *, basePeriod: str | None = None) -> dict | None
 
     gmTrend: list[float] = []
     try:
-        seriesResult = company.finance.ratioSeries
+        seriesResult = company._ratioSeries()
         if seriesResult is not None:
             data, _years = seriesResult
             gmSeries = data.get("RATIO", {}).get("grossMargin", [])

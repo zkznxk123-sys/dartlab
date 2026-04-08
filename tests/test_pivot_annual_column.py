@@ -14,24 +14,24 @@ pytestmark = [pytest.mark.unit, pytest.mark.requires_data]
 
 
 def test_dart_is_no_annual_column_default():
-    """Plan v7 R0: 기본 IS DataFrame 에 연간 컬럼이 없어야 함."""
+    """Plan v10: c.IS property 제거 → c.show("IS") 단일 진입점. 연간 컬럼 default 없음."""
     import dartlab
 
     c = dartlab.Company("000660")
-    df = c.IS
+    df = c.show("IS")
     assert df is not None
 
     annCols = [col for col in df.columns if col.isdigit() and len(col) == 4]
-    assert annCols == [], f"Plan v7 R0: 연간 컬럼이 default 노출됨: {annCols}"
+    assert annCols == [], f"연간 컬럼이 default 노출됨: {annCols}"
     assert any("Q" in col for col in df.columns), "분기 컬럼이 사라짐"
 
 
 def test_dart_bs_no_annual_column_default():
-    """Plan v7 R0: BS 도 동일 — 분기 컬럼만."""
+    """c.show("BS") 도 동일 — 분기 컬럼만."""
     import dartlab
 
     c = dartlab.Company("000660")
-    df = c.BS
+    df = c.show("BS")
     assert df is not None
     annCols = [col for col in df.columns if col.isdigit() and len(col) == 4]
     assert annCols == [], f"BS 에도 연간 컬럼 default 노출됨: {annCols}"

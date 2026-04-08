@@ -77,9 +77,9 @@ MAX_RATIO_YEARS = 8
 
 
 def getRatioSeries(company) -> tuple[dict, list[str]] | None:
-    """ratioSeries를 안전하게 가져온다."""
+    """ratioSeries 를 안전하게 가져온다 (private internal helper)."""
     try:
-        result = company.finance.ratioSeries
+        result = company._ratioSeries()
         if result is None:
             return None
         return result
@@ -103,9 +103,9 @@ def mergeRows(primary: dict | None, fallback: dict | None) -> dict:
 
 
 def getRatios(company):
-    """ratios 객체를 안전하게 가져온다."""
+    """ratios DataFrame 을 안전하게 가져온다 — c.show("ratios") 위임."""
     try:
-        return company.finance.ratios
+        return company.show("ratios")
     except (ValueError, KeyError, AttributeError):
         return None
 

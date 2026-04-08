@@ -85,8 +85,8 @@ def _extractDividend(company: "Company") -> pl.DataFrame | None:
     """배당 데이터 — CF dividends_paid + IS DPS 시계열."""
     from dartlab.core.show import isPeriodColumn, selectFromShow
 
-    cf = company.CF
-    is_df = company.IS
+    cf = company.show("CF")
+    is_df = company.show("IS")
     if cf is None:
         return None
 
@@ -111,7 +111,7 @@ def _extractTreasuryStock(company: "Company") -> pl.DataFrame | None:
     """자사주 데이터 — BS treasury_stock 시계열."""
     from dartlab.core.show import isPeriodColumn, selectFromShow
 
-    bs = company.BS
+    bs = company.show("BS")
     if bs is None:
         return None
     ts = selectFromShow(bs, ["treasury_stock"])

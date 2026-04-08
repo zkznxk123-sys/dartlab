@@ -110,7 +110,7 @@ def _calcEfficiencyGrade(company) -> str | None:
     추세 개선 시 +1 보너스.
     """
     try:
-        result = company.finance.ratioSeries
+        result = company._ratioSeries()
         if result is None:
             return None
     except (ValueError, KeyError, AttributeError):

@@ -33,62 +33,8 @@ class CompanyProtocol(Protocol):
         """merged topic x period 수평화 테이블."""
         ...
 
-    @property
-    def BS(self) -> pl.DataFrame | None:
-        """재무상태표 (stock — 시점잔액).
-
-        데이터 계약:
-            단위: KRW 원 (DART) / USD raw (EDGAR)
-            시점:
-                - DART ``{year}Q{n}``: 분기 컬럼 + ``{year}`` 연간 alias (= Q4 = 연말잔액)
-                - EDGAR ``{year}``: fiscal year-end 연말잔액
-            null: 데이터 없음 (진짜 0 과 구분 불가)
-            컬럼: snakeId, 계정명, 분기 컬럼(역순), 연간 컬럼(역순)
-        """
-        ...
-
-    @property
-    def IS(self) -> pl.DataFrame | None:
-        """손익계산서 (flow — 매출/이익 흐름).
-
-        데이터 계약:
-            단위: KRW 원 (DART) / USD raw (EDGAR)
-            시점:
-                - DART ``{year}Q{n}``: 분기 단독값 (예: 2025Q4 = Q4 한 분기)
-                - DART ``{year}``: 그 해 연간 합 (= Q1+Q2+Q3+Q4)
-                - EDGAR ``{year}``: fiscal year 합 (회사별 결산일)
-            null: 데이터 없음
-            컬럼: snakeId, 계정명, 분기 컬럼(역순), 연간 컬럼(역순)
-
-        Note:
-            calc 함수는 ``row['2025']`` 직접 read 권장 (분기 합산 헬퍼 우회).
-            ``row['2025Q4']`` 는 Q4 단독값이며 연간값이 아님.
-        """
-        ...
-
-    @property
-    def CF(self) -> pl.DataFrame | None:
-        """현금흐름표 (flow — 영업/투자/재무 활동).
-
-        데이터 계약:
-            단위: KRW 원 (DART) / USD raw (EDGAR)
-            시점: IS 와 동일 — 분기 컬럼은 단독값, 연간 컬럼은 합
-            null: 데이터 없음
-
-        Note:
-            DART raw CF 는 누적 형태이지만 ``pivot.py::_normalizeQ4`` 가
-            standalone 분기로 변환. 위층은 분기/연간 컬럼 의미만 알면 됨.
-        """
-        ...
-
-    @property
-    def CIS(self) -> pl.DataFrame | None:
-        """포괄손익계산서 (flow — 기타포괄손익 포함).
-
-        데이터 계약:
-            단위/시점/null: IS 와 동일
-        """
-        ...
+    # Plan v10 P0/P1: c.BS / c.IS / c.CF / c.CIS / c.ratios / c.SCE property 제거.
+    # 사용자 진입점은 c.show("IS", freq=, scope=) / c.select(...) 만 (api-contract).
 
     def show(
         self,
@@ -217,69 +163,13 @@ class DocsProtocol(Protocol):
 
 @runtime_checkable
 class FinanceProtocol(Protocol):
-    """finance namespace 공통 인터페이스."""
+    """[INTERNAL] finance namespace — 사용자 진입점 아님.
 
-    @property
-    def BS(self) -> pl.DataFrame | None:
-        """재무상태표 (stock — 시점잔액).
+    Plan v10 P3a: 사용자는 ``c.show("IS", freq=, scope=)`` 만 사용한다.
+    이 protocol 은 내부 backend interface 로만 의미.
+    """
 
-        데이터 계약:
-            단위: KRW 원 (DART) / USD raw (EDGAR)
-            시점:
-                - DART ``{year}Q{n}``: 분기 컬럼 + ``{year}`` 연간 alias (= Q4 = 연말잔액)
-                - EDGAR ``{year}``: fiscal year-end 연말잔액
-            null: 데이터 없음 (진짜 0 과 구분 불가)
-            컬럼: snakeId, 계정명, 분기 컬럼(역순), 연간 컬럼(역순)
-        """
-        ...
-
-    @property
-    def IS(self) -> pl.DataFrame | None:
-        """손익계산서 (flow — 매출/이익 흐름).
-
-        데이터 계약:
-            단위: KRW 원 (DART) / USD raw (EDGAR)
-            시점:
-                - DART ``{year}Q{n}``: 분기 단독값 (예: 2025Q4 = Q4 한 분기)
-                - DART ``{year}``: 그 해 연간 합 (= Q1+Q2+Q3+Q4)
-                - EDGAR ``{year}``: fiscal year 합 (회사별 결산일)
-            null: 데이터 없음
-            컬럼: snakeId, 계정명, 분기 컬럼(역순), 연간 컬럼(역순)
-
-        Note:
-            calc 함수는 ``row['2025']`` 직접 read 권장 (분기 합산 헬퍼 우회).
-            ``row['2025Q4']`` 는 Q4 단독값이며 연간값이 아님.
-        """
-        ...
-
-    @property
-    def CF(self) -> pl.DataFrame | None:
-        """현금흐름표 (flow — 영업/투자/재무 활동).
-
-        데이터 계약:
-            단위: KRW 원 (DART) / USD raw (EDGAR)
-            시점: IS 와 동일 — 분기 컬럼은 단독값, 연간 컬럼은 합
-            null: 데이터 없음
-
-        Note:
-            DART raw CF 는 누적 형태이지만 ``pivot.py::_normalizeQ4`` 가
-            standalone 분기로 변환. 위층은 분기/연간 컬럼 의미만 알면 됨.
-        """
-        ...
-
-    @property
-    def CIS(self) -> pl.DataFrame | None:
-        """포괄손익계산서 (flow — 기타포괄손익 포함).
-
-        데이터 계약:
-            단위/시점/null: IS 와 동일
-        """
-        ...
-
-    @property
-    def ratios(self) -> Any:
-        """재무비율."""
-        ...
+    pass
 
 
 @runtime_checkable

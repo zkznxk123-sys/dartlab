@@ -100,40 +100,9 @@ def _existingRceptNos(directory: Path, stockCode: str) -> set[str]:
         return set()
 
 
-# report 카테고리 특별 처리:
-# - report는 한 rcept_no당 26개 apiType 행으로 펼쳐져 있다.
-# - 일부 apiType가 partial로 저장되었을 수 있으므로,
-#   "rcept_no가 존재 + 최소 N개 apiType"을 기준으로 완전성 판단.
-_REPORT_MIN_APITYPES = 5  # 5개 미만이면 부분 수집으로 간주 → 재수집
-
-
-def _existingRceptNosReport(reportDir: Path, stockCode: str) -> set[str]:
-    """report parquet에서 '완전 수집된' rcept_no 집합 추출.
-
-    한 rcept_no당 apiType이 _REPORT_MIN_APITYPES 이상이어야 완전으로 간주.
-    """
-    import polars as pl
-
-    path = reportDir / f"{stockCode}.parquet"
-    if not path.exists():
-        return set()
-    try:
-        cols = pl.scan_parquet(path).collect_schema().names()
-        if "rcept_no" not in cols or "apiType" not in cols:
-            return set()
-        df = (
-            pl.scan_parquet(path)
-            .select("rcept_no", "apiType")
-            .filter(pl.col("rcept_no").is_not_null() & (pl.col("rcept_no") != ""))
-            .unique()
-            .group_by("rcept_no")
-            .agg(pl.len().alias("n"))
-            .filter(pl.col("n") >= _REPORT_MIN_APITYPES)
-            .collect()
-        )
-        return set(df["rcept_no"].to_list())
-    except (pl.exceptions.ComputeError, pl.exceptions.ColumnNotFoundError, OSError):
-        return set()
+# report도 docs/finance와 동일 — rcept_no 존재 여부만 본다.
+# (이전엔 apiType≥5 partial 임계를 두었으나, 정상 종목까지 재수집 대상으로
+#  분류하는 부작용이 있어 폐기. partial은 batchCollect 단계에서 처리한다.)
 
 
 def _reportNmToFinanceKey(reportNm: str) -> tuple[str, str] | None:
@@ -258,7 +227,7 @@ def _discoverNewFilings(
     for sc, rows in codeToFilings.items():
         existingDocs = _existingRceptNos(docsDir, sc)
         existingFinance = _existingRceptNos(financeDir, sc)
-        existingReport = _existingRceptNosReport(reportDir, sc)
+        existingReport = _existingRceptNos(reportDir, sc)
 
         missingDocs = [r for r in rows if r["rcept_no"] not in existingDocs]
         missingFinance = [r for r in rows if r["rcept_no"] not in existingFinance]

@@ -429,8 +429,11 @@ class Company:
         self.cik = tickerRow["cik"]
         self.corpName = tickerRow.get("title") or self.ticker
 
+        # Plan v10 P3 (deferred): namespace 제거 별도 commit. underscore alias.
         self.docs = _DocsAccessor(self)
         self.finance = _FinanceAccessor(self)
+        self._docs = self.docs
+        self._finance = self.finance
         self._profileAccessor = _ProfileAccessor(self)
         self._reportAccessor = None  # lazy init
 
@@ -737,178 +740,10 @@ class Company:
             self._cache["_annual"] = buildAnnual(self.cik)
         return self._cache["_annual"]
 
-    @property
-    def BS(self) -> pl.DataFrame | None:
-        """재무상태표 (Balance Sheet) — 계정명 x 기간 DataFrame.
+    # c.BS / c.IS / c.CF / c.CIS property 제거 (Plan v10 P0 — api-contract).
+    # 사용자는 c.show("IS") / c.show.IS() / c.show("IS", freq="Y") 사용.
 
-        Capabilities:
-            - SEC XBRL 정규화 재무상태표
-            - 최대 10년 분기/연도 시계열
-
-        Requires:
-            데이터: 없음 (SEC EDGAR 자동 수집)
-
-        AIContext:
-            - ask()/chat()에서 자산/부채/자본 구조 분석 컨텍스트
-
-        Guide:
-            - "재무상태표 보여줘" → c.BS 또는 c.show("BS")
-            - "자산 구조가 어떻게 돼?" → c.BS로 확인
-
-        SeeAlso:
-            - IS: 손익계산서
-            - CF: 현금흐름표
-            - CIS: 포괄손익계산서
-            - select: 특정 계정/기간 필터
-            - show: topic 통합 조회
-
-        Returns:
-            pl.DataFrame — 계정명 | 2024Q4 | 2024Q3 | ... 또는 None.
-
-        Example::
-
-            c = Company("AAPL")
-            c.BS  # Apple 재무상태표
-        """
-        return self.finance.BS
-
-    @property
-    def IS(self) -> pl.DataFrame | None:
-        """손익계산서 (Income Statement) — 계정명 x 기간 DataFrame.
-
-        Capabilities:
-            - SEC XBRL 정규화 손익계산서
-            - 매출, 영업이익, 순이익 등 수익성 계정 시계열
-
-        Requires:
-            데이터: 없음 (SEC EDGAR 자동 수집)
-
-        AIContext:
-            - ask()/chat()에서 수익성, 마진 분석 컨텍스트
-
-        Guide:
-            - "손익계산서 보여줘" → c.IS 또는 c.show("IS")
-            - "매출 추이가 어떻게 돼?" → c.IS로 확인
-
-        SeeAlso:
-            - BS: 재무상태표
-            - CF: 현금흐름표
-            - CIS: 포괄손익계산서
-            - select: 특정 계정/기간 필터
-            - show: topic 통합 조회
-
-        Returns:
-            pl.DataFrame — 계정명 | 2024Q4 | 2024Q3 | ... 또는 None.
-
-        Example::
-
-            c = Company("AAPL")
-            c.IS  # Apple 손익계산서
-        """
-        return self.finance.IS
-
-    @property
-    def CF(self) -> pl.DataFrame | None:
-        """현금흐름표 (Cash Flow) — 계정명 x 기간 DataFrame.
-
-        Capabilities:
-            - SEC XBRL 정규화 현금흐름표
-            - 영업/투자/재무 활동별 현금흐름 시계열
-
-        Requires:
-            데이터: 없음 (SEC EDGAR 자동 수집)
-
-        AIContext:
-            - ask()/chat()에서 현금 창출력, FCF 분석 컨텍스트
-
-        Guide:
-            - "현금흐름표 보여줘" → c.CF 또는 c.show("CF")
-            - "FCF가 얼마야?" → c.CF로 영업/투자 현금흐름 확인
-
-        SeeAlso:
-            - BS: 재무상태표
-            - IS: 손익계산서
-            - CIS: 포괄손익계산서
-            - select: 특정 계정/기간 필터
-            - show: topic 통합 조회
-
-        Returns:
-            pl.DataFrame — 계정명 | 2024Q4 | 2024Q3 | ... 또는 None.
-
-        Example::
-
-            c = Company("AAPL")
-            c.CF  # Apple 현금흐름표
-        """
-        return self.finance.CF
-
-    @property
-    def CIS(self) -> pl.DataFrame | None:
-        """포괄손익계산서 (Comprehensive Income) — 계정명 x 기간 DataFrame.
-
-        Capabilities:
-            - SEC XBRL 정규화 포괄손익계산서
-            - 기타포괄손익 항목 시계열
-
-        Requires:
-            데이터: 없음 (SEC EDGAR 자동 수집)
-
-        AIContext:
-            - ask()/chat()에서 포괄손익 구성 분석 컨텍스트
-
-        Guide:
-            - "포괄손익계산서 보여줘" → c.CIS 또는 c.show("CIS")
-            - "기타포괄손익이 뭐가 있어?" → c.CIS로 확인
-
-        SeeAlso:
-            - BS: 재무상태표
-            - IS: 손익계산서
-            - CF: 현금흐름표
-            - SCE: 자본변동표
-            - show: topic 통합 조회
-
-        Returns:
-            pl.DataFrame — 계정명 | 2024Q4 | 2024Q3 | ... 또는 None.
-
-        Example::
-
-            c = Company("AAPL")
-            c.CIS  # Apple 포괄손익계산서
-        """
-        return self.finance.CIS
-
-    @property
-    def SCE(self) -> pl.DataFrame | None:
-        """자본변동표 (Statement of Changes in Equity) — 계정명 x 기간 DataFrame.
-
-        Capabilities:
-            - SEC XBRL 정규화 자본변동표
-            - 자본금, 이익잉여금, 자기주식 등 자본 구성 변동 시계열
-
-        Requires:
-            데이터: 없음 (SEC EDGAR 자동 수집)
-
-        AIContext:
-            - ask()/chat()에서 자본 구조 변동, 자사주 매입 분석 컨텍스트
-
-        Guide:
-            - "자본변동표 보여줘" → c.SCE
-            - "자사주 매입 내역이 궁금해" → c.SCE로 확인
-
-        SeeAlso:
-            - BS: 재무상태표
-            - CIS: 포괄손익계산서
-            - show: topic 통합 조회
-
-        Returns:
-            pl.DataFrame — 계정명 | 2024Q4 | 2024Q3 | ... 또는 None.
-
-        Example::
-
-            c = Company("AAPL")
-            c.SCE  # Apple 자본변동표
-        """
-        return self.finance.SCE
+    # c.SCE property 제거 (Plan v10 P1) — c.show("SCE") 사용
 
     @property
     def sections(self) -> pl.DataFrame | None:
@@ -944,38 +779,9 @@ class Company:
         """
         return self._profileAccessor.sections
 
-    @property
-    def ratios(self) -> pl.DataFrame | None:
-        """재무비율 시계열 — category x metric x 기간 DataFrame.
-
-        Capabilities:
-            - 수익성/안정성/성장성/효율성/현금흐름 5대 카테고리 30+ 지표
-            - 최대 10년 연도별 시계열
-
-        Requires:
-            데이터: 없음 (SEC EDGAR 자동 수집)
-
-        AIContext:
-            - ask()/chat()에서 재무 건전성, 추세 비교 컨텍스트
-
-        Guide:
-            - "재무비율 보여줘" → c.ratios 또는 c.show("ratios")
-            - "ROE 추이가 어떻게 돼?" → c.ratios로 확인
-
-        SeeAlso:
-            - insights: 재무비율 기반 자동 등급/해설
-            - BS, IS, CF: 원본 재무제표
-            - timeseries: 분기별 원본 시계열
-
-        Returns:
-            pl.DataFrame — category | metric | 2024 | 2023 | ... 또는 None.
-
-        Example::
-
-            c = Company("AAPL")
-            c.ratios  # Apple 재무비율 시계열
-        """
-        rs = self.finance.ratioSeries
+    def _buildRatios(self) -> pl.DataFrame | None:
+        """[INTERNAL] EDGAR 재무비율 DataFrame 빌더 — show("ratios") 가 호출."""
+        rs = self._finance.ratioSeries
         if rs is None:
             return None
         series, years = rs
@@ -1210,7 +1016,7 @@ class Company:
             c = Company("AAPL")
             c.filings()  # Apple SEC filing 목록
         """
-        return self.docs.filings()
+        return self._docs.filings()
 
     def disclosure(
         self,
@@ -1538,16 +1344,16 @@ class Company:
 
         # 1. finance 제표 먼저
         for stmt in ("BS", "IS", "CF", "CIS"):
-            if getattr(self.finance, stmt) is not None:
+            if getattr(self._finance, stmt) is not None:
                 ordered.append(stmt)
                 seen.add(stmt)
 
-        if self.finance.ratioSeries is not None and "ratios" not in seen:
+        if self._finance.ratioSeries is not None and "ratios" not in seen:
             ordered.append("ratios")
             seen.add("ratios")
 
         # 2. docs topics — form별 정렬 (10-K → 10-Q → 20-F → 기타)
-        sec = self.docs.sections
+        sec = self._docs.sections
         if sec is not None:
             topicCol = sec["topic"].unique().to_list()
             topicCol = _sortDocTopics(topicCol)
@@ -1695,12 +1501,12 @@ class Company:
 
         if source == "finance":
             if topic == "ratios":
-                rs = self.finance.ratioSeries
-                if rs is None:
-                    return None
-                series, years = rs
-                return self._applyPeriodFilter(_ratioSeriesToDataFrame(series, years), period)
-            df = getattr(self.finance, topic, None)
+                df = self._buildRatios()
+                return self._applyPeriodFilter(df, period) if df is not None else None
+            if topic == "SCE":
+                df = self._finance.SCE
+                return self._applyPeriodFilter(df, period) if df is not None else None
+            df = getattr(self._finance, topic, None)
             return self._applyPeriodFilter(df, period) if df is not None else None
 
         # docs — blockType에 따라 text/table 반환
@@ -1888,7 +1694,7 @@ class Company:
         """
         topic = _TOPIC_ALIASES.get(topic, topic)
         if topic in _FINANCE_TOPICS:
-            df = getattr(self.finance, topic)
+            df = getattr(self._finance, topic)
             if df is None:
                 return None
             chapter, label = _topicChapterLabel(topic)
@@ -1905,7 +1711,7 @@ class Company:
             }
 
         if topic == "ratios":
-            rs = self.finance.ratioSeries
+            rs = self._finance.ratioSeries
             if rs is None:
                 return None
             series, years = rs
@@ -1934,7 +1740,7 @@ class Company:
                 "coverage": coverage,
             }
 
-        sec = self.docs.sections
+        sec = self._docs.sections
         if sec is not None and topic in sec["topic"].to_list():
             topicRows = sec.filter(pl.col("topic") == topic)
             periodCols = [c for c in sec.columns if _isPeriodColumn(c)]
@@ -2008,7 +1814,7 @@ class Company:
             chapter, label = _topicChapterLabel(topic)
 
             if topic in _FINANCE_TOPICS:
-                df = getattr(self.finance, topic)
+                df = getattr(self._finance, topic)
                 rows.append(
                     {
                         "chapter": chapter,
@@ -2022,7 +1828,7 @@ class Company:
                     }
                 )
             elif topic == "ratios":
-                rs = self.finance.ratioSeries
+                rs = self._finance.ratioSeries
                 if rs is not None:
                     _, years = rs
                     df = _ratioSeriesToDataFrame(*rs)
@@ -2039,7 +1845,7 @@ class Company:
                         }
                     )
             else:
-                sec = self.docs.sections
+                sec = self._docs.sections
                 if sec is not None:
                     topicRows = sec.filter(pl.col("topic") == topic)
                     periodCols = [c for c in sec.columns if _isPeriodColumn(c)]
@@ -2185,7 +1991,7 @@ class Company:
             topicHistoryDataFrame,
         )
 
-        docsSections = self.docs.sections
+        docsSections = self._docs.sections
         if docsSections is None:
             return None
         if topic is not None and fromPeriod is not None and toPeriod is not None:
@@ -2238,7 +2044,7 @@ class Company:
         """
         from dartlab.core.docs.diff import keywordFrequency
 
-        docsSections = self.docs.sections
+        docsSections = self._docs.sections
         if docsSections is None:
             return None
         kws = None
@@ -2479,11 +2285,11 @@ class Company:
 
     @property
     def contextSlices(self) -> pl.DataFrame | None:
-        return self.docs.contextSlices if hasattr(self.docs, "contextSlices") else None
+        return self._docs.contextSlices if hasattr(self._docs, "contextSlices") else None
 
     @property
     def retrievalBlocks(self) -> pl.DataFrame | None:
-        return self.docs.retrievalBlocks if hasattr(self.docs, "retrievalBlocks") else None
+        return self._docs.retrievalBlocks if hasattr(self._docs, "retrievalBlocks") else None
 
     @property
     def notes(self):
@@ -2496,12 +2302,8 @@ class Company:
     def profile(self):
         return self._profileAccessor
 
-    @property
-    def ratioSeries(self):
-        return self.finance.ratioSeries if hasattr(self.finance, "ratioSeries") else None
-
-    # sector, sectorParams, sceMatrix — EXEMPT 등록 (test_protocol.py)
-    # 이유: KRX 섹터 인프라 / DART SCE 구조와 상이
+    # c.ratioSeries property 제거 (Plan v10 P1) — show("ratios") 사용
+    # sector, sectorParams, sceMatrix — EXEMPT (test_protocol.py)
 
     @property
     def rank(self):
@@ -2511,7 +2313,7 @@ class Company:
     def sources(self) -> pl.DataFrame:
         """데이터 소스 현황 — EDGAR는 docs + finance 2개 소스."""
         rows = []
-        for src, accessor in [("docs", self.docs), ("finance", self.finance)]:
+        for src, accessor in [("docs", self._docs), ("finance", self._finance)]:
             available = accessor is not None
             rows.append({"source": src, "available": available, "rows": 0, "cols": 0, "shape": ""})
         return pl.DataFrame(rows)
@@ -2668,7 +2470,7 @@ class Company:
             return None
         # 1인당 매출 계산
         rev_per_employee = None
-        is_df = self.IS
+        is_df = self.show("IS")
         if is_df is not None:
             from dartlab.core.show import isPeriodColumn, selectFromShow
 
@@ -2698,8 +2500,8 @@ class Company:
         """
         if view in ("all", "market"):
             return None  # 전종목 횡단비교 미지원
-        bs = self.BS
-        cf = self.CF
+        bs = self.show("BS")
+        cf = self.show("CF")
         if bs is None:
             return None
         from dartlab.core.show import selectFromShow
@@ -2728,7 +2530,7 @@ class Company:
         """
         if view in ("all", "market"):
             return None
-        bs = self.BS
+        bs = self.show("BS")
         if bs is None:
             return None
         from dartlab.core.show import selectFromShow

@@ -210,18 +210,8 @@ class TestAttributes:
     def test_sector_none(self, mock_company):
         assert mock_company.sector is None
 
-    def test_notes_accessor(self, mock_company):
-        assert mock_company.notes.inventory is None
-        assert mock_company.notes.borrowings is None
-
-    def test_is_property(self, mock_company):
-        assert isinstance(mock_company.IS, pl.DataFrame)
-
-    def test_bs_property(self, mock_company):
-        assert isinstance(mock_company.BS, pl.DataFrame)
-
-    def test_cf_property(self, mock_company):
-        assert isinstance(mock_company.CF, pl.DataFrame)
+    # Plan v10: c.notes / c.IS / c.BS / c.CF property 제거 — c.show("inventory") 등 사용.
+    # Mock company 회귀는 test_fixture_company_full.py 에서 c.show() 형태로 검증.
 
     # Plan v9 P0.7: c.annual / c.cumulative property 제거 → c.timeseries(annual=True/cumulative=True)
     # 실제 데이터 회귀는 tests/test_fixture_company_full.py::test_annual 가 fixture 로 검증.
