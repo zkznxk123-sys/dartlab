@@ -264,14 +264,9 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "K-IFRS 주석사항 접근자.",
     },
     "Company.priority": {"kind": "method", "summary": "낮을수록 먼저 시도. DART=10 (기본 provider)."},
-    "Company.profile": {
-        "aicontext": "c.sections는 내부적으로 profile.sections를 반환\n분석/리뷰에서 통합된 데이터를 소비하는 기본 경로",
-        "capabilities": "docs sections를 spine으로, finance/report 데이터를 merge하여 통합 뷰 제공\nprofile.sections로 source 우선순위(finance > report > docs) 적용된 sections 접근\nprofile.show(topic)으로 merge된 결과 조회",
-        "guide": '"통합 프로필" → c.profile\n"merge된 sections" → c.profile.sections',
+    "Company.facts": {
         "kind": "property",
-        "requires": "데이터: docs (자동 다운로드). finance/report는 있으면 자동 merge.",
-        "seeAlso": "sections: profile.sections의 단축 접근\nshow: profile 기반 topic 데이터 조회",
-        "summary": "docs spine + finance/report merge layer -- 통합 프로필 접근자.",
+        "summary": "통합 facts 테이블 (sections + finance + report merge).",
     },
     "Company.quant": {
         "capabilities": "종합 판단 (강세/중립/약세) + RSI/SMA/BB\n25개 기술적 지표 DataFrame\n최근 매매 신호 이벤트\n시장 베타 + CAPM + 해석\n재무-기술적 괴리 진단\n기술적 경고/기회 플래그",

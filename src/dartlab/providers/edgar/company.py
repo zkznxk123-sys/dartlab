@@ -2297,8 +2297,9 @@ class Company:
         return self._cache["_notes_wrapper"]
 
     @property
-    def profile(self):
-        return self._profileAccessor
+    def facts(self) -> pl.DataFrame | None:
+        """topic × period 형태의 통합 facts 테이블."""
+        return getattr(self._profileAccessor, "facts", None)
 
     # c.ratioSeries property 제거 (Plan v10 P1) — show("ratios") 사용
     # sector, sectorParams, sceMatrix — EXEMPT (test_protocol.py)

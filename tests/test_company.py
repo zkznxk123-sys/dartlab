@@ -269,7 +269,6 @@ class TestCompany:
         assert c.docs is not None
         assert c.report is not None
         assert c.index is not None
-        assert c.profile is not None
         assert isinstance(c.index, pl.DataFrame)
         assert len(c.report.apiTypes) == 28
         status = c.report.status()
@@ -469,14 +468,14 @@ class TestCompany:
 
     def test_profile_facts_include_docs_source(self):
         c = self.c
-        facts = c.profile.facts
+        facts = c.facts
         assert facts is not None
         assert "source" in facts.columns
         assert "docs" in set(facts["source"].unique().to_list())
 
     def test_profile_trace_for_docs_topic(self):
         c = self.c
-        traced = c.profile.trace("riskDerivative")
+        traced = c.trace("riskDerivative")
         assert traced is not None
         assert traced["primarySource"] == "docs"
 
@@ -505,9 +504,9 @@ class TestCompany:
 
     def test_profile_trace_for_finance_and_report_topics(self):
         c = self.c
-        assert c.profile.trace("dividend")["primarySource"] == "report"
-        assert c.profile.trace("BS")["primarySource"] == "finance"
-        assert c.profile.trace("CIS")["primarySource"] == "finance"
+        assert c.trace("dividend")["primarySource"] == "report"
+        assert c.trace("BS")["primarySource"] == "finance"
+        assert c.trace("CIS")["primarySource"] == "finance"
         ratioTrace = c.trace("ratios")
         assert ratioTrace["primarySource"] == "finance"
         assert ratioTrace["template"] == "general"
@@ -521,15 +520,15 @@ class TestCompany:
         assert set(["chapter", "topic", "kind", "source", "periods", "shape", "preview"]).issubset(set(c.index.columns))
         assert c.sections is not None
         assert isinstance(c.sections, pl.DataFrame)
-        assert c.profile.facts is not None
-        assert isinstance(c.profile.facts, pl.DataFrame)
+        assert c.facts is not None
+        assert isinstance(c.facts, pl.DataFrame)
 
     def test_profile_trace_returns_provenance(self):
         c = self.c
-        traced = c.profile.trace("BS")
+        traced = c.trace("BS")
         assert traced is not None
         assert traced["primarySource"] == "finance"
-        traced_docs = c.profile.trace("companyOverview")
+        traced_docs = c.trace("companyOverview")
         assert traced_docs is not None
         assert traced_docs["primarySource"] == "docs"
 
@@ -564,7 +563,7 @@ class TestCompany:
             assert "_sections" not in cacheKeys
 
             baselineCompany = DartCompany(SAMSUNG)
-            assert traced == baselineCompany.profile.trace(topic, period="2024")
+            assert traced == baselineCompany.trace(topic, period="2024")
 
     def test_show_finance_fast_path_avoids_sections(self):
         from dartlab.providers.dart.company import Company as DartCompany

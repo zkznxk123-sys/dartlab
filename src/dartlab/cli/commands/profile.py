@@ -37,7 +37,7 @@ def run(args) -> int:
     console.print(f"\n  [bold]{company.corpName}[/] ({company.stockCode})\n")
 
     mode = "facts" if args.facts else "index"
-    payload = company.profile.facts if args.facts else company.index
+    payload = company.facts if args.facts else company.index
 
     if payload is None:
         console.print(f"[dim]{company.corpName} {mode} 데이터가 없습니다.[/]")

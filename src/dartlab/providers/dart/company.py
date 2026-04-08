@@ -3532,39 +3532,9 @@ class Company:
         return rows
 
     @property
-    def profile(self) -> _ProfileAccessor:
-        """docs spine + finance/report merge layer -- 통합 프로필 접근자.
-
-        Capabilities:
-            - docs sections를 spine으로, finance/report 데이터를 merge하여 통합 뷰 제공
-            - profile.sections로 source 우선순위(finance > report > docs) 적용된 sections 접근
-            - profile.show(topic)으로 merge된 결과 조회
-
-        AIContext:
-            - c.sections는 내부적으로 profile.sections를 반환
-            - 분석/리뷰에서 통합된 데이터를 소비하는 기본 경로
-
-        Guide:
-            - "통합 프로필" → c.profile
-            - "merge된 sections" → c.profile.sections
-
-        SeeAlso:
-            - sections: profile.sections의 단축 접근
-            - show: profile 기반 topic 데이터 조회
-
-        Returns:
-            _ProfileAccessor -- sections, show(), topics 메서드 제공
-
-        Requires:
-            데이터: docs (자동 다운로드). finance/report는 있으면 자동 merge.
-
-        Example::
-
-            c = Company("005930")
-            c.profile.sections         # 통합 sections
-            c.profile.show("BS")       # merge된 재무상태표
-        """
-        return self._profileAccessor
+    def facts(self) -> pl.DataFrame | None:
+        """topic × period 형태의 통합 facts 테이블 (sections + finance + report merge)."""
+        return self._profileAccessor.facts
 
     @property
     def retrievalBlocks(self) -> pl.DataFrame | None:

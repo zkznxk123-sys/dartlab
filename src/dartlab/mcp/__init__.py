@@ -389,14 +389,12 @@ def _executeTool(name: str, args: dict) -> str:
         if name == "companyAudit":
             return str(_getCompany(code).audit())
         if name == "companyProfile":
-            p = _getCompany(code).profile
-            if hasattr(p, "__dict__"):
-                return json.dumps(
-                    {k: str(v)[:500] for k, v in p.__dict__.items() if not k.startswith("_")},
-                    ensure_ascii=False,
-                    indent=2,
-                )
-            return str(p)
+            c = _getCompany(code)
+            return json.dumps(
+                {"corpName": c.corpName, "stockCode": c.stockCode, "facts": str(c.facts)[:500]},
+                ensure_ascii=False,
+                indent=2,
+            )
         if name == "companySections":
             return _fmt(_getCompany(code).sections)
 
