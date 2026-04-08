@@ -43,7 +43,7 @@ class SegmentTable:
                 seen[name] = 1
                 uniqueCols.append(name)
 
-        data: dict[str, list] = {"계정명": []}
+        data: dict[str, list] = {"항목": []}
         for col in uniqueCols:
             data[col] = []
 
@@ -51,11 +51,13 @@ class SegmentTable:
             vals = self.rows.get(name)
             if vals is None:
                 continue
-            data["계정명"].append(name)
+            data["항목"].append(name)
             for i in range(nCols):
                 data[uniqueCols[i]].append(vals[i] if i < len(vals) else None)
 
-        return pl.DataFrame(data)
+        df = pl.DataFrame(data)
+        # backward-compat alias
+        return df.with_columns(pl.col("항목").alias("계정명"))
 
 
 @dataclass

@@ -204,7 +204,8 @@ def reportPivotBySe(df: pl.DataFrame, *, raw: bool = False) -> pl.DataFrame | No
     periodCols.sort(key=lambda p: (int(p[:4]), int(p[-1])), reverse=True)
     result = pivoted.select(["se"] + periodCols)
     if not raw:
-        result = result.rename({"se": "계정명"})
+        result = result.rename({"se": "항목"})
+        result = result.with_columns(pl.col("항목").alias("계정명"))
     return result
 
 

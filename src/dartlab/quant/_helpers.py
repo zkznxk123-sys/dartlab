@@ -102,16 +102,23 @@ def load_shares_outstanding(market: str = "KR"):
     KR: data/dart/scan/sharesOutstanding.parquet (보통주/우선주 분리)
     US: data/edgar/scan/sharesOutstanding.parquet (XBRL dei)
 
+    scan 카테고리이므로 `_ensureScanData()` 가 자동으로 HF 에서 받아온다 —
+    finance.parquet / changes.parquet 과 동일 패턴.
+
     Returns:
         pl.LazyFrame 또는 None
     """
     import polars as pl
 
-    root = _scan_data_root()
     if market == "KR":
-        path = root / "dart" / "scan" / "sharesOutstanding.parquet"
+        from dartlab.scan._helpers import _ensureScanData
+
+        scanDir = _ensureScanData()
+        path = scanDir / "sharesOutstanding.parquet"
     else:
+        root = _scan_data_root()
         path = root / "edgar" / "scan" / "sharesOutstanding.parquet"
+
     if not path.exists():
         log.warning("sharesOutstanding parquet 없음: %s", path)
         return None

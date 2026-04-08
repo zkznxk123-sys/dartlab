@@ -421,6 +421,23 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
 # ── 전체 빌드 ────────────────────────────────────────────────────────
 
 
+def _buildSharesOutstandingSafe(*, verbose: bool = True) -> Path | None:
+    """발행주식수 풀 빌드 — 빌드 실패해도 전체 scan은 계속 진행."""
+    try:
+        from dartlab.providers.dart.docs.finance.shareCapital.builder import buildSharesOutstandingScan
+
+        if verbose:
+            _log("[shares] 발행주식수 풀 빌드 시작")
+        df = buildSharesOutstandingScan()
+        if verbose:
+            _log(f"[shares] 완료: rows={df.height} stocks={df['stock_code'].n_unique()}")
+        return _scanDir() / "sharesOutstanding.parquet"
+    except (FileNotFoundError, RuntimeError, OSError, ValueError) as exc:
+        if verbose:
+            _log(f"[shares] 실패: {exc}")
+        return None
+
+
 def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path | list[Path] | None]:
     """changes + finance + report 전체 프리빌드."""
     if verbose:
@@ -432,6 +449,7 @@ def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path 
     results["changes"] = buildChanges(sinceYear=sinceYear, verbose=verbose)
     results["finance"] = buildFinance(sinceYear=sinceYear, verbose=verbose)
     results["report"] = buildReport(sinceYear=sinceYear, verbose=verbose)
+    results["sharesOutstanding"] = _buildSharesOutstandingSafe(verbose=verbose)
 
     if verbose:
         _log("=" * 60)

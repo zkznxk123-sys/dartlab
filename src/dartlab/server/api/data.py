@@ -356,15 +356,16 @@ def _resolve_module_data(c: Company, entry) -> Any:
 
         rows = []
         for account, values in stmt_data.items():
-            row = {"계정명": account}
+            row = {"항목": account}
             for i, p in enumerate(periods):
                 row[str(p)] = values[i] if i < len(values) else None
             rows.append(row)
         if not rows:
             return None
         if order:
-            rows.sort(key=lambda r: order.get(r["계정명"], 9999))
-        return pl.DataFrame(rows)
+            rows.sort(key=lambda r: order.get(r["항목"], 9999))
+        df = pl.DataFrame(rows)
+        return df.with_columns(pl.col("항목").alias("계정명"))
 
     attrName = entry.funcName or entry.name
     if name in ("IS", "BS", "CF"):

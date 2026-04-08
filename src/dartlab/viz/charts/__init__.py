@@ -249,9 +249,10 @@ def waterfall(
 
 def _extract_account_series(df: pl.DataFrame, keyword: str) -> dict[str, float | None]:
     """재무제표에서 계정명 키워드로 연도별 값 추출."""
-    if "계정명" not in df.columns:
+    labelCol = "항목" if "항목" in df.columns else "계정명" if "계정명" in df.columns else None
+    if labelCol is None:
         return {}
-    matched = df.filter(pl.col("계정명").str.contains(keyword))
+    matched = df.filter(pl.col(labelCol).str.contains(keyword))
     if matched.height == 0:
         return {}
     year_cols = sorted([c for c in df.columns if _PERIOD_COL_RE.match(c)])

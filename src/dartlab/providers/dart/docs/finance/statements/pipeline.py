@@ -115,7 +115,7 @@ def _buildDf(
 
     rows = []
     for name in accountOrder:
-        row: dict[str, object] = {"계정명": name}
+        row: dict[str, object] = {"항목": name}
         for key in sortedKeys:
             row[key] = nameData[name].get(key)
         rows.append(row)
@@ -123,7 +123,9 @@ def _buildDf(
     if not rows:
         return pl.DataFrame()
 
-    schema = {"계정명": pl.Utf8}
+    schema = {"항목": pl.Utf8}
     for key in sortedKeys:
         schema[key] = pl.Float64
-    return pl.DataFrame(rows, schema=schema)
+    df = pl.DataFrame(rows, schema=schema)
+    # backward-compat alias
+    return df.with_columns(pl.col("항목").alias("계정명"))

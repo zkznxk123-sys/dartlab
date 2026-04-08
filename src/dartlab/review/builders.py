@@ -282,7 +282,7 @@ def _quarterlyRevenueTable(selectResult) -> TableBlock | None:
     if not periodCols:
         return None
 
-    labelCol = "계정명" if "계정명" in df.columns else df.columns[0]
+    labelCol = "항목" if "항목" in df.columns else "계정명" if "계정명" in df.columns else df.columns[0]
     keepCols = [labelCol] + periodCols
 
     rows = []

@@ -248,10 +248,11 @@ def _splitBsIs(df: pl.DataFrame) -> tuple[pl.DataFrame, pl.DataFrame]:
 
     자본총계/자본합계 행을 경계로 그 행까지가 BS, 그 이후가 IS.
     """
-    if df.is_empty() or "계정명" not in df.columns:
+    labelCol = "항목" if "항목" in df.columns else "계정명" if "계정명" in df.columns else None
+    if df.is_empty() or labelCol is None:
         return df, pl.DataFrame()
 
-    names = df["계정명"].to_list()
+    names = df[labelCol].to_list()
     splitIdx = len(names)
 
     for i, name in enumerate(names):
@@ -273,7 +274,7 @@ def _toDataFrame(
     """계정명 × 기간 딕셔너리 → polars DataFrame."""
     rows = []
     for name in accountOrder:
-        row: dict[str, object] = {"계정명": name}
+        row: dict[str, object] = {"항목": name}
         for year in sortedYears:
             row[year] = nameData[name].get(year)
         rows.append(row)
@@ -281,7 +282,9 @@ def _toDataFrame(
     if not rows:
         return pl.DataFrame()
 
-    schema = {"계정명": pl.Utf8}
+    schema = {"항목": pl.Utf8}
     for year in sortedYears:
         schema[year] = pl.Float64
-    return pl.DataFrame(rows, schema=schema)
+    df = pl.DataFrame(rows, schema=schema)
+    # backward-compat alias
+    return df.with_columns(pl.col("항목").alias("계정명"))

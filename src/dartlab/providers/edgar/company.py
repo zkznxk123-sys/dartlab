@@ -355,7 +355,7 @@ def _ratioSeriesToDataFrame(
                 continue
             row: dict[str, Any] = {
                 "분류": _RATIO_CATEGORY_LABELS.get(category, category),
-                "계정명": _RATIO_FIELD_LABELS.get(fieldName, fieldName),
+                "항목": _RATIO_FIELD_LABELS.get(fieldName, fieldName),
                 "_field": fieldName,
             }
             for idx, year in enumerate(years):
@@ -364,8 +364,8 @@ def _ratioSeriesToDataFrame(
 
     if not rows:
         return None
-    df = pl.DataFrame(rows)
-    return df.drop("_field")
+    df = pl.DataFrame(rows).drop("_field")
+    return df.with_columns(pl.col("항목").alias("계정명"))
 
 
 def _isPeriodColumn(col: str) -> bool:
