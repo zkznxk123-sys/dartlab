@@ -5,7 +5,7 @@
 
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.22.0"
 app = marimo.App(width="medium")
 
 
@@ -13,6 +13,7 @@ app = marimo.App(width="medium")
 def _():
     # dartlab 임포트
     import dartlab
+
     return (dartlab,)
 
 
@@ -33,7 +34,7 @@ def _(c):
 @app.cell
 def _(c):
     # 손익계산서 조회
-    c.show("IS")
+    c.show("IS",'annual')
     return
 
 

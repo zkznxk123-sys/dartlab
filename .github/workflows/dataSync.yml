@@ -29,7 +29,7 @@ on:
     inputs:
       lookback_days:
         description: '신규 공시 조회 기간 (일)'
-        default: '7'
+        default: '60'
         type: string
       mode:
         description: 'recent (list.json 기반) / full (88분기 차집합, 무거움)'
@@ -97,7 +97,7 @@ jobs:
         run: uv run python .github/scripts/syncRecent.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
-          SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '7' }}
+          SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '60' }}
           SYNC_CATEGORIES: finance,report
 
       - name: Upload to HuggingFace (finance)
@@ -190,7 +190,7 @@ jobs:
         run: uv run python .github/scripts/syncRecent.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
-          SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '7' }}
+          SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '60' }}
           SYNC_CATEGORIES: docs
 
       - name: Upload to HuggingFace (docs)

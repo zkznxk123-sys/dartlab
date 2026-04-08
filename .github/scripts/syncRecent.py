@@ -73,45 +73,65 @@ def _cloneCategory(category: str, dataDir: str, targetCodes: set[str]) -> int:
     return existing
 
 
-def _existingRceptNos(docsDir: Path, stockCode: str) -> set[str]:
-    """기존 docs parquet에서 rcept_no 집합 추출."""
+def _existingRceptNos(directory: Path, stockCode: str) -> set[str]:
+    """parquet 파일에서 rcept_no 집합 추출 (docs/finance/report 공통).
+
+    3개 카테고리 모두 `rcept_no` 컬럼을 가지므로 단일 함수로 통일.
+    파일이 없거나 컬럼이 없거나 손상된 경우 빈 set.
+    """
     import polars as pl
 
-    path = docsDir / f"{stockCode}.parquet"
+    path = directory / f"{stockCode}.parquet"
     if not path.exists():
         return set()
     try:
-        df = pl.scan_parquet(path).select("rcept_no").collect()
-        return set(df["rcept_no"].unique().to_list())
-    except (pl.exceptions.ComputeError, OSError):
-        return set()
-
-
-def _existingFinanceReprts(financeDir: Path, stockCode: str) -> set[tuple[str, str]]:
-    """기존 finance parquet의 (bsns_year, reprt_code) 세트 — 어느 보고서가 이미 들어와 있는지."""
-    import polars as pl
-
-    path = financeDir / f"{stockCode}.parquet"
-    if not path.exists():
-        return set()
-    try:
-        # placeholder/stub parquet 가드 — collect_status 만 있고 reprt_code 없는 케이스
         cols = pl.scan_parquet(path).collect_schema().names()
-        if "reprt_code" not in cols or "bsns_year" not in cols:
+        if "rcept_no" not in cols:
             return set()
         df = (
             pl.scan_parquet(path)
-            .select("bsns_year", "reprt_code")
-            .filter(pl.col("bsns_year").is_not_null() & pl.col("reprt_code").is_not_null())
+            .select("rcept_no")
+            .filter(pl.col("rcept_no").is_not_null() & (pl.col("rcept_no") != ""))
             .unique()
             .collect()
         )
-        return set(
-            zip(
-                df["bsns_year"].cast(pl.Utf8).to_list(),
-                df["reprt_code"].cast(pl.Utf8).to_list(),
-            )
+        return set(df["rcept_no"].to_list())
+    except (pl.exceptions.ComputeError, pl.exceptions.ColumnNotFoundError, OSError):
+        return set()
+
+
+# report 카테고리 특별 처리:
+# - report는 한 rcept_no당 26개 apiType 행으로 펼쳐져 있다.
+# - 일부 apiType가 partial로 저장되었을 수 있으므로,
+#   "rcept_no가 존재 + 최소 N개 apiType"을 기준으로 완전성 판단.
+_REPORT_MIN_APITYPES = 5  # 5개 미만이면 부분 수집으로 간주 → 재수집
+
+
+def _existingRceptNosReport(reportDir: Path, stockCode: str) -> set[str]:
+    """report parquet에서 '완전 수집된' rcept_no 집합 추출.
+
+    한 rcept_no당 apiType이 _REPORT_MIN_APITYPES 이상이어야 완전으로 간주.
+    """
+    import polars as pl
+
+    path = reportDir / f"{stockCode}.parquet"
+    if not path.exists():
+        return set()
+    try:
+        cols = pl.scan_parquet(path).collect_schema().names()
+        if "rcept_no" not in cols or "apiType" not in cols:
+            return set()
+        df = (
+            pl.scan_parquet(path)
+            .select("rcept_no", "apiType")
+            .filter(pl.col("rcept_no").is_not_null() & (pl.col("rcept_no") != ""))
+            .unique()
+            .group_by("rcept_no")
+            .agg(pl.len().alias("n"))
+            .filter(pl.col("n") >= _REPORT_MIN_APITYPES)
+            .collect()
         )
+        return set(df["rcept_no"].to_list())
     except (pl.exceptions.ComputeError, pl.exceptions.ColumnNotFoundError, OSError):
         return set()
 
@@ -215,41 +235,52 @@ def _discoverNewFilings(
         sc = row["stock_code"]
         codeToFilings.setdefault(sc, []).append(row)
 
-    # P0 수정 (2026-04-06): 카테고리별 독립 누락 검사.
-    # 과거 버그: docs의 rcept_no만 비교 → docs는 이미 새 보고서가 들어와 있으면
-    # finance/report가 누락된 상태여도 targetCodes에서 빠져 영구 누락.
-    # 수정: docs 새 rcept_no OR finance에 (year, reprt_code)가 누락된 종목 모두 포함.
+    # 근본 원칙 (2026-04-08): rcept_no를 단일 키로 카테고리별 독립 누락 검사.
+    #
+    # 정기보고서 list.json의 각 행 = (stockCode, rcept_no) 단위.
+    # 이 rcept_no가 docs/finance/report 각 parquet에 들어있는지 독립 검사.
+    # - docs: rcept_no 컬럼 직접 비교
+    # - finance: rcept_no 컬럼 직접 비교 (정정 보고서도 감지)
+    # - report: rcept_no 비교 + apiType 개수 ≥ _REPORT_MIN_APITYPES (partial 재수집)
+    #
+    # 종목 단위 targetCodes는 합집합이지만, 카테고리별로 정확히 누락된 (rcept_no/period)만
+    # 수집하도록 missingByCat에 분리 저장한다.
     docsDir = Path(dataDir) / DATA_RELEASES["docs"]["dir"]
     financeDir = Path(dataDir) / DATA_RELEASES["finance"]["dir"]
+    reportDir = Path(dataDir) / DATA_RELEASES["report"]["dir"]
+
     targetCodes: set[str] = set()
-    targetFilings: dict[str, list[dict]] = {}
-    docsNewCount = 0
-    financeMissingCount = 0
+    targetFilings: dict[str, list[dict]] = {}  # docs 직접수집용 (rcept_no list)
+    missingDocsCount = 0
+    missingFinanceCount = 0
+    missingReportCount = 0
 
     for sc, rows in codeToFilings.items():
         existingDocs = _existingRceptNos(docsDir, sc)
-        existingFinance = _existingFinanceReprts(financeDir, sc)
+        existingFinance = _existingRceptNos(financeDir, sc)
+        existingReport = _existingRceptNosReport(reportDir, sc)
 
-        # 이 종목에서 새로 발견된 docs rcept_no
-        newRowsDocs = [r for r in rows if r["rcept_no"] not in existingDocs]
+        missingDocs = [r for r in rows if r["rcept_no"] not in existingDocs]
+        missingFinance = [r for r in rows if r["rcept_no"] not in existingFinance]
+        missingReport = [r for r in rows if r["rcept_no"] not in existingReport]
 
-        # 이 종목에서 finance가 누락된 (year, reprt_code) — list.json의 최신 보고서들 기준
-        missingFinance = []
-        for r in rows:
-            key = _reportNmToFinanceKey(r["report_nm"])
-            if key is not None and key not in existingFinance:
-                missingFinance.append(r)
-
-        if newRowsDocs:
-            docsNewCount += 1
+        if missingDocs:
+            missingDocsCount += 1
         if missingFinance:
-            financeMissingCount += 1
+            missingFinanceCount += 1
+        if missingReport:
+            missingReportCount += 1
 
-        # 둘 중 하나라도 있으면 수집 대상
-        if newRowsDocs or missingFinance:
+        if missingDocs or missingFinance or missingReport:
             targetCodes.add(sc)
-            # docs 수집용 — newRowsDocs 우선, 없으면 finance 누락 행을 docs 수집용으로 사용
-            targetFilings[sc] = newRowsDocs if newRowsDocs else missingFinance
+            # docs 직접 ZIP 수집은 missingDocs 행만 처리.
+            # finance/report 수집은 batchCollect가 (year, reprt_code) 기반이므로
+            # main()에서 missing rows를 합쳐 targetPeriodsByCode를 구성한다.
+            targetFilings[sc] = {
+                "docs": missingDocs,
+                "finance": missingFinance,
+                "report": missingReport,
+            }
 
     skipped = len(allCandidateCodes) - len(targetCodes)
     reportNames = filtered["report_nm"].unique().to_list()
@@ -257,7 +288,8 @@ def _discoverNewFilings(
     print(f"[syncRecent] 보고서 유형: {reportNames}")
     print(
         f"[syncRecent] 수집 대상: {len(targetCodes)}개 "
-        f"(docs 새 rcept_no={docsNewCount}, finance 누락={financeMissingCount}, 스킵={skipped})"
+        f"(docs 누락={missingDocsCount}, finance 누락={missingFinanceCount}, "
+        f"report 누락={missingReportCount}, 스킵={skipped})"
     )
 
     return targetCodes, targetFilings
@@ -288,10 +320,10 @@ async def _collectDocsDirect(
     keyList = [k.strip() for k in keys.split(",") if k.strip()]
     client = AsyncDartClient(keyList[0])
 
-    # 모든 filing을 flat list로 변환
+    # 모든 docs 누락 filing을 flat list로 변환
     allJobs: list[tuple[str, dict]] = []
-    for sc, rows in targetFilings.items():
-        for row in rows:
+    for sc, perCat in targetFilings.items():
+        for row in perCat.get("docs", []):
             allJobs.append((sc, row))
 
     total = len(allJobs)
@@ -427,7 +459,10 @@ def main():
         print("DART_API_KEYS 환경변수가 필요합니다.")
         sys.exit(1)
 
-    lookbackDays = int(os.environ.get("SYNC_LOOKBACK_DAYS", "7"))
+    # 2개월 기본 — list.json에 있는데 docs/finance/report에 없는 것만 수집한다.
+    # 짧으면 정정 보고서 + 늦은 제출을 놓친다. rcept_no 누락 검사가 정확하므로
+    # 길어도 비용은 사실상 list.json 페이징뿐.
+    lookbackDays = int(os.environ.get("SYNC_LOOKBACK_DAYS", "60"))
     categories = [
         c.strip()
         for c in os.environ.get("SYNC_CATEGORIES", "finance,report,docs").split(",")
@@ -482,53 +517,48 @@ def main():
     # 4단계: 카테고리별 수집
     startTime = time.time()
 
-    if "docs" in categories and len(categories) == 1:
-        # docs 전용 모드: 직접 ZIP 수집 (listing API 재조회 없음)
+    # 카테고리별 정확히 누락된 종목 + (year, reprt_code) 만 수집한다.
+    # docs는 별도 직접 ZIP 수집 경로, finance/report는 batchCollect.
+    def _periodsFor(cat: str) -> tuple[list[str], dict[str, list[tuple[str, str]]]]:
+        """cat에서 누락이 있는 종목 + 그 종목의 누락 (year, reprt_code) list."""
+        codes: list[str] = []
+        periods: dict[str, list[tuple[str, str]]] = {}
+        for sc, perCat in targetFilings.items():
+            rows = perCat.get(cat, [])
+            if not rows:
+                continue
+            ks: set[tuple[str, str]] = set()
+            for r in rows:
+                k = _reportNmToFinanceKey(r["report_nm"])
+                if k is not None:
+                    ks.add(k)
+            if ks:
+                codes.append(sc)
+                periods[sc] = sorted(ks)
+        return codes, periods
+
+    if "docs" in categories:
         asyncio.run(_collectDocsDirect(targetFilings, dataDir, keys))
-    elif "docs" not in categories:
-        # finance/report만: batchCollect 사용 (88분기 차집합 우회)
+
+    nonDocsCats = [c for c in categories if c != "docs"]
+    if nonDocsCats:
         from dartlab.providers.dart.openapi.batch import batchCollect
 
-        # list.json 발견 결과에서 종목별 정확한 (year, reprt_code) 추출
-        targetPeriodsByCode: dict[str, list[tuple[str, str]]] = {}
-        for sc, rows in targetFilings.items():
-            keys_set = set()
-            for r in rows:
-                k = _reportNmToFinanceKey(r["report_nm"])
-                if k is not None:
-                    keys_set.add(k)
-            if keys_set:
-                targetPeriodsByCode[sc] = sorted(keys_set)
-
-        batchCollect(
-            list(targetCodes),
-            categories=categories,
-            incremental=True,
-            showProgress=False,
-            targetPeriodsByCode=targetPeriodsByCode,
-        )
-    else:
-        # 혼합 모드 (fallback): batchCollect로 전체 수집
-        from dartlab.providers.dart.openapi.batch import batchCollect
-
-        # finance/report 카테고리에 대해 list.json 기반 정확한 (year, reprt_code) 추출
-        targetPeriodsByCode = {}
-        for sc, rows in targetFilings.items():
-            keys_set = set()
-            for r in rows:
-                k = _reportNmToFinanceKey(r["report_nm"])
-                if k is not None:
-                    keys_set.add(k)
-            if keys_set:
-                targetPeriodsByCode[sc] = sorted(keys_set)
-
-        batchCollect(
-            list(targetCodes),
-            categories=categories,
-            incremental=True,
-            showProgress=False,
-            targetPeriodsByCode=targetPeriodsByCode,
-        )
+        # finance/report 각각 독립적으로 누락 종목만 수집.
+        # 한 카테고리만 누락이면 다른 카테고리는 건드리지 않는다.
+        for cat in nonDocsCats:
+            codes, periods = _periodsFor(cat)
+            if not codes:
+                print(f"[syncRecent] {cat}: 누락 없음 → 스킵")
+                continue
+            print(f"[syncRecent] {cat}: {len(codes)}개 종목 수집 시작")
+            batchCollect(
+                codes,
+                categories=[cat],
+                incremental=True,
+                showProgress=False,
+                targetPeriodsByCode=periods,
+            )
 
     elapsed = time.time() - startTime
 

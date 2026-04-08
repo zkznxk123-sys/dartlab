@@ -17,6 +17,7 @@ import argparse
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 CHANGED_FILE = Path("dist/changed.txt")
@@ -164,11 +165,27 @@ def _ghReleaseUpload(tag: str, files: list[Path]) -> None:
             check=True,
         )
 
-    batchSize = 50
+    # GitHub secondary rate limit (HTTP 403) 회피:
+    # - 배치 20개 (50은 secondary rate limit 유발)
+    # - 배치 사이 30초 sleep
+    # - 배치 실패 시 60초 후 1회 재시도
+    batchSize = 20
+    sleepBetween = 30
+    totalBatches = (len(files) + batchSize - 1) // batchSize
     for i in range(0, len(files), batchSize):
         batch = files[i : i + batchSize]
+        batchNum = i // batchSize + 1
         cmd = ["gh", "release", "upload", tag, "--clobber"] + [str(f) for f in batch]
-        subprocess.run(cmd, check=True)
+        try:
+            subprocess.run(cmd, check=True)
+            print(f"[uploadData] GH batch {batchNum}/{totalBatches} 완료 ({len(batch)}개)")
+        except subprocess.CalledProcessError as e:
+            print(f"[uploadData] GH batch {batchNum} 실패 → 60초 후 재시도: {e}")
+            time.sleep(60)
+            subprocess.run(cmd, check=True)
+            print(f"[uploadData] GH batch {batchNum}/{totalBatches} 재시도 성공")
+        if batchNum < totalBatches:
+            time.sleep(sleepBetween)
 
 
 def main():

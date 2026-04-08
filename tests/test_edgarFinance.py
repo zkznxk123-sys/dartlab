@@ -177,7 +177,7 @@ class TestBuildTimeseries:
             "longterm_borrowings",
             "operating_cashflow",
             "investing_cashflow",
-            "cash_flows_from_financing_activities",
+            "financing_cashflow",
             "cost_of_sales",
             "gross_profit",
             "profit_before_tax",

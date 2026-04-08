@@ -207,6 +207,30 @@ def _financeToDataFrame(
     if not rows:
         return None
 
+    # Plan v7 R1: SNAKEID_ALIASES 양방향 row 머지 (root 통합).
+    # 같은 개념이 두 snakeId 로 분리된 케이스 (예: cash_flows_from_financing_activities ↔
+    # financing_cashflow) 를 한 row 로 합친다. col 별 not-null 우선.
+    from dartlab.core.finance.labels import SNAKEID_ALIASES
+
+    snakeToRow = {r["snakeId"]: r for r in rows}
+    metaCols = {"snakeId", "계정명", "_level", "_sort"}
+    mergedSnakeIds: set[str] = set()
+    for alias, canonical in SNAKEID_ALIASES.items():
+        if alias == canonical:
+            continue
+        aRow = snakeToRow.get(alias)
+        cRow = snakeToRow.get(canonical)
+        if aRow is None or cRow is None:
+            continue
+        for col, val in aRow.items():
+            if col in metaCols:
+                continue
+            if cRow.get(col) is None and val is not None:
+                cRow[col] = val
+        mergedSnakeIds.add(alias)
+    if mergedSnakeIds:
+        rows = [r for r in rows if r["snakeId"] not in mergedSnakeIds]
+
     rows.sort(key=lambda r: r["_sort"])
     df = pl.DataFrame(rows)
     df = df.drop(["_level", "_sort"])

@@ -209,14 +209,21 @@ def resolve_label(snake_id: str, market: str = "KR") -> str:
 # ── DART ↔ EDGAR snakeId alias (L0에 배치 — import 방향 준수) ──
 
 SNAKEID_ALIASES: dict[str, str] = {
-    # ── 현금흐름 ──
+    # ── 현금흐름 (Plan v7 R1: 모두 short form 으로 통일 — 양방향 머지) ──
+    # canonical = operating_cashflow / investing_cashflow / financing_cashflow.
+    # mapper 가 만든 long form (`cash_flows_from_*_activities`) 은 alias 로 통합.
     "operating_cash_flow": "operating_cashflow",
     "investing_cash_flow": "investing_cashflow",
-    "financing_cash_flow": "cash_flows_from_financing_activities",
-    "cash_flows_from_financing": "cash_flows_from_financing_activities",
+    "financing_cash_flow": "financing_cashflow",
     "cash_flows_from_operating": "operating_cashflow",
     "cash_flows_from_investing": "investing_cashflow",
-    "financing_cashflow": "cash_flows_from_financing_activities",
+    "cash_flows_from_financing": "financing_cashflow",
+    "cash_flows_from_operating_activities": "operating_cashflow",
+    "cash_flows_from_investing_activities": "investing_cashflow",
+    "cash_flows_from_financing_activities": "financing_cashflow",
+    "net_cash_flows_from_financing_activities": "financing_cashflow",
+    "net_cash_flows_from_operating_activities": "operating_cashflow",
+    "net_cash_flows_from_investing_activities": "investing_cashflow",
     # ── 손익 ──
     "revenue": "sales",
     "operating_income": "operating_profit",
