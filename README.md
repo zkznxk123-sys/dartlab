@@ -66,13 +66,13 @@ c.sections                          # every topic, every period, side by side
 
 c.show("businessOverview")          # what this company actually does
 c.diff("businessOverview")          # what changed since last year
-c.BS                                # standardized balance sheet
-c.ratios                            # financial ratios, already calculated
+c.show("BS")                        # standardized balance sheet
+c.show("ratios")                    # financial ratios, already calculated
 
 # Same interface, different country
 us = dartlab.Company("AAPL")
 us.show("business")
-us.ratios
+us.show("ratios")
 
 # Ask in natural language
 dartlab.ask("Analyze Samsung Electronics financial health")
@@ -332,8 +332,8 @@ Same interface, different data source. Auto-fetched from SEC API — no pre-down
 c = dartlab.Company("005930")           c = dartlab.Company("AAPL")
 c.sections                              c.sections
 c.show("businessOverview")              c.show("business")
-c.BS                                    c.BS
-c.ratios                                c.ratios
+c.show("BS")                            c.show("BS")
+c.show("ratios")                        c.show("ratios")
 c.diff("businessOverview")              c.diff("10-K::item7Mdna")
 ```
 

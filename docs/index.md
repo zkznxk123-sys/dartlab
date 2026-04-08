@@ -23,7 +23,7 @@ dartlab.ask("삼성전자 분석해줘")           # AI 분석가
 | 엔진 | 진입점 | 역할 |
 |------|--------|------|
 | [Company](api/company) | `Company("005930")` | 데이터 조회 (show/select/sections) |
-| [Financial Data](api/finance) | `c.BS`, `c.ratios` | 재무제표 + 비율 |
+| [Financial Data](api/finance) | `c.show("BS")`, `c.show("ratios")` | 재무제표 + 비율 |
 | [Analysis](api/analysis) | `c.analysis()` | 14축 재무분석 + 6막 서사 |
 | [Credit](api/credit) | `c.credit()` | 독립 신용평가 (dCR 20단계) |
 | [Scan](api/scan) | `dartlab.scan()` | 전종목 횡단분석 |

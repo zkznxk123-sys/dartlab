@@ -66,13 +66,13 @@ c.sections                          # 모든 topic, 모든 기간, 나란히
 
 c.show("businessOverview")          # 이 회사가 실제로 뭘 하는지
 c.diff("businessOverview")          # 작년 대비 뭐가 바뀌었는지
-c.BS                                # 표준화된 재무상태표
-c.ratios                            # 재무비율, 이미 계산됨
+c.show("BS")                        # 표준화된 재무상태표
+c.show("ratios")                    # 재무비율, 이미 계산됨
 
 # 같은 인터페이스, 다른 나라
 us = dartlab.Company("AAPL")
 us.show("business")
-us.ratios
+us.show("ratios")
 
 # 자연어로 질문
 dartlab.ask("삼성전자 재무건전성 분석해줘")
@@ -332,8 +332,8 @@ flowchart TB
 c = dartlab.Company("005930")           c = dartlab.Company("AAPL")
 c.sections                              c.sections
 c.show("businessOverview")              c.show("business")
-c.BS                                    c.BS
-c.ratios                                c.ratios
+c.show("BS")                            c.show("BS")
+c.show("ratios")                        c.show("ratios")
 c.diff("businessOverview")              c.diff("10-K::item7Mdna")
 ```
 

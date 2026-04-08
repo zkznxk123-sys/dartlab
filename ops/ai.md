@@ -80,7 +80,7 @@ dartlab.chat("005930", "배당 추세를 분석하고 이상 징후를 찾아줘
 - **매크로 환경 질문**: `dartlab.macro("축")` — 시장 레벨 매크로 해석 (Company 불필요)
 - **시장 비교/순위**: scan 단일 축 + filter
 - **데이터 직접 조회**: show/select (배당, 매출 추이, 주석 등)
-- **주석 상세**: c.notes.xxx (재고/차입금/유형자산 등 12항목)
+- **주석 상세**: c.show("inventory" / "borrowings" / "tangibleAsset" 등 12항목)
 - **실시간 이슈**: newsSearch + gather("news") 교차 검증
 - **웹서치 자발 사용**: 분석 부족 시 자동으로 newsSearch/webSearch 보충
 

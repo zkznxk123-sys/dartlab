@@ -33,16 +33,17 @@ c.select("IS", ["매출액", "영업이익"]).toDict()   # dict 변환
 
 **성능**: show/select는 해당 토픽만 부분 빌드 — 0.01~0.65초.
 
-## 재무제표 바로가기
+## 재무제표 / 비율
 
 ```python
-c.BS                    # 재무상태표
-c.IS                    # 손익계산서
-c.CF                    # 현금흐름표
-c.CIS                   # 포괄손익계산서
-c.ratios                # 47개 재무비율
-c.ratioSeries           # 비율 시계열
-c.timeseries            # 분기별 시계열
+c.show("BS")                  # 재무상태표
+c.show("IS")                  # 손익계산서 (분기, 기본)
+c.show("IS", freq="Y")        # 연간 합산
+c.show("CF")                  # 현금흐름표
+c.show("CIS")                 # 포괄손익계산서
+c.show("SCE")                 # 자본변동표
+c.show("ratios")              # 47개 재무비율
+c.show("ratioSeries")         # 비율 시계열
 ```
 
 ## 주석 (Notes) 접근
@@ -50,23 +51,14 @@ c.timeseries            # 분기별 시계열
 재무제표 주석은 BS/IS 총액 뒤의 **항목별 분해** 데이터다.
 
 ```python
-c.notes.borrowings      # 차입금 상세 (이자율, 만기, 담보)
-c.notes.inventory       # 재고자산 분해
-c.notes.provisions      # 충당부채
-c.notes.segments        # 부문별 매출/이익
-c.notes.tangibleAsset   # 유형자산 변동
-c.notes.lease           # 리스부채
-c.notes.eps             # 주당이익 분해
-c.notes.costByNature    # 비용 성격별 분류
-```
-
-## 4 Namespace
-
-```python
-c.docs      # 원문 (사업보고서 텍스트)
-c.finance   # 숫자 (IS/BS/CF, ratios)
-c.report    # 정형 공시 (DART 전용)
-c.profile   # 통합 (위 3개 병합)
+c.show("borrowings")      # 차입금 상세 (이자율, 만기, 담보)
+c.show("inventory")       # 재고자산 분해
+c.show("provisions")      # 충당부채
+c.show("segments")        # 부문별 매출/이익
+c.show("tangibleAsset")   # 유형자산 변동
+c.show("lease")           # 리스부채
+c.show("eps")             # 주당이익 분해
+c.show("costByNature")    # 비용 성격별 분류
 ```
 
 ## 탐색/추적

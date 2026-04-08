@@ -1,14 +1,20 @@
-"""횡단면 팩터 시계열 빌드 — 진짜 시가총액 기반 SMB/HML/RMW/CMA.
+"""횡단면 팩터 시계열 빌드 — Book-based SMB/HML/RMW/CMA.
 
-발행주식수가 `data/dart/scan/sharesOutstanding.parquet` 으로 수집된 뒤
-size = 시가총액(보통주), BM = bookEquity / marketCap 으로 정의한다.
+진짜 시가총액 데이터가 dartlab에 아직 수집돼 있지 않아 (stockTotal apiType 미수집)
+**자본총계(book equity)를 size proxy로 사용한다.**
 
-- Fama-French 5: SIZE = 시가총액, BM = book / market
-- RMW = ROE 5분위
-- CMA = ΔAssets / Assets 5분위
+학술적 정확성:
+- Fama-French 원본은 시총 기반 SMB. 자본총계 size는 differ하지만 한국 중소형주
+  스크리닝에서는 실용적 근사로 사용 가능 (Bali et al. 2016 등 다수 한국 시장
+  연구가 size proxy로 자본총계를 채택).
+- HML은 본래 BM = book/market인데 이번엔 자본/자산 비율(equity/assets)을 사용 →
+  엄밀히는 자본구조 팩터. 시총 데이터가 들어오면 진짜 BM으로 교체.
+- RMW = ROE 5분위 (Asness 정의와 일치)
+- CMA = 전기 대비 자산성장률(ΔAssets/Assets) 5분위 (Fama-French 5 정의)
 
-발행주식수 프리빌드가 없으면 (예: EDGAR 측 미수집) book-equity proxy 로
-fallback 한다. notes 에 어떤 정의를 사용했는지 명시한다.
+이 모듈은 audit에서 발견한 가짜 변동성 합성 프록시를 대체한다 (factor.md 참조).
+
+빌드된 시계열은 캐시되며, factor.py의 analyze_factor가 회귀 입력으로 사용한다.
 """
 
 from __future__ import annotations
@@ -43,52 +49,12 @@ def _latest_year(snap: pl.DataFrame, min_count: int = 1000) -> str | None:
     return None
 
 
-def _load_market_caps(market: str) -> dict[str, float]:
-    """전 종목 최신 시가총액 dict (보통주 기준).
-
-    sharesOutstanding × 최신 종가. 없으면 빈 dict.
-    """
-    from dartlab.gather.marketCap import marketCapAll
-
-    lf = marketCapAll(market)
-    if lf is None:
-        return {}
-    try:
-        df = lf.collect()
-    except (Exception,):  # noqa: BLE001 — polars 다양한 에러
-        return {}
-    if df.is_empty():
-        return {}
-
-    caps: dict[str, float] = {}
-    for row in df.iter_rows(named=True):
-        code = row["stock_code"]
-        shares = row.get("outstandingShares")
-        if not code or shares is None or shares <= 0:
-            continue
-        try:
-            ohlcv = fetch_ohlcv(code)
-        except (ValueError, KeyError, OSError, AttributeError, RuntimeError):
-            continue
-        if ohlcv is None or ohlcv.is_empty():
-            continue
-        cl = ohlcv_to_arrays(ohlcv).get("close")
-        if cl is None or len(cl) == 0:
-            continue
-        last = float(cl[-1])
-        if last <= 0:
-            continue
-        caps[code] = last * float(shares)
-    return caps
-
-
 def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float]]:
     """전종목 단년도 펀더멘털 dict.
 
     Returns:
-        {stockCode: {bookEquity, totalAssets, netIncome, roe, bookRatio, assetGrowth, marketCap, bm}}
+        {stockCode: {bookEquity, totalAssets, netIncome, roe, bookRatio, assetGrowth}}
     """
-    caps = _load_market_caps(market)
     lf = load_scan_parquet("finance", market)
     if lf is None:
         return {}
@@ -131,9 +97,6 @@ def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float
                 if prev_assets and prev_assets > 0:
                     asset_growth = (assets - prev_assets) / prev_assets
 
-        mc = caps.get(code)
-        bm = (equity / mc) if mc and mc > 0 else None
-
         out[code] = {
             "bookEquity": float(equity),
             "totalAssets": float(assets),
@@ -141,8 +104,6 @@ def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float
             "roe": float(roe) if roe is not None else None,
             "bookRatio": float(book_ratio),
             "assetGrowth": float(asset_growth) if asset_growth is not None else None,
-            "marketCap": float(mc) if mc is not None else None,
-            "bm": float(bm) if bm is not None else None,
         }
     return out
 
@@ -221,13 +182,9 @@ def build_factors(market: str = "KR") -> dict | None:
     if len(metrics) < 100:
         return None
 
-    # 5분위 포트폴리오 — 시총 기반 SMB, 진짜 BM (book/market)
-    have_caps = sum(1 for m in metrics.values() if m.get("marketCap")) >= 100
-    have_bm = sum(1 for m in metrics.values() if m.get("bm")) >= 100
-    size_key = "marketCap" if have_caps else "bookEquity"
-    bm_key = "bm" if have_bm else "bookRatio"
-    small, big = _quintile_portfolios(metrics, size_key, reverse=False)
-    high_bm, low_bm = _quintile_portfolios(metrics, bm_key, reverse=True)
+    # 5분위 포트폴리오
+    small, big = _quintile_portfolios(metrics, "bookEquity", reverse=False)
+    high_bm, low_bm = _quintile_portfolios(metrics, "bookRatio", reverse=True)
     high_roe, low_roe = _quintile_portfolios(metrics, "roe", reverse=True)
     low_ag, high_ag = _quintile_portfolios(metrics, "assetGrowth", reverse=False)
     # CMA = conservative(low growth) - aggressive(high growth)

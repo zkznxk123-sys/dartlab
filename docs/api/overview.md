@@ -50,7 +50,7 @@ dartlab.ask("삼성전자 재무 분석해줘")   # AI 분석가
 | 엔진 | 진입점 | 용도 | 상세 |
 |------|--------|------|------|
 | [Company](company) | `Company("005930")` | Data access | show/select/sections/notes |
-| [Financial Data](finance) | `c.BS`, `c.ratios` | Financial statements | BS/IS/CF/ratios/timeseries |
+| [Financial Data](finance) | `c.show("BS")`, `c.show("ratios")` | Financial statements | BS/IS/CF/ratios |
 | [Scan](scan) | `dartlab.scan()` | Market-wide analysis | 15-axis cross-sectional |
 | [Gather](gather) | `c.gather()` | External data | price/flow/macro/news |
 | [Analysis](analysis) | `c.analysis()` | Deep analysis | 14-axis financial + forecast |

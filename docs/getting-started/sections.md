@@ -109,16 +109,15 @@ c.sections.ordered()    # sorted newest first
 c.sections.coverage()   # per-topic period coverage summary
 ```
 
-## docs.sections vs sections
+## c.sections — single entry point
 
-Currently `c.sections` and `c.docs.sections` are identical. Both point to the pure docs source view.
+`c.sections` is the single user-facing entry for the unified topic × period DataFrame.
+Use `c.show(topic)` for individual topic data with source priority (finance > report > docs) applied automatically.
 
 ```python
-c.sections              # shortcut
-c.docs.sections         # explicit path (same result)
+c.sections              # full topic × period map
+c.show("BS")            # individual topic with source priority
 ```
-
-`show(topic)` applies source priority (finance > report > docs) to return a merged result, so for practical use, just use `show()`.
 
 ## Same for EDGAR
 

@@ -46,10 +46,10 @@ c.show("companyOverview")    # company overview
 ## 4. Financial statements
 
 ```python
-c.IS      # Income Statement
-c.BS      # Balance Sheet
-c.CF      # Cash Flow
-c.ratios  # 47 financial ratios
+c.show("IS")       # Income Statement
+c.show("BS")       # Balance Sheet
+c.show("CF")       # Cash Flow
+c.show("ratios")   # 47 financial ratios
 ```
 
 ## 5. Detect what changed

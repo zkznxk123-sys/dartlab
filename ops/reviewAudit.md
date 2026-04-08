@@ -5,21 +5,21 @@
 ## 진행 절차
 
 1. `c.review()` 단일 섹션씩 호출(메모리 안전), 표/숫자 line by line 읽기
-2. 의심점 → raw `c.IS/BS/CF/notes` 직접 호출로 교차검증
+2. 의심점 → `c.show("IS"/"BS"/"CF"/"inventory" 등)` 직접 호출로 교차검증
 3. 진짜 버그면 아래 표에 등록 → 보수적 fix → 재검증
 4. 종목 1개 끝나면 다음 종목으로 커버리지 확장
 
 ## 단위 함정 (Plan v4 root fix 후 — 회귀 차단됨)
 
-- `c.notes.*` 모두 **원 단위** 노출 (Plan v4 P1 후)
+- `c.show("inventory" 등)` notes 모두 **원 단위** 노출 (Plan v4 P1 후)
   - 4 분산 parser (costByNature/tangibleAsset/segment/affiliate) 도 `normalizeFromUnitScale` 경유
   - notes 내부 표준은 백만원이지만 노출 시점에 ×1_000_000
-- `c.IS / c.BS / c.CF` → **원**
+- `c.show("IS"/"BS"/"CF")` → **원**
 - 새 parser 추가 시 raw `*= unit` 금지 (sentinel `test_no_global_raw_unit_multiply` 차단)
 
 ## Q4 컬럼 함정 (Plan v4 root fix 후 — 자동 해결)
 
-- Plan v4 Layer A 후 `c.IS / c.CIS / c.CF` 가 분기 컬럼 + **annual 컬럼 (`{year}`)** 자동 노출
+- Plan v4 Layer A 후 `c.show("IS"/"CIS"/"CF")` 가 분기 컬럼 + **annual 컬럼 (`{year}`)** 자동 노출
 - calc 가 `row['2025']` 직접 read 하면 연간값 (Q1+Q2+Q3+Q4 합)
 - `row['2025Q4']` 는 Q4 단독값 (분기 단독)
 - ttmSum/getFlowValue/_annualizeFlow 헬퍼 모두 제거됨 (Plan v5)
@@ -33,7 +33,7 @@
 
 | # | 위치 | 증상 | 원인 | Fix | 상태 |
 |---|---|---|---|---|---|
-| 1 | `review/builders.py::_notesDetailBlocks` | 비용성격별 "원재료사용 1,210만" (실제 12.1조) | `c.notes.*` 는 백만원 단위 노출 → 6자리 축소 표시 | Plan v4 Layer 1: 4 분산 parser 가 `normalizeFromUnitScale` 경유, 모든 notes 원 단위 노출 | ✅ root fix |
+| 1 | `review/builders.py::_notesDetailBlocks` | 비용성격별 "원재료사용 1,210만" (실제 12.1조) | notes 가 백만원 단위 노출 → 6자리 축소 표시 | Plan v4 Layer 1: 4 분산 parser 가 `normalizeFromUnitScale` 경유, 모든 notes 원 단위 노출 | ✅ root fix |
 | 2 | 영업레버리지(DOL) | 2024Q4/2023Q4/2018Q4 None | 부호 전환(음→양) 시 직관적 해석 불가로 의도적 None 가능성 큼 | — | ⏸ 보류 |
 | 3 | 수익성 — 매출총이익률 표 | 본문 60.4% vs 표 57.3%→68.8% | 재현 불가 (이전 세션 오인) | — | ❌ 무효 |
 | 4 | `review/narrative.py` 7 detector | "매출 +66.1% / 영업이익률 40.9%→58.4%" — 표 (46.8%/35.5%→48.6%) 와 불일치 | DART IS/CF Q4 컬럼이 분기 단독값인데 detector 가 연간값으로 오인 | Plan v4 Layer A: pivot 결과에 annual 컬럼 자동 노출 → `row['2025']` 직접 read | ✅ root fix |

@@ -207,7 +207,7 @@ In a Colab cell:
 
 import dartlab
 c = dartlab.Company("005930")
-c.BS
+c.show("BS")
 ```
 
 ---

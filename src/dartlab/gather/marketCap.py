@@ -139,38 +139,9 @@ def marketCapSnapshot(stockCode: str, *, market: str = "auto") -> dict | None:
     }
 
 
-def marketCapAll(market: str = "KR") -> pl.LazyFrame | None:
-    """전 종목 최신 시가총액 횡단면 (factor/value 빌더용).
-
-    분기별 시계열에서 종목당 가장 최근 rcept_date 한 행만 추출. 종가는
-    별도로 일별 종가가 필요하므로 여기서는 outstanding 만 반환 (factor
-    빌더가 자체 종가와 곱한다).
-
-    Returns:
-        LazyFrame (stock_code, rcept_date, outstandingShares, preferredOutstanding)
-        또는 None.
-    """
-    lf = load_shares_outstanding(market)
-    if lf is None:
-        return None
-    if market == "KR":
-        latest = (
-            lf.sort(["stock_code", "rcept_date"], descending=[False, True])
-            .group_by("stock_code")
-            .agg(
-                [
-                    pl.col("rcept_date").first(),
-                    pl.col("outstandingShares").first(),
-                    pl.col("preferredOutstanding").first(),
-                ]
-            )
-        )
-    else:
-        latest = (
-            lf.sort(["ticker", "end"], descending=[False, True])
-            .group_by("ticker")
-            .agg([pl.col("end").first().alias("rcept_date"), pl.col("val").first().alias("outstandingShares")])
-            .with_columns(pl.lit(0.0).alias("preferredOutstanding"))
-            .rename({"ticker": "stock_code"})
-        )
-    return latest
+# marketCapAll() 은 의도적으로 제공하지 않는다.
+# 이유: 전 종목 시총 횡단면은 종목별 OHLCV 반복 fetch 가 본질적으로 필요하고,
+#       Yahoo rate limit + KR fallback 비용으로 비현실적 (실측 ~3시간).
+# 시총은 한 종목씩만 합성한다 — `marketCap(stockCode)` / `marketCapSnapshot(stockCode)`.
+# 횡단면 가치 분석이 필요하면 finance.parquet book-based proxy (valueFactor 의
+# 기존 방식) 를 사용한다.
