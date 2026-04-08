@@ -191,11 +191,12 @@
 
 	.dl-blog-sidebar {
 		display: block;
+		align-self: start;
 	}
 
 	.dl-blog-sidebar-inner {
 		position: sticky;
-		top: 72px;
+		top: 64px;
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
