@@ -26,6 +26,7 @@
 | [vscode.md](vscode.md) | L4 | vscode/ | VSCode 확장 — 프로바이더 연결, stdio 프로토콜, 배포 |
 | [ui.md](ui.md) | L4 | ui/ | Svelte SPA — 패리티 규칙 (VSCode 선행) |
 | [viz.md](viz.md) | 교차 | viz/ | 차트 + 다이어그램 시각화 엔진 |
+| **[api-contract.md](api-contract.md)** | **—** | **전체** | **모든 API 호출 규칙 — 단일 진입점 + 파라미터 계약, 분기 기본 + 연간 파라미터, 파라미터 이름 일관성. 새 함수 추가 전 필독.** |
 | **[architecture.md](architecture.md)** | **—** | **전체** | **전체 청사진 — 레이어, 엔진, 규칙, 데이터 출력** |
 | **[testing.md](testing.md)** | **—** | **전체** | **테스트 체계 — 마커, 커버리지 90% 목표, CI** |
 | **[issues.md](issues.md)** | **—** | **전체** | **이슈 관리 — GitHub Issue + 테스트 + 커밋 연결 체계** |

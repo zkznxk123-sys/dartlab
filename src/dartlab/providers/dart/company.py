@@ -1319,7 +1319,7 @@ class Company:
         cacheKey = "_ratioSeries_Q_CFS"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        qResult = self.finance.timeseries
+        qResult = self.finance.timeseries()
         if qResult is None:
             return None
         qSeries, periods = qResult
@@ -1356,7 +1356,7 @@ class Company:
         cacheKey = f"_financeStmt_{sjDiv}"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        qResult = self.timeseries
+        qResult = self.timeseries()
         if qResult is None:
             return None
         series, periods = qResult
@@ -1811,7 +1811,7 @@ class Company:
                     rows.append((f"finance:{payloadTopic}:{item}", f"{item}={value}"))
 
         if topic in {"BS", "IS", "CF"}:
-            annual = self.finance.annual
+            annual = self.finance.timeseries(annual=True)
             if annual is None:
                 return None
             series, years = annual
@@ -3833,111 +3833,59 @@ class Company:
             df = df.select(metaCols + periodCols)
         return df
 
-    @property
-    def timeseries(self):
-        """분기별 standalone 시계열 (연결 기준).
+    def timeseries(self, *, annual: bool = False, cumulative: bool = False):
+        """finance 시계열 — 단일 진입점, 파라미터 토글 (api-contract).
+
+        ``ops/api-contract.md`` 의 "단일 진입점 + 파라미터 계약" 규칙에 따라
+        분기 / 연간 / 누적을 같은 메서드에서 옵션으로 받는다.
 
         Capabilities:
-            - BS/IS/CF 계정별 분기 standalone 시계열
-            - 최대 10년 분기별 데이터
-            - finance XBRL 정규화 기반
-
-        AIContext:
+            - BS/IS/CF 계정별 시계열 (finance XBRL 정규화 기반)
+            - 분기 standalone (기본), 연도 집계 (``annual=True``), YTD 누적 (``cumulative=True``)
             - insights, forecast, valuation 등 분석 엔진의 핵심 입력 데이터
-            - 분기별 추세 분석의 기초
 
-        Guide:
-            - "분기별 시계열 데이터" → c.timeseries
-            - "매출 분기별 추이" → series, periods = c.timeseries; series["IS"]["sales"]
-
-        SeeAlso:
-            - annual: 연도별 집계 시계열
-            - cumulative: 분기별 누적(YTD) 시계열
-            - BS: DataFrame 형태 재무상태표 (timeseries의 다른 뷰)
+        Args:
+            annual: True 면 분기 데이터를 연도 단위로 집계 (4분기 strict 합).
+            cumulative: True 면 Q1→Q4 YTD 누적.
+            ``annual`` / ``cumulative`` 중 하나만 True 가능 (둘 다 True 시 ValueError).
 
         Returns:
-            (series, periods) 또는 None.
+            ``(series, periods)`` 또는 None.
             series = {"BS": {"snakeId": [값...]}, "IS": {...}, "CF": {...}}
-            periods = ["2016-Q1", "2016-Q2", ..., "2024-Q4"]
+            periods = ``["2016Q1", "2016Q2", ..., "2024Q4"]`` (분기) 또는
+            ``["2016", "2017", ..., "2024"]`` (annual=True).
 
         Requires:
             데이터: finance (자동 다운로드)
 
-        Example::
-
-            c = Company("005930")
-            series, periods = c.timeseries
-            series["IS"]["sales"]  # 분기별 매출 시계열
-        """
-        return self._financeProperty("timeseries")
-
-    @property
-    def annual(self):
-        """연도별 시계열 (연결 기준).
-
-        Capabilities:
-            - BS/IS/CF 계정별 연도 시계열
-            - 분기 데이터를 연도 단위로 집계
-            - finance XBRL 정규화 기반
-
         AIContext:
-            - 연도 단위 추세 분석 — forecast, ratioSeries의 기초 데이터
+            - 분기별 추세 분석의 기초 데이터 — 매출/이익/현금흐름 시계열
+            - annual=True 는 forecast / ratioSeries 의 기초 입력
+            - cumulative=True 는 연중 진행률 파악
 
         Guide:
-            - "연���별 시계열" → c.annual
-            - "연간 매출 추이" → series, years = c.annual; series["IS"]["sales"]
+            - "분기별 시계열" → ``c.timeseries()``
+            - "매출 분기별 추이" → ``series, periods = c.timeseries(); series["IS"]["sales"]``
+            - "연간 매출 추이" → ``series, years = c.timeseries(annual=True)``
+            - "올해 누적 매출" → ``series, periods = c.timeseries(cumulative=True)``
 
         SeeAlso:
-            - timeseries: 분기별 시계열 (더 세밀)
-            - cumulative: 분기별 누적 시계열
+            - BS / IS / CF / CIS: DataFrame 형태 재무제표 (timeseries 의 다른 뷰)
             - ratioSeries: 연도별 재무비율 시계열
 
-        Returns:
-            (series, years) 또는 None.
-
-        Requires:
-            데이터: finance (자동 다운로드)
-
         Example::
 
             c = Company("005930")
-            series, years = c.annual
-            series["IS"]["sales"]  # 연도별 매출 시계열
+            series, periods = c.timeseries()              # 분기 (기본)
+            series, years = c.timeseries(annual=True)     # 연간 합산
+            series, periods = c.timeseries(cumulative=True)  # YTD 누적
         """
-        return self._financeProperty("annual")
-
-    @property
-    def cumulative(self):
-        """분기별 누적 시계열 (연결 기준).
-
-        Capabilities:
-            - IS/CF 계정별 분기 누적(YTD) 시계열
-            - Q1→Q2→Q3→Q4 누적 합산
-            - finance XBRL 정규화 기반
-
-        AIContext:
-            - Q4 누적이 연간 실적 — 연중 진행률 파악에 활용
-
-        Guide:
-            - "누적 시계열" → c.cumulative
-            - "올해 누적 매출" → series, periods = c.cumulative
-
-        SeeAlso:
-            - timeseries: 분기별 standalone (누적이 아닌 개별 분기)
-            - annual: 연도별 집계
-
-        Returns:
-            (series, periods) 또는 None.
-
-        Requires:
-            데이터: finance (자동 다운로드)
-
-        Example::
-
-            c = Company("005930")
-            series, periods = c.cumulative
-        """
-        return self._financeProperty("cumulative")
+        if annual and cumulative:
+            raise ValueError("annual / cumulative 중 하나만 True 가능합니다.")
+        if not self._hasFinance:
+            self._hintOnce("timeseries", "timeseries", "finance")
+            return None
+        return self.finance.timeseries(annual=annual, cumulative=cumulative)
 
     @property
     def sceMatrix(self):

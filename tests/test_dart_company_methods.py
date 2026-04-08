@@ -223,11 +223,8 @@ class TestAttributes:
     def test_cf_property(self, mock_company):
         assert isinstance(mock_company.CF, pl.DataFrame)
 
-    def test_annual_property(self, mock_company):
-        assert isinstance(mock_company.annual, pl.DataFrame)
-
-    def test_cumulative_property(self, mock_company):
-        assert isinstance(mock_company.cumulative, pl.DataFrame)
+    # Plan v9 P0.7: c.annual / c.cumulative property 제거 → c.timeseries(annual=True/cumulative=True)
+    # 실제 데이터 회귀는 tests/test_fixture_company_full.py::test_annual 가 fixture 로 검증.
 
 
 # ══════════════════════════════════════

@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 
 def _getSeriesAndMeta(company: Any) -> tuple[dict, str | None, str | None, str, str]:
     """company에서 series, stockCode, sectorKey, market, currency 추출."""
-    ts = company.finance.timeseries
+    ts = company.finance.timeseries()
     series = ts[0] if isinstance(ts, tuple) else ts
 
     stockCode = getattr(company, "stockCode", None)

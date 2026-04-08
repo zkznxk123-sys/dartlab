@@ -258,7 +258,7 @@ def createSimulation(
         growthPath = list(revenueGrowth)
 
     # series 추출 + 시간 필터
-    ts = company.finance.timeseries
+    ts = company.finance.timeseries()
     fullSeries = ts[0] if isinstance(ts, tuple) else ts
     periods = ts[1] if isinstance(ts, tuple) else []
 

@@ -251,7 +251,7 @@ def _calcCrossStatementGrade(company, *, basePeriod: str | None = None) -> str |
 def calcPiotroskiDetail(company, *, basePeriod: str | None = None) -> dict | None:
     """Piotroski F-Score 9개 항목 상세."""
     try:
-        annual = company.annual
+        annual = company.timeseries(annual=True)
         if annual is None:
             return None
     except (ValueError, KeyError, AttributeError):

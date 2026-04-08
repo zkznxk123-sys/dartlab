@@ -703,71 +703,43 @@ class Company:
 
         launchViewer(self.ticker, port=port)
 
-    @property
-    def timeseries(self):
-        """분기별 재무 시계열 — (series dict, years list) 튜플.
+    def timeseries(self, *, annual: bool = False, cumulative: bool = False):
+        """finance 시계열 — 단일 진입점, 파라미터 토글 (api-contract).
+
+        ``ops/api-contract.md`` 의 "단일 진입점 + 파라미터 계약" 규칙에 따라
+        분기 / 연간을 같은 메서드에서 옵션으로 받는다.
 
         Capabilities:
-            - SEC XBRL 분기별 재무 시계열 원본
-            - BS/IS/CF/CIS 전 제표 계정의 분기 수치
+            - SEC XBRL 정규화 재무 시계열 (BS/IS/CF/CIS)
+            - 분기 standalone (기본) 또는 연도 집계 (``annual=True``)
+            - EDGAR 는 분기 누적 (cumulative) 미지원 → annual fallback
 
-        Requires:
-            데이터: 없음 (SEC EDGAR 자동 수집)
+        Args:
+            annual: True 면 10-K 기준 연도 단위 시계열.
+            cumulative: EDGAR 는 미지원, annual 로 fallback.
+            둘 다 True 시 ValueError.
+
+        Returns:
+            ``(series, periods)`` 또는 None.
 
         AIContext:
             - ask()/chat()에서 추세 분석, 성장률 계산 컨텍스트
 
         Guide:
-            - "분기별 재무 데이터 원본이 필요해" → c.timeseries
-            - "분기별 추세를 보고 싶어" → c.timeseries로 원본 조회 후 분석
+            - "분기별 재무 데이터" → ``c.timeseries()``
+            - "연간 재무 데이터" → ``c.timeseries(annual=True)``
 
         SeeAlso:
-            - annual: 연간 재무 시계열
-            - BS, IS, CF, CIS: 제표별 DataFrame
+            - BS / IS / CF / CIS: 제표별 DataFrame
             - ratios: 재무비율 시계열
-
-        Returns:
-            tuple[dict, list[str]] — (계정별 시계열 dict, 기간 리스트) 또는 None.
 
         Example::
 
             c = Company("AAPL")
-            c.timeseries  # 분기별 시계열 데이터
+            series, periods = c.timeseries()              # 분기
+            series, years = c.timeseries(annual=True)     # 연간
         """
-        return self.finance.timeseries
-
-    @property
-    def annual(self):
-        """연간 재무 시계열 — (series dict, years list) 튜플.
-
-        Capabilities:
-            - SEC XBRL 연간 재무 시계열 원본
-            - 분기 집계가 아닌 10-K 기준 연간 수치
-
-        Requires:
-            데이터: 없음 (SEC EDGAR 자동 수집)
-
-        AIContext:
-            - ask()/chat()에서 연간 추세, YoY 비교 컨텍스트
-
-        Guide:
-            - "연간 재무 데이터 원본이 필요해" → c.annual
-            - "YoY 비교를 하고 싶어" → c.annual로 연도별 원본 조회
-
-        SeeAlso:
-            - timeseries: 분기별 재무 시계열
-            - BS, IS, CF, CIS: 제표별 DataFrame
-            - ratios: 재무비율 시계열
-
-        Returns:
-            tuple[dict, list[str]] — (계정별 시계열 dict, 연도 리스트) 또는 None.
-
-        Example::
-
-            c = Company("AAPL")
-            c.annual  # 연간 시계열 데이터
-        """
-        return self.finance.annual
+        return self.finance.timeseries(annual=annual, cumulative=cumulative)
 
     @property
     def BS(self) -> pl.DataFrame | None:
@@ -2471,11 +2443,6 @@ class Company:
         return self._profileAccessor
 
     @property
-    def cumulative(self):
-        """누적 시계열 — EDGAR는 연간 데이터가 곧 누적이므로 annual 위임."""
-        return self.finance.annual
-
-    @property
     def ratioSeries(self):
         return self.finance.ratioSeries if hasattr(self.finance, "ratioSeries") else None
 
@@ -2523,10 +2490,8 @@ class Company:
         return df
 
     def getTimeseries(self, period: str = "q", fsDivPref: str = "CFS"):
-        """재무 시계열 데이터."""
-        if period == "y":
-            return self.finance.annual
-        return self.finance.timeseries
+        """재무 시계열 데이터 (deprecated — c.timeseries(annual=...) 사용)."""
+        return self.finance.timeseries(annual=(period == "y"))
 
     def audit(self) -> list | None:
         """감사/내부통제 분석 — EDGAR item9A + item14 기반.

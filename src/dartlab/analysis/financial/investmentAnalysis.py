@@ -52,7 +52,7 @@ def _estimateWacc(company) -> float | None:
     try:
         from dartlab.core.finance.proforma import compute_company_wacc
 
-        annual = company.finance.annual
+        annual = company.finance.timeseries(annual=True)
         if annual is not None:
             series, _ = annual
             sectorParams = getattr(company, "sectorParams", None)

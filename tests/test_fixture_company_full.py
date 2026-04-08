@@ -137,14 +137,14 @@ class TestDerivedData:
         assert result is None or isinstance(result, pl.DataFrame)
 
     def test_annual(self, samsung):
-        result = samsung.annual
+        result = samsung.timeseries(annual=True)  # Plan v9: c.annual property → c.timeseries(annual=True)
         # annual은 (dict, periods) 튜플 또는 None
         assert result is None or isinstance(result, tuple)
         if isinstance(result, tuple):
             assert len(result) == 2
 
     def test_timeseries(self, samsung):
-        result = samsung.timeseries
+        result = samsung.timeseries()  # Plan v9: property → method
         # timeseries는 (dict, periods) 튜플 또는 None
         assert result is None or isinstance(result, tuple)
         if isinstance(result, tuple):

@@ -96,7 +96,7 @@ class _ProfileAccessor:
 
         frames: list[pl.DataFrame] = []
 
-        annual = self._company.finance.annual
+        annual = self._company.finance.timeseries(annual=True)
         if annual is not None:
             series, years = annual
             for sj in ("BS", "IS", "CF"):
