@@ -467,7 +467,6 @@
 		grid-template-columns: minmax(0, var(--content-max-width)) var(--toc-width);
 		gap: 2rem;
 		justify-content: center;
-		align-items: start;
 	}
 
 	.blog-post-col {

@@ -36,7 +36,7 @@ class Inflection:
 
 
 def _accountCol(df: pl.DataFrame) -> str | None:
-    for candidate in ("account", "계정명", "metric", "snakeId"):
+    for candidate in ("account", "항목", "계정명", "metric", "snakeId"):
         if candidate in df.columns:
             return candidate
     return None

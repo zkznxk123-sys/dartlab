@@ -258,9 +258,12 @@ def selectFromShow(
     # 모든 메타 컬럼을 돌면서 매칭 행 인덱스를 union.
     if indList is not None:
         metaCols = [c for c in result.columns if not isPeriodColumn(c)]
-        if "계정명" in metaCols:
-            metaCols.remove("계정명")
-            metaCols.insert(0, "계정명")
+        # "항목" 또는 "계정명" 우선 정렬 (label 컬럼 first)
+        for labelCol in ("항목", "계정명"):
+            if labelCol in metaCols:
+                metaCols.remove(labelCol)
+                metaCols.insert(0, labelCol)
+                break
         target = len(indList)
         collectedIdx: set[int] = set()
         for mc in metaCols:

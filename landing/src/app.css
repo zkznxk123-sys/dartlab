@@ -48,5 +48,5 @@ img, svg, video, canvas, iframe {
 /* SvelteKit body wrapper도 강제 — display:contents지만 명시적으로 */
 body > div {
 	max-width: 100vw;
-	overflow-x: hidden;
+	overflow-x: clip;
 }

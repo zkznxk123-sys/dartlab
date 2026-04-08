@@ -191,7 +191,8 @@
 
 	.dl-blog-sidebar {
 		display: block;
-		align-self: start;
+		align-self: stretch;
+		height: 100%;
 	}
 
 	.dl-blog-sidebar-inner {

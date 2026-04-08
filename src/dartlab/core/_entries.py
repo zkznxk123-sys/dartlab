@@ -19,7 +19,7 @@ _ENTRIES: list[DataEntry] = [
         dataType="timeseries",
         description="연도별 손익계산서 시계열. 매출액, 영업이익, 순이익 등 전체 계정.",
         requires="finance",
-        columns=(ColumnMeta("계정명", "K-IFRS 손익계산서 계정과목"),),
+        columns=(ColumnMeta("항목", "K-IFRS 손익계산서 계정과목"),),
         analysisHints=(
             "매출 성장률(YoY) 계산",
             "영업이익률(영업이익/매출액) 추이",
@@ -36,7 +36,7 @@ _ENTRIES: list[DataEntry] = [
         dataType="timeseries",
         description="연도별 재무상태표 시계열. 자산, 부채, 자본 전체 계정.",
         requires="finance",
-        columns=(ColumnMeta("계정명", "K-IFRS 재무상태표 계정과목"),),
+        columns=(ColumnMeta("항목", "K-IFRS 재무상태표 계정과목"),),
         analysisHints=(
             "부채비율(부채총계/자본총계) 추이",
             "유동비율(유동자산/유동부채) 확인",
@@ -52,7 +52,7 @@ _ENTRIES: list[DataEntry] = [
         dataType="timeseries",
         description="연도별 현금흐름표 시계열. 영업/투자/재무활동 현금흐름.",
         requires="finance",
-        columns=(ColumnMeta("계정명", "K-IFRS 현금흐름표 계정과목"),),
+        columns=(ColumnMeta("항목", "K-IFRS 현금흐름표 계정과목"),),
         analysisHints=(
             "영업활동CF가 양수인지 확인 (음수 = 위험)",
             "FCF = 영업활동CF - 자본적지출",
@@ -102,7 +102,7 @@ _ENTRIES: list[DataEntry] = [
         extractor=None,
         requires="finance",
         unit="원",
-        columns=(ColumnMeta("계정명", "K-IFRS 재무상태표 계정과목 (snakeId → 한글명)"),),
+        columns=(ColumnMeta("항목", "K-IFRS 재무상태표 계정과목 (snakeId → 한글명)"),),
         analysisHints=(
             "부채비율(부채총계/자본총계) 추이",
             "유동비율(유동자산/유동부채) 확인",
@@ -123,7 +123,7 @@ _ENTRIES: list[DataEntry] = [
         extractor=None,
         requires="finance",
         unit="원",
-        columns=(ColumnMeta("계정명", "K-IFRS 손익계산서 계정과목 (snakeId → 한글명)"),),
+        columns=(ColumnMeta("항목", "K-IFRS 손익계산서 계정과목 (snakeId → 한글명)"),),
         analysisHints=(
             "매출 성장률(YoY) 계산",
             "영업이익률(영업이익/매출액) 추이",
@@ -144,7 +144,7 @@ _ENTRIES: list[DataEntry] = [
         extractor=None,
         requires="finance",
         unit="원",
-        columns=(ColumnMeta("계정명", "K-IFRS 현금흐름표 계정과목 (snakeId → 한글명)"),),
+        columns=(ColumnMeta("항목", "K-IFRS 현금흐름표 계정과목 (snakeId → 한글명)"),),
         analysisHints=(
             "영업활동CF가 양수인지 확인 (음수 = 위험)",
             "FCF = 영업활동CF - 자본적지출",

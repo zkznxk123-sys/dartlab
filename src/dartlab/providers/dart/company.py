@@ -2068,7 +2068,7 @@ class Company:
         if (
             topic in {"IS", "BS", "CIS", "CF", "SCE"}
             and isinstance(result, pl.DataFrame)
-            and "계정명" in result.columns
+            and ("항목" in result.columns or "계정명" in result.columns)
         ):
             result = self._cleanFinanceDataFrame(result, topic)
 
@@ -2082,33 +2082,37 @@ class Company:
 
     @staticmethod
     def _cleanFinanceDataFrame(df: pl.DataFrame, sjDiv: str) -> pl.DataFrame:
-        """재무제표 DataFrame 후처리: all-null 행 제거, CF 고유 정리."""
+        """재무제표 DataFrame 후처리: all-null 행 제거, CF 고유 정리.
+
+        label 컬럼은 "항목" 표준이지만 backward-compat 으로 "계정명" alias 도 존재.
+        실제 group_by / filter 는 "항목" 컬럼 기준.
+        """
         periodCols = [c for c in df.columns if _isPeriodColumn(c)]
         if not periodCols:
             return df
-        # CF 고유: 당기순이익 제거 (standalone 차분 오류), 영문 계정명 제거
+        labelCol = "항목" if "항목" in df.columns else "계정명"
+        # CF 고유: 당기순이익 제거 (standalone 차분 오류), 영문 항목 제거
         if sjDiv == "CF":
-            df = df.filter(~pl.col("계정명").is_in(["당기순이익", "법인세비용차감전순이익"]))
-            df = df.filter(~pl.col("계정명").str.contains(r"^[a-z_]+$"))
-        # 공통: all-null 행 제거 (모든 기간이 null인 행)
+            df = df.filter(~pl.col(labelCol).is_in(["당기순이익", "법인세비용차감전순이익"]))
+            df = df.filter(~pl.col(labelCol).str.contains(r"^[a-z_]+$"))
+        # 공통: all-null 행 제거 (모든 기간이 null 인 행)
         notAllNull = pl.any_horizontal([pl.col(c).is_not_null() for c in periodCols])
         df = df.filter(notAllNull)
-        # 공통: 같은 계정명 중복행 병합 — mapper 의 한국어 → 여러 snakeId (1:N) 충돌 해결.
-        # 184 한국어가 1:N 으로 매핑되어 있음 (mapperData/accountMappings.json).
+        # 공통: 같은 항목 중복행 병합 — mapper 의 한국어 → 여러 snakeId (1:N) 충돌 해결.
         # 대부분 typo/공시 양식 변형이라 동일 의미 — coalesce 가 안전.
-        # 데이터 손실 없는 케이스(같은 값 또는 한쪽 null)가 99%+, 경고는 노이즈.
-        # 진짜 다른 값일 때만 경고 + 그 경우엔 max 사용 (큰 값 보존).
-        if df["계정명"].n_unique() < df.height:
+        if df[labelCol].n_unique() < df.height:
             hasSnakeId = "snakeId" in df.columns
             aggCols = [c for c in periodCols]
             extraAgg = []
             if hasSnakeId:
                 extraAgg = [pl.col("snakeId").first().alias("snakeId")]
-            # 모든 not-null 값 중 첫 값 (대부분 동일). 다른 값이면 첫 값 우선.
-            # 경고는 진짜 충돌 (값이 서로 다른 경우) 만 — Phase 미구현, mapper 정리 필요
-            merged = df.group_by("계정명", maintain_order=True).agg(
+            merged = df.group_by(labelCol, maintain_order=True).agg(
                 extraAgg + [pl.col(c).drop_nulls().first().alias(c) for c in aggCols]
             )
+            # backward-compat: 다른 alias 컬럼이 있었으면 다시 추가
+            otherLabel = "계정명" if labelCol == "항목" else "항목"
+            if otherLabel in df.columns:
+                merged = merged.with_columns(pl.col(labelCol).alias(otherLabel))
             df = merged.select([c for c in df.columns if c in merged.columns])
         return df
 
@@ -2160,7 +2164,7 @@ class Company:
             if hDf is None or hDf.is_empty():
                 continue
 
-            itemCol = "계정명" if "계정명" in hDf.columns else "항목" if "항목" in hDf.columns else None
+            itemCol = "항목" if "항목" in hDf.columns else "계정명" if "계정명" in hDf.columns else None
             if itemCol is None:
                 for c in hDf.columns:
                     if not _isPeriodColumn(c):
@@ -3051,10 +3055,10 @@ class Company:
             return None
         if period is not None and parsed.df is not None:
             labelCol = (
-                "계정명"
-                if "계정명" in parsed.df.columns
-                else "항목"
+                "항목"
                 if "항목" in parsed.df.columns
+                else "계정명"
+                if "계정명" in parsed.df.columns
                 else parsed.df.columns[0]
             )
             periodCols = [c for c in parsed.df.columns if c != labelCol]

@@ -297,15 +297,15 @@ def mergeAliasRows(
 
     Args:
         rowMap: ``{snakeId: row_dict}``. row_dict 는 in-place 수정됨.
-        metaCols: 머지 대상에서 제외할 메타 컬럼 (snakeId, 계정명 등).
-            None 이면 ``{"snakeId", "계정명", "_level", "_sort"}`` default.
+        metaCols: 머지 대상에서 제외할 메타 컬럼 (snakeId, 항목 등).
+            None 이면 ``{"snakeId", "항목", "계정명", "_level", "_sort"}`` default.
             calc 단계 dict 머지에서는 ``set()`` 전달.
 
     Returns:
         머지된 (= 제거 대상) alias snakeId set. 호출자가 필요 시 ``rowMap`` 에서 제거.
     """
     if metaCols is None:
-        metaCols = {"snakeId", "계정명", "_level", "_sort"}
+        metaCols = {"snakeId", "항목", "계정명", "_level", "_sort"}
     mergedSnakeIds: set[str] = set()
     for alias, canonical in SNAKEID_ALIASES.items():
         if alias == canonical:

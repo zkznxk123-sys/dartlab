@@ -73,6 +73,29 @@ def _cloneCategory(category: str, dataDir: str, targetCodes: set[str]) -> int:
     return existing
 
 
+def _loadDocsSkipped(dataDir: str) -> set[str]:
+    """document.xml status 014 (파일 없음) 받은 rcept_no 영구 스킵 리스트.
+
+    DART 시스템에 document.xml이 존재하지 않는 보고서가 있다 (정정류 외에도
+    원본 보고서 일부). 매 run마다 시도하면 키 낭비 → 한 번 014 받으면 영구 스킵.
+    """
+    p = Path(dataDir) / "dart" / "_collect_state" / "skipped_docs_rcept.txt"
+    if not p.exists():
+        return set()
+    return {line.strip() for line in p.read_text(encoding="utf-8").splitlines() if line.strip()}
+
+
+def _appendDocsSkipped(dataDir: str, rcepts: set[str]) -> None:
+    if not rcepts:
+        return
+    p = Path(dataDir) / "dart" / "_collect_state" / "skipped_docs_rcept.txt"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    existing = _loadDocsSkipped(dataDir)
+    merged = existing | rcepts
+    p.write_text("\n".join(sorted(merged)), encoding="utf-8")
+    print(f"[syncRecent] docs 영구 스킵 리스트 갱신: +{len(rcepts)}, 총 {len(merged)}")
+
+
 def _existingRceptNos(directory: Path, stockCode: str) -> set[str]:
     """parquet 파일에서 rcept_no 집합 추출 (docs/finance/report 공통).
 
@@ -218,6 +241,8 @@ def _discoverNewFilings(
     financeDir = Path(dataDir) / DATA_RELEASES["finance"]["dir"]
     reportDir = Path(dataDir) / DATA_RELEASES["report"]["dir"]
 
+    docsSkipped = _loadDocsSkipped(dataDir)
+
     targetCodes: set[str] = set()
     targetFilings: dict[str, list[dict]] = {}  # docs 직접수집용 (rcept_no list)
     missingDocsCount = 0
@@ -243,9 +268,12 @@ def _discoverNewFilings(
         existingFinance = _existingRceptNos(financeDir, sc)
         existingReport = _existingRceptNos(reportDir, sc)
 
-        # docs는 원본 보고서만 (정정류 제외)
+        # docs는 원본 보고서만 (정정류 제외) + 영구 스킵 리스트 제외
         docsRows = [r for r in rows if _isDocsTarget(r["report_nm"])]
-        missingDocs = [r for r in docsRows if r["rcept_no"] not in existingDocs]
+        missingDocs = [
+            r for r in docsRows
+            if r["rcept_no"] not in existingDocs and r["rcept_no"] not in docsSkipped
+        ]
         missingFinance = [r for r in rows if r["rcept_no"] not in existingFinance]
         missingReport = [r for r in rows if r["rcept_no"] not in existingReport]
 
@@ -324,6 +352,7 @@ async def _collectDocsDirect(
     doneCount = [0]
     failCount = [0]
     stockSections: dict[str, list[dict]] = {}  # stockCode → sections
+    skippedRcepts: set[str] = set()  # status 014 → 영구 스킵 후보
 
     sem = asyncio.Semaphore(4)  # 동시 4개 다운로드 (API 한도 소진 속도 조절)
 
@@ -352,6 +381,18 @@ async def _collectDocsDirect(
             failCount[0] += 1
             doneCount[0] += 1
             return
+
+        # status 014 (파일 없음) 감지 → 영구 스킵 마킹
+        if len(raw) < 500 and raw.startswith(b"<?xml"):
+            try:
+                body = raw.decode("utf-8", errors="replace")
+                if "<status>014</status>" in body:
+                    skippedRcepts.add(rceptNo)
+                    failCount[0] += 1
+                    doneCount[0] += 1
+                    return
+            except (UnicodeDecodeError, AttributeError):
+                pass
 
         try:
             zf = zipfile.ZipFile(io.BytesIO(raw))
@@ -418,6 +459,10 @@ async def _collectDocsDirect(
     await asyncio.gather(*[_guarded(sc, row) for sc, row in allJobs])
     for c in clients:
         await c.close()
+
+    # status 014 받은 rcept_no 영구 스킵 리스트에 누적
+    if skippedRcepts:
+        _appendDocsSkipped(dataDir, skippedRcepts)
 
     # 종목별 parquet 저장
     results: dict[str, int] = {}
