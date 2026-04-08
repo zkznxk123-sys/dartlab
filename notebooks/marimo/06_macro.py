@@ -5,28 +5,32 @@
 
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.22.0"
 app = marimo.App(width="medium")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
-    # dartlab 임포트
-    import dartlab
-    return (dartlab,)
+    import marimo as mo
+    mo.md("""# Macro
 
-
-@app.cell
-def _(dartlab):
-    # macro 가이드 — 사용 가능한 축 확인
-    dartlab.macro()
+시장 레벨 매크로 해석 — 사이클/금리/자산/심리/유동성.""")
     return
 
+@app.cell
+def _():
+    import dartlab
+    dartlab.macro()
+    return (dartlab,)
 
 @app.cell
 def _(dartlab):
-    # 한국 매크로 사이클 해석
-    dartlab.macro("사이클", market="KR")
+    dartlab.macro("사이클")
+    return
+
+@app.cell
+def _(dartlab):
+    dartlab.macro("금리")
     return
 
 

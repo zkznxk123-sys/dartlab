@@ -5,35 +5,65 @@
 
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.22.0"
 app = marimo.App(width="medium")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
-    # dartlab 임포트
-    import dartlab
-    return (dartlab,)
+    import marimo as mo
+    mo.md("""# Analysis
 
-
-@app.cell
-def _(dartlab):
-    # 종목코드로 Company 생성
-    c = dartlab.Company("005930")
-    return (c,)
-
-
-@app.cell
-def _(c):
-    # analysis 가이드 — 14축 목록 확인
-    c.analysis()
+14축 재무 분석 + forecast + valuation. 6막 인과 구조.""")
     return
 
+@app.cell
+def _():
+    import dartlab
+    c = dartlab.Company("005930")
+    c.analysis()
+    return (dartlab, c)
+
+@app.cell(hide_code=True)
+def _():
+    import marimo as mo
+    mo.md("""## financial 그룹""")
+    return
 
 @app.cell
 def _(c):
-    # 수익성 분석
-    c.analysis("financial", "수익성")
+    c.analysis("수익성")
+    return
+
+@app.cell
+def _(c):
+    c.analysis("성장성")
+    return
+
+@app.cell
+def _(c):
+    c.analysis("안정성")
+    return
+
+@app.cell
+def _(c):
+    c.analysis("현금흐름")
+    return
+
+@app.cell(hide_code=True)
+def _():
+    import marimo as mo
+    mo.md("""## forecast / valuation""")
+    return
+
+@app.cell
+def _(c):
+    c.analysis("매출전망")
+    return
+
+@app.cell
+def _(c):
+    c.analysis("가치평가")
     return
 
 

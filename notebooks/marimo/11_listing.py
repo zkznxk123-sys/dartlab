@@ -5,21 +5,32 @@
 
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.22.0"
 app = marimo.App(width="medium")
 
 
+@app.cell(hide_code=True)
+def _():
+    import marimo as mo
+    mo.md("""# Listing
+
+상장 종목 / 공시 메타데이터 카탈로그.""")
+    return
+
 @app.cell
 def _():
-    # dartlab 임포트
     import dartlab
+    dartlab.listing()
     return (dartlab,)
-
 
 @app.cell
 def _(dartlab):
-    # 전체 종목 리스트 조회
-    dartlab.listing()
+    dartlab.listing("all")
+    return
+
+@app.cell
+def _(dartlab):
+    dartlab.listing("filings", corp="005930")
     return
 
 

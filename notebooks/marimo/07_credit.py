@@ -5,35 +5,38 @@
 
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.22.0"
 app = marimo.App(width="medium")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
-    # dartlab 임포트
-    import dartlab
-    return (dartlab,)
+    import marimo as mo
+    mo.md("""# Credit
 
-
-@app.cell
-def _(dartlab):
-    # 종목코드로 Company 생성
-    c = dartlab.Company("005930")
-    return (c,)
-
-
-@app.cell
-def _(c):
-    # credit 가이드 — 7축 목록 확인
-    c.credit()
+독립 신용평가 엔진 — 7축 dCR 등급.""")
     return
 
+@app.cell
+def _():
+    import dartlab
+    c = dartlab.Company("005930")
+    c.credit()
+    return (dartlab, c)
 
 @app.cell
 def _(c):
-    # 채무상환 능력 평가
-    c.credit("채무상환")
+    c.credit("등급")
+    return
+
+@app.cell
+def _(c):
+    c.credit("수익성")
+    return
+
+@app.cell
+def _(c):
+    c.credit("부채")
     return
 
 

@@ -5,28 +5,71 @@
 
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.22.0"
 app = marimo.App(width="medium")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
-    # dartlab 임포트
-    import dartlab
-    return (dartlab,)
+    import marimo as mo
+    mo.md("""# Gather
 
-
-@app.cell
-def _(dartlab):
-    # gather 가이드 — 사용 가능한 축 확인
-    dartlab.gather()
+외부 시장 데이터 수집 — 주가/매크로/뉴스/수급.""")
     return
 
+@app.cell
+def _():
+    import dartlab
+    dartlab.gather()
+    return (dartlab,)
+
+@app.cell(hide_code=True)
+def _():
+    import marimo as mo
+    mo.md("""## 주가""")
+    return
 
 @app.cell
 def _(dartlab):
-    # 삼성전자 주가 수집
     dartlab.gather("price", "005930")
+    return
+
+@app.cell
+def _(dartlab):
+    dartlab.gather("price", "KOSPI")
+    return
+
+@app.cell(hide_code=True)
+def _():
+    import marimo as mo
+    mo.md("""## 매크로""")
+    return
+
+@app.cell
+def _(dartlab):
+    dartlab.gather("macro")
+    return
+
+@app.cell(hide_code=True)
+def _():
+    import marimo as mo
+    mo.md("""## 수급 (KR 전용)""")
+    return
+
+@app.cell
+def _(dartlab):
+    dartlab.gather("flow", "005930")
+    return
+
+@app.cell(hide_code=True)
+def _():
+    import marimo as mo
+    mo.md("""## 뉴스""")
+    return
+
+@app.cell
+def _(dartlab):
+    dartlab.gather("news", "삼성전자")
     return
 
 
