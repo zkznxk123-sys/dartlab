@@ -83,7 +83,7 @@ def calcDividendPolicy(company, *, basePeriod: str | None = None) -> dict | None
 
         payoutRatio = _pct(divPaid, ni) if ni > 0 else None
 
-        # 배당 성장률 — Plan v6 C7: base effect cap ±999%
+        # 배당 성장률 — base effect cap ±999%
         # prev=0 (신규배당) 또는 cur=0 (중단) 은 None.
         # 신규배당 base effect (예: SK +8600%, HMM +2913%) 는 사용자 혼란 → cap.
         dividendGrowth = None

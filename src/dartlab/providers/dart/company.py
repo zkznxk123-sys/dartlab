@@ -2008,7 +2008,7 @@ class Company:
                 direct = self._showDirectTopic(topic, period=period, raw=raw)
                 if direct is not None:
                     return direct
-            # R26-1: silent None → 명시적 ValueError.
+            # silent None 대신 명시적 ValueError 로 안내
             raise ValueError(f"'{topic}' topic 을 찾을 수 없습니다.\n  전체 목록: c.topics 또는 c.index 로 확인하세요.")
 
         topicRows = sec.filter(pl.col("topic") == topic)
@@ -2093,8 +2093,7 @@ class Company:
         # 공통: all-null 행 제거 (모든 기간이 null인 행)
         notAllNull = pl.any_horizontal([pl.col(c).is_not_null() for c in periodCols])
         df = df.filter(notAllNull)
-        # 공통: 같은 계정명 중복행 병합
-        # Plan v6 C2: mapper 의 한국어 → 여러 snakeId 매핑 (1:N) 충돌 해결.
+        # 공통: 같은 계정명 중복행 병합 — mapper 의 한국어 → 여러 snakeId (1:N) 충돌 해결.
         # 184 한국어가 1:N 으로 매핑되어 있음 (mapperData/accountMappings.json).
         # 대부분 typo/공시 양식 변형이라 동일 의미 — coalesce 가 안전.
         # 데이터 손실 없는 케이스(같은 값 또는 한쪽 null)가 99%+, 경고는 노이즈.
@@ -2344,7 +2343,7 @@ class Company:
         if isinstance(colList, str):
             colList = [colList]
 
-        # R26-4: 빈 indList → 명시적 안내
+        # 빈 indList → 명시적 안내
         if indList is not None and len(indList) == 0:
             raise ValueError(
                 "select 의 indList (행 필터) 가 비어 있습니다. "
@@ -2364,7 +2363,7 @@ class Company:
         else:
             filtered = selectFromShow(df, indList, colList)
         if filtered is None:
-            # R26-2: indList 가 dataframe 에 매치 안 되면 silent None → 명시적 에러
+            # indList 가 dataframe 에 매치 안 되면 silent None 대신 명시적 에러
             available = []
             try:
                 # 첫 컬럼이 보통 계정명
@@ -3979,7 +3978,7 @@ class Company:
     def fiscalYearEnd(self) -> str:
         """회계연도 종료 월-일 (한국 종목은 12-31 표준).
 
-        Plan v5 Z3: EDGAR 와의 fiscal year-end 비교를 위한 metadata.
+        EDGAR 와의 fiscal year-end 비교를 위한 metadata.
         한국 회계 관습 상 거의 모든 상장사가 12월말 결산 — 상수 반환.
 
         Returns:

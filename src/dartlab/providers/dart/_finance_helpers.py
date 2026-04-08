@@ -139,9 +139,9 @@ def _financeToDataFrame(
         - 분기 컬럼: ``2025Q1, 2025Q2, 2025Q3, 2025Q4, 2024Q1, ...`` (역순)
         - 연간 컬럼: ``2025, 2024, ...`` ← ``includeAnnual=True`` 일 때만
 
-    Plan v7 R0 (사용자 피드백): 시계열 view 에 분기+연간 둘 다 노출은 schema noise.
-    기본은 분기만. 연간은 ``includeAnnual=True`` 옵션으로 명시 요청.
-    calc 함수는 ``toDictBySnakeId`` 가 분기에서 자동 합산하므로 영향 없음.
+    시계열 view 에 분기+연간 둘 다 노출은 schema noise. 기본은 분기만 노출하고
+    연간은 ``includeAnnual=True`` 옵션으로 명시 요청한다. calc 함수는
+    ``toDictBySnakeId`` 가 분기에서 자동 합산하므로 영향 없음.
 
     연간 컬럼 의미 (includeAnnual=True 일 때):
         - IS/CIS/CF (flow): 그 해 Q1+Q2+Q3+Q4 합 (분기 단독값 합산)

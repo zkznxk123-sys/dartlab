@@ -71,7 +71,7 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
             ],
         }
     """
-    # Plan v6 C5: snakeId 단일 패턴 (alias 양방향 자동 매핑)
+    # snakeId 단일 패턴 (alias 양방향 자동 매핑)
     cfAccounts = [
         "영업활동현금흐름",
         "투자활동현금흐름",
@@ -93,8 +93,8 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
     capexRow = data.get("purchase_of_property_plant_and_equipment", {})
     intCapexRow = data.get("purchase_of_intangible_assets", {})
     # Note: SK하이닉스 2025Q4 같이 raw 데이터에 결손이면 None — calc 결과도 None.
-    # `c.CF` 의 dartlab derived row (`financing_cashflow`) 는 별도 데이터 소스라
-    # select 가 안 가져옴. 별도 fix 필요 (Plan v7).
+    # `c.show("CF")` 의 derived row (`financing_cashflow`) 는 별도 데이터 소스로,
+    # mergeAliasRows 가 양방향 머지 처리 (core/finance/labels.py).
 
     yCols = annualColsFromPeriods(allPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:

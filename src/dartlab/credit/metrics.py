@@ -102,8 +102,8 @@ def _isQuarterlyFallback(cols: list[str]) -> bool:
     return bool(cols) and "Q" in cols[0]
 
 
-# Plan v5 H: credit 차입금 산출용 TTM 합산 — annualSumFlow credit 모드 alias
-# 1~2 분기도 부분 데이터로 연환산 (부정확하지만 credit 안정성 보수)
+# credit 차입금 산출용 TTM 합산 — annualSumFlow credit 모드 alias.
+# 1~2 분기도 부분 데이터로 연환산 (부정확하지만 credit 안정성 보수).
 def _ttmSum(flowData: dict, qCol: str, allPeriods: list[str]) -> float | None:
     from dartlab.core.finance.flow import annualSumFlow
 
@@ -197,7 +197,7 @@ def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
     cl = bsData.get("유동부채", {})
     bsData.get("비유동부채", {})
     cash = bsData.get("현금및현금성자산", {})
-    # Plan v5 E: 차입금 fallback 은 col loop 안에서 sumBorrowingsKorean 위임
+    # 차입금 fallback 은 col loop 안에서 sumBorrowingsKorean 위임
     bsData.get("이익잉여금", {})
 
     rev = isData.get("매출액", {})
@@ -231,7 +231,7 @@ def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
         curLiab = cl.get(col)
         cashVal = cash.get(col)
 
-        # Plan v5 E: 차입금 분리/통합 fallback 위임 (analysis/_helpers.py::sumBorrowingsKorean)
+        # 차입금 분리/통합 fallback 위임 (analysis/_helpers.py::sumBorrowingsKorean)
         stBorrow, ltBorrow, totalBorrowing = sumBorrowingsKorean(bsData, col)
         bsData.get("사채", {}).get(col) or 0  # 사채 별도 노출 (회귀 호환)
 

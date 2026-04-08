@@ -287,7 +287,16 @@ async def _collectDocsDirect(
     docsDir.mkdir(parents=True, exist_ok=True)
 
     keyList = [k.strip() for k in keys.split(",") if k.strip()]
-    client = AsyncDartClient(keyList[0])
+    # 모든 키로 client 미리 생성 → 첫 키가 exhausted여도 다음 키로 자동 회전.
+    # 이전 버그: keyList[0]만 사용 → 첫 키 exhausted 시 docs 수집 0건으로 즉시 종료.
+    clients = [AsyncDartClient(k) for k in keyList]
+    clientIdx = [0]
+
+    def _activeClient():
+        """exhausted 안 된 첫 client 반환. 모두 exhausted면 None."""
+        while clientIdx[0] < len(clients) and clients[clientIdx[0]].exhausted:
+            clientIdx[0] += 1
+        return clients[clientIdx[0]] if clientIdx[0] < len(clients) else None
 
     # 모든 docs 누락 filing을 flat list로 변환
     allJobs: list[tuple[str, dict]] = []
@@ -303,7 +312,8 @@ async def _collectDocsDirect(
     sem = asyncio.Semaphore(4)  # 동시 4개 다운로드 (API 한도 소진 속도 조절)
 
     async def _fetchOne(stockCode: str, row: dict) -> None:
-        if client.exhausted:
+        client = _activeClient()
+        if client is None:
             return
 
         rceptNo = row["rcept_no"]
@@ -390,7 +400,8 @@ async def _collectDocsDirect(
                 print(f"[syncRecent] docs 타임아웃: {stockCode} {row.get('rcept_no', '?')}")
 
     await asyncio.gather(*[_guarded(sc, row) for sc, row in allJobs])
-    await client.close()
+    for c in clients:
+        await c.close()
 
     # 종목별 parquet 저장
     results: dict[str, int] = {}

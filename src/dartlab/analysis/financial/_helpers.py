@@ -113,8 +113,8 @@ def getRatios(company):
 def toDict(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict], list[str]] | None:
     """SelectResult → ({계정명: {period: val}}, periodCols).
 
-    Plan v7 R4: ``toDictBySnakeId`` 가 한국어 라벨도 키로 노출하므로
-    이 함수는 deprecated thin wrapper. 신규 코드는 ``toDictBySnakeId`` 사용.
+    ``toDictBySnakeId`` 가 한국어 라벨도 키로 노출하므로 이 함수는 deprecated thin
+    wrapper. 신규 코드는 ``toDictBySnakeId`` 사용.
 
     maxPeriods=0이면 전체 기간, >0이면 최신 N개만.
     EDGAR DataFrame(account 컬럼 = snakeId)일 때 키를 한국어 라벨로 자동 변환하여
@@ -163,7 +163,7 @@ def toDictBySnakeId(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict],
     toDict와 동일하되, 키를 snakeId 컬럼으로 사용한다.
     snakeId로 select한 뒤 .get()도 snakeId로 접근할 때 사용.
 
-    Plan v5 B: ``SNAKEID_ALIASES`` 의 alias key 도 같은 데이터로 자동 노출.
+    ``SNAKEID_ALIASES`` 의 alias key 도 같은 데이터로 자동 노출.
     예: ``data.get("liabilities")`` 가 있으면 ``data.get("total_liabilities")``
     도 같은 값 반환. EDGAR↔DART snakeId 차이를 calc 함수가 무시할 수 있다.
     """
@@ -181,7 +181,7 @@ def toDictBySnakeId(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict],
     if idCol is None:
         return toDict(selectResult, maxPeriods)
 
-    # Plan v7 R4: 한국어 라벨도 함께 키로 노출 (toDict 와 단일 경로 통합).
+    # 한국어 라벨도 함께 키로 노출 (toDict 와 단일 경로 통합).
     # data.get("매출액") 와 data.get("sales") 둘 다 같은 row 반환.
     labelCol = "계정명" if "계정명" in df.columns else None
 
@@ -274,11 +274,11 @@ def annualLabel(period: str) -> str:
     return period
 
 
-# 차입금 snakeId 후보 리스트 — 회사마다 다른 변형 모두 합산
-# 분리 키 (단/장기) + 통합 키 (borrowings)
-# Plan v5 B: SNAKEID_ALIASES 가 자동으로 short_term_borrowings/long_term_borrowings
-# 같은 변형을 canonical 키 (shortterm_borrowings/longterm_borrowings) 로 매핑하므로
-# 여기선 canonical 만 나열하면 된다 (변형 키 중복 합산 방지).
+# 차입금 snakeId 후보 리스트 — 회사마다 다른 변형 모두 합산.
+# 분리 키 (단/장기) + 통합 키 (borrowings).
+# SNAKEID_ALIASES 가 자동으로 short_term_borrowings/long_term_borrowings 같은
+# 변형을 canonical 키 (shortterm_borrowings/longterm_borrowings) 로 매핑하므로
+# 여기선 canonical 만 나열한다 (변형 키 중복 합산 방지).
 _BORROWING_KEYS = (
     "shortterm_borrowings",
     "longterm_borrowings",
@@ -362,22 +362,21 @@ def sumBorrowings(snakeData: dict, col: str) -> float:
 
 
 def sumCostOfSales(snakeData: dict, col: str) -> float:
-    """매출원가 합산 — 제품/상품/공사/용역원가 분리 키 fallback (Plan v4 G1)."""
+    """매출원가 합산 — 제품/상품/공사/용역원가 분리 키 fallback."""
     return _sumWithFallback(snakeData, col, _COGS_KEYS, "cost_of_sales")
 
 
 def sumSGA(snakeData: dict, col: str) -> float:
-    """판매관리비 합산 — 판매비/관리비 분리 키 fallback (Plan v4 G1)."""
+    """판매관리비 합산 — 판매비/관리비 분리 키 fallback."""
     return _sumWithFallback(snakeData, col, _SGA_KEYS, "selling_and_administrative_expenses")
 
 
 def sumIncomeTax(snakeData: dict, col: str) -> float:
-    """법인세 합산 — 당기/이연 분리 키 fallback (Plan v4 G1)."""
+    """법인세 합산 — 당기/이연 분리 키 fallback."""
     return _sumWithFallback(snakeData, col, _INCOME_TAX_KEYS, "income_taxes")
 
 
-# 한국어 키 dict 용 차입금 합산 (credit/metrics.py 호환)
-# Plan v5 E: credit 의 자체 fallback 코드를 위임받음
+# 한국어 키 dict 용 차입금 합산 (credit/metrics.py 가 위임).
 _KR_BORROWING_SHORT = ("단기차입금", "차입금단기", "short_term_borrowings")
 _KR_BORROWING_LONG = ("장기차입금", "long_term_borrowings")
 _KR_BORROWING_UNIFIED = ("차입부채", "차입금", "장기차입부채", "유동성장기차입금")

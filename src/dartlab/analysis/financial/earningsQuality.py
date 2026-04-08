@@ -213,7 +213,7 @@ def calcBeneishTimeline(company, *, basePeriod: str | None = None) -> dict | Non
             "threshold": float,
         }
     """
-    # Plan v5 P6: snakeId 단일 패턴 (B alias 양방향이 EDGAR↔DART 변형 자동 처리)
+    # snakeId 단일 패턴 (alias 양방향이 EDGAR↔DART 변형 자동 처리)
     isResult = company.select(
         "IS",
         ["매출액", "매출원가", "판매비와관리비", "당기순이익"],

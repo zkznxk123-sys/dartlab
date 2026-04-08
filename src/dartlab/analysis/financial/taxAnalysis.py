@@ -168,7 +168,6 @@ def calcDeferredTax(company, *, basePeriod: str | None = None) -> dict | None:
             ],
         }
     """
-    # Plan v5 P6: snakeId 단일
     bsResult = company.select("BS", ["이연법인세자산", "이연법인세부채", "자산총계"])
     bsParsed = toDictBySnakeId(bsResult)
     if bsParsed is None:

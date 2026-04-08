@@ -177,7 +177,7 @@ def calcSustainableGrowthRate(company, *, basePeriod: str | None = None) -> dict
     - gap > 0: 외부 자본 필요 (성장이 내부 역량 초과)
     - gap < 0: 여유 (자사주/배당 확대 여력)
     """
-    # Plan v5 P6: snakeId 단일 패턴
+    # snakeId 단일 패턴
     isResult = company.select("IS", ["매출액", "당기순이익"])
     bsResult = company.select("BS", ["자본총계"])
     cfResult = company.select("CF", ["dividends_paid"])

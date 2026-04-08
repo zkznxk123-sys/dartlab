@@ -678,8 +678,7 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             b["relativeValuation"] = _safe(lambda: relativeValuationBlock(calcRelVal(company, basePeriod=basePeriod)))
         if _need("residualIncome"):
             b["residualIncome"] = _safe(lambda: residualIncomeBlock(calcRim(company, basePeriod=basePeriod)))
-        # Plan v6 P2 C4: priceTarget 결과를 valuationSynthesis 에 전달
-        # → 두 모델 차이 narration 자동 추가 (사용자 혼란 해소)
+        # priceTarget 결과를 valuationSynthesis 에 전달 — 두 모델 차이 narration 자동 추가
         _ptCache: dict = {}
 
         def _getPt():

@@ -51,7 +51,7 @@ def calcCostBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
             ],
         }
     """
-    # Plan v5 P7: snakeId 단일 + sumCostOfSales/sumSGA 분리 키 fallback
+    # snakeId 단일 + sumCostOfSales / sumSGA 분리 키 fallback
     accounts = ["매출액", "매출원가", "판매비와관리비"]
     isResult = company.select("IS", accounts)
     isParsed = toDictBySnakeId(isResult)

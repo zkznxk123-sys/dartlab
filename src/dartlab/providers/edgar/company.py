@@ -489,8 +489,8 @@ class Company:
         XBRL companyfacts 의 fp='FY' end 날짜에서 가장 자주 등장하는 month-day 추출.
         DART 종목은 12-31 표준 (한국 회계 관습).
 
-        Plan v5 Z3: calendar year vs fiscal year 매칭 명시. 회사 간 연도 비교
-        시 fiscal year-end 가 다른 회사를 calendar year 로 매칭하면 잘못된 비교.
+        calendar year vs fiscal year 매칭 명시. 회사 간 연도 비교 시 fiscal
+        year-end 가 다른 회사를 calendar year 로 매칭하면 잘못된 비교가 된다.
 
         Returns:
             "MM-DD" 형식 문자열, 데이터 없으면 None.
@@ -1466,7 +1466,7 @@ class Company:
 
         sec = self.sections
         if sec is None:
-            # R26-1: silent None → 명시적 ValueError
+            # silent None 대신 명시적 ValueError 로 안내
             raise ValueError(
                 f"sections 데이터를 가져올 수 없습니다 (ticker={getattr(self, 'ticker', '?')}). "
                 f"네트워크 또는 SEC EDGAR API 상태를 확인하세요."
@@ -1474,7 +1474,7 @@ class Company:
 
         topicRows = sec.filter(pl.col("topic") == topic)
         if topicRows.is_empty():
-            # R26-1: silent None → 명시적 ValueError. 가용 topic 일부 안내.
+            # 가용 topic 일부 안내 (silent None 차단)
             try:
                 available = sec["topic"].unique().to_list()[:20]
             except (AttributeError, KeyError):
@@ -1612,7 +1612,7 @@ class Company:
         from dartlab.core.select import SelectResult
         from dartlab.core.show import selectFromShow
 
-        # R26-3: show() 가 ValueError 발생하면 그대로 propagate
+        # show() 가 ValueError 발생하면 그대로 propagate (silent None 차단)
         df = self.show(topic)
         if df is None or not isinstance(df, pl.DataFrame):
             raise ValueError(
@@ -1624,7 +1624,7 @@ class Company:
         if isinstance(colList, str):
             colList = [colList]
 
-        # R26-4: 빈 indList → 명시적 안내
+        # 빈 indList → 명시적 안내
         if indList is not None and len(indList) == 0:
             raise ValueError(
                 "select 의 indList (행 필터) 가 비어 있습니다. "
@@ -1633,7 +1633,7 @@ class Company:
 
         filtered = selectFromShow(df, indList, colList)
         if filtered is None:
-            # R26-2: silent None → 명시적 ValueError
+            # silent None 대신 명시적 ValueError
             available = []
             try:
                 if df.width > 0:

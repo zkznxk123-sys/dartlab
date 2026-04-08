@@ -39,8 +39,8 @@ def _notesDetailBlocks(data: dict, keyLabels: dict[str, str]) -> list:
     notes accessor 는 원 단위로 노출되므로(`pipeline.py::_buildTableDf`에서 정규화)
     추가 단위 변환 불필요.
 
-    Plan v6 P4 (#7): all-null row 제거 — parser 가 sub-row 헤더 (예: "OAT Nego",
-    "Banker's Usance" 등) 를 데이터 row 로 추출한 노이즈 차단.
+    all-null row 제거 — parser 가 sub-row 헤더 (예: "OAT Nego", "Banker's Usance"
+    등) 를 데이터 row 로 추출한 노이즈를 차단한다.
     """
     notesDetail = data.get("notesDetail")
     if not notesDetail:
@@ -49,7 +49,7 @@ def _notesDetailBlocks(data: dict, keyLabels: dict[str, str]) -> list:
     for key, rows in notesDetail.items():
         if not rows:
             continue
-        # Plan v6 P4 #7: all-null row (계정명/snakeId 외 모든 값 None) 제거
+        # all-null row (계정명/snakeId 외 모든 값 None) 제거
         cleaned = []
         for row in rows:
             hasValue = any(
@@ -2262,8 +2262,8 @@ def sensitivityBlock(data: dict) -> list:
 def valuationSynthesisBlock(data: dict, priceTargetData: dict | None = None) -> list:
     """calcValuationSynthesis 결과 -> MetricBlock + TextBlock.
 
-    Plan v6 P2 (C4): priceTargetData 인자 받아 두 모델 (synthesis 보수적 vs
-    priceTarget 시나리오 가중) 차이 narration 자동 추가. 사용자 혼란 해소.
+    priceTargetData 인자를 받아 두 모델 (synthesis 보수적 vs priceTarget 시나리오
+    가중) 차이를 narration 으로 자동 추가하여 사용자 혼란을 해소한다.
     """
     if not data:
         return []
@@ -2294,7 +2294,7 @@ def valuationSynthesisBlock(data: dict, priceTargetData: dict | None = None) -> 
         rows = [{"모델": e["method"], "적정가(원)": f"{e['value']:,.0f}"} for e in estimates]
         blocks.append(TableBlock("모델별 적정가", pl.DataFrame(rows)))
 
-    # Plan v6 C4: 두 모델 통합 narration
+    # 두 모델 통합 narration
     if priceTargetData:
         synthFair = data.get("weightedFairValue")
         ptFair = priceTargetData.get("weightedTarget")
