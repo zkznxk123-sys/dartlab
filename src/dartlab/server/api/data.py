@@ -364,8 +364,7 @@ def _resolve_module_data(c: Company, entry) -> Any:
             return None
         if order:
             rows.sort(key=lambda r: order.get(r["항목"], 9999))
-        df = pl.DataFrame(rows)
-        return df.with_columns(pl.col("항목").alias("계정명"))
+        return pl.DataFrame(rows)
 
     attrName = entry.funcName or entry.name
     if name in ("IS", "BS", "CF"):
