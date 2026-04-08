@@ -681,14 +681,12 @@
 		-webkit-overflow-scrolling: touch;
 	}
 
-	/* tbody/thead를 다시 table-row-group으로 두되 width 100% + min-width: max-content
-	   → 좁은 표는 컨테이너 풀폭, 넓은 표는 컨텐츠 폭 + 표 안에서 가로 스크롤 */
+	/* tbody/thead — 표 wrapper(table)는 block + overflow-x auto이므로
+	   안의 thead/tbody는 table-row-group으로 자연스럽게 두고 width auto.
+	   이전 min-width: max-content는 viewport를 넘는 표에서 부모를 펼쳐서 제거. */
 	.blog-article :global(table thead),
 	.blog-article :global(table tbody) {
-		display: table;
 		width: 100%;
-		min-width: max-content;
-		table-layout: auto;
 	}
 
 	.blog-article :global(thead) {
