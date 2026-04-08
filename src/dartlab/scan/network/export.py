@@ -99,7 +99,7 @@ def _build_person_data(data: dict) -> tuple[list[dict], list[dict]]:
             {
                 "code": tc,
                 "group": code_to_group.get(tc, ""),
-                "pct": row.get("ownership_pct") or 0,
+                "pct": row.get("ownership_pct"),
                 "relate": row.get("relate", ""),
             }
         )

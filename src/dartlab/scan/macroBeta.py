@@ -102,7 +102,7 @@ def scan_macroBeta(
                 "gdpBeta": round(betas.get("gdp", 0), 3),
                 "rateBeta": round(betas.get("rate", 0), 3),
                 "fxBeta": round(betas.get("fx", 0), 3),
-                "rSquared": round(rSq or 0, 4),
+                "rSquared": round(rSq, 4) if rSq is not None else None,
                 "nObs": nValid,
                 "confidence": confidence,
             }
