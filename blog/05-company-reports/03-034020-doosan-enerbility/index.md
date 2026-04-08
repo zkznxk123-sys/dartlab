@@ -9,12 +9,21 @@ stockCode: "034020"
 corpName: "두산에너빌리티"
 storyTemplate: "위기 탈출"
 grade: "dCR-AA+"
+tags:
+  - 두산에너빌리티
+  - "034020"
+  - 원자력
+  - 발전소
+  - 부채 다이어트
+  - 체코 두코바니
+  - 전자공시
 thumbnail: /avatar-chart.png
 youtubeId: ""
 ---
 
-> **위기 탈출 + 장기 사이클** | 산업재 > 발전·에너지 | 2026-04-07 기준
-> 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: dartlab review + analysis + credit + report.dividend
+> **위기 탈출 + 장기 사이클** | 산업재 > 발전·에너지 | 2026-04-08 dartlab 실측
+> 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: review + analysis + credit + report.dividend
+> 같은 시리즈: [SK하이닉스 (000660)](../01-000660-skhynix/) · [삼양식품 (003230)](../02-003230-samyang-foods/) · [기업분석 시리즈 전체](/blog/series/company-reports)
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: "SK하이닉스 (000660) — 한국 반도체 30년의 미스터리, 그리고 영업이익률 58%"
 date: 2026-04-08
-description: "1983 현대전자로 시작해서 1999 LG반도체 인수, 2001 채권단 관리, 2012 SK 인수, 그리고 2025 영업이익률 58.4%. 30년의 미스터리를 dartlab으로 까보는 글이다."
+description: "1983 현대전자로 시작해 다섯 번 망할 뻔한 회사가 2025년 4분기 영업이익률 58.40%, 사상 처음으로 모회사 삼성전자를 추월했다. 9년 사이클 + 가격결정력 + CAPEX 27조 베팅을 dartlab으로 펼친다."
 category: company-reports
 series: company-reports
 seriesOrder: 1
@@ -9,12 +9,21 @@ stockCode: "000660"
 corpName: "SK하이닉스"
 storyTemplate: "장기 사이클 + 위기 탈출"
 grade: "dCR-AA"
+tags:
+  - SK하이닉스
+  - "000660"
+  - 반도체
+  - HBM
+  - 메모리 사이클
+  - 가격결정력
+  - 전자공시
 thumbnail: /avatar-chart.png
 youtubeId: ""
 ---
 
-> **장기 사이클 + 위기 탈출** | IT > 메모리반도체 | 2026-04-07 기준
-> 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: dartlab review + analysis + credit + report
+> **장기 사이클 + 위기 탈출** | IT > 메모리반도체 | 2026-04-08 dartlab 실측
+> 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: review + analysis + credit + report
+> 같은 시리즈: [삼양식품 (003230)](../02-003230-samyang-foods/) · [두산에너빌리티 (034020)](../03-034020-doosan-enerbility/) · [기업분석 시리즈 전체](/blog/series/company-reports)
 
 ---
 
