@@ -428,9 +428,8 @@ class Company:
         self.cik = tickerRow["cik"]
         self.corpName = tickerRow.get("title") or self.ticker
 
-        # public namespace 는 docs 만 (P3a: c.finance 제거)
-        self.docs = _DocsAccessor(self)
-        self._docs = self.docs
+        # public namespace 모두 제거 (P3a/b/c)
+        self._docs = _DocsAccessor(self)
         self._finance = _FinanceAccessor(self)
         self._profileAccessor = _ProfileAccessor(self)
         self._reportAccessor = None  # lazy init

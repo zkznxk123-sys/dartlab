@@ -308,8 +308,8 @@ class MockCompany:
         self.market = market
         self.currency = currency
         self.notes = _MockNotesAccessor()
-        self.docs = _MockDocsAccessor()
-        self.finance = _MockFinanceAccessor()
+        self._docs = _MockDocsAccessor()
+        self._finance = _MockFinanceAccessor()
         self._cache: dict = {}
 
         # 합성 DataFrame 미리 생성

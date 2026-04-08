@@ -13,7 +13,7 @@ def test_profile_sections_returns_none_for_empty_docs_sections():
 
     company = types.SimpleNamespace(
         _cache={},
-        docs=types.SimpleNamespace(sections=pl.DataFrame()),
+        _docs=types.SimpleNamespace(sections=pl.DataFrame()),
     )
 
     accessor = _ProfileAccessor(company)
