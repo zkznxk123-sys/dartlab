@@ -7,6 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — Plan v10: 1.0.0 전 클린업 (BREAKING)
+
+**API contract 단일 진입점 원칙 강제** — 사용자 surface 를 `c.show() / c.select() / c.sections / c.diff() / c.filings() / c.facts / c.review() / c.analysis() / c.credit()` 만으로 단일화.
+
+**P0 — finance property 4종 제거**:
+- `c.IS / c.BS / c.CF / c.CIS` (DART + EDGAR) → `c.show("IS")` / `c.show("BS")` / `c.show("CF")` / `c.show("CIS")`
+
+**P1 — ratios/SCE property 제거**:
+- `c.ratios / c.ratioSeries / c.SCE / c.sceMatrix` → `c.show("ratios")` / `c.show("ratioSeries")` / `c.show("SCE")` / `c.show("sceMatrix")`
+
+**P2 — notes 12 sub-property 제거**:
+- `c.notes.inventory` / `borrowings` / `tangibleAsset` / `intangibleAsset` / `receivables` / `provisions` / `eps` / `segments` / `costByNature` / `lease` / `affiliates` / `investmentProperty` → `c.show("inventory")` 등 12 topic dispatch
+
+**P3 — 4 namespace 전면 제거**:
+- `c.docs / c.finance / c.report / c.profile` (DART + EDGAR) public 접근 0
+- 사용자 surface 에서 namespace 4종 완전 제거
+- `c.facts` 신설 (이전 `c.profile.facts`)
+- `c.sections / c.diff() / c.trace() / c.filings()` 는 top-level 유지 (sections 사상 핵심)
+- 내부 compute (review/credit/valuation/analysis) 는 `c._docs / _finance / _report` private 백엔드 사용 — 데이터 형식 차이 (RatioResult 객체 vs DataFrame) 로 show() 흡수 불가
+
+**P4 — Plan vN 마커 정리**: Plan v3~v9 / R26 마커 38곳 수동 정리.
+
+**P5 — finance DataFrame 컬럼 단일화**:
+- `계정명` 컬럼 완전 제거 → `항목` 단일화 (sections 사상 정합 — `topic × period × 항목` 3차원)
+- 197 ref 마이그레이션, alias backward-compat 도 제거 (1.0.0 전 breaking 허용)
+
+**P6 — label SSOT 통합**:
+- `core/finance/labels.py::get_korean_labels()` 가 snakeId → 한국어 라벨 단일 진실의 원천
+- `AccountMapper.labelMap()` 은 한 줄 위임으로 축소 (이중 매핑 함수 통합)
+- L0 ← L1 import 방향 유지 (provider → core)
+
+### Migration
+
+```python
+# Old                            # New
+c.IS                              c.show("IS")
+c.BS / c.CF / c.CIS               c.show("BS") / c.show("CF") / c.show("CIS")
+c.IS_annual                       c.show("IS", freq="Y")
+c.timeseries()                    c.show("IS")
+c.annual                          c.show("IS", freq="Y")
+c.cumulative                      c.show("IS", freq="YTD")
+c.ratios                          c.show("ratios")
+c.ratioSeries                     c.show("ratioSeries")
+c.SCE / c.sceMatrix               c.show("SCE") / c.show("sceMatrix")
+c.notes.inventory                 c.show("inventory")
+c.notes.borrowings                c.show("borrowings")
+c.docs.sections                   c.sections
+c.docs.diff()                     c.diff()
+c.docs.filings()                  c.filings()
+c.finance.ratios                  c.show("ratios")
+c.report.dividend                 c.show("dividend")
+c.report.majorHolder              c.show("majorHolder")
+c.profile.facts                   c.facts
+c.profile.trace(topic)            c.trace(topic)
+c.profile.sections                c.sections
+df["계정명"]                       df["항목"]
+```
+
+unit tests: 2065 → 2066 passed (Plan v10 전체).
+
 ### Changed — 헬퍼 단일 진실의 원천 (SSOT) 통합
 
 - **`core/finance/flow.py::synthesizeAnnualFromQuarters`** 신설 — 분기 → 연간 합성 SSOT.

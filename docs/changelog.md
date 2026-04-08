@@ -11,6 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — Plan v10: 1.0.0 전 클린업 (BREAKING)
+
+API contract 단일 진입점 원칙 강제. 사용자 surface 를 `c.show() / c.select() / c.sections / c.diff() / c.filings() / c.facts / c.review() / c.analysis() / c.credit()` 만으로 단일화.
+
+- **P0**: `c.IS / c.BS / c.CF / c.CIS` 별도 property 제거 → `c.show("IS")` 등 (DART + EDGAR)
+- **P1**: `c.ratios / c.ratioSeries / c.SCE / c.sceMatrix` 제거 → `c.show("ratios")` 등
+- **P2**: `c.notes.X` 12 sub-property 제거 → `c.show("inventory")` 등
+- **P3**: 4 namespace 전면 제거 — `c.docs / c.finance / c.report / c.profile` (public 접근 0). 내부 compute 는 `c._docs / _finance / _report` private 백엔드. `c.facts` 신설 (이전 `c.profile.facts`).
+- **P4**: Plan v3~v9 / R26 마커 38곳 정리
+- **P5**: finance DataFrame 컬럼 `계정명` → `항목` 단일화 (sections 사상 정합, 197 ref + alias 제거)
+- **P6**: snakeId → 한국어 라벨 SSOT 통합 (`core/finance/labels.py::get_korean_labels()` 단일 함수, `AccountMapper.labelMap()` 한 줄 위임)
+
+상세 마이그레이션 가이드는 루트 `CHANGELOG.md` 참조.
+
 ### Changed — 헬퍼 단일 진실의 원천 (SSOT) 통합
 
 - `core/finance/flow.py::synthesizeAnnualFromQuarters` 신설 — 분기 → 연간 합성 SSOT

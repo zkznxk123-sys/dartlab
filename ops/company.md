@@ -25,7 +25,7 @@ c.select("IS", ["매출액"])         # 행/열 필터
 | 진입점 | `dartlab.Company("005930")`, `c.show()`, `c.select()` |
 | 소비 | core/(protocols, finance, docs), providers/(dart, edgar) |
 | 생산 | scan, analysis, review, ai 모두 Company를 소비 |
-| 핵심 | sections 사상 (topic × period), 4 namespace, canHandle 라우팅 |
+| 핵심 | sections 사상 (topic × period), 단일 진입점 (show/select), canHandle 라우팅 |
 
 ## 근본 전제
 
@@ -64,25 +64,36 @@ source 우선순위: **finance > report > docs** (숫자 → 정형 → 서술)
 개별 property(dividend, employee 등)는 sections 사상 이전의 우회로다.
 Company 클래스에 직접 연결하지 않고, **show() 경로로만 접근**한다.
 
-## 4 Namespace
+## 단일 진입점 (Plan v10 P3 — namespace 전면 제거)
+
+사용자 surface 는 **method/property** 만:
 
 ```python
-c.docs      # 원문 (sections 기반)
-c.finance   # 숫자 (IS/BS/CF/CIS, ratios, timeseries)
-c.report    # 정형 공시
-c.profile   # 통합 (sections + finance + report merge)
+c.show("IS")          # finance topic 데이터 (DataFrame)
+c.show("inventory")   # notes topic
+c.show("dividend")    # report topic
+c.select("IS", ["매출액"])  # 행/열 필터
+c.sections            # 통합 sections DataFrame (sections 사상 핵심)
+c.facts               # 통합 facts DataFrame
+c.diff()              # 기간간 텍스트 변화
+c.filings()           # 공시 목록
+c.trace(topic)        # 출처 추적
+c.review(...)         # 보고서
+c.analysis(...)       # 분석
+c.credit(...)         # 신용평가
 ```
 
-기본 소비 경로는 **profile first** — `c.sections`는 `c.profile.sections`.
+`c.docs / c.finance / c.report / c.profile` 4개 public namespace 는 **모두 제거됨**.
+내부 compute 레이어 (review/credit/analysis/valuation) 는 `c._docs / _finance / _report` private 백엔드를 사용한다.
 
-### DART vs EDGAR namespace 차이
+### DART vs EDGAR 데이터 차이 (백엔드)
 
-| namespace | DART | EDGAR |
+| 영역 | DART | EDGAR |
 |-----------|------|-------|
-| docs | 공시 HTML → sections | 10-K/10-Q HTML → sections |
-| finance | 로컬 parquet (K-IFRS) | SEC companyfacts API (US-GAAP XBRL) |
-| report | 28 apiType (OpenDART API) | 14 apiType (XBRL + 10-K 텍스트 파싱), 13개 공통 |
-| profile | sections + finance + report merge | sections + finance merge |
+| docs (private) | 공시 HTML → sections | 10-K/10-Q HTML → sections |
+| finance (private) | 로컬 parquet (K-IFRS) | SEC companyfacts API (US-GAAP XBRL) |
+| report (private) | 28 apiType (OpenDART API) | 14 apiType (XBRL + 10-K 텍스트 파싱), 13개 공통 |
+| profile (private) | sections + finance + report merge | sections + finance merge |
 
 EDGAR report는 SEC에 구조화 API가 없으므로 XBRL facts + 10-K 텍스트 regex로 추출한다.
 
@@ -108,25 +119,18 @@ c.trace(topic)    # 출처 추적 (docs/finance/report 중 어디서 왔는지)
 c.diff()          # 기간간 텍스트 변화
 ```
 
-### namespace 3개
+### finance topics (Plan v10)
 ```python
-c.docs             # 원문 접근
-c.finance          # 재무제표 접근
-c.profile          # 통합 프로필
+c.show("IS")           # 손익계산서 — 분기 컬럼 (2025Q4, 2025Q3, ...)
+c.show("IS", freq="Y") # 연간 합산
+c.show("BS") / c.show("CF") / c.show("CIS") / c.show("SCE")
+c.show("ratios")       # 재무비율 DataFrame
+c.show("ratioSeries")  # 시계열 비율
 ```
 
-### finance 바로가기
-```python
-c.BS / c.IS / c.CF / c.CIS       # 재무제표 — 분기 컬럼만 노출 (schema only quarterly)
-c.ratios / c.ratioSeries          # 비율
-c.timeseries                      # 시계열
-```
-
-⚠ `c.IS / c.BS / c.CF / c.CIS` 는 기본적으로 **분기 컬럼만** 노출한다 (`2025Q4`, `2025Q3`, ...).
-연간 누적 값이 필요하면 calc 함수가 `toDictBySnakeId(c.select(...))` 로 변환할 때
-`core/finance/flow.py::synthesizeAnnualFromQuarters` 가 분기에서 자동 합성하여
-`data["sales"]["2024"]` 처럼 4자리 연도 키로 노출한다 (IS/CIS/CF 는 4분기 strict 합,
-BS 는 Q4 alias). 시계열 view 의 분기+연간 동시 노출 schema noise 를 방지.
+⚠ 기본은 **분기 컬럼만** 노출 — 연간 누적은 `freq="Y"` 명시 또는 calc 함수가
+`toDictBySnakeId(c.select(...))` 로 변환할 때 `synthesizeAnnualFromQuarters` 가
+자동 합성 (`data["sales"]["2024"]`).
 
 ### 메타
 ```python
@@ -164,9 +168,8 @@ review() 전체 호출은 83초 → AI 코드 실행(60초 제한)에서 금지.
 
 | 경로 | 결과 | 용도 | DART | EDGAR |
 |------|------|------|------|-------|
-| `c.notes.inventory` | 파싱된 DataFrame (항목 × 연도) | AI/코드 분석용 | ✅ HTML 파싱 | ✅ XBRL 수치 태그 |
-| `c.show("financialNotes", block, period="2025")` | 원문 마크다운 | 원문 확인용 | ✅ | — (EDGAR는 notes() 경유) |
-| `c.notes.keys()` | 데이터 있는 카테고리 목록 | 탐색 | ✅ | ✅ |
+| `c.show("inventory")` | 파싱된 DataFrame (항목 × 연도) | AI/코드 분석용 | ✅ HTML 파싱 | ✅ XBRL 수치 태그 |
+| `c.show("financialNotes", block, period="2025")` | 원문 마크다운 | 원문 확인용 | ✅ | — |
 
 ### notes 지원 항목 (12개)
 
@@ -185,7 +188,7 @@ review() 전체 호출은 83초 → AI 코드 실행(60초 제한)에서 금지.
 | affiliates | 관계기업 | ✅ | △ | 지분법 투자 (XBRL 태그 제한적) |
 | investmentProperty | 투자부동산 | ✅ | △ | 공정가치/장부가 (XBRL 태그 제한적) |
 
-**EDGAR notes 데이터 소스**: XBRL companyfacts에서 수치 태그 직접 추출. TextBlock(HTML 내장 테이블)은 `c.docs.notes(query)` 경유.
+**EDGAR notes 데이터 소스**: XBRL companyfacts에서 수치 태그 직접 추출.
 
 ### analysis enrichment
 

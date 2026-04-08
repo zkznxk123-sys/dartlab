@@ -333,32 +333,33 @@ source 우선순위: **finance > report > docs** (숫자 → 정형 → 서술)
 
 ---
 
-## 위반 카탈로그 (Plan v9 진행 상황)
+## 위반 카탈로그
 
-### ✅ 해결됨 (Plan v9)
+### ✅ 해결됨 (Plan v9 + v10)
 
-- `c.timeseries()` 메서드 제거 → `c.show("IS", freq=, scope=)` 단일 진입점
-- `c.annual` / `c.cumulative` property 제거
-- `c.finance.timeseries()` accessor method 제거
-- DART `getTimeseries()` deprecated 제거
-- EDGAR `getTimeseries()` deprecated 제거
-- EDGAR `c.cumulative` property 제거
+**Plan v9:**
+- `c.timeseries()` / `c.annual` / `c.cumulative` 제거 → `c.show("IS", freq=, scope=)` 통합
+- DART/EDGAR `getTimeseries()` deprecated 제거
 - `c.show()` / `c.select()` 에 `freq` / `scope` 파라미터 추가
-- 8 caller 마이그레이션 → `c._buildFinanceSeries(freq=, scope=)` private 호출
 - `synthesizeAnnualFromQuarters` SSOT (core/finance/flow.py)
 - `mergeAliasRows` SSOT (core/finance/labels.py)
-- credit/metrics 자체 `_toDict` / `_annualCols` → analysis._helpers 위임
+- credit/metrics → analysis._helpers 위임
 
-### ⚠️ 잔존 (다음 phase fix 대상)
+**Plan v10 (1.0.0 전 클린업):**
+- **P0** `c.IS / c.BS / c.CF / c.CIS` 별도 property 제거 → `c.show("IS")` (DART + EDGAR)
+- **P1** `c.ratios / c.ratioSeries / c.SCE / c.sceMatrix` 별도 property 제거 → `c.show("ratios")` 등
+- **P2** `c.notes.X` 12 sub-property 제거 → `c.show("inventory")` 등
+- **P3** **4 namespace 전면 제거** — `c.docs / c.finance / c.report / c.profile` (public 접근 0)
+  - 사용자 surface = `c.show()` / `c.select()` / `c.sections` / `c.diff()` / `c.filings()` / `c.facts` / `c.review()` / `c.analysis()` / `c.credit()`
+  - 내부 compute (review/credit/valuation/analysis) 는 `c._docs / _finance / _report` private 백엔드 사용
+- **P4** Plan vN / R26 마커 정리
+- **P5** finance DataFrame 컬럼 `계정명` → `항목` 단일화 (sections 사상 정합)
+- **P6** snakeId → 한국어 라벨 SSOT 통합 (`core/finance/labels.py::get_korean_labels()`, `AccountMapper.labelMap()` 한 줄 위임)
 
-| 위반 | 위치 | 조치 |
-|---|---|---|
-| `c.IS / c.BS / c.CF / c.CIS` 별도 property | `providers/dart/company.py:1370~1507` | `c.show("IS", ...)` 강제 (313 ref 마이그레이션) |
-| `c.ratios / c.ratioSeries` 별도 property | `providers/dart/company.py:3789, 3962` | `c.show("ratios", freq=)` 통합 |
-| `c.SCE / c.sceMatrix` 별도 property | `providers/dart/company.py:3891, 3928` | `c.show("SCE")` 통합 |
-| `c.notes.X` accessor namespace | 12 sub-property | `c.show("inventory")` 등 통합 |
-| `_financeToDataFrame(includeAnnual=)` 내부 | `providers/dart/_finance_helpers.py:133` | `freq=` 로 rename |
-| EDGAR `c.BS / c.IS / c.CF / c.CIS` | DART 와 동일 | 동기화 |
+### ⚠️ 잔존 / 후속
+
+- 데이터 파일 (`accountMappings.json`) 위치 — 현재 `providers/dart/finance/mapperData/`. 진정한 SSOT 면 `core/data/` 로 이동 필요. 후속.
+- `_KR_SUPPLEMENTS` 하드코딩 — `accountMappings.json` 에 흡수 필요. 후속.
 
 ---
 
