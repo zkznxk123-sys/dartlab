@@ -38,7 +38,7 @@ def _topicBlocksFrame(topic: str, rows: list[dict[str, object]]) -> pl.DataFrame
 
 
 def _legacyIndexDocsRows(company) -> list[dict[str, object]]:
-    sec = company.docs.sections
+    sec = company._docs.sections
     if sec is None or "topic" not in sec.columns:
         return []
 
@@ -266,7 +266,7 @@ class TestCompany:
         from dartlab.providers.dart.report.types import PREFERRED_QUARTER
 
         c = self.c
-        assert c.docs is not None
+        assert c._docs is not None
         assert c.report is not None
         assert c.index is not None
         assert isinstance(c.index, pl.DataFrame)
@@ -281,9 +281,9 @@ class TestCompany:
     def test_sections_includes_docs_and_finance(self):
         c = self.c
         assert c.sections is not None
-        assert c.docs.sections is not None
+        assert c._docs.sections is not None
         # sections ⊇ docs.sections (finance/report 행이 추가됨)
-        assert c.sections.height >= c.docs.sections.height
+        assert c.sections.height >= c._docs.sections.height
         topics = c.sections["topic"].to_list()
         assert "BS" in topics
         assert "companyOverview" in topics
@@ -292,8 +292,8 @@ class TestCompany:
     def test_first_layer_dataframe_contracts(self):
         c = self.c
         assert isinstance(c.filings(), pl.DataFrame)
-        assert c.docs.sections is not None
-        assert isinstance(c.docs.sections.raw, pl.DataFrame)
+        assert c._docs.sections is not None
+        assert isinstance(c._docs.sections.raw, pl.DataFrame)
         assert isinstance(c.sections, pl.DataFrame)
         assert isinstance(c.sources, pl.DataFrame)
         assert isinstance(c.show("BS"), pl.DataFrame)
@@ -304,35 +304,35 @@ class TestCompany:
 
     def test_docs_sections_projection_and_semantic_registry_accessors(self):
         c = self.c
-        ordered = c.docs.sectionsOrdered()
-        coverage = c.docs.sectionsCoverage(topic="businessOverview")
-        annual = c.docs.sectionsFreq("annual")
-        registry = c.docs.sectionsSemanticRegistry(topic="mdna")
-        collisions = c.docs.sectionsSemanticCollisions(topic="mdna")
-        structureRegistry = c.docs.sectionsStructureRegistry(topic="businessOverview")
-        structureCollisions = c.docs.sectionsStructureCollisions(topic="businessOverview")
-        structureEvents = c.docs.sectionsStructureEvents(topic="businessOverview")
-        structureSummary = c.docs.sectionsStructureSummary(topic="businessOverview")
-        structureChanges = c.docs.sectionsStructureChanges(topic="businessOverview", nodeType="body")
-        bodyStructureRegistry = c.docs.sectionsStructureRegistry(topic="businessOverview", nodeType="body")
-        bodyStructureEvents = c.docs.sectionsStructureEvents(topic="businessOverview", nodeType="body")
-        bodyStructureSummary = c.docs.sectionsStructureSummary(topic="businessOverview", nodeType="body")
-        bodyStructureChanges = c.docs.sectionsStructureChanges(topic="businessOverview", nodeType="body")
-        accessorPeriods = c.docs.sections.periods()
-        accessorOrdered = c.docs.sections.ordered()
-        accessorCoverage = c.docs.sections.coverage(topic="businessOverview")
-        accessorAnnual = c.docs.sections.freq("annual")
-        accessorRegistry = c.docs.sections.semanticRegistry(topic="mdna")
-        accessorCollisions = c.docs.sections.semanticCollisions(topic="mdna")
-        accessorStructureRegistry = c.docs.sections.structureRegistry(topic="businessOverview")
-        accessorStructureCollisions = c.docs.sections.structureCollisions(topic="businessOverview")
-        accessorStructureEvents = c.docs.sections.structureEvents(topic="businessOverview")
-        accessorStructureSummary = c.docs.sections.structureSummary(topic="businessOverview")
-        accessorStructureChanges = c.docs.sections.structureChanges(topic="businessOverview", nodeType="body")
-        accessorBodyStructureRegistry = c.docs.sections.structureRegistry(topic="businessOverview", nodeType="body")
-        accessorBodyStructureEvents = c.docs.sections.structureEvents(topic="businessOverview", nodeType="body")
-        accessorBodyStructureSummary = c.docs.sections.structureSummary(topic="businessOverview", nodeType="body")
-        accessorBodyStructureChanges = c.docs.sections.structureChanges(topic="businessOverview", nodeType="body")
+        ordered = c._docs.sectionsOrdered()
+        coverage = c._docs.sectionsCoverage(topic="businessOverview")
+        annual = c._docs.sectionsFreq("annual")
+        registry = c._docs.sectionsSemanticRegistry(topic="mdna")
+        collisions = c._docs.sectionsSemanticCollisions(topic="mdna")
+        structureRegistry = c._docs.sectionsStructureRegistry(topic="businessOverview")
+        structureCollisions = c._docs.sectionsStructureCollisions(topic="businessOverview")
+        structureEvents = c._docs.sectionsStructureEvents(topic="businessOverview")
+        structureSummary = c._docs.sectionsStructureSummary(topic="businessOverview")
+        structureChanges = c._docs.sectionsStructureChanges(topic="businessOverview", nodeType="body")
+        bodyStructureRegistry = c._docs.sectionsStructureRegistry(topic="businessOverview", nodeType="body")
+        bodyStructureEvents = c._docs.sectionsStructureEvents(topic="businessOverview", nodeType="body")
+        bodyStructureSummary = c._docs.sectionsStructureSummary(topic="businessOverview", nodeType="body")
+        bodyStructureChanges = c._docs.sectionsStructureChanges(topic="businessOverview", nodeType="body")
+        accessorPeriods = c._docs.sections.periods()
+        accessorOrdered = c._docs.sections.ordered()
+        accessorCoverage = c._docs.sections.coverage(topic="businessOverview")
+        accessorAnnual = c._docs.sections.freq("annual")
+        accessorRegistry = c._docs.sections.semanticRegistry(topic="mdna")
+        accessorCollisions = c._docs.sections.semanticCollisions(topic="mdna")
+        accessorStructureRegistry = c._docs.sections.structureRegistry(topic="businessOverview")
+        accessorStructureCollisions = c._docs.sections.structureCollisions(topic="businessOverview")
+        accessorStructureEvents = c._docs.sections.structureEvents(topic="businessOverview")
+        accessorStructureSummary = c._docs.sections.structureSummary(topic="businessOverview")
+        accessorStructureChanges = c._docs.sections.structureChanges(topic="businessOverview", nodeType="body")
+        accessorBodyStructureRegistry = c._docs.sections.structureRegistry(topic="businessOverview", nodeType="body")
+        accessorBodyStructureEvents = c._docs.sections.structureEvents(topic="businessOverview", nodeType="body")
+        accessorBodyStructureSummary = c._docs.sections.structureSummary(topic="businessOverview", nodeType="body")
+        accessorBodyStructureChanges = c._docs.sections.structureChanges(topic="businessOverview", nodeType="body")
 
         assert isinstance(ordered, pl.DataFrame)
         assert isinstance(coverage, pl.DataFrame)
@@ -363,7 +363,7 @@ class TestCompany:
         assert isinstance(accessorBodyStructureEvents, pl.DataFrame)
         assert isinstance(accessorBodyStructureSummary, pl.DataFrame)
         assert isinstance(accessorBodyStructureChanges, pl.DataFrame)
-        assert annual.height <= c.docs.sections.height
+        assert annual.height <= c._docs.sections.height
         orderedPeriodCols = [c for c in ordered.columns if c.startswith("20")]
         assert orderedPeriodCols == accessorPeriods
         assert orderedPeriodCols[0].endswith("Q4")
@@ -434,10 +434,10 @@ class TestCompany:
 
     def test_docs_sections_structure_helpers_return_valid_dataframes(self):
         c = self.c
-        registry = c.docs.sections.structureRegistry(topic="businessOverview", nodeType="body")
-        events = c.docs.sections.structureEvents(topic="businessOverview", nodeType="body")
-        summary = c.docs.sections.structureSummary(topic="businessOverview", nodeType="body")
-        changes = c.docs.sections.structureChanges(topic="businessOverview", nodeType="body")
+        registry = c._docs.sections.structureRegistry(topic="businessOverview", nodeType="body")
+        events = c._docs.sections.structureEvents(topic="businessOverview", nodeType="body")
+        summary = c._docs.sections.structureSummary(topic="businessOverview", nodeType="body")
+        changes = c._docs.sections.structureChanges(topic="businessOverview", nodeType="body")
 
         assert isinstance(registry, pl.DataFrame)
         assert isinstance(events, pl.DataFrame)

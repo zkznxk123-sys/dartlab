@@ -31,7 +31,7 @@ def _mock_company():
     c.show.return_value = None
     c.trace.return_value = None
     c.topics = ["BS", "IS"]
-    c.docs.sections = None
+    c._docs.sections = None
     c.facts = None
     c.BS = None
     c.IS = None

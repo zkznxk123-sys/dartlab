@@ -24,7 +24,7 @@ def extractExecutive(company: "Company") -> pl.DataFrame | None:
     1순위: 10-K Item 10 섹션 텍스트 파싱
     2순위: XBRL에서 officer 관련 태그 (제한적)
     """
-    sections = company.docs.sections
+    sections = company._docs.sections
     if sections is None or sections.is_empty():
         return None
 

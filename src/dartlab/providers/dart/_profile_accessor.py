@@ -211,7 +211,7 @@ class _ProfileAccessor:
                 if rows:
                     frames.append(pl.DataFrame(rows))
 
-        docsBlocks = self._company.docs.retrievalBlocks
+        docsBlocks = self._company._docs.retrievalBlocks
         if docsBlocks is not None and not docsBlocks.is_empty():
             # topic = coalesce(detailTopic, semanticTopic, topic)
             topicExpr = pl.col("topic")
@@ -297,7 +297,7 @@ class _ProfileAccessor:
 
         requestedPeriod = rawPeriod(period) if isinstance(period, str) else period
         facts = self.facts
-        docsSections = self._company.docs.sections
+        docsSections = self._company._docs.sections
 
         sources: list[dict[str, Any]] = []
 

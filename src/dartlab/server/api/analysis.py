@@ -51,7 +51,7 @@ def api_company_diff_matrix(
     from dartlab.core.docs.diff import build_diff_matrix, build_heatmap_spec
 
     try:
-        sections = c.docs.sections.raw
+        sections = c._docs.sections.raw
         matrix_data = build_diff_matrix(sections, textOnly=textOnly)
         heatmap = build_heatmap_spec(matrix_data, c.corpName, top_n=topN)
     except HANDLED_API_ERRORS as e:
@@ -167,7 +167,7 @@ def api_company_bridge(
     )
 
     try:
-        sections = c.docs.sections.raw
+        sections = c._docs.sections.raw
         periods = sorted(
             [col for col in sections.columns if _re.fullmatch(r"\d{4}(Q[1-4])?", col)],
             reverse=True,
@@ -223,7 +223,7 @@ def api_company_topics_graph(
     )
 
     try:
-        sections = c.docs.sections.raw
+        sections = c._docs.sections.raw
         matrix = build_mention_matrix(sections)
         analysis = analyze_graph(matrix.get("adjacency", {}), threshold=threshold)
 

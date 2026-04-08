@@ -31,7 +31,7 @@ def run(args) -> int:
 
     console.print(f"\n  [bold]{company.corpName}[/] ({company.stockCode})\n")
 
-    sections = company.docs.sections
+    sections = company._docs.sections
     if sections is None:
         console.print(f"[dim]{company.corpName} sections 데이터가 없습니다.[/]")
         return 0

@@ -35,7 +35,7 @@ class _ProfileAccessor:
         if cacheKey in self._company._cache:
             return self._company._cache[cacheKey]
 
-        docsSec = self._company.docs.sections
+        docsSec = self._company._docs.sections
         if docsSec is None or (isinstance(docsSec, pl.DataFrame) and docsSec.is_empty()):
             self._company._cache[cacheKey] = None
             return None

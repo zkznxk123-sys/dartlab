@@ -316,12 +316,11 @@ class Company:
         self._hintedKeys: set[str] = set()  # 동일 안내 반복 방지
 
         self._notesAccessor = Notes(self) if self._hasDocs else None
-        # public namespace 는 docs/report 만 (P3a: c.finance 제거)
-        self.docs = _DocsAccessor(self)
+        # public namespace 는 report 만 (P3a/c: finance/docs 제거)
         self.report = _ReportAccessor(self)
         self._profileAccessor = _ProfileAccessor(self)
         # private 백엔드 — 내부 compute 전용 (review/credit/valuation 등)
-        self._docs = self.docs
+        self._docs = _DocsAccessor(self)
         self._finance = _FinanceAccessor(self)
         self._report = self.report
 

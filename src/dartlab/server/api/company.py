@@ -213,7 +213,7 @@ def apiViewerDoc(
 
     try:
         company = get_company(code)
-        sec = company.docs.sections.raw
+        sec = company._docs.sections.raw
         if sec is None:
             raise HTTPException(status_code=404, detail="sections 없음")
 

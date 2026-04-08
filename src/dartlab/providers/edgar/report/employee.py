@@ -68,7 +68,7 @@ def extractEmployee(company: "Company") -> pl.DataFrame | None:
 
     # 2순위: 10-K 텍스트 파싱
     if not rows:
-        sections = company.docs.sections
+        sections = company._docs.sections
         if sections is not None and not sections.is_empty():
             # Item 1 Business 섹션 찾기
             item1Topics = sections.filter(pl.col("topic").str.contains("(?i)item1Business|item1$"))

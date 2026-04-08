@@ -197,7 +197,7 @@ def calcDisclosureDeltaFlags(company, *, basePeriod: str | None = None) -> list[
 
 
 def _safeDiffResult(company):
-    """company.docs.sections에서 DiffResult를 안전하게 얻는다.
+    """company._docs.sections에서 DiffResult를 안전하게 얻는다.
 
     결과를 company._cache에 저장하여 4개 calc 함수가 공유.
     """
@@ -208,7 +208,7 @@ def _safeDiffResult(company):
 
     result = None
     try:
-        docsSections = company.docs.sections
+        docsSections = company._docs.sections
         if docsSections is not None:
             from dartlab.core.docs.diff import sectionsDiff
 

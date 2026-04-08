@@ -26,7 +26,7 @@ def extractOutsideDirector(company: "Company") -> pl.DataFrame | None:
     10-K Item 10 (Directors and Corporate Governance) 섹션에서
     independent director 언급을 파싱.
     """
-    sections = company.docs.sections
+    sections = company._docs.sections
     if sections is None or sections.is_empty():
         return None
 

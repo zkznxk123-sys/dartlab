@@ -84,7 +84,7 @@ def collectSignals(company, *, usePredictionAxis: bool = False) -> ContextSignal
 
     # 2. diff 변화율 수집
     try:
-        diffResult = company.docs.diff()
+        diffResult = company._docs.diff()
         if diffResult and hasattr(diffResult, "changeRate"):
             signals.diffChangeRate = diffResult.changeRate or 0.0
         # 리스크 topic 변화율

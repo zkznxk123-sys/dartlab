@@ -1333,7 +1333,7 @@ def calcDisclosureDelta(company, *, basePeriod: str | None = None) -> dict | Non
     FinBERT 등 톤 분석은 미적용 — 변화 크기만 사용.
     """
     try:
-        diffResult = company.docs.diff()
+        diffResult = company._docs.diff()
     except (AttributeError, TypeError):
         return None
 

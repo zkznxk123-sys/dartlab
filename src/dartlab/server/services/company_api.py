@@ -221,7 +221,7 @@ def build_diff_summary(company: Company, topic: str) -> dict[str, Any] | None:
     try:
         from dartlab.core.docs.diff import sectionsDiff
 
-        sec = company.docs.sections
+        sec = company._docs.sections
         if sec is None:
             return None
 

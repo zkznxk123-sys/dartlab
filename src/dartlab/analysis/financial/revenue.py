@@ -271,7 +271,7 @@ def calcCompanyProfile(company, *, basePeriod: str | None = None) -> dict | None
         if corpName:
             parts["company"] = corpName
         try:
-            sections = company.docs.sections
+            sections = company._docs.sections
             if sections is not None:
                 import polars as pl
 

@@ -133,7 +133,7 @@ def verifyOpenEdgarSaveCompatibility(ticker: str) -> dict[str, object]:
     from dartlab.providers.edgar.company import Company
 
     company = Company(ticker)
-    docsSections = company.docs.sections
+    docsSections = company._docs.sections
     financeBs = company._finance.BS
     indexDf = company.index
     docTopics = []
