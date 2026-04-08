@@ -676,6 +676,13 @@
 		white-space: nowrap;
 	}
 
+	/* 표 안의 inline code는 줄바꿈 허용 — 검증표 마지막 컬럼이 viewport 넘침 방지 */
+	.blog-article :global(td code:not(pre code)) {
+		white-space: normal;
+		word-break: break-all;
+		font-size: 0.78rem;
+	}
+
 	.blog-article :global(tbody tr:last-child td) {
 		border-bottom: none;
 	}

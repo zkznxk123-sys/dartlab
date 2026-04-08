@@ -23,7 +23,7 @@ youtubeId: ""
 
 > **반전 폭발 + 인물 중심** | 식품 > 라면 | 2026-04-08 dartlab 실측
 > 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: review + analysis + credit + report.dividend
-> 같은 시리즈: [SK하이닉스 (000660)](/blog/000660-skhynix) · [두산에너빌리티 (034020)](/blog/034020-doosan-enerbility) · [기업분석 시리즈 전체](/blog/series/company-reports)
+> 같은 시리즈: [SK하이닉스 (000660)](/blog/000660-skhynix) · [두산에너빌리티 (034020)](/blog/034020-doosan-enerbility) · [알테오젠 (196170)](/blog/196170-alteogen) · [기업분석 시리즈 전체](/blog/series/company-reports)
 
 ---
 
