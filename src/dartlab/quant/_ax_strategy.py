@@ -13,7 +13,6 @@ Quant 클래스의 `_AXIS_REGISTRY` 가 lazy import 하는 진입 모듈. analys
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 import numpy as np
 import polars as pl
@@ -21,13 +20,14 @@ import polars as pl
 from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 from dartlab.quant.strategy.backtest import (
     BacktestResult,
-    cpcv as cpcv_fn,
     multi_asset_backtest,
     vector_backtest,
     walk_forward,
 )
+from dartlab.quant.strategy.backtest import (
+    cpcv as cpcv_fn,
+)
 from dartlab.quant.strategy.presets import (
-    STYLE_KR_ONLY,
     STYLE_REGISTRY,
     list_styles,
     resolve_style,

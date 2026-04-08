@@ -37,7 +37,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from dartlab.quant.indicators import vbollinger, vrsi
+from dartlab.quant.indicators import vrsi
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import get_arrays
