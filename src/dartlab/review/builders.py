@@ -3579,7 +3579,7 @@ def strategySnapshotBlock(data: dict) -> list:
         sharpe = snap.get("sharpe", 0.0)
         rows_label.append(label)
         rows_sharpe.append(f"{sharpe:+.2f}")
-        rows_mdd.append(f"{snap.get('mdd', 0.0)*100:+.1f}%")
+        rows_mdd.append(f"{snap.get('mdd', 0.0) * 100:+.1f}%")
         rows_dsr.append(f"{snap.get('dsr', 0.0):.2f}")
         rows_entry.append("●" if snap.get("entry_today") else "—")
         rows_exit.append("●" if snap.get("exit_today") else "—")
@@ -3613,9 +3613,7 @@ def strategySnapshotBlock(data: dict) -> list:
     )
 
     # 활성 진입 신호 narrate (1줄)
-    active_styles = [
-        style_labels[k] for k, v in data.items() if v.get("entry_today") and v.get("status") == "ok"
-    ]
+    active_styles = [style_labels[k] for k, v in data.items() if v.get("entry_today") and v.get("status") == "ok"]
     helper = (
         "8 검증 스타일 백테스트 결과 + 오늘 시점 진입/청산 진단. "
         "Sharpe ≥ 1.2 강함, ≥ 0.6 양호, < 0.2 약함. DSR (Bailey-Lopez) 가 우연성 검증."

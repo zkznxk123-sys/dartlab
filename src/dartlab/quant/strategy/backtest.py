@@ -84,7 +84,7 @@ class BacktestResult:
             return f"BacktestResult(status={self.status!r}, reason={self.reason!r})"
         return (
             f"BacktestResult(style={self.style}, sharpe={self.sharpe:+.2f}, "
-            f"mdd={self.mdd*100:+.1f}%, dsr={self.dsr:.2f}, "
+            f"mdd={self.mdd * 100:+.1f}%, dsr={self.dsr:.2f}, "
             f"trades={self.trades.height if self.trades is not None else 0}, "
             f"oos={self.oos})"
         )
@@ -270,17 +270,21 @@ def vector_backtest(
     equity = np.cumprod(1.0 + daily_ret)
 
     # trades DataFrame
-    trades_df = pl.DataFrame(trades) if trades else pl.DataFrame(
-        schema={
-            "entry_idx": pl.Int64,
-            "exit_idx": pl.Int64,
-            "entry_price": pl.Float64,
-            "exit_price": pl.Float64,
-            "pnl": pl.Float64,
-            "bars_held": pl.Int64,
-            "exit_reason": pl.Utf8,
-            "cost_bps": pl.Float64,
-        }
+    trades_df = (
+        pl.DataFrame(trades)
+        if trades
+        else pl.DataFrame(
+            schema={
+                "entry_idx": pl.Int64,
+                "exit_idx": pl.Int64,
+                "entry_price": pl.Float64,
+                "exit_price": pl.Float64,
+                "pnl": pl.Float64,
+                "bars_held": pl.Int64,
+                "exit_reason": pl.Utf8,
+                "cost_bps": pl.Float64,
+            }
+        )
     )
 
     pnls = np.array([t["pnl"] for t in trades], dtype=np.float64)
@@ -371,7 +375,7 @@ def walk_forward(
     if n < train + test:
         return BacktestResult(
             status="error",
-            reason=f"insufficient data for walk-forward: n={n}, need {train+test}",
+            reason=f"insufficient data for walk-forward: n={n}, need {train + test}",
             style=style,
             oos=True,
         )
@@ -591,7 +595,18 @@ def multi_asset_backtest(
         sharpe=sh,
         sortino=so,
         mdd=md,
-        winrate=winrate(np.array([t["pnl"] for code in individual for t in (individual[code].trades.to_dicts() if individual[code].trades is not None else [])], dtype=np.float64)) if individual else 0.0,
+        winrate=winrate(
+            np.array(
+                [
+                    t["pnl"]
+                    for code in individual
+                    for t in (individual[code].trades.to_dicts() if individual[code].trades is not None else [])
+                ],
+                dtype=np.float64,
+            )
+        )
+        if individual
+        else 0.0,
         dsr=ds,
         style=f"{style}_x{n_assets}" if style else f"multi_x{n_assets}",
         oos=False,

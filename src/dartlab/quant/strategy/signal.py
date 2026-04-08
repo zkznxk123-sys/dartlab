@@ -42,9 +42,7 @@ class Signal:
         if self._length is None:
             self._length = len(arr)
         elif len(arr) != self._length:
-            raise ValueError(
-                f"signal length mismatch: '{key}' has {len(arr)}, expected {self._length}"
-            )
+            raise ValueError(f"signal length mismatch: '{key}' has {len(arr)}, expected {self._length}")
         self._signals[key] = arr
         return self
 

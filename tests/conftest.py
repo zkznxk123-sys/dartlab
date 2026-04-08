@@ -345,7 +345,9 @@ class MockCompany:
     def insights(self):
         return {"overall": "B+", "profitability": "A"}
 
-    def select(self, stmt: str, accounts: list[str] | str | None = None, colList=None, *, strict: bool = True, **kwargs):
+    def select(
+        self, stmt: str, accounts: list[str] | str | None = None, colList=None, *, strict: bool = True, **kwargs
+    ):
         """재무제표 계정 필터 — MockSelectResult 반환."""
         if isinstance(accounts, str):
             accounts = [accounts]

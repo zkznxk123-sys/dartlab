@@ -51,8 +51,8 @@ class EntryVerdict:
     """현재 시점 진입 진단 (entry 축 결과)."""
 
     style: str
-    active: bool          # 오늘 entry 신호 True 인가
-    exit_today: bool      # 오늘 exit 신호 True 인가
+    active: bool  # 오늘 entry 신호 True 인가
+    exit_today: bool  # 오늘 exit 신호 True 인가
     last_price: float | None
     stop_level: float | None
     last_date: str | None
@@ -245,8 +245,13 @@ def runEntry(
     if close is None or len(close) < 30:
         return {
             "_error": EntryVerdict(
-                style="-", active=False, exit_today=False, last_price=None,
-                stop_level=None, last_date=None, status="error",
+                style="-",
+                active=False,
+                exit_today=False,
+                last_price=None,
+                stop_level=None,
+                last_date=None,
+                status="error",
                 reason=f"insufficient OHLCV: {stockCode}",
             )
         }
@@ -260,17 +265,27 @@ def runEntry(
         result = _build_rule_from_style(key, stockCode)
         if isinstance(result, BacktestResult):
             out[key] = EntryVerdict(
-                style=key, active=False, exit_today=False, last_price=last_price,
-                stop_level=None, last_date=last_date_str,
-                status=result.status, reason=result.reason,
+                style=key,
+                active=False,
+                exit_today=False,
+                last_price=last_price,
+                stop_level=None,
+                last_date=last_date_str,
+                status=result.status,
+                reason=result.reason,
             )
             continue
         rule = result
         if len(rule.entry_expr) == 0:
             out[key] = EntryVerdict(
-                style=key, active=False, exit_today=False, last_price=last_price,
-                stop_level=None, last_date=last_date_str,
-                status="error", reason="empty rule",
+                style=key,
+                active=False,
+                exit_today=False,
+                last_price=last_price,
+                stop_level=None,
+                last_date=last_date_str,
+                status="error",
+                reason="empty rule",
             )
             continue
         active = bool(rule.entry_expr[-1])
@@ -284,8 +299,12 @@ def runEntry(
             if not np.isnan(stops[-1]):
                 stop_level = float(stops[-1])
         out[key] = EntryVerdict(
-            style=key, active=active, exit_today=exit_today,
-            last_price=last_price, stop_level=stop_level, last_date=last_date_str,
+            style=key,
+            active=active,
+            exit_today=exit_today,
+            last_price=last_price,
+            stop_level=stop_level,
+            last_date=last_date_str,
         )
     return out
 

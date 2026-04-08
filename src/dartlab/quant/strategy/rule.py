@@ -138,9 +138,7 @@ class Rule:
         valid_entries = entry_indices[entry_indices < n - forward]
         if len(valid_entries) < 5:
             return {"error": "too few valid entry indices"}
-        entry_rets = np.array(
-            [close[i + forward] / close[i] - 1 for i in valid_entries], dtype=np.float64
-        )
+        entry_rets = np.array([close[i + forward] / close[i] - 1 for i in valid_entries], dtype=np.float64)
         # random baseline
         np.random.seed(42)
         rand_idx = np.random.randint(0, n - forward, size=max(len(valid_entries), 100))
