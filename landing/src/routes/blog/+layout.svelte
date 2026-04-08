@@ -256,17 +256,31 @@
 			grid-template-columns: 1fr;
 			gap: 1rem;
 			padding: 1.5rem 0.75rem 4rem;
+			max-width: 100%;
+			min-width: 0;
+		}
+
+		.dl-blog-sidebar {
+			max-width: 100%;
+			min-width: 0;
+			overflow: hidden;
 		}
 
 		.dl-blog-sidebar-inner {
 			position: static;
+			max-width: 100%;
+			min-width: 0;
+			overflow: hidden;
 		}
 
 		.dl-blog-category-nav {
 			flex-direction: row;
 			flex-wrap: nowrap;
 			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
 			gap: 0;
+			max-width: 100%;
+			min-width: 0;
 		}
 
 		.dl-blog-nav-label { display: none; }
