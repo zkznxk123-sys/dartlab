@@ -299,7 +299,7 @@ class TestRatioQuality:
         df = _ratioSeriesToDataFrame(series, years, fieldNames=("roe", "roa"))
 
         assert df is not None
-        assert df["항목"].to_list() == ["ROE (%)", "ROA (%)"]
+        assert df["항목"].to_list() == ["자기자본이익률 (ROE %)", "총자산이익률 (ROA %)"]
 
     def test_yoy_sign_change_returns_none(self):
         from dartlab.core.finance.ratios import _yoy

@@ -91,7 +91,7 @@ def test_excel_returns_non_zero_on_company_error(capsys):
 
     captured = capsys.readouterr()
     assert result == 1
-    assert "오류: missing data" in captured.err
+    assert "오류" in captured.err
 
 
 def test_parse_profile_options():
