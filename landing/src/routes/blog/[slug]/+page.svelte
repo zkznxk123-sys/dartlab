@@ -527,6 +527,12 @@
 	}
 
 	/* Article typography — mirrors docs layout */
+	.blog-article {
+		min-width: 0;
+		max-width: 100%;
+		overflow-wrap: break-word;
+	}
+
 	.blog-article :global(h1) {
 		font-size: 2rem;
 		font-weight: 800;
@@ -614,8 +620,8 @@
 		display: block;
 		width: 100%;
 		max-width: 100%;
+		min-width: 0;
 		overflow-x: auto;
-		table-layout: auto;
 		border-collapse: separate;
 		border-spacing: 0;
 		margin: 1.75rem 0;
@@ -631,9 +637,14 @@
 		-webkit-overflow-scrolling: touch;
 	}
 
-	.blog-article :global(table tbody),
-	.blog-article :global(table thead) {
-		width: auto;
+	/* tbody/thead를 다시 table-row-group으로 두되 width 100% + min-width: max-content
+	   → 좁은 표는 컨테이너 풀폭, 넓은 표는 컨텐츠 폭 + 표 안에서 가로 스크롤 */
+	.blog-article :global(table thead),
+	.blog-article :global(table tbody) {
+		display: table;
+		width: 100%;
+		min-width: max-content;
+		table-layout: auto;
 	}
 
 	.blog-article :global(thead) {
