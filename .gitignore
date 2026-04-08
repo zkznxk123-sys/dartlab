@@ -35,9 +35,6 @@ TODO.md
 /BROKEN_LINKS_REPORT.txt
 # Data
 data/
-# data/credit/은 git 추적 (신용평가 보고서 발간용)
-!data/credit/
-!data/credit/**
 
 # Backup (파일 삭제 대신 이동)
 _backup/

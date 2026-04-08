@@ -50,7 +50,7 @@
 					<a href="{base}/blog/" class="dl-blog-category-link" class:active={currentPath === '/blog' || currentPath === '/blog/'}>
 						All Posts
 					</a>
-					{#each categoryDefinitions as category}
+					{#each categoryDefinitions.filter((c) => !('hidden' in c) || !c.hidden) as category}
 						<a
 							href="{base}{getCategoryPath(category.id)}"
 							class="dl-blog-category-link"

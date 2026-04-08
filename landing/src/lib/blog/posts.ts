@@ -45,7 +45,8 @@ export const categoryDefinitions = [
 		seoDescription:
 			'dartlab dCR 신용분석 보고서. 공시 데이터 기반 정량 분석으로 산출한 독립 신용등급, 등급 근거, 재무 하이라이트, 등급 전망을 제공합니다.',
 		brandMessage:
-			'DartLab은 공시 데이터만으로 재현 가능한 독립 신용등급을 산출합니다.'
+			'DartLab은 공시 데이터만으로 재현 가능한 독립 신용등급을 산출합니다.',
+		hidden: true
 	},
 	{
 		id: 'company-reports',
@@ -69,7 +70,8 @@ export const categoryDefinitions = [
 		seoDescription:
 			'dartlab 경제분석 보고서. 사이클→금리→위기→전망의 3막 서사 구조로 경제를 분석합니다. Hamilton RS, Kalman DFM, Nelson-Siegel, BIS Credit-to-GDP gap 등 12개 방법론.',
 		brandMessage:
-			'DartLab은 종목코드 없이 경제 전체를 분석합니다. 매월 자동 발간.'
+			'DartLab은 종목코드 없이 경제 전체를 분석합니다. 매월 자동 발간.',
+		hidden: true
 	}
 ] as const;
 
