@@ -178,6 +178,7 @@ class KnowledgeDB:
         return self._ensure_db()
 
     def close(self) -> None:
+        """SQLite 연결 닫기. 싱글톤 재초기화 시 호출."""
         if self._conn:
             self._conn.close()
             self._conn = None
@@ -200,6 +201,22 @@ class KnowledgeDB:
         provider: str = "",
         model: str = "",
     ) -> None:
+        """AI 실행 1건을 ``executions`` 테이블에 기록.
+
+        Args:
+            stock_code: 종목코드 (없으면 None — market-level 질문).
+            question: 사용자 질문 (200자로 절단).
+            question_type: 질문 분류 ("analysis"/"compare"/"forecast" 등).
+            mode: "analysis" | "coding".
+            result_summary: 답변 요약 (_MAX_SUMMARY_CHARS 자로 절단).
+            grade: 분석 결과 등급 (있으면).
+            key_metrics: JSON 문자열 형태의 핵심 지표 (500자로 절단).
+            duration_sec: 실행 시간 (초).
+            code_rounds: 코드 실행 round 수.
+            has_error: 에러 발생 여부.
+            provider: LLM provider 식별자.
+            model: 모델 식별자.
+        """
         conn = self._ensure_db()
         summary = result_summary[:_MAX_SUMMARY_CHARS] if result_summary else ""
         conn.execute(
@@ -231,6 +248,20 @@ class KnowledgeDB:
         limit: int = 5,
         decay_days: int = 90,
     ) -> list[dict]:
+        """특정 종목의 최근 AI 실행 이력을 시간 역순으로 반환.
+
+        AI 가 같은 종목의 분석 컨텍스트를 회상할 때 사용. ``decay_days`` 이전
+        기록은 자동 제외 (오래된 정보의 영향 차단).
+
+        Args:
+            stock_code: 종목코드.
+            limit: 반환 건수 상한.
+            decay_days: 회상 윈도우 (일). 기본 90일.
+
+        Returns:
+            ``[{stock_code, question, question_type, result_summary, timestamp,
+            grade, key_metrics}, ...]`` — 최신 우선.
+        """
         conn = self._ensure_db()
         cutoff = time.time() - (decay_days * 86400)
         rows = conn.execute(
@@ -266,6 +297,20 @@ class KnowledgeDB:
         quality_score: float = 0.8,
         mode: str = "analysis",
     ) -> int | None:
+        """성공한 코드 패턴을 ``skills`` 테이블에 저장 (few-shot 학습 자료).
+
+        Args:
+            question: 원본 질문 (500자로 절단).
+            code_template: 실행에 성공한 코드 (5000자로 절단).
+            category: skill 분류 ("financial"/"docs"/"market" 등).
+            tools_used: 사용한 도구 목록 JSON.
+            result_keys: 결과 dict 의 키 목록 JSON.
+            quality_score: 0.0~1.0 품질 점수 (높을수록 우수).
+            mode: "analysis" | "coding".
+
+        Returns:
+            INSERT 된 row 의 id, 실패 시 None.
+        """
         conn = self._ensure_db()
         now = time.time()
         cursor = conn.execute(
@@ -295,6 +340,19 @@ class KnowledgeDB:
         limit: int = 2,
         mode: str | None = None,
     ) -> list[tuple]:
+        """카테고리 별 상위 품질 skill 검색 (few-shot 주입용).
+
+        category 매칭 우선, 부족하면 mode 전체에서 보충.
+        품질 점수 / 성공 횟수 내림차순 정렬.
+
+        Args:
+            category: skill 분류 키.
+            limit: 반환 건수.
+            mode: "analysis" | "coding" 중 하나로 제한 (None = 둘 다).
+
+        Returns:
+            sqlite row 튜플 리스트. 컬럼 순서는 ``skills`` 테이블 schema 기준.
+        """
         conn = self._ensure_db()
         if mode:
             rows = conn.execute(
@@ -328,6 +386,10 @@ class KnowledgeDB:
         return rows
 
     def record_skill_success(self, skill_id: int) -> None:
+        """skill 의 ``success_count`` 증가 + ``last_used`` 갱신.
+
+        skill 을 재사용하여 성공할 때마다 호출 — 점진적 품질 신호.
+        """
         conn = self._ensure_db()
         conn.execute(
             "UPDATE skills SET success_count = success_count + 1, last_used = ? WHERE id = ?",

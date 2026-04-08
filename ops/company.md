@@ -117,10 +117,16 @@ c.profile          # 통합 프로필
 
 ### finance 바로가기
 ```python
-c.BS / c.IS / c.CF / c.CIS       # 재무제표
+c.BS / c.IS / c.CF / c.CIS       # 재무제표 — 분기 컬럼만 노출 (schema only quarterly)
 c.ratios / c.ratioSeries          # 비율
 c.timeseries                      # 시계열
 ```
+
+⚠ `c.IS / c.BS / c.CF / c.CIS` 는 기본적으로 **분기 컬럼만** 노출한다 (`2025Q4`, `2025Q3`, ...).
+연간 누적 값이 필요하면 calc 함수가 `toDictBySnakeId(c.select(...))` 로 변환할 때
+`core/finance/flow.py::synthesizeAnnualFromQuarters` 가 분기에서 자동 합성하여
+`data["sales"]["2024"]` 처럼 4자리 연도 키로 노출한다 (IS/CIS/CF 는 4분기 strict 합,
+BS 는 Q4 alias). 시계열 view 의 분기+연간 동시 노출 schema noise 를 방지.
 
 ### 메타
 ```python

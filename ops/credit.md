@@ -552,6 +552,13 @@ data/credit/              # 내부 데이터 (git 미추적)
 | `gather.macro` | 거시지표 | 금리/스프레드 |
 | `scan.*` | 횡단 비교 | 업종 내 순위 |
 
+### SSOT 헬퍼 위임
+
+`credit/metrics.py` 의 `_toDict` / `_annualCols` 는 `analysis/financial/_helpers.py`
+의 `toDictBySnakeId` / `annualColsFromPeriods` 를 alias 로 위임한다 (Plan v9 P0).
+credit 은 analysis 의 calc 함수는 호출하지 않지만, 데이터 변환 헬퍼는 SSOT 단일
+경로를 사용한다.
+
 ## 방법론 기반 — 세계적 참조점
 
 | 참조 | dartlab 적용 | 차별점 |

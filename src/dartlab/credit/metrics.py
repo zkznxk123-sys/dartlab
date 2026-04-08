@@ -1,13 +1,17 @@
 """7축 신용분석 정량 지표 산출.
 
 모든 지표를 company.select() / company.notes / company.show()에서
-직접 산출한다. 다른 analysis calc 함수를 호출하지 않는다 (단, 차입금
-fallback 같은 공유 헬퍼는 _helpers 에서 위임).
+직접 산출한다. 다른 analysis calc 함수는 호출하지 않으며,
+공유 헬퍼만 ``analysis/financial/_helpers`` 에서 가져온다 (SSOT).
 """
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import sumBorrowingsKorean
+from dartlab.analysis.financial._helpers import (
+    annualColsFromPeriods,
+    sumBorrowingsKorean,
+    toDictBySnakeId,
+)
 
 
 def _div(a, b, pct: bool = False) -> float | None:
@@ -67,55 +71,10 @@ def _cv(values: list) -> float | None:
     return round((variance**0.5) / abs(mean) * 100, 2)
 
 
-def _toDict(selectResult) -> tuple[dict[str, dict], list[str]] | None:
-    """SelectResult → ({계정명: {period: val}}, periods).
-
-    analysis._helpers.toDict 와 동일 로직을 자체 구현.
-    cross-dependency 방지: credit ↛ analysis.
-    """
-    if selectResult is None:
-        return None
-
-    df = selectResult.df
-    from dartlab.core.show import isPeriodColumn
-
-    periods = sorted([c for c in df.columns if isPeriodColumn(c)], reverse=True)
-    if not periods:
-        return None
-
-    labelCol = "계정명" if "계정명" in df.columns else (df.columns[0] if df.columns else None)
-    if labelCol is None:
-        return None
-
-    # EDGAR bridge: snakeId → 한국어 라벨 (양 provider 호환)
-    needsBridge = labelCol != "계정명" and "계정명" not in df.columns
-    krLabels: dict[str, str] | None = None
-    if needsBridge:
-        from dartlab.core.finance.labels import get_korean_labels
-
-        krLabels = get_korean_labels()
-
-    data: dict[str, dict] = {}
-    for row in df.iter_rows(named=True):
-        label = str(row.get(labelCol, ""))
-        key = krLabels.get(label, label) if krLabels else label
-        data[key] = {c: row.get(c) for c in periods}
-    return (data, periods) if data else None
-
-
-def _annualCols(periods: list[str], basePeriod: str | None, maxYears: int = 8) -> list[str]:
-    """기간 목록에서 연간 컬럼 추출 — basePeriod 이하만.
-
-    analysis._helpers.annualColsFromPeriods 와 동일 로직을 자체 구현.
-    cross-dependency 방지: credit ↛ analysis.
-    """
-    cols = sorted([c for c in periods if "Q" not in c], reverse=True)
-    if not cols:
-        cols = sorted([c for c in periods if c.endswith("Q4")], reverse=True)
-    if basePeriod is not None:
-        limit = basePeriod + "Q5" if "Q" not in basePeriod else basePeriod
-        cols = [c for c in cols if (c + "Q5" if "Q" not in c else c) <= limit]
-    return cols[:maxYears]
+# SSOT 위임: _toDict / _annualCols 는 analysis/_helpers 의 함수와 동일 로직.
+# 호환을 위한 alias — 신규 코드는 toDictBySnakeId / annualColsFromPeriods 직접 호출.
+_toDict = toDictBySnakeId
+_annualCols = annualColsFromPeriods
 
 
 def _isQuarterlyFallback(cols: list[str]) -> bool:
