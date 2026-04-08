@@ -167,7 +167,7 @@ def calcGovernanceFlags(company, *, basePeriod: str | None = None) -> list[tuple
 def _safePivotMajorHolder(company):
     """report.majorHolder를 안전하게 가져온다."""
     try:
-        result = company.report.majorHolder
+        result = company._report.majorHolder
         if result is None:
             return None
         return result
@@ -178,7 +178,7 @@ def _safePivotMajorHolder(company):
 def _safePivotExecutive(company):
     """report.executive를 안전하게 가져온다."""
     try:
-        result = company.report.executive
+        result = company._report.executive
         if result is None:
             return None
         return result
@@ -189,7 +189,7 @@ def _safePivotExecutive(company):
 def _safePivotAudit(company):
     """report.audit를 안전하게 가져온다."""
     try:
-        result = company.report.audit
+        result = company._report.audit
         if result is None:
             return None
         return result

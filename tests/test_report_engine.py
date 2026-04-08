@@ -187,7 +187,7 @@ class TestCompanyReport:
         from dartlab import Company
 
         c = Company(SAMSUNG)
-        r = c.report.dividend
+        r = c._report.dividend
         assert r is not None
         assert len(r.dps) > 0
 
@@ -195,7 +195,7 @@ class TestCompanyReport:
         from dartlab import Company
 
         c = Company(SAMSUNG)
-        r = c.report.employee
+        r = c._report.employee
         assert r is not None
         assert len(r.totalEmployee) > 0
 
@@ -203,7 +203,7 @@ class TestCompanyReport:
         from dartlab import Company
 
         c = Company(SAMSUNG)
-        r = c.report.majorHolder
+        r = c._report.majorHolder
         assert r is not None
         assert len(r.totalShareRatio) > 0
 
@@ -211,7 +211,7 @@ class TestCompanyReport:
         from dartlab import Company
 
         c = Company(SAMSUNG)
-        r = c.report.executive
+        r = c._report.executive
         assert r is not None
         assert r.totalCount > 0
 
@@ -219,7 +219,7 @@ class TestCompanyReport:
         from dartlab import Company
 
         c = Company(SAMSUNG)
-        r = c.report.audit
+        r = c._report.audit
         assert r is not None
         assert len(r.opinions) > 0
 
@@ -227,7 +227,7 @@ class TestCompanyReport:
         from dartlab import Company
 
         c = Company(SAMSUNG)
-        df = c.report.extract("stockTotal")
+        df = c._report.extract("stockTotal")
         assert df is not None
         assert isinstance(df, pl.DataFrame)
         assert df.height > 0
@@ -236,6 +236,6 @@ class TestCompanyReport:
         from dartlab import Company
 
         c = Company(SAMSUNG)
-        df = c.report.extractAnnual("corporateBond")
+        df = c._report.extractAnnual("corporateBond")
         assert df is not None
         assert isinstance(df, pl.DataFrame)

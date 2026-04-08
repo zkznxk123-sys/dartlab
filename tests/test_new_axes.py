@@ -96,7 +96,7 @@ def _mockCompanyWithReport():
     company = MagicMock()
     company.stockCode = "005930"
 
-    company.report.majorHolder = MockMajorHolderResult(
+    company._report.majorHolder = MockMajorHolderResult(
         years=[2021, 2022, 2023, 2024],
         totalShareRatio=[20.5, 20.3, 19.8, 19.5],
         latestHolders=[
@@ -105,9 +105,9 @@ def _mockCompanyWithReport():
         ],
     )
 
-    company.report.executive = MockExecutiveResult(totalCount=10, registeredCount=5, outsideCount=4)
+    company._report.executive = MockExecutiveResult(totalCount=10, registeredCount=5, outsideCount=4)
 
-    company.report.audit = MockAuditResult()
+    company._report.audit = MockAuditResult()
 
     return company
 
@@ -195,7 +195,7 @@ class TestGovernance:
         from dartlab.analysis.financial.governance import calcOwnershipTrend
 
         company = MagicMock()
-        company.report.majorHolder = None
+        company._report.majorHolder = None
         result = calcOwnershipTrend(company)
         assert result is None
 

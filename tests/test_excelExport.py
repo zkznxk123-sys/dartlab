@@ -34,8 +34,8 @@ def mockCompany():
     c._hasReport = True
     c._cache = {"_finance_q_CFS": ({"IS": {"sales": [1, 2, 3]}, "BS": {}, "CF": {}}, ["2022_Q1"])}
     c.report = MagicMock()
-    c.report.dividend = None
-    c.report.employee = None
+    c._report.dividend = None
+    c._report.employee = None
     return c
 
 

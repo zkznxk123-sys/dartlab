@@ -2266,8 +2266,8 @@ class Company:
         )
 
     @property
-    def report(self):
-        """EDGAR report 네임스페이스 — XBRL 기반 구조화 데이터."""
+    def _report(self):
+        """[INTERNAL] EDGAR report 백엔드 — XBRL 기반. 사용자 API: c.show(...)."""
         if self._reportAccessor is None:
             from dartlab.providers.edgar._report_accessor import _ReportAccessor
 

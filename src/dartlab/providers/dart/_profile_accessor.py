@@ -176,8 +176,8 @@ class _ProfileAccessor:
                     frames.append(pl.DataFrame(rows))
 
         if self._company.report is not None:
-            for apiType in self._company.report.apiTypes:
-                df = self._company.report.extractAnnual(apiType)
+            for apiType in self._company._report.apiTypes:
+                df = self._company._report.extractAnnual(apiType)
                 if df is None or df.is_empty():
                     continue
                 rows = []
@@ -285,7 +285,7 @@ class _ProfileAccessor:
             return self._company._finance.SCE
         if topic in self._REPORT_AUTHORITATIVE_TOPICS and self._company.report is not None:
             if topic == "audit":
-                return self._company.report.audit
+                return self._company._report.audit
             return getattr(self._company.report, topic, None)
         sections = self.sections
         if sections is None:
@@ -362,7 +362,7 @@ class _ProfileAccessor:
 
         result = None
         try:
-            df = self._company.report.extractAnnual("stockTotal")
+            df = self._company._report.extractAnnual("stockTotal")
             if df is not None and len(df) > 0:
                 # se='보통주', 최신 날짜 기준 istc_totqy(유통중주식총수) 추출
                 common = df.filter(pl.col("se") == "보통주")

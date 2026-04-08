@@ -270,8 +270,8 @@ class TestCompany:
         assert c.report is not None
         assert c.index is not None
         assert isinstance(c.index, pl.DataFrame)
-        assert len(c.report.apiTypes) == 28
-        status = c.report.status()
+        assert len(c._report.apiTypes) == 28
+        status = c._report.status()
         assert isinstance(status, pl.DataFrame)
         assert set(["apiType", "label", "preferredQuarter", "isPivot", "available"]).issubset(status.columns)
         assert (
@@ -659,8 +659,8 @@ class TestCompany:
         from dartlab.providers.dart.report.types import ReportResult
 
         c = self.c
-        dividend = c.report.result("dividend")
-        treasury = c.report.result("treasuryStock")
+        dividend = c._report.result("dividend")
+        treasury = c._report.result("treasuryStock")
 
         assert dividend is not None
         assert hasattr(dividend, "df")
