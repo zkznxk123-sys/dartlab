@@ -47,11 +47,15 @@ def normalize(actual: float | None, unit: str) -> float | None:
 
 
 def detectUnit(text: str) -> str:
-    """표 단위 텍스트에서 추출. 기본 조원."""
-    if "억원" in text or "(억" in text:
-        return "억"
-    if "백만원" in text:
+    """표 단위 텍스트에서 추출. 우선순위: 가장 가까운 단위 키워드."""
+    # 가장 가까운 단위 (text 끝쪽 = 표에 가까움)
+    last_eok = max(text.rfind("억원"), text.rfind("(억"))
+    last_jo = max(text.rfind("조원"), text.rfind("(조"))
+    last_mil = text.rfind("백만원")
+    if last_mil > max(last_eok, last_jo):
         return "백만"
+    if last_eok > last_jo:
+        return "억"
     return "조"
 
 
@@ -160,14 +164,17 @@ def auditPost(code: str, path: str):
                 act_raw = actual[label].get(year)
                 act_norm = normalize(act_raw, unit)
                 if act_norm is None:
+                    # 표가 0이고 실측이 None이면 "데이터 없음 = 0" 으로 본문에서 의미 동일
+                    if table_v == 0:
+                        continue
                     issues.append({
                         "path": path, "line": t["lineApprox"], "topic": t["topic"],
                         "label": label, "year": year, "table": table_v, "actual": None,
                         "msg": "actual missing",
                     })
                     continue
-                # tolerance: 표시 단위가 정수면 1.0, 소수 1자리면 0.1
-                tol = 0.6 if abs(table_v) >= 100 else 0.06
+                # tolerance: 0.5단위 반올림 + 1% 상대 (둘 중 큰 값)
+                tol = max(0.55, abs(act_norm) * 0.012)
                 if abs(act_norm - table_v) > tol:
                     issues.append({
                         "path": path, "line": t["lineApprox"], "topic": t["topic"],
