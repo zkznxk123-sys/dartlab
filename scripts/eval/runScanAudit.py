@@ -5,6 +5,7 @@ Usage:
     uv run python -X utf8 scripts/runScanAudit.py all   # 모든 축 순차
     uv run python -X utf8 scripts/runScanAudit.py summary  # 저장된 결과 요약
 """
+
 from __future__ import annotations
 
 import gc
@@ -18,10 +19,22 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # 실행 가능 축 (target 불필요)
 AXES = [
-    "governance", "workforce", "capital", "debt",
-    "cashflow", "profitability", "growth", "quality",
-    "liquidity", "insider", "audit", "efficiency",
-    "dividendTrend", "valuation", "macroBeta", "screen",
+    "governance",
+    "workforce",
+    "capital",
+    "debt",
+    "cashflow",
+    "profitability",
+    "growth",
+    "quality",
+    "liquidity",
+    "insider",
+    "audit",
+    "efficiency",
+    "dividendTrend",
+    "valuation",
+    "macroBeta",
+    "screen",
 ]
 
 
@@ -29,13 +42,14 @@ def audit_one(axis: str) -> dict:
     """한 축 실행 → 통계 dict 반환."""
     import polars as pl
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"[AUDIT] {axis} 시작")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     t0 = time.time()
     try:
         import dartlab
+
         if axis == "screen":
             # screen은 target 없이 호출하면 프리셋 목록
             result = dartlab.scan("screen", "value")
@@ -85,13 +99,14 @@ def audit_one(axis: str) -> dict:
     # 등급/분류 컬럼 분포
     grade_dist = {}
     for col in columns:
-        if any(kw in col.lower() for kw in ["등급", "grade", "rank", "분류", "pattern", "패턴", "type", "class", "signal", "risk"]):
+        if any(
+            kw in col.lower()
+            for kw in ["등급", "grade", "rank", "분류", "pattern", "패턴", "type", "class", "signal", "risk"]
+        ):
             try:
                 vc = result[col].value_counts().sort("count", descending=True)
                 grade_dist[col] = {
-                    row[col]: int(row["count"])
-                    for row in vc.head(10).to_dicts()
-                    if row[col] is not None
+                    row[col]: int(row["count"]) for row in vc.head(10).to_dicts() if row[col] is not None
                 }
             except Exception:
                 pass
@@ -163,9 +178,9 @@ def print_summary(results: list[dict] | None = None):
             return
         results = json.loads(p.read_text(encoding="utf-8"))
 
-    print(f"\n{'='*80}")
+    print(f"\n{'=' * 80}")
     print(f"Scan Audit Summary — 2026-03-31")
-    print(f"{'='*80}")
+    print(f"{'=' * 80}")
     print(f"{'축':<16} {'상태':<8} {'종목수':>8} {'컬럼':>6} {'최악NaN컬럼':<20} {'NaN%':>6} {'시간':>6}")
     print("-" * 80)
     for r in results:

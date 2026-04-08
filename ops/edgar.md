@@ -86,11 +86,11 @@ DART report는 OpenDART API가 구조화 테이블을 직접 제공하지만, SE
 
 ```bash
 # 동기화 테스트
-bash scripts/test-lock.sh tests/ -k "test_edgar_has_all_dart_public_methods" -v
+bash scripts/dev/test-lock.sh tests/ -k "test_edgar_has_all_dart_public_methods" -v
 
 # Protocol 적합성 전체
-bash scripts/test-lock.sh tests/test_protocol.py -v
+bash scripts/dev/test-lock.sh tests/test_protocol.py -v
 
 # EDGAR 전용 테스트
-bash scripts/test-lock.sh tests/ -k "edgar" -v --tb=short
+bash scripts/dev/test-lock.sh tests/ -k "edgar" -v --tb=short
 ```

@@ -4,7 +4,7 @@
 실행은 하지 않으므로 데이터 없이도 CI에서 동작한다.
 
 사용법:
-    python scripts/validateNotebooks.py
+    python scripts/audit/validateNotebooks.py
 """
 
 import ast

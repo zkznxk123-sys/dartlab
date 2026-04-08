@@ -8,7 +8,7 @@
 - src/dartlab/guide/_generated.py — 런타임 capabilities 카탈로그
 
 실행:
-    uv run python scripts/generateSpec.py
+    uv run python scripts/build/generateSpec.py
 
 릴리즈 시 CI에서 자동 실행하여 수동 관리 포인트를 제거한다.
 """
@@ -1031,7 +1031,7 @@ def generateCapabilities() -> str:
     header = (
         "# dartlab Capabilities\n\n"
         f"> v{version} 기준 자동 생성. 직접 수정 금지.  \n"
-        "> `uv run python scripts/generateSpec.py`로 재생성.\n\n"
+        "> `uv run python scripts/build/generateSpec.py`로 재생성.\n\n"
     )
     parts = [
         header,
@@ -1149,7 +1149,9 @@ def generateLlmsTxt() -> str:
 
 def generateSkillRef() -> str:
     """Claude Code 스킬용 reference.md 생성."""
-    header = "# dartlab API Reference (Skills용)\n\n이 문서는 `scripts/generateSpec.py`에 의해 자동 생성됩니다.\n\n"
+    header = (
+        "# dartlab API Reference (Skills용)\n\n이 문서는 `scripts/build/generateSpec.py`에 의해 자동 생성됩니다.\n\n"
+    )
     parts = [
         header,
         _pythonApiSection(),
@@ -1284,7 +1286,7 @@ def _generateCatalog() -> str:
     return (
         '"""AI 시스템 프롬프트용 도구 카탈로그 (자동 생성).\n'
         "\n"
-        "이 파일은 scripts/generateSpec.py가 자동 생성합니다. 직접 수정 금지.\n"
+        "이 파일은 scripts/build/generateSpec.py가 자동 생성합니다. 직접 수정 금지.\n"
         "execute_code 도구 -- CAPABILITIES 기반 코드 생성 + 실행.\n"
         '"""\n'
         "\n"
@@ -1418,7 +1420,7 @@ def _generateCapabilitiesPy() -> str:
     return (
         '"""런타임 capabilities 카탈로그 (자동 생성).\n'
         "\n"
-        "이 파일은 scripts/generateSpec.py가 자동 생성합니다. 직접 수정 금지.\n"
+        "이 파일은 scripts/build/generateSpec.py가 자동 생성합니다. 직접 수정 금지.\n"
         '"""\n'
         "\n"
         f"CAPABILITIES: dict[str, dict] = {dictRepr}\n"
@@ -1556,7 +1558,7 @@ def generateApiReferenceMd() -> str:
         "",
         "# API Reference",
         "",
-        "> 이 문서는 `scripts/generateSpec.py`에 의해 자동 생성됩니다. 직접 수정 금지.",
+        "> 이 문서는 `scripts/build/generateSpec.py`에 의해 자동 생성됩니다. 직접 수정 금지.",
         "",
     ]
 

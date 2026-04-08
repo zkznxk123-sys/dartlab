@@ -11,6 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.4] - 2026-04-09
+
+### Fixed
+
+- IT/플랫폼 archetype 오분류 (NAVER currentRatio None) 수정 — `_detectArchetype()` IS/BS general signature 강화
+- accountMappings.json `core/data/` SSOT 이동 (L0 ← L1 정합)
+- `_KR_SUPPLEMENTS` 28건 → `core/data/labelSupplements.json` 분리
+- ratios DataFrame 라벨 5건 한국어 병기 (ROE/ROA/FCF/ROIC/Debt-EBITDA)
+- 메모리 한계 1500/1900MB 상향
+
+### Changed
+
+- `scripts/` 폴더 5 카테고리 체계화 — build / audit / eval / data / dev
+
 ## [0.9.3] - 2026-04-09
 
 ### Changed — Plan v10: 1.0.0 전 클린업 (BREAKING)

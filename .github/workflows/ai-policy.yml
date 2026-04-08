@@ -28,7 +28,7 @@ jobs:
           PR_HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
           if [ "$EVENT_NAME" = "pull_request" ]; then
-            python scripts/check_no_ai_markers.py --check-range "$PR_BASE" "$PR_HEAD"
+            python scripts/audit/check_no_ai_markers.py --check-range "$PR_BASE" "$PR_HEAD"
           else
-            python scripts/check_no_ai_markers.py --check-range "$PUSH_BEFORE" "$PUSH_HEAD"
+            python scripts/audit/check_no_ai_markers.py --check-range "$PUSH_BEFORE" "$PUSH_HEAD"
           fi

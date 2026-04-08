@@ -21,8 +21,8 @@ log = logging.getLogger(__name__)
 # ── 메모리 임계값 (MB) ──
 # Polars 네이티브 메모리 포함, 단일 프로세스 기준
 PRESSURE_WARNING_MB = 800.0  # 경고: 캐시 절반 축소
-PRESSURE_CRITICAL_MB = 1200.0  # 위험: 캐시 1/4 축소 + GC
-PRESSURE_FATAL_MB = 1600.0  # 치명: 캐시 전체 비우기 + GC
+PRESSURE_CRITICAL_MB = 1500.0  # 위험: 캐시 1/4 축소 + GC
+PRESSURE_FATAL_MB = 1900.0  # 치명: 캐시 전체 비우기 + GC
 
 
 def get_memory_mb() -> float:

@@ -196,7 +196,7 @@ c.analysis("financial", "수익성")["roicTree"]["history"][0]
 
 `landing/static/llms.txt`는 AI 크롤러용 사이트맵. 회사 종합편 같은 핵심 글의 요약·URL을 직접 노출하면 AI 답변에서 인용 빈도가 올라간다.
 
-현재 llms.txt는 자동 생성(`scripts/generateSpec.py`). 회사 종합편을 거기에 추가하는 건 별도 plan에서.
+현재 llms.txt는 자동 생성(`scripts/build/generateSpec.py`). 회사 종합편을 거기에 추가하는 건 별도 plan에서.
 
 ---
 

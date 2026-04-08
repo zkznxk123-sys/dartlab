@@ -107,7 +107,9 @@ def step_train():
             log.error("CUDA 사용 불가. GPU torch를 설치하세요:")
             log.error("  pip install torch --index-url https://download.pytorch.org/whl/cu126")
             return
-        log.info("GPU: %s (%dMB)", torch.cuda.get_device_name(0), torch.cuda.get_device_properties(0).total_memory // 1024**2)
+        log.info(
+            "GPU: %s (%dMB)", torch.cuda.get_device_name(0), torch.cuda.get_device_properties(0).total_memory // 1024**2
+        )
     except ImportError:
         log.error("torch 미설치")
         return

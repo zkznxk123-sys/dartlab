@@ -1,8 +1,8 @@
 """dartlab 전체 구조 맵 자동 생성.
 
 사용법:
-    python scripts/structureMap.py              # 콘솔 출력
-    python scripts/structureMap.py --save       # STRUCTURE_MAP.md 저장
+    python scripts/audit/structureMap.py              # 콘솔 출력
+    python scripts/audit/structureMap.py --save       # STRUCTURE_MAP.md 저장
 
 출력:
     1. 레이어별 모듈 트리 (파일 수, 함수/클래스 수)
@@ -278,7 +278,7 @@ def _buildReport(scan: dict, hotspots: list[dict], registryCount: int) -> str:
         if len(hotspots) > 20:
             lines.append(f"\n... 외 {len(hotspots) - 20}개")
 
-    lines.append("\n---\n*`python scripts/structureMap.py`로 자동 생성*\n")
+    lines.append("\n---\n*`python scripts/audit/structureMap.py`로 자동 생성*\n")
     return "\n".join(lines)
 
 

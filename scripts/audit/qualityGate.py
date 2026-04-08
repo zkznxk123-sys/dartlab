@@ -1,10 +1,10 @@
 """코드 품질 게이트 — radon 복잡도 + vulture 죽은 코드 자동 검사.
 
 사용법:
-    python scripts/qualityGate.py                    # 전체 검사
-    python scripts/qualityGate.py --changed-only     # git 변경 파일만 (pre-commit용)
-    python scripts/qualityGate.py --baseline-update  # 현재 수치를 baseline으로 저장
-    python scripts/qualityGate.py --record           # 히스토리에 현재 수치 기록
+    python scripts/audit/qualityGate.py                    # 전체 검사
+    python scripts/audit/qualityGate.py --changed-only     # git 변경 파일만 (pre-commit용)
+    python scripts/audit/qualityGate.py --baseline-update  # 현재 수치를 baseline으로 저장
+    python scripts/audit/qualityGate.py --record           # 히스토리에 현재 수치 기록
 
 규칙:
     1. 신규/변경 함수: 복잡도 D(25) 초과 금지

@@ -68,14 +68,14 @@ def analysis(axis: str, company: Company) -> dict:
 
 ```
 5 surface (Python API, CLI, Server, Data Modules, AI Tools)
-    ↓ scripts/generateSpec.py (코드에서 자동 수집)
+    ↓ scripts/build/generateSpec.py (코드에서 자동 수집)
     ├── CAPABILITIES.md                  (루트 총괄 스펙맵)
     ├── landing/static/llms.txt          (AI 크롤러용)
     └── .claude/skills/dartlab/reference.md (Claude Code 스킬)
 ```
 
-- **CAPABILITIES.md, llms.txt, reference.md는 직접 수정하지 않는다** → `scripts/generateSpec.py`로만 생성
-- 모듈 추가/변경 시: `uv run python scripts/generateSpec.py` 실행
+- **CAPABILITIES.md, llms.txt, reference.md는 직접 수정하지 않는다** → `scripts/build/generateSpec.py`로만 생성
+- 모듈 추가/변경 시: `uv run python scripts/build/generateSpec.py` 실행
 - 릴리즈 전 반드시 실행하여 문서-코드 동기화 확인
 - "없다/범위밖" 판단 전에 CAPABILITIES 먼저 확인한다
 - registry 소비처: Company property, Excel export, LLM tool, Server API, Skills, CAPABILITIES, llms.txt (7곳)

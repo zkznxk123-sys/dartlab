@@ -4,9 +4,9 @@
 이미 존재하는 fixture는 건너뛴다 (--force로 덮어쓰기).
 
 사용법:
-  uv run python -X utf8 scripts/generateFixtures.py
-  uv run python -X utf8 scripts/generateFixtures.py --force
-  uv run python -X utf8 scripts/generateFixtures.py --stocks 005930 005380
+  uv run python -X utf8 scripts/build/generateFixtures.py
+  uv run python -X utf8 scripts/build/generateFixtures.py --force
+  uv run python -X utf8 scripts/build/generateFixtures.py --stocks 005930 005380
 """
 
 import argparse

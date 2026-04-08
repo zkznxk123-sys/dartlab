@@ -197,4 +197,4 @@ src/dartlab/ai/selfai/
 | `src/dartlab/ai/runtime/core.py` | 통합 지점 (에러 피드백) |
 | `src/dartlab/ai/tools/coding.py` | sandbox (DartlabCodeExecutor) |
 | `data/dart/auditAi/` | audit 데이터 |
-| `scripts/auditAi.py` | 감사 실행기 |
+| `scripts/audit/auditAi.py` | 감사 실행기 |

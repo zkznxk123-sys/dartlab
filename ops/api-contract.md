@@ -264,7 +264,7 @@ CI sentinel `tests/test_imports.py` 가 강제.
 - DART 전용은 `tests/test_protocol.py::_DART_ONLY_EXEMPT` 에 **사유 주석과 함께** 등록
 - analysis 축, review 블록, CLI 명령 추가 시 EDGAR Company 에서도 실행하여 crash 없음 확인
 - 통화 분기는 `company.currency` 참조 (하드코딩 금지)
-- 동기화 검증: `bash scripts/test-lock.sh tests/ -k "test_edgar_has_all_dart_public_methods" -v`
+- 동기화 검증: `bash scripts/dev/test-lock.sh tests/ -k "test_edgar_has_all_dart_public_methods" -v`
 
 ---
 

@@ -40,8 +40,13 @@ def _collectFeatures(year: int) -> list[CompanyFeatures]:
 
     # scan ratio에서 핵심 비율 수집
     ratioNames = [
-        "per", "pbr", "operatingMargin", "debtRatio",
-        "revenueGrowth", "roe", "totalAssetTurnover",
+        "per",
+        "pbr",
+        "operatingMargin",
+        "debtRatio",
+        "revenueGrowth",
+        "roe",
+        "totalAssetTurnover",
     ]
 
     # 각 ratio를 DataFrame으로 로드
@@ -100,20 +105,22 @@ def _collectFeatures(year: int) -> list[CompanyFeatures]:
         # 간단히 PBR * 자본총계로 추정하거나, 0으로 대체
         lnMc = math.log(max(abs(pbr) * 1e9, 1))  # 대략적 추정
 
-        features.append(CompanyFeatures(
-            stockCode=code,
-            year=year,
-            sector=sectorData.get(code, ""),
-            revenueGrowth=revGrowth,
-            per=per,
-            pbr=pbr,
-            lnMarketCap=lnMc,
-            operatingMargin=opMargin or 0,
-            capexRatio=0,  # scan에서 직접 제공하지 않으면 0
-            debtRatio=debtRatio or 0,
-            foreignHoldingRatio=0,  # scan에서 직접 제공하지 않으면 0
-            revenueGrowthLag=0,  # 전년 데이터 없으면 0
-        ))
+        features.append(
+            CompanyFeatures(
+                stockCode=code,
+                year=year,
+                sector=sectorData.get(code, ""),
+                revenueGrowth=revGrowth,
+                per=per,
+                pbr=pbr,
+                lnMarketCap=lnMc,
+                operatingMargin=opMargin or 0,
+                capexRatio=0,  # scan에서 직접 제공하지 않으면 0
+                debtRatio=debtRatio or 0,
+                foreignHoldingRatio=0,  # scan에서 직접 제공하지 않으면 0
+                revenueGrowthLag=0,  # 전년 데이터 없으면 0
+            )
+        )
 
     return features
 

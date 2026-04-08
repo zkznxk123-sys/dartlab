@@ -12,9 +12,9 @@ DARTLAB_DATA_DIR 환경변수 또는 dartlab.dataDir로 변경 가능.
 - requires_samsung, requires_finance 등: 개별 데이터 의존성 (로컬에 없으면 skip)
 
 테스트 실행 가이드 (반드시 test-lock.sh 경유):
-  bash scripts/test-lock.sh tests/ -m "unit" -v --tb=short             # 1단계: unit (안전, 빠름)
-  bash scripts/test-lock.sh tests/ -m "integration" -v --tb=short      # 2단계: integration (Company 로딩)
-  bash scripts/test-lock.sh tests/ -m "heavy" -v --tb=short            # 3단계: heavy (단독)
+  bash scripts/dev/test-lock.sh tests/ -m "unit" -v --tb=short             # 1단계: unit (안전, 빠름)
+  bash scripts/dev/test-lock.sh tests/ -m "integration" -v --tb=short      # 2단계: integration (Company 로딩)
+  bash scripts/dev/test-lock.sh tests/ -m "heavy" -v --tb=short            # 3단계: heavy (단독)
   ⚠ pytest tests/ -v 전체 한번에 돌리면 메모리 크래시 위험
   ⚠ Polars 네이티브 Rust 메모리는 gc.collect()로 회수 불가 — fixture 해제가 유일한 방법
 
@@ -43,7 +43,7 @@ def pytest_configure(config):
         warnings.warn(
             "⚠ test-lock.sh 없이 pytest 직접 실행 — "
             "다른 세션과 동시 실행 시 OOM 위험.\n"
-            "  권장: bash scripts/test-lock.sh tests/ -m unit -v",
+            "  권장: bash scripts/dev/test-lock.sh tests/ -m unit -v",
             stacklevel=1,
         )
 

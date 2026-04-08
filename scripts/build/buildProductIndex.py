@@ -4,7 +4,7 @@
 exogenousAxes.py가 kindList 대신 이걸 참조하면 더 정확한 제품 매핑.
 
 Usage:
-    uv run python scripts/buildProductIndex.py
+    uv run python scripts/build/buildProductIndex.py
 """
 
 from __future__ import annotations
@@ -41,10 +41,7 @@ def main():
 
     # &cr; 등 치환
     latest = latest.with_columns(
-        pl.col("product")
-        .str.replace_all("&cr;", " ")
-        .str.replace_all(r"\s+", " ")
-        .str.strip_chars()
+        pl.col("product").str.replace_all("&cr;", " ").str.replace_all(r"\s+", " ").str.strip_chars()
     )
 
     latest.write_parquet(outputPath)

@@ -6,6 +6,7 @@ Piotroski F-Score, Altman Z-Score, DuPont 분해, Composite Quality를
 Usage:
     uv run python -X utf8 scripts/scanCrossInsights.py
 """
+
 from __future__ import annotations
 
 import gc
@@ -44,9 +45,18 @@ def _loadAxis(axisName: str) -> pl.DataFrame:
 def _mergeAll() -> pl.DataFrame:
     """12개 축을 순차 left join으로 병합."""
     axes = [
-        "profitability", "quality", "cashflow", "debt",
-        "liquidity", "efficiency", "growth", "valuation",
-        "governance", "insider", "dividendTrend", "capital",
+        "profitability",
+        "quality",
+        "cashflow",
+        "debt",
+        "liquidity",
+        "efficiency",
+        "growth",
+        "valuation",
+        "governance",
+        "insider",
+        "dividendTrend",
+        "capital",
         "audit",
     ]
     merged = None
@@ -65,12 +75,33 @@ def _mergeAll() -> pl.DataFrame:
 
 
 _GRADE_SCORES: dict[str, int] = {
-    "우수": 2, "양호": 1, "보통": 0, "저수익": -1, "적자": -2,
-    "A": 2, "B": 1, "C": 0, "D": -1, "E": -2,
-    "안전": 2, "관찰": 0, "주의": -1, "고위험": -2,
-    "고성장": 2, "성장": 1, "정체": 0, "역성장": -1, "급감": -2,
-    "저평가": 2, "적정": 1, "고평가": -1, "과열": -2, "해당없음": 0,
-    "비효율": -2, "무배당": -1, "위험": -2,
+    "우수": 2,
+    "양호": 1,
+    "보통": 0,
+    "저수익": -1,
+    "적자": -2,
+    "A": 2,
+    "B": 1,
+    "C": 0,
+    "D": -1,
+    "E": -2,
+    "안전": 2,
+    "관찰": 0,
+    "주의": -1,
+    "고위험": -2,
+    "고성장": 2,
+    "성장": 1,
+    "정체": 0,
+    "역성장": -1,
+    "급감": -2,
+    "저평가": 2,
+    "적정": 1,
+    "고평가": -1,
+    "과열": -2,
+    "해당없음": 0,
+    "비효율": -2,
+    "무배당": -1,
+    "위험": -2,
 }
 
 
@@ -84,6 +115,7 @@ def _gradeToScore(col: str) -> pl.Expr:
 
 def _addPiotroskiFScore(m: pl.DataFrame) -> pl.DataFrame:
     """Piotroski F-Score (0~9) proxy 계산."""
+
     def _safe(col: str) -> pl.Expr:
         return pl.col(col) if col in m.columns else pl.lit(None)
 
@@ -99,9 +131,12 @@ def _addPiotroskiFScore(m: pl.DataFrame) -> pl.DataFrame:
 
     return m.with_columns(
         (f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9).alias("fScore"),
-        pl.when(f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 >= 7).then(pl.lit("Strong"))
-        .when(f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 >= 4).then(pl.lit("Neutral"))
-        .otherwise(pl.lit("Weak")).alias("fZone"),
+        pl.when(f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 >= 7)
+        .then(pl.lit("Strong"))
+        .when(f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 >= 4)
+        .then(pl.lit("Neutral"))
+        .otherwise(pl.lit("Weak"))
+        .alias("fZone"),
     )
 
 
@@ -109,9 +144,15 @@ def _addAltmanZScore(m: pl.DataFrame) -> pl.DataFrame:
     """Altman Z-Score 계산 (proxy). 필수 컬럼 없으면 null."""
     has_all = all(
         c in m.columns
-        for c in ["liquidity_currentAssets", "liquidity_currentLiabilities",
-                   "quality_totalAssets", "profitability_roa",
-                   "valuation_marketCap", "debt_총부채", "efficiency_assetTurnover"]
+        for c in [
+            "liquidity_currentAssets",
+            "liquidity_currentLiabilities",
+            "quality_totalAssets",
+            "profitability_roa",
+            "valuation_marketCap",
+            "debt_총부채",
+            "efficiency_assetTurnover",
+        ]
     )
     if not has_all:
         return m.with_columns(pl.lit(None).cast(pl.Float64).alias("zScore"), pl.lit(None).cast(pl.Utf8).alias("zZone"))
@@ -122,22 +163,22 @@ def _addAltmanZScore(m: pl.DataFrame) -> pl.DataFrame:
     x4 = pl.col("valuation_marketCap") / pl.col("debt_총부채")
     x5 = pl.col("efficiency_assetTurnover")
 
-    z = (1.2 * x1 + 1.4 * x2 + 3.3 * x3 + 0.6 * x4 + x5)
+    z = 1.2 * x1 + 1.4 * x2 + 3.3 * x3 + 0.6 * x4 + x5
 
     return m.with_columns(
         z.alias("zScore"),
-        pl.when(z > 2.99).then(pl.lit("Safe"))
-        .when(z > 1.81).then(pl.lit("Grey"))
-        .otherwise(pl.lit("Distress")).alias("zZone"),
+        pl.when(z > 2.99)
+        .then(pl.lit("Safe"))
+        .when(z > 1.81)
+        .then(pl.lit("Grey"))
+        .otherwise(pl.lit("Distress"))
+        .alias("zZone"),
     )
 
 
 def _addDuPont(m: pl.DataFrame) -> pl.DataFrame:
     """DuPont 3-factor 분해."""
-    has_all = all(
-        c in m.columns
-        for c in ["profitability_netMargin", "efficiency_assetTurnover", "debt_부채비율"]
-    )
+    has_all = all(c in m.columns for c in ["profitability_netMargin", "efficiency_assetTurnover", "debt_부채비율"])
     if not has_all:
         return m.with_columns(
             pl.lit(None).cast(pl.Float64).alias("dupont_margin"),
@@ -148,7 +189,7 @@ def _addDuPont(m: pl.DataFrame) -> pl.DataFrame:
 
     margin = pl.col("profitability_netMargin").abs() / 100
     turnover = pl.col("efficiency_assetTurnover")
-    leverage = (1 + pl.col("debt_부채비율") / 100)
+    leverage = 1 + pl.col("debt_부채비율") / 100
 
     total = margin + turnover + leverage
     m_pct = margin / total * 100
@@ -156,9 +197,12 @@ def _addDuPont(m: pl.DataFrame) -> pl.DataFrame:
     l_pct = leverage / total * 100
 
     driver = (
-        pl.when(l_pct > 50).then(pl.lit("레버리지형"))
-        .when(m_pct > 40).then(pl.lit("마진형"))
-        .when(t_pct > 40).then(pl.lit("회전형"))
+        pl.when(l_pct > 50)
+        .then(pl.lit("레버리지형"))
+        .when(m_pct > 40)
+        .then(pl.lit("마진형"))
+        .when(t_pct > 40)
+        .then(pl.lit("회전형"))
         .otherwise(pl.lit("균형형"))
     )
 
@@ -182,10 +226,10 @@ def _addCompositeQuality(m: pl.DataFrame) -> pl.DataFrame:
         return m.with_columns(pl.lit(None).cast(pl.Int8).alias("qualityScore"))
 
     m = m.with_columns(score_cols)
-    qs_names = [f"_qs_{a}" for a in ["profitability", "quality", "growth", "debt", "efficiency"] if f"_qs_{a}" in m.columns]
-    m = m.with_columns(
-        pl.sum_horizontal(*[pl.col(c) for c in qs_names]).alias("qualityScore")
-    ).drop(qs_names)
+    qs_names = [
+        f"_qs_{a}" for a in ["profitability", "quality", "growth", "debt", "efficiency"] if f"_qs_{a}" in m.columns
+    ]
+    m = m.with_columns(pl.sum_horizontal(*[pl.col(c) for c in qs_names]).alias("qualityScore")).drop(qs_names)
     return m
 
 
@@ -204,84 +248,92 @@ def _extractInsights(m: pl.DataFrame) -> dict:
     # ── 기존 8개 (버그 수정) ──
 
     # 1. 허상이익
-    _count("허상이익(수익양호+질위험)",
-           pl.col("profitability_grade").is_in(["양호", "우수"])
-           & pl.col("quality_grade").is_in(["주의", "위험"]))
+    _count(
+        "허상이익(수익양호+질위험)",
+        pl.col("profitability_grade").is_in(["양호", "우수"]) & pl.col("quality_grade").is_in(["주의", "위험"]),
+    )
 
     # 2. 적자but현금유입
-    _count("적자but현금유입(턴어라운드후보)",
-           (pl.col("profitability_grade") == "적자")
-           & pl.col("quality_grade").is_in(["양호", "우수"]))
+    _count(
+        "적자but현금유입(턴어라운드후보)",
+        (pl.col("profitability_grade") == "적자") & pl.col("quality_grade").is_in(["양호", "우수"]),
+    )
 
     # 3. 레버리지성장 — growth_grade 사용 (기존 pattern 버그 수정)
-    _count("레버리지성장(고성장+부채고위험)",
-           (pl.col("growth_grade") == "고성장")
-           & (pl.col("debt_grade") == "고위험"))
+    _count("레버리지성장(고성장+부채고위험)", (pl.col("growth_grade") == "고성장") & (pl.col("debt_grade") == "고위험"))
 
     # 4. 건전성장
-    _count("건전성장(성장+부채안전)",
-           pl.col("growth_grade").is_in(["고성장", "성장"])
-           & (pl.col("debt_grade") == "안전"))
+    _count(
+        "건전성장(성장+부채안전)", pl.col("growth_grade").is_in(["고성장", "성장"]) & (pl.col("debt_grade") == "안전")
+    )
 
     # 5. 가치주
-    _count("가치주(저평가+수익양호)",
-           (pl.col("valuation_grade") == "저평가")
-           & pl.col("profitability_grade").is_in(["양호", "우수"]))
+    _count(
+        "가치주(저평가+수익양호)",
+        (pl.col("valuation_grade") == "저평가") & pl.col("profitability_grade").is_in(["양호", "우수"]),
+    )
 
     # 6. 거품
-    _count("거품(고평가+적자)",
-           pl.col("valuation_grade").is_in(["고평가", "과열"])
-           & (pl.col("profitability_grade") == "적자"))
+    _count(
+        "거품(고평가+적자)",
+        pl.col("valuation_grade").is_in(["고평가", "과열"]) & (pl.col("profitability_grade") == "적자"),
+    )
 
     # 7. 배당지속가능성
     if "dividendTrend_pattern" in m.columns and "cashflow_pattern" in m.columns:
-        _count("배당연속증가+현금건전",
-               (pl.col("dividendTrend_pattern") == "연속증가")
-               & pl.col("cashflow_pattern").is_in(["현금축적형", "성장투자형"]))
-        _count("배당연속증가but현금위기",
-               (pl.col("dividendTrend_pattern") == "연속증가")
-               & pl.col("cashflow_pattern").is_in(["현금위기형", "외부의존형"]))
+        _count(
+            "배당연속증가+현금건전",
+            (pl.col("dividendTrend_pattern") == "연속증가")
+            & pl.col("cashflow_pattern").is_in(["현금축적형", "성장투자형"]),
+        )
+        _count(
+            "배당연속증가but현금위기",
+            (pl.col("dividendTrend_pattern") == "연속증가")
+            & pl.col("cashflow_pattern").is_in(["현금위기형", "외부의존형"]),
+        )
 
     # 8. 효율적but유동성위험
-    _count("효율적but유동성위험",
-           pl.col("efficiency_grade").is_in(["우수", "양호"])
-           & pl.col("liquidity_grade").is_in(["위험", "주의"]))
+    _count(
+        "효율적but유동성위험",
+        pl.col("efficiency_grade").is_in(["우수", "양호"]) & pl.col("liquidity_grade").is_in(["위험", "주의"]),
+    )
 
     # ── 신규 6개 (학술 프레임워크) ──
 
     # 9. F-Score 가치주
     if "fScore" in m.columns:
-        _count("F-Score가치주(F>=8+저평가)",
-               (pl.col("fScore") >= 8) & (pl.col("valuation_grade") == "저평가"))
+        _count("F-Score가치주(F>=8+저평가)", (pl.col("fScore") >= 8) & (pl.col("valuation_grade") == "저평가"))
 
     # 10. F-Score 위험 거품
     if "fScore" in m.columns:
-        _count("F-Score위험거품(F<=2+고평가)",
-               (pl.col("fScore") <= 2)
-               & pl.col("valuation_grade").is_in(["고평가", "과열"]))
+        _count(
+            "F-Score위험거품(F<=2+고평가)",
+            (pl.col("fScore") <= 2) & pl.col("valuation_grade").is_in(["고평가", "과열"]),
+        )
 
     # 11. Z-Score 잠재위험
     if "zZone" in m.columns and "audit_opinion" in m.columns:
-        _count("Z-Score잠재위험(Distress+감사적정)",
-               (pl.col("zZone") == "Distress")
-               & (pl.col("audit_opinion") == "적정의견"))
+        _count(
+            "Z-Score잠재위험(Distress+감사적정)",
+            (pl.col("zZone") == "Distress") & (pl.col("audit_opinion") == "적정의견"),
+        )
 
     # 12. Z-Score 안전 저평가
     if "zZone" in m.columns:
-        _count("Z-Score안전저평가(Safe+저평가)",
-               (pl.col("zZone") == "Safe") & (pl.col("valuation_grade") == "저평가"))
+        _count("Z-Score안전저평가(Safe+저평가)", (pl.col("zZone") == "Safe") & (pl.col("valuation_grade") == "저평가"))
 
     # 13. DuPont 레버리지 의존
     if "dupont_driver" in m.columns:
-        _count("DuPont레버리지의존",
-               (pl.col("dupont_driver") == "레버리지형")
-               & (pl.col("profitability_roe").is_not_null())
-               & (pl.col("profitability_roe") > 5))
+        _count(
+            "DuPont레버리지의존",
+            (pl.col("dupont_driver") == "레버리지형")
+            & (pl.col("profitability_roe").is_not_null())
+            & (pl.col("profitability_roe") > 5),
+        )
 
     # 14. Quality 올스타
     if "qualityScore" in m.columns:
-        _count("Quality올스타(QS>=7+저평가)",
-               (pl.col("qualityScore") >= 7) & (pl.col("valuation_grade") == "저평가"))
+        _count("Quality올스타(QS>=7+저평가)", (pl.col("qualityScore") >= 7) & (pl.col("valuation_grade") == "저평가"))
 
     return R
 
@@ -295,9 +347,18 @@ def _extractSamples(m: pl.DataFrame) -> dict:
         fv = m.filter((pl.col("fScore") >= 8) & (pl.col("valuation_grade") == "저평가"))
         if fv.height > 0:
             samples["F-Score가치주_top10"] = [
-                {k: r.get(k) for k in
-                 ["stockCode", "fScore", "valuation_per", "valuation_pbr",
-                  "profitability_opMargin", "quality_accrualRatio", "debt_grade"]}
+                {
+                    k: r.get(k)
+                    for k in [
+                        "stockCode",
+                        "fScore",
+                        "valuation_per",
+                        "valuation_pbr",
+                        "profitability_opMargin",
+                        "quality_accrualRatio",
+                        "debt_grade",
+                    ]
+                }
                 for r in fv.sort("fScore", descending=True).head(10).to_dicts()
             ]
 
@@ -306,9 +367,17 @@ def _extractSamples(m: pl.DataFrame) -> dict:
         distress = m.filter(pl.col("zZone") == "Distress").filter(pl.col("zScore").is_not_null())
         if distress.height > 0:
             samples["Z-Score_Distress_top10"] = [
-                {k: r.get(k) for k in
-                 ["stockCode", "zScore", "valuation_grade", "profitability_grade",
-                  "debt_grade", "liquidity_grade"]}
+                {
+                    k: r.get(k)
+                    for k in [
+                        "stockCode",
+                        "zScore",
+                        "valuation_grade",
+                        "profitability_grade",
+                        "debt_grade",
+                        "liquidity_grade",
+                    ]
+                }
                 for r in distress.sort("zScore").head(10).to_dicts()
             ]
 
@@ -317,9 +386,18 @@ def _extractSamples(m: pl.DataFrame) -> dict:
         qs = m.filter((pl.col("qualityScore") >= 7) & (pl.col("valuation_grade") == "저평가"))
         if qs.height > 0:
             samples["Quality올스타_top10"] = [
-                {k: r.get(k) for k in
-                 ["stockCode", "qualityScore", "fScore", "valuation_per", "valuation_pbr",
-                  "profitability_opMargin", "quality_accrualRatio"]}
+                {
+                    k: r.get(k)
+                    for k in [
+                        "stockCode",
+                        "qualityScore",
+                        "fScore",
+                        "valuation_per",
+                        "valuation_pbr",
+                        "profitability_opMargin",
+                        "quality_accrualRatio",
+                    ]
+                }
                 for r in qs.sort("qualityScore", descending=True).head(10).to_dicts()
             ]
 
@@ -332,9 +410,17 @@ def _extractSamples(m: pl.DataFrame) -> dict:
         )
         if lev.height > 0:
             samples["DuPont레버리지형_top10"] = [
-                {k: r.get(k) for k in
-                 ["stockCode", "profitability_roe", "dupont_margin",
-                  "dupont_turnover", "dupont_leverage", "debt_부채비율"]}
+                {
+                    k: r.get(k)
+                    for k in [
+                        "stockCode",
+                        "profitability_roe",
+                        "dupont_margin",
+                        "dupont_turnover",
+                        "dupont_leverage",
+                        "debt_부채비율",
+                    ]
+                }
                 for r in lev.sort("dupont_leverage", descending=True).head(10).to_dicts()
             ]
 

@@ -101,7 +101,7 @@ def main():
     # 공통 종목
     commonCodes = sorted(set(oiSeries.keys()) & set(revSeries.keys()))
     if args.pilot > 0:
-        commonCodes = commonCodes[:args.pilot]
+        commonCodes = commonCodes[: args.pilot]
     print(f"[3/4] {len(commonCodes)}개 종목 백테스트 시작...")
 
     # 백테스트: 각 종목에서 t-1 기준 예측 → t 실제와 비교
@@ -122,22 +122,26 @@ def main():
         revActualDir = _actualDirection(revVals)
 
         if oiPredDir and oiActualDir:
-            results.append({
-                "stockCode": code,
-                "metric": "operatingIncome",
-                "predicted": oiPredDir,
-                "actual": oiActualDir,
-                "correct": oiPredDir == oiActualDir,
-            })
+            results.append(
+                {
+                    "stockCode": code,
+                    "metric": "operatingIncome",
+                    "predicted": oiPredDir,
+                    "actual": oiActualDir,
+                    "correct": oiPredDir == oiActualDir,
+                }
+            )
 
         if revPredDir and revActualDir:
-            results.append({
-                "stockCode": code,
-                "metric": "revenue",
-                "predicted": revPredDir,
-                "actual": revActualDir,
-                "correct": revPredDir == revActualDir,
-            })
+            results.append(
+                {
+                    "stockCode": code,
+                    "metric": "revenue",
+                    "predicted": revPredDir,
+                    "actual": revActualDir,
+                    "correct": revPredDir == revActualDir,
+                }
+            )
 
     # 정확도 계산
     if not results:

@@ -549,18 +549,29 @@ def _detectArchetype(series: dict[str, dict[str, list[float | None]]]) -> str:
     }
     scores["securities"] = len(_SEC_IS.intersection(isKeys)) + len(_SEC_BS.intersection(bsKeys))
 
-    # 일반 기업 시그니처 -- 매출/매출원가가 있으면 general 우세
-    _GENERAL_IS = {"sales", "revenue", "cost_of_sales", "selling_and_administrative_expenses"}
+    # 일반 기업 시그니처 -- 매출/매출원가/판관비/영업비용이 있으면 general 우세
+    # NAVER 같은 IT/플랫폼은 매출원가 없이 operating_expenses 단일 사용
+    _GENERAL_IS = {
+        "sales",
+        "revenue",
+        "cost_of_sales",
+        "selling_and_administrative_expenses",
+        "operating_expenses",
+    }
     generalSignals = len(_GENERAL_IS.intersection(isKeys))
+
+    # 일반 기업 BS 시그니처 (재고/매출채권/유형자산) -- IT/플랫폼은 재고 없을 수 있어 1개로 충분
+    _GENERAL_BS = {"inventories", "trade_and_other_receivables", "tangible_assets", "intangible_assets"}
+    generalSignalsBs = len(_GENERAL_BS.intersection(bsKeys))
 
     # 최고 점수 archetype 선택
     max_score = max(scores.values())
     if max_score == 0:
         return "general"
 
-    # 일반 기업 시그니처가 충분하면 (매출+매출원가 등 2개 이상) 금융업 오분류 방지
-    # 최소 3점 이상이어야 금융업 확정. 단, 일반 시그니처가 1개뿐이면 금융업 허용.
-    if max_score < 3 and generalSignals >= 2:
+    # 일반 기업 시그니처가 충분하면 (IS 2+ 또는 IS 1 + BS 2+) 금융업 오분류 방지.
+    # securities 처럼 financial_assets_* 만 점수에 잡히는 hybrid 도 제외.
+    if max_score < 4 and (generalSignals >= 2 or (generalSignals >= 1 and generalSignalsBs >= 2)):
         return "general"
 
     top = [k for k, v in scores.items() if v == max_score]

@@ -4,8 +4,9 @@
 실측값과 1:1 비교한다. 코드/표/실측 3자 정합 확인.
 
 실행:
-    uv run python -X utf8 scripts/auditBlogFinance.py
+    uv run python -X utf8 scripts/audit/auditBlogFinance.py
 """
+
 from __future__ import annotations
 import re
 from pathlib import Path
@@ -19,6 +20,7 @@ POSTS = [
     ("011200", "blog/05-company-reports/05-011200-hmm/index.md"),
     ("068270", "blog/05-company-reports/06-068270-celltrion/index.md"),
 ]
+
 
 # (raw markdown text → numeric value in 원). value can be None on parse fail.
 def parseCell(raw: str) -> float | None:
@@ -110,14 +112,16 @@ def findFinanceTables(text: str):
             if cells:
                 first_col_header = cells[0]
         before_ctx = text[max(0, m.start() - 400) : m.start()]
-        out.append({
-            "code": code.strip(),
-            "topic": topic,
-            "keys": keys,
-            "table": table,
-            "unitHint": first_col_header + " " + before_ctx,
-            "lineApprox": text[: m.start()].count("\n") + 1,
-        })
+        out.append(
+            {
+                "code": code.strip(),
+                "topic": topic,
+                "keys": keys,
+                "table": table,
+                "unitHint": first_col_header + " " + before_ctx,
+                "lineApprox": text[: m.start()].count("\n") + 1,
+            }
+        )
     return out
 
 
@@ -133,13 +137,15 @@ def auditPost(code: str, path: str):
         try:
             df = c.select(t["topic"], t["keys"], freq="Y")
         except Exception as e:
-            issues.append({
-                "path": path,
-                "line": t["lineApprox"],
-                "topic": t["topic"],
-                "keys": t["keys"],
-                "error": f"select failed: {e}",
-            })
+            issues.append(
+                {
+                    "path": path,
+                    "line": t["lineApprox"],
+                    "topic": t["topic"],
+                    "keys": t["keys"],
+                    "error": f"select failed: {e}",
+                }
+            )
             continue
 
         rows, year_cols = parseTable(t["table"])
@@ -167,22 +173,35 @@ def auditPost(code: str, path: str):
                     # 표가 0이고 실측이 None이면 "데이터 없음 = 0" 으로 본문에서 의미 동일
                     if table_v == 0:
                         continue
-                    issues.append({
-                        "path": path, "line": t["lineApprox"], "topic": t["topic"],
-                        "label": label, "year": year, "table": table_v, "actual": None,
-                        "msg": "actual missing",
-                    })
+                    issues.append(
+                        {
+                            "path": path,
+                            "line": t["lineApprox"],
+                            "topic": t["topic"],
+                            "label": label,
+                            "year": year,
+                            "table": table_v,
+                            "actual": None,
+                            "msg": "actual missing",
+                        }
+                    )
                     continue
                 # tolerance: 0.5단위 반올림 + 1% 상대 (둘 중 큰 값)
                 tol = max(0.55, abs(act_norm) * 0.012)
                 if abs(act_norm - table_v) > tol:
-                    issues.append({
-                        "path": path, "line": t["lineApprox"], "topic": t["topic"],
-                        "label": label, "year": year,
-                        "table": table_v, "actual": round(act_norm, 3),
-                        "diff": round(act_norm - table_v, 3),
-                        "unit": unit,
-                    })
+                    issues.append(
+                        {
+                            "path": path,
+                            "line": t["lineApprox"],
+                            "topic": t["topic"],
+                            "label": label,
+                            "year": year,
+                            "table": table_v,
+                            "actual": round(act_norm, 3),
+                            "diff": round(act_norm - table_v, 3),
+                            "unit": unit,
+                        }
+                    )
     return issues
 
 
@@ -200,9 +219,7 @@ def main():
 
     print(f"\n=== TOTAL: {len(all_issues)} issues ===")
     Path("scripts/_audit_blog_finance_report.md").write_text(
-        "# Blog Finance Audit\n\n"
-        + f"{len(all_issues)} mismatches\n\n"
-        + "\n".join(f"- {it}" for it in all_issues),
+        "# Blog Finance Audit\n\n" + f"{len(all_issues)} mismatches\n\n" + "\n".join(f"- {it}" for it in all_issues),
         encoding="utf-8",
     )
 

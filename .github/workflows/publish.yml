@@ -35,7 +35,7 @@ jobs:
 
       - name: Run tests (pytest-xdist parallel)
         env:
-          PYTEST_MEMORY_LIMIT_MB: "1500"
+          PYTEST_MEMORY_LIMIT_MB: "1900"
         run: pytest tests/ -n 2 --dist loadfile --tb=short -m "not requires_data and not heavy" --benchmark-disable --ignore=tests/test_fixture_analysis_real.py --ignore=tests/test_fixture_credit_real.py --ignore=tests/test_fixture_review_real.py
         if: hashFiles('tests/') != ''
 

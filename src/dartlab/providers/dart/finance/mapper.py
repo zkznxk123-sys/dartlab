@@ -228,10 +228,10 @@ class AccountMapper:
 
     def __init__(self):
         if AccountMapper._mappings is None:
-            path = _DATA_DIR / "accountMappings.json"
-            with open(path, encoding="utf-8") as f:
-                data = json.load(f)
-            AccountMapper._mappings = data["mappings"]
+            from dartlab.core.finance.labels import _load_account_mappings
+
+            data = _load_account_mappings()
+            AccountMapper._mappings = data.get("mappings", {})
             AccountMapper._stdAccountsRaw = data.get("standardAccounts", {})
 
     @property

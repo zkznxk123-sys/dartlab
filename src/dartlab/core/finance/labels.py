@@ -13,10 +13,8 @@ from pathlib import Path
 
 @lru_cache(maxsize=1)
 def _load_account_mappings() -> dict:
-    """DART mapperData/accountMappings.json 전체 로드."""
-    mapper_path = (
-        Path(__file__).resolve().parents[2] / "providers" / "dart" / "finance" / "mapperData" / "accountMappings.json"
-    )
+    """K-IFRS account mappings — core SSOT (`core/data/accountMappings.json`)."""
+    mapper_path = Path(__file__).resolve().parents[1] / "data" / "accountMappings.json"
     if not mapper_path.exists():
         return {}
     return json.loads(mapper_path.read_text(encoding="utf-8"))
@@ -27,35 +25,13 @@ def _load_standard_accounts() -> dict[str, dict]:
     return _load_account_mappings().get("standardAccounts", {})
 
 
-# standardAccounts에 없지만 AI 컨텍스트에서 자주 쓰는 snakeId 보충 매핑
-_KR_SUPPLEMENTS: dict[str, str] = {
-    "pretax_income": "법인세비용차감전순이익",
-    "profit_before_tax": "법인세비용차감전순이익",
-    "income_before_income_taxes_expenses": "법인세비용차감전순이익",
-    "income_tax_expense": "법인세비용",
-    "net_income": "당기순이익",
-    "net_income_controlling": "지배기업귀속순이익",
-    "net_income_cf": "당기순이익",
-    "operating_cash_flow": "영업활동현금흐름",
-    "investing_cash_flow": "투자활동현금흐름",
-    "financing_cash_flow": "재무활동현금흐름",
-    "basic_eps": "기본주당이익",
-    "diluted_eps": "희석주당이익",
-    "dividends_per_share": "주당배당금",
-    "interest_expense": "이자비용",
-    "free_cash_flow": "잉여현금흐름",
-    "short_term_borrowings": "단기차입금",
-    "debentures": "사채",
-    "net_debt": "순차입금",
-    "ebitda": "EBITDA",
-    "total_equity": "자본총계",
-    "owners_of_parent_equity": "지배기업소유주지분",
-    "noncontrolling_interests_equity": "비지배지분",
-    "common_stock": "보통주자본금",
-    "additional_paid_in_capital": "주식발행초과금",
-    "accumulated_other_comprehensive_income": "기타포괄손익누계액",
-    "treasury_stock": "자기주식",
-}
+@lru_cache(maxsize=1)
+def _load_label_supplements() -> dict[str, str]:
+    """labelSupplements.json — standardAccounts 외 보충 라벨 SSOT."""
+    p = Path(__file__).resolve().parents[1] / "data" / "labelSupplements.json"
+    if not p.exists():
+        return {}
+    return json.loads(p.read_text(encoding="utf-8")).get("supplements", {})
 
 
 @lru_cache(maxsize=1)
@@ -100,8 +76,8 @@ def get_korean_labels() -> dict[str, str]:
                 result[snakeId] = candidate
             used.add(result[snakeId])
 
-    # 3. 보충
-    for sid, name in _KR_SUPPLEMENTS.items():
+    # 3. 보충 (labelSupplements.json SSOT)
+    for sid, name in _load_label_supplements().items():
         if sid not in result:
             result[sid] = name
 

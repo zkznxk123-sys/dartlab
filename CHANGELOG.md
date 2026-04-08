@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.4] - 2026-04-09
+
+### Fixed — Plan v10 후속 audit fix
+
+- **NAVER 등 IT/플랫폼 archetype 오분류 수정**: `_detectArchetype()` 가
+  `operating_expenses` 단일 사용 + `financial_assets_*` 보유 IT 기업을 `securities`
+  로 잘못 분류 → 유동비율/이자보상배율 등 모두 None 처리되던 버그.
+  - `_GENERAL_IS` 에 `operating_expenses` 추가
+  - BS general signature (재고/매출채권/유형/무형) 추가
+  - max_score 임계값 3 → 4 (금융업 확정 더 보수적)
+  - 결과: NAVER `currentRatio` None → 136.28, `cashRatio` None → 74.62
+
+- **`accountMappings.json` core SSOT 이동**: `providers/dart/finance/mapperData/`
+  → `core/data/`. L0 ← L1 import 방향 정합. `AccountMapper` 가 core 의
+  `_load_account_mappings()` 위임. test_mapping_integrity 경로 갱신.
+
+- **`_KR_SUPPLEMENTS` 데이터 파일 SSOT**: 28건 하드코딩 → `core/data/labelSupplements.json`
+  로 분리. `get_korean_labels()` 가 `_load_label_supplements()` 위임.
+
+- **ratios DataFrame 라벨 5건 보충**: ROE/ROA/FCF/ROIC/Debt/EBITDA 한국어 병기
+  ("자기자본이익률 (ROE %)" 등). 잔존 3건 (ROCE/Piotroski F-Score/Altman Z-Score)
+  은 학술 영문명.
+
+- **메모리 한계 1500/1900MB**: PRESSURE_CRITICAL 1200 → 1500, PRESSURE_FATAL 1600
+  → 1900. CI PYTEST_MEMORY_LIMIT_MB 1500 → 1900.
+
+### Changed — scripts 폴더 체계화
+
+5개 카테고리 분류:
+- `scripts/build/` — 산출물 생성 (buildNotebooks, generateSpec, generateFixtures, ...)
+- `scripts/audit/` — 품질 게이트 (auditBlog, qualityGate, validateNotebooks, check_no_ai_markers, ...)
+- `scripts/eval/` — 평가/예측 (backtestPrediction, evalDiagnose, runEvalBatch, scanInsights, ...)
+- `scripts/data/` — 데이터 수집/복구 (collectIndustryIndicators, repair_cache_with_progress, ...)
+- `scripts/dev/` — 개발자 헬퍼 (test-lock.sh, install_git_hooks.sh, ...)
+
+영향: workflow yml, conftest, ops/*, .claude/audits, .claude/skills, .claude/hooks 모두 경로 갱신.
+
 ## [0.9.3] - 2026-04-09
 
 ### Changed — Plan v10: 1.0.0 전 클린업 (BREAKING)

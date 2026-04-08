@@ -17,19 +17,19 @@
 - Company 1개 ≈ 200~500MB. 동시 3개 = OOM.
 - conftest.py에 1200MB 초과 시 pytest.exit() 안전장치.
 - fixture scope → `module` (session scope 금지).
-- `pytest` 직접 호출 금지 → `bash scripts/test-lock.sh` 사용.
+- `pytest` 직접 호출 금지 → `bash scripts/dev/test-lock.sh` 사용.
 
 ## 실행 방법
 
 ```bash
 # unit만 (빠름, 항상)
-bash scripts/test-lock.sh tests/ -m "unit" -v --tb=short
+bash scripts/dev/test-lock.sh tests/ -m "unit" -v --tb=short
 
 # integration (데이터 필요)
-bash scripts/test-lock.sh tests/ -m "not unit and not heavy and not requires_data" -v --tb=short
+bash scripts/dev/test-lock.sh tests/ -m "not unit and not heavy and not requires_data" -v --tb=short
 
 # heavy (단독)
-bash scripts/test-lock.sh tests/ -m "heavy" -v --tb=short
+bash scripts/dev/test-lock.sh tests/ -m "heavy" -v --tb=short
 ```
 
 ## 엔진별 테스트 파일
