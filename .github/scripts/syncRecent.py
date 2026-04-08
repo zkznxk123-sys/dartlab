@@ -210,7 +210,7 @@ def _discoverNewFilings(
     # 이 rcept_no가 docs/finance/report 각 parquet에 들어있는지 독립 검사.
     # - docs: rcept_no 컬럼 직접 비교
     # - finance: rcept_no 컬럼 직접 비교 (정정 보고서도 감지)
-    # - report: rcept_no 비교 + apiType 개수 ≥ _REPORT_MIN_APITYPES (partial 재수집)
+    # - report: rcept_no 컬럼 직접 비교 (apiType 임계 폐기 — 정상 종목 오탐 부작용)
     #
     # 종목 단위 targetCodes는 합집합이지만, 카테고리별로 정확히 누락된 (rcept_no/period)만
     # 수집하도록 missingByCat에 분리 저장한다.
