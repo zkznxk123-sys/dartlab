@@ -16,37 +16,12 @@ class _FinanceAccessor:
     def __init__(self, company: Company):
         self._company = company
 
-    def timeseries(self, *, annual: bool = False, cumulative: bool = False):
-        """finance 시계열 — 단일 진입점, 파라미터 토글 (api-contract).
-
-        Args:
-            annual: True 면 연도 단위 집계.
-            cumulative: EDGAR 는 분기 누적 미지원 → annual 로 fallback.
-            둘 다 True 시 ValueError.
-
-        Returns:
-            ``(series, periods)`` 또는 None.
-        """
-        if annual and cumulative:
-            raise ValueError("annual / cumulative 중 하나만 True 가능합니다.")
-        if annual or cumulative:
-            if "_annual" not in self._company._cache:
-                from dartlab.providers.edgar.finance.pivot import buildAnnual
-
-                self._company._cache["_annual"] = buildAnnual(self._company.cik)
-            return self._company._cache["_annual"]
-        if "_ts" not in self._company._cache:
-            from dartlab.providers.edgar.finance.pivot import buildTimeseries
-
-            self._company._cache["_ts"] = buildTimeseries(self._company.cik)
-        return self._company._cache.get("_ts")
-
     def _stmtDf(self, stmtKey: str) -> pl.DataFrame | None:
         cacheKey = f"_finance_{stmtKey}"
         if cacheKey in self._company._cache:
             return self._company._cache[cacheKey]
 
-        annual = self.timeseries(annual=True)
+        annual = self._company._buildFinanceSeries(freq="Y")
         if annual is None:
             self._company._cache[cacheKey] = None
             return None
@@ -106,7 +81,7 @@ class _FinanceAccessor:
         if "_ratios" not in self._company._cache:
             from dartlab.core.finance.ratios import calcRatios
 
-            annual = self.timeseries(annual=True)
+            annual = self._company._buildFinanceSeries(freq="Y")
             if annual is None:
                 self._company._cache["_ratios"] = None
             else:
@@ -119,7 +94,7 @@ class _FinanceAccessor:
         cacheKey = "_ratioSeries"
         if cacheKey in self._company._cache:
             return self._company._cache[cacheKey]
-        annual = self.timeseries(annual=True)
+        annual = self._company._buildFinanceSeries(freq="Y")
         if annual is None:
             return None
         aSeries, years = annual

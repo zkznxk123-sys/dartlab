@@ -120,7 +120,7 @@ def _fetchPriceContext(company: Any) -> dict | None:
 def _getSeriesAndShares(company: Any) -> tuple[dict | None, int | None, str]:
     """company에서 annual series, shares, currency 추출."""
     try:
-        ann = company.timeseries(annual=True)
+        ann = company._buildFinanceSeries(freq="Y")
         if ann is None:
             return None, None, getattr(company, "currency", "KRW") or "KRW"
         series = ann[0] if isinstance(ann, tuple) else ann

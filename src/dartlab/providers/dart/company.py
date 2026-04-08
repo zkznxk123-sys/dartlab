@@ -1319,7 +1319,7 @@ class Company:
         cacheKey = "_ratioSeries_Q_CFS"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        qResult = self.finance.timeseries()
+        qResult = self._buildFinanceSeries(freq="Q")
         if qResult is None:
             return None
         qSeries, periods = qResult
@@ -1333,8 +1333,11 @@ class Company:
         self._cache[cacheKey] = result
         return result
 
-    def _financeOrDocsStatement(self, sjDiv: str) -> pl.DataFrame | None:
-        if sjDiv == "CIS":
+    def _financeOrDocsStatement(
+        self, sjDiv: str, *, freq: str = "Q", scope: str = "consolidated"
+    ) -> pl.DataFrame | None:
+        # CIS 의 경우 quarterly 캐시 직접 사용 (freq=Q + scope=consolidated 에 한정)
+        if sjDiv == "CIS" and freq == "Q" and scope == "consolidated":
             cisQ = self._financeCisQuarterly() if self._hasFinance else None
             if cisQ is not None:
                 series, periods = cisQ
@@ -1342,26 +1345,32 @@ class Company:
                 df = _financeToDataFrame(series, normalizedPeriods, "CIS")
                 if df is not None:
                     return df
-        df = self._financeStmt(sjDiv) if self._hasFinance else None
+        df = self._financeStmt(sjDiv, freq=freq, scope=scope) if self._hasFinance else None
         if df is not None:
             return df
-        r = self._call_module("statements")
-        return getattr(r, sjDiv, None) if r else None
+        # docs fallback 은 분기 연결만 지원
+        if freq == "Q" and scope == "consolidated":
+            r = self._call_module("statements")
+            return getattr(r, sjDiv, None) if r else None
+        return None
 
     # ── 재무제표 (property) ──
     # finance(XBRL) 우선 → docs fallback
 
-    def _financeStmt(self, sjDiv: str) -> pl.DataFrame | None:
-        """finance 분기별 시계열에서 sjDiv DataFrame 생성 (캐싱)."""
-        cacheKey = f"_financeStmt_{sjDiv}"
+    def _financeStmt(self, sjDiv: str, *, freq: str = "Q", scope: str = "consolidated") -> pl.DataFrame | None:
+        """finance 시계열에서 sjDiv DataFrame 생성 (캐싱).
+
+        Internal helper. show("IS", freq=, scope=) 진입점이 호출.
+        """
+        cacheKey = f"_financeStmt_{sjDiv}_{freq}_{scope}"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        qResult = self.timeseries()
+        qResult = self._buildFinanceSeries(freq=freq, scope=scope)
         if qResult is None:
             return None
         series, periods = qResult
         # 2016-Q1 → 2016Q1 포맷 통일
-        normalizedPeriods = [p.replace("-", "") for p in periods]
+        normalizedPeriods = [str(p).replace("-", "") for p in periods]
         df = _financeToDataFrame(series, normalizedPeriods, sjDiv)
         self._cache[cacheKey] = df
         return df
@@ -1776,8 +1785,19 @@ class Company:
 
         return buildBlockIndex(topicRows)
 
-    def _showFinanceTopic(self, topic: str, *, period: str | None = None) -> pl.DataFrame | None:
-        """finance source topic의 실제 데이터 반환."""
+    def _showFinanceTopic(
+        self,
+        topic: str,
+        *,
+        period: str | None = None,
+        freq: str = "Q",
+        scope: str = "consolidated",
+    ) -> pl.DataFrame | None:
+        """finance source topic 의 실제 데이터 반환.
+
+        ``c.show("IS", freq="Y", scope="separate")`` 같은 사용자 호출이
+        여기로 들어와서 freq/scope 에 따라 빌드.
+        """
         if topic == "ratios":
             ratioSeries = self._ratioSeries()
             if ratioSeries is None:
@@ -1786,6 +1806,10 @@ class Company:
             templateKey = _ratioTemplateKeyForIndustryGroup(getattr(self.sector, "industryGroup", None))
             fieldNames = _RATIO_TEMPLATE_FIELDS.get(templateKey)
             return self._applyPeriodFilter(_ratioSeriesToDataFrame(series, years, fieldNames=fieldNames), period)
+        if topic in {"BS", "IS", "CF", "CIS"}:
+            df = self._financeOrDocsStatement(topic, freq=freq, scope=scope)
+            return self._applyPeriodFilter(df, period) if df is not None else None
+        # SCE / sceMatrix 등 — finance accessor 위임 (분기/연결 only)
         df = getattr(self.finance, topic, None)
         if df is None:
             return None
@@ -1811,7 +1835,7 @@ class Company:
                     rows.append((f"finance:{payloadTopic}:{item}", f"{item}={value}"))
 
         if topic in {"BS", "IS", "CF"}:
-            annual = self.finance.timeseries(annual=True)
+            annual = self._buildFinanceSeries(freq="Y")
             if annual is None:
                 return None
             series, years = annual
@@ -2021,59 +2045,72 @@ class Company:
         block: int | None = None,
         *,
         period: str | list[str] | None = None,
+        freq: str = "Q",
+        scope: str = "consolidated",
         raw: bool = False,
     ) -> pl.DataFrame | None:
-        """topic의 데이터를 반환.
+        """topic 의 데이터를 반환 — 사용자 단일 진입점 (api-contract).
+
+        ``ops/api-contract.md`` 의 "단일 진입점 + 파라미터 계약" 규칙에 따라
+        모든 topic 접근은 ``c.show(topic, ...)`` 로 통합한다. 별도 property
+        (`c.IS`, `c.BS`, `c.CF`, `c.CIS`, `c.ratios`, `c.SCE`, `c.notes.X`) 는
+        사용 금지 — 모두 ``c.show("...")`` 로 호출.
 
         Capabilities:
             - 120+ topic 접근 (재무제표, 사업내용, 지배구조, 임원현황 등)
-            - 기간별 수평화 (topic × period 매트릭스)
-            - 블록 단위 drill-down (목차 → 상세)
-            - docs/finance/report 3개 소스 자동 통합
-            - 세로 뷰 (period 리스트 전달 시)
+            - 기간 / 주기 / 범위 / 블록 / 세로뷰 모두 파라미터 토글
+            - docs / finance / report 3 source 자동 통합
 
         Args:
-            topic: topic 이름 (BS, IS, CF, dividend, companyOverview 등). c.topics로 전체 목록.
-            block: blockOrder 인덱스. None이면 블록 목차 (블록 1개면 바로 데이터).
-            period: 특정 기간 필터 ("2023", "2024Q2"). 리스트면 세로 뷰 (기간 × 항목).
-            raw: True면 원본 그대로 (정제 없이).
+            topic: topic 이름. ``"BS"`` ``"IS"`` ``"CF"`` ``"CIS"`` ``"SCE"`` ``"ratios"``
+                같은 finance topic 또는 ``"dividend"`` ``"companyOverview"`` 같은 docs/report
+                topic. 전체 목록은 ``c.topics``.
+            block: 블록 인덱스. None 이면 블록 목차 (1개면 바로 데이터).
+            period: 단일 기간 필터 (``"2023"``, ``"2024Q2"``) 또는 리스트 (세로 비교 뷰).
+            freq: 시계열 주기 — ``"Q"`` (분기, 기본) / ``"Y"`` (연간 strict 합) /
+                ``"YTD"`` (year-to-date 누적). pandas 관용 코드. **finance topic 한정**.
+            scope: 재무제표 범위 — ``"consolidated"`` (연결, 기본) / ``"separate"`` (별도).
+                **finance topic 한정**.
+            raw: True 면 원본 그대로 (정제 없이).
 
         Returns:
             pl.DataFrame | None — topic 데이터. 블록 목차 또는 실제 데이터.
 
         Requires:
-            데이터: docs (자동 다운로드). finance topic은 finance 데이터도 필요.
+            데이터: docs (자동 다운로드). finance topic 은 finance parquet 도 필요.
+
+        AIContext:
+            - 120+ topic 단일 접근점 — LLM 이 데이터 조회 핵심 도구
+            - finance topic 은 freq/scope 토글로 분기/연간/연결/별도 자유 전환
+
+        Guide:
+            - "분기 손익" → ``c.show("IS")``
+            - "연간 손익" → ``c.show("IS", freq="Y")``
+            - "별도 재무상태표" → ``c.show("BS", scope="separate")``
+            - "2023년 손익" → ``c.show("IS", period="2023")``
+            - "배당 정보" → ``c.show("dividend")``
+
+        SeeAlso:
+            - select: show() 결과에서 행/열 필터 + 차트
+            - trace: 데이터 출처 추적
+            - topics: 사용 가능한 topic 전체 목록
 
         Example::
 
             c = dartlab.Company("005930")
-            c.show("BS")                   # 재무상태표
-            c.show("IS", period="2023")    # 2023년 손익계산서
-            c.show("dividend")             # 배당
-            c.show("IS", period=["2022", "2023"])  # 세로 비교
-
-        AIContext:
-            - 120+ topic에 대한 단일 접근점 — LLM이 데이터를 조회하는 핵심 도구
-            - period 리스트로 기간 비교 뷰 생성 가능
-
-        Guide:
-            - "배당 정보 보여줘" → c.show("dividend")
-            - "사업 개요 확인" → c.show("businessOverview")
-            - "2023년 손익계산서" → c.show("IS", period="2023")
-            - "연도별 비교" → c.show("IS", period=["2022", "2023"])
-
-        SeeAlso:
-            - select: show() 결과에서 특정 행/열 필터 + 차트
-            - trace: 데이터 출처 추적
-            - topics: 사용 가능한 topic 전체 목록
-            - diff: 기간간 텍스트 변경 비교
+            c.show("IS")                              # 분기 연결 (기본)
+            c.show("IS", freq="Y")                    # 연간 연결
+            c.show("IS", scope="separate")            # 분기 별도
+            c.show("IS", freq="Y", scope="separate")  # 연간 별도
+            c.show("IS", period="2023")               # 2023년 필터
+            c.show("dividend")                        # 배당
         """
         # alias 해석 (board → boardOfDirectors 등)
         topic = _TOPIC_ALIASES.get(topic, topic)
 
-        # period가 리스트면 세로 뷰: 먼저 전체 데이터 → transpose
+        # period 가 리스트면 세로 뷰: 먼저 전체 데이터 → transpose
         if isinstance(period, list):
-            wide = self.show(topic, block, raw=raw)
+            wide = self.show(topic, block, freq=freq, scope=scope, raw=raw)
             if wide is None or not isinstance(wide, pl.DataFrame):
                 return None
             return self._transposeToVertical(wide, period)
@@ -2085,7 +2122,7 @@ class Company:
         if topic in {"BS", "IS", "CF", "CIS", "SCE", "ratios"}:
             if block not in (None, 0):
                 return None
-            result = self._showFinanceTopic(topic, period=period)
+            result = self._showFinanceTopic(topic, period=period, freq=freq, scope=scope)
             if topic in {"IS", "BS", "CIS", "CF", "SCE"} and isinstance(result, pl.DataFrame) and result.width > 0:
                 result = self._cleanFinanceDataFrame(result, topic)
             return result if isinstance(result, pl.DataFrame) else None
@@ -2153,7 +2190,7 @@ class Company:
         boRows["blockType"][0]
 
         if source == "finance":
-            result = self._showFinanceTopic(topic, period=period)
+            result = self._showFinanceTopic(topic, period=period, freq=freq, scope=scope)
         elif source == "report":
             result = self._showReportTopic(topic, period=period, raw=raw)
         else:
@@ -2386,50 +2423,36 @@ class Company:
         topic: str,
         indList: str | list[str] | None = None,
         colList: str | list[str] | None = None,
+        *,
+        freq: str = "Q",
+        scope: str = "consolidated",
     ):
-        """show() 결과에서 행(indList) + 열(colList) 필터.
+        """show() 결과에서 행(indList) + 열(colList) 필터 — 사용자 단일 진입점.
 
-        Capabilities:
-            - show() 결과에서 특정 계정/항목만 추출
-            - 기간 필터링 (특정 연도만)
-            - .chart() 체이닝으로 바로 시각화
-            - 한글/영문 계정명 모두 지원
+        ``c.show()`` 와 동일한 freq/scope 파라미터를 받는다 (api-contract).
 
         Args:
             topic: IS, BS, CF, CIS, SCE 또는 docs topic.
-            indList: 행 필터. 한글 계정명/snakeId/항목명. 단일 str도 가능.
-            colList: 열(기간) 필터. 단일 str도 가능.
+            indList: 행 필터. 한글 계정명/snakeId/항목명. 단일 str 도 가능.
+            colList: 열(기간) 필터. 단일 str 도 가능.
+            freq: 시계열 주기 — ``"Q"`` (분기, 기본) / ``"Y"`` (연간) / ``"YTD"`` (누적).
+            scope: 재무제표 범위 — ``"consolidated"`` (연결, 기본) / ``"separate"`` (별도).
 
         Returns:
-            SelectResult — DataFrame 위임 + .chart() 체이닝. 없으면 None.
-
-        Requires:
-            데이터: docs (자동 다운로드)
+            SelectResult — DataFrame 위임 + .chart() 체이닝. 없으면 ValueError.
 
         Example::
 
             c.select("IS", ["매출액", "영업이익"])
+            c.select("IS", ["매출액"], freq="Y")              # 연간 매출
+            c.select("BS", ["자본총계"], scope="separate")    # 별도 자본
             c.select("IS", ["매출액"]).chart()
-            c.select("BS", ["자본총계"], ["2024", "2023"])
-
-        AIContext:
-            - 특정 계정의 시계열 추출 — 추세 분석 및 차트 생성의 기본 도구
-            - .chart() 체이닝으로 시각화까지 한 번에
-
-        Guide:
-            - "매출액 추이 그래프" → c.select("IS", ["매출액"]).chart()
-            - "영업이익만 뽑아줘" → c.select("IS", ["영업이익"])
-            - "2023-2024 자본 비교" → c.select("BS", ["자본총계"], ["2024", "2023"])
-
-        SeeAlso:
-            - show: 전체 topic ��이터 조회 (select의 원본)
-            - table: docs 마크다운 테이블 구조화 파싱
         """
         from dartlab.core.select import SelectResult
         from dartlab.core.show import selectFromShow
 
-        # R26-3: show() 가 ValueError 발생하면 그대로 propagate (silent None X)
-        df = self.show(topic)
+        # show() 가 ValueError 발생하면 그대로 propagate (silent None X)
+        df = self.show(topic, freq=freq, scope=scope)
         if df is None or not isinstance(df, pl.DataFrame):
             # show 가 정상 None 반환한 경우 (raw 모드 등) — ValueError 대신 명확한 안내
             raise ValueError(
@@ -3744,22 +3767,6 @@ class Company:
         self._cache[cacheKey] = result
         return result
 
-    def getTimeseries(self, period: str = "q", fsDivPref: str = "CFS"):
-        """Deprecated — use ``c.timeseries`` property instead.
-
-        Args:
-            period: "q" (분기별 standalone), "y" (연도별), "cum" (분기별 누적).
-            fsDivPref: "CFS" (연결) 또는 "OFS" (별도).
-        """
-        import warnings
-
-        warnings.warn(
-            "getTimeseries()는 deprecated입니다. c.timeseries / c.annual / c.cumulative를 사용하세요.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self._getFinanceBuild(period, fsDivPref)
-
     def _getRatiosInternal(self, fsDivPref: str = "CFS"):
         """내부용 재무비율 계산 (deprecation 없음)."""
         cacheKey = f"_ratios_{fsDivPref}"
@@ -3833,59 +3840,31 @@ class Company:
             df = df.select(metaCols + periodCols)
         return df
 
-    def timeseries(self, *, annual: bool = False, cumulative: bool = False):
-        """finance 시계열 — 단일 진입점, 파라미터 토글 (api-contract).
+    def _buildFinanceSeries(self, *, freq: str = "Q", scope: str = "consolidated"):
+        """[INTERNAL] finance series-tuple 빌더.
 
-        ``ops/api-contract.md`` 의 "단일 진입점 + 파라미터 계약" 규칙에 따라
-        분기 / 연간 / 누적을 같은 메서드에서 옵션으로 받는다.
+        사용자는 직접 호출하지 않는다. 사용자 진입점은 ``c.show("IS", freq=, scope=)``
+        / ``c.select("IS", [...], freq=, scope=)`` 만이다 (api-contract).
 
-        Capabilities:
-            - BS/IS/CF 계정별 시계열 (finance XBRL 정규화 기반)
-            - 분기 standalone (기본), 연도 집계 (``annual=True``), YTD 누적 (``cumulative=True``)
-            - insights, forecast, valuation 등 분석 엔진의 핵심 입력 데이터
+        analysis / forecast / valuation / credit / review 등 calc 모듈이
+        ``(series, periods)`` 튜플 형태가 필요할 때만 호출한다.
 
         Args:
-            annual: True 면 분기 데이터를 연도 단위로 집계 (4분기 strict 합).
-            cumulative: True 면 Q1→Q4 YTD 누적.
-            ``annual`` / ``cumulative`` 중 하나만 True 가능 (둘 다 True 시 ValueError).
+            freq: ``"Q"`` (분기, 기본) / ``"Y"`` (연간) / ``"YTD"`` (누적).
+            scope: ``"consolidated"`` (연결, 기본) / ``"separate"`` (별도).
 
         Returns:
             ``(series, periods)`` 또는 None.
-            series = {"BS": {"snakeId": [값...]}, "IS": {...}, "CF": {...}}
-            periods = ``["2016Q1", "2016Q2", ..., "2024Q4"]`` (분기) 또는
-            ``["2016", "2017", ..., "2024"]`` (annual=True).
-
-        Requires:
-            데이터: finance (자동 다운로드)
-
-        AIContext:
-            - 분기별 추세 분석의 기초 데이터 — 매출/이익/현금흐름 시계열
-            - annual=True 는 forecast / ratioSeries 의 기초 입력
-            - cumulative=True 는 연중 진행률 파악
-
-        Guide:
-            - "분기별 시계열" → ``c.timeseries()``
-            - "매출 분기별 추이" → ``series, periods = c.timeseries(); series["IS"]["sales"]``
-            - "연간 매출 추이" → ``series, years = c.timeseries(annual=True)``
-            - "올해 누적 매출" → ``series, periods = c.timeseries(cumulative=True)``
-
-        SeeAlso:
-            - BS / IS / CF / CIS: DataFrame 형태 재무제표 (timeseries 의 다른 뷰)
-            - ratioSeries: 연도별 재무비율 시계열
-
-        Example::
-
-            c = Company("005930")
-            series, periods = c.timeseries()              # 분기 (기본)
-            series, years = c.timeseries(annual=True)     # 연간 합산
-            series, periods = c.timeseries(cumulative=True)  # YTD 누적
         """
-        if annual and cumulative:
-            raise ValueError("annual / cumulative 중 하나만 True 가능합니다.")
+        if freq not in ("Q", "Y", "YTD"):
+            raise ValueError(f"freq 는 'Q' / 'Y' / 'YTD' 중 하나여야 합니다 (받음: {freq!r})")
+        if scope not in ("consolidated", "separate"):
+            raise ValueError(f"scope 는 'consolidated' / 'separate' 중 하나여야 합니다 (받음: {scope!r})")
         if not self._hasFinance:
-            self._hintOnce("timeseries", "timeseries", "finance")
             return None
-        return self.finance.timeseries(annual=annual, cumulative=cumulative)
+        _periodMap = {"Q": "q", "Y": "y", "YTD": "cum"}
+        _scopeMap = {"consolidated": "CFS", "separate": "OFS"}
+        return self._getFinanceBuild(_periodMap[freq], _scopeMap[scope])
 
     @property
     def sceMatrix(self):

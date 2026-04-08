@@ -545,7 +545,7 @@ def calcRevenueGrowth(company, *, basePeriod: str | None = None) -> dict | None:
 
     # annual 기반 CAGR 교차 검증 — ratioSeries 분기 기반이 왜곡될 수 있음
     try:
-        ann = company.timeseries(annual=True)
+        ann = company._buildFinanceSeries(freq="Y")
         if ann:
             from dartlab.core.finance.extract import getRevenueGrowth3Y
 

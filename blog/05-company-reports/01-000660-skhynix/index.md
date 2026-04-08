@@ -1,6 +1,6 @@
 ---
 title: "SK하이닉스 (000660) — 한국 반도체 30년의 미스터리, 그리고 영업이익률 58%"
-date: 2026-04-08
+date: 2026-03-22
 description: "1983 현대전자로 시작해 다섯 번 망할 뻔한 회사가 2025년 4분기 영업이익률 58.40%, 사상 처음으로 모회사 삼성전자를 추월했다. 9년 사이클 + 가격결정력 + CAPEX 27조 베팅을 dartlab으로 펼친다."
 category: company-reports
 series: company-reports

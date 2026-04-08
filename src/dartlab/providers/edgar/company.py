@@ -703,43 +703,39 @@ class Company:
 
         launchViewer(self.ticker, port=port)
 
-    def timeseries(self, *, annual: bool = False, cumulative: bool = False):
-        """finance 시계열 — 단일 진입점, 파라미터 토글 (api-contract).
+    def _buildFinanceSeries(self, *, freq: str = "Q", scope: str = "consolidated"):
+        """[INTERNAL] EDGAR finance series-tuple 빌더.
 
-        ``ops/api-contract.md`` 의 "단일 진입점 + 파라미터 계약" 규칙에 따라
-        분기 / 연간을 같은 메서드에서 옵션으로 받는다.
-
-        Capabilities:
-            - SEC XBRL 정규화 재무 시계열 (BS/IS/CF/CIS)
-            - 분기 standalone (기본) 또는 연도 집계 (``annual=True``)
-            - EDGAR 는 분기 누적 (cumulative) 미지원 → annual fallback
+        사용자 진입점은 ``c.show("IS", freq=, scope=)`` 만이다 (api-contract).
+        EDGAR 는 ``scope="separate"`` 미지원 (SEC 는 연결만 보고).
+        ``freq="YTD"`` 도 미지원 — annual 로 fallback.
 
         Args:
-            annual: True 면 10-K 기준 연도 단위 시계열.
-            cumulative: EDGAR 는 미지원, annual 로 fallback.
-            둘 다 True 시 ValueError.
+            freq: ``"Q"`` (분기, 기본) / ``"Y"`` (연간) / ``"YTD"`` (annual fallback).
+            scope: ``"consolidated"`` (기본) — separate 는 raise.
 
         Returns:
             ``(series, periods)`` 또는 None.
-
-        AIContext:
-            - ask()/chat()에서 추세 분석, 성장률 계산 컨텍스트
-
-        Guide:
-            - "분기별 재무 데이터" → ``c.timeseries()``
-            - "연간 재무 데이터" → ``c.timeseries(annual=True)``
-
-        SeeAlso:
-            - BS / IS / CF / CIS: 제표별 DataFrame
-            - ratios: 재무비율 시계열
-
-        Example::
-
-            c = Company("AAPL")
-            series, periods = c.timeseries()              # 분기
-            series, years = c.timeseries(annual=True)     # 연간
         """
-        return self.finance.timeseries(annual=annual, cumulative=cumulative)
+        if freq not in ("Q", "Y", "YTD"):
+            raise ValueError(f"freq 는 'Q' / 'Y' / 'YTD' 중 하나 (받음: {freq!r})")
+        if scope == "separate":
+            raise ValueError("EDGAR 는 scope='separate' 미지원 — SEC 는 연결만 보고")
+        if scope != "consolidated":
+            raise ValueError(f"scope 는 'consolidated' / 'separate' 중 하나 (받음: {scope!r})")
+        # EDGAR _FinanceAccessor 는 freq 옵션 직접 지원
+        if freq == "Q":
+            if "_ts" not in self._cache:
+                from dartlab.providers.edgar.finance.pivot import buildTimeseries
+
+                self._cache["_ts"] = buildTimeseries(self.cik)
+            return self._cache.get("_ts")
+        # Y / YTD → annual
+        if "_annual" not in self._cache:
+            from dartlab.providers.edgar.finance.pivot import buildAnnual
+
+            self._cache["_annual"] = buildAnnual(self.cik)
+        return self._cache["_annual"]
 
     @property
     def BS(self) -> pl.DataFrame | None:
@@ -2488,10 +2484,6 @@ class Company:
         if df is None:
             return None
         return df
-
-    def getTimeseries(self, period: str = "q", fsDivPref: str = "CFS"):
-        """재무 시계열 데이터 (deprecated — c.timeseries(annual=...) 사용)."""
-        return self.finance.timeseries(annual=(period == "y"))
 
     def audit(self) -> list | None:
         """감사/내부통제 분석 — EDGAR item9A + item14 기반.

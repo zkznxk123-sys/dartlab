@@ -128,6 +128,35 @@
 	const pageUrl = $derived(`${brand.url}blog/${data.slug}`);
 	const pageImage = $derived(postInfo?.thumbnail ? `${brand.url}${postInfo.thumbnail.replace(/^\//, '')}` : `${brand.url}og-image.png`);
 	const faqItems = $derived(parseFaqFromMarkdown(data.rawMarkdown ?? ''));
+	// frontmatter tags 파싱: YAML 배열은 mdsvex가 string으로 줄 수 있음 → 둘 다 처리
+	const frontmatterTags = $derived((() => {
+		const t: unknown = (meta as Record<string, unknown>)?.tags;
+		if (Array.isArray(t)) return t.map(String);
+		if (typeof t === 'string') return t.split(/[,\n]/).map((s) => s.trim().replace(/^[-"']|["']$/g, '')).filter(Boolean);
+		return [] as string[];
+	})());
+	const allKeywords = $derived(
+		Array.from(new Set([
+			postInfo?.categoryLabel,
+			postInfo?.seriesLabel,
+			...frontmatterTags,
+			...(((meta as Record<string, unknown>)?.keywords as string[] | undefined) ?? []),
+			'전자공시',
+			'DartLab',
+			'DART',
+		].filter(Boolean) as string[]))
+	);
+	// 본문 단어 수 추정 (Article schema wordCount)
+	const wordCount = $derived((() => {
+		const raw = data.rawMarkdown ?? '';
+		const cleaned = raw
+			.replace(/^---[\s\S]*?---/, '')
+			.replace(/```[\s\S]*?```/g, ' ')
+			.replace(/!\[[^\]]*\]\([^)]+\)/g, ' ')
+			.replace(/\[[^\]]+\]\([^)]+\)/g, ' ')
+			.replace(/[#>*`|_-]/g, ' ');
+		return cleaned.replace(/\s+/g, ' ').trim().length;
+	})());
 	const jsonLd = $derived(
 		JSON.stringify([
 			buildArticleJsonLd({
@@ -138,7 +167,7 @@
 				image: pageImage,
 				datePublished: postInfo?.date ?? '',
 				section: postInfo?.categoryLabel ?? '',
-				keywords: [postInfo?.categoryLabel, postInfo?.seriesLabel, ...(meta?.keywords ?? []), '전자공시', 'DartLab'].filter(Boolean),
+				keywords: allKeywords,
 				isPartOf: postInfo ? `${brand.url}blog/category/${postInfo.category}` : `${brand.url}blog/`
 			}),
 			buildBreadcrumbJsonLd([
@@ -671,13 +700,19 @@
 		vertical-align: top;
 	}
 
-	.blog-article :global(td:first-child),
+	/* 첫 컬럼은 헤더만 nowrap (연도 라벨 등). td는 wrap 허용 — 긴 본문 셀이 다른 컬럼을 밀어내지 않도록 */
 	.blog-article :global(th:first-child) {
 		white-space: nowrap;
 	}
 
-	/* 표 안의 inline code는 줄바꿈 허용 — 검증표 마지막 컬럼이 viewport 넘침 방지 */
-	.blog-article :global(td code:not(pre code)) {
+	.blog-article :global(td:first-child) {
+		word-break: keep-all;
+		max-width: 320px;
+	}
+
+	/* 표 안의 inline code는 줄바꿈 허용 — 코드가 컬럼을 옆으로 밀어내지 않도록 */
+	.blog-article :global(td code:not(pre code)),
+	.blog-article :global(th code:not(pre code)) {
 		white-space: normal;
 		word-break: break-all;
 		font-size: 0.78rem;

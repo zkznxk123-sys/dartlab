@@ -17,6 +17,8 @@ interface ArticleOptions {
 	section?: string;
 	keywords?: string[];
 	isPartOf?: string;
+	wordCount?: number;
+	about?: { name: string; identifier?: string };
 }
 
 interface BreadcrumbItem {
@@ -152,6 +154,14 @@ export function buildArticleJsonLd(options: ArticleOptions): SeoThing {
 		dateModified: options.dateModified ?? options.datePublished,
 		articleSection: options.section,
 		keywords: keywords.length > 0 ? keywords.join(', ') : undefined,
+		wordCount: options.wordCount,
+		about: options.about
+			? {
+					'@type': 'Thing',
+					name: options.about.name,
+					...(options.about.identifier ? { identifier: options.about.identifier } : {})
+				}
+			: undefined,
 		inLanguage: 'ko',
 		author: { '@type': 'Person', name: 'eddmpython', url: 'https://github.com/eddmpython' },
 		publisher: {

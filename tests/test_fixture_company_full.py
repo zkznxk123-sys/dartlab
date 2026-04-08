@@ -136,19 +136,14 @@ class TestDerivedData:
         result = samsung.ratios
         assert result is None or isinstance(result, pl.DataFrame)
 
-    def test_annual(self, samsung):
-        result = samsung.timeseries(annual=True)  # Plan v9: c.annual property → c.timeseries(annual=True)
-        # annual은 (dict, periods) 튜플 또는 None
-        assert result is None or isinstance(result, tuple)
-        if isinstance(result, tuple):
-            assert len(result) == 2
+    def test_annual_via_show(self, samsung):
+        # Plan v9: c.annual / c.timeseries 제거 → c.show("IS", freq="Y") 단일 진입점
+        df = samsung.show("IS", freq="Y")
+        assert df is None or hasattr(df, "shape")
 
-    def test_timeseries(self, samsung):
-        result = samsung.timeseries()  # Plan v9: property → method
-        # timeseries는 (dict, periods) 튜플 또는 None
-        assert result is None or isinstance(result, tuple)
-        if isinstance(result, tuple):
-            assert len(result) == 2
+    def test_quarterly_via_show(self, samsung):
+        df = samsung.show("IS", freq="Q")
+        assert df is None or hasattr(df, "shape")
 
     def test_topics(self, samsung):
         result = samsung.topics
