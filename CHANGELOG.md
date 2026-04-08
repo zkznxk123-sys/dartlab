@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.3] - 2026-04-09
+
 ### Changed — Plan v10: 1.0.0 전 클린업 (BREAKING)
 
 **API contract 단일 진입점 원칙 강제** — 사용자 surface 를 `c.show() / c.select() / c.sections / c.diff() / c.filings() / c.facts / c.review() / c.analysis() / c.credit()` 만으로 단일화.
