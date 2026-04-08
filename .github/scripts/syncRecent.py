@@ -224,12 +224,28 @@ def _discoverNewFilings(
     missingFinanceCount = 0
     missingReportCount = 0
 
+    # docs 직접 수집은 document.xml API를 쓰는데, 정정/첨부정정/첨부추가/연장신고서는
+    # 별도 파일이 존재하지 않아 status 014를 받는다 (DART 시스템 한계).
+    # 원본 보고서만 docs 누락 대상으로 본다. finance/report는 정정도 포함 — 데이터 수정이
+    # 반영되어야 하므로 batchCollect로 다시 받는다.
+    DOCS_EXCLUDE_PREFIX = ("[기재정정]", "[첨부정정]", "[첨부추가]")
+    DOCS_EXCLUDE_KEYWORD = "사업보고서제출기한연장신고서"
+
+    def _isDocsTarget(reportNm: str) -> bool:
+        if reportNm.startswith(DOCS_EXCLUDE_PREFIX):
+            return False
+        if DOCS_EXCLUDE_KEYWORD in reportNm:
+            return False
+        return True
+
     for sc, rows in codeToFilings.items():
         existingDocs = _existingRceptNos(docsDir, sc)
         existingFinance = _existingRceptNos(financeDir, sc)
         existingReport = _existingRceptNos(reportDir, sc)
 
-        missingDocs = [r for r in rows if r["rcept_no"] not in existingDocs]
+        # docs는 원본 보고서만 (정정류 제외)
+        docsRows = [r for r in rows if _isDocsTarget(r["report_nm"])]
+        missingDocs = [r for r in docsRows if r["rcept_no"] not in existingDocs]
         missingFinance = [r for r in rows if r["rcept_no"] not in existingFinance]
         missingReport = [r for r in rows if r["rcept_no"] not in existingReport]
 

@@ -41,9 +41,10 @@ class _FinanceAccessor:
             if label is None:
                 # snake_case → Title Case fallback (e.g., "cash_and_cash_equivalents" → "Cash And Cash Equivalents")
                 label = snakeId.replace("_", " ").title()
+            # 컬럼명 표준: "항목" (sections 사상). "계정명" 은 backward-compat alias.
             row: dict[str, Any] = {
                 "snakeId": snakeId,
-                "계정명": label,
+                "항목": label,
             }
             for i, year in enumerate(years):
                 row[str(year)] = values[i] if i < len(values) else None
@@ -55,8 +56,10 @@ class _FinanceAccessor:
 
         result = pl.DataFrame(rows)
         # 기간 컬럼 역순 정렬
-        periodCols = [c for c in result.columns if c not in ("snakeId", "계정명")]
-        result = result.select(["snakeId", "계정명"] + periodCols[::-1])
+        periodCols = [c for c in result.columns if c not in ("snakeId", "항목")]
+        result = result.select(["snakeId", "항목"] + periodCols[::-1])
+        # backward-compat alias
+        result = result.with_columns(pl.col("항목").alias("계정명"))
         self._company._cache[cacheKey] = result
         return result
 

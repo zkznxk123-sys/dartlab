@@ -163,7 +163,8 @@ def _financeToDataFrame(
         label = labels.get(snakeId, snakeId)
         level = levels.get(snakeId, 2)
         sortKey = order.get(snakeId, 9999)
-        row = {"snakeId": snakeId, "계정명": label, "_level": level, "_sort": sortKey}
+        # 컬럼명 표준: "항목" (sections 사상 정합). "계정명" 은 backward-compat alias.
+        row = {"snakeId": snakeId, "항목": label, "_level": level, "_sort": sortKey}
         for i, y in enumerate(years):
             row[y] = values[i] if i < len(values) else None
         rows.append(row)
@@ -190,9 +191,11 @@ def _financeToDataFrame(
     df = pl.DataFrame(rows)
     df = df.drop(["_level", "_sort"])
     # 컬럼 순서: 메타 + 분기 컬럼 역순 + 연간 컬럼 역순
-    quarterCols = sorted([c for c in df.columns if "Q" in c and c not in ("snakeId", "계정명")], reverse=True)
-    annualCols = sorted([c for c in df.columns if c.isdigit() and c not in ("snakeId", "계정명")], reverse=True)
-    df = df.select(["snakeId", "계정명"] + quarterCols + annualCols)
+    quarterCols = sorted([c for c in df.columns if "Q" in c and c not in ("snakeId", "항목")], reverse=True)
+    annualCols = sorted([c for c in df.columns if c.isdigit() and c not in ("snakeId", "항목")], reverse=True)
+    df = df.select(["snakeId", "항목"] + quarterCols + annualCols)
+    # backward-compat alias: "계정명" 컬럼도 노출 (Phase B 마이그레이션 후 제거).
+    df = df.with_columns(pl.col("항목").alias("계정명"))
     return df
 
 
@@ -282,7 +285,7 @@ def _ratioSeriesToDataFrame(
                 continue
             row = {
                 "분류": _RATIO_CATEGORY_LABELS.get(category, category),
-                "계정명": _RATIO_FIELD_LABELS.get(fieldName, fieldName),
+                "항목": _RATIO_FIELD_LABELS.get(fieldName, fieldName),
                 "_field": fieldName,
             }
             for idx, year in enumerate(years):
@@ -292,8 +295,10 @@ def _ratioSeriesToDataFrame(
     if not rows:
         return None
 
-    df = pl.DataFrame(rows)
-    return df.drop("_field")
+    df = pl.DataFrame(rows).drop("_field")
+    # backward-compat alias
+    df = df.with_columns(pl.col("항목").alias("계정명"))
+    return df
 
 
 def _sceToDataFrame(
@@ -319,7 +324,7 @@ def _sceToDataFrame(
         detailKr = DETAIL_LABELS.get(detail, detail) if detail else ""
         label = f"{causeKr} / {detailKr}" if detailKr else causeKr
         row = {
-            "계정명": label,
+            "항목": label,
             "_cause": cause,
             "_detail": detail,
             "_sort": item,
@@ -332,8 +337,10 @@ def _sceToDataFrame(
         return None
 
     rows.sort(key=lambda r: (r["_cause"], r["_detail"], r["_sort"]))
-    df = pl.DataFrame(rows)
-    return df.drop(["_cause", "_detail", "_sort"])
+    df = pl.DataFrame(rows).drop(["_cause", "_detail", "_sort"])
+    # backward-compat alias
+    df = df.with_columns(pl.col("항목").alias("계정명"))
+    return df
 
 
 def _buildCisSeries(df: pl.DataFrame, periods: list[str], formatPeriod) -> dict[str, list[Any | None]]:
