@@ -129,20 +129,23 @@ def _financeToDataFrame(
     series: dict[str, dict[str, list]],
     years: list[str],
     sjDiv: str,
+    *,
+    includeAnnual: bool = False,
 ) -> pl.DataFrame | None:
     """finance 분기별 시계열 → 한글 계정명 × 기간 컬럼 DataFrame.
 
     컬럼 schema:
         - 메타: ``snakeId``, ``계정명``
         - 분기 컬럼: ``2025Q1, 2025Q2, 2025Q3, 2025Q4, 2024Q1, ...`` (역순)
-        - **연간 컬럼: ``2025, 2024, ...`` (역순)** ← Plan v4 root fix
+        - 연간 컬럼: ``2025, 2024, ...`` ← ``includeAnnual=True`` 일 때만
 
-    연간 컬럼 의미 (Plan v4):
+    Plan v7 R0 (사용자 피드백): 시계열 view 에 분기+연간 둘 다 노출은 schema noise.
+    기본은 분기만. 연간은 ``includeAnnual=True`` 옵션으로 명시 요청.
+    calc 함수는 ``toDictBySnakeId`` 가 분기에서 자동 합산하므로 영향 없음.
+
+    연간 컬럼 의미 (includeAnnual=True 일 때):
         - IS/CIS/CF (flow): 그 해 Q1+Q2+Q3+Q4 합 (분기 단독값 합산)
         - BS (stock): 그 해 Q4 (= 연말잔액) alias
-
-    calc 함수가 연간 비교 필요 시 ``row['2025']`` 만 read 하면 됨.
-    ttmSum / _annualizeFlow / getFlowValue 등의 위층 합산 헬퍼는 불필요.
     """
     stmtData = series.get(sjDiv)
     if not stmtData:
@@ -174,7 +177,10 @@ def _financeToDataFrame(
         for i, y in enumerate(years):
             row[y] = values[i] if i < len(values) else None
 
-        # 연간 컬럼 (Plan v4 root fix)
+        # 연간 컬럼 (Plan v4 root fix, Plan v7 R0 옵션화)
+        if not includeAnnual:
+            rows.append(row)
+            continue
         for yr in annualYears:
             qCols = quarterYears[yr]
             if sjDiv == "BS":

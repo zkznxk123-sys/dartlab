@@ -145,7 +145,48 @@ def toDict(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict], list[str
         # snakeId → 한국어 키 변환 (EDGAR)
         key = krLabels.get(label, label) if krLabels else label
         data[key] = {c: row.get(c) for c in periods}
-    return (data, periods) if data else None
+    if not data:
+        return None
+    # Plan v7 R0: 분기에서 연간 합성 (toDictBySnakeId 와 동일)
+    periods = _synthesizeAnnualInPlace(data, periods, getattr(selectResult, "topic", None))
+    return (data, periods)
+
+
+def _synthesizeAnnualInPlace(data: dict[str, dict], periods: list[str], topic: str | None) -> list[str]:
+    """Plan v7 R0: data dict 에 연간 값 합성, 확장된 periods 반환.
+
+    _financeToDataFrame 가 더 이상 연간 컬럼을 노출하지 않으므로,
+    calc 가 ``data[key]['2024']`` 로 read 할 수 있도록 분기에서 합성.
+    IS/CIS/CF (flow): 4분기 모두 있을 때만 합 (부분 합산 금지).
+    BS (stock): Q4 (없으면 가장 최근 분기).
+    """
+    qPeriods = [p for p in periods if "Q" in p and len(p) >= 5]
+    if not qPeriods:
+        return periods
+    yearMap: dict[str, list[str]] = {}
+    for q in qPeriods:
+        yearMap.setdefault(q[:4], []).append(q)
+    isStock = topic == "BS"
+    for row in data.values():
+        for yr, qs in yearMap.items():
+            if yr in row:
+                continue
+            if isStock:
+                annualVal = None
+                for q in sorted(qs, reverse=True):
+                    v = row.get(q)
+                    if v is not None:
+                        annualVal = v
+                        break
+            else:
+                vals = [row.get(q) for q in qs]
+                valid = [v for v in vals if v is not None]
+                annualVal = sum(valid) if len(valid) == 4 else None
+            row[yr] = annualVal
+    addedYears = [yr for yr in yearMap.keys() if yr not in periods]
+    if addedYears:
+        return sorted(periods + addedYears, key=_periodSortKey, reverse=True)
+    return periods
 
 
 def toDictBySnakeId(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict], list[str]] | None:
@@ -179,6 +220,9 @@ def toDictBySnakeId(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict],
 
     if not data:
         return None
+
+    # Plan v7 R0: 연간 합성 (toDict 와 동일)
+    periods = _synthesizeAnnualInPlace(data, periods, getattr(selectResult, "topic", None))
 
     # Plan v5 B + v6 C5: SNAKEID_ALIASES 양방향 + 값 병합
     # alias 와 canonical 둘 다 dict 에 있을 수도 있음 (예: cash_flows_from_financing_activities
