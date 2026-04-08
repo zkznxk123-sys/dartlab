@@ -158,76 +158,31 @@ def _financeToDataFrame(
     order = mapper.sortOrder(sjDiv)
     levels = mapper.levelMap(sjDiv)
 
-    # 분기 컬럼에서 연도 추출 (예: "2025Q1" → "2025")
-    quarterYears: dict[str, list[str]] = {}
-    for q in years:
-        if "Q" in q and len(q) >= 5:
-            yr = q[:4]
-            quarterYears.setdefault(yr, []).append(q)
-    annualYears = sorted(quarterYears.keys(), reverse=True)
-
     rows = []
     for snakeId, values in stmtData.items():
         label = labels.get(snakeId, snakeId)
         level = levels.get(snakeId, 2)
         sortKey = order.get(snakeId, 9999)
         row = {"snakeId": snakeId, "계정명": label, "_level": level, "_sort": sortKey}
-
-        # 분기 컬럼
         for i, y in enumerate(years):
             row[y] = values[i] if i < len(values) else None
-
-        # 연간 컬럼 (Plan v4 root fix, Plan v7 R0 옵션화)
-        if not includeAnnual:
-            rows.append(row)
-            continue
-        for yr in annualYears:
-            qCols = quarterYears[yr]
-            if sjDiv == "BS":
-                # stock: Q4 = 연말잔액. 없으면 그 해 마지막 분기.
-                qCols.sort(reverse=True)  # Q4, Q3, Q2, Q1
-                annualVal = None
-                for qc in qCols:
-                    v = row.get(qc)
-                    if v is not None:
-                        annualVal = v
-                        break
-            else:
-                # flow: 그 해 분기 단독값 합. None-safe.
-                qVals = [row.get(qc) for qc in qCols]
-                validQ = [v for v in qVals if v is not None]
-                if len(validQ) >= 1:
-                    annualVal = sum(validQ)
-                else:
-                    annualVal = None
-            row[yr] = annualVal
-
         rows.append(row)
 
     if not rows:
         return None
 
-    # Plan v7 R1: SNAKEID_ALIASES 양방향 row 머지 (root 통합).
-    # 같은 개념이 두 snakeId 로 분리된 케이스 (예: cash_flows_from_financing_activities ↔
-    # financing_cashflow) 를 한 row 로 합친다. col 별 not-null 우선.
-    from dartlab.core.finance.labels import SNAKEID_ALIASES
+    # 옵션: 분기 → 연간 합성. SSOT 헬퍼 위임 (core/finance/flow.py).
+    if includeAnnual:
+        from dartlab.core.finance.flow import synthesizeAnnualFromQuarters
+
+        rowMap = {r["snakeId"]: r for r in rows}
+        synthesizeAnnualFromQuarters(rowMap, list(years), sjDiv)
+
+    # SNAKEID_ALIASES 양방향 row 머지 — SSOT 헬퍼 위임 (core/finance/labels.py).
+    from dartlab.core.finance.labels import mergeAliasRows
 
     snakeToRow = {r["snakeId"]: r for r in rows}
-    metaCols = {"snakeId", "계정명", "_level", "_sort"}
-    mergedSnakeIds: set[str] = set()
-    for alias, canonical in SNAKEID_ALIASES.items():
-        if alias == canonical:
-            continue
-        aRow = snakeToRow.get(alias)
-        cRow = snakeToRow.get(canonical)
-        if aRow is None or cRow is None:
-            continue
-        for col, val in aRow.items():
-            if col in metaCols:
-                continue
-            if cRow.get(col) is None and val is not None:
-                cRow[col] = val
-        mergedSnakeIds.add(alias)
+    mergedSnakeIds = mergeAliasRows(snakeToRow)
     if mergedSnakeIds:
         rows = [r for r in rows if r["snakeId"] not in mergedSnakeIds]
 

@@ -9,6 +9,23 @@ All notable changes to DartLab will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed — 헬퍼 단일 진실의 원천 (SSOT) 통합
+
+- `core/finance/flow.py::synthesizeAnnualFromQuarters` 신설 — 분기 → 연간 합성 SSOT
+- `core/finance/labels.py::mergeAliasRows` 신설 — SNAKEID_ALIASES 머지 SSOT
+- `_helpers.py` / `_finance_helpers.py` 인라인 머지 로직 제거 → SSOT 위임
+- 결과: 이중/삼중 매핑 경로 정리
+
+### Added — Plan v7 부채 청산 (R0~R8)
+
+- annual 컬럼 옵션화 (`c.IS / c.BS / c.CF / c.CIS` 분기만 노출)
+- CF derived row 통합 (alias 양방향 머지)
+- toDict → toDictBySnakeId 단일 경로 마이그레이션 (14 calc + credit/review)
+- except narrow 11곳, F841 unused 120곳, dict literal `or 0` 정리
+- credit/metrics docstring 보강
+
 ## [0.9.2] - 2026-04-07
 
 ### Added

@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — 헬퍼 단일 진실의 원천 (SSOT) 통합
+
+- **`core/finance/flow.py::synthesizeAnnualFromQuarters`** 신설 — 분기 → 연간 합성 SSOT.
+  `toDict`, `toDictBySnakeId`, `_financeToDataFrame` 모두가 위임.
+- **`core/finance/labels.py::mergeAliasRows`** 신설 — SNAKEID_ALIASES 양방향 row 머지 SSOT.
+  pivot DataFrame 머지와 calc dict 머지 모두 단일 함수 호출.
+- `analysis/financial/_helpers.py` 의 `_synthesizeAnnualInPlace` 인라인 머지 로직 제거 → SSOT 위임.
+- `providers/dart/_finance_helpers.py::_financeToDataFrame` 의 인라인 머지 로직 제거 → SSOT 위임.
+- 결과: 이중/삼중 매핑 경로 정리, 규칙 변경 시 단일 파일만 수정.
+
+### Added — Plan v7 부채 청산 (5 commit, R0~R8)
+
+- **annual 컬럼 옵션화**: `c.IS / c.BS / c.CF / c.CIS` 기본 분기만 노출.
+  연간 합성은 `toDictBySnakeId` 가 4분기에서 자동.
+- **CF derived row 통합**: `financing_cashflow` ↔ `cash_flows_from_financing_activities`
+  같은 alias 쌍을 pivot 에서 한 row 로 머지 (SK하이닉스 2025 재무CF 결손 해결).
+- **toDict → toDictBySnakeId 단일 경로 마이그레이션**: 14 calc 파일 + credit/engine + review/narrative.
+  한국어 라벨도 키로 노출하여 양 provider 호환.
+- **except narrow**: 11 곳 `except Exception:` → 구체적 예외로 좁힘.
+- **F841 unused variable**: 120 곳 자동 정리.
+- **dict literal `or 0`**: 결과 dict 노출 위치 None 보존 (scan/macroBeta, scan/network/export).
+- **credit/metrics docstring**: `_div`, `_cv`, `_isQuarterlyFallback` 9 섹션 보강.
+
 ## [0.9.2] - 2026-04-07
 
 ### Added

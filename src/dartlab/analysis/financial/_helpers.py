@@ -150,46 +150,11 @@ def toDict(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict], list[str
         data[key] = {c: row.get(c) for c in periods}
     if not data:
         return None
-    # Plan v7 R0: 분기에서 연간 합성 (toDictBySnakeId 와 동일)
-    periods = _synthesizeAnnualInPlace(data, periods, getattr(selectResult, "topic", None))
+    # 분기에서 연간 합성 — SSOT 헬퍼 위임 (core/finance/flow.py)
+    from dartlab.core.finance.flow import synthesizeAnnualFromQuarters
+
+    periods = synthesizeAnnualFromQuarters(data, periods, getattr(selectResult, "topic", None))
     return (data, periods)
-
-
-def _synthesizeAnnualInPlace(data: dict[str, dict], periods: list[str], topic: str | None) -> list[str]:
-    """Plan v7 R0: data dict 에 연간 값 합성, 확장된 periods 반환.
-
-    _financeToDataFrame 가 더 이상 연간 컬럼을 노출하지 않으므로,
-    calc 가 ``data[key]['2024']`` 로 read 할 수 있도록 분기에서 합성.
-    IS/CIS/CF (flow): 4분기 모두 있을 때만 합 (부분 합산 금지).
-    BS (stock): Q4 (없으면 가장 최근 분기).
-    """
-    qPeriods = [p for p in periods if "Q" in p and len(p) >= 5]
-    if not qPeriods:
-        return periods
-    yearMap: dict[str, list[str]] = {}
-    for q in qPeriods:
-        yearMap.setdefault(q[:4], []).append(q)
-    isStock = topic == "BS"
-    for row in data.values():
-        for yr, qs in yearMap.items():
-            if yr in row:
-                continue
-            if isStock:
-                annualVal = None
-                for q in sorted(qs, reverse=True):
-                    v = row.get(q)
-                    if v is not None:
-                        annualVal = v
-                        break
-            else:
-                vals = [row.get(q) for q in qs]
-                valid = [v for v in vals if v is not None]
-                annualVal = sum(valid) if len(valid) == 4 else None
-            row[yr] = annualVal
-    addedYears = [yr for yr in yearMap.keys() if yr not in periods]
-    if addedYears:
-        return sorted(periods + addedYears, key=_periodSortKey, reverse=True)
-    return periods
 
 
 def toDictBySnakeId(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict], list[str]] | None:
@@ -233,35 +198,21 @@ def toDictBySnakeId(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict],
     if not data:
         return None
 
-    # Plan v7 R0: 연간 합성 (toDict 와 동일)
-    periods = _synthesizeAnnualInPlace(data, periods, getattr(selectResult, "topic", None))
+    # 연간 합성 — SSOT 헬퍼 위임 (toDict 와 동일 경로)
+    from dartlab.core.finance.flow import synthesizeAnnualFromQuarters
 
-    # Plan v5 B + v6 C5: SNAKEID_ALIASES 양방향 + 값 병합
-    # alias 와 canonical 둘 다 dict 에 있을 수도 있음 (예: cash_flows_from_financing_activities
-    # 가 mapper labels 에서 있고, financing_cashflow 가 dartlab derived row 에서 별도 존재).
-    # 양쪽 다 있으면 col 별로 not-null 우선 병합 (한쪽이 None 이고 다른 쪽이 값 있으면 값 사용).
-    from dartlab.core.finance.labels import SNAKEID_ALIASES
+    periods = synthesizeAnnualFromQuarters(data, periods, getattr(selectResult, "topic", None))
 
-    def _mergeAliasRows(canonRow: dict, aliasRow: dict) -> dict:
-        """col 별 not-null 우선 병합."""
-        merged = {}
-        allCols = set(canonRow.keys()) | set(aliasRow.keys())
-        for col in allCols:
-            v = canonRow.get(col)
-            if v is None:
-                v = aliasRow.get(col)
-            merged[col] = v
-        return merged
+    # SNAKEID_ALIASES 머지 + 양방향 노출 — SSOT 헬퍼 위임 (core/finance/labels.py).
+    # 두 키 모두 row 가 존재하면 col 별 not-null 머지, 한쪽만 존재하면 다른 쪽도
+    # 같은 row 를 가리키도록 노출하여 calc 가 어느 쪽 키로도 접근 가능.
+    from dartlab.core.finance.labels import SNAKEID_ALIASES, mergeAliasRows
 
+    mergeAliasRows(data, metaCols=set())  # dict 머지 — 메타 컬럼 없음
     for alias, canonical in SNAKEID_ALIASES.items():
         canonRow = data.get(canonical)
         aliasRow = data.get(alias)
-        if canonRow is not None and aliasRow is not None and canonRow is not aliasRow:
-            # 둘 다 별도 row 존재 → 병합 (Plan v6 C5)
-            merged = _mergeAliasRows(canonRow, aliasRow)
-            data[canonical] = merged
-            data[alias] = merged
-        elif canonRow is not None and aliasRow is None:
+        if canonRow is not None and aliasRow is None:
             data[alias] = canonRow
         elif aliasRow is not None and canonRow is None:
             data[canonical] = aliasRow

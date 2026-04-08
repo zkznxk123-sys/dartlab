@@ -611,10 +611,11 @@
 	}
 
 	.blog-article :global(table) {
-		display: table;
+		display: block;
 		width: 100%;
 		max-width: 100%;
-		table-layout: fixed;
+		overflow-x: auto;
+		table-layout: auto;
 		border-collapse: separate;
 		border-spacing: 0;
 		margin: 1.75rem 0;
@@ -657,6 +658,11 @@
 		color: #cbd5e1;
 		background: rgba(255, 255, 255, 0.01);
 		vertical-align: top;
+	}
+
+	.blog-article :global(td:first-child),
+	.blog-article :global(th:first-child) {
+		white-space: nowrap;
 	}
 
 	.blog-article :global(tbody tr:last-child td) {

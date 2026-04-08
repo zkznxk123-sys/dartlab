@@ -279,3 +279,45 @@ SNAKEID_ALIASES: dict[str, str] = {
     # ── 투자 ──
     "capex": "purchase_of_property_plant_and_equipment",
 }
+
+
+def mergeAliasRows(
+    rowMap: dict[str, dict],
+    *,
+    metaCols: set[str] | None = None,
+) -> set[str]:
+    """SNAKEID_ALIASES 양방향 row 머지 — 단일 진실의 원천 (SSOT).
+
+    같은 개념이 두 snakeId 로 분리된 케이스 (예: ``cash_flows_from_financing_activities``
+    ↔ ``financing_cashflow``) 를 한 row 로 in-place 합친다. col 별 not-null 우선.
+    canonical row 만 살아남고 alias row 는 제거 대상으로 분류.
+
+    DART pivot (``_financeToDataFrame``) 과 calc 헬퍼 (``toDictBySnakeId``)
+    양쪽 모두 이 함수를 호출 — 머지 로직은 이 한 곳에만 존재.
+
+    Args:
+        rowMap: ``{snakeId: row_dict}``. row_dict 는 in-place 수정됨.
+        metaCols: 머지 대상에서 제외할 메타 컬럼 (snakeId, 계정명 등).
+            None 이면 ``{"snakeId", "계정명", "_level", "_sort"}`` default.
+            calc 단계 dict 머지에서는 ``set()`` 전달.
+
+    Returns:
+        머지된 (= 제거 대상) alias snakeId set. 호출자가 필요 시 ``rowMap`` 에서 제거.
+    """
+    if metaCols is None:
+        metaCols = {"snakeId", "계정명", "_level", "_sort"}
+    mergedSnakeIds: set[str] = set()
+    for alias, canonical in SNAKEID_ALIASES.items():
+        if alias == canonical:
+            continue
+        aRow = rowMap.get(alias)
+        cRow = rowMap.get(canonical)
+        if aRow is None or cRow is None:
+            continue
+        for col, val in aRow.items():
+            if col in metaCols:
+                continue
+            if cRow.get(col) is None and val is not None:
+                cRow[col] = val
+        mergedSnakeIds.add(alias)
+    return mergedSnakeIds

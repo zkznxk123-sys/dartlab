@@ -1,26 +1,91 @@
-"""dartlab flow account 합산 — 단일 진실의 원천.
+"""dartlab flow account 합산 — 단일 진실의 원천 (SSOT).
 
-dartlab finance accessor 의 IS/CIS/CF 컬럼은 분기 단독값
-(`pivot.py::_normalizeQ4` 가 raw 4분기 연간을 standalone 으로 변환).
-calc 가 연간값을 얻으려면 4분기 합산 필요.
+dartlab finance accessor (``c.IS / c.CIS / c.CF``) 의 컬럼은 분기 단독값.
+(``pivot.py::_normalizeQ4`` 가 raw 4분기 연간 thstrm_amount 를 standalone 으로 변환.)
+calc 가 연간값을 얻으려면 4분기 합산이 필요. 이 모듈이 그 합산의 단일 출처.
 
-Plan v4 Layer A 이후 `c.IS / c.CIS / c.CF` 는 분기 컬럼 + annual 컬럼
-(`{year}`) 둘 다 자동 노출. 따라서 calc 는 보통 `row['2025']` 직접 read.
-이 모듈은 분기 부족 종목 / fallback 가 필요한 곳에서만 사용:
-- analysis 모드: ttmSum 의 누적공시 fallback (배당금 등 1~2회 이벤트)
-- credit 모드: 1~2 분기 부분합산 (부정확하지만 0보다 낫다)
+두 함수를 export 한다:
+
+- ``synthesizeAnnualFromQuarters(data, periods, topic)``
+  → dict ``{snakeId: {period: val}}`` 에 연간 키 ``YYYY`` 를 in-place 합성.
+  ``toDict``, ``toDictBySnakeId``, ``_financeToDataFrame`` 모두가 호출.
+
+- ``annualSumFlow(flowData, qCol, allPeriods, withFallback)``
+  → 단일 컬럼 기준 합산. credit/metrics 의 fallback 경로 전용.
+  누적공시 fallback (배당금 1~2회 이벤트) + credit-mode 부분 합산 지원.
 
 데이터 계약:
-- 4 분기 (Q4+Q3+Q2+Q1) 모두 있으면 단순 합 (정확)
-- 3 분기 → 평균 × 4 (연환산)
-- 1~2 분기 + with_fallback=False → 평균 × 4 (credit 모드, 부정확)
-- 1~2 분기 + with_fallback=True → None 또는 누적공시 fallback
-- Q1·Q2 None + Q4 단독 → Q4 그대로 (analysis 모드)
+
+- ``synthesizeAnnualFromQuarters`` (analysis 표준 — strict)
+  - IS/CIS/CF: **4분기 모두 있을 때만** 단순 합 (부분 합산 금지 → None)
+  - BS: Q4 (= 연말잔액). 없으면 그 해 가장 최근 분기.
+
+- ``annualSumFlow`` (credit/legacy — lenient)
+  - 3 분기 이상 → 평균 × 4 (연환산)
+  - 1~2 분기 + ``withFallback=True`` → Q1·Q2 None + Q4 단독 → Q4 그대로 (누적공시)
+  - 1~2 분기 + ``withFallback=False`` → 평균 × 4 (credit 모드 부정확 추정)
 """
 
 from __future__ import annotations
 
 from typing import Iterable
+
+
+def synthesizeAnnualFromQuarters(
+    data: dict[str, dict],
+    periods: list[str],
+    topic: str | None,
+) -> list[str]:
+    """분기 컬럼만 있는 dict 에 연간 키를 in-place 합성 (SSOT).
+
+    ``toDict`` / ``toDictBySnakeId`` / ``_financeToDataFrame`` 셋 다 이 함수 호출.
+    규칙 변경은 이 한 곳에서만.
+
+    Args:
+        data: ``{snakeId: {period: value}}`` 형태. period 는 ``YYYYQN`` 또는 ``YYYY``.
+            in-place 수정 — 합성된 연간 키 ``YYYY`` 가 row 에 추가됨.
+        periods: 입력 기간 리스트. 분기 + (이미 있는) 연간 모두 포함 가능.
+        topic: ``"BS"`` 면 stock 규칙 (Q4 = 연말잔액 alias),
+            그 외 (IS/CIS/CF) 는 flow 규칙 (4분기 strict 합).
+
+    Returns:
+        합성된 연간 라벨이 추가된 새 periods 리스트 (최신 우선 정렬).
+        이미 존재하는 연간 키는 건너뛴다.
+
+    Examples:
+        >>> data = {"sales": {"2024Q1": 10, "2024Q2": 12, "2024Q3": 14, "2024Q4": 16}}
+        >>> synthesizeAnnualFromQuarters(data, ["2024Q1","2024Q2","2024Q3","2024Q4"], "IS")
+        ['2024', '2024Q4', '2024Q3', '2024Q2', '2024Q1']
+        >>> data["sales"]["2024"]
+        52
+    """
+    qPeriods = [p for p in periods if "Q" in p and len(p) >= 5]
+    if not qPeriods:
+        return periods
+    yearMap: dict[str, list[str]] = {}
+    for q in qPeriods:
+        yearMap.setdefault(q[:4], []).append(q)
+    isStock = topic == "BS"
+    for row in data.values():
+        for yr, qs in yearMap.items():
+            if yr in row:
+                continue
+            if isStock:
+                annualVal = None
+                for q in sorted(qs, reverse=True):
+                    v = row.get(q)
+                    if v is not None:
+                        annualVal = v
+                        break
+            else:
+                vals = [row.get(q) for q in qs]
+                valid = [v for v in vals if v is not None]
+                annualVal = sum(valid) if len(valid) == 4 else None
+            row[yr] = annualVal
+    addedYears = [yr for yr in yearMap.keys() if yr not in periods]
+    if not addedYears:
+        return periods
+    return sorted(periods + addedYears, key=lambda p: p if "Q" in p else p + "Q5", reverse=True)
 
 
 def annualSumFlow(
