@@ -1,6 +1,6 @@
 ---
 title: "삼양식품 (003230) — 라면 빅3 꼴등이 매출 2.3조 글로벌 식품 거인이 되기까지"
-date: 2026-03-29
+date: 2026-04-03
 description: "2014년 라면 시장 꼴등 회사가 9년 만에 영업이익률 21.83%, 매출 5.1배. 그 사이 한 사람의 매운맛 베팅이 있었고, 호황의 정중앙에서 잉여현금이 -1,397억으로 떨어지는 공격투자 사이클이 있었다."
 category: company-reports
 series: company-reports
@@ -23,7 +23,7 @@ youtubeId: ""
 
 > **반전 폭발 + 인물 중심** | 식품 > 라면 | 2026-04-08 dartlab 실측
 > 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: review + analysis + credit + report.dividend
-> 같은 시리즈: [SK하이닉스 (000660)](/blog/000660-skhynix) · [두산에너빌리티 (034020)](/blog/034020-doosan-enerbility) · [알테오젠 (196170)](/blog/196170-alteogen) · [기업분석 시리즈 전체](/blog/series/company-reports)
+> 같은 시리즈: [SK하이닉스 (000660)](/blog/000660-skhynix) · [두산에너빌리티 (034020)](/blog/034020-doosan-enerbility) · [알테오젠 (196170)](/blog/196170-alteogen) · [HMM (011200)](/blog/011200-hmm) · [기업분석 시리즈 전체](/blog/series/company-reports)
 
 ---
 

@@ -122,6 +122,7 @@
 - 02 삼양식품 (003230) — 2026-04-08 시계열 표 + 사진 5장 추가 (12,000자, SVG 5장, 사진 5장) — [audit](https://github.com/eddmpython/dartlab/blob/master/.claude/audits/02-samyang-anomalies.md), [영상 009](https://github.com/eddmpython/dartlab/tree/master/video/output/009-samyang-buldak)
 - 03 두산에너빌리티 (034020) — 2026-04-08 핵심 후킹 정직 재작성("9년 적자" 거짓 → "9년 다이어트") + 시계열 표 + 사진 4장 (12,000자, SVG 3장, 사진 4장) — [audit](https://github.com/eddmpython/dartlab/blob/master/.claude/audits/010-doosan-anomalies.md), [영상 010](https://github.com/eddmpython/dartlab/tree/master/video/output/010-doosan-enerbility)
 - 04 알테오젠 (196170) — 2026-04-08 단일 종목 깊이 기획 (블로그 + 영상 + 대사 한 세트). 8년 영업적자 → 머크 키트루다 SC 라이선스 → 2025 영업이익률 49.52%. 박순재 17년 인물 서사 (16,000자, SVG 7장 신규 제작, 사진 4장, 시계열 표 IS/BS/CF 3종) — [영상 012](https://github.com/eddmpython/dartlab/tree/master/video/output/012-alteogen)
+- 05 HMM (011200) — 2026-04-08 dartlab 3개 엔진 동시 사용 첫 글 (analysis + quant + credit). 9년 5번 사이클, 자본총계 31배 폭증, 베타 0.37/R² 10%/변동성 59% — "시장이 아니라 사이클이 주가를 결정하는 회사" (24,000자, SVG 4장, 사진 3장)
 
 이전 글들 (LG화학/KT&G/대한항공/삼성전자) 은 audit·영상 동반 없이 작성되어 2026-04-07 정리됨. 새 시리즈는 SK하이닉스부터 시작.
 

@@ -1,6 +1,6 @@
 ---
 title: "두산에너빌리티 (034020) — 부채비율 305%에서 129%까지, 9년 다이어트의 진짜 모습"
-date: 2026-04-02
+date: 2026-04-05
 description: "2018년 부채비율 305%였던 회사가 7년 만에 129%로. 9년 동안 영업이익은 매년 흑자였지만 이자비용이 그 흑자를 거의 매번 잡아먹었다. 2025년 12월 체코 5조 6천억 잭팟은 다이어트가 끝났다는 외부 인증이다."
 category: company-reports
 series: company-reports
@@ -23,7 +23,7 @@ youtubeId: ""
 
 > **위기 탈출 + 장기 사이클** | 산업재 > 발전·에너지 | 2026-04-08 dartlab 실측
 > 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: review + analysis + credit + report.dividend
-> 같은 시리즈: [SK하이닉스 (000660)](/blog/000660-skhynix) · [삼양식품 (003230)](/blog/003230-samyang-foods) · [알테오젠 (196170)](/blog/196170-alteogen) · [기업분석 시리즈 전체](/blog/series/company-reports)
+> 같은 시리즈: [SK하이닉스 (000660)](/blog/000660-skhynix) · [삼양식품 (003230)](/blog/003230-samyang-foods) · [알테오젠 (196170)](/blog/196170-alteogen) · [HMM (011200)](/blog/011200-hmm) · [기업분석 시리즈 전체](/blog/series/company-reports)
 
 ---
 

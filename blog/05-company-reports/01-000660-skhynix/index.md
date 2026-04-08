@@ -1,6 +1,6 @@
 ---
 title: "SK하이닉스 (000660) — 한국 반도체 30년의 미스터리, 그리고 영업이익률 58%"
-date: 2026-03-22
+date: 2026-04-01
 description: "1983 현대전자로 시작해 다섯 번 망할 뻔한 회사가 2025년 4분기 영업이익률 58.40%, 사상 처음으로 모회사 삼성전자를 추월했다. 9년 사이클 + 가격결정력 + CAPEX 27조 베팅을 dartlab으로 펼친다."
 category: company-reports
 series: company-reports
@@ -23,7 +23,7 @@ youtubeId: ""
 
 > **장기 사이클 + 위기 탈출** | IT > 메모리반도체 | 2026-04-08 dartlab 실측
 > 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: review + analysis + credit + report
-> 같은 시리즈: [삼양식품 (003230)](/blog/003230-samyang-foods) · [두산에너빌리티 (034020)](/blog/034020-doosan-enerbility) · [알테오젠 (196170)](/blog/196170-alteogen) · [기업분석 시리즈 전체](/blog/series/company-reports)
+> 같은 시리즈: [삼양식품 (003230)](/blog/003230-samyang-foods) · [두산에너빌리티 (034020)](/blog/034020-doosan-enerbility) · [알테오젠 (196170)](/blog/196170-alteogen) · [HMM (011200)](/blog/011200-hmm) · [기업분석 시리즈 전체](/blog/series/company-reports)
 
 ---
 
