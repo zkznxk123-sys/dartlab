@@ -661,7 +661,7 @@ def calcDilutionTrend(company, *, basePeriod: str | None = None) -> dict | None:
     basicRow = None
     dilutedRow = None
     for row in epsDf:
-        item = str(row.get("계정명", row.get("항목", ""))).strip()
+        item = str(row.get("항목", row.get("계정명", ""))).strip()
         if "희석" in item:
             dilutedRow = row
         elif "기본" in item or "주당" in item:

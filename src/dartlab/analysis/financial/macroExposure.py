@@ -300,7 +300,7 @@ def calcValuationBand(company, *, basePeriod: str | None = None) -> dict | None:
                 # 기간 컬럼에서 값 추출
                 values = []
                 for col in row.columns:
-                    if col in ("snakeId", "계정명", "account"):
+                    if col in ("snakeId", "항목", "계정명", "account"):
                         continue
                     val = row[col][0]
                     if val is not None:

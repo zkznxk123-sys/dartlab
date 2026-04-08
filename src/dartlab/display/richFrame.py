@@ -50,7 +50,7 @@ def _periodColumns(df: pl.DataFrame) -> list[str]:
 
 def _labelColumn(df: pl.DataFrame) -> str | None:
     """계정명 컬럼 찾기."""
-    for candidate in ("계정명", "label", "account_nm", "topic"):
+    for candidate in ("항목", "계정명", "label", "account_nm", "topic"):
         if candidate in df.columns:
             return candidate
     return None

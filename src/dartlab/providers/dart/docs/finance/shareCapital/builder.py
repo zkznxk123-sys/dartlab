@@ -78,57 +78,73 @@ def buildSharesOutstandingScan(
     if not parquetFiles:
         raise FileNotFoundError(f"docs parquet 없음: {docsRoot}")
 
-    log.info("[shares] scanning %d docs parquets", len(parquetFiles))
+    log.info("[shares] scanning %d docs parquets (per-file)", len(parquetFiles))
 
-    glob = str(docsRoot / "*.parquet")
-    lf = (
-        pl.scan_parquet(glob)
-        .filter(pl.col("section_title") == _SECTION_TITLE)
-        .select(
-            [
-                "stock_code",
-                "corp_name",
-                "year",
-                "rcept_date",
-                "rcept_no",
-                "report_type",
-                "section_content",
-            ]
-        )
-    )
-    df = lf.collect()
-    log.info("[shares] %d shares-section rows", df.height)
+    keepCols = [
+        "stock_code",
+        "corp_name",
+        "year",
+        "rcept_date",
+        "rcept_no",
+        "report_type",
+        "section_content",
+    ]
 
     records: list[dict] = []
     skipped = 0
-    for row in df.iter_rows(named=True):
-        parsed = parseShareCapitalTable(row["section_content"], includePreferred=True)
-        if parsed is None:
-            skipped += 1
+    failedFiles = 0
+    sectionRows = 0
+    for idx, pf in enumerate(parquetFiles):
+        try:
+            sub = (
+                pl.scan_parquet(str(pf))
+                .filter(pl.col("section_title") == _SECTION_TITLE)
+                .select(keepCols)
+                .collect()
+            )
+        except (pl.exceptions.PolarsError, OSError):
+            failedFiles += 1
             continue
-        rec = {
-            "stock_code": row["stock_code"],
-            "corp_name": row["corp_name"],
-            "year": row["year"],
-            "rcept_date": row["rcept_date"],
-            "rcept_no": row["rcept_no"],
-            "report_type": row["report_type"],
-            "authorizedShares": parsed.get("authorizedShares"),
-            "issuedShares": parsed.get("issuedShares"),
-            "retiredShares": parsed.get("retiredShares"),
-            "outstandingShares": parsed.get("outstandingShares"),
-            "treasuryShares": parsed.get("treasuryShares"),
-            "floatingShares": parsed.get("floatingShares"),
-            "treasuryRatio": parsed.get("treasuryRatio"),
-            "preferredIssued": parsed.get("preferredIssued"),
-            "preferredOutstanding": parsed.get("preferredOutstanding"),
-            "preferredTreasury": parsed.get("preferredTreasury"),
-            "preferredFloating": parsed.get("preferredFloating"),
-            "source": "dart_docs",
-        }
-        records.append(rec)
+        if sub.is_empty():
+            continue
+        sectionRows += sub.height
+        for row in sub.iter_rows(named=True):
+            parsed = parseShareCapitalTable(row["section_content"], includePreferred=True)
+            if parsed is None:
+                skipped += 1
+                continue
+            records.append(
+                {
+                    "stock_code": row["stock_code"],
+                    "corp_name": row["corp_name"],
+                    "year": row["year"],
+                    "rcept_date": row["rcept_date"],
+                    "rcept_no": row["rcept_no"],
+                    "report_type": row["report_type"],
+                    "authorizedShares": parsed.get("authorizedShares"),
+                    "issuedShares": parsed.get("issuedShares"),
+                    "retiredShares": parsed.get("retiredShares"),
+                    "outstandingShares": parsed.get("outstandingShares"),
+                    "treasuryShares": parsed.get("treasuryShares"),
+                    "floatingShares": parsed.get("floatingShares"),
+                    "treasuryRatio": parsed.get("treasuryRatio"),
+                    "preferredIssued": parsed.get("preferredIssued"),
+                    "preferredOutstanding": parsed.get("preferredOutstanding"),
+                    "preferredTreasury": parsed.get("preferredTreasury"),
+                    "preferredFloating": parsed.get("preferredFloating"),
+                    "source": "dart_docs",
+                }
+            )
+        if (idx + 1) % 500 == 0:
+            log.info("[shares] progress %d/%d (records=%d)", idx + 1, len(parquetFiles), len(records))
 
-    log.info("[shares] parsed %d / skipped %d", len(records), skipped)
+    log.info(
+        "[shares] section_rows=%d parsed=%d skipped=%d failedFiles=%d",
+        sectionRows,
+        len(records),
+        skipped,
+        failedFiles,
+    )
 
     if not records:
         raise RuntimeError("발행주식수 추출 결과가 비어있음")

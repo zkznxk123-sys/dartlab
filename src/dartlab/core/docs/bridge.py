@@ -130,7 +130,7 @@ def get_finance_amounts(company, period: str) -> dict[str, float]:
             continue
 
         for row in stmt.iter_rows(named=True):
-            account = row.get("계정명") or row.get("account") or row.get("항목")
+            account = row.get("항목") or row.get("계정명") or row.get("account")
             val = row.get(target_period)
             if account and val is not None:
                 try:

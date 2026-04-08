@@ -131,7 +131,11 @@ def toDict(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict], list[str
         return None
 
     labelCol = (
-        "항목" if "항목" in df.columns else "계정명" if "계정명" in df.columns else (df.columns[0] if df.columns else None)
+        "항목"
+        if "항목" in df.columns
+        else "계정명"
+        if "계정명" in df.columns
+        else (df.columns[0] if df.columns else None)
     )
     if labelCol is None:
         return None

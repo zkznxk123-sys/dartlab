@@ -660,10 +660,11 @@
 	}
 
 	.blog-article :global(table) {
-		display: table;
+		display: block;
 		width: 100%;
 		max-width: 100%;
-		table-layout: auto;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
 		border-collapse: separate;
 		border-spacing: 0;
 		margin: 1.75rem 0;
@@ -681,18 +682,11 @@
 
 	/* thead/tbody — 컨테이너 풀폭 우선, 컨텐츠가 더 크면 가로 스크롤
 	   table은 block + overflow-x auto이므로 자식이 max-content면 표 안에서만 스크롤 */
-	@media (max-width: 768px) {
-		.blog-article :global(table) {
-			display: block;
-			overflow-x: auto;
-			-webkit-overflow-scrolling: touch;
-		}
-		.blog-article :global(table thead),
-		.blog-article :global(table tbody) {
-			display: table;
-			width: 100%;
-			min-width: max-content;
-		}
+	.blog-article :global(table thead),
+	.blog-article :global(table tbody) {
+		display: table;
+		width: 100%;
+		min-width: max-content;
 	}
 
 	.blog-article :global(thead) {
