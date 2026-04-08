@@ -99,7 +99,7 @@ def test_dart_docs_isinstance_protocol():
     from dartlab.providers.dart.company import Company
 
     c = Company(SAMSUNG)
-    assert isinstance(c.docs, DocsProtocol)
+    assert isinstance(c._docs, DocsProtocol)
 
 
 @requires_samsung
@@ -107,7 +107,7 @@ def test_dart_finance_isinstance_protocol():
     from dartlab.providers.dart.company import Company
 
     c = Company(SAMSUNG)
-    assert isinstance(c.finance, FinanceProtocol)
+    assert isinstance(c._finance, FinanceProtocol)
 
 
 @pytest.mark.skipif(
