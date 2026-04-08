@@ -23,7 +23,7 @@ youtubeId: ""
 
 > **위기 탈출 + 장기 사이클** | 산업재 > 발전·에너지 | 2026-04-08 dartlab 실측
 > 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: review + analysis + credit + report.dividend
-> 같은 시리즈: [SK하이닉스 (000660)](/blog/000660-skhynix) · [삼양식품 (003230)](/blog/003230-samyang-foods) · [기업분석 시리즈 전체](/blog/series/company-reports)
+> 같은 시리즈: [SK하이닉스 (000660)](/blog/000660-skhynix) · [삼양식품 (003230)](/blog/003230-samyang-foods) · [알테오젠 (196170)](/blog/196170-alteogen) · [기업분석 시리즈 전체](/blog/series/company-reports)
 
 ---
 
