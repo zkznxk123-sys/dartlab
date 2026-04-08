@@ -428,11 +428,10 @@ class Company:
         self.cik = tickerRow["cik"]
         self.corpName = tickerRow.get("title") or self.ticker
 
-        # Plan v10 P3 (deferred): namespace 제거 별도 commit. underscore alias.
+        # public namespace 는 docs 만 (P3a: c.finance 제거)
         self.docs = _DocsAccessor(self)
-        self.finance = _FinanceAccessor(self)
         self._docs = self.docs
-        self._finance = self.finance
+        self._finance = _FinanceAccessor(self)
         self._profileAccessor = _ProfileAccessor(self)
         self._reportAccessor = None  # lazy init
 

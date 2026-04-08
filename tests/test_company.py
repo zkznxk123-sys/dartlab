@@ -267,7 +267,6 @@ class TestCompany:
 
         c = self.c
         assert c.docs is not None
-        assert c.finance is not None
         assert c.report is not None
         assert c.index is not None
         assert c.profile is not None
@@ -298,11 +297,11 @@ class TestCompany:
         assert isinstance(c.docs.sections.raw, pl.DataFrame)
         assert isinstance(c.sections, pl.DataFrame)
         assert isinstance(c.sources, pl.DataFrame)
-        assert isinstance(c.finance.BS, pl.DataFrame)
-        assert isinstance(c.finance.IS, pl.DataFrame)
-        assert isinstance(c.finance.CIS, pl.DataFrame)
-        assert isinstance(c.finance.CF, pl.DataFrame)
-        assert isinstance(c.finance.SCE, pl.DataFrame)
+        assert isinstance(c.show("BS"), pl.DataFrame)
+        assert isinstance(c.show("IS"), pl.DataFrame)
+        assert isinstance(c.show("CIS"), pl.DataFrame)
+        assert isinstance(c.show("CF"), pl.DataFrame)
+        assert isinstance(c.show("SCE"), pl.DataFrame)
 
     def test_docs_sections_projection_and_semantic_registry_accessors(self):
         c = self.c
@@ -483,10 +482,8 @@ class TestCompany:
 
     def test_finance_cis_and_sce_are_exposed(self):
         c = self.c
-        assert isinstance(c.finance.CIS, pl.DataFrame)
-        assert isinstance(c.CIS, pl.DataFrame)
-        assert isinstance(c.finance.SCE, pl.DataFrame)
-        assert isinstance(c.SCE, pl.DataFrame)
+        assert isinstance(c.show("CIS"), pl.DataFrame)
+        assert isinstance(c.show("SCE"), pl.DataFrame)
 
     def test_sections_contain_docs_topics(self):
         c = self.c

@@ -167,7 +167,7 @@ def _extract_from_company(
     if financials is None:
         financials = {}
         try:
-            ratios = company.finance.ratios
+            ratios = company._finance.ratios
             if ratios is not None:
                 eps = ratios.get("eps") if isinstance(ratios, dict) else getattr(ratios, "eps", None)
                 bps = ratios.get("bps") if isinstance(ratios, dict) else getattr(ratios, "bps", None)

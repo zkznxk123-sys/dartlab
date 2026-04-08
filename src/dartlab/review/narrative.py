@@ -255,7 +255,7 @@ def _detectWorkingCapitalStrain(company, blockMap) -> NarrativeThread | None:
 
     # 순현금 상태이면 "유동성 위기" 서사 억제
     try:
-        ratios = company.finance.ratios
+        ratios = company._finance.ratios
         nd = getattr(ratios, "netDebt", None)
         if nd is not None and nd < 0:
             return None  # 순현금이면 유동성 위기 아님
@@ -634,7 +634,7 @@ def buildActTransitions(company, blockMap: dict) -> dict[str, str]:
     transitions = {}
 
     try:
-        ratios = company.finance.ratios
+        ratios = company._finance.ratios
     except (AttributeError, ValueError):
         return transitions
 

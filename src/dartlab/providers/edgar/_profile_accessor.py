@@ -49,7 +49,7 @@ class _ProfileAccessor:
         # finance topics 추가
         extraRows: list[dict[str, Any]] = []
         for ft in ("BS", "IS", "CF", "CIS"):
-            df = getattr(self._company.finance, ft, None)
+            df = getattr(self._company._finance, ft, None)
             if df is not None:
                 extraRows.append(
                     {
@@ -61,7 +61,7 @@ class _ProfileAccessor:
                         **{p: None for p in periodCols},
                     }
                 )
-        if self._company.finance.ratioSeries is not None:
+        if self._company._finance.ratioSeries is not None:
             extraRows.append(
                 {
                     "chapter": "Financial Statements",

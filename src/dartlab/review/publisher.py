@@ -177,7 +177,7 @@ def _makeTitle(templateName: str, corpName: str) -> str:
 def _extractSector(company) -> str:
     """Company에서 업종 정보 추출."""
     try:
-        ratios = company.finance.ratios
+        ratios = company._finance.ratios
         sector = getattr(ratios, "sector", None) or ""
         industryGroup = getattr(ratios, "industryGroup", None) or ""
         if sector and industryGroup:

@@ -134,7 +134,7 @@ def verifyOpenEdgarSaveCompatibility(ticker: str) -> dict[str, object]:
 
     company = Company(ticker)
     docsSections = company.docs.sections
-    financeBs = company.finance.BS
+    financeBs = company._finance.BS
     indexDf = company.index
     docTopics = []
     if indexDf is not None and "source" in indexDf.columns and "topic" in indexDf.columns:

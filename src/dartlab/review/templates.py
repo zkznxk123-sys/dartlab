@@ -599,7 +599,7 @@ def detectTemplate(company) -> str | None:
 def _extractCommon(company):
     """공통 데이터 추출 (체크 함수 공용)."""
     try:
-        ratios = company.finance.ratios
+        ratios = company._finance.ratios
     except (AttributeError, ValueError):
         return None
 
@@ -607,7 +607,7 @@ def _extractCommon(company):
         return getattr(ratios, name, default)
 
     try:
-        rs = company.finance.ratioSeries
+        rs = company._finance.ratioSeries
         if rs:
             data, _ = rs
             opMargins = data.get("RATIO", {}).get("operatingMargin", [])

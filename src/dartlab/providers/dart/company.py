@@ -315,15 +315,14 @@ class Company:
 
         self._hintedKeys: set[str] = set()  # 동일 안내 반복 방지
 
-        # Plan v10 P3 (deferred): namespace 제거 별도 commit 예정. 큰 마이그레이션.
         self._notesAccessor = Notes(self) if self._hasDocs else None
+        # public namespace 는 docs/report 만 (P3a: c.finance 제거)
         self.docs = _DocsAccessor(self)
-        self.finance = _FinanceAccessor(self)
         self.report = _ReportAccessor(self)
         self._profileAccessor = _ProfileAccessor(self)
-        # underscore alias (P3 마이그레이션 시작용)
+        # private 백엔드 — 내부 compute 전용 (review/credit/valuation 등)
         self._docs = self.docs
-        self._finance = self.finance
+        self._finance = _FinanceAccessor(self)
         self._report = self.report
 
     def __repr__(self):

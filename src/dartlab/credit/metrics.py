@@ -112,7 +112,7 @@ def _ttmSum(flowData: dict, qCol: str, allPeriods: list[str]) -> float | None:
 
 def _getRatios(company):
     try:
-        return company.finance.ratios
+        return company._finance.ratios
     except (ValueError, KeyError, AttributeError):
         return None
 
