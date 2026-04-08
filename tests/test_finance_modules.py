@@ -71,7 +71,7 @@ class TestBond:
     def test_basic(self):
         from dartlab.providers.dart.docs.finance.bond import bond
 
-        r = bond(SAMSUNG)
+        bond(SAMSUNG)
         # 삼성전자는 채무증권이 없을 수 있음
         # None이어도 에러 없이 반환만 확인
 
@@ -172,7 +172,7 @@ class TestContingentLiability:
     def test_basic(self):
         from dartlab.providers.dart.docs.finance.contingentLiability import contingentLiability
 
-        r = contingentLiability(SAMSUNG)
+        contingentLiability(SAMSUNG)
         # 삼성전자는 우발부채가 없을 수 있음 — None이어도 에러 없이 반환 확인
 
 
@@ -181,7 +181,7 @@ class TestRelatedPartyTx:
     def test_basic(self):
         from dartlab.providers.dart.docs.finance.relatedPartyTx import relatedPartyTx
 
-        r = relatedPartyTx(SAMSUNG)
+        relatedPartyTx(SAMSUNG)
         # None이어도 에러 없이 반환 확인
 
 
@@ -190,7 +190,7 @@ class TestSanction:
     def test_basic(self):
         from dartlab.providers.dart.docs.finance.sanction import sanction
 
-        r = sanction(SAMSUNG)
+        sanction(SAMSUNG)
         # 제재가 없을 수 있음 — None이어도 에러 없이 반환 확인
 
 

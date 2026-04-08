@@ -75,7 +75,7 @@ def retrievalBlocks(ticker: str) -> pl.DataFrame | None:
         return None
 
     # 메타 컬럼 (period 제외)
-    metaCols = [c for c in sec.columns if c not in periodCols]
+    [c for c in sec.columns if c not in periodCols]
 
     # ── Python loop로 block 행 생성 (Polars unpivot보다 유연) ──
     tickers: list[str] = []

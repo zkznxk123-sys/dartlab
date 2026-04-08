@@ -306,7 +306,6 @@ def _executeQuery(
     toolPanels: list[str] = []
     queryStart = time.monotonic()
     queryToolCount = 0
-    thinkingPhase = True
 
     try:
         with Live(console=console, refresh_per_second=10, vertical_overflow="visible", transient=True) as live:
@@ -315,12 +314,10 @@ def _executeQuery(
 
             for ev in events:
                 if ev.kind == "chunk":
-                    thinkingPhase = False
                     buffer += ev.data["text"]
                     live.update(Markdown(buffer))
 
                 elif ev.kind == "tool_call":
-                    thinkingPhase = False
                     toolName = ev.data.get("name", "")
                     label = _toolLabel(toolName)
                     from dartlab.cli.constants import formatToolArgs

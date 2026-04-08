@@ -203,7 +203,7 @@ class _FileProcessor:
                     continue
 
                 thstrm = qDf["_thstrm"][0]
-                addAmount = qDf["_addAmount"][0] if "_addAmount" in qDf.columns else None
+                qDf["_addAmount"][0] if "_addAmount" in qDf.columns else None
 
                 if thstrm is None:
                     continue

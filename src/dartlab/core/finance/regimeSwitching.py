@@ -318,8 +318,8 @@ def _hamilton_filter(
         predicted[t] = xi_pred
 
         # 조건부 밀도
-        resid0 = y[t] - mu[0] - (phi * y[t - 1] if t > 0 else 0.0)
-        resid1 = y[t] - mu[1] - (phi * y[t - 1] if t > 0 else 0.0)
+        y[t] - mu[0] - (phi * y[t - 1] if t > 0 else 0.0)
+        y[t] - mu[1] - (phi * y[t - 1] if t > 0 else 0.0)
         eta = np.array(
             [
                 _gaussian_density(y[t], mu[0] + (phi * y[t - 1] if t > 0 else 0.0), sigma[0]),

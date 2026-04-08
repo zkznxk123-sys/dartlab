@@ -204,7 +204,6 @@ def extractProfiles(rows: list[list[str]]) -> list[AffiliateProfile]:
     headers = None
     subHeaders = None
     headerIdx = None
-    dataLen = None
     category = None
 
     for i, cells in enumerate(rows):
@@ -246,14 +245,14 @@ def extractProfiles(rows: list[list[str]]) -> list[AffiliateProfile]:
             headers = cells
             headerIdx = i
             subHeaders = None
-            dataLen = len(cells)
+            len(cells)
             continue
 
         # 서브헤더: 헤더 바로 다음 행이고 지분율/장부금액 키워드 포함
         if headers and headerIdx is not None and i == headerIdx + 1:
             if any(kw in cellStr for kw in _PROFILE_SUBHEADER_KEYWORDS):
                 subHeaders = cells
-                dataLen = max(len(headers), len(subHeaders))
+                max(len(headers), len(subHeaders))
                 continue
 
         # "구 분 | 당기말" 같은 2셀 헤더 → 다음 행이 실제 컬럼 헤더

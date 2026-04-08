@@ -188,7 +188,7 @@ def technicalVerdict(df: pl.DataFrame) -> dict[str, Any]:
             beta = _calcBeta(df, market)
             result["relativeStrength"] = rs
             result["beta"] = beta
-    except Exception:
+    except (ValueError, KeyError, AttributeError, ZeroDivisionError):
         pass
 
     return result

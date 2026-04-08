@@ -2150,7 +2150,7 @@ class Company:
             return None
 
         source = boRows["source"][0] if "source" in boRows.columns else "docs"
-        bt = boRows["blockType"][0]
+        boRows["blockType"][0]
 
         if source == "finance":
             result = self._showFinanceTopic(topic, period=period)

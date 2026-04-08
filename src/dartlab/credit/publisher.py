@@ -1171,7 +1171,7 @@ def generateReportMarkdown(
         lines.extend(causalDiagram)
 
     # ── 재무 분석 (7축/5축 상세) ──
-    finNum = _secCounter[0] + 1
+    _secCounter[0] + 1
     lines.append(_sec("재무 분석"))
     lines.append("")
 

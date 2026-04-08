@@ -749,7 +749,7 @@ def calcValuationSynthesis(company: Any, *, basePeriod: str | None = None) -> di
         eq = getLatest(series, "BS", "total_equity")
         if eq and shares and shares > 0:
             bps = eq / shares
-            revCagr = getRevenueGrowth3Y(series) or 0
+            getRevenueGrowth3Y(series) or 0
             # 2년 후 Forward BPS = 현재 BPS × (1 + ROE추정)^2
             # ROE 추정: 최근 양수 ROE 또는 섹터 평균 8%
             niVals = getAnnualValues(series, "IS", "net_profit")

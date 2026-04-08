@@ -108,16 +108,6 @@ def _addInsightBullBear(
 ) -> None:
     """insight 10영역의 구체적 수치를 bull/bear에 직접 사용."""
     # 영역별 중요도 (앞쪽일수록 중요)
-    priorityAreas = [
-        "performance",
-        "profitability",
-        "health",
-        "cashflow",
-        "governance",
-        "predictability",
-        "uncertainty",
-        "coreEarnings",
-    ]
 
     for detail in details:
         if detail.area in ("risk", "opportunity"):
@@ -254,7 +244,6 @@ def _buildNarrative(
     va: ValuationSection | None,
 ) -> str:
     """1-2문장 핵심 투자 요약."""
-    name = ""
     parts = []
 
     nBull = len(bull)

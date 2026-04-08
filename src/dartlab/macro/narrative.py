@@ -264,7 +264,7 @@ def detect_conflicts(summary: dict) -> list[str]:
 
     forecast = summary.get("forecast") or {}
     cycle = summary.get("cycle") or {}
-    crisis = summary.get("crisis") or {}
+    summary.get("crisis") or {}
     sentiment = summary.get("sentiment") or {}
     inventory = summary.get("inventory") or {}
     corporate = summary.get("corporate") or {}
@@ -355,7 +355,7 @@ def generate_act_transition(act: int, summary: dict) -> str:
         prob = _safe(rp.get("probability"), "probability")
 
         hamilton = forecast.get("hamiltonRegime") or {}
-        regime = hamilton.get("currentRegime", "")
+        hamilton.get("currentRegime", "")
 
         parts = []
         if prob is not None:

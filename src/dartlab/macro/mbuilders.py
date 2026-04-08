@@ -58,7 +58,7 @@ def build_dashboard_blocks(summary: dict) -> list:
     crisis = summary.get("crisis") or {}
     inventory = summary.get("inventory") or {}
     trade = summary.get("trade") or {}
-    corporate = summary.get("corporate") or {}
+    summary.get("corporate") or {}
 
     signals = [
         ("사이클", cycle.get("phaseLabel", "—")),

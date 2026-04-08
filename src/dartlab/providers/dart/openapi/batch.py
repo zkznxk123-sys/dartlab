@@ -897,7 +897,7 @@ def batchCollect(
     result: dict[str, dict[str, int]] = {}
     runError: list[BaseException] = []
 
-    catLabel = ", ".join(cats)
+    ", ".join(cats)
 
     def _buildDisplay() -> Table:
         """워커 상태 + 전체 진행 bar를 rich Table로 구성."""

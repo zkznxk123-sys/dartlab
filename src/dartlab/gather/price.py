@@ -36,12 +36,10 @@ async def fetch(
     chain = health_tracker.reorder(chain)
 
     # client=None이면 자체 생성
-    ownClient = False
     if client is None:
         from .http import GatherHttpClient
 
         client = GatherHttpClient()
-        ownClient = True
 
     for source_name in chain:
         if circuit_breaker.is_open(source_name):

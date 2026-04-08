@@ -392,7 +392,7 @@ def interpretAssets(indicators: dict[str, float | None]) -> list[AssetSignal]:
     # 3. 환율 (원/달러) — 금리차 교차 해석
     fx = indicators.get("fx_usdkrw")
     fx_chg = indicators.get("fx_change_pct")
-    rate_diff = indicators.get("rate_diff")  # US금리 - KR금리
+    indicators.get("rate_diff")  # US금리 - KR금리
     rate_diff_chg = indicators.get("rate_diff_change")
     if fx is not None:
         # 기본 방향 해석

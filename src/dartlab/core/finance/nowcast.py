@@ -136,7 +136,7 @@ def _kalman_smoother(
         a_smooth, P_smooth
     """
     T = a_filt.shape[0]
-    rp = A.shape[0]
+    A.shape[0]
 
     a_smooth = np.zeros_like(a_filt)
     P_smooth = np.zeros_like(P_filt)

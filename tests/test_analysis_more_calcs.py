@@ -63,7 +63,7 @@ def _krToSnakeId() -> dict[str, str]:
         "감가상각비": "depreciation",
         "영업활동현금흐름": "operating_cashflow",
         "투자활동현금흐름": "investing_cashflow",
-        "재무활동으로인한현금흐름": "cash_flows_from_financing_activities",
+        "재무활동으로인한현금흐름": "financing_cashflow",
         "유형자산의취득": "purchase_of_property_plant_and_equipment",
         "무형자산의취득": "purchase_of_intangible_assets",
         "단기차입금": "shortterm_borrowings",

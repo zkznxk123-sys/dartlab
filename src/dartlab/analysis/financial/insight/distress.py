@@ -484,7 +484,7 @@ def calcDistress(
 
     # 감사 Red Flag 수 기반 점수
     n_critical = sum(1 for a in audit_anomalies if a.severity == "danger")
-    n_warning = sum(1 for a in audit_anomalies if a.severity == "warning")
+    sum(1 for a in audit_anomalies if a.severity == "warning")
     n_total = len(audit_anomalies)
 
     if n_total > 0:

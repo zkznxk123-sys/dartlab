@@ -145,7 +145,7 @@ def calcEfficiencyFlags(company, *, basePeriod: str | None = None) -> list[str]:
     revYoy = h0.get("revenue")
     revPrev = h1.get("revenue")
     if invYoy is not None and revPrev is not None and revPrev > 0:
-        revGrowth = _yoy(revYoy, revPrev)
+        _yoy(revYoy, revPrev)
         # 여기서는 이미 계산된 inventoryYoy 사용
         if invYoy is not None and invYoy > 20:
             flags.append(f"재고자산 +{invYoy:.0f}% 급증")

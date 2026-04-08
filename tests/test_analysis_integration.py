@@ -135,9 +135,9 @@ def test_individual_calc_functions(mock_company):
                 fn = getattr(mod, calc.fn)
                 sig = inspect.signature(fn)
                 if "basePeriod" in sig.parameters:
-                    result = fn(mock_company, basePeriod=None)
+                    fn(mock_company, basePeriod=None)
                 else:
-                    result = fn(mock_company)
+                    fn(mock_company)
                 # result can be dict, list, None, or any type — just no crash
             except (KeyError, ValueError, TypeError, AttributeError, ArithmeticError, ImportError):
                 # These are expected for mock data — calc functions may reject synthetic data

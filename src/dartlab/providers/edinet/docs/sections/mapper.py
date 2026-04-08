@@ -114,7 +114,7 @@ def mapSectionTitle(title: str) -> str | None:
         return mappings[normalized]
 
     # 부분 매칭 (핵심 키워드 포함 여부)
-    normalizedLower = normalized.lower()
+    normalized.lower()
     for key, topicId in mappings.items():
         if key in normalized or normalized in key:
             return topicId

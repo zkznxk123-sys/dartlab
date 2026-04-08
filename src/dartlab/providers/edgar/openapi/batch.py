@@ -392,7 +392,7 @@ def batchCollectEdgar(
     result: dict[str, dict[str, int]] = {}
     runError: list[BaseException] = []
 
-    catLabel = ", ".join(cats)
+    ", ".join(cats)
 
     def _buildDisplay() -> Table:
         tbl = Table.grid(padding=(0, 1))

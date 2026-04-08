@@ -1773,16 +1773,14 @@ def _analyzeSalesOrder(inp: _Input) -> NarrativeParagraph | None:
 
     # 수주잔고 컬럼 탐색
     backlogCol = None
-    orderCol = None
-    salesCol = None
     for c in cols:
         cl = c.lower()
         if "잔고" in c or "backlog" in cl:
             backlogCol = c
         elif "수주" in c and "잔고" not in c or "order" in cl:
-            orderCol = c
+            pass
         elif "매출" in c or "sales" in cl or "납품" in c:
-            salesCol = c
+            pass
 
     if backlogCol:
         try:
@@ -1903,16 +1901,14 @@ def _analyzeQuarterlyMomentum(inp: _Input) -> NarrativeParagraph | None:
 
     # 분기별 매출/영업이익 시계열 추출
     salesCol = None
-    opCol = None
-    periodCol = None
     for c in cols:
         cl = c.lower()
         if "매출" in c and "원가" not in c or "sales" in cl or "revenue" in cl:
             salesCol = c
         elif "영업이익" in c or "operating" in cl:
-            opCol = c
+            pass
         elif "기간" in c or "period" in cl or "quarter" in cl or "분기" in c:
-            periodCol = c
+            pass
 
     if salesCol:
         try:
@@ -2256,7 +2252,7 @@ def _analyzeIndexTrend(inp: _Input) -> NarrativeParagraph | None:
 
     salesIdx = _toIndex(sales)
     opIdx = _toIndex(op) if op else []
-    niIdx = _toIndex(ni) if ni else []
+    _toIndex(ni) if ni else []
     arIdx = _toIndex(receivables) if receivables else []
     invIdx = _toIndex(inventories) if inventories else []
     taIdx = _toIndex(totalAssets) if totalAssets else []
@@ -2385,7 +2381,7 @@ def _detectCrossReferences(paragraphs: list[NarrativeParagraph]) -> list[str]:
     beneish = dimMap.get("earningsManipulation")
     valueCreation = dimMap.get("valueCreation")
     indexTrend = dimMap.get("indexTrend")
-    strategy = dimMap.get("businessStrategy")
+    dimMap.get("businessStrategy")
 
     # segment + margin: 고마진 부문 비중 하락
     if (

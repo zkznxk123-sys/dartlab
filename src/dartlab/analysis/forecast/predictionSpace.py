@@ -249,7 +249,6 @@ def _computeAxisState(axisName: str, axisDef: dict, macroData: dict) -> AxisStat
     # 지표 값 수집
     allValues: list[list[float]] = []
     indicatorVals: dict[str, float | None] = {}
-    asOf = ""
 
     for indName in indicators:
         series = macroData.get(indName)

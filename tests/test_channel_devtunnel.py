@@ -108,7 +108,7 @@ class TestChannelCLI:
 
         parser = build_parser()
         # parse_args가 SystemExit 없이 통과하면 등록됨
-        args = parser.parse_args(["channel", "--help"]) if False else None
+        parser.parse_args(["channel", "--help"]) if False else None
         # 실제로는 --help가 sys.exit하므로, 명령 자체 등록 검증만:
         from dartlab.cli.commands.channel import configure_parser, run
 

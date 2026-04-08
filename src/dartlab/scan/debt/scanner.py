@@ -204,8 +204,8 @@ def _debtMixFromMerged(scanPath: Path) -> dict[str, dict]:
     latestYear = target.group_by(scCol).agg(pl.col("bsns_year").max().alias("_maxYear"))
     target = target.join(latestYear, on=scCol).filter(pl.col("bsns_year") == pl.col("_maxYear")).drop("_maxYear")
 
-    allLiabIds = LIABILITIES_IDS | LIABILITIES_NMS
-    allEquityIds = EQUITY_IDS | EQUITY_NMS
+    LIABILITIES_IDS | LIABILITIES_NMS
+    EQUITY_IDS | EQUITY_NMS
 
     liabRows = target.filter(
         pl.col("account_id").is_in(list(LIABILITIES_IDS)) | pl.col("account_nm").is_in(list(LIABILITIES_NMS))

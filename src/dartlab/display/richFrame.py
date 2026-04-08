@@ -79,13 +79,11 @@ def renderFinance(df: pl.DataFrame, *, topic: str = "") -> Table:
         if labelCol:
             cells.append(str(row.get(labelCol, "")))
 
-        prevVal: float | None = None
         # 기간 역순이라 YoY는 다음 컬럼과 비교
         for i, col in enumerate(periodCols):
             val = row.get(col)
             if isinstance(val, str):
                 cells.append(val)
-                prevVal = None
                 continue
 
             formatted = _formatValue(val)
@@ -96,7 +94,6 @@ def renderFinance(df: pl.DataFrame, *, topic: str = "") -> Table:
                 formatted += _yoyMark(val, nextVal)
 
             cells.append(formatted)
-            prevVal = val
 
         table.add_row(*cells)
 

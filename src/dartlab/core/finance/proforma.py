@@ -798,7 +798,7 @@ def build_proforma(
     projections: list[ProFormaYear] = []
     prev_revenue = base["revenue"]
     prev_ppe = base["ppe_net"]
-    prev_cash = base["cash"]
+    base["cash"]
     prev_equity = base["total_equity"]
     prev_stb = base["short_term_debt"]
     prev_ltb = base["long_term_debt"]
@@ -948,7 +948,6 @@ def build_proforma(
         # 다음 연도용 이전값 갱신
         prev_revenue = yr.revenue
         prev_ppe = yr.ppe_net
-        prev_cash = yr.cash
         prev_equity = yr.total_equity
         prev_stb = yr.short_term_debt
         prev_ltb = yr.long_term_debt

@@ -2062,7 +2062,7 @@ def calcRevenueDirection(company, *, basePeriod: str | None = None) -> dict | No
 
     # 베이즈 사후확률 갱신 — 업종별 사전확률에서 시작
     # 슈퍼예측가 원리: 사전확률이 정확할수록 사후확률도 정확
-    sectorKey = _getSectorKey(company)
+    _getSectorKey(company)
     industry = None
     try:
         from dartlab.core.finance.exogenousAxes import _lookupFromKindList
@@ -2233,7 +2233,7 @@ def calcPredictionSynthesis(company, *, basePeriod: str | None = None) -> dict |
     # 4. 거시경제 신호 (방향성은 중립 — 조건부 위험 지표)
     if macro is not None:
         cyclicality = macro["sectorCyclicality"]
-        macroScore = _DIRECTION_SCORES.get(cyclicality, 0.0) if cyclicality == "defensive" else 0.0
+        _DIRECTION_SCORES.get(cyclicality, 0.0) if cyclicality == "defensive" else 0.0
         signals["macroSensitivity"] = {
             "direction": cyclicality,
             "strength": 0.0,

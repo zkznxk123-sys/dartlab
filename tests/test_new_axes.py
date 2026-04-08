@@ -280,19 +280,6 @@ class TestPeerBenchmark:
         company = MagicMock()
         company.stockCode = "005930"
 
-        mockResult = {
-            "rankings": [
-                {
-                    "ratioName": "roe",
-                    "label": "ROE",
-                    "value": 15.0,
-                    "percentile": 75.0,
-                    "rank": 250,
-                    "total": 1000,
-                    "period": "2024",
-                },
-            ]
-        }
         with patch(
             "dartlab.analysis.financial.peerBenchmark._calcPercentile",
             side_effect=lambda sc, rn, lb: {

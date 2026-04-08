@@ -181,10 +181,10 @@ def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
     eq = bsData.get("자본총계", {})
     ca = bsData.get("유동자산", {})
     cl = bsData.get("유동부채", {})
-    ncl = bsData.get("비유동부채", {})
+    bsData.get("비유동부채", {})
     cash = bsData.get("현금및현금성자산", {})
     # Plan v5 E: 차입금 fallback 은 col loop 안에서 sumBorrowingsKorean 위임
-    re = bsData.get("이익잉여금", {})
+    bsData.get("이익잉여금", {})
 
     rev = isData.get("매출액", {})
     oi = isData.get("영업이익", {})
@@ -192,7 +192,7 @@ def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
     finCost = isData.get("금융비용", {})
     intCost = isData.get("이자비용", {})
     dep = isData.get("감가상각비", {})
-    gp = isData.get("매출총이익", {})
+    isData.get("매출총이익", {})
 
     ocf = cfData.get("영업활동현금흐름", {})
     capex = cfData.get("유형자산의취득", {})
@@ -219,7 +219,7 @@ def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
 
         # Plan v5 E: 차입금 분리/통합 fallback 위임 (analysis/_helpers.py::sumBorrowingsKorean)
         stBorrow, ltBorrow, totalBorrowing = sumBorrowingsKorean(bsData, col)
-        bondsVal = bsData.get("사채", {}).get(col) or 0  # 사채 별도 노출 (회귀 호환)
+        bsData.get("사채", {}).get(col) or 0  # 사채 별도 노출 (회귀 호환)
 
         # IS/CF 플로우 변수: Q4 fallback이면 TTM 합산
         if _quarterlyMode:
@@ -804,14 +804,14 @@ def calcFinancialMetrics(company, *, basePeriod: str | None = None) -> dict | No
 
         if _qMode:
             intInc = _ttmSum(intIncome, col, _allP)
-            intExp = _ttmSum(intExpense, col, _allP) or _ttmSum(cfFinCost, col, _allP)
+            _ttmSum(intExpense, col, _allP) or _ttmSum(cfFinCost, col, _allP)
             netIncome = _ttmSum(ni, col, _allP)
             provCharge = _ttmSum(provision, col, _allP)
             opIncome = _ttmSum(oi, col, _allP)
             ocfVal = _ttmSum(ocf, col, _allP)
         else:
             intInc = intIncome.get(col)
-            intExp = intExpense.get(col) or cfFinCost.get(col)
+            intExpense.get(col) or cfFinCost.get(col)
             netIncome = ni.get(col)
             provCharge = provision.get(col)
             opIncome = oi.get(col)

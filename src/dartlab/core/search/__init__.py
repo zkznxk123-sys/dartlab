@@ -73,7 +73,7 @@ def _resolveCorp(corp: str | None) -> tuple[str | None, str | None]:
         match = searchListing(corp)
         if match is not None and match.height > 0:
             return None, match["stock_code"][0]
-    except Exception:
+    except (ImportError, KeyError, ValueError, AttributeError):
         pass
     return None, None
 

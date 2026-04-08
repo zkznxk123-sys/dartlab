@@ -231,7 +231,7 @@ def _detectWorkingCapitalStrain(company, blockMap) -> NarrativeThread | None:
         return None
 
     col0, col1 = yCols[0], yCols[1]
-    rev0 = _get(revRow, col0)
+    _get(revRow, col0)
     ni0 = _get(niRow, col0)
     ocf0 = _get(ocfRow, col0)
 
@@ -332,7 +332,7 @@ def _detectOverinvestment(company, blockMap) -> NarrativeThread | None:
     # ROIC 추정: NOPAT / 투하자본
     effTaxRate = tax / pt if pt > 0 else 0.25
     nopat = op * (1 - min(max(effTaxRate, 0), 0.5))
-    investedCapital = eq + (_get(bsData.get("부채총계", {}), col0) - _get(bsData.get("자본총계", {}), col0) * 0)
+    eq + (_get(bsData.get("부채총계", {}), col0) - _get(bsData.get("자본총계", {}), col0) * 0)
     # 간이 투하자본 = 자산총계 (현금 차감 없는 단순화)
     roic = nopat / ta * 100 if ta > 0 else None
 
@@ -397,7 +397,7 @@ def _detectEarningsManipulation(company, blockMap) -> NarrativeThread | None:
     ni = _get(niRow, col0)
     ocf = _get(ocfRow, col0)
     ta = _get(taRow, col0)
-    rev = _get(revRow, col0)
+    _get(revRow, col0)
 
     if ta <= 0 or ni == 0:
         return None

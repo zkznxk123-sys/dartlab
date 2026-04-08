@@ -241,7 +241,7 @@ def summarizeEdgarDocsFrame(df: pl.DataFrame) -> dict[str, object]:
 
     sectionTitle = pl.col("section_title").cast(pl.Utf8)
     sectionContent = pl.col("section_content").cast(pl.Utf8)
-    formType = pl.col("form_type").cast(pl.Utf8)
+    pl.col("form_type").cast(pl.Utf8)
 
     formMetricsDf = (
         df.group_by("form_type")

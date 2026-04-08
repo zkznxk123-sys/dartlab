@@ -93,7 +93,7 @@ def _enrichWithKorean(df: pl.DataFrame) -> pl.DataFrame:
                         {name_col: "_종목명", "종목코드": "stockCode"}
                     )
                     df = df.join(name_map, on="stockCode", how="left")
-        except Exception:
+        except (ImportError, AttributeError, KeyError, ValueError, RuntimeError):
             pass
 
     # 한글 rename

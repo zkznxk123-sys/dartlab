@@ -133,7 +133,7 @@ def segmentCompositionBlock(data: dict) -> list:
             for s in h["shares"]:
                 if s not in allSegs:
                     allSegs.append(s)
-        histYears = [h["year"] for h in history]
+        [h["year"] for h in history]
         histRows = []
         for seg in allSegs:
             row: dict = {"부문": seg}
@@ -1059,7 +1059,7 @@ def _enrichedFlagsBlock(flags: list[str], enrichedFlags: list[dict] | None = Non
             for ef in enrichedFlags
         ]
         # enrichedFlags의 메시지에 정밀도 주석 추가
-        efCodes = {ef.get("code") for ef in enrichedFlags}
+        {ef.get("code") for ef in enrichedFlags}
         augmented = []
         for f in flags:
             matched = next((ef for ef in enrichedFlags if ef.get("message") == f), None)
@@ -2298,7 +2298,7 @@ def valuationSynthesisBlock(data: dict, priceTargetData: dict | None = None) -> 
     if priceTargetData:
         synthFair = data.get("weightedFairValue")
         ptFair = priceTargetData.get("weightedTarget")
-        currentPrice = data.get("currentPrice") or priceTargetData.get("currentPrice")
+        data.get("currentPrice") or priceTargetData.get("currentPrice")
         if synthFair and ptFair and synthFair > 0 and ptFair > 0:
             divergence = abs(ptFair - synthFair) / synthFair * 100
             ratio = ptFair / synthFair
@@ -2676,7 +2676,7 @@ def segmentForecastBlock(data: dict) -> list:
     if not segments:
         return []
 
-    cur = data.get("currency", "KRW")
+    data.get("currency", "KRW")
     blocks: list = [
         HeadingBlock(
             _meta("segmentForecast").label,

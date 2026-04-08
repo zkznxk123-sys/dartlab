@@ -512,10 +512,10 @@ def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict |
     apRow = bsData.get("trade_and_other_payables", {})
     advRow = bsData.get("advance_from_customers", {})
     contRow = bsData.get("contract_liabilities", {})
-    stRow = bsData.get("shortterm_borrowings", {})
-    ltRow = bsData.get("longterm_borrowings", {})
-    unifiedBorrowRow = bsData.get("borrowings", {})  # 통합 차입금 fallback
-    bondRow = bsData.get("debentures", {})
+    bsData.get("shortterm_borrowings", {})
+    bsData.get("longterm_borrowings", {})
+    bsData.get("borrowings", {})  # 통합 차입금 fallback
+    bsData.get("debentures", {})
     cashRow = bsData.get("cash_and_cash_equivalents", {})
 
     yCols = annualColsFromPeriods(isPeriods, maxYears=_MAX_YEARS, basePeriod=basePeriod)
@@ -666,12 +666,12 @@ def calcRoicTree(company, *, basePeriod: str | None = None) -> dict | None:
     apRow = bsData.get("trade_and_other_payables", {})
     ppeRow = bsData.get("tangible_assets", {})
     intRow = bsData.get("intangible_assets", {})
-    eqRow = bsData.get("total_stockholders_equity", {})
-    stRow = bsData.get("shortterm_borrowings", {})
-    ltRow = bsData.get("longterm_borrowings", {})
-    unifiedBorrowRow = bsData.get("borrowings", {})  # 통합 차입금 fallback
-    bondRow = bsData.get("debentures", {})
-    cashRow = bsData.get("cash_and_cash_equivalents", {})
+    bsData.get("total_stockholders_equity", {})
+    bsData.get("shortterm_borrowings", {})
+    bsData.get("longterm_borrowings", {})
+    bsData.get("borrowings", {})  # 통합 차입금 fallback
+    bsData.get("debentures", {})
+    bsData.get("cash_and_cash_equivalents", {})
 
     yCols = annualColsFromPeriods(isPeriods, basePeriod, _MAX_YEARS)
     if not yCols:

@@ -499,7 +499,7 @@ def calcDebtMaturity(company, *, basePeriod: str | None = None) -> dict | None:
     ltFinRow = data.get("장기금융부채", {})
 
     clRow = data.get("유동부채", {})
-    nclRow = data.get("비유동부채", {})
+    data.get("비유동부채", {})
     tlRow = data.get("부채총계", {})
 
     # 연도 컬럼만

@@ -172,7 +172,7 @@ def analyze_value(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
             arr = ohlcv_to_arrays(ohlcv)
             if "close" in arr and len(arr["close"]) > 0:
                 components["latestPrice"] = round(float(arr["close"][-1]), 2)
-    except Exception:
+    except (ValueError, KeyError, OSError, AttributeError, IndexError):
         pass
 
     result["components"] = components

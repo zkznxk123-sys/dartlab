@@ -87,7 +87,7 @@ def _handleAsk(msg: dict[str, Any]) -> None:
                     from dartlab import Company as C2
 
                     c = C2(results[0].get("stockCode", results[0].get("corp_code", "")))
-            except Exception:
+            except (ImportError, ValueError, KeyError, AttributeError):
                 pass
 
     kwargs: dict[str, Any] = {}
@@ -525,13 +525,13 @@ def _buildReadyDiag() -> dict[str, Any]:
 
         profile = get_profile_manager().load()
         diag["aiProvider"] = profile.default_provider or "none"
-    except Exception:
+    except (ImportError, AttributeError, OSError):
         diag["aiProvider"] = "none"
     try:
         from dartlab import config
 
         diag["dataDir"] = str(config.dataDir)
-    except Exception:
+    except (ImportError, AttributeError):
         pass
     try:
         import os

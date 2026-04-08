@@ -253,7 +253,7 @@ def test_execute_tool_company_analysis_with_axis():
     mock_company.analysis.return_value = {"key": "value"}
 
     with patch("dartlab.Company", return_value=mock_company):
-        result = _executeTool("companyAnalysis", {"stockCode": "005930", "axis": "financial", "sub": "수익성"})
+        _executeTool("companyAnalysis", {"stockCode": "005930", "axis": "financial", "sub": "수익성"})
 
     mock_company.analysis.assert_called_once_with("financial", "수익성")
     _cache.clear()
@@ -267,7 +267,7 @@ def test_execute_tool_company_analysis_axis_only():
     mock_company.analysis.return_value = "guide"
 
     with patch("dartlab.Company", return_value=mock_company):
-        result = _executeTool("companyAnalysis", {"stockCode": "005930", "axis": "financial"})
+        _executeTool("companyAnalysis", {"stockCode": "005930", "axis": "financial"})
 
     mock_company.analysis.assert_called_once_with("financial")
     _cache.clear()
@@ -281,7 +281,7 @@ def test_execute_tool_company_analysis_no_axis():
     mock_company.analysis.return_value = "全体 가이드"
 
     with patch("dartlab.Company", return_value=mock_company):
-        result = _executeTool("companyAnalysis", {"stockCode": "005930"})
+        _executeTool("companyAnalysis", {"stockCode": "005930"})
 
     mock_company.analysis.assert_called_once_with()
     _cache.clear()
@@ -295,7 +295,7 @@ def test_execute_tool_company_show():
     mock_company.show.return_value = "사업개요 내용"
 
     with patch("dartlab.Company", return_value=mock_company):
-        result = _executeTool("companyShow", {"stockCode": "005930", "topic": "businessOverview"})
+        _executeTool("companyShow", {"stockCode": "005930", "topic": "businessOverview"})
 
     mock_company.show.assert_called_once_with("businessOverview")
     _cache.clear()
@@ -309,7 +309,7 @@ def test_execute_tool_company_diff_with_topic():
     mock_company.diff.return_value = "변경사항"
 
     with patch("dartlab.Company", return_value=mock_company):
-        result = _executeTool("companyDiff", {"stockCode": "005930", "topic": "revenue"})
+        _executeTool("companyDiff", {"stockCode": "005930", "topic": "revenue"})
 
     mock_company.diff.assert_called_once_with("revenue")
     _cache.clear()
@@ -323,7 +323,7 @@ def test_execute_tool_company_diff_no_topic():
     mock_company.diff.return_value = "전체 변경"
 
     with patch("dartlab.Company", return_value=mock_company):
-        result = _executeTool("companyDiff", {"stockCode": "005930"})
+        _executeTool("companyDiff", {"stockCode": "005930"})
 
     mock_company.diff.assert_called_once()
     _cache.clear()
@@ -418,7 +418,7 @@ def test_execute_tool_company_review_section():
     mock_company.review.return_value = mock_review
 
     with patch("dartlab.Company", return_value=mock_company):
-        result = _executeTool("companyReview", {"stockCode": "005930", "section": "수익구조"})
+        _executeTool("companyReview", {"stockCode": "005930", "section": "수익구조"})
 
     mock_company.review.assert_called_once_with("수익구조")
     _cache.clear()

@@ -240,7 +240,7 @@ def analyze_meanvar(
     if returns is None:
         return {**result, "error": f"수익률 데이터 부족 ({len(codes)}종목)"}
 
-    n = len(codes)
+    len(codes)
     mu = np.mean(returns, axis=0) * 252
 
     if covEstimator == "ledoit_wolf":

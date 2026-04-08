@@ -131,7 +131,7 @@ def calcResidualIncome(
         )
 
     # 평균 RI -> 영구가치 추정
-    avgRi = sum(riValues) / len(riValues)
+    sum(riValues) / len(riValues)
 
     # fade factor(omega) 동적 추정 -- ROE-CoE spread 지속성
     omega = _estimateOmega(niVals, eqVals, coeDecimal, warnings)

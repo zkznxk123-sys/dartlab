@@ -139,7 +139,7 @@ def _portfolio_returns(codes: list[str], market: str, year: str, max_n: int = 30
     for c in codes[:max_n]:
         try:
             o = fetch_ohlcv(c)
-        except Exception:
+        except (ValueError, KeyError, OSError, AttributeError, RuntimeError):
             continue
         if o is None or o.is_empty():
             continue

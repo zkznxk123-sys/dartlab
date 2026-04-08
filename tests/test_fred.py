@@ -177,7 +177,7 @@ class TestSeriesMock:
 
         def mock_get(endpoint, **params):
             call_count[0] += 1
-            sid = params.get("series_id", "A")
+            params.get("series_id", "A")
             return {
                 "observations": [
                     {"date": "2024-01-01", "value": str(call_count[0] * 10)},

@@ -188,7 +188,7 @@ def solveMerton(
 
         if abs(dV) < tol * V and abs(dSigma) < tol * sigma_A:
             # 수렴
-            d1_final = (math.log(V / D) + (riskFreeRate + 0.5 * sigma_A**2) * maturity) / (sigma_A * sqrtT)
+            (math.log(V / D) + (riskFreeRate + 0.5 * sigma_A**2) * maturity) / (sigma_A * sqrtT)
             d2d = (math.log(V / D) + (riskFreeRate - 0.5 * sigma_A**2) * maturity) / (sigma_A * sqrtT)
             pd_pct = _norm_cdf(-d2d) * 100
 

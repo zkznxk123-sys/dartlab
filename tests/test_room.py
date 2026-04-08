@@ -89,8 +89,8 @@ class TestBroadcast:
     @pytest.mark.asyncio
     async def test_broadcast_to_all(self):
         room = Room("test-room")
-        m1 = await room.join("Alice")
-        m2 = await room.join("Bob")
+        await room.join("Alice")
+        await room.join("Bob")
 
         # join 이벤트를 비우기
         for m in room.members.values():

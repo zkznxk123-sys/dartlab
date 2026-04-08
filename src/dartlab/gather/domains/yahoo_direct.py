@@ -56,8 +56,8 @@ async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSn
     change_pct = (change / prev_close * 100) if prev_close else 0.0
 
     # 52주 고/저 — indicators에서 추출
-    highs = indicators.get("high", [])
-    lows = indicators.get("low", [])
+    indicators.get("high", [])
+    indicators.get("low", [])
     volumes = indicators.get("volume", [])
 
     return PriceSnapshot(

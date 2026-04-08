@@ -75,7 +75,7 @@ def parseInternalControlTable(block: list[str]) -> list[dict]:
         if any("단위" in c for c in cells):
             continue
 
-        rowText = " ".join(cells)
+        " ".join(cells)
 
         # 기 정보 추출 (제56기, 제55기 등)
         period = None

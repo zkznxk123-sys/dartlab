@@ -97,7 +97,7 @@ def walkForwardBacktest(
 
             cycle_result = analyze_cycle(market=market, as_of=as_of_str)
             phase = cycle_result.get("phase")
-        except Exception:
+        except (ImportError, KeyError, ValueError, AttributeError):
             pass
 
         try:
@@ -107,7 +107,7 @@ def walkForwardBacktest(
             rp = forecast_result.get("recessionProb")
             if rp:
                 recession_prob = rp.get("probability")
-        except Exception:
+        except (ImportError, KeyError, ValueError, AttributeError):
             pass
 
         actual = _is_in_recession(current)

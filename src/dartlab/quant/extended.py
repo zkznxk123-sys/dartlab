@@ -130,8 +130,8 @@ def calcTechnicalSignals(company) -> dict | None:
         return None
 
     close = ohlcv["close"].to_numpy().astype(np.float64)
-    high = ohlcv["high"].to_numpy().astype(np.float64)
-    low = ohlcv["low"].to_numpy().astype(np.float64)
+    ohlcv["high"].to_numpy().astype(np.float64)
+    ohlcv["low"].to_numpy().astype(np.float64)
 
     from dartlab.quant import indicators as ind
     from dartlab.quant import signals as sig

@@ -375,7 +375,7 @@ class TestContextSignalsIntegration:
     @pytest.mark.unit
     def test_context_signals_changes_result(self):
         """맥락 신호가 있으면 결과가 달라져야 함."""
-        result_no_ctx = compute_price_target(
+        compute_price_target(
             SERIES,
             shares=100,
             mc_iterations=200,

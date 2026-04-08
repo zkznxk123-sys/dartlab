@@ -132,10 +132,10 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     taxRow = isData.get("income_tax_expense") or isData.get("income_taxes", {})
     ptRow = isData.get("profit_before_tax", {})
     eqRow = bsData.get("total_stockholders_equity", {})
-    stRow = bsData.get("shortterm_borrowings", {})
-    ltRow = bsData.get("longterm_borrowings", {})
-    unifiedBorrowRow = bsData.get("borrowings", {})
-    bondRow = bsData.get("debentures", {})
+    bsData.get("shortterm_borrowings", {})
+    bsData.get("longterm_borrowings", {})
+    bsData.get("borrowings", {})
+    bsData.get("debentures", {})
     cashRow = bsData.get("cash_and_cash_equivalents", {})
 
     yCols = annualColsFromPeriods(isPeriods, maxYears=_MAX_YEARS + 1, basePeriod=basePeriod)
@@ -148,7 +148,7 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
 
     history = []
     for i, col in enumerate(yCols[:-1]):
-        prevCol = yCols[i + 1] if i + 1 < len(yCols) else None
+        yCols[i + 1] if i + 1 < len(yCols) else None
         opIncome = _getF(opRow, col)
         taxExpense = _getF(taxRow, col)
         ptIncome = _getF(ptRow, col)
@@ -308,10 +308,10 @@ def calcEvaTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     taxRow = isData.get("income_tax_expense") or isData.get("income_taxes", {})
     ptRow = isData.get("profit_before_tax", {})
     eqRow = bsData.get("total_stockholders_equity", {})
-    stRow = bsData.get("shortterm_borrowings", {})
-    ltRow = bsData.get("longterm_borrowings", {})
-    unifiedBorrowRow = bsData.get("borrowings", {})
-    bondRow = bsData.get("debentures", {})
+    bsData.get("shortterm_borrowings", {})
+    bsData.get("longterm_borrowings", {})
+    bsData.get("borrowings", {})
+    bsData.get("debentures", {})
     cashRow = bsData.get("cash_and_cash_equivalents", {})
 
     yCols = annualColsFromPeriods(isPeriods, maxYears=_MAX_YEARS, basePeriod=basePeriod)

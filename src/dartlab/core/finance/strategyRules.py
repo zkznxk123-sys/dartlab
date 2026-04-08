@@ -54,7 +54,7 @@ def evaluateStrategies(macroData: dict) -> list[StrategySignal]:
 
     cycle = macroData.get("cycle") or {}
     rates = macroData.get("rates") or {}
-    sentiment = macroData.get("sentiment") or {}
+    macroData.get("sentiment") or {}
     liquidity = macroData.get("liquidity") or {}
     forecast = macroData.get("forecast") or {}
     crisis = macroData.get("crisis") or {}
@@ -360,9 +360,7 @@ def evaluateStrategies(macroData: dict) -> list[StrategySignal]:
 
     # 전략 21: 금리↔주가 역학
     asset_signals = assets.get("signals") or []
-    equity_up = any(
-        s.get("direction") == "up" for s in asset_signals if isinstance(s, dict) and s.get("asset") == "equity"
-    )
+    any(s.get("direction") == "up" for s in asset_signals if isinstance(s, dict) and s.get("asset") == "equity")
     results.append(
         _sig(
             21,
@@ -480,7 +478,7 @@ def evaluateStrategies(macroData: dict) -> list[StrategySignal]:
     )
 
     # 전략 30: 장단기차 → CLI 선행
-    cli_mom = lei.get("cliMomentum")
+    lei.get("cliMomentum")
     results.append(
         _sig(
             30,

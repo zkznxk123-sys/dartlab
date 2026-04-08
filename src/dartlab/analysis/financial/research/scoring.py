@@ -157,7 +157,7 @@ def calcMagicFormula(
     """ROIC + Earnings Yield."""
     op = _latest(aSeries, "IS", "operating_profit")
     ta = _latest(aSeries, "BS", "total_assets")
-    ca = _latest(aSeries, "BS", "current_assets")
+    _latest(aSeries, "BS", "current_assets")
     cl = _latest(aSeries, "BS", "current_liabilities")
     cash = _latest(aSeries, "BS", "cash_and_cash_equivalents")
 

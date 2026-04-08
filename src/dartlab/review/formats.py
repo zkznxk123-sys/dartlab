@@ -168,7 +168,7 @@ def renderMarkdown(review) -> str:
         if len(allTemplates) > 1:
             descs = []
             for t in allTemplates:
-                ti = STORY_TEMPLATES.get(t, {})
+                STORY_TEMPLATES.get(t, {})
                 descs.append(f"{t}")
             parts.append(f"**스토리: {' + '.join(descs)}**")
         else:

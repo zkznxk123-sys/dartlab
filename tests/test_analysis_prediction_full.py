@@ -514,8 +514,8 @@ class TestMemoizedCalcCache:
         _clear_cache(mock_company)
         from dartlab.analysis.financial.predictionSignals import calcEarningsMomentum
 
-        result_default = calcEarningsMomentum(mock_company)
-        result_2023 = calcEarningsMomentum(mock_company, basePeriod="2023Q4")
+        calcEarningsMomentum(mock_company)
+        calcEarningsMomentum(mock_company, basePeriod="2023Q4")
         # 다른 basePeriod면 다른 캐시 키
         # 둘 다 None이면 동일하지만 키는 다르게 저장됨
         assert "_calcEarningsMomentum:None" in mock_company._cache

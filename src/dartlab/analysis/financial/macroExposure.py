@@ -55,7 +55,7 @@ def _getMonthlyChange(df, months: int = 3, col: str = "value"):
         past = sorted_df[col][months]
         if latest is not None and past is not None and past != 0:
             return float(latest - past)
-    except Exception:
+    except (KeyError, IndexError, ValueError, TypeError):
         pass
     return None
 
@@ -74,7 +74,7 @@ def _getYoYChange(df, col: str = "value"):
         year_ago = monthly[col][-13]
         if latest is not None and year_ago is not None and year_ago != 0:
             return float((latest / year_ago - 1) * 100)
-    except Exception:
+    except (KeyError, IndexError, ValueError, TypeError, ImportError):
         pass
     return None
 

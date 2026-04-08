@@ -864,7 +864,7 @@ def buildSce(
     isStmt = series.get("IS", {})
 
     rows: list[dict] = []
-    nYears = len(years)
+    len(years)
 
     # 1. BS equity 컴포넌트 연간 변화량
     for snakeId, label in _EQUITY_COMPONENTS:

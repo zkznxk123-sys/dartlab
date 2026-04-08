@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 import polars as pl
 
-from dartlab.core.docs.diff import DiffEntry, DiffResult, DiffSummary
+from dartlab.core.docs.diff import DiffEntry, DiffResult
 
 # 변화 스코어링용 기본 키워드
 _SIGNAL_KEYWORDS: dict[str, list[str]] = {
@@ -84,7 +84,7 @@ def score_changes(
     Returns:
         ScoredChange 리스트 (score 내림차순 정렬).
     """
-    summary_map: dict[str, DiffSummary] = {s.topic: s for s in diff_result.summaries}
+    {s.topic: s for s in diff_result.summaries}
 
     # entries에서 topic별 최근 변화 추출
     latest_entry: dict[str, DiffEntry] = {}

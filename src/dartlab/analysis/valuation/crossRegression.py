@@ -174,7 +174,7 @@ def fitCrossSection(
 
     # 섹터 더미 구성
     sectors = sorted({o.sector for o in obs if o.sector})
-    sectorRef = sectors[0] if sectors else ""
+    sectors[0] if sectors else ""
     sectorDummies = sectors[1:] if len(sectors) > 1 else []
 
     # X, y 구성
