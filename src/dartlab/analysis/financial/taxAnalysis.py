@@ -5,11 +5,7 @@
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import (
-    annualColsFromPeriods,
-    toDict,
-    toDictBySnakeId,
-)
+from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = 8
@@ -51,7 +47,7 @@ def calcEffectiveTaxRate(company, *, basePeriod: str | None = None) -> dict | No
     """
     accounts = ["법인세비용", "법인세차감전순이익", "세전이익"]
     isResult = company.select("IS", accounts)
-    isParsed = toDict(isResult)
+    isParsed = toDictBySnakeId(isResult)
     if isParsed is None:
         return None
 
@@ -114,14 +110,12 @@ def calcTaxCashConversion(company, *, basePeriod: str | None = None) -> dict | N
     isResult = company.select("IS", ["법인세비용"])
     cfResult = company.select("CF", ["payments_of_income_taxes"])
 
-    isParsed = toDict(isResult)
+    isParsed = toDictBySnakeId(isResult)
     if isParsed is None:
         return None
 
     isData, isPeriods = isParsed
     taxExpRow = isData.get("법인세비용", {})
-
-    from dartlab.analysis.financial._helpers import toDictBySnakeId
 
     cfParsed = toDictBySnakeId(cfResult)
     cfData = cfParsed[0] if cfParsed else {}

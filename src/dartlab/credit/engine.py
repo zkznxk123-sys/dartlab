@@ -118,9 +118,9 @@ def _isHolding(company) -> bool:
     try:
         bs = company.select("BS", ["종속기업,관계기업및공동기업투자", "관계기업등지분관련투자자산", "자산총계"])
         if bs is not None and len(bs) > 0:
-            from dartlab.analysis.financial._helpers import toDict
+            from dartlab.analysis.financial._helpers import toDictBySnakeId
 
-            parsed = toDict(bs)
+            parsed = toDictBySnakeId(bs)
             if parsed:
                 data, periods = parsed
                 invest = data.get("종속기업,관계기업및공동기업투자", {}) or data.get("관계기업등지분관련투자자산", {})
@@ -199,10 +199,10 @@ def _calcCHSAdjustment(company, baseScore: float) -> dict | None:
 
         bs = company.select("BS", ["자산총계", "부채총계", "현금및현금성자산", "현금및예치금"])
         is_ = company.select("IS", ["당기순이익"])
-        from dartlab.analysis.financial._helpers import toDict
+        from dartlab.analysis.financial._helpers import toDictBySnakeId
 
-        bsParsed = toDict(bs)
-        isParsed = toDict(is_)
+        bsParsed = toDictBySnakeId(bs)
+        isParsed = toDictBySnakeId(is_)
         if not bsParsed or not isParsed:
             return None
 
@@ -241,9 +241,9 @@ def _calcCHSAdjustment(company, baseScore: float) -> dict | None:
         try:
             epsData = company.select("IS", ["기본주당이익", "당기순이익"])
             if epsData is not None:
-                from dartlab.analysis.financial._helpers import toDict as _td
+                from dartlab.analysis.financial._helpers import toDictBySnakeId
 
-                epsParsed = _td(epsData)
+                epsParsed = toDictBySnakeId(epsData)
                 if epsParsed:
                     epsDict, epsPeriods = epsParsed
                     eps = (epsDict.get("기본주당이익", {}) or {}).get(epsPeriods[0] if epsPeriods else "")
@@ -443,14 +443,7 @@ def _calcNotchAdjustment(
     if score <= _CONFIG["notch_gate_score"]:
         return {"totalNotch": 0, "reasons": []}
 
-    ctx = dict(
-        company=company,
-        latest=latest,
-        metrics=metrics,
-        holding=holding,
-        captive=captive,
-        sepMetrics=sepMetrics,
-    )
+    ctx = dict(company=company, latest=latest, metrics=metrics, holding=holding, captive=captive, sepMetrics=sepMetrics)
     notches: list[tuple[int, str]] = []
     for rule in _NOTCH_RULES:
         notches.extend(rule(**ctx))
@@ -479,13 +472,7 @@ def _calcNotchAdjustment(
 
 
 def _explainDivergence(
-    grade: str,
-    score: float,
-    axes: list,
-    latest: dict,
-    chsResult: dict | None,
-    captive: bool,
-    holding: bool,
+    grade: str, score: float, axes: list, latest: dict, chsResult: dict | None, captive: bool, holding: bool
 ) -> list[str]:
     """등급 결정 근거 + 신평사 등급과의 괴리 원인 자동 설명."""
     explanations: list[str] = []
@@ -543,16 +530,7 @@ def _applyPostAdjustments(company, overall, latest, metrics, axes, captive, hold
     grade, gradeDesc, pdEstimate = mapTo20Grade(overall)
 
     # Notch Adjustment
-    notchAdj = _calcNotchAdjustment(
-        company,
-        grade,
-        overall,
-        latest,
-        metrics,
-        holding,
-        captive,
-        sepMetrics,
-    )
+    notchAdj = _calcNotchAdjustment(company, grade, overall, latest, metrics, holding, captive, sepMetrics)
     if notchAdj["totalNotch"] != 0:
         grade = _notchGrade(grade, -notchAdj["totalNotch"])
         pdEstimate = estimatePD(grade)
@@ -690,11 +668,7 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
                 latest = row
                 break
     holding = _isHolding(company)
-    captive = _isCaptiveFinance(
-        latest.get("totalBorrowing") or 0,
-        latest.get("ebitda"),
-        isFinancialCo,
-    )
+    captive = _isCaptiveFinance(latest.get("totalBorrowing") or 0, latest.get("ebitda"), isFinancialCo)
     # OFS 기반 캡티브 보강 (D/EBITDA < 15이어도 연결/별도 차입금 비율로 감지)
     if not captive and not isFinancialCo:
         captive = _isCaptiveByOFS(company, latest.get("totalBorrowing") or 0)
@@ -848,14 +822,7 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
 
     # ── CHS + Notch + divergence 공통 후처리 ──
     grade, gradeDesc, pdEstimate, overall, chsResult, notchAdj, divExpl = _applyPostAdjustments(
-        company,
-        overall,
-        latest,
-        metrics,
-        axes,
-        captive,
-        holding,
-        sepMetrics,
+        company, overall, latest, metrics, axes, captive, holding, sepMetrics
     )
 
     # ── eCR ──
@@ -931,38 +898,23 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
             narrateTrend,
         )
 
-        narratives = buildNarratives(
-            result,
-            captive=captive,
-            holding=holding,
-            separateMetrics=sepMetrics,
-        )
+        narratives = buildNarratives(result, captive=captive, holding=holding, separateMetrics=sepMetrics)
 
         # 추가 서사
         profileNarrative = narrateProfile(
-            metrics.get("profile"),
-            metrics.get("segmentComposition"),
-            metrics.get("rank"),
+            metrics.get("profile"), metrics.get("segmentComposition"), metrics.get("rank")
         )
         trendNarrative = narrateTrend(metrics["history"])
         borrowingsNarrative = narrateBorrowings(
-            metrics.get("borrowingsDetail"),
-            metrics["history"][0] if metrics["history"] else None,
+            metrics.get("borrowingsDetail"), metrics["history"][0] if metrics["history"] else None
         )
 
         # 6막 인과 연결
-        causalChain = narrateCausalChain(
-            metrics["history"][0] if metrics["history"] else {},
-            result,
-        )
+        causalChain = narrateCausalChain(metrics["history"][0] if metrics["history"] else {}, result)
 
         result["narratives"] = {
             "overall": buildOverallNarrative(
-                result,
-                narratives,
-                captive=captive,
-                holding=holding,
-                separateMetrics=sepMetrics,
+                result, narratives, captive=captive, holding=holding, separateMetrics=sepMetrics
             ),
             "causalChain": causalChain,
             "profile": profileNarrative,
@@ -1168,13 +1120,7 @@ def _calcHistoricalScores(metrics: dict, thresholds: dict) -> list[float]:
 # ═══════════════════════════════════════════════════════════
 
 
-def _evaluateFinancial(
-    company,
-    *,
-    detail: bool = False,
-    basePeriod: str | None = None,
-    sector=None,
-) -> dict | None:
+def _evaluateFinancial(company, *, detail: bool = False, basePeriod: str | None = None, sector=None) -> dict | None:
     """금융업(은행/보험/증권) 전용 5축 평가.
 
     D/EBITDA, FFO/Debt를 사용하지 않고
@@ -1273,14 +1219,7 @@ def _evaluateFinancial(
 
     # ── CHS + Notch + divergence 공통 후처리 ──
     grade, gradeDesc, pdEstimate, overall, chsResult, notchAdj, divExpl = _applyPostAdjustments(
-        company,
-        overall,
-        latest,
-        metrics,
-        axes,
-        False,
-        False,
-        None,
+        company, overall, latest, metrics, axes, False, False, None
     )
 
     sectorLabel = f"{getSectorLabel(sector)} (Track B 금융전용)"

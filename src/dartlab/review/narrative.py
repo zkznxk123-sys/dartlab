@@ -29,9 +29,9 @@ class NarrativeThread:
 
 
 def _toDict(selectResult) -> tuple[dict[str, dict], list[str]] | None:
-    from dartlab.analysis.financial._helpers import toDict
+    from dartlab.analysis.financial._helpers import toDictBySnakeId
 
-    return toDict(selectResult)
+    return toDictBySnakeId(selectResult)
 
 
 def _annualCols(periods: list[str], maxYears: int = _MAX_YEARS) -> list[str]:

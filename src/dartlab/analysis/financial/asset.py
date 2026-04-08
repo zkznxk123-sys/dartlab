@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict
+from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = 8
@@ -135,7 +135,7 @@ def calcAssetStructure(company, *, basePeriod: str | None = None) -> dict | None
         + _OP_LIAB_SIMPLE
     )
     result = company.select("BS", allAccounts)
-    parsed = toDict(result)
+    parsed = toDictBySnakeId(result)
     if parsed is None:
         return None
 
@@ -305,8 +305,8 @@ def calcWorkingCapital(company, *, basePeriod: str | None = None) -> dict | None
 
     bsResult = company.select("BS", bsAccounts)
     isResult = company.select("IS", isAccounts)
-    bsParsed = toDict(bsResult)
-    isParsed = toDict(isResult)
+    bsParsed = toDictBySnakeId(bsResult)
+    isParsed = toDictBySnakeId(isResult)
     if bsParsed is None or isParsed is None:
         return None
 
@@ -399,13 +399,13 @@ def calcCapexPattern(company, *, basePeriod: str | None = None) -> dict | None:
     bsResult = company.select("BS", bsAccounts)
     isResult = company.select("IS", isAccounts)
 
-    bsParsed = toDict(bsResult)
+    bsParsed = toDictBySnakeId(bsResult)
     if bsParsed is None:
         return None
 
     bsData, bsPeriods = bsParsed
-    cfData = toDict(cfResult)
-    isData = toDict(isResult)
+    cfData = toDictBySnakeId(cfResult)
+    isData = toDictBySnakeId(isResult)
 
     cfDict = cfData[0] if cfData else {}
     isDict = isData[0] if isData else {}
@@ -514,7 +514,7 @@ def calcInvestmentPropertyTrend(company, *, basePeriod: str | None = None) -> di
         }
     """
     bsResult = company.select("BS", ["자산총계", "투자부동산"])
-    parsed = toDict(bsResult)
+    parsed = toDictBySnakeId(bsResult)
     if parsed is None:
         return None
 
@@ -600,7 +600,7 @@ def calcIntangibleAssetDetail(company, *, basePeriod: str | None = None) -> dict
 
     # notes 없으면 BS에서 기본 분해
     bsResult = company.select("BS", ["무형자산", "영업권", "자산총계"])
-    bsParsed = toDict(bsResult)
+    bsParsed = toDictBySnakeId(bsResult)
     if bsParsed is None:
         return None
 

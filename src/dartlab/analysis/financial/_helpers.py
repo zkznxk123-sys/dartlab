@@ -113,6 +113,9 @@ def getRatios(company):
 def toDict(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict], list[str]] | None:
     """SelectResult → ({계정명: {period: val}}, periodCols).
 
+    Plan v7 R4: ``toDictBySnakeId`` 가 한국어 라벨도 키로 노출하므로
+    이 함수는 deprecated thin wrapper. 신규 코드는 ``toDictBySnakeId`` 사용.
+
     maxPeriods=0이면 전체 기간, >0이면 최신 N개만.
     EDGAR DataFrame(account 컬럼 = snakeId)일 때 키를 한국어 라벨로 자동 변환하여
     analysis 함수에서 data.get("매출액") 등이 양쪽 provider에서 동일하게 작동한다.
@@ -213,10 +216,19 @@ def toDictBySnakeId(selectResult, maxPeriods: int = 0) -> tuple[dict[str, dict],
     if idCol is None:
         return toDict(selectResult, maxPeriods)
 
+    # Plan v7 R4: 한국어 라벨도 함께 키로 노출 (toDict 와 단일 경로 통합).
+    # data.get("매출액") 와 data.get("sales") 둘 다 같은 row 반환.
+    labelCol = "계정명" if "계정명" in df.columns else None
+
     data: dict[str, dict] = {}
     for row in df.iter_rows(named=True):
         sid = str(row.get(idCol, ""))
-        data[sid] = {c: row.get(c) for c in periods}
+        rowData = {c: row.get(c) for c in periods}
+        data[sid] = rowData
+        if labelCol:
+            label = str(row.get(labelCol, ""))
+            if label and label != sid:
+                data[label] = rowData
 
     if not data:
         return None

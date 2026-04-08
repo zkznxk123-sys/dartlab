@@ -7,13 +7,8 @@ select()로 IS/BS 원본 계정을 가져와서
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import (
-    MAX_RATIO_YEARS,
-    toDict,
-)
-from dartlab.analysis.financial._helpers import (
-    annualColsFromPeriods as _annualColsFromPeriods,
-)
+from dartlab.analysis.financial._helpers import MAX_RATIO_YEARS, toDictBySnakeId
+from dartlab.analysis.financial._helpers import annualColsFromPeriods as _annualColsFromPeriods
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = MAX_RATIO_YEARS
@@ -48,12 +43,11 @@ def calcTurnoverTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """
     isResult = company.select("IS", ["매출액", "매출원가"])
     bsResult = company.select(
-        "BS",
-        ["자산총계", "매출채권", "매출채권및기타채권", "재고자산", "매입채무", "매입채무및기타채무"],
+        "BS", ["자산총계", "매출채권", "매출채권및기타채권", "재고자산", "매입채무", "매입채무및기타채무"]
     )
 
-    isParsed = toDict(isResult)
-    bsParsed = toDict(bsResult)
+    isParsed = toDictBySnakeId(isResult)
+    bsParsed = toDictBySnakeId(bsResult)
     if isParsed is None or bsParsed is None:
         return None
 

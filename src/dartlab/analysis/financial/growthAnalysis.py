@@ -6,14 +6,8 @@ select()로 IS/BS/CF 원본 계정을 가져와서
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import (
-    MAX_RATIO_YEARS,
-    toDict,
-    toDictBySnakeId,
-)
-from dartlab.analysis.financial._helpers import (
-    annualColsFromPeriods as _annualColsFromPeriods,
-)
+from dartlab.analysis.financial._helpers import MAX_RATIO_YEARS, toDictBySnakeId
+from dartlab.analysis.financial._helpers import annualColsFromPeriods as _annualColsFromPeriods
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = MAX_RATIO_YEARS
@@ -44,14 +38,11 @@ def calcGrowthTrend(company, *, basePeriod: str | None = None) -> dict | None:
 
     IS + BS에서 원본 금액을 가져와 규모감과 방향을 동시에 본다.
     """
-    isResult = company.select(
-        "IS",
-        ["매출액", "영업이익", "당기순이익"],
-    )
+    isResult = company.select("IS", ["매출액", "영업이익", "당기순이익"])
     bsResult = company.select("BS", ["자산총계"])
 
-    isParsed = toDict(isResult)
-    bsParsed = toDict(bsResult)
+    isParsed = toDictBySnakeId(isResult)
+    bsParsed = toDictBySnakeId(bsResult)
     if isParsed is None:
         return None
 
@@ -318,9 +309,9 @@ def calcCagrComparison(company, *, basePeriod: str | None = None) -> dict | None
     bsResult = company.select("BS", ["자산총계", "부채총계", "자본총계"])
     cfResult = company.select("CF", ["유형자산의취득"])
 
-    isParsed = toDict(isResult)
-    bsParsed = toDict(bsResult)
-    cfParsed = toDict(cfResult)
+    isParsed = toDictBySnakeId(isResult)
+    bsParsed = toDictBySnakeId(bsResult)
+    cfParsed = toDictBySnakeId(cfResult)
     if isParsed is None or bsParsed is None:
         return None
 

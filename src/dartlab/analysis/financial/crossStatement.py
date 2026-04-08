@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict
+from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = 8
@@ -54,8 +54,8 @@ def calcIsCfDivergence(company, *, basePeriod: str | None = None) -> dict | None
     isResult = company.select("IS", ["당기순이익", "영업이익"])
     cfResult = company.select("CF", ["영업활동현금흐름"])
 
-    isParsed = toDict(isResult)
-    cfParsed = toDict(cfResult)
+    isParsed = toDictBySnakeId(isResult)
+    cfParsed = toDictBySnakeId(cfResult)
     if isParsed is None or cfParsed is None:
         return None
 
@@ -137,8 +137,8 @@ def calcIsBsDivergence(company, *, basePeriod: str | None = None) -> dict | None
     isResult = company.select("IS", ["매출액"])
     bsResult = company.select("BS", ["매출채권및기타채권", "재고자산"])
 
-    isParsed = toDict(isResult)
-    bsParsed = toDict(bsResult)
+    isParsed = toDictBySnakeId(isResult)
+    bsParsed = toDictBySnakeId(bsResult)
     if isParsed is None or bsParsed is None:
         return None
 
@@ -375,9 +375,9 @@ def calcArticulationCheck(company, *, basePeriod: str | None = None) -> dict | N
     )
     isResult = company.select("IS", ["당기순이익"])
 
-    bsParsed = toDict(bsResult)
-    cfParsed = toDict(cfResult)
-    isParsed = toDict(isResult)
+    bsParsed = toDictBySnakeId(bsResult)
+    cfParsed = toDictBySnakeId(cfResult)
+    isParsed = toDictBySnakeId(isResult)
     if bsParsed is None or cfParsed is None or isParsed is None:
         return None
 

@@ -12,7 +12,6 @@ from dartlab.analysis.financial._helpers import (
     annualColsFromPeriods,
     getRatios,
     sumBorrowings,
-    toDict,
     toDictBySnakeId,
 )
 from dartlab.analysis.financial._memoize import memoized_calc
@@ -228,8 +227,7 @@ def calcDistressScore(company, *, basePeriod: str | None = None) -> dict | None:
     X4 = 시가총액/부채총계, X5 = 매출/총자산
     """
     bsResult = company.select(
-        "BS",
-        ["자산총계", "유동자산", "유동부채", "부채총계", "이익잉여금", "미처분이익잉여금(결손금)"],
+        "BS", ["자산총계", "유동자산", "유동부채", "부채총계", "이익잉여금", "미처분이익잉여금(결손금)"]
     )
     isResult = company.select("IS", ["영업이익", "매출액"])
 
@@ -482,7 +480,7 @@ def calcDebtMaturity(company, *, basePeriod: str | None = None) -> dict | None:
             "부채총계",
         ],
     )
-    parsed = toDict(bsResult, maxPeriods=5)
+    parsed = toDictBySnakeId(bsResult, maxPeriods=5)
     if parsed is None:
         return None
 
@@ -509,7 +507,7 @@ def calcDebtMaturity(company, *, basePeriod: str | None = None) -> dict | None:
 
     # OCF for 차환능력 평가
     cfResult = company.select("CF", ["영업활동현금흐름"])
-    cfParsed = toDict(cfResult, maxPeriods=5) if cfResult else None
+    cfParsed = toDictBySnakeId(cfResult, maxPeriods=5) if cfResult else None
     cfData = cfParsed[0] if cfParsed else {}
     ocfRow = cfData.get("영업활동현금흐름", {})
     history = []

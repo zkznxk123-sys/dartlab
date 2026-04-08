@@ -15,10 +15,7 @@ from __future__ import annotations
 import logging
 import math
 
-from dartlab.analysis.financial._helpers import (
-    annualColsFromPeriods,
-    toDict,
-)
+from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
 log = logging.getLogger(__name__)
@@ -152,9 +149,9 @@ def calcEarningsMomentum(company, *, basePeriod: str | None = None) -> dict | No
     cfResult = company.select("CF", ["영업활동현금흐름"])
     bsResult = company.select("BS", ["자산총계", "자본총계"])
 
-    isParsed = toDict(isResult)
-    cfParsed = toDict(cfResult)
-    bsParsed = toDict(bsResult)
+    isParsed = toDictBySnakeId(isResult)
+    cfParsed = toDictBySnakeId(cfResult)
+    bsParsed = toDictBySnakeId(bsResult)
     if isParsed is None or cfParsed is None or bsParsed is None:
         return None
 
@@ -387,7 +384,7 @@ def _extractPeerFeatures(company) -> dict[str, float] | None:
 def _getHistoricalRevenueGrowth(company, *, basePeriod: str | None = None) -> float | None:
     """최근 매출 성장률 (%) 계산."""
     isResult = company.select("IS", ["매출액"])
-    parsed = toDict(isResult)
+    parsed = toDictBySnakeId(isResult)
     if parsed is None:
         return None
     data, periods = parsed
@@ -416,7 +413,7 @@ def calcStructuralBreak(company, *, basePeriod: str | None = None) -> dict | Non
     from dartlab.core.finance.ols import detectStructuralBreak, ols
 
     isResult = company.select("IS", ["매출액", "영업이익"])
-    isParsed = toDict(isResult)
+    isParsed = toDictBySnakeId(isResult)
     if isParsed is None:
         return None
     isData, isPeriods = isParsed
@@ -663,7 +660,7 @@ def calcMacroRegression(company, *, basePeriod: str | None = None) -> dict | Non
         - table: list[dict] — 연도별 매출 성장률 vs 거시 변화율 시계열 테이블
     """
     isResult = company.select("IS", ["매출액", "영업이익"])
-    isParsed = toDict(isResult)
+    isParsed = toDictBySnakeId(isResult)
     if isParsed is None:
         return None
     isData, isPeriods = isParsed
@@ -777,9 +774,7 @@ def _getFinanceSeries(company):
 
 
 def _loadAdaptive(
-    revGrowth: list[float | None],
-    periodCols: list[str],
-    stockCode: str | None = None,
+    revGrowth: list[float | None], periodCols: list[str], stockCode: str | None = None
 ) -> dict[str, list[float | None]] | None:
     """적응형 변수 선택 — 매핑 후보 + 범용 후보에서 상관도 기반 최적 3개.
 
@@ -877,10 +872,7 @@ def _quickCorr(y: list[float | None], x: list[float | None]) -> float | None:
     return cov / (ystd * xstd)
 
 
-def _loadMacroAligned(
-    periodCols: list[str],
-    stockCode: str | None = None,
-) -> dict[str, list[float | None]] | None:
+def _loadMacroAligned(periodCols: list[str], stockCode: str | None = None) -> dict[str, list[float | None]] | None:
     """Parquet 캐시에서 거시 지표를 로드 → YoY 변화율을 직접 계산.
 
     periodCols가 분기("2024Q3" 등)이면 전년동기 대비 YoY,
@@ -940,9 +932,7 @@ def _loadMacroAligned(
 
 
 def _fitOLS(
-    y: list[float | None],
-    macroData: dict[str, list[float | None]],
-    cols: list[str],
+    y: list[float | None], macroData: dict[str, list[float | None]], cols: list[str]
 ) -> tuple[dict[str, float] | None, float | None, int]:
     """OLS 회귀 — y ~ 거시변화율 + 산업지표변화율 (가변 변수).
 
@@ -1038,9 +1028,7 @@ def _invertMatrix(m: list[list[float]]) -> list[list[float]] | None:
 
 
 def _calcLagCorrelation(
-    y: list[float | None],
-    macroData: dict[str, list[float | None]],
-    cols: list[str],
+    y: list[float | None], macroData: dict[str, list[float | None]], cols: list[str]
 ) -> dict[str, dict[str, float | None]]:
     """시간차(lag) 상관도 — lag 0, 1, 2."""
     result: dict[str, dict[str, float | None]] = {}
@@ -1069,12 +1057,7 @@ def _calcLagCorrelation(
     return result
 
 
-def _pearsonCorrelation(
-    y: list[float | None],
-    x: list[float | None],
-    *,
-    lag: int = 0,
-) -> float | None:
+def _pearsonCorrelation(y: list[float | None], x: list[float | None], *, lag: int = 0) -> float | None:
     """피어슨 상관계수 (lag 적용)."""
     pairs: list[tuple[float, float]] = []
     for i in range(len(y)):
@@ -1156,7 +1139,7 @@ def calcEventImpact(company, *, basePeriod: str | None = None) -> dict | None:
         - resilience: str — "high"/"medium"/"low" — 기업의 충격 회복력
     """
     isResult = company.select("IS", ["매출액", "영업이익"])
-    isParsed = toDict(isResult)
+    isParsed = toDictBySnakeId(isResult)
     if isParsed is None:
         return None
     isData, isPeriods = isParsed
@@ -1432,8 +1415,8 @@ def calcInventoryDivergence(company, *, basePeriod: str | None = None) -> dict |
     )
     isResult = company.select("IS", ["매출액", "매출원가"])
 
-    bsParsed = toDict(bsResult)
-    isParsed = toDict(isResult)
+    bsParsed = toDictBySnakeId(bsResult)
+    isParsed = toDictBySnakeId(isResult)
     if bsParsed is None or isParsed is None:
         return None
 
@@ -2002,7 +1985,7 @@ def calcRevenueDirection(company, *, basePeriod: str | None = None) -> dict | No
     학술 근거: M4/M5 Competition — 단순 방법이 최강.
     """
     isResult = company.select("IS", ["매출액", "영업이익"])
-    isParsed = toDict(isResult)
+    isParsed = toDictBySnakeId(isResult)
     if isParsed is None:
         return None
     isData, isPeriods = isParsed

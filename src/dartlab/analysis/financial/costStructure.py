@@ -7,13 +7,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from dartlab.analysis.financial._helpers import (
-    annualColsFromPeriods,
-    sumCostOfSales,
-    sumSGA,
-    toDict,
-    toDictBySnakeId,
-)
+from dartlab.analysis.financial._helpers import annualColsFromPeriods, sumCostOfSales, sumSGA, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = 8
@@ -128,7 +122,7 @@ def calcOperatingLeverage(company, *, basePeriod: str | None = None) -> dict | N
     """
     accounts = ["매출액", "영업이익", "매출총이익"]
     isResult = company.select("IS", accounts)
-    isParsed = toDict(isResult)
+    isParsed = toDictBySnakeId(isResult)
     if isParsed is None:
         return None
 
@@ -210,7 +204,7 @@ def calcBreakevenEstimate(company, *, basePeriod: str | None = None) -> dict | N
     """
     accounts = ["매출액", "매출원가", "판매비와관리비"]
     isResult = company.select("IS", accounts)
-    isParsed = toDict(isResult)
+    isParsed = toDictBySnakeId(isResult)
     if isParsed is None:
         return None
 
@@ -297,8 +291,7 @@ def calcCostByNatureAnalysis(company, *, basePeriod: str | None = None) -> dict 
     # 기간 컬럼 추출
     sampleRow = rawRows[0]
     periodCols = sorted(
-        [k for k in sampleRow if k not in ("계정명", "항목") and str(k).replace("-", "").isdigit()],
-        reverse=True,
+        [k for k in sampleRow if k not in ("계정명", "항목") and str(k).replace("-", "").isdigit()], reverse=True
     )
     if not periodCols:
         return None

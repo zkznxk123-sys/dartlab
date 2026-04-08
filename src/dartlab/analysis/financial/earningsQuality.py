@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import math
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDict, toDictBySnakeId
+from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = 8
@@ -55,9 +55,9 @@ def calcAccrualAnalysis(company, *, basePeriod: str | None = None) -> dict | Non
     cfResult = company.select("CF", ["영업활동현금흐름"])
     bsResult = company.select("BS", ["자산총계"])
 
-    isParsed = toDict(isResult)
-    cfParsed = toDict(cfResult)
-    bsParsed = toDict(bsResult)
+    isParsed = toDictBySnakeId(isResult)
+    cfParsed = toDictBySnakeId(cfResult)
+    bsParsed = toDictBySnakeId(bsResult)
     if isParsed is None or cfParsed is None or bsParsed is None:
         return None
 
@@ -140,7 +140,7 @@ def calcEarningsPersistence(company, *, basePeriod: str | None = None) -> dict |
     """
     accounts = ["영업이익", "법인세차감전순이익", "세전이익"]
     isResult = company.select("IS", accounts)
-    isParsed = toDict(isResult)
+    isParsed = toDictBySnakeId(isResult)
     if isParsed is None:
         return None
 
@@ -558,7 +558,7 @@ def calcNonOperatingBreakdown(company, *, basePeriod: str | None = None) -> dict
         ["영업이익", "금융이익", "금융비용", "지분법관련손익", "기타수익", "기타비용", "법인세차감전순이익"],
     )
 
-    isParsed = toDict(isResult)
+    isParsed = toDictBySnakeId(isResult)
     if isParsed is None:
         return None
 

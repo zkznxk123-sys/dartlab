@@ -8,13 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from dartlab.analysis.financial._helpers import (
-    MAX_RATIO_YEARS,
-    annualColsFromPeriods,
-    sumBorrowings,
-    toDict,
-    toDictBySnakeId,
-)
+from dartlab.analysis.financial._helpers import MAX_RATIO_YEARS, annualColsFromPeriods, sumBorrowings, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = MAX_RATIO_YEARS
@@ -59,17 +53,13 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
     isFinancial = _isFinancialSector(company)
 
     if isFinancial:
-        isResult = company.select(
-            "IS",
-            ["이자수익", "금융이익", "영업이익", "당기순이익"],
-        )
+        isResult = company.select("IS", ["이자수익", "금융이익", "영업이익", "당기순이익"])
     else:
         isResult = company.select(
-            "IS",
-            ["매출액", "매출원가", "매출총이익", "판매비와관리비", "영업이익", "당기순이익"],
+            "IS", ["매출액", "매출원가", "매출총이익", "판매비와관리비", "영업이익", "당기순이익"]
         )
 
-    parsed = toDict(isResult)
+    parsed = toDictBySnakeId(isResult)
     if parsed is None:
         return None
 
@@ -154,14 +144,11 @@ def calcReturnTrend(company, *, basePeriod: str | None = None) -> dict | None:
     ROE = (NI/EBT) x (EBT/EBIT) x (EBIT/Rev) x (Rev/TA) x (TA/Equity)
         = 세금부담 x 이자부담 x 영업마진 x 자산회전 x 레버리지
     """
-    isResult = company.select(
-        "IS",
-        ["매출액", "영업이익", "법인세차감전순이익", "당기순이익"],
-    )
+    isResult = company.select("IS", ["매출액", "영업이익", "법인세차감전순이익", "당기순이익"])
     bsResult = company.select("BS", ["자산총계", "자본총계"])
 
-    isParsed = toDict(isResult)
-    bsParsed = toDict(bsResult)
+    isParsed = toDictBySnakeId(isResult)
+    bsParsed = toDictBySnakeId(bsResult)
     if isParsed is None or bsParsed is None:
         return None
 
@@ -244,7 +231,7 @@ def calcMarginWaterfall(company, *, basePeriod: str | None = None) -> dict | Non
             "당기순이익",
         ],
     )
-    parsed = toDict(isResult)
+    parsed = toDictBySnakeId(isResult)
     if parsed is None:
         return None
 
@@ -621,8 +608,7 @@ def calcRoicTree(company, *, basePeriod: str | None = None) -> dict | None:
     학술근거: Koller, Goedhart, Wessels - Valuation (McKinsey).
     """
     isResult = company.select(
-        "IS",
-        ["매출액", "매출원가", "판매비와관리비", "영업이익", "법인세비용", "법인세차감전순이익"],
+        "IS", ["매출액", "매출원가", "판매비와관리비", "영업이익", "법인세비용", "법인세차감전순이익"]
     )
     bsResult = company.select(
         "BS",

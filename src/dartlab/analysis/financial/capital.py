@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import annualColsFromPeriods, sumBorrowings, toDict, toDictBySnakeId
+from dartlab.analysis.financial._helpers import annualColsFromPeriods, sumBorrowings, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_QUARTERS = 5
@@ -247,7 +247,7 @@ def _latestAnnualVal(company, stmt: str, accountName: str) -> float | None:
         result = company.select(stmt, [accountName])
     except (ValueError, KeyError):
         return None
-    parsed = toDict(result)
+    parsed = toDictBySnakeId(result)
     if parsed is None:
         return None
     data, allPeriods = parsed
