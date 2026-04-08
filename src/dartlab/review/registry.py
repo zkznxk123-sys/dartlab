@@ -856,6 +856,7 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
     if keys is None or keys & {
         "technicalVerdict",
         "technicalSignals",
+        "strategySnapshot",
         "marketBeta",
         "fundamentalDivergence",
         "marketAnalysisFlags",
@@ -864,6 +865,7 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             calcFundamentalDivergence,
             calcMarketAnalysisFlags,
             calcMarketBeta,
+            calcStrategySnapshot,
             calcTechnicalSignals,
             calcTechnicalVerdict,
         )
@@ -871,6 +873,7 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             fundamentalDivergenceBlock,
             marketAnalysisFlagsBlock,
             marketBetaBlock,
+            strategySnapshotBlock,
             technicalSignalsBlock,
             technicalVerdictBlock,
         )
@@ -879,6 +882,8 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             b["technicalVerdict"] = _safe(lambda: technicalVerdictBlock(calcTechnicalVerdict(company)))
         if _need("technicalSignals"):
             b["technicalSignals"] = _safe(lambda: technicalSignalsBlock(calcTechnicalSignals(company)))
+        if _need("strategySnapshot"):
+            b["strategySnapshot"] = _safe(lambda: strategySnapshotBlock(calcStrategySnapshot(company)))
         if _need("marketBeta"):
             b["marketBeta"] = _safe(lambda: marketBetaBlock(calcMarketBeta(company)))
         if _need("fundamentalDivergence"):

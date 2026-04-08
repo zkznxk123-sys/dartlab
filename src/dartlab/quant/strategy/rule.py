@@ -92,6 +92,73 @@ class Rule:
             meta=merged,
         )
 
+    def shift_lag(self, lag: int = 1) -> "Rule":
+        """Lookahead 가드 — entry/exit boolean 을 lag 봉만큼 미루기.
+
+        사용자가 만든 신호가 t 시점 정보를 사용했는지 확신 없을 때 paranoid mode.
+        lag=1 이면 어제 신호로 오늘 진입 (next-bar 체결과 결합 시 t-1 신호 → t+1 체결).
+
+        학술 근거: Lopez de Prado AFML — "When in doubt, shift by 1".
+        """
+        if lag <= 0:
+            return self
+        n = len(self.entry_expr)
+        ent = np.zeros(n, dtype=np.bool_)
+        ex = np.zeros(n, dtype=np.bool_)
+        if n > lag:
+            ent[lag:] = self.entry_expr[:-lag]
+            ex[lag:] = self.exit_expr[:-lag]
+        return Rule(
+            entry_expr=ent,
+            exit_expr=ex,
+            sizing=self.sizing,
+            stop=self.stop,
+            meta={**self.meta, "shift_lag": lag},
+        )
+
+    def lookahead_check(self, close: np.ndarray) -> dict:
+        """Lookahead leakage sanity test — entries 가 미래 정보 누설했나 통계 검증.
+
+        방법:
+            1. entry 시점의 다음 N봉 수익률 분포 vs random 시점의 분포 비교.
+            2. 만약 entry 시점 직후 수익률이 비현실적으로 높으면 leakage 의심.
+            3. 정직한 신호는 +1~5% 정도, leakage 신호는 +20%+ 자주 나타남.
+
+        Returns:
+            dict {entry_n_avg_ret_5d, random_avg_ret_5d, ratio, suspicious}
+        """
+        n = len(self.entry_expr)
+        if n < 30 or len(close) != n:
+            return {"error": "length mismatch or too short"}
+        entry_indices = np.where(self.entry_expr)[0]
+        if len(entry_indices) < 5:
+            return {"error": "too few entry signals"}
+        # 5봉 forward return at entry indices
+        forward = 5
+        valid_entries = entry_indices[entry_indices < n - forward]
+        if len(valid_entries) < 5:
+            return {"error": "too few valid entry indices"}
+        entry_rets = np.array(
+            [close[i + forward] / close[i] - 1 for i in valid_entries], dtype=np.float64
+        )
+        # random baseline
+        np.random.seed(42)
+        rand_idx = np.random.randint(0, n - forward, size=max(len(valid_entries), 100))
+        rand_rets = np.array([close[i + forward] / close[i] - 1 for i in rand_idx], dtype=np.float64)
+
+        entry_avg = float(np.mean(entry_rets))
+        rand_avg = float(np.mean(rand_rets))
+        ratio = entry_avg / rand_avg if abs(rand_avg) > 1e-9 else 0.0
+        # suspicious: entry 평균이 random 의 5배 이상 + entry 평균이 +5% 이상
+        suspicious = (abs(ratio) > 5 and abs(entry_avg) > 0.05) or abs(entry_avg) > 0.10
+        return {
+            "n_entries": int(len(valid_entries)),
+            "entry_forward_5d_avg": round(entry_avg, 4),
+            "random_forward_5d_avg": round(rand_avg, 4),
+            "ratio": round(ratio, 2),
+            "suspicious": bool(suspicious),
+        }
+
     def __len__(self) -> int:
         return len(self.entry_expr)
 

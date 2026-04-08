@@ -43,14 +43,34 @@ from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import get_arrays
 
 
-def build(company, *, donch_period: int = 20, atr_k: float = 2.5) -> Rule:
-    """돌파 룰 빌드."""
+def build(
+    company,
+    *,
+    entry_period: int = 20,
+    exit_period: int = 10,
+    atr_k: float = 2.0,
+) -> Rule:
+    """돌파 룰 빌드 — Faith Turtle System 1 정확한 룰셋.
+
+    학술/실무 정의 (Curtis Faith "Way of the Turtle" 1980s, Donchian 1960s):
+        Entry: close > rolling_high(20) — 20일 신고가 돌파
+        Exit:  close < rolling_low(10)  — 10일 신저가 (Turtle System 1)
+        Stop:  ATR×2 (Turtle 원본은 N(=ATR)×2 손절)
+
+    추가 robustness:
+        OBV 5일 누적 양수 (거래량 확인) — Faith 원본 비포함이지만 false signal 감소.
+
+    Args:
+        entry_period: 진입 채널 기간 (Turtle 20일)
+        exit_period: 청산 채널 기간 (Turtle 10일, S1)
+        atr_k: ATR stop 배수 (Turtle 2N)
+    """
     arr = get_arrays(company)
     close = arr.get("close")
     high = arr.get("high")
     low = arr.get("low")
     volume = arr.get("volume")
-    if close is None or high is None or low is None or volume is None or len(close) < 60:
+    if close is None or high is None or low is None or volume is None or len(close) < entry_period + 20:
         n = len(close) if close is not None else 0
         return Rule(
             entry_expr=np.zeros(max(n, 1), dtype=np.bool_),
@@ -58,18 +78,22 @@ def build(company, *, donch_period: int = 20, atr_k: float = 2.5) -> Rule:
             meta={"style": "breakout", "error": "insufficient data"},
         )
 
-    upper, middle, lower = vdonchian(high, low, period=donch_period)
+    # Turtle 진입 채널 (20일)
+    entry_upper, _, _ = vdonchian(high, low, period=entry_period)
+    # Turtle 청산 채널 (10일)
+    _, _, exit_lower = vdonchian(high, low, period=exit_period)
+
     obv = vobv(close, volume)
     obv_5d = np.diff(obv, prepend=obv[0])
     obv_5d_ma = np.convolve(obv_5d, np.ones(5) / 5, mode="same")
 
     s = Signal()
-    s.add("above_high", (close > upper) & ~np.isnan(upper))
-    s.add("below_mid", (close < middle) & ~np.isnan(middle))
+    s.add("above_entry_high", (close > entry_upper) & ~np.isnan(entry_upper))
+    s.add("below_exit_low", (close < exit_lower) & ~np.isnan(exit_lower))
     s.add("obv_up", obv_5d_ma > 0)
 
     return Rule(
-        entry_expr=s.above_high & s.obv_up,
-        exit_expr=s.below_mid,
-        meta={"style": "breakout"},
+        entry_expr=s.above_entry_high & s.obv_up,
+        exit_expr=s.below_exit_low,
+        meta={"style": "breakout", "definition": "Turtle_System1"},
     ).with_stop("atr", k=atr_k, period=14)

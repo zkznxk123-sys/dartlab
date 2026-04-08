@@ -207,6 +207,7 @@ _BLOCKS: list[BlockMeta] = [
     # ── 시장분석 ──
     BlockMeta("technicalVerdict", "기술적 종합 판단", "시장분석", "강세/중립/약세 판정, RSI, ADX, SMA/BB 위치"),
     BlockMeta("technicalSignals", "매매 신호", "시장분석", "골든크로스/RSI/MACD/볼린저 신호 최근 20일"),
+    BlockMeta("strategySnapshot", "전략별 진입 진단", "시장분석", "8 검증 스타일 백테스트 + 오늘 진입/청산 진단 (Sharpe/MDD/DSR)"),
     BlockMeta("marketBeta", "시장 베타", "시장분석", "실측 베타, 알파, CAPM 기대수익률"),
     BlockMeta("fundamentalDivergence", "재무-시장 괴리", "시장분석", "재무 스코어 vs 기술적 판단 교차검증"),
     BlockMeta("marketAnalysisFlags", "시장분석 플래그", "시장분석", "기술적 신호 경고/기회"),

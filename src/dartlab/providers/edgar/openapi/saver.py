@@ -150,7 +150,7 @@ def verifyOpenEdgarSaveCompatibility(ticker: str) -> dict[str, object]:
     return {
         "ticker": ticker.upper(),
         "corpName": company.corpName,
-        "hasTimeseries": company.timeseries is not None,
+        "hasTimeseries": company.show("IS") is not None,
         "docsSectionsShape": None if docsSections is None else docsSections.shape,
         "financeBsShape": None if financeBs is None else financeBs.shape,
         "indexShape": indexDf.shape,

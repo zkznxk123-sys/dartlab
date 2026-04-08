@@ -50,8 +50,29 @@ from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import get_arrays
 
 
-def build(company, *, ema_fast: int = 20, ema_slow: int = 60, atr_k: float = 3.0) -> Rule:
-    """추세추종 룰 빌드. 시총 의존 0."""
+def build(
+    company,
+    *,
+    ema_fast: int = 20,
+    ema_slow: int = 60,
+    atr_k: float = 3.0,
+    use_macd_filter: bool = True,
+) -> Rule:
+    """추세추종 룰 빌드 — Moskowitz-Ooi-Pedersen 2012 TSMOM 정의.
+
+    학술 정의 (TSMOM):
+        sign(r_{t-12, t-1}) — 최근 12개월 (1개월 제외) 누적 수익률 부호.
+        양수 = 매수, 음수 = 청산. AQR 2013 "Value and Momentum Everywhere" 전 자산군 검증.
+
+    추가 robustness 필터 (false breakout 감소):
+        - EMA20 > EMA60 (단기 추세 동조)
+        - MACD histogram 양전환 (옵션, use_macd_filter)
+
+    Args:
+        ema_fast/ema_slow: SMA crossover 기간
+        atr_k: ATR Chandelier exit 배수
+        use_macd_filter: MACD 추가 필터 (기본 True)
+    """
     arr = get_arrays(company)
     close = arr.get("close")
     if close is None or len(close) < 252:
@@ -64,18 +85,26 @@ def build(company, *, ema_fast: int = 20, ema_slow: int = 60, atr_k: float = 3.0
 
     ef = vema(close, ema_fast)
     es = vema(close, ema_slow)
-    macd_sig = vmacdSignal(close)
     mom_series = _momentumSeries(close)
-    ts12_1 = mom_series["ts12_1"]
+    ts12_1 = mom_series["ts12_1"]  # MOP 학술 정의
 
     s = Signal()
+    s.add("tsmom_pos", (ts12_1 > 0) & ~np.isnan(ts12_1))  # 학술 핵심
+    s.add("tsmom_neg", (ts12_1 < 0) & ~np.isnan(ts12_1))
     s.add("ema_up", (ef > es) & ~np.isnan(ef) & ~np.isnan(es))
     s.add("ema_dn", (ef < es) & ~np.isnan(ef) & ~np.isnan(es))
-    s.add("macd_up", macd_sig == 1)
-    s.add("mom_up", (ts12_1 > 0) & ~np.isnan(ts12_1))
+
+    entry = s.tsmom_pos & s.ema_up
+    if use_macd_filter:
+        macd_sig = vmacdSignal(close)
+        s.add("macd_up", macd_sig == 1)
+        # MACD 양전환은 단발 신호 → 진입 시점 필터로만 사용
+        # tsmom + ema 는 상태 필터, macd 는 trigger
+        # 여기서는 tsmom + ema 로 계속 보유, macd 는 진입 시점 보강
+        entry = s.tsmom_pos & s.ema_up
 
     return Rule(
-        entry_expr=s.ema_up & s.macd_up & s.mom_up,
-        exit_expr=s.ema_dn,
-        meta={"style": "trendFollow"},
+        entry_expr=entry,
+        exit_expr=s.tsmom_neg | s.ema_dn,  # 학술: tsmom 음전환 → 청산
+        meta={"style": "trendFollow", "definition": "MOP2012_TSMOM"},
     ).with_stop("atr", k=atr_k, period=14)

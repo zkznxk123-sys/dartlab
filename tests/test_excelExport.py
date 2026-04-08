@@ -123,7 +123,7 @@ def test_ratios_sheet(mockCompany):
         "CF": {"operating_cashflow": [50, 60, 70]},
     }
     years = ["2022", "2023", "2024"]
-    mockCompany.annual = (annualSeries, years)
+    mockCompany._buildFinanceSeries = lambda **kwargs: (annualSeries, years)
 
     with patch(PATCH_TARGET, return_value=(annualSeries, years)):
         with tempfile.TemporaryDirectory() as tmpDir:

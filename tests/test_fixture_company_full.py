@@ -70,7 +70,7 @@ class TestFinanceAccess:
     def test_IS_returns_dataframe(self, samsung):
         import polars as pl
 
-        result = samsung.IS
+        result = samsung.show("IS")
         if result is not None:
             assert isinstance(result, pl.DataFrame)
             assert "항목" in result.columns
@@ -78,7 +78,7 @@ class TestFinanceAccess:
     def test_BS_returns_dataframe(self, samsung):
         import polars as pl
 
-        result = samsung.BS
+        result = samsung.show("BS")
         if result is not None:
             assert isinstance(result, pl.DataFrame)
             assert "항목" in result.columns
@@ -86,7 +86,7 @@ class TestFinanceAccess:
     def test_CF_may_be_none(self, samsung):
         import polars as pl
 
-        result = samsung.CF
+        result = samsung.show("CF")
         # fixture에 CF가 없을 수 있음
         assert result is None or isinstance(result, pl.DataFrame)
 
@@ -133,7 +133,7 @@ class TestDerivedData:
     def test_ratios(self, samsung):
         import polars as pl
 
-        result = samsung.ratios
+        result = samsung.show("ratios")
         assert result is None or isinstance(result, pl.DataFrame)
 
     def test_annual_via_show(self, samsung):

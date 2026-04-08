@@ -345,6 +345,15 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         example='quant("walkforward", "005930", style="meanReversion")',
         group="strategy",
     ),
+    "multi": _AxisEntry(
+        module="dartlab.quant._ax_strategy",
+        fn="runMultiAsset",
+        label="멀티자산",
+        description="멀티 종목 포트폴리오 백테스트 (equal/inv_vol/risk_parity 가중)",
+        example='quant("multi", ["005930","000660"], style="trendFollow")',
+        group="strategy",
+        multiStock=True,
+    ),
 }
 
 # ── Alias 테이블 ─────────────────────────────────────────
@@ -437,6 +446,9 @@ _ALIASES: dict[str, str] = {
     "진입진단": "entry",
     "워크포워드": "walkforward",
     "전진검증": "walkforward",
+    "멀티자산": "multi",
+    "포트폴리오백테스트": "multi",
+    "multiasset": "multi",
 }
 
 # 기존 metric 이름 (하위호환용)

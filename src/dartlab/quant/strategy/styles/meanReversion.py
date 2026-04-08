@@ -44,11 +44,54 @@ from dartlab.quant.strategy.styles._common import get_arrays
 from dartlab.quant.volatility import _volatilitySeries
 
 
-def build(company, *, rsi_low: float = 30, rsi_high: float = 50, atr_k: float = 2.0) -> Rule:
-    """평균회귀 룰 빌드."""
+def _residualZScore(close: np.ndarray, window: int = 60) -> np.ndarray:
+    """log(close) 의 rolling residual z-score — Avellaneda-Lee OU 정상화 form.
+
+    학술 (Avellaneda & Lee 2008):
+        log price → rolling mean 제거 (de-trend) → std 정규화
+        z < -s_bo (entry threshold), z > -s_so (exit threshold)
+    """
+    n = len(close)
+    z = np.full(n, np.nan, dtype=np.float64)
+    log_p = np.log(np.maximum(close, 1e-9))
+    for i in range(window, n):
+        win = log_p[i - window + 1 : i + 1]
+        mu = float(np.mean(win))
+        sd = float(np.std(win, ddof=1))
+        if sd > 0:
+            z[i] = (log_p[i] - mu) / sd
+    return z
+
+
+def build(
+    company,
+    *,
+    z_entry: float = -1.25,
+    z_exit: float = -0.5,
+    z_window: int = 60,
+    rsi_confirm: float = 35,
+    atr_k: float = 2.0,
+) -> Rule:
+    """평균회귀 룰 빌드 — Avellaneda-Lee 2008 statistical arbitrage 정의.
+
+    학술 정의:
+        z(t) = (log(close) - rolling_mean(60)) / rolling_std(60)
+        Entry: z < -1.25 (1.25σ 하방 이탈) + 변동성 정상 + RSI 확인
+        Exit:  z > -0.5 (평균 회복 진행)
+
+    원본 Avellaneda-Lee 는 PCA residual 이지만 단일 종목엔 self-residual 사용.
+    s_bo = -1.25, s_so = -0.50 은 논문 권장값.
+
+    Args:
+        z_entry: 진입 z-score 임계 (음수, 더 작을수록 강한 oversold)
+        z_exit: 청산 z-score 임계
+        z_window: rolling 기간 (논문 60일)
+        rsi_confirm: RSI 추가 확인 임계 (false signal 감소)
+        atr_k: ATR stop 배수
+    """
     arr = get_arrays(company)
     close = arr.get("close")
-    if close is None or len(close) < 60:
+    if close is None or len(close) < z_window + 20:
         n = len(close) if close is not None else 0
         return Rule(
             entry_expr=np.zeros(max(n, 1), dtype=np.bool_),
@@ -56,20 +99,20 @@ def build(company, *, rsi_low: float = 30, rsi_high: float = 50, atr_k: float = 
             meta={"style": "meanReversion", "error": "insufficient data"},
         )
 
+    z = _residualZScore(close, window=z_window)
     rsi = vrsi(close, period=14)
-    bb_up, bb_mid, bb_lo = vbollinger(close, period=20, std=2.0)
     vol_series = _volatilitySeries(close)
     realized = vol_series["realized_vol"]
-    vol_q60 = float(np.nanquantile(realized, 0.60)) if not np.all(np.isnan(realized)) else float("inf")
+    vol_q70 = float(np.nanquantile(realized, 0.70)) if not np.all(np.isnan(realized)) else float("inf")
 
     s = Signal()
-    s.add("rsi_low", (rsi < rsi_low) & ~np.isnan(rsi))
-    s.add("rsi_high", (rsi > rsi_high) & ~np.isnan(rsi))
-    s.add("below_bb", (close < bb_lo) & ~np.isnan(bb_lo))
-    s.add("vol_normal", (realized < vol_q60) & ~np.isnan(realized))
+    s.add("z_low", (z < z_entry) & ~np.isnan(z))
+    s.add("z_recover", (z > z_exit) & ~np.isnan(z))
+    s.add("rsi_oversold", (rsi < rsi_confirm) & ~np.isnan(rsi))
+    s.add("vol_normal", (realized < vol_q70) & ~np.isnan(realized))
 
     return Rule(
-        entry_expr=s.rsi_low & s.below_bb & s.vol_normal,
-        exit_expr=s.rsi_high,
-        meta={"style": "meanReversion"},
+        entry_expr=s.z_low & s.rsi_oversold & s.vol_normal,
+        exit_expr=s.z_recover,
+        meta={"style": "meanReversion", "definition": "Avellaneda-Lee_2008"},
     ).with_stop("atr", k=atr_k, period=14)

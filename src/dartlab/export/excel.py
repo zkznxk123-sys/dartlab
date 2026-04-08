@@ -196,9 +196,11 @@ def _writeRatiosSheet(wb: Workbook, c: Company, *, label: str = "") -> None:
     from dartlab.core.finance.ratios import RATIO_CATEGORIES, calcRatioSeries, toSeriesDict
 
     annualResult = c._buildFinanceSeries(freq="Y")
-    if annualResult is None:
+    if annualResult is None or len(annualResult) != 2:
         return
     annualSeries, years = annualResult
+    if not annualSeries or not years:
+        return
     rs = calcRatioSeries(annualSeries, years)
     ratioSeriesDict, _ = toSeriesDict(rs)
     ratioData = ratioSeriesDict.get("RATIO", {})

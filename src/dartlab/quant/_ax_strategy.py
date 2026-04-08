@@ -22,6 +22,7 @@ from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 from dartlab.quant.strategy.backtest import (
     BacktestResult,
     cpcv as cpcv_fn,
+    multi_asset_backtest,
     vector_backtest,
     walk_forward,
 )
@@ -153,6 +154,15 @@ def runBacktest(
     if style is None:
         return BacktestResult(status="error", reason="style= or Rule= is required", style=None)
 
+    # KR-only 사전 체크 (OHLCV fetch 전) — _build_rule_from_style 이 NotApplicable 반환
+    if isinstance(style, str):
+        key = resolve_style(style)
+        if key in {"flowFollow", "seasonalKR"} and resolve_market(stockCode, "auto") != "KR":
+            return BacktestResult.not_applicable(
+                style=key,
+                reason=f"KR-only style: {key} (data not available for non-KR markets)",
+            )
+
     arr = _arrays(stockCode)
     close = arr.get("close")
     if close is None or len(close) < 60:
@@ -278,6 +288,38 @@ def runEntry(
             last_price=last_price, stop_level=stop_level, last_date=last_date_str,
         )
     return out
+
+
+def runMultiAsset(
+    stockCodes: list[str] | None = None,
+    *,
+    style: str | None = None,
+    weighting: str = "equal",
+    **kwargs,
+) -> BacktestResult:
+    """`c.quant("multi", ["005930","000660",...], style="trendFollow")` — 멀티 종목 포트폴리오.
+
+    Args:
+        stockCodes: 종목 리스트
+        style: 8 프리셋 스타일 이름
+        weighting: equal | inv_vol | risk_parity
+    """
+    if not stockCodes:
+        return BacktestResult(status="error", reason="stockCodes list required", style=None)
+    if not style:
+        return BacktestResult(status="error", reason="style= required", style=None)
+
+    key = resolve_style(style)
+    reg = STYLE_REGISTRY()
+    if key not in reg:
+        return BacktestResult(status="error", reason=f"unknown style: {style}", style=None)
+
+    return multi_asset_backtest(
+        list(stockCodes),
+        reg[key],
+        weighting=weighting,
+        style=key,
+    )
 
 
 def runWalkforward(

@@ -21,7 +21,7 @@
     >>> print(f"Sharpe={bt.sharpe:.2f} DSR={bt.dsr:.2f}")
 """
 
-from .backtest import BacktestResult, cpcv, vector_backtest, walk_forward
+from .backtest import BacktestResult, cpcv, multi_asset_backtest, vector_backtest, walk_forward
 from .metrics import (
     dsr,
     expectancy,
@@ -45,6 +45,7 @@ __all__ = [
     "vector_backtest",
     "walk_forward",
     "cpcv",
+    "multi_asset_backtest",
     "STYLE_REGISTRY",
     "STYLE_KR_ONLY",
     "resolve_style",

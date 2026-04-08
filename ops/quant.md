@@ -24,7 +24,7 @@ c.quant("모멘텀")         # 단일 축 분석
 | 진입점 | `c.quant()`, `c.quant("종합")`, `dartlab.quant("축", "종목")` |
 | 소비 | gather(price, flow), scan 프리빌드 parquet, docs/changes parquet |
 | 생산 | ai(L3)가 정량 판단에 소비, review가 기술적 섹션에 소비 |
-| 축 | 30축 7그룹 |
+| 축 | 8그룹 — 기존 7그룹 + Strategy DSL (사용자 컨트롤 백테스트) |
 
 ## 호출 계약 (4엔진 통일 패턴)
 
@@ -81,7 +81,12 @@ dartlab.quant.momentum("005930")
 dartlab.quant.verdict("005930")
 ```
 
-## 축 체계 (7그룹 29축)
+## 축 체계 (8그룹)
+
+기존 7그룹 신호/지표/팩터 + Strategy DSL 그룹 (사용자 boolean 룰 백테스트). 시총 횡단면
+의존 0 — 단일 종목만 지원. KR 전용 스타일은 EdgarCompany 호출 시 NotApplicable sentinel.
+
+## 7그룹 신호/지표
 
 ### A. 기술적 (technical) — 가격 전용
 
@@ -146,6 +151,73 @@ dartlab.quant.verdict("005930")
 | 평균분산 | meanvar | Markowitz long-only (active-set QP) + Ledoit-Wolf 옵션 + riskFree | ✅ Phase 2C 완료 (clip+renorm → active-set 교체) |
 | 리스크패리티 | riskparity | HRP (Lopez de Prado) — 진짜 single-linkage clustering | ✅ Phase 2C 완료 |
 | 자산배분 | allocation | Equal Risk Contribution (Maillard 2010) | ✅ description 정정 + alias 정리 완료 |
+
+### H. Strategy DSL — 사용자 boolean 룰 + 백테스트 + Lopez 검증
+
+사용자가 가설을 boolean expression 으로 직접 컴포즈 (가중치 박지 마라). 8 검증
+스타일 프리셋 + walk_forward + CPCV + DSR + PBO. **시총 의존 0** (단일 종목만).
+외부 의존 0 (numpy + polars + math 만, 정규분포 CDF/PPF 자체 구현).
+
+| 축 | key | 설명 | 상태 |
+|---|---|---|---|
+| 전략 | strategy | 사용자 정의 boolean Rule 백테스트 | ✅ Phase D 완료 |
+| 백테스트 | backtest | 스타일명 또는 Rule 백테스트 (cpcv 옵션) | ✅ Phase D 완료 |
+| 스타일 | style | 8 검증 프리셋 일괄/단일 백테스트 | ✅ Phase E 완료 |
+| 진입진단 | entry | 현재 시점 entry/exit/stop 한 줄 진단 | ✅ Phase F 완료 |
+| 워크포워드 | walkforward | Lopez 슬라이딩 OOS Sharpe + DSR + PBO | ✅ Phase D 완료 |
+
+#### 8 검증 스타일 (시총 의존 0)
+
+| key | 한글 | 시장 | 핵심 신호 | 학술 근거 |
+|---|---|---|---|---|
+| trendFollow | 추세추종 | KR/US | EMA20>EMA60 + MACD + 12-1M momentum | Asness 2013 |
+| meanReversion | 평균회귀 | KR/US | RSI<30 + BB lower + vol normal | Avellaneda-Lee 2008 |
+| breakout | 돌파 | KR/US | Donchian 20 + OBV 5d | Donchian/Faith Turtle |
+| dipBuy | 눌림목매수 | KR/US | regime bull + EMA50 + RSI<40 | BTFD pattern |
+| eventDriven | 이벤트드리븐 | KR(DART)/US(10-K) | filing flag + SMA5 + T+20 | Bernard-Thomas 1989 PEAD |
+| flowFollow | 수급추종 | **KR only** | foreign 5d + inst 5d 동시 양수 | 한국증권학회 2017 |
+| lowVolDefensive | 저변동방어 | KR/US | vol q30 + MDD 252d | Frazzini-Pedersen 2014 BAB |
+| seasonalKR | 한국캘린더 | **KR only** | TOM (월말 3 + 월초 3) | Lakonishok-Smidt 1988 / 한국재무학회 2018 |
+
+KR 전용 스타일은 EdgarCompany 호출 시 `BacktestResult.not_applicable()` sentinel
+반환 (예외 X, None X). `_DART_ONLY_EXEMPT` 등록 불필요.
+
+#### Strategy DSL 사용 패턴
+
+```python
+from dartlab.quant.strategy import Signal, Rule
+
+# 1. 사용자 boolean rule (가중치 없음)
+s = Signal()
+s.add("rsi_oversold", c.quant("신호", series=True)["rsiSignal"] == 1)
+s.add("regime_bull", c.quant("레짐", series=True)["_series"]["state"] == 2)
+rule = Rule(s.rsi_oversold & s.regime_bull, exit_expr=...).with_stop("atr", k=3.0)
+
+# 2. 백테스트
+bt = c.quant("strategy", rule=rule)
+print(f"Sharpe={bt.sharpe:.2f} DSR={bt.dsr:.2f}")
+
+# 3. 8 스타일 일괄
+all_styles = c.quant("스타일")  # dict[str, BacktestResult]
+
+# 4. 오늘 진입 진단
+e = c.quant("진입진단")          # dict[str, EntryVerdict]
+
+# 5. Walk-forward + DSR/PBO
+wf = c.quant("워크포워드", style="seasonalKR", train=120, test=30)
+```
+
+review 6막 시장분석 섹션에 `strategySnapshot` 카드 자동 등장 — 8 스타일 백테스트
+매트릭스 (Sharpe/MDD/DSR/오늘진입/오늘청산/Trades/판정).
+
+#### 검증 메트릭 (자체 구현, scipy 0)
+
+- **Sharpe / Sortino / MDD / Winrate / Profit Factor / Expectancy / Turnover / Exposure** — 표준
+- **DSR (Bailey-López de Prado 2014)** — Deflated Sharpe Ratio, 다중 시도 + skew/kurt 정정
+- **PBO (Bailey-Borwein-López de Prado-Zhu 2015)** — Probability of Backtest Overfitting
+- **CPCV (López de Prado AFML)** — Combinatorial Purged Cross-Validation, embargo 지원
+- **walk_forward** — Lopez 슬라이딩 train/test
+- 정규분포 CDF/PPF: `math.erf` + Acklam Beasley-Springer-Moro 근사 (외부 라이브러리 0)
 
 ## 학술 근거
 
