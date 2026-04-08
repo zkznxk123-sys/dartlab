@@ -2039,7 +2039,27 @@ class Company:
             return payload.filter(pl.col("year").cast(pl.Utf8) == normalizedPeriod)
         return payload
 
-    def show(
+    @property
+    def show(self):
+        """topic 의 데이터를 반환 — 사용자 단일 진입점 (api-contract dual access).
+
+        Call form 과 attribute form 둘 다 지원 (pandas 관용):
+
+            c.show("IS")               # call form
+            c.show.IS()                # attribute form (callable)
+            c.show.IS(freq="Y")        # attribute form + kwargs
+            c.show("IS", freq="Y")     # call form + kwargs
+
+        실제 동작은 ``_showImpl`` 에 있고, 이 property 는 ``CallableAccessor`` 로
+        wrap 한다. 시그니처는 ``_showImpl`` 의 docstring 참조.
+        """
+        from dartlab.core.dualAccess import CallableAccessor
+
+        if "_showAccessor" not in self._cache:
+            self._cache["_showAccessor"] = CallableAccessor(self._showImpl, name="show")
+        return self._cache["_showAccessor"]
+
+    def _showImpl(
         self,
         topic: str,
         block: int | None = None,
@@ -2049,7 +2069,7 @@ class Company:
         scope: str = "consolidated",
         raw: bool = False,
     ) -> pl.DataFrame | None:
-        """topic 의 데이터를 반환 — 사용자 단일 진입점 (api-contract).
+        """topic 의 데이터를 반환 — 내부 구현 (사용자는 ``c.show`` 호출).
 
         ``ops/api-contract.md`` 의 "단일 진입점 + 파라미터 계약" 규칙에 따라
         모든 topic 접근은 ``c.show(topic, ...)`` 로 통합한다. 별도 property
@@ -2418,7 +2438,23 @@ class Company:
             return parts[0]
         return pl.concat(parts, how="diagonal_relaxed")
 
-    def select(
+    @property
+    def select(self):
+        """show() 결과에서 행/열 필터 — dual access.
+
+            c.select("IS", ["매출액"])           # call form
+            c.select.IS(["매출액"])              # attr form
+            c.select.IS(["매출액"], freq="Y")    # attr + kwargs
+
+        실제 동작은 ``_selectImpl`` 참조.
+        """
+        from dartlab.core.dualAccess import CallableAccessor
+
+        if "_selectAccessor" not in self._cache:
+            self._cache["_selectAccessor"] = CallableAccessor(self._selectImpl, name="select")
+        return self._cache["_selectAccessor"]
+
+    def _selectImpl(
         self,
         topic: str,
         indList: str | list[str] | None = None,
@@ -2427,7 +2463,7 @@ class Company:
         freq: str = "Q",
         scope: str = "consolidated",
     ):
-        """show() 결과에서 행(indList) + 열(colList) 필터 — 사용자 단일 진입점.
+        """show() 결과에서 행(indList) + 열(colList) 필터 — 내부 구현.
 
         ``c.show()`` 와 동일한 freq/scope 파라미터를 받는다 (api-contract).
 
@@ -2803,7 +2839,24 @@ class Company:
             return None
         return result.to_dataframe()
 
-    def review(
+    @property
+    def review(self):
+        """재무제표 구조화 보고서 — dual access.
+
+            c.review()                  # 전체
+            c.review("수익성")           # call form
+            c.review.수익성              # attr form (callable)
+            c.review(preset="audit")    # preset
+
+        실제 동작은 ``_reviewImpl`` 참조.
+        """
+        from dartlab.core.dualAccess import CallableAccessor
+
+        if "_reviewAccessor" not in self._cache:
+            self._cache["_reviewAccessor"] = CallableAccessor(self._reviewImpl, name="review")
+        return self._cache["_reviewAccessor"]
+
+    def _reviewImpl(
         self,
         section: str | None = None,
         layout=None,
@@ -2814,7 +2867,7 @@ class Company:
         detail: bool | None = None,
         basePeriod: str | None = None,
     ):
-        """재무제표 구조화 보고서 — 14개 섹션 데이터 검토서.
+        """재무제표 구조화 보고서 — 14개 섹션 데이터 검토서 (내부 구현).
 
         Capabilities:
             - 14개 섹션 전체 보고서 (수익구조~재무정합성)
@@ -2935,8 +2988,25 @@ class Company:
 
         return buildReview(self, section=section, layout=layout, basePeriod=basePeriod)
 
-    def analysis(self, axis: str | None = None, sub: str | None = None, **kwargs):
-        """재무제표 완전 분석 — 14축, 단일 종목 심층.
+    @property
+    def analysis(self):
+        """재무제표 완전 분석 — dual access (api-contract).
+
+            c.analysis()                              # 가이드
+            c.analysis("financial", "수익성")          # call form
+            c.analysis.financial("수익성")             # attr form
+            c.analysis.수익성                          # attr (반환 callable)
+
+        실제 동작은 ``_analysisImpl`` 참조.
+        """
+        from dartlab.core.dualAccess import CallableAccessor
+
+        if "_analysisAccessor" not in self._cache:
+            self._cache["_analysisAccessor"] = CallableAccessor(self._analysisImpl, name="analysis")
+        return self._cache["_analysisAccessor"]
+
+    def _analysisImpl(self, axis: str | None = None, sub: str | None = None, **kwargs):
+        """재무제표 완전 분석 — 14축, 단일 종목 심층 (내부 구현).
 
         Capabilities:
             - 14축 분석: 수익구조, 자금조달, 자산구조, 현금흐름, 수익성, 성장성, 안정성, 효율성, 종합평가, 이익품질, 비용구조, 자본배분, 투자효율, 재무정합성
@@ -2988,8 +3058,25 @@ class Company:
             return _analysis(axis, sub, company=self, **kwargs)
         return _analysis(axis, company=self, **kwargs)
 
-    def credit(self, axis: str | None = None, *, detail: bool = False, basePeriod: str | None = None):
-        """독립 신용평가 — dCR 20단계 등급.
+    @property
+    def credit(self):
+        """독립 신용평가 — dual access.
+
+            c.credit()                  # 등급 종합
+            c.credit("채무상환")          # call form
+            c.credit.채무상환             # attr form (callable)
+            c.credit(detail=True)        # 상세
+
+        실제 동작은 ``_creditImpl`` 참조.
+        """
+        from dartlab.core.dualAccess import CallableAccessor
+
+        if "_creditAccessor" not in self._cache:
+            self._cache["_creditAccessor"] = CallableAccessor(self._creditImpl, name="credit")
+        return self._cache["_creditAccessor"]
+
+    def _creditImpl(self, axis: str | None = None, *, detail: bool = False, basePeriod: str | None = None):
+        """독립 신용평가 — dCR 20단계 등급 (내부 구현).
 
         dartlab 독립 신용평가 엔진(credit/)이 산출하는 dCR 등급.
         7축 정량 스코어링 + 업종별 차등 + 시계열 안정화.

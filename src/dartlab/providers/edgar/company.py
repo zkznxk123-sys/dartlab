@@ -989,7 +989,16 @@ class Company:
 
     # insights는 analysis 내부 — c.analysis("financial", "종합평가")로 접근
 
-    def review(
+    @property
+    def review(self):
+        """재무 검토 보고서 — dual access."""
+        from dartlab.core.dualAccess import CallableAccessor
+
+        if "_reviewAccessor" not in self._cache:
+            self._cache["_reviewAccessor"] = CallableAccessor(self._reviewImpl, name="review")
+        return self._cache["_reviewAccessor"]
+
+    def _reviewImpl(
         self,
         section: str | None = None,
         layout=None,
@@ -1056,8 +1065,17 @@ class Company:
             basePeriod=basePeriod,
         )
 
-    def analysis(self, axis: str | None = None, sub: str | None = None, **kwargs):
-        """분석 엔진 실행 — analysis()에 self를 바인딩.
+    @property
+    def analysis(self):
+        """분석 엔진 실행 — dual access."""
+        from dartlab.core.dualAccess import CallableAccessor
+
+        if "_analysisAccessor" not in self._cache:
+            self._cache["_analysisAccessor"] = CallableAccessor(self._analysisImpl, name="analysis")
+        return self._cache["_analysisAccessor"]
+
+    def _analysisImpl(self, axis: str | None = None, sub: str | None = None, **kwargs):
+        """분석 엔진 실행 — analysis()에 self를 바인딩 (내부 구현).
 
         Capabilities:
             - 14축 재무분석 + forecast + valuation
@@ -1106,8 +1124,17 @@ class Company:
             return _analysis(axis, sub, company=self, **kwargs)
         return _analysis(axis, company=self, **kwargs)
 
-    def credit(self, axis: str | None = None, *, detail: bool = False, basePeriod: str | None = None):
-        """독립 신용평가 — dCR 20단계 등급."""
+    @property
+    def credit(self):
+        """독립 신용평가 — dual access."""
+        from dartlab.core.dualAccess import CallableAccessor
+
+        if "_creditAccessor" not in self._cache:
+            self._cache["_creditAccessor"] = CallableAccessor(self._creditImpl, name="credit")
+        return self._cache["_creditAccessor"]
+
+    def _creditImpl(self, axis: str | None = None, *, detail: bool = False, basePeriod: str | None = None):
+        """독립 신용평가 — dCR 20단계 등급 (내부 구현)."""
         from dartlab.credit import creditCompany
 
         return creditCompany(self, axis=axis, detail=detail, basePeriod=basePeriod)
@@ -1555,7 +1582,23 @@ class Company:
         self._cache[cacheKey] = result
         return result
 
-    def show(
+    @property
+    def show(self):
+        """topic 데이터 조회 — dual access (api-contract).
+
+            c.show("IS")               # call form
+            c.show.IS()                # attr form
+            c.show.IS(freq="Y")        # attr + kwargs
+
+        실제 동작은 ``_showImpl``.
+        """
+        from dartlab.core.dualAccess import CallableAccessor
+
+        if "_showAccessor" not in self._cache:
+            self._cache["_showAccessor"] = CallableAccessor(self._showImpl, name="show")
+        return self._cache["_showAccessor"]
+
+    def _showImpl(
         self,
         topic: str,
         block: int | None = None,
@@ -1564,7 +1607,7 @@ class Company:
         raw: bool = False,
         **_kw: Any,
     ) -> pl.DataFrame | None:
-        """topic 데이터 조회 — sections 사상의 핵심 소비 경로.
+        """topic 데이터 조회 — sections 사상의 핵심 소비 경로 (내부 구현).
 
         Capabilities:
             - finance topic(BS/IS/CF/CIS/ratios) + docs topic(10-K/10-Q 항목) 통합 조회
@@ -1705,13 +1748,28 @@ class Company:
 
         return buildBlockIndex(topicRows)
 
-    def select(
+    @property
+    def select(self):
+        """show() 결과에서 행/열 필터 — dual access.
+
+            c.select("IS", ["sales"])
+            c.select.IS(["sales"])
+
+        실제 동작은 ``_selectImpl``.
+        """
+        from dartlab.core.dualAccess import CallableAccessor
+
+        if "_selectAccessor" not in self._cache:
+            self._cache["_selectAccessor"] = CallableAccessor(self._selectImpl, name="select")
+        return self._cache["_selectAccessor"]
+
+    def _selectImpl(
         self,
         topic: str,
         indList: str | list[str] | None = None,
         colList: str | list[str] | None = None,
     ):
-        """show() 결과에서 행/열 필터 — 특정 계정 x 특정 기간 추출.
+        """show() 결과에서 행/열 필터 — 특정 계정 x 특정 기간 추출 (내부 구현).
 
         Capabilities:
             - show() 결과에서 행(계정명)과 열(기간) 동시 필터

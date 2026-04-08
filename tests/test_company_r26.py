@@ -4,6 +4,10 @@ R26-1: c.show('없는토픽') silent None → ValueError
 R26-2: c.select('IS', ['없는계정']) silent None → ValueError
 R26-3: c.select('없는토픽', ['매출액']) silent None → ValueError (show 에서)
 R26-4: c.select('IS', []) silent None → ValueError
+
+Plan v9 dual access (P0.13): show/select 가 property → CallableAccessor 로 변경되어
+``inspect.getsource(Company.show)`` 가 property 객체를 받아 에러 발생.
+대신 내부 구현 ``_showImpl`` / ``_selectImpl`` 의 source 를 검증한다.
 """
 
 from __future__ import annotations
@@ -14,12 +18,12 @@ pytestmark = pytest.mark.unit
 
 
 def test_dart_company_show_has_explicit_error_path():
-    """R26-1: DART company.show 가 ValueError 발생 코드 가짐."""
+    """R26-1: DART company._showImpl 가 ValueError 발생 코드 가짐."""
     import inspect
 
     from dartlab.providers.dart.company import Company
 
-    src = inspect.getsource(Company.show)
+    src = inspect.getsource(Company._showImpl)
     assert "ValueError" in src
     assert "찾을 수 없" in src
 
@@ -30,7 +34,7 @@ def test_dart_company_select_validates_empty_indlist():
 
     from dartlab.providers.dart.company import Company
 
-    src = inspect.getsource(Company.select)
+    src = inspect.getsource(Company._selectImpl)
     assert "len(indList) == 0" in src
     assert "indList" in src
 
@@ -41,18 +45,18 @@ def test_dart_company_select_raises_on_unmatched_indlist():
 
     from dartlab.providers.dart.company import Company
 
-    src = inspect.getsource(Company.select)
+    src = inspect.getsource(Company._selectImpl)
     assert "찾을 수 없" in src
     assert "ValueError" in src
 
 
 def test_edgar_company_show_has_explicit_error_path():
-    """R26-1 EDGAR: edgar company.show 가 ValueError 발생 코드 가짐."""
+    """R26-1 EDGAR: edgar company._showImpl 가 ValueError 발생 코드 가짐."""
     import inspect
 
     from dartlab.providers.edgar.company import Company
 
-    src = inspect.getsource(Company.show)
+    src = inspect.getsource(Company._showImpl)
     assert "ValueError" in src
     assert "찾을 수 없" in src
 
@@ -63,7 +67,7 @@ def test_edgar_company_select_validates_empty_indlist():
 
     from dartlab.providers.edgar.company import Company
 
-    src = inspect.getsource(Company.select)
+    src = inspect.getsource(Company._selectImpl)
     assert "len(indList) == 0" in src
 
 
@@ -73,7 +77,7 @@ def test_edgar_company_select_raises_on_unmatched():
 
     from dartlab.providers.edgar.company import Company
 
-    src = inspect.getsource(Company.select)
+    src = inspect.getsource(Company._selectImpl)
     assert "찾을 수 없" in src
     assert "ValueError" in src
 

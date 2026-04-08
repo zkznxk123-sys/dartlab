@@ -1127,10 +1127,67 @@
 		.post-nav { grid-template-columns: 1fr; }
 	}
 
+	@media (max-width: 768px) {
+		.blog-post-layout {
+			max-width: 100%;
+			padding: 0;
+			gap: 1rem;
+		}
+		.blog-post-col {
+			max-width: 100%;
+			min-width: 0;
+			width: 100%;
+		}
+		.post-header {
+			max-width: 100%;
+		}
+		.post-summary {
+			width: 100%;
+			padding: 0.85rem 0.95rem;
+		}
+		.post-summary p {
+			font-size: 0.92rem;
+			word-break: keep-all;
+			overflow-wrap: anywhere;
+		}
+		/* 본문 자체 — 모든 자식이 부모 폭 넘지 않도록 */
+		.blog-article {
+			max-width: 100%;
+			min-width: 0;
+			overflow-wrap: anywhere;
+			word-break: keep-all;
+		}
+		.blog-article :global(p),
+		.blog-article :global(li),
+		.blog-article :global(h1),
+		.blog-article :global(h2),
+		.blog-article :global(h3),
+		.blog-article :global(h4),
+		.blog-article :global(blockquote) {
+			max-width: 100%;
+			overflow-wrap: anywhere;
+			word-break: keep-all;
+		}
+		/* pre/code 블록은 가로 스크롤 */
+		.blog-article :global(pre) {
+			max-width: 100%;
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+		.blog-article :global(img),
+		.blog-article :global(svg) {
+			max-width: 100%;
+			height: auto;
+		}
+	}
+
 	@media (max-width: 480px) {
 		.post-header {
 			margin-bottom: 1.5rem;
 			padding-bottom: 1.25rem;
+		}
+		.blog-article {
+			font-size: 0.95rem;
 		}
 	}
 </style>

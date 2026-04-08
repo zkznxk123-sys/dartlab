@@ -289,5 +289,14 @@
 	@media (max-width: 480px) {
 		.dl-blog-logo-text { display: none; }
 		.dl-blog-divider { display: none; }
+		.dl-blog-body {
+			padding: 1rem 0.5rem 3rem;
+			gap: 0.75rem;
+		}
+		.dl-blog-main {
+			min-width: 0;
+			max-width: 100%;
+			overflow-x: hidden;
+		}
 	}
 </style>
