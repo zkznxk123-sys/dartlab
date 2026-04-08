@@ -319,6 +319,9 @@
 						})}
 					</div>
 				{/if}
+				{#if meta?.title}
+					<h1 class="post-title">{meta.title}</h1>
+				{/if}
 				{#if meta?.description}
 					<div class="post-summary" aria-label="포스트 핵심 요약">
 						<span class="post-summary-kicker">Quick Summary</span>
@@ -485,6 +488,17 @@
 		margin-bottom: 2rem;
 		padding-bottom: 1.5rem;
 		border-bottom: 1px solid rgba(30, 36, 51, 0.8);
+	}
+
+	.post-title {
+		width: min(100%, 820px);
+		margin: 1.1rem 0 0.4rem;
+		font-size: clamp(1.6rem, 3vw, 2.35rem);
+		font-weight: 800;
+		line-height: 1.28;
+		color: #f8fafc;
+		letter-spacing: -0.01em;
+		text-align: center;
 	}
 
 	.post-summary {
