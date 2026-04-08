@@ -96,6 +96,28 @@ def load_scan_parquet(name: str, market: str = "KR"):
     return pl.scan_parquet(path)
 
 
+def load_shares_outstanding(market: str = "KR"):
+    """발행주식수 프리빌드 LazyFrame 로드.
+
+    KR: data/dart/scan/sharesOutstanding.parquet (보통주/우선주 분리)
+    US: data/edgar/scan/sharesOutstanding.parquet (XBRL dei)
+
+    Returns:
+        pl.LazyFrame 또는 None
+    """
+    import polars as pl
+
+    root = _scan_data_root()
+    if market == "KR":
+        path = root / "dart" / "scan" / "sharesOutstanding.parquet"
+    else:
+        path = root / "edgar" / "scan" / "sharesOutstanding.parquet"
+    if not path.exists():
+        log.warning("sharesOutstanding parquet 없음: %s", path)
+        return None
+    return pl.scan_parquet(path)
+
+
 def load_docs_for_stock(stockCode: str):
     """단일 종목 docs parquet 로드.
 
