@@ -1104,16 +1104,17 @@
 		margin-bottom: 1.5rem;
 	}
 	.post-disclaimer {
-		font-size: 0.8rem;
-		color: #94a3b8;
-		line-height: 1.5;
+		font-size: 0.95rem;
+		color: #ea4647;
+		line-height: 1.6;
 		margin: 0;
+		font-weight: 500;
 	}
 	.post-support-cta {
-		font-size: 0.85rem;
-		color: #cbd5e1;
-		line-height: 1.5;
-		margin: 0.75rem 0 1.2rem;
+		font-size: 1rem;
+		color: #e2e8f0;
+		line-height: 1.6;
+		margin: 0.75rem 0 1.5rem;
 	}
 	.post-support a {
 		display: inline-block;
