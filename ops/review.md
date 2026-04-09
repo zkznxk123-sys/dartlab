@@ -450,7 +450,7 @@ review audit 에서 세그먼트/재무 데이터 이상 발견
 
 ## 버그픽스 점검 진행사항
 
-→ `ops/reviewAudit.md` — 종목별 audit, 발견 버그, 단위 함정, 진행 절차
+→ `data/dart/auditReview/{종목코드}.md` — 종목별 audit 결과 저장
 
 ## 관련 코드
 
