@@ -384,7 +384,12 @@ def calcProfitabilityFlags(company, *, basePeriod: str | None = None) -> list[st
                     " (금융이익=순금융수익, 수수료·보험 등 별도 합산)"
                 )
             else:
-                flags.append(f"영업이익률 {om:.1f}% — 데이터 이상 가능")
+                # 지주사(로열티/지분법 수입 위주)는 영업이익률 100%+ 정상.
+                # "데이터 이상"이라고 하면 사용자에게 불필요한 공포 유발.
+                flags.append(
+                    f"영업이익률 {om:.1f}% — 매출 대비 영업이익이 크다"
+                    " (지주사·로열티·지분법이익 구조일 수 있음)"
+                )
 
     if isFinancial:
         flags.append("금융업: ROE·ROA가 핵심 수익성 지표 (마진 분석은 참고용)")
