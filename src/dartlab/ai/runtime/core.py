@@ -12,12 +12,15 @@ dartlab.ask(), server UI, CLI가 모두 이 코어를 소비한다.
 from __future__ import annotations
 
 import concurrent.futures
+import logging
 import os
 import re
 import sqlite3
 import time
 from difflib import SequenceMatcher
 from typing import Any, Generator
+
+log = logging.getLogger(__name__)
 
 from dartlab.ai.runtime.events import AnalysisEvent
 
@@ -1263,14 +1266,44 @@ def _analyze_inner(
         if _ground_executor is not None:
             _ground_executor.shutdown(wait=False)
 
-    if disclosureBrief:
-        userParts.append(disclosureBrief)
-    if groundingText:
-        userParts.append(groundingText)
-    if memoryHints:
-        userParts.append(memoryHints)
-    if insightHints:
-        userParts.append(insightHints)
+    # ── ContextBuilder v2 (feature flag) ──
+    # DARTLAB_CONTEXT_V2=1 시 ai/context/ 의 ContextBuilder 가 userParts 를 조립.
+    # Phase 1: legacy selectors 만 사용 → 동작 동등. A/B 비교 + 회귀 검증용.
+    # Phase 1.5: 14축 calc selectors 도입 시 본격 효과.
+    _use_context_v2 = os.environ.get("DARTLAB_CONTEXT_V2") == "1"
+    if _use_context_v2:
+        try:
+            from dartlab.ai.context import ContextBuilder
+
+            _bundle = ContextBuilder(
+                question=question,
+                company=company,
+                provider=getattr(config_, "provider", None),
+            ).build()
+            # legacy 라벨 (corp/stock) 은 ContextBuilder 가 CRITICAL 로 이미 포함.
+            for _text in _bundle.toUserParts():
+                if _text and _text not in userParts:
+                    userParts.append(_text)
+            log.debug(
+                "context v2: intent=%s parts=%d tokens=%d dropped=%s",
+                _bundle.intent,
+                len(_bundle.parts),
+                _bundle.totalTokens,
+                _bundle.droppedKeys,
+            )
+        except Exception:  # noqa: BLE001 — v2 실패 시 legacy fallback
+            log.exception("ContextBuilder v2 failed, falling back to legacy")
+            _use_context_v2 = False
+
+    if not _use_context_v2:
+        if disclosureBrief:
+            userParts.append(disclosureBrief)
+        if groundingText:
+            userParts.append(groundingText)
+        if memoryHints:
+            userParts.append(memoryHints)
+        if insightHints:
+            userParts.append(insightHints)
     userParts.append(f"질문: {question}")
     userContent = "\n\n---\n\n".join(userParts)
     messages.append({"role": "user", "content": userContent})
@@ -1307,6 +1340,40 @@ def _analyze_inner(
         if stock_id and mode == "analysis" and len("".join(_full_response_parts)) > 500:
             try:
                 _updateInsightFromResponse(stock_id, "".join(_full_response_parts), company)
+            except (ImportError, OSError, sqlite3.Error, AttributeError, ValueError):
+                pass
+
+        # ── ACE Curator (DARTLAB_CONTEXT_V2 활성 시) ──
+        # 응답 + grade → playbook bullet 추출 → KnowledgeDB delta merge.
+        # Generator/Reflector/Curator 폐쇄 루프의 마지막 단계.
+        # arxiv.org/abs/2510.04618
+        if (
+            os.environ.get("DARTLAB_CONTEXT_V2") == "1"
+            and mode == "analysis"
+            and _full_response_parts
+        ):
+            try:
+                from dartlab.ai.context.intent import classifyIntent
+                from dartlab.ai.context.playbook import curate
+                from dartlab.ai.memory.summarizer import extractGrade
+
+                _full = "".join(_full_response_parts)
+                _intent = classifyIntent(question, hasCompany=company is not None).intent.value
+                _sector = ""
+                if company is not None:
+                    _sector = (
+                        getattr(company, "sector", None)
+                        or getattr(company, "sectorName", None)
+                        or ""
+                    )
+                _grade = extractGrade(_full)
+                curate(
+                    intent=_intent,
+                    response_text=_full,
+                    grade=_grade,
+                    sector=str(_sector),
+                    source="reflection",
+                )
             except (ImportError, OSError, sqlite3.Error, AttributeError, ValueError):
                 pass
 

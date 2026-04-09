@@ -124,6 +124,25 @@ CREATE TABLE IF NOT EXISTS meta (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
+
+-- ACE (Agentic Context Engineering) playbook 테이블
+-- arxiv.org/abs/2510.04618 — Generator/Reflector/Curator 폐쇄 루프
+-- delta merge: 신규 bullet INSERT, 중복은 success/fail 카운트만 갱신 (삭제 금지 — context collapse 방지)
+CREATE TABLE IF NOT EXISTS playbook (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    intent TEXT NOT NULL,
+    sector TEXT NOT NULL DEFAULT '',
+    bullet TEXT NOT NULL,
+    success_count INTEGER NOT NULL DEFAULT 0,
+    fail_count INTEGER NOT NULL DEFAULT 0,
+    quality REAL NOT NULL DEFAULT 0.5,
+    source TEXT NOT NULL DEFAULT 'reflection',
+    created_at REAL NOT NULL,
+    last_used REAL NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_pb_intent ON playbook(intent);
+CREATE INDEX IF NOT EXISTS idx_pb_quality ON playbook(quality DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_pb_unique ON playbook(intent, sector, bullet);
 """
 
 
@@ -544,6 +563,130 @@ class KnowledgeDB:
             )
             for r in rows
         ]
+
+    # ── playbook (ACE: Generator/Reflector/Curator) ────────
+    # arxiv.org/abs/2510.04618 — delta merge로 evolving playbook 유지.
+    # 규칙: 신규 bullet INSERT, 중복은 카운트만 갱신, 절대 삭제 X (context collapse 방지).
+
+    def upsert_bullet(
+        self,
+        intent: str,
+        bullet: str,
+        *,
+        sector: str = "",
+        outcome: str = "neutral",
+        source: str = "reflection",
+    ) -> None:
+        """playbook bullet 삽입 또는 카운트 갱신.
+
+        Args:
+            intent: ai.context.intent.Intent.value (예: "act2_profit").
+            bullet: 한 줄 전략/관찰 (200자 cap, 자동 절단).
+            sector: 섹터 분리 (기본 빈 문자열 = 전 섹터 공용).
+            outcome: "success" → success_count++, "fail" → fail_count++, "neutral" → 등록만.
+            source: "reflection" | "audit" | "manual".
+
+        delta merge: UNIQUE(intent, sector, bullet) 충돌 시 INSERT 무시 후 카운트만 UPDATE.
+        """
+        bullet = (bullet or "").strip()
+        if not bullet or not intent:
+            return
+        bullet = bullet[:200]
+        with self._write_lock:
+            conn = self._ensure_db()
+            now = time.time()
+            # 신규 시도 — 충돌은 무시
+            try:
+                conn.execute(
+                    "INSERT INTO playbook "
+                    "(intent, sector, bullet, success_count, fail_count, quality, "
+                    " source, created_at, last_used) VALUES (?, ?, ?, 0, 0, 0.5, ?, ?, ?)",
+                    (intent, sector or "", bullet, source, now, now),
+                )
+            except sqlite3.IntegrityError:
+                pass  # unique 충돌 — 카운트 갱신만 진행
+            # 카운트/quality 갱신
+            # NOTE: SQLite UPDATE의 SET expression은 OLD 값을 보므로
+            # quality 식에서 +1을 명시적으로 더해야 함 (Beta posterior 근사).
+            if outcome == "success":
+                conn.execute(
+                    "UPDATE playbook SET success_count = success_count + 1, "
+                    "quality = (success_count + 2.0) / (success_count + fail_count + 3.0), "
+                    "last_used = ? WHERE intent = ? AND sector = ? AND bullet = ?",
+                    (now, intent, sector or "", bullet),
+                )
+            elif outcome == "fail":
+                conn.execute(
+                    "UPDATE playbook SET fail_count = fail_count + 1, "
+                    "quality = (success_count + 1.0) / (success_count + fail_count + 3.0), "
+                    "last_used = ? WHERE intent = ? AND sector = ? AND bullet = ?",
+                    (now, intent, sector or "", bullet),
+                )
+            else:
+                conn.execute(
+                    "UPDATE playbook SET last_used = ? "
+                    "WHERE intent = ? AND sector = ? AND bullet = ?",
+                    (now, intent, sector or "", bullet),
+                )
+            conn.commit()
+
+    def get_bullets(
+        self,
+        intent: str,
+        *,
+        sector: str = "",
+        limit: int = 6,
+        min_quality: float = 0.4,
+    ) -> list[tuple[str, float, int, int]]:
+        """intent별 playbook bullet 검색 (Generator 단계 주입용).
+
+        Args:
+            intent: 정확 매칭.
+            sector: 섹터 우선 매칭, 부족하면 공용("")으로 보충.
+            limit: 최대 반환 수.
+            min_quality: 이 값 미만은 제외 (단, neutral=0.5는 통과).
+
+        Returns:
+            ``[(bullet, quality, success, fail), ...]`` quality 내림차순.
+        """
+        if not intent:
+            return []
+        conn = self._ensure_db()
+        # 섹터 우선
+        rows: list[tuple[str, float, int, int]] = []
+        if sector:
+            rows = list(
+                conn.execute(
+                    "SELECT bullet, quality, success_count, fail_count FROM playbook "
+                    "WHERE intent = ? AND sector = ? AND quality >= ? "
+                    "ORDER BY quality DESC, last_used DESC LIMIT ?",
+                    (intent, sector, min_quality, limit),
+                ).fetchall()
+            )
+        if len(rows) < limit:
+            remaining = limit - len(rows)
+            seen = {r[0] for r in rows}
+            extras = conn.execute(
+                "SELECT bullet, quality, success_count, fail_count FROM playbook "
+                "WHERE intent = ? AND sector = '' AND quality >= ? "
+                "ORDER BY quality DESC, last_used DESC LIMIT ?",
+                (intent, min_quality, remaining * 2),
+            ).fetchall()
+            for e in extras:
+                if e[0] not in seen and len(rows) < limit:
+                    rows.append(e)
+        return rows
+
+    def playbook_size(self, intent: str | None = None) -> int:
+        """playbook 통계 — intent별 또는 전체 bullet 수."""
+        conn = self._ensure_db()
+        if intent:
+            row = conn.execute(
+                "SELECT COUNT(*) FROM playbook WHERE intent = ?", (intent,)
+            ).fetchone()
+        else:
+            row = conn.execute("SELECT COUNT(*) FROM playbook").fetchone()
+        return int(row[0]) if row else 0
 
     # ── meta ───────────────────────────────────────────────
 

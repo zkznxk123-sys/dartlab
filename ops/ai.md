@@ -170,8 +170,75 @@ db.pull()                  # HF → 로컬 DB merge (upsert)
 - 실행 → 분류(P/T/C/V) → 수정 → 재실행 → 기록
 - auditAnalysis 마크다운 → KnowledgeDB insights 테이블로 자동 파싱 (마이그레이션 시)
 
+## ContextBuilder + ACE Playbook (2026-04-09 도입)
+
+prompt engineering → **context engineering** 전환. ACE (Agentic Context Engineering, ICLR 2026) 패턴 적용.
+arxiv.org/abs/2510.04618 — Generator/Reflector/Curator 폐쇄 루프 + delta merge.
+
+### 활성화
+
+```bash
+DARTLAB_CONTEXT_V2=1 python -m dartlab ask "..."
+```
+
+기본은 OFF (legacy 동작). v2 ON 시 ContextBuilder가 userParts를 조립하고 응답 종료 후 Curator가 playbook을 갱신한다.
+
+### 구조
+
+```
+ai/context/
+├── intent.py         # 8 Intent 결정론 분류기 (act1~6 + compare + concept)
+├── encoder.py        # TOON 인코딩 (큰 표는 ~60% 토큰 절감)
+├── budget.py         # 11 provider 토큰 한도 + 우선순위 트리밍
+├── bundle.py         # ContextPart + PartPriority + ContextBundle
+├── builder.py        # ContextBuilder 메인 진입점
+├── playbook.py       # ACE Reflector(extractBullets) + Curator(curate) + retrieveBullets
+└── selectors/
+    ├── legacy.py     # 기존 5 pre-grounding 헬퍼 래퍼
+    └── playbook.py   # bullets → ContextPart HIGH 주입
+```
+
+### ACE 폐쇄 루프
+
+```
+Question
+  → ContextBuilder.build()
+       intent 분류 → selectors 호출 → budget 트리밍
+       playbook bullets retrieval (intent + sector)
+  → Generator (ai/runtime/_streamWithCodeExecution)
+  → Reflector (extractBullets — 결정론 regex)
+       응답 텍스트 → "결론:", "핵심:", "- bullet" 패턴 추출
+  → Curator (curate → KnowledgeDB.upsert_bullet)
+       grade(G/P→success, C/V→fail, T→neutral)에 따라 카운트 갱신
+       delta merge: 신규는 INSERT, 중복은 카운트만 (UNIQUE intent+sector+bullet)
+       quality = Beta posterior 근사 (success+1)/(success+fail+2)
+  → 다음 호출 시 retrieveBullets가 quality desc로 top-N 주입
+```
+
+### selfai 폐기 학습 적용
+
+- LLM Reflector 사용 X (페이퍼는 LLM 사용) — 결정론 regex만
+- 자동 진화 X — 모든 selector는 명시적 코드
+- KnowledgeDB와 SQLite 위에 얇은 레이어 — 디버깅 가능, 토큰 비용 0
+- bullet 절대 삭제 X (context collapse 방지)
+
+### 검증 (2026-04-09)
+
+- intent 분류: **30/30 (100%)**
+- TOON 토큰 절감: 평균 **+59%** (균질 표 데이터에서 +63%까지)
+- KnowledgeDB delta merge: 같은 bullet 5회 호출 시 row 1개, success/fail 카운트만 갱신
+- ContextBuilder 통합: bullets가 `ace.playbook` key로 HIGH 우선순위 주입
+- 회귀: test_ai_runtime 77 + test_ai_context 28 + test_ai_context_playbook 27 = **132 PASS**
+
+### Phase 1.5 (다음)
+
+- selectors/act1~6.py — 14축 calc 결과를 intent별로 선택 주입
+- A/B 평가: audit 30종 재실행, ACE 페이퍼 finance +8.6% 재현 시도
+- LLM Reflector 검토 (현재는 결정론 추출만)
+
 ## 관련 코드
 
+- `src/dartlab/ai/context/` — Phase 1: ContextBuilder + ACE 폐쇄 루프 (intent/encoder/budget/builder/playbook/selectors)
 - `src/dartlab/ai/` — providers, tools, runtime, memory, persistence, conversation
 - `src/dartlab/ai/runtime/core.py` — 시스템 프롬프트, 코드 실행, 마크다운 변환, 인사이트 주입, preGround 백그라운드 thread
 - `src/dartlab/ai/persistence/knowledge_db.py` — 단일 영속 DB (CRUD + 마이그레이션 + HF push/pull). selfai 폐기 후 영속성만 분리 보존
