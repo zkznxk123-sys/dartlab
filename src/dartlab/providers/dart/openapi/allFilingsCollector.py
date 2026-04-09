@@ -376,7 +376,7 @@ def fillContentAll(
             result = fillContent(date, client=client, showProgress=showProgress)
             if result is not None:
                 filled += 1
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             if showProgress:
                 print(f"[{date}] 에러: {e}")
             break  # API 한도 초과 등이면 중단

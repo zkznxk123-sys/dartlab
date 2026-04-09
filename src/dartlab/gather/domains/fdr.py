@@ -63,7 +63,7 @@ async def fetch_history(
 
     try:
         df = fdr.DataReader(stock_code, startDate, endDate)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         log.warning("FDR fetch 실패 (%s): %s", stock_code, exc)
         return []
 
@@ -108,7 +108,7 @@ def _saveCache(stockCode: str, market: str, rows: list[dict]) -> None:
         path = _cacheKey(stockCode, market)
         df.write_parquet(path)
         log.debug("FDR 캐시 저장: %s (%d rows)", path, len(rows))
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         log.warning("FDR 캐시 저장 실패: %s", exc)
 
 
@@ -133,5 +133,5 @@ def _loadCache(stockCode: str, market: str) -> list[dict] | None:
 
         df = pl.read_parquet(path)
         return df.to_dicts()
-    except Exception:
+    except Exception:  # noqa: BLE001
         return None

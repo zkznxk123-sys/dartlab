@@ -141,7 +141,7 @@ def loadMacroParquet(indicatorId: str, *, source: str = "ecos") -> pl.DataFrame 
         return None
     try:
         return pl.read_parquet(path)
-    except Exception:
+    except Exception:  # noqa: BLE001
         log.warning("Parquet 읽기 실패: %s", path)
         return None
 

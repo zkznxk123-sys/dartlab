@@ -41,8 +41,16 @@ from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import get_arrays
 
 
-def build(company, *, ema_period: int = 50, rsi_low: float = 40, rsi_high: float = 60, atr_k: float = 2.0) -> Rule:
-    """눌림목매수 룰 빌드."""
+def build(company, *, ema_period: int = 50, rsi_low: float = 50, rsi_high: float = 65, atr_k: float = 2.0) -> Rule:
+    """눌림목매수 룰 빌드.
+
+    [학술 정의] BTFD (Buy The F***ing Dip) — 강세장(bull regime) + 장기 추세 위(EMA50)
+    상태에서 단기 momentum 약세(RSI < 50) 진입. 회복(RSI > 65) 시 청산.
+
+    [임계 정정 (Phase 4 R1)] 이전 RSI<40 은 강세장 + EMA50 위 와 물리적으로 양립
+    불가능 (bull&above_ema 시 RSI 최소 42.5 ~ 중앙값 59). RSI<50 이 학술적으로 정확.
+    RSI 30 oversold 는 추세 종료 의미 — meanReversion 룰의 영역.
+    """
     arr = get_arrays(company)
     close = arr.get("close")
     if close is None or len(close) < 100:

@@ -39,7 +39,7 @@ def analyze_earnings(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
             .filter(pl.col("account_nm").str.contains("영업이익"))
             .collect()
         )
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return {**result, "error": str(e)}
     if stock.is_empty():
         return {**result, "error": "영업이익 데이터 없음"}

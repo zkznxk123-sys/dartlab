@@ -19,7 +19,7 @@ def _loadMacroIndicator(g, seriesId: str, source: str = "ecos", start: str = "20
         if source == "ecos":
             return g.macro("KR", seriesId, start=start)
         return g.macro(seriesId, start=start)
-    except Exception:
+    except Exception:  # noqa: BLE001
         return None
 
 
@@ -41,7 +41,7 @@ def _getLatestValue(df, col: str = "value"):
         sorted_df = df.sort("date", descending=True)
         val = sorted_df[col][0]
         return float(val) if val is not None else None
-    except Exception:
+    except Exception:  # noqa: BLE001
         return None
 
 
@@ -325,7 +325,7 @@ def calcValuationBand(company, *, basePeriod: str | None = None) -> dict | None:
                         "zoneLabel": band.zLabel,
                         "dataPoints": len(values),
                     }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log.debug("밸류에이션밴드 %s 실패: %s", metric, e)
             continue
 

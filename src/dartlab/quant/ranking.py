@@ -36,7 +36,7 @@ def _load_account(lf: pl.LazyFrame, sj: str, account: str, year: str) -> dict[st
             .select("stockCode", "thstrm_amount")
             .collect()
         )
-    except Exception:
+    except Exception:  # noqa: BLE001
         df = None
 
     # fallback: 연결 없으면 전체
@@ -49,7 +49,7 @@ def _load_account(lf: pl.LazyFrame, sj: str, account: str, year: str) -> dict[st
                 .select("stockCode", "thstrm_amount")
                 .collect()
             )
-        except Exception:
+        except Exception:  # noqa: BLE001
             return {}
 
     if df is None or df.is_empty():
@@ -75,7 +75,7 @@ def analyze_ranking(*, market: str = "KR", stockCode: str | None = None, **kwarg
     # 최신 연도 확인
     try:
         years = lf.select("bsns_year").unique().collect().to_series().sort(descending=True).to_list()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return {**result, "error": str(e)}
 
     if not years:

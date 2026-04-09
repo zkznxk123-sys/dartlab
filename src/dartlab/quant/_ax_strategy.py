@@ -41,9 +41,11 @@ class _StubCompany:
 
     runStrategy 등이 stockCode 만 받기 때문에, 스타일 build 가 요구하는
     company.stockCode 인터페이스를 흉내낸다.
+    `_strategy_start` 속성으로 styles/_common.get_arrays 가 장기 OHLCV 가져옴.
     """
 
     stockCode: str
+    _strategy_start: str | None = None
 
 
 @dataclass(frozen=True)
@@ -69,14 +71,16 @@ class EntryVerdict:
 # ── 공통 헬퍼 ───────────────────────────────────────────────────────────────
 
 
-def _arrays(stockCode: str) -> dict:
-    df = fetch_ohlcv(stockCode)
+def _arrays(stockCode: str, *, start: str | None = None) -> dict:
+    """OHLCV 가져오기. start='2020-01-01' 같이 명시하면 장기 데이터."""
+    kwargs = {"start": start} if start else {}
+    df = fetch_ohlcv(stockCode, **kwargs)
     if df is None or df.is_empty():
         return {}
     return ohlcv_to_arrays(df)
 
 
-def _build_rule_from_style(style_name: str, stockCode: str) -> Rule | BacktestResult:
+def _build_rule_from_style(style_name: str, stockCode: str, *, start: str | None = None) -> Rule | BacktestResult:
     """스타일명 → Rule 또는 NotApplicable sentinel."""
     key = resolve_style(style_name)
     reg = STYLE_REGISTRY()
@@ -86,7 +90,7 @@ def _build_rule_from_style(style_name: str, stockCode: str) -> Rule | BacktestRe
             reason=f"unknown style: {style_name!r} (available: {list(reg.keys())})",
             style=style_name,
         )
-    company = _StubCompany(stockCode=stockCode)
+    company = _StubCompany(stockCode=stockCode, _strategy_start=start)
     return reg[key](company)
 
 
@@ -113,7 +117,7 @@ def runStrategy(
     """
     if rule is None:
         return BacktestResult(status="error", reason="rule= is required", style=None)
-    arr = _arrays(stockCode)
+    arr = _arrays(stockCode, start=kwargs.get("start"))
     close = arr.get("close")
     if close is None or len(close) < 60:
         return BacktestResult(status="error", reason=f"insufficient OHLCV: {stockCode}", style=None)
@@ -163,7 +167,7 @@ def runBacktest(
                 reason=f"KR-only style: {key} (data not available for non-KR markets)",
             )
 
-    arr = _arrays(stockCode)
+    arr = _arrays(stockCode, start=kwargs.get("start"))
     close = arr.get("close")
     if close is None or len(close) < 60:
         return BacktestResult(status="error", reason=f"insufficient OHLCV: {stockCode}", style=None)
@@ -172,7 +176,7 @@ def runBacktest(
         rule = style
         style_name = rule.meta.get("style")
     else:
-        result = _build_rule_from_style(style, stockCode)
+        result = _build_rule_from_style(style, stockCode, start=kwargs.get("start"))
         if isinstance(result, BacktestResult):
             return result  # NotApplicable 또는 error sentinel
         rule = result
@@ -237,7 +241,7 @@ def runEntry(
 
     백테스트 안 돌리고 마지막 봉의 entry/exit 신호 + stop level 만 한 줄 반환.
     """
-    arr = _arrays(stockCode)
+    arr = _arrays(stockCode, start=kwargs.get("start"))
     close = arr.get("close")
     high = arr.get("high")
     low = arr.get("low")
@@ -355,7 +359,7 @@ def runWalkforward(
     if rule is None and style is None:
         return BacktestResult(status="error", reason="rule= or style= required", style=None)
 
-    arr = _arrays(stockCode)
+    arr = _arrays(stockCode, start=kwargs.get("start"))
     close = arr.get("close")
     if close is None or len(close) < train + test:
         return BacktestResult(

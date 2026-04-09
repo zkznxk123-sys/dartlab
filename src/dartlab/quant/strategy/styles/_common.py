@@ -11,8 +11,12 @@ import numpy as np
 from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 
 
-def get_arrays(company) -> dict:
+def get_arrays(company, *, start: str | None = None) -> dict:
     """Company 객체에서 OHLCV → numpy dict 변환.
+
+    Args:
+        company: dartlab Company 객체 또는 stockCode 속성 가진 stub
+        start: '2020-01-01' 같이 명시 시 장기 OHLCV (gather 가 지원)
 
     Returns:
         dict {open, high, low, close, volume, date} 또는 빈 dict
@@ -20,7 +24,9 @@ def get_arrays(company) -> dict:
     code = getattr(company, "stockCode", None) or getattr(company, "stock_code", None)
     if not code:
         return {}
-    df = fetch_ohlcv(code)
+    # company 객체에 _strategy_start 속성 있으면 그것도 사용 (옵션)
+    s = start or getattr(company, "_strategy_start", None)
+    df = fetch_ohlcv(code, **({"start": s} if s else {}))
     if df is None or df.is_empty():
         return {}
     return ohlcv_to_arrays(df)

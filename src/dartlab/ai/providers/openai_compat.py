@@ -116,7 +116,7 @@ class OpenAICompatProvider(BaseProvider):
                 temperature=self.config.temperature,
                 max_tokens=self.config.max_tokens,
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             raise _wrap_rate_limit(self.config.provider, e) from e
         choice = response.choices[0]
         usage = None
@@ -144,7 +144,7 @@ class OpenAICompatProvider(BaseProvider):
                 max_tokens=self.config.max_tokens,
                 stream=True,
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             raise _wrap_rate_limit(self.config.provider, e) from e
         for chunk in response:
             if chunk.choices and chunk.choices[0].delta.content:
@@ -175,7 +175,7 @@ class OpenAICompatProvider(BaseProvider):
 
         try:
             response = client.chat.completions.create(**kwargs)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             raise _wrap_rate_limit(self.config.provider, e) from e
         choice = response.choices[0]
 

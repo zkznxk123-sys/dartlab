@@ -162,7 +162,7 @@ def analyze_screen(*, market: str = "KR", preset: str = "quality", stockCode: st
         df = lf.filter(pl.col("fs_nm").str.contains("연결")).collect()
         if df.is_empty():
             df = lf.collect()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return {**result, "error": str(e)}
 
     yr = df.get_column("bsns_year").sort(descending=True).to_list()[0]
@@ -249,7 +249,7 @@ def _screen_dividend(result: dict, market: str, stockCode: str | None) -> dict:
         return {**result, "error": "dividend.parquet 없음"}
     try:
         df = lf.collect()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return {**result, "error": str(e)}
 
     # DPS > 0인 종목 찾기

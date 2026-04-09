@@ -403,7 +403,7 @@ def _executeTool(name: str, args: dict) -> str:
 
         return f"Unknown tool: {name}"
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         _log.error("Tool %s error: %s\n%s", name, e, traceback.format_exc())
         try:
             from dartlab.guide import guide

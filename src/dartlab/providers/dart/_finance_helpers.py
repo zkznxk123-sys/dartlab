@@ -24,7 +24,7 @@ _RATIO_FIELD_LABELS: dict[str, str] = {
     # 수익성
     "roe": "자기자본이익률 (ROE %)",
     "roa": "총자산이익률 (ROA %)",
-    "roce": "ROCE (%)",
+    "roce": "사용자본이익률 (ROCE %)",
     "roic": "투하자본이익률 (ROIC %)",
     "operatingMargin": "영업이익률 (%)",
     "netMargin": "순이익률 (%)",
@@ -83,8 +83,8 @@ _RATIO_FIELD_LABELS: dict[str, str] = {
     "totalEquity": "자본(지배)",
     "operatingCashflow": "영업현금흐름",
     # 부실 예측
-    "piotroskiFScore": "Piotroski F-Score (0~9)",
-    "altmanZScore": "Altman Z-Score",
+    "piotroskiFScore": "재무건전성 (Piotroski F-Score, 0~9)",
+    "altmanZScore": "부실위험 (Altman Z-Score)",
 }
 
 

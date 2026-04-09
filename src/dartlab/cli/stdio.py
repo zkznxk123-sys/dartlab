@@ -125,7 +125,7 @@ def _handleAsk(msg: dict[str, Any]) -> None:
                 emittedDone = True
     except KeyboardInterrupt:
         _emit({"id": reqId, "event": "error", "data": {"error": "Interrupted"}})
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         _emit({"id": reqId, "event": "error", "data": {"error": str(exc)}})
 
     if not emittedDone:
@@ -197,7 +197,7 @@ def _handleStatus(_msg: dict[str, Any]) -> None:
                 "data": {"provider": provider, "model": model, "ready": True, "providers": providers},
             }
         )
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         _emit(
             {
                 "event": "status",
@@ -213,7 +213,7 @@ def _handleListTemplates(_msg: dict[str, Any]) -> None:
 
         templates = list_templates()
         _emit({"event": "templates", "data": {"templates": templates}})
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         _emit({"event": "templates", "data": {"templates": [], "error": str(exc)}})
 
 
@@ -229,7 +229,7 @@ def _handleSetProvider(msg: dict[str, Any]) -> None:
             from dartlab.guide.credentials import CredentialManager
 
             CredentialManager().saveKey(f"{provider}_api_key", apiKey)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             _emit({"event": "error", "data": {"error": f"키 저장 실패: {exc}"}})
             return
 
@@ -264,7 +264,7 @@ def _handleSetProvider(msg: dict[str, Any]) -> None:
                         return
         except ImportError:
             pass
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             _emit({"event": "error", "data": {"error": f"provider 확인 실패: {exc}"}})
 
     _sessionProvider = provider or _sessionProvider
@@ -299,7 +299,7 @@ def _handleOAuthPasteToken(msg: dict[str, Any]) -> None:
         _save_token(data)
         _sessionProvider = provider
         _emit({"event": "providerChanged", "data": {"provider": provider, "model": ""}})
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         _emit({"event": "error", "data": {"error": f"토큰 저장 실패: {exc}"}})
 
 
@@ -339,7 +339,7 @@ def _handleOAuthPasteCode(msg: dict[str, Any]) -> None:
         exchange_code(code, verifier)
         _sessionProvider = provider
         _emit({"event": "providerChanged", "data": {"provider": provider, "model": ""}})
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         _emit({"event": "error", "data": {"error": f"토큰 교환 실패: {exc}"}})
 
 
@@ -512,7 +512,7 @@ def _getVersion() -> str:
         import dartlab
 
         return dartlab.__version__
-    except Exception:
+    except Exception:  # noqa: BLE001
         return "unknown"
 
 
@@ -537,6 +537,6 @@ def _buildReadyDiag() -> dict[str, Any]:
         import os
 
         diag["dartKey"] = bool(os.environ.get("DART_API_KEY") or os.environ.get("DART_API_KEYS"))
-    except Exception:
+    except Exception:  # noqa: BLE001
         diag["dartKey"] = False
     return diag

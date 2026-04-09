@@ -301,7 +301,7 @@ async def api_parse_raw_table(code: str, topic: str, block_idx: int):
         if target is None:
             raise HTTPException(status_code=404, detail="raw_markdown 블록이 아님")
 
-        result = await parseRawMarkdownBlock(target.rawMarkdown, topic, block_idx)
+        result = await parseRawMarkdownBlock(target.rawMarkdown, topic)
         return {
             "stockCode": company.stockCode,
             "topic": topic,

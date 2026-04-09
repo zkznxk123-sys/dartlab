@@ -105,7 +105,7 @@ def analyze_rates(*, market: str = "US", as_of: str | None = None, overrides: di
     result["decomposition"] = None
     if market.upper() == "US" and dgs10 and data.get("t10yie") and data.get("dfii10"):
         acm_tp = fetch_latest(get_gather(as_of), "THREEFYTP10")
-        decomp = decomposeLongRate(dgs10, data["t10yie"], data["dfii10"], ff, acm_term_premium=acm_tp)
+        decomp = decomposeLongRate(dgs10, data["t10yie"], data["dfii10"], acm_term_premium=acm_tp)
         result["decomposition"] = {
             "nominal": decomp.nominal,
             "expectedInflation": decomp.expectedInflation,

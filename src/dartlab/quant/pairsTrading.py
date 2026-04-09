@@ -137,7 +137,7 @@ def _get_top_stocks(market: str, n: int = 5) -> list[str]:
             .filter(pl.col("fs_nm").str.contains("연결"))
             .collect()
         )
-    except Exception:
+    except Exception:  # noqa: BLE001
         return []
 
     if bs.is_empty():

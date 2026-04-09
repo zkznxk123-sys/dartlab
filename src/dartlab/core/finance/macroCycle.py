@@ -802,7 +802,6 @@ def decomposeLongRate(
     nominal: float,
     bei: float,
     tips: float,
-    fed_funds: float | None = None,
     acm_term_premium: float | None = None,
 ) -> RateDecomposition:
     """10년 명목금리를 3요소로 분해 (DKW 모델 근사).
@@ -811,7 +810,6 @@ def decomposeLongRate(
         nominal: 10년 명목금리 DGS10 (%)
         bei: 10년 BEI T10YIE (%)  — 기대인플레이션
         tips: 10년 TIPS DFII10 (%) — 실질금리
-        fed_funds: 정책금리 (%) — 기간프리미엄 보정용 (optional)
         acm_term_premium: Adrian-Crump-Moench 10년 기간프리미엄 (%).
             FRED THREEFYTP10에서 수집. None이면 잔차 근사.
 
@@ -990,7 +988,6 @@ def interpretFxDrivers(
     rate_diff_change: float | None = None,
     trade_balance_yoy: float | None = None,
     vix: float | None = None,
-    vix_change: float | None = None,
 ) -> FxDrivers:
     """환율 변동의 3요인 분해 해석.
 
@@ -1004,7 +1001,6 @@ def interpretFxDrivers(
         rate_diff_change: 한미 금리차 변화 (%p, 양수=미국금리상대상승)
         trade_balance_yoy: 무역수지 YoY 변화 (%, 양수=흑자확대)
         vix: VIX 수준
-        vix_change: VIX 변화 (pts)
 
     Returns:
         FxDrivers

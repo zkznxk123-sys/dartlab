@@ -40,7 +40,7 @@ def scan_macroBeta(
     # 전종목 매출 시계열 로드 (프리빌드 finance.parquet에서 추출)
     try:
         revDf = _loadRevenueSeries(_ensureScanData())
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         log.warning("매출 시계열 로드 실패: %s", exc)
         return _emptyDf()
 

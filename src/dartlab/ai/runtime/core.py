@@ -496,7 +496,6 @@ def _streamWithCodeExecution(
     *,
     maxRounds: int = 3,
     mode: str = "analysis",
-    question_text: str = "",
 ) -> Generator[str | AnalysisEvent, None, None]:
     """LLM 스트리밍 + 코드블록 자동 감지/실행 루프.
 
@@ -964,28 +963,15 @@ def analyze(
     exclude: list[str] | None = None,
     # 멀티컴퍼니 비교 지원
     companies: list[Any] | None = None,
-    # 모드 (하위호환 — 내부적으로 무시)
-    use_tools: bool = True,
+    # 활성 파라미터
     max_turns: int = 5,
-    max_tools: int | None = None,
     reflect: bool = False,
     report_mode: bool = False,
-    # 하위호환 파라미터 (내부적으로 무시)
-    snapshot: dict | None = None,
-    auto_snapshot: bool = True,
-    focus_context: str | None = None,
-    diff_context: str | None = None,
-    auto_diff: bool = True,
     history: list | None = None,
     history_messages: list[dict] | None = None,
-    view_context: dict | None = None,
-    dialogue_policy: str | None = None,
     conversation_meta: dict | None = None,
-    question_types: tuple[str, ...] = (),
-    # 기능 플래그
-    validate: bool = True,
-    detect_navigate: bool = True,
     emit_system_prompt: bool = True,
+    # 하위호환 deprecated 파라미터 (내부적으로 무시) — kwargs 로 흡수됨
     # 단축 경로
     not_found_msg: str | None = None,
     # 템플릿
@@ -1290,7 +1276,7 @@ def _analyze_inner(
     messages.append({"role": "user", "content": userContent})
 
     # ── 4. LLM 스트리밍 + 코드블록 자동 실행 ──
-    for item in _streamWithCodeExecution(llm, messages, stockCode=stock_id, mode=mode, question_text=question):
+    for item in _streamWithCodeExecution(llm, messages, stockCode=stock_id, mode=mode):
         if isinstance(item, AnalysisEvent):
             yield item
         else:

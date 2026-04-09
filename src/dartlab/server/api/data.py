@@ -182,8 +182,8 @@ def api_data_stats():
 
 
 @router.get("/api/spec")
-def api_spec(engine: str | None = None, section: str | None = None):
-    """시스템 스펙 조회 — LLM/MCP/외부 클라이언트용."""
+def api_spec():
+    """시스템 스펙 조회 — LLM/MCP/외부 클라이언트용 (deprecated)."""
     raise HTTPException(
         status_code=501,
         detail="스펙 조회 API는 현재 사용할 수 없습니다 (ai.spec 모듈 제거됨)",

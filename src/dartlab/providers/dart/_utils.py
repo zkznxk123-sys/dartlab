@@ -189,7 +189,7 @@ def _checkDartDocsFreshness(stockCode: str, category: str = "docs"):
 
     try:
         result = checkFreshness(stockCode)
-    except Exception:
+    except Exception:  # noqa: BLE001
         return None
     if not result.isFresh:
         latestReport = result.missingFilings[0]["report_nm"] if result.missingFilings else ""

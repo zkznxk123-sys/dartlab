@@ -163,7 +163,6 @@ def analyze_assets(*, market: str = "US", as_of: str | None = None, overrides: d
             rate_diff_change=asset_input.get("rate_diff_change"),
             trade_balance_yoy=trade_yoy,
             vix=data.get("vix"),
-            vix_change=data.get("vix_change"),
         )
         result["fxDrivers"] = {
             "rateDiffEffect": fd.rateDiffEffect,
