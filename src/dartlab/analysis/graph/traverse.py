@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from dartlab.core.graph.schema import CompanyGraph, Edge, EdgeType, Node, NodeType
+from dartlab.analysis.graph.schema import CompanyGraph, Edge, EdgeType, Node, NodeType
 
 
 def causes(

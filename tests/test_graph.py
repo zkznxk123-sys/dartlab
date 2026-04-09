@@ -11,14 +11,14 @@ from __future__ import annotations
 
 import pytest
 
-from dartlab.core.graph.schema import (
+from dartlab.analysis.graph.schema import (
     CompanyGraph,
     Edge,
     EdgeType,
     Node,
     NodeType,
 )
-from dartlab.core.graph.traverse import (
+from dartlab.analysis.graph.traverse import (
     ancestors,
     causes,
     causesNarrative,

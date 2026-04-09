@@ -11,7 +11,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from dartlab.core.graph.schema import (
+from dartlab.analysis.graph.schema import (
     CompanyGraph,
     Edge,
     EdgeType,

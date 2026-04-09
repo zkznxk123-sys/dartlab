@@ -59,8 +59,8 @@ def selectGraphCauses(
         return []
 
     try:
-        from dartlab.core.graph import buildGraph
-        from dartlab.core.graph.traverse import causesNarrative, timelineNarrative
+        from dartlab.analysis.graph import buildGraph
+        from dartlab.analysis.graph.traverse import causesNarrative, timelineNarrative
     except ImportError:
         return []
 
