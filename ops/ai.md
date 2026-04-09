@@ -57,6 +57,19 @@ dartlab.chat("005930", "배당 추세는?")     # Company-bound
 | `openai` | API key | O |
 | `ollama` | 로컬 | 모델 의존 |
 
+### Ollama 권장 모델 (AI audit 기반 결정)
+
+| 모델 | VRAM | Tool Calling | Context | dartlab audit | 권장 |
+|------|------|:---:|------|------|------|
+| Gemma 4 E4B | 6GB | 네이티브 | 128K | ⏳ audit 대기 | ⏳ |
+| Gemma 4 31B Dense | 20GB+ | 네이티브 | 256K | ⏳ audit 대기 | ⏳ |
+| Qwen 3.5 27B | 16GB+ | O | 128K | ⏳ audit 대기 | ⏳ |
+| Llama 4 Scout | 16GB+ | O | 10M | ⏳ audit 대기 | ⏳ |
+
+> **벤치마크 숫자로 기본 모델을 정하지 않는다.**
+> 각 모델로 dartlab AI audit 30개 질문 실행 → G/P/C/V 등급 비교 → 충분한 품질이 나오는 모델만 권장.
+> 벤치마크 #3 이어도 14축 분석 + 6막 서사 + tool calling 이 잘 안 되면 권장 불가.
+
 ## API
 
 ```python
