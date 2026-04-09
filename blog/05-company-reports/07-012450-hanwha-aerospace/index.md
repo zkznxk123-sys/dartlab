@@ -18,7 +18,8 @@ tags:
   - 폴란드
   - 누리호
   - 전자공시
-thumbnail: /thumbnails/012450-hanwha-aerospace.webp
+thumbnail: /avatar-chart.png
+ogImage: /thumbnails/012450-hanwha-aerospace.webp
 youtubeId: ""
 ---
 

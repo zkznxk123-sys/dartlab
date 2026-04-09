@@ -197,6 +197,7 @@ export interface PostMeta {
 	date: string;
 	description: string;
 	thumbnail: string;
+	ogImage?: string;
 	cardPreview: string;
 	cardPreviewWebp?: string;
 	previewAsset?: string;
@@ -266,7 +267,8 @@ function buildPosts(): PostMeta[] {
 		const readingMinutes = estimateReadingMinutes(rawMarkdown);
 		const previewAsset = findPreviewAsset(path, rawMarkdown);
 		const thumbnail = metadata.thumbnail ? String(metadata.thumbnail) : '/avatar-chart.png';
-		const cardPreview = metadata.cardPreview ? String(metadata.cardPreview) : previewAsset ?? thumbnail;
+		const ogImage = metadata.ogImage ? String(metadata.ogImage) : undefined;
+		const cardPreview = metadata.cardPreview ? String(metadata.cardPreview) : ogImage ?? previewAsset ?? thumbnail;
 		const cardPreviewWebp = toWebpAsset(cardPreview);
 
 		result.push({
@@ -275,6 +277,7 @@ function buildPosts(): PostMeta[] {
 			date: String(metadata.date),
 			description: metadata.description ? String(metadata.description) : '',
 			thumbnail,
+			ogImage,
 			cardPreview,
 			cardPreviewWebp,
 			previewAsset,

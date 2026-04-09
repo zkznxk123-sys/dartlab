@@ -18,7 +18,8 @@ tags:
   - ALT-B4
   - 박순재
   - 전자공시
-thumbnail: /thumbnails/196170-alteogen.webp
+thumbnail: /avatar-chart.png
+ogImage: /thumbnails/196170-alteogen.webp
 youtubeId: ""
 ---
 

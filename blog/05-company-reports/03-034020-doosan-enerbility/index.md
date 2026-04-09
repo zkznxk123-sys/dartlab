@@ -17,7 +17,8 @@ tags:
   - 부채 다이어트
   - 체코 두코바니
   - 전자공시
-thumbnail: /thumbnails/034020-doosan-enerbility.webp
+thumbnail: /avatar-chart.png
+ogImage: /thumbnails/034020-doosan-enerbility.webp
 youtubeId: ""
 ---
 

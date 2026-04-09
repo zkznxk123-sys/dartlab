@@ -17,7 +17,8 @@ tags:
   - 고정비 레버리지
   - 미국 수출
   - 전자공시
-thumbnail: /thumbnails/003230-samyang-foods.webp
+thumbnail: /avatar-chart.png
+ogImage: /thumbnails/003230-samyang-foods.webp
 youtubeId: ""
 ---
 

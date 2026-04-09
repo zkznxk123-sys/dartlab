@@ -18,7 +18,8 @@ tags:
   - 인플렉트라
   - 합병
   - 전자공시
-thumbnail: /thumbnails/068270-celltrion.webp
+thumbnail: /avatar-chart.png
+ogImage: /thumbnails/068270-celltrion.webp
 youtubeId: ""
 ---
 

@@ -126,7 +126,11 @@
 	const pageTitle = $derived(`${meta?.title ?? 'Blog'} — DartLab 전자공시 분석`);
 	const pageDesc = $derived(meta?.description ?? `DartLab Blog — ${meta?.title ?? ''}`);
 	const pageUrl = $derived(`${brand.url}blog/${data.slug}`);
-	const pageImage = $derived(postInfo?.thumbnail ? `${brand.url}${postInfo.thumbnail.replace(/^\//, '')}` : `${brand.url}og-image.png`);
+	const pageImage = $derived(
+		postInfo?.ogImage ? `${brand.url}${postInfo.ogImage.replace(/^\//, '')}` :
+		postInfo?.thumbnail ? `${brand.url}${postInfo.thumbnail.replace(/^\//, '')}` :
+		`${brand.url}og-image.png`
+	);
 	const faqItems = $derived(parseFaqFromMarkdown(data.rawMarkdown ?? ''));
 	// frontmatter tags 파싱: YAML 배열은 mdsvex가 string으로 줄 수 있음 → 둘 다 처리
 	const frontmatterTags = $derived((() => {
@@ -307,17 +311,6 @@
 				{/if}
 				{#if meta?.title}
 					<h1 class="post-title">{meta.title}</h1>
-				{/if}
-				{#if postInfo?.thumbnail}
-					<img
-						src="{base}{postInfo.thumbnail}"
-						alt={meta?.title ?? ''}
-						class="post-hero-thumbnail"
-						width="1200"
-						height="630"
-						loading="eager"
-						decoding="async"
-					/>
 				{/if}
 				{#if meta?.description}
 					<div class="post-summary" aria-label="포스트 핵심 요약">
@@ -532,14 +525,6 @@
 		color: #e2e8f0;
 	}
 
-	.post-hero-thumbnail {
-		width: 100%;
-		max-width: 100%;
-		height: auto;
-		border-radius: 12px;
-		margin: 1.5rem 0;
-		border: 1px solid rgba(30, 36, 51, 0.6);
-	}
 
 	.post-meta-row {
 		display: flex;

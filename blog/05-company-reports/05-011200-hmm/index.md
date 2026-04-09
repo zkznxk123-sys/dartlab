@@ -18,7 +18,8 @@ tags:
   - SCFI
   - dartlab quant
   - 전자공시
-thumbnail: /thumbnails/011200-hmm.webp
+thumbnail: /avatar-chart.png
+ogImage: /thumbnails/011200-hmm.webp
 youtubeId: ""
 ---
 
