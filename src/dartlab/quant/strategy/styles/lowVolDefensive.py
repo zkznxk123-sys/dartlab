@@ -44,8 +44,29 @@ from dartlab.quant.tailrisk import _tailriskSeries
 from dartlab.quant.volatility import _volatilitySeries
 
 
-def build(company, *, vol_low_q: float = 0.30, vol_high_q: float = 0.70, mdd_threshold: float = -0.10) -> Rule:
-    """저변동방어 룰 빌드."""
+def build(
+    company,
+    *,
+    vol_low_q: float = 0.40,
+    vol_high_q: float = 0.70,
+    mdd_z_entry: float = 0.0,
+    mdd_z_exit: float = -1.0,
+) -> Rule:
+    """저변동방어 룰 빌드.
+
+    [학술 정의 정정 (Phase 4 R2)] 원래 plan 의 절대 `mdd_threshold=-0.10` 은
+    KR 시장에 물리적으로 도달 불가능 (KOSPI 대형주도 1년 내 거의 항상 10%+ 낙폭).
+    Frazzini-Pedersen 2014 BAB 의 cross-section 정의를 단일 종목에 적용 불가.
+
+    대신 self-history z-score: 자기 자신의 5년 rolling MDD 분포 vs 현재 시점.
+    `mdd_z = (mdd_t - μ) / σ` — z > 0.5 = 평소보다 안정적, z < -0.5 = 평소보다 위험.
+
+    Args:
+        vol_low_q: 변동성 진입 quantile (낮은 vol 권장)
+        vol_high_q: 변동성 청산 quantile
+        mdd_z_entry: rolling MDD self z-score 진입 임계 (높을수록 더 안정 시점)
+        mdd_z_exit: 청산 임계
+    """
     arr = get_arrays(company)
     close = arr.get("close")
     if close is None or len(close) < 252:
@@ -62,24 +83,33 @@ def build(company, *, vol_low_q: float = 0.30, vol_high_q: float = 0.70, mdd_thr
     mdd_series = ts["rolling_mdd"]
 
     valid_vol = realized[~np.isnan(realized)]
-    if len(valid_vol) < 20:
+    valid_mdd = mdd_series[~np.isnan(mdd_series)]
+    if len(valid_vol) < 20 or len(valid_mdd) < 20:
         n = len(close)
         return Rule(
             entry_expr=np.zeros(n, dtype=np.bool_),
             exit_expr=np.zeros(n, dtype=np.bool_),
-            meta={"style": "lowVolDefensive", "error": "no vol data"},
+            meta={"style": "lowVolDefensive", "error": "no vol/mdd data"},
         )
 
     q_low = float(np.quantile(valid_vol, vol_low_q))
     q_high = float(np.quantile(valid_vol, vol_high_q))
 
+    # MDD self-history z-score (Phase 4 R2)
+    mdd_mu = float(np.mean(valid_mdd))
+    mdd_sigma = float(np.std(valid_mdd, ddof=1))
+    if mdd_sigma <= 0:
+        mdd_sigma = 1.0
+    mdd_z = (mdd_series - mdd_mu) / mdd_sigma
+
     s = Signal()
     s.add("vol_low", (realized < q_low) & ~np.isnan(realized))
     s.add("vol_high", (realized > q_high) & ~np.isnan(realized))
-    s.add("mdd_ok", (mdd_series > mdd_threshold) & ~np.isnan(mdd_series))
+    s.add("mdd_safer", (mdd_z > mdd_z_entry) & ~np.isnan(mdd_z))
+    s.add("mdd_riskier", (mdd_z < mdd_z_exit) & ~np.isnan(mdd_z))
 
     return Rule(
-        entry_expr=s.vol_low & s.mdd_ok,
-        exit_expr=s.vol_high,
-        meta={"style": "lowVolDefensive"},
+        entry_expr=s.vol_low & s.mdd_safer,
+        exit_expr=s.vol_high | s.mdd_riskier,
+        meta={"style": "lowVolDefensive", "definition": "BAB_self_zscore"},
     )

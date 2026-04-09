@@ -1,0 +1,197 @@
+"""scan → review 모듈 — 전종목 횡단 데이터로 교차 조합 관점 제공.
+
+analysis calc 패턴과 동일: calcXxx(company) → dict, review builders 가 블록으로 조립.
+
+scan 의 진짜 힘 — 2~3축 교차 조합으로 단일 종목에서 안 보이는 뷰 생성:
+- 수익성 × 성장성 → "성숙기 캐시카우" / "고성장 고마진"
+- 부채 × 자본환원 → "레버리지 주주환원"
+- 매출 순위 × 영업이익 순위 → "마진 프리미엄"
+
+데이터: scan/finance.parquet 프리빌드 사용 (이미 존재, _ensureScanData 자동 다운로드).
+"""
+
+from __future__ import annotations
+
+import logging
+
+log = logging.getLogger(__name__)
+
+
+def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
+    """전종목 횡단 → 이 종목의 시장 내 위치 (2~3축 교차 조합 관점).
+
+    scan/finance.parquet 에서 수익성/성장성/이익품질/부채 4축 백분위 산출 후
+    교차 조합으로 관점 (crossViews) 생성.
+
+    Args:
+        company: Company 객체 (stockCode 필요)
+        basePeriod: 기준 연도 (None 이면 최신)
+
+    Returns:
+        dict {profitability_pct, growth_pct, quality_pct, debt_pct, total_stocks,
+              crossViews: list[dict], narrative: str}
+        또는 None
+    """
+    import polars as pl
+
+    from dartlab.scan._helpers import _ensureScanData, parse_num
+
+    code = getattr(company, "stockCode", None) or getattr(company, "stock_code", None)
+    if not code:
+        return None
+
+    scanDir = _ensureScanData()
+    path = scanDir / "finance.parquet"
+    if not path.exists():
+        log.warning("scan/finance.parquet 없음")
+        return None
+
+    try:
+        lf = pl.scan_parquet(str(path))
+        snap = (
+            lf.filter(pl.col("fs_nm").str.contains("연결"))
+            .filter(pl.col("reprt_nm").str.contains("4분기"))
+            .collect()
+        )
+    except (pl.exceptions.PolarsError, OSError) as e:
+        log.warning("finance.parquet 스캔 실패: %s", e)
+        return None
+
+    if snap.is_empty():
+        return None
+
+    # 최신 연도
+    years = sorted(snap["bsns_year"].unique().to_list(), reverse=True)
+    year = years[0] if years else None
+    if not year:
+        return None
+    cur = snap.filter(pl.col("bsns_year") == year)
+
+    # 이 종목 데이터 추출
+    stock = cur.filter(pl.col("stockCode") == code)
+    if stock.is_empty():
+        return None
+
+    total = cur["stockCode"].n_unique()
+
+    def _extract(df, account_nms):
+        """계정명 매칭 → 금액 추출."""
+        for nm in account_nms:
+            rows = df.filter(pl.col("account_nm") == nm)
+            if not rows.is_empty():
+                v = parse_num(rows["thstrm_amount"][0])
+                if v is not None:
+                    return v
+        return None
+
+    def _percentile(df, account_nms, stock_val):
+        """전종목 대비 백분위."""
+        if stock_val is None:
+            return None
+        vals = []
+        for sc in df["stockCode"].unique().to_list():
+            s = df.filter(pl.col("stockCode") == sc)
+            v = _extract(s, account_nms)
+            if v is not None:
+                vals.append(v)
+        if len(vals) < 50:
+            return None
+        below = sum(1 for v in vals if v < stock_val)
+        return round(below / len(vals) * 100, 1)
+
+    # 4축 계정명
+    revenue_nms = ["매출액", "수익(매출액)", "영업수익"]
+    op_nms = ["영업이익", "영업이익(손실)"]
+    ni_nms = ["당기순이익", "당기순이익(손실)"]
+    equity_nms = ["자본총계"]
+    debt_nms = ["부채총계"]
+
+    # 이 종목 값 추출
+    rev = _extract(stock, revenue_nms)
+    op = _extract(stock, op_nms)
+    ni = _extract(stock, ni_nms)
+    eq = _extract(stock, equity_nms)
+    debt = _extract(stock, debt_nms)
+
+    # 파생 비율
+    op_margin = round(op / rev * 100, 1) if rev and op and rev > 0 else None
+    roe = round(ni / eq * 100, 1) if ni and eq and eq > 0 else None
+    debt_ratio = round(debt / eq * 100, 1) if debt and eq and eq > 0 else None
+
+    # 백분위 (전종목 대비)
+    profitability_pct = _percentile(cur.filter(cur["sj_div"] == "IS"), op_nms, op)
+    # 성장성: 전기 대비 (간략 — 전기 데이터 없으면 None)
+    growth_pct = None  # 뼈대 — 전기 데이터 비교 필요 (추후)
+
+    quality_pct = None  # 뼈대 — OCF/NI 비교 (추후)
+    debt_pct = _percentile(cur.filter(cur["sj_div"] == "BS"), debt_nms, debt)
+
+    # 교차 조합 관점
+    crossViews = []
+    if profitability_pct is not None:
+        if profitability_pct >= 80 and (growth_pct is None or growth_pct <= 40):
+            crossViews.append({"view": "성숙기 캐시카우", "basis": f"수익성 상위 {100-profitability_pct:.0f}% + 성장 하위권"})
+        if profitability_pct >= 70 and growth_pct is not None and growth_pct >= 70:
+            crossViews.append({"view": "고성장 고마진", "basis": f"수익성 상위 {100-profitability_pct:.0f}% + 성장 상위 {100-growth_pct:.0f}%"})
+    if debt_pct is not None and profitability_pct is not None:
+        if debt_pct >= 70 and profitability_pct >= 60:
+            crossViews.append({"view": "레버리지 수익형", "basis": f"부채 상위 {100-debt_pct:.0f}% + 수익성 상위 {100-profitability_pct:.0f}%"})
+        if debt_pct <= 30:
+            crossViews.append({"view": "무차입 안정형", "basis": f"부채 하위 {debt_pct:.0f}%"})
+
+    # 서사
+    parts = []
+    if profitability_pct is not None:
+        parts.append(f"수익성 상위 {100-profitability_pct:.0f}%")
+    if growth_pct is not None:
+        parts.append(f"성장성 상위 {100-growth_pct:.0f}%")
+    if debt_pct is not None:
+        if debt_pct >= 70:
+            parts.append(f"부채 상위 {100-debt_pct:.0f}% (높음)")
+        else:
+            parts.append(f"부채 하위 {debt_pct:.0f}% (안정)")
+    if crossViews:
+        parts.append(f"→ {crossViews[0]['view']}")
+    narrative = ". ".join(parts) + "." if parts else "peer 비교 데이터 부족."
+
+    return {
+        "stockCode": code,
+        "year": year,
+        "total_stocks": total,
+        "profitability_pct": profitability_pct,
+        "growth_pct": growth_pct,
+        "quality_pct": quality_pct,
+        "debt_pct": debt_pct,
+        "op_margin": op_margin,
+        "roe": roe,
+        "debt_ratio": debt_ratio,
+        "crossViews": crossViews,
+        "narrative": narrative,
+    }
+
+
+def calcGovernanceSummary(company) -> dict | None:
+    """scan governance → 종목의 지배구조 5축 점수/등급 (뼈대).
+
+    c.governance() 가 이미 구현돼 있으면 위임, 아니면 scan report 에서 추출.
+    """
+    code = getattr(company, "stockCode", None) or getattr(company, "stock_code", None)
+    if not code:
+        return None
+
+    try:
+        gov = company.governance() if hasattr(company, "governance") else None
+        if gov is not None and hasattr(gov, "to_dicts"):
+            rows = gov.to_dicts()
+            if rows:
+                r = rows[0]
+                return {
+                    "stockCode": code,
+                    "totalScore": r.get("totalScore"),
+                    "grade": r.get("grade"),
+                    "narrative": f"지배구조 {r.get('grade', '?')}등급 ({r.get('totalScore', '?')}점).",
+                }
+    except (AttributeError, TypeError, ValueError):
+        pass
+
+    return {"stockCode": code, "narrative": "지배구조 데이터 없음."}

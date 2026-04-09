@@ -182,6 +182,14 @@ def runBacktest(
         rule = result
         style_name = resolve_style(style)
 
+    # Phase 4 R4 — flowFollow 등 데이터 부족 시 data_limited sentinel
+    if rule.meta.get("error") == "data_limited":
+        return BacktestResult(
+            status="data_limited",
+            reason=rule.meta.get("reason", "data limited"),
+            style=style_name,
+        )
+
     if cpcv:
         return cpcv_fn(
             close,
@@ -221,14 +229,15 @@ def runStyle(
         return pl.DataFrame(list_styles())
 
     name = name or "all"
+    start = kwargs.get("start")
 
     if name == "all":
         results = {}
         for key in STYLE_REGISTRY().keys():
-            results[key] = runBacktest(stockCode, style=key)
+            results[key] = runBacktest(stockCode, style=key, start=start)
         return results
 
-    return runBacktest(stockCode, style=name)
+    return runBacktest(stockCode, style=name, start=start)
 
 
 def runEntry(
@@ -265,8 +274,9 @@ def runEntry(
 
     keys = list(STYLE_REGISTRY().keys()) if style == "all" else [resolve_style(style)]
     out: dict[str, EntryVerdict] = {}
+    start = kwargs.get("start")
     for key in keys:
-        result = _build_rule_from_style(key, stockCode)
+        result = _build_rule_from_style(key, stockCode, start=start)
         if isinstance(result, BacktestResult):
             out[key] = EntryVerdict(
                 style=key,

@@ -1,4 +1,11 @@
-"""수급추종 (Flow Follow) — 외국인/기관 동시 순매수 (KR 전용).
+"""수급추종 (Flow Follow) — 외국인/기관 동시 순매수 (KR 전용, short-term).
+
+[데이터 한계 — Phase 4 R4 명시]
+gather/flow.py 는 naver finance 페이지네이션 한계로 **최근 5~30일 외국인/기관 데이터**
+만 제공. 5년 walk-forward 백테스트 불가능. 본 스타일은 **단기 swing trade** (1주~1개월)
+로만 작동 — 학술적으로도 외국인 수급은 단기 효과 (Choe-Kho-Stulz 2005).
+
+EdgarCompany(US) 또는 데이터 부족 (< 30일) 시 NotApplicable / data_limited sentinel.
 
 [언제 강한가]
 외국인 보유비중 증가 + 기관 동조 매수 구간. 한국 시장 학술 검증된
@@ -80,12 +87,21 @@ def build(company, *, atr_k: float = 3.0):
     fc5 = series.get("foreign_cum5")
     ic5 = series.get("inst_cum5")
 
-    if fc5 is None or ic5 is None or not flow_dates:
+    if fc5 is None or ic5 is None or not flow_dates or len(flow_dates) < 30:
         n = len(close)
         return Rule(
             entry_expr=np.zeros(n, dtype=np.bool_),
             exit_expr=np.zeros(n, dtype=np.bool_),
-            meta={"style": "flowFollow", "error": "no flow data"},
+            meta={
+                "style": "flowFollow",
+                "error": "data_limited",
+                "reason": (
+                    f"flowFollow needs 30+ days flow history (Choe-Kho-Stulz 2005), "
+                    f"found {len(flow_dates) if flow_dates else 0}. "
+                    "naver finance 페이지네이션 한계."
+                ),
+                "flow_days_available": len(flow_dates) if flow_dates else 0,
+            },
         )
 
     # OHLCV date 와 flow date 매칭 → 시계열 정렬

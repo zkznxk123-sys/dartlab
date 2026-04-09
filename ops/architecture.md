@@ -21,6 +21,48 @@ L4 (표현)       vscode/        VSCode 확장
                 viz/           시각화 (차트 + 다이어그램)
 ```
 
+### 5 분석 엔진의 공통 패턴
+
+analysis, scan, macro, credit, quant 는 모두 같은 패턴으로 review 에 기여한다:
+
+1. **데이터 소비** — 각자의 데이터 소스에서 원본 수집
+2. **분석기준 생성** — 학술/실무 검증된 기준으로 평가
+3. **분석서사 생성** — 숫자를 한국어 인과 문장으로 변환
+4. **분석관점 생성** — 이 종목에 대한 관점 (강세/약세/위험/기회)
+5. **분석근거 생성** — 관점의 통계적/학술적 근거
+6. **review 에 도구로 제공** — review 가 6막 서사에 조합
+
+| 엔진 | 데이터 소스 | 서사 | review 기여 |
+|---|---|---|---|
+| analysis | 재무제표 (IS/BS/CF) | 수익성/성장성/현금/안정성/효율성/종합 | 6막 1~5 |
+| scan | 전종목 횡단 (finance/report parquet) | peer 비교/순위/시장 위치 | 6막 전체 맥락 |
+| macro | 거시지표 (FRED/ECOS) | 사이클/금리/자산/심리/유동성 | 6막 6 |
+| credit | 신용등급/재무비율 | 등급/이력/플래그 | 6막 4~5 |
+| quant | 주가 OHLCV + 수급 | 추세/리스크/수급/전략검증/재무교차 | 6막 6 시장분석 |
+
+엔진은 **review 에 도구를 쥐어주는 것이 가치**다. 숫자를 던지고 "알아서 읽어라" 가 아니라
+서사·관점·근거를 만들어 review 가 최종 판단을 조립할 수 있게 한다.
+
+### 모듈 제공 패턴 (analysis 기준 — 5 엔진 동일)
+
+```
+엔진/
+  calcs.py 또는 extended.py
+    calcXxx(company) → dict          # 독립 모듈, 서로 호출 X
+    calcYyy(company) → dict          # 각각 데이터 소비 + 서사 생성
+
+review/
+  catalog.py    BlockMeta("xxx", label, section, description)
+  builders.py   xxxBlock(dict) → list[Block]     # calc dict → 블록 변환
+  narrate.py    narrateXxx(dict) → str           # 한국어 인과 문장
+  registry.py   if _need("xxx"): b["xxx"] = xxxBlock(calcXxx(company))
+```
+
+- calc 함수는 **독립 모듈** — 다른 calc 호출 가능하지만 순환 금지
+- 각 calc 는 `@_memoized_calc` 데코레이터로 Company 세션 내 캐시
+- review 가 calc 을 **어떤 순서로, 어떤 섹션에** 조합할지 결정 (엔진이 결정 X)
+- 새 calc 추가 시: 엔진 calcs + catalog BlockMeta + builders xxxBlock + registry _need 4곳
+
 ### import 방향 규칙
 
 **L0 ← L1 ← L2 ← L3. 역방향 금지.**

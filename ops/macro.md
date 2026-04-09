@@ -43,9 +43,20 @@ dartlab.macro("종합")
 
 다른 분석 엔진(analysis/quant/credit/scan)도 동일 패턴: 무인자 → 가이드, "축이름" → 분석.
 
+## macro → review 모듈 매핑
+
+macro 는 review 6막 매크로 섹션에 사이클/금리/자산/심리/유동성 분석을 제공한다.
+
+| calc 함수 | review 블록 | 서사 내용 |
+|---|---|---|
+| `calcMacroCycleNarrative(company)` | macroCycle | 경기 사이클 4국면 + 섹터 전략 + 기업-매크로 연결 |
+| `calcValuationBand(company)` | valuationBand | PER/PBR 정규분포 밴드 현재 위치 |
+
+현재 registry 에서 `dartlab.macro("사이클")` 직접 호출 → calc 패턴으로 정규화 예정.
+
 ## 설계 원칙
 
-- **Company 불필요** — 종목코드 없이 동작
+- **Company 불필요** — 종목코드 없이 동작 (macro 자체). 단 review 연동 시 company.market 참조
 - **macro ↛ analysis** — 같은 L2지만 상호 import 금지. 해석 조합은 AI(L3)의 몫
 - **numpy만** — Hamilton RS, Kalman DFM, Nelson-Siegel 전부 numpy 직접 구현. 외부 통계 라이브러리 0
 - 3계층: L0(core/finance 순수함수) → L1(gather 수집) → L2(macro 분석축)

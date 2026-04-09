@@ -852,6 +852,16 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
                 lambda: calibrationReportBlock(calcCalibrationReport(company, basePeriod=basePeriod))
             )
 
+    # ── 비교분석 (scan 교차 조합 관점 → review 통합) ──
+    if keys is None or keys & {"peerPosition", "governanceSummary"}:
+        from dartlab.review.builders import quantModuleBlock as _scanBlock
+        from dartlab.scan.extended import calcGovernanceSummary, calcPeerPosition
+
+        if _need("peerPosition"):
+            b["peerPosition"] = _safe(lambda: _scanBlock("peerPosition", calcPeerPosition(company)))
+        if _need("governanceSummary"):
+            b["governanceSummary"] = _safe(lambda: _scanBlock("governanceSummary", calcGovernanceSummary(company)))
+
     # ── 시장분석 (quant 기술적 분석 → review 통합) ──
     if keys is None or keys & {
         "technicalVerdict",
@@ -862,17 +872,24 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         "marketAnalysisFlags",
     }:
         from dartlab.quant.extended import (
+            calcCrosscheckNarrative,
             calcFundamentalDivergence,
             calcMarketAnalysisFlags,
             calcMarketBeta,
+            calcQuantConclusion,
+            calcRiskNarrative,
+            calcSignalNarrative,
+            calcStrategyNarrative,
             calcStrategySnapshot,
             calcTechnicalSignals,
             calcTechnicalVerdict,
+            calcTrendNarrative,
         )
         from dartlab.review.builders import (
             fundamentalDivergenceBlock,
             marketAnalysisFlagsBlock,
             marketBetaBlock,
+            quantModuleBlock,
             strategySnapshotBlock,
             technicalSignalsBlock,
             technicalVerdictBlock,
@@ -882,6 +899,17 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             b["technicalVerdict"] = _safe(lambda: technicalVerdictBlock(calcTechnicalVerdict(company)))
         if _need("technicalSignals"):
             b["technicalSignals"] = _safe(lambda: technicalSignalsBlock(calcTechnicalSignals(company)))
+        # quant 서사 모듈 5+1 — analysis calc 패턴 (각각 독립, review 가 조합)
+        for qkey, qcalc in [
+            ("trendNarrative", calcTrendNarrative),
+            ("riskNarrative", calcRiskNarrative),
+            ("signalNarrative", calcSignalNarrative),
+            ("strategyNarrative", calcStrategyNarrative),
+            ("crosscheckNarrative", calcCrosscheckNarrative),
+            ("quantConclusion", calcQuantConclusion),
+        ]:
+            if _need(qkey):
+                b[qkey] = _safe(lambda c=qcalc: quantModuleBlock(qkey, c(company)))
         if _need("strategySnapshot"):
             b["strategySnapshot"] = _safe(lambda: strategySnapshotBlock(calcStrategySnapshot(company)))
         if _need("marketBeta"):
@@ -923,6 +951,7 @@ def buildReview(
     *,
     preset: str | None = None,
     template: str | None = None,
+    perspective: str | None = None,
     detail: bool | None = None,
     basePeriod: str | None = None,
 ):
@@ -1004,9 +1033,18 @@ def buildReview(
 
             live.update(Spinner("dots", text="블록 사전 생성 중..."))
 
+        # 관점별 순서 결정 (perspective)
+        perspectiveOrder: list[str] | None = None
+        if perspective is not None:
+            from dartlab.review.templates import PERSPECTIVE_TEMPLATES, resolvePerspective
+
+            pkey = resolvePerspective(perspective)
+            if pkey and pkey in PERSPECTIVE_TEMPLATES:
+                perspectiveOrder = PERSPECTIVE_TEMPLATES[pkey]["order"]
+            # resolve 실패 시 기본 6막 순서 유지
+
         # 템플릿 순서 결정 (블록 빌드 전에 필요한 keys 산출)
         if section is not None:
-            # R31-1: section 이 TEMPLATES 에 없으면 silent 빈 Review 가 아닌 명시적 ValueError
             if section not in TEMPLATES:
                 available = ", ".join(sorted(TEMPLATES.keys()))
                 raise ValueError(
@@ -1017,6 +1055,8 @@ def buildReview(
             templateKeys = [section]
         elif ly.sectionOrder is not None:
             templateKeys = [k for k in ly.sectionOrder if k in TEMPLATES]
+        elif perspectiveOrder is not None:
+            templateKeys = [k for k in perspectiveOrder if k in TEMPLATES]
         else:
             templateKeys = list(TEMPLATE_ORDER)
 

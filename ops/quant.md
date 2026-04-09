@@ -94,7 +94,7 @@ dartlab.quant.verdict("005930")
 |---|---|---|---|
 | 지표 | indicators | 45개 기술적 지표 DataFrame | 구현 |
 | 신호 | signals | 9개 매매 신호 | 구현 |
-| 판단 | verdict | 강세/중립/약세 종합 판단 | 구현 |
+| 판단 | verdict | 강세/중립/약세 + **3 카테고리 분해** (추세/모멘텀/변동성) | ✅ Phase 5 audit 검증 (12년 데이터) |
 | 모멘텀 | momentum | 12-1개월 횡단면, 시계열, 52주 신고가 | 구현 |
 | 변동성 | volatility | GARCH(1,1), HAR-RV, 기간구조 | 구현 |
 | 레짐 | regime | Hamilton 2-state HMM, 추세추종 | 구현 |
@@ -170,17 +170,36 @@ dartlab.quant.verdict("005930")
 
 | key | 한글 | 시장 | 핵심 신호 | 학술 근거 |
 |---|---|---|---|---|
-| trendFollow | 추세추종 | KR/US | EMA20>EMA60 + MACD + 12-1M momentum | Asness 2013 |
-| meanReversion | 평균회귀 | KR/US | RSI<30 + BB lower + vol normal | Avellaneda-Lee 2008 |
-| breakout | 돌파 | KR/US | Donchian 20 + OBV 5d | Donchian/Faith Turtle |
-| dipBuy | 눌림목매수 | KR/US | regime bull + EMA50 + RSI<40 | BTFD pattern |
-| eventDriven | 이벤트드리븐 | KR(DART)/US(10-K) | filing flag + SMA5 + T+20 | Bernard-Thomas 1989 PEAD |
-| flowFollow | 수급추종 | **KR only** | foreign 5d + inst 5d 동시 양수 | 한국증권학회 2017 |
-| lowVolDefensive | 저변동방어 | KR/US | vol q30 + MDD 252d | Frazzini-Pedersen 2014 BAB |
+| trendFollow | 추세추종 | KR/US | TSMOM (12-1M momentum) + EMA20>EMA60 | Moskowitz-Ooi-Pedersen 2012 |
+| meanReversion | 평균회귀 | KR/US | residual z-score < -1.25 + RSI<35 + vol normal | Avellaneda-Lee 2008 OU |
+| breakout | 돌파 | KR/US | Donchian 20 entry + 10 exit + OBV | Faith Turtle System 1 |
+| dipBuy | 눌림목매수 | KR/US | bull regime + EMA50 위 + RSI<50 | BTFD (Phase 4 R1: RSI 40→50) |
+| eventDriven | 이벤트드리븐 | KR(DART)/US | DART 공시 + SMA5 + T+20 | Bernard-Thomas 1989 / Park-Chai 2020 |
+| flowFollow | 수급추종 | **KR only, ≥30일** | foreign/inst 5일 누적 양수 | Choe-Kho-Stulz 2005 (단기 효과) |
+| lowVolDefensive | 저변동방어 | KR/US | vol q40 + MDD self z-score > 0 | Frazzini-Pedersen 2014 BAB (self-z 변형) |
 | seasonalKR | 한국캘린더 | **KR only** | TOM (월말 3 + 월초 3) | Lakonishok-Smidt 1988 / 한국재무학회 2018 |
 
-KR 전용 스타일은 EdgarCompany 호출 시 `BacktestResult.not_applicable()` sentinel
-반환 (예외 X, None X). `_DART_ONLY_EXEMPT` 등록 불필요.
+**Phase 4 R1-R4 정정 (2026-04-09)**:
+- R1 dipBuy: RSI 40 → 50 (bull&above_ema 와 RSI<40 은 물리적 양립 불가)
+- R2 lowVolDefensive: 절대 MDD 임계 폐기 → self-history z-score (KR 시장 현실화)
+- R3 eventDriven: `load_allfilings_for_stock` 60일 제한 폐기 + DART 8자리 → OHLCV 10자리 date format fix
+- R4 flowFollow: naver 5일 한계 → status="data_limited" sentinel + 학술 출처 명시
+
+**5년 KOSPI 5종목 백테스트 검증 결과 (2026-04-09)**:
+
+| 종목 | trendFollow | meanReversion | dipBuy | eventDriven | lowVolDefensive | seasonalKR |
+|---|---:|---:|---:|---:|---:|---:|
+| 삼성전자 | +0.84 | +0.17 | +0.30 | **+1.14** | +0.06 | +0.60 |
+| SK하이닉스 | +0.82 | +0.19 | **+1.04** | +0.84 | +0.14 | +0.38 |
+| 현대차 | +0.43 | +0.05 | +0.41 | +0.69 | +0.12 | +0.10 |
+| 카카오 | +0.56 | +0.19 | -0.58 | +0.28 | +0.23 | +0.43 |
+| 셀트리온 | -0.74 | -0.39 | -0.28 | +0.01 | +0.23 | +0.29 |
+
+**6 학술 효과 한국 시장 재현 성공**: TSMOM (대형 기술주), Avellaneda-Lee (winrate 97~100%),
+BTFD (강세장), Bernard-Thomas PEAD (sharpe 1.14, DSR 1.00), BAB (보수적), TOM (76 trades 안정).
+
+KR 전용 스타일 (`flowFollow`, `seasonalKR`)은 EdgarCompany 호출 시
+`BacktestResult.not_applicable()` sentinel 반환 (예외 X, None X). `_DART_ONLY_EXEMPT` 등록 불필요.
 
 #### Strategy DSL 사용 패턴
 
@@ -326,6 +345,29 @@ from dartlab.quant.extended import (
     calcTechnicalVerdict,
 )
 ```
+
+## quant → review 모듈 매핑 (analysis calc 패턴)
+
+quant 는 review 6막 시장분석 섹션에 독립 calc 모듈로 서사를 제공한다.
+
+| calc 함수 (extended.py) | review 블록 | 서사 내용 |
+|---|---|---|
+| `calcTechnicalVerdict` | technicalVerdict | 종합 판단 (verdict/score) + trend 카테고리 |
+| `calcTechnicalSignals` | technicalSignals | 최근 20일 매매 신호 집계 |
+| `calcMarketBeta` | marketBeta | 베타/CAPM/상대강도 |
+| `calcFundamentalDivergence` | fundamentalDivergence | 재무-시장 괴리 진단 |
+| `calcMarketRisk` | marketRisk | ATR 변동성 등급 |
+| `calcMarketAnalysisFlags` | marketAnalysisFlags | 경고/기회 플래그 |
+| `calcStrategySnapshot` | strategySnapshot | 8 스타일 백테스트 + 진입 진단 |
+| **`calcTrendNarrative`** | trendNarrative | **추세 서사** (12년 audit 근거) |
+| **`calcRiskNarrative`** | riskNarrative | **리스크 서사** (ATR+베타+RSI) |
+| **`calcSignalNarrative`** | signalNarrative | **수급 신호 서사** |
+| **`calcStrategyNarrative`** | strategyNarrative | **전략 검증 서사** (Sharpe+DSR+진입) |
+| **`calcCrosscheckNarrative`** | crosscheckNarrative | **재무-시장 교차 서사** |
+| **`calcQuantConclusion`** | quantConclusion | **결론** (방향 카운트, 가중치 X) |
+
+각 calc 함수는 독립 모듈 — `@_memoized_calc` 로 Company 세션 내 캐시.
+review builders 가 블록으로 변환, narrate 가 한국어 서사 생성.
 
 ## 관련 코드
 

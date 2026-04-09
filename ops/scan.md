@@ -120,10 +120,27 @@ data/edgar/scan/
 | signal | ✅ | — | DART 공시 키워드 트렌드 전용 |
 | disclosureRisk | ✅ | — | DART changes.parquet 전용 |
 
+## scan → review 모듈 매핑
+
+scan 은 review 6-4 "비교분석" 섹션에 독립 calc 모듈로 **교차 조합 관점**을 제공한다.
+전종목 횡단 데이터를 2~3축 교차하면 단일 종목에서 안 보이는 뷰가 나온다:
+
+- 수익성 × 성장성 → "성숙기 캐시카우" / "고성장 고마진"
+- 부채 × 자본환원 → "레버리지 주주환원" / "무차입 보수"
+- 매출 순위 × 영업이익 순위 → "마진 프리미엄" / "규모만 큰 저마진"
+
+| calc 함수 (`scan/extended.py`) | review 블록 | 서사 내용 |
+|---|---|---|
+| `calcPeerPosition` | peerPosition | 수익성/성장/품질/부채 백분위 + 교차 관점 |
+| `calcGovernanceSummary` | governanceSummary | 지배구조 5축 점수/등급 |
+
+scan/finance.parquet 프리빌드 사용 → 단일 종목 filter 빠름.
+
 ## 설계 원칙
 
 - scanner는 Company를 import하지 않는다 (역의존 방지)
 - Company에서 scan 데이터는 `_ensure*()` 경유로 접근
+- scan → review calc 함수 (`scan/extended.py`) 는 review 가 호출하는 wrapper
 - 스코어링/분류 로직 변경은 실험 검증 후 반영
 
 ## 관련 코드

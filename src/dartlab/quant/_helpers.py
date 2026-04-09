@@ -215,10 +215,20 @@ def stock_percentile(lf, stockCode: str, col: str, stock_col: str = "stockCode",
         return None, None
 
 
-def load_allfilings_for_stock(stockCode: str):
-    """allFilings parquet에서 단일 종목 데이터 로드.
+def load_allfilings_for_stock(stockCode: str, *, lookback_days: int | None = None):
+    """allFilings parquet 에서 단일 종목 데이터 로드.
 
-    data/dart/allFilings/*.parquet에서 corp_code 또는 stockCode로 필터링.
+    `data/dart/allFilings/*.parquet` 일자별 전종목 파일에서 stock_code 로 필터.
+    polars lazy scan + filter pushdown 으로 메모리 안전 (전체 스캔 가능).
+
+    [Phase 4 R3 fix]
+    - 이전: `parquets[-60:]` 슬라이싱으로 60일 한정 → eventDriven 5년 백테스트 막힘
+    - 정정: 전체 일자 lazy scan, 컬럼 매칭 `stock_code` (snake_case) 우선
+    - lookback_days 명시 시만 최근 N일로 제한 (호출자 책임)
+
+    Args:
+        stockCode: 6자리 종목코드 (예: '005930')
+        lookback_days: None=전체 / 숫자=최근 N일
 
     Returns:
         pl.DataFrame 또는 None
@@ -231,22 +241,27 @@ def load_allfilings_for_stock(stockCode: str):
         return None
 
     parquets = sorted(adir.glob("*.parquet"))
-    # _meta.parquet 제외
     parquets = [p for p in parquets if "_meta" not in p.name]
     if not parquets:
         return None
 
-    frames = []
-    for p in parquets[-60:]:  # 최근 60일분만 (메모리 안전)
+    if lookback_days is not None and lookback_days > 0:
+        parquets = parquets[-lookback_days:]
+
+    # 컬럼명 우선순위: stock_code (snake) → stockCode → 종목코드 → corp_code
+    candidate_cols = ("stock_code", "stockCode", "종목코드", "corp_code")
+
+    frames: list = []
+    for p in parquets:
         try:
             lf = pl.scan_parquet(p)
             schema = lf.collect_schema().names()
-            for col in ("stockCode", "종목코드", "corp_code"):
-                if col in schema:
-                    filtered = lf.filter(pl.col(col) == stockCode).collect()
-                    if len(filtered) > 0:
-                        frames.append(filtered)
-                    break
+            matched_col = next((c for c in candidate_cols if c in schema), None)
+            if matched_col is None:
+                continue
+            filtered = lf.filter(pl.col(matched_col) == stockCode).collect()
+            if len(filtered) > 0:
+                frames.append(filtered)
         except (OSError, pl.exceptions.ComputeError):
             continue
 

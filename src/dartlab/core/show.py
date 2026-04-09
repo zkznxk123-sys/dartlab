@@ -212,18 +212,12 @@ def _cascadeFilterRows(
     if len(collected) >= target:
         return df[sorted(collected)]
 
-    # 4) contains — 긴 쿼리가 짧은 컬럼값을 포함할 때 안전장치
+    # 4) contains — 쿼리가 키의 부분이거나 키가 쿼리의 부분일 때 모든 매칭 수집.
+    # "매출액" → "dx_매출액", "ds_매출액", "sdc_매출액" 등 전부 잡는다.
     for nq in normQueries:
-        best_key: str | None = None
-        best_len = 0
         for nk, idxList in normMap.items():
             if nq in nk or nk in nq:
-                # 여러 후보 중 가장 긴 매칭을 선택 (짧은 부분매칭 방지)
-                if len(nk) > best_len:
-                    best_key = nk
-                    best_len = len(nk)
-        if best_key is not None:
-            collected.update(normMap[best_key])
+                collected.update(idxList)
     if collected:
         return df[sorted(collected)]
 

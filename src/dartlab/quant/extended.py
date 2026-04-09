@@ -445,6 +445,84 @@ def calcMarketAnalysisFlags(company) -> list[str]:
     return flags
 
 
+# ── Quant 서사 모듈 5개 (analysis calc 패턴 — 각각 독립, review 가 조합) ──
+
+
+@_memoized_calc
+def calcTrendNarrative(company) -> dict | None:
+    """추세 서사 — MA 정배열 + ADX + 12년 audit 근거."""
+    from dartlab.review.narrate import narrateTrend
+
+    verdict = calcTechnicalVerdict(company)
+    if verdict is None:
+        return None
+    return {"narrative": narrateTrend(verdict), "data": verdict.get("categories", {}).get("trend")}
+
+
+@_memoized_calc
+def calcRiskNarrative(company) -> dict | None:
+    """리스크 서사 — ATR + 베타 + 변동성 등급."""
+    from dartlab.review.narrate import narrateQuantRisk
+
+    verdict = calcTechnicalVerdict(company)
+    risk = calcMarketRisk(company)
+    return {"narrative": narrateQuantRisk(risk, verdict), "data": risk}
+
+
+@_memoized_calc
+def calcSignalNarrative(company) -> dict | None:
+    """수급 신호 서사 — 최근 20일 매수/매도 신호."""
+    from dartlab.review.narrate import narrateSignals
+
+    signals = calcTechnicalSignals(company)
+    return {"narrative": narrateSignals(signals), "data": signals}
+
+
+@_memoized_calc
+def calcStrategyNarrative(company) -> dict | None:
+    """전략 검증 서사 — 스타일별 Sharpe + 진입 신호."""
+    from dartlab.review.narrate import narrateStrategyVerdict
+
+    strategy = calcStrategySnapshot(company)
+    return {"narrative": narrateStrategyVerdict(strategy), "data": strategy}
+
+
+@_memoized_calc
+def calcCrosscheckNarrative(company) -> dict | None:
+    """재무-시장 교차 서사 — analysis 등급 vs 기술적 판단."""
+    from dartlab.review.narrate import narrateCrosscheck
+
+    divergence = calcFundamentalDivergence(company)
+    return {"narrative": narrateCrosscheck(divergence), "data": divergence}
+
+
+@_memoized_calc
+def calcQuantConclusion(company) -> dict | None:
+    """결론 — 5 서사 방향 카운트 (가중치 X). review 가 마지막에 호출."""
+    from dartlab.review.narrate import narrateQuantConclusion
+
+    verdict = calcTechnicalVerdict(company)
+    signals = calcTechnicalSignals(company)
+    strategy = calcStrategySnapshot(company)
+    divergence = calcFundamentalDivergence(company)
+
+    if verdict is None:
+        return None
+
+    cats = verdict.get("categories", {})
+    trend_label = cats.get("trend", {}).get("label", "")
+    summary = (signals or {}).get("signalSummary", {})
+    bullish = summary.get("bullish", 0)
+    bearish = summary.get("bearish", 0)
+    active_styles = []
+    if strategy:
+        for k, v in strategy.items():
+            if isinstance(v, dict) and v.get("entry_today") and v.get("status") == "ok":
+                active_styles.append(k)
+    diagnosis = (divergence or {}).get("diagnosis", "")
+    return {"narrative": narrateQuantConclusion(trend_label, bullish, bearish, active_styles, diagnosis)}
+
+
 @_memoized_calc
 def calcStrategySnapshot(company) -> dict | None:
     """전략별 진입 진단 — 8 검증된 스타일 일괄 백테스트.
@@ -469,10 +547,10 @@ def calcStrategySnapshot(company) -> dict | None:
     if not code:
         return None
 
-    # 1) 백테스트 (8 스타일)
-    bt_results = runStyle(code, name="all")
+    # 1) 백테스트 (8 스타일) — 5년 OHLCV 로 학술 결과 재현 (Phase 4 R5)
+    bt_results = runStyle(code, name="all", start="2014-01-01")
     # 2) 진입 진단 (현재 시점)
-    entry_results = runEntry(code, style="all")
+    entry_results = runEntry(code, style="all", start="2014-01-01")
 
     snap: dict = {}
     for key in STYLE_REGISTRY().keys():

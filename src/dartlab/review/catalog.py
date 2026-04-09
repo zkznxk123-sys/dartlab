@@ -215,6 +215,16 @@ _BLOCKS: list[BlockMeta] = [
     ),
     BlockMeta("marketBeta", "시장 베타", "시장분석", "실측 베타, 알파, CAPM 기대수익률"),
     BlockMeta("fundamentalDivergence", "재무-시장 괴리", "시장분석", "재무 스코어 vs 기술적 판단 교차검증"),
+    # ── 비교분석 (scan 교차 조합 관점) ──
+    BlockMeta("peerPosition", "시장 내 위치", "비교분석", "전종목 수익성/성장/부채 백분위 + 교차 관점"),
+    BlockMeta("governanceSummary", "지배구조 요약", "비교분석", "5축 점수/등급"),
+    # ── 시장분석 (quant 서사) ──
+    BlockMeta("trendNarrative", "추세 서사", "시장분석", "MA 정배열 + ADX + 12년 audit 근거"),
+    BlockMeta("riskNarrative", "리스크 서사", "시장분석", "ATR 변동성 + 베타 + RSI"),
+    BlockMeta("signalNarrative", "수급 신호 서사", "시장분석", "최근 20일 매수/매도 신호 집계"),
+    BlockMeta("strategyNarrative", "전략 검증 서사", "시장분석", "8 스타일 Sharpe + 오늘 진입 신호"),
+    BlockMeta("crosscheckNarrative", "재무-시장 교차 서사", "시장분석", "재무 등급 vs 기술적 판단"),
+    BlockMeta("quantConclusion", "시장 결론", "시장분석", "5 서사 방향 카운트 → 매수/매도/혼조"),
     BlockMeta("marketAnalysisFlags", "시장분석 플래그", "시장분석", "기술적 신호 경고/기회"),
     # ── 매크로 (시장 환경 + 기업-매크로 연결) ──
     BlockMeta("macroCycle", "경기 사이클", "매크로", "회복/확장/둔화/침체 4국면 + 신뢰도 + 섹터 전략"),

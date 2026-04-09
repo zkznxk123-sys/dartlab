@@ -59,7 +59,10 @@ def _selectDocsRevenue(
     반환: ({부문명: {period: 매출액}}, annualCols) 또는 None.
     """
     for topic in ("productService", "salesOrder"):
-        result = company.select(topic, ["매출액"])
+        try:
+            result = company.select(topic, ["매출액"])
+        except (ValueError, KeyError):
+            result = None
         if result is None:
             continue
         parsed = _parseDocsRevenueResult(result, basePeriod=basePeriod)

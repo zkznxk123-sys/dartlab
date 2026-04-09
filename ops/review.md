@@ -1,15 +1,47 @@
 # Review
 
-**4엔진(analysis + credit + macro + quant) 조립 보고서.** 6막 서사 구조.
-각 엔진 품질이 올라가면 review 품질도 올라간다.
+**기업이야기꾼의 대본.** 5 분석 엔진이 만든 재료를 6막 서사로 조립.
+
+## 사상 — 기업이야기꾼
+
+> 1. **5 엔진** (analysis/scan/macro/credit/quant) 이 데이터를 미리 계산해서 **재료** (calc dict) 를 만든다
+> 2. **review** 가 재료를 6막 서사로 조립해 **대본** (보고서) 을 만든다
+> 3. **AI/사람** 이 대본을 가지고 **언어적 분석·해석**을 한다
+>
+> review 는 해석하지 않는다. **스토리가 될 수 있는 데이터를 배치**한다.
+> 해석은 AI (`c.reviewer()`) 또는 사람의 몫이다.
+> 세상에 대해서도 이야기 할 수 있고, 세상이 이래서 기업이 이렇게 간다는 관점도 다룬다.
+
+## 3단계 템플릿 체계
+
+| 레벨 | 이름 | 결정하는 것 | 예시 |
+|---|---|---|---|
+| **1. 관점 (perspective)** | PERSPECTIVE_TEMPLATES | **섹션 순서** | 바텀업/탑다운/사이클/가치/성장/위기 |
+| **2. 기업유형 (template)** | STORY_TEMPLATES | **강조 블록** (★) | 사이클/프랜차이즈/턴어라운드/성장/자본집약/지주/현금부자 |
+| **3. 프리셋 (preset)** | PRESETS | **섹션 부분집합** | 경영진/감사/신용/성장/밸류에이션 |
+
+perspective × template × preset 은 **독립 차원**. 동시 사용 가능.
 
 ## 호출 계약
 
 ```python
 import dartlab
 c = dartlab.Company("005930")
-c.review("수익성")          # 단일 섹션 (메모리 안전 — 추천)
-c.reviewer(guide="...")     # AI 종합의견 포함
+
+# 기본 (바텀업 6막)
+c.review()
+c.review("수익성")                    # 단일 섹션
+
+# 기업유형 템플릿 (강조 블록 ★)
+c.review(template="사이클")
+
+# 관점별 순서 (섹션 재배치)
+c.review(perspective="topDown")       # 매크로→시장→재무 순서
+c.review(perspective="가치")          # 한글도 가능
+c.review(perspective="crisis", template="턴어라운드")  # 동시 사용
+
+# AI 종합의견
+c.reviewer(guide="...")
 ```
 
 ## 노트북
@@ -22,26 +54,51 @@ c.reviewer(guide="...")     # AI 종합의견 포함
 | 항목 | 내용 |
 |------|------|
 | 레이어 | L2 |
-| 진입점 | `c.review()`, `c.reviewer()` |
-| 소비 | **analysis + credit + macro + quant** (블록식 조합) |
+| 사상 | **기업이야기꾼의 대본** — 데이터 배치, 해석은 AI/사람 |
+| 진입점 | `c.review()`, `c.review(perspective=...)`, `c.reviewer()` |
+| 소비 | **analysis + credit + scan + quant + macro** 5엔진 (블록식 조합) |
 | 생산 | ai(reviewer), 사용자(터미널/HTML/마크다운/JSON), 블로그 보고서 |
 | 출력 | rich, html, markdown, json |
+| 템플릿 | 3단계: 관점(순서) × 기업유형(강조) × 프리셋(부분집합) |
 
-## 4엔진 조합 매핑
+## 5엔진 조합 매핑
 
-| 막 | 섹션 | 소비 엔진 | 핵심 블록 |
+5 분석 엔진이 각각 독립 calc 모듈로 review 에 도구를 제공한다 (ops/architecture.md "모듈 제공 패턴" 참조).
+
+| 막 | 섹션 | 소비 엔진 | 핵심 calc/블록 |
 |---|------|---------|---------|
-| 1막 사업이해 | 수익구조, 성장성 | analysis | profile, segmentComposition, growth |
-| 2막 수익성 | 수익성, 비용구조 | analysis | marginTrend, returnTrend, costBreakdown |
-| 3막 현금전환 | 현금흐름, 이익품질 | analysis | cashFlowOverview, cashQuality |
-| 4막 안정성 | 자금조달, 안정성 | analysis | leverage, distress |
-| 5막 자본배분 | 자산구조 ~ 신용평가 | analysis + **credit** | capitalAllocation, **creditScore** |
-| 6막 전망 | 가치평가 ~ 매크로 | analysis + **quant** + **macro** | valuation, **technicalVerdict**, **macroCycle** |
+| 1막 사업이해 | 수익구조, 성장성 | **analysis** | calcSegmentComposition, calcRevenueGrowth, calcConcentration, ... |
+| 2막 수익성 | 수익성, 비용구조 | **analysis** | calcMarginTrend, calcReturnTrend, calcCostBreakdown, ... |
+| 3막 현금전환 | 현금흐름, 이익품질 | **analysis** | calcCashFlowOverview, calcCashQuality, ... |
+| 4막 안정성 | 자금조달, 안정성 | **analysis** | calcLeverage, calcDistress, ... |
+| 5막 자본배분 | 자산구조 ~ 신용평가 | **analysis** + **credit** | calcCapitalAllocation, calcCreditScore, calcCreditNarrative, ... |
+| 6막-1 가치평가 | 가치평가, 매출전망 | **analysis**(forecast/valuation) | calcValuationSynthesis, calcRevenueDirection, ... |
+| 6막-2 비교분석 | 비교분석 | **scan** | calcPeerPosition (교차 조합 관점), calcGovernanceSummary |
+| 6막-3 시장분석 | 시장분석 | **quant** | calcTrendNarr, calcRiskNarr, calcSignalNarr, calcStrategyNarr, calcCrosscheckNarr, calcQuantConclusion |
+| 6막-4 매크로 | 매크로 | **macro** | calcMacroCycleNarrative, calcValuationBand |
+
+## 관점별 템플릿 (PERSPECTIVE_TEMPLATES)
+
+기업 유형에 관계없이 **분석 순서**를 바꾼다. 같은 블록들이 다른 순서로 배치된다.
+
+| 관점 | key | 순서 (앞에서부터) | 사용 사례 |
+|---|---|---|---|
+| **바텀업** | `bottomUp` | 수익구조 → 성장성 → 수익성 → ... → 시장분석 | 기본 (현재 6막) |
+| **탑다운** | `topDown` | 시장분석 → 비교분석 → 매출전망 → 가치평가 → ... → 수익구조 | 거시환경 중심 |
+| **사이클** | `cycle` | 시장분석 → 매출전망 → 수익구조 → 비용구조 → 현금흐름 → 안정성 | 반도체/화학/조선 |
+| **가치** | `value` | 가치평가 → 안정성 → 자금조달 → 현금흐름 → 자본배분 → 수익성 | 가치투자자 |
+| **성장** | `growth` | 수익구조 → 성장성 → 매출전망 → 투자효율 → 효율성 → 가치평가 | 성장투자자 |
+| **위기** | `crisis` | 안정성 → 자금조달 → 현금흐름 → 이익품질 → 신용평가 → 종합평가 | 위험 진단 |
+
+`perspective` (순서) × `template` (강조) 동시 사용:
+- `c.review(perspective="crisis", template="턴어라운드")` → 위기 순서 + 턴어라운드 강조
 
 ## 단일 진입점
 
 - **`c.review()` / `c.reviewer()`** 로 접근한다 (Company-bound)
-- review는 analysis + credit + macro + quant 결과를 소비하여 보고서로 조립한다
+- review 는 **analysis + credit + scan + quant + macro** 5 엔진 결과를 소비하여 보고서로 조립
+- 각 엔진은 calc 함수 (독립 모듈) 로 서사·관점·근거를 만들어 review 에 도구로 제공
+- **관점 (perspective)** 으로 순서, **기업유형 (template)** 으로 강조, **프리셋 (preset)** 으로 부분집합
 
 ## API
 
@@ -306,6 +363,81 @@ review 5-7 신용평가 섹션이 credit의 모든 정보를 흡수한다:
 1→2: "매출 333.6조에서 영업이익률 13.1% — 이 마진의 원천은?"
 2→3: "순이익 45.2조 → 영업CF 85.3조 (189%) — 이익이 현금으로 뒷받침되는가?"
 ```
+
+## Review Audit 체계
+
+> review 를 실제로 돌려보면서 사람(또는 AI 대리) 이 읽고 → 데이터 이상 / 엔진 부족 / 템플릿 부족 발견 → 코드 수정 → 다시 돌려보기.
+> 이게 유일한 진짜 audit. 개별 엔진 단위 audit 는 파편화 — review audit 1개로 통합.
+
+### 파이프라인
+
+```
+1단계: review 실행
+   c.review(perspective="bottomUp", template="auto")
+
+2단계: 사람/AI 읽고 발견
+   데이터 이상 / 엔진 오류 / 서사 부재 / 관점 부적절 / 축 추가 필요 / AI 해석 오류
+
+3단계: 기록
+   data/dart/auditReview/{종목코드}.md (review 전문 + 발견 + 조치)
+
+4단계: 수정 + 재검증 (발견 0건까지)
+
+5단계: 크로스 종목 (3~5종목 공통 패턴 → 엔진 레벨 수정)
+```
+
+### 오류 발견 → 학습 매커니즘 반영 경로
+
+review audit 에서 발견한 오류는 **3가지 학습 매커니즘** 중 하나로 이어질 수 있다:
+
+| 원인 | 학습 대상 | 파일 (SSOT) | 절차 |
+|---|---|---|---|
+| **계정명 미매핑** | accountMappings.json | `core/data/accountMappings.json` (34,171 매핑) | `_reference/LEARNING_WORKFLOW.md` 6단계: 측정→수집→분석→학습→병합→검증. 매핑률 목표 ≥95% |
+| **Topic 인식 실패** | sections 매퍼 | `core/docs/topicGraph.py::TOPIC_KEYWORDS` (33 topic) | 한글 키워드 추가 → 실험(`experiments/XXX.py`) 검증 → STATUS.md 갱신 |
+| **snakeId 불일치** | DART↔EDGAR alias | `core/finance/labels.py::SNAKEID_ALIASES` (70 alias) | 하드코딩 수동 편집 → mergeAliasRows 양방향 검증 |
+| **파싱 규칙 변경** (DART 공시 구조 변경) | 분석 calc 함수 | `analysis/financial/*.py` | 실험 기반 검증 후 반영. accountMappings 무분별한 수작업 PR 거절 |
+
+### 학습 절차 상세
+
+**1. 계정 매핑 학습** (`_reference/LEARNING_WORKFLOW.md`):
+```
+측정 (현재 매핑률) → 수집 (미매핑 계정 리스트)
+→ 분석 (snakeId 판단, SequenceMatcher ≥0.95 자동/0.6~0.95 수동)
+→ 학습 (learnedSynonyms.json 수정)
+→ 병합 (accountMappings.json 재생성)
+→ 검증 (BS 항등식 ±1%, 매핑률 재측정)
+```
+
+**2. Sections 학습** (`core/docs/topicGraph.py`):
+```
+DART 공시 HTML 구조 변경 감지 → topicGraph.py TOPIC_KEYWORDS 확인
+→ 키워드 추가/수정 → 실험 파일 작성 (experiments/XXX.py)
+→ 종목별 매칭률 ≥95% 확인 → STATUS.md 갱신 → 사용자 승인
+```
+
+**3. DART 공시 구조 변경 대응** (매 분기 잠재):
+```
+review audit 에서 세그먼트/재무 데이터 이상 발견
+→ 원본 docs parquet 의 해당 topic 확인 (c.show("productService"))
+→ 테이블 레이아웃 변경 여부 판단
+→ revenue.py / bridge.py 파싱 룰 수정
+→ 실험 검증 → 프로덕션 반영
+```
+
+### 실행 주기
+
+| 주기 | 대상 | 목적 |
+|---|---|---|
+| 신규 엔진/축 추가 시 | 1종목 | 새 블록 review 정상 등장 |
+| 릴리즈 전 | KOSPI top 5 | 전체 회귀 |
+| 분기 1회 | KOSPI top 10 + 업종 대표 5 | 데이터 드리프트 + 학습 필요 판단 |
+
+### 핵심 원칙
+
+- **review 를 보면서 한다** — calc 단위 테스트로는 대본 품질 알 수 없음
+- **파편 audit 금지** — analysis/quant/AI audit 따로 X. review audit 1개로 통합
+- **발견 → 기록 → 수정 → 재검증** 폐쇄 루프
+- **학습은 실험 기반** — accountMappings 무분별한 수작업 금지, 실험 검증 후 반영
 
 ## 품질 검증
 

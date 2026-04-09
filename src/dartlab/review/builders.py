@@ -25,6 +25,8 @@ from dartlab.review.narrate import (
     narrateLeverage,
     narrateMargin,
     narrateROIC,
+    narrateStrategy,
+    narrateTechnicalVerdict,
     narrateValuation,
 )
 from dartlab.review.utils import unifyTableScale
@@ -3475,14 +3477,46 @@ def technicalVerdictBlock(data: dict) -> list:
     if bbPos is not None:
         metrics.append(("BB 위치", f"{bbPos:.0f}%"))
 
-    return [
+    blocks: list = [
         HeadingBlock(
             _meta("technicalVerdict").label,
             level=2,
-            helper="RSI 30 이하 과매도, 70 이상 과매수. ADX 25 이상이면 강한 추세",
+            helper="카테고리 간 우선순위 없음 — audit 통과한 독립 분해. 미래 예측 아님.",
         ),
         MetricBlock(metrics),
     ]
+
+    # ── 카테고리 서브섹션 (Phase 5 verdict 강화, audit 통과 라벨만) ──
+    categories = data.get("categories") or {}
+    # 12년 audit 통과: trend 만 (momentum/volatility 12년 전라벨 fail → drop)
+    cat_ko = {"trend": "추세"}
+    for key, ko in cat_ko.items():
+        cat = categories.get(key)
+        if not cat:
+            continue
+        cat_metrics = [
+            ("점수", f"{cat['score']:.0f}/100"),
+            ("라벨", cat["label"]),
+        ]
+        inds = cat.get("indicators", {})
+        for ik, iv in inds.items():
+            if isinstance(iv, bool):
+                cat_metrics.append((ik, "예" if iv else "아니오"))
+            elif isinstance(iv, float):
+                cat_metrics.append((ik, f"{iv:.1f}"))
+            elif isinstance(iv, (list, dict)):
+                continue  # 중첩 구조 skip
+            else:
+                cat_metrics.append((ik, str(iv)))
+        blocks.append(HeadingBlock(f"{ko} ({key})", level=3))
+        blocks.append(MetricBlock(cat_metrics))
+
+    # narrate (Phase 5 E)
+    narrative = narrateTechnicalVerdict(data)
+    if narrative:
+        blocks.append(TextBlock(narrative))
+
+    return blocks
 
 
 def technicalSignalsBlock(data: dict) -> list:
@@ -3543,6 +3577,33 @@ def technicalSignalsBlock(data: dict) -> list:
         blocks.append(TableBlock("최근 신호 이벤트", pl.DataFrame(rows)))
 
     return blocks
+
+
+def quantModuleBlock(key: str, data: dict | None) -> list:
+    """quant 서사 모듈 1개 → Block (analysis calc 패턴).
+
+    각 calc*Narrative 함수가 독립으로 반환한 dict 를 review 블록으로 변환.
+    analysis 의 개별 calc → builder 패턴과 동일.
+    """
+    if not data:
+        return []
+    narrative = data.get("narrative", "")
+    if not narrative or narrative.endswith("데이터 없음.") or narrative.endswith("데이터 부족."):
+        return []
+    label = _meta(key).label if _has_meta(key) else key
+    return [
+        HeadingBlock(label, level=3),
+        TextBlock(narrative),
+    ]
+
+
+def _has_meta(key: str) -> bool:
+    """catalog 에 해당 key 의 BlockMeta 가 있는지."""
+    try:
+        _meta(key)
+        return True
+    except (KeyError, AttributeError):
+        return False
 
 
 def strategySnapshotBlock(data: dict) -> list:
@@ -3621,7 +3682,7 @@ def strategySnapshotBlock(data: dict) -> list:
     if active_styles:
         helper += f"\n오늘 진입 신호 활성 스타일: {', '.join(active_styles)}"
 
-    return [
+    blocks: list = [
         HeadingBlock(
             "전략별 진입 진단",
             level=2,
@@ -3629,6 +3690,13 @@ def strategySnapshotBlock(data: dict) -> list:
         ),
         TableBlock("스타일 백테스트 매트릭스", table),
     ]
+
+    # 학술 출처 + 5년 결과 + 오늘 신호 narrate (Phase 4 R5)
+    narrative = narrateStrategy(data)
+    if narrative:
+        blocks.append(TextBlock(narrative))
+
+    return blocks
 
 
 def marketBetaBlock(data: dict) -> list:

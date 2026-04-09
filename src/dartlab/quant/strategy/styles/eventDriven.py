@@ -56,15 +56,24 @@ def _date_to_filing_flag(dates: list, filing_date_strs: list[str], window: int =
     flag = np.zeros(n, dtype=np.bool_)
     if not filing_date_strs:
         return flag
-    # filing dates 를 set 으로 (YYYY-MM-DD)
+
+    # filing dates 정규화 — DART 는 'YYYYMMDD' (8자리), OHLCV 는 'YYYY-MM-DD'
+    def _normalize(s: str) -> str:
+        if not s:
+            return ""
+        s = str(s).strip()
+        if len(s) == 8 and s.isdigit():
+            return f"{s[:4]}-{s[4:6]}-{s[6:8]}"
+        return s[:10]
+
     filing_set = set()
     for s in filing_date_strs:
-        try:
-            filing_set.add(s[:10])
-        except (TypeError, IndexError):
-            continue
+        normalized = _normalize(s)
+        if normalized:
+            filing_set.add(normalized)
+
     for i, d in enumerate(dates):
-        d_str = d.strftime("%Y-%m-%d") if isinstance(d, Date) else str(d)[:10]
+        d_str = d.strftime("%Y-%m-%d") if isinstance(d, Date) else _normalize(str(d))
         if d_str in filing_set:
             for j in range(i, min(i + window, n)):
                 flag[j] = True

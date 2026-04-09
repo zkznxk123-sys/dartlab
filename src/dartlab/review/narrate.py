@@ -52,6 +52,38 @@ _THRESHOLDS: dict[str, dict] = {
             (None, "매출이 고르게 분산되어 있다"),
         ],
     },
+    "strategy_sharpe": {
+        "breakpoints": [
+            (1.0, "강한 통계적 우위"),
+            (0.4, "양호한 우위"),
+            (0.0, "중립"),
+            (-0.3, "약한 비효율"),
+            (None, "불리"),
+        ],
+    },
+}
+
+# 학술 출처 — 8 스타일별 (Phase 4 R5)
+_STRATEGY_SOURCES: dict[str, str] = {
+    "trendFollow": "TSMOM (Moskowitz-Ooi-Pedersen 2012)",
+    "meanReversion": "Statistical Arbitrage (Avellaneda-Lee 2008)",
+    "breakout": "Turtle System 1 (Faith 1980s, Donchian 1960s)",
+    "dipBuy": "BTFD (강세장 단기 약세 진입)",
+    "eventDriven": "PEAD (Bernard-Thomas 1989, 한국 Park-Chai 2020)",
+    "flowFollow": "외국인 수급 단기 효과 (Choe-Kho-Stulz 2005)",
+    "lowVolDefensive": "BAB (Frazzini-Pedersen 2014, self z-score 변형)",
+    "seasonalKR": "TOM (Lakonishok-Smidt 1988, 한국재무학회 2018)",
+}
+
+_STRATEGY_LABELS: dict[str, str] = {
+    "trendFollow": "추세추종",
+    "meanReversion": "평균회귀",
+    "breakout": "돌파",
+    "dipBuy": "눌림목매수",
+    "eventDriven": "이벤트드리븐",
+    "flowFollow": "수급추종",
+    "lowVolDefensive": "저변동방어",
+    "seasonalKR": "한국캘린더",
 }
 
 _Z_SCORE_LABELS: dict[str, str] = {
@@ -101,6 +133,223 @@ def _detectTrend(values: list, min_count: int = 3) -> str | None:
 
 
 # ── Narrate 함수 ──
+
+
+# ── Quant 서사 5단계 (Phase 6) ──────────────────────────────────────────────
+# analysis 가 재무 서사를 만들듯, quant 는 주가 서사를 만들어 review 에 준다.
+# 5 분석 엔진 공통 패턴: 데이터 소비 → 분석기준·서사·관점·근거 → review 도구.
+
+
+def narrateTrend(verdict_data: dict | None) -> str:
+    """추세 서사 — MA 정배열 + ADX + 12년 audit 근거."""
+    if not verdict_data:
+        return "추세 데이터 없음."
+    cats = verdict_data.get("categories", {})
+    trend = cats.get("trend", {})
+    inds = trend.get("indicators", {})
+
+    label = trend.get("label", "")
+    ma = inds.get("ma_alignment", "혼조")
+    ma_score = inds.get("ma_alignment_score", 0)
+    adx = verdict_data.get("adx") or inds.get("adx", 0)
+    st = inds.get("supertrend", "")
+    psar = inds.get("psar", "")
+
+    if label == "강한 상승":
+        text = f"추세 강한 상승 (MA {ma} {ma_score}단계, ADX {adx:.0f})"
+        if st == "long" and psar == "long":
+            text += ". Supertrend + PSAR 모두 상승 확인"
+        text += ". 12년 audit t=7.63 검증 — 다음 20봉 수익률 통계 우위."
+    else:
+        text = f"추세 횡보 (MA {ma}, ADX {adx:.0f})"
+        text += ". 방향성 약함 — 추세 전략 효과 제한적."
+    return text
+
+
+def narrateQuantRisk(risk_data: dict | None, verdict_data: dict | None) -> str:
+    """리스크 서사 — ATR + 베타 + 변동성 등급."""
+    if not risk_data:
+        return "리스크 데이터 없음."
+    atr_pct = risk_data.get("atrPercent", 0)
+    vol_grade = risk_data.get("volatilityGrade", "")
+    beta_dict = risk_data.get("beta") or (verdict_data or {}).get("beta") or {}
+    beta_val = beta_dict.get("value") if isinstance(beta_dict, dict) else beta_dict
+    rsi = (verdict_data or {}).get("rsi")
+
+    parts = []
+    if atr_pct:
+        grade_ko = {"high": "높음", "medium": "보통", "low": "낮음"}.get(vol_grade, vol_grade)
+        parts.append(f"일일 변동성 ATR {atr_pct:.1f}% ({grade_ko})")
+    if beta_val is not None:
+        if beta_val > 1.3:
+            parts.append(f"베타 {beta_val:.2f} — 시장 하락 시 더 큰 손실")
+        elif beta_val < 0.7:
+            parts.append(f"베타 {beta_val:.2f} — 시장 대비 방어적")
+        else:
+            parts.append(f"베타 {beta_val:.2f}")
+    if rsi is not None:
+        if rsi >= 70:
+            parts.append(f"RSI {rsi:.0f} 과매수 — 단기 조정 가능")
+        elif rsi <= 30:
+            parts.append(f"RSI {rsi:.0f} 과매도 — 반등 기대")
+        else:
+            parts.append(f"RSI {rsi:.0f} 중립")
+    return ". ".join(parts) + "." if parts else "리스크 데이터 부족."
+
+
+def narrateSignals(signals_data: dict | None) -> str:
+    """수급 신호 서사 — 최근 20일 매수/매도 신호 집계."""
+    if not signals_data:
+        return "신호 데이터 없음."
+    summary = signals_data.get("signalSummary", {})
+    bullish = summary.get("bullish", 0)
+    bearish = summary.get("bearish", 0)
+    events = signals_data.get("recentEvents", [])
+
+    parts = [f"최근 20일 매수 {bullish}건 / 매도 {bearish}건"]
+    # 가장 최근 이벤트 1~2개 언급
+    if events:
+        recent = events[-2:]
+        for ev in recent:
+            parts.append(f"{ev.get('type','')} {ev.get('direction','')}")
+    if bullish > bearish + 1:
+        parts.append("→ 단기 매수 우위")
+    elif bearish > bullish + 1:
+        parts.append("→ 단기 매도 우위")
+    else:
+        parts.append("→ 매수·매도 균형")
+    return ". ".join(parts) + "."
+
+
+def narrateStrategyVerdict(strategy_data: dict | None) -> str:
+    """전략 검증 서사 — 스타일별 Sharpe + 오늘 진입 신호."""
+    if not strategy_data:
+        return "전략 데이터 없음."
+    style_ko = {
+        "trendFollow": "추세추종", "meanReversion": "평균회귀", "breakout": "돌파",
+        "dipBuy": "눌림목매수", "eventDriven": "이벤트드리븐", "flowFollow": "수급추종",
+        "lowVolDefensive": "저변동방어", "seasonalKR": "한국캘린더",
+    }
+    strong = []
+    active = []
+    for key, ko in style_ko.items():
+        snap = strategy_data.get(key)
+        if not snap or snap.get("status") != "ok":
+            continue
+        sharpe = snap.get("sharpe", 0)
+        dsr = snap.get("dsr", 0)
+        if sharpe >= 0.5 and dsr >= 0.7:
+            strong.append(f"{ko} Sharpe {sharpe:+.2f} (DSR {dsr:.2f})")
+        if snap.get("entry_today"):
+            active.append(ko)
+
+    parts = []
+    if strong:
+        parts.append("검증된 전략: " + ", ".join(strong[:3]))
+    if active:
+        parts.append("오늘 진입 활성: " + ", ".join(active))
+    if not strong:
+        parts.append("12년 검증에서 강한 우위 스타일 없음")
+    return ". ".join(parts) + "."
+
+
+def narrateCrosscheck(divergence_data: dict | None) -> str:
+    """재무-시장 교차 서사 — analysis 등급 vs 기술적 판단 일치/불일치."""
+    if not divergence_data:
+        return "교차진단 데이터 없음."
+    diagnosis = divergence_data.get("diagnosis", "")
+    fin_grade = divergence_data.get("financialGrade", "")
+    tech_verdict = divergence_data.get("technicalVerdict", "")
+
+    if diagnosis:
+        return f"재무-시장 교차: {diagnosis}."
+    parts = []
+    if fin_grade:
+        parts.append(f"재무 등급 {fin_grade}")
+    if tech_verdict:
+        parts.append(f"기술 {tech_verdict}")
+    if parts:
+        return " + ".join(parts) + "."
+    return "교차진단 정보 부족."
+
+
+def narrateQuantConclusion(
+    trend_label: str,
+    bullish_signals: int,
+    bearish_signals: int,
+    active_styles: list[str],
+    diagnosis: str,
+) -> str:
+    """결론 — 5 서사 방향 카운트 (가중치 X)."""
+    bull = 0
+    bear = 0
+    if trend_label == "강한 상승":
+        bull += 1
+    elif trend_label == "횡보":
+        pass  # 중립
+    else:
+        bear += 1
+    if bullish_signals > bearish_signals + 1:
+        bull += 1
+    elif bearish_signals > bullish_signals + 1:
+        bear += 1
+    if active_styles:
+        bull += 1
+    if "정합" in diagnosis or "일치" in diagnosis:
+        bull += 1
+    elif "괴리" in diagnosis or "불일치" in diagnosis:
+        bear += 1
+
+    if bull >= 3:
+        return "**결론: 매수 우위** — 추세·수급·전략 정합."
+    if bear >= 3:
+        return "**결론: 매도 우위** — 추세 약세·수급 이탈·리스크 확대."
+    if bull >= 2:
+        return "**결론: 약한 매수 우위** — 일부 지표 긍정."
+    if bear >= 2:
+        return "**결론: 약한 매도 우위** — 일부 지표 부정."
+    return "**결론: 혼조** — 분석 엔진 간 불일치, 관망 권장."
+
+
+def narrateTechnicalVerdict(data: dict) -> str | None:
+    """verdict 축 카테고리 → 한국어 1~2문장 (Phase 5, 12년 audit 통과분만).
+
+    12년 audit 결과: trend 카테고리의 "강한 상승" (t=7.63@20d) 과
+    "횡보" (t=-6.26@20d) 만 통계적 유의미. momentum/volatility/volume/pattern 전부 fail.
+    과적합 아닌 진짜 신호만 narrate.
+    """
+    categories = data.get("categories") or {}
+    trend = categories.get("trend")
+    if not trend:
+        return None
+
+    inds = trend.get("indicators", {})
+    ma = inds.get("ma_alignment", "")
+    adx = inds.get("adx", 0)
+    score = trend.get("score", 50)
+    label = trend.get("label", "")
+
+    # 기존 verdict 최상위 지표 참조 (rsi/adx/bbPosition — audit 통과 아니지만 참고 정보)
+    rsi = data.get("rsi")
+    bb = data.get("bbPosition")
+
+    parts: list[str] = []
+
+    if label == "강한 상승":
+        parts.append(f"추세 강한 상승 (MA {ma}, ADX {adx:.0f}) — 12년 검증 유의미 (t=7.63)")
+    else:
+        parts.append(f"추세 횡보 (MA {ma}, ADX {adx:.0f}) — 방향성 약함")
+
+    # 참고 지표 (audit 미통과이지만 사실 데이터로 노출)
+    ref = []
+    if rsi is not None:
+        ref.append(f"RSI {rsi:.0f}")
+    if bb is not None:
+        ref.append(f"BB {bb:.0f}%")
+    if ref:
+        parts.append(f"참고: {', '.join(ref)}")
+
+    return ". ".join(parts) + "."
 
 
 def narrateGrowth(yoy: float | None, cagr: float | None) -> str | None:
@@ -271,6 +520,84 @@ def narrateValuation(data: dict) -> str | None:
         else:
             text += f". 적정가 대비 {abs(margin):.0f}% 프리미엄 — 고평가 주의"
     return text + "."
+
+
+def narrateStrategy(snap: dict) -> str | None:
+    """전략별 진입 진단 narrate (review 시장분석 6막 prospect).
+
+    8 검증 스타일 백테스트 결과를 학술 출처 + 5년 결과 + 오늘 신호로 한국어 narrate.
+    """
+    if not snap:
+        return None
+
+    parts: list[str] = []
+
+    # 1) 강한 우위 스타일 (sharpe ≥ 0.6 + DSR ≥ 0.7)
+    strong = []
+    for key, label in _STRATEGY_LABELS.items():
+        s = snap.get(key)
+        if not s or s.get("status") != "ok":
+            continue
+        if s.get("sharpe", 0) >= 0.6 and s.get("dsr", 0) >= 0.7:
+            src = _STRATEGY_SOURCES.get(key, "")
+            sharpe = s.get("sharpe", 0)
+            dsr = s.get("dsr", 0)
+            wr = s.get("winrate", 0) * 100
+            strong.append(f"**{label}** ({src}) — Sharpe {sharpe:+.2f}, DSR {dsr:.2f}, 승률 {wr:.0f}%")
+    if strong:
+        parts.append("[5년 백테스트 강한 우위] " + " / ".join(strong) + ".")
+
+    # 2) 오늘 진입 활성 신호
+    active_today = []
+    for key, label in _STRATEGY_LABELS.items():
+        s = snap.get(key)
+        if not s or s.get("status") != "ok":
+            continue
+        if s.get("entry_today"):
+            stop = s.get("stop_level")
+            stop_str = f", ATR stop {stop:,.0f}" if stop else ""
+            active_today.append(f"**{label}**{stop_str}")
+    if active_today:
+        parts.append("[오늘 진입 신호 활성] " + ", ".join(active_today) + ".")
+
+    # 3) 청산 신호
+    exit_today = []
+    for key, label in _STRATEGY_LABELS.items():
+        s = snap.get(key)
+        if not s or s.get("status") != "ok":
+            continue
+        if s.get("exit_today"):
+            exit_today.append(label)
+    if exit_today:
+        parts.append("[오늘 청산 신호] " + ", ".join(exit_today) + ".")
+
+    # 4) 데이터 한계/NotApplicable 명시
+    limited = []
+    for key, label in _STRATEGY_LABELS.items():
+        s = snap.get(key)
+        if not s:
+            continue
+        if s.get("status") == "data_limited":
+            limited.append(f"{label}(데이터 부족)")
+        elif s.get("status") == "not_applicable":
+            limited.append(f"{label}(KR 전용)")
+    if limited:
+        parts.append("[제한] " + ", ".join(limited) + ".")
+
+    # 5) 통계 신뢰도 경고 (DSR < 0.5)
+    weak_dsr = []
+    for key, label in _STRATEGY_LABELS.items():
+        s = snap.get(key)
+        if not s or s.get("status") != "ok":
+            continue
+        dsr = s.get("dsr", 0)
+        sharpe = s.get("sharpe", 0)
+        if abs(sharpe) > 0.3 and dsr < 0.5:
+            weak_dsr.append(f"{label}(DSR {dsr:.2f})")
+    if weak_dsr:
+        parts.append("[⚠ 통계 신뢰도 약함] " + ", ".join(weak_dsr) + " — 우연 가능성 배제 어려움.")
+
+    return " ".join(parts) if parts else None
 
 
 def narrateConcentration(data: dict) -> str | None:

@@ -809,10 +809,11 @@ class Company:
         *,
         preset: str | None = None,
         template: str | None = None,
+        perspective: str | None = None,
         detail: bool | None = None,
         basePeriod: str | None = None,
     ):
-        """재무제표 구조화 보고서 — 14개 섹션 데이터 검토서.
+        """재무제표 구조화 보고서 — 기업이야기꾼의 대본.
 
         Capabilities:
             - 14개 섹션 전체 보고서 (수익구조~재무정합성)
@@ -864,6 +865,7 @@ class Company:
             helper=helper,
             preset=preset,
             template=template,
+            perspective=perspective,
             detail=detail,
             basePeriod=basePeriod,
         )

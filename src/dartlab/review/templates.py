@@ -389,6 +389,89 @@ TEMPLATES = _buildTemplates()
 TEMPLATE_ORDER = [s.key for s in SECTIONS]
 
 
+# ── 관점별 템플릿 (perspective) — 섹션 순서 재배치 ──────────────
+# 기업유형 STORY_TEMPLATES (강조) 와 독립 차원.
+# perspective × template 동시 사용 가능.
+
+PERSPECTIVE_TEMPLATES: dict[str, dict] = {
+    "bottomUp": {
+        "description": "재무 → 시장 → 매크로 순서 (현재 6막, 기본)",
+        "order": TEMPLATE_ORDER,  # 기존 6막 순서 그대로
+    },
+    "topDown": {
+        "description": "매크로 → 시장 → 재무 순서 (거시환경 중심)",
+        "order": [
+            "시장분석", "비교분석", "매출전망", "가치평가",
+            "종합평가", "신용평가", "안정성", "자금조달",
+            "현금흐름", "이익품질", "수익성", "비용구조",
+            "수익구조", "성장성", "자산구조", "효율성",
+            "투자효율", "자본배분", "재무정합성",
+            "지배구조", "공시변화",
+        ],
+    },
+    "cycle": {
+        "description": "사이클 관점 — 시장 위치 먼저, 기업이 어디에 있는지",
+        "order": [
+            "시장분석", "매출전망", "수익구조", "성장성",
+            "비용구조", "수익성", "현금흐름", "자금조달",
+            "안정성", "가치평가", "종합평가", "비교분석",
+        ],
+    },
+    "value": {
+        "description": "가치투자 관점 — 밸류에이션 + 안전 + 배당 먼저",
+        "order": [
+            "가치평가", "안정성", "자금조달", "현금흐름",
+            "자본배분", "수익성", "종합평가", "신용평가",
+            "수익구조", "성장성", "효율성", "비교분석",
+            "시장분석",
+        ],
+    },
+    "growth": {
+        "description": "성장투자 관점 — 매출성장 + 마진 + 투자효율 먼저",
+        "order": [
+            "수익구조", "성장성", "매출전망", "수익성",
+            "투자효율", "효율성", "자본배분", "현금흐름",
+            "가치평가", "비교분석", "시장분석",
+        ],
+    },
+    "crisis": {
+        "description": "위기 진단 관점 — 부채 + 유동성 + 신용 + 리스크 먼저",
+        "order": [
+            "안정성", "자금조달", "현금흐름", "이익품질",
+            "신용평가", "종합평가", "수익성", "수익구조",
+            "가치평가", "시장분석",
+        ],
+    },
+}
+
+# 한글 alias → 영문 key
+PERSPECTIVE_ALIASES: dict[str, str] = {
+    "바텀업": "bottomUp",
+    "탑다운": "topDown",
+    "사이클": "cycle",
+    "가치": "value",
+    "성장": "growth",
+    "위기": "crisis",
+    "bottomup": "bottomUp",
+    "topdown": "topDown",
+}
+
+
+def resolvePerspective(name: str | None) -> str | None:
+    """한글/영문 → 정규 키. None 이면 None (기본 6막)."""
+    if not name:
+        return None
+    s = name.strip()
+    if s in PERSPECTIVE_TEMPLATES:
+        return s
+    if s in PERSPECTIVE_ALIASES:
+        return PERSPECTIVE_ALIASES[s]
+    low = s.lower()
+    if low in PERSPECTIVE_ALIASES:
+        return PERSPECTIVE_ALIASES[low]
+    return None
+
+
 # ── 스토리 템플릿 — 기업 특성별 강조/축소 ──
 # 6막 순서는 불변. emphasize된 블록에 시각적 표시 + aiGuide 조정.
 
