@@ -282,20 +282,6 @@
 	<div class="blog-post-layout">
 		<div class="blog-post-col">
 			<header class="post-header">
-				{#if postInfo?.thumbnail}
-					<picture>
-						<source srcset="{base}{postInfo.thumbnail.replace('.png', '.webp')}" type="image/webp" />
-						<img
-							src="{base}{postInfo.thumbnail}"
-							alt={meta?.title ?? ''}
-							class="post-avatar"
-							width="96"
-							height="96"
-							loading="lazy"
-							decoding="async"
-						/>
-					</picture>
-				{/if}
 				{#if postInfo}
 					<div class="post-meta-row">
 						<a href="{base}{getCategoryPath(postInfo.category)}" class="post-badge">{postInfo.categoryLabel}</a>
@@ -321,6 +307,17 @@
 				{/if}
 				{#if meta?.title}
 					<h1 class="post-title">{meta.title}</h1>
+				{/if}
+				{#if postInfo?.thumbnail}
+					<img
+						src="{base}{postInfo.thumbnail}"
+						alt={meta?.title ?? ''}
+						class="post-hero-thumbnail"
+						width="1200"
+						height="630"
+						loading="eager"
+						decoding="async"
+					/>
 				{/if}
 				{#if meta?.description}
 					<div class="post-summary" aria-label="포스트 핵심 요약">
@@ -535,12 +532,13 @@
 		color: #e2e8f0;
 	}
 
-	.post-avatar {
-		width: 96px;
-		height: 96px;
-		border-radius: 50%;
-		border: 2px solid rgba(234, 70, 71, 0.2);
-		margin-bottom: 1rem;
+	.post-hero-thumbnail {
+		width: 100%;
+		max-width: 100%;
+		height: auto;
+		border-radius: 12px;
+		margin: 1.5rem 0;
+		border: 1px solid rgba(30, 36, 51, 0.6);
 	}
 
 	.post-meta-row {
