@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.5] - 2026-04-09
+
+### Fixed
+
+- ratio label dict 중복 key 정리 (F601) — 카테고리별 재정렬
+- ruff lint 16건 (unused imports, f-string placeholder)
+- qualityGate.py _HISTORY_PATH 새 위치 (`scripts/audit/`) 반영
+
 ## [0.9.4] - 2026-04-09
 
 ### Fixed — Plan v10 후속 audit fix
