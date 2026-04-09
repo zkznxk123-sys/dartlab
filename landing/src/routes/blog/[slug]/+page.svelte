@@ -394,12 +394,6 @@
 				</div>
 			</section>
 
-			<div class="coffee-banner">
-				<a href={brand.coffee} target="_blank" rel="noopener noreferrer">
-					<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="150" height="42" loading="lazy" decoding="async" />
-				</a>
-			</div>
-
 			<div class="giscus-container" bind:this={giscusEl}></div>
 
 			{#if prevNext.prev || prevNext.next}
@@ -1102,20 +1096,6 @@
 		color: #e2e8f0;
 	}
 	.post-nav-link:hover .post-nav-title { color: #ea4647; }
-
-	/* Coffee banner */
-	.coffee-banner {
-		margin-top: 3rem;
-		padding-top: 2rem;
-		border-top: 1px solid rgba(30, 36, 51, 0.8);
-		text-align: center;
-	}
-	.coffee-banner img {
-		transition: opacity 0.2s;
-	}
-	.coffee-banner img:hover {
-		opacity: 0.85;
-	}
 
 	/* Giscus */
 	.giscus-container {
