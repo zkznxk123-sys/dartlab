@@ -120,11 +120,40 @@ def _normalizeName(name: str) -> str:
     return re.sub(r"(?<=[\uAC00-\uD7A3])\s+(?=[\uAC00-\uD7A3])", "", name.strip())
 
 
+# 외화 통화코드 — 이 문자열이 포함된 값은 원화가 아님
+_FOREIGN_CURRENCY_RE = re.compile(
+    r"(USD|JPY|EUR|GBP|CNY|HKD|SGD|AUD|CAD|CHF|TWD|THB|INR|VND|MYR|IDR|PHP|BRL|MXN|ZAR)"
+    r"|(\[.*?천\])"  # "[USD, 천]" 같은 패턴
+    r"|(JP￥|US\$|€|£|¥|￥)"  # 통화 기호
+    r"|(\(.*?천\))"  # "(JP￥ 18,500,000천)" 같은 괄호 패턴
+)
+
+
+def _hasForeignCurrency(value: str) -> bool:
+    """외화 통화코드가 포함된 값인지 판별."""
+    return bool(_FOREIGN_CURRENCY_RE.search(value))
+
+
 def _pickValue(values: list[str]) -> str:
-    """값 리스트에서 대표값 선택. 마지막 유효 숫자를 사용."""
+    """값 리스트에서 대표값 선택.
+
+    우선순위:
+    1. 외화 통화코드가 없는 원화 숫자값 (마지막)
+    2. 그래도 없으면 아무 유효값 (마지막)
+    """
+    # 1차: 원화 값만 (외화 코드 없는 숫자)
     for v in reversed(values):
-        if v and v.strip() and v.strip() not in ("-", ""):
-            return v
+        v_stripped = (v or "").strip()
+        if not v_stripped or v_stripped == "-":
+            continue
+        if _hasForeignCurrency(v_stripped):
+            continue
+        return v_stripped
+    # 2차: 외화 포함이라도 유효하면 (fallback)
+    for v in reversed(values):
+        v_stripped = (v or "").strip()
+        if v_stripped and v_stripped != "-":
+            return v_stripped
     return values[0] if values else ""
 
 
@@ -193,17 +222,19 @@ def _buildTableDf(
             if normalized not in itemData:
                 itemData[normalized] = {}
             if item.values:
-                itemData[normalized][colName] = _pickValue(item.values)
+                picked = _pickValue(item.values)
+                if not picked:
+                    continue
+                # 같은 항목명이 이미 있으면 덮어쓰지 않는다 (첫 번째 원화 값 우선).
+                # NAVER처럼 "외화대출"이 20행 반복되는 경우 마지막 행이 덮어쓰면
+                # 외화 금액이 원화로 이중 변환되는 문제 발생.
+                if colName not in itemData[normalized]:
+                    itemData[normalized][colName] = picked
 
     if not itemData:
         return None
 
     from dartlab.core.finance.unitNormalize import normalizeFromUnitScale
-
-    # 이상치 상한 — 원 단위 기준 1,000조 (1e15).
-    # 한국 최대 기업(삼성전자) 총자산이 ~500조. 1,000조 초과값은 파싱 오류.
-    # 다중 통화 notes(NAVER 등)에서 외화 금액이 원화로 이중 변환되는 케이스 방지.
-    _ANOMALY_THRESHOLD = 1e15
 
     rows = []
     for name, vals in itemData.items():
@@ -212,11 +243,7 @@ def _buildTableDf(
             raw = vals.get(col, "")
             parsed = parseAmount(raw)
             unit = colUnit.get(col, 1.0)
-            normalized = normalizeFromUnitScale(parsed, unit)
-            # 비정상 큰 값 필터 — 파싱 오류로 판단하여 None
-            if normalized is not None and abs(normalized) > _ANOMALY_THRESHOLD:
-                normalized = None
-            row[col] = normalized
+            row[col] = normalizeFromUnitScale(parsed, unit)
         rows.append(row)
 
     schema: dict[str, type] = {"항목": pl.Utf8}
