@@ -26,6 +26,8 @@ youtubeId: ""
 > 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: review + analysis + credit + report.dividend
 > 같은 시리즈: [SK하이닉스 (000660)](/blog/000660-skhynix) · [삼양식품 (003230)](/blog/003230-samyang-foods) · [알테오젠 (196170)](/blog/196170-alteogen) · [HMM (011200)](/blog/011200-hmm) · [셀트리온 (068270)](/blog/068270-celltrion) · [기업분석 시리즈 전체](/blog/series/company-reports)
 
+![두산에너빌리티 — 9년 다이어트 끝에 영업이익 54%](./assets/03-thumbnail.webp)
+
 ---
 
 ![지배주주 순이익 9년 추이](./assets/03-net-income-9year.svg)

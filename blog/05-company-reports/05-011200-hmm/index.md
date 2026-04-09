@@ -27,6 +27,8 @@ youtubeId: ""
 > 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: **analysis + quant + credit** (4개 엔진 동시 사용)
 > 같은 시리즈: [SK하이닉스 (000660)](/blog/000660-skhynix) · [삼양식품 (003230)](/blog/003230-samyang-foods) · [두산에너빌리티 (034020)](/blog/034020-doosan-enerbility) · [알테오젠 (196170)](/blog/196170-alteogen) · [셀트리온 (068270)](/blog/068270-celltrion) · [기업분석 시리즈 전체](/blog/series/company-reports)
 
+![HMM — 9년 5번 사이클, 자본총계 31배 폭증](./assets/05-thumbnail.webp)
+
 ---
 
 ![HMM 영업이익 10년 사이클](./assets/05-op-9year-cycle.svg)

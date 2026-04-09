@@ -27,6 +27,8 @@ youtubeId: ""
 > 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: review + analysis + credit + report
 > 같은 시리즈: [SK하이닉스 (000660)](/blog/000660-skhynix) · [삼양식품 (003230)](/blog/003230-samyang-foods) · [두산에너빌리티 (034020)](/blog/034020-doosan-enerbility) · [HMM (011200)](/blog/011200-hmm) · [셀트리온 (068270)](/blog/068270-celltrion) · [기업분석 시리즈 전체](/blog/series/company-reports)
 
+![알테오젠 — 8년 영업적자에서 영업이익률 49.52%까지](./assets/04-thumbnail.webp)
+
 ---
 
 ![알테오젠 영업이익 9년 — 8년 적자에서 +1,069억까지](./assets/04-op-9year-line.svg)

@@ -26,6 +26,8 @@ youtubeId: ""
 > 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: review + analysis + credit + report
 > 같은 시리즈: [삼양식품 (003230)](/blog/003230-samyang-foods) · [두산에너빌리티 (034020)](/blog/034020-doosan-enerbility) · [알테오젠 (196170)](/blog/196170-alteogen) · [HMM (011200)](/blog/011200-hmm) · [셀트리온 (068270)](/blog/068270-celltrion) · [기업분석 시리즈 전체](/blog/series/company-reports)
 
+![SK하이닉스 — 한국 반도체 30년의 미스터리, 그리고 영업이익률 58%](./assets/01-thumbnail.webp)
+
 ---
 
 ![영업이익률 9년 5번 사이클](./assets/01-margin-cycle-9year.svg)

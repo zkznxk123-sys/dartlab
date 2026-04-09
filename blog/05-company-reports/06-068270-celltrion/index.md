@@ -26,6 +26,8 @@ youtubeId: ""
 > **인물 중심** | 헬스케어 > 바이오시밀러 | 2026-04-08 dartlab 실측
 > 같은 시리즈: [SK하이닉스](/blog/000660-skhynix) · [삼양식품](/blog/003230-samyang-foods) · [두산에너빌리티](/blog/034020-doosan-enerbility) · [알테오젠](/blog/196170-alteogen) · [HMM](/blog/011200-hmm) · [기업분석 시리즈 전체](/blog/series/company-reports)
 
+![셀트리온 — IMF로 직장 잃은 41세가 5천만원으로 시작한 회사](./assets/06-thumbnail.webp)
+
 ---
 
 ![서정진의 25년 시간선](./assets/06-seo-25year-timeline.svg)
