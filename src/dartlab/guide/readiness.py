@@ -162,7 +162,7 @@ def _checkAi(*, provider: str | None = None, **_kw: Any) -> ReadinessResult:
             ReadinessIssue(
                 kind="no_provider",
                 message="AI 모듈을 로드할 수 없습니다",
-                fixAction="pip install dartlab[ai]",
+                fixAction="pip install --upgrade dartlab",
             )
         )
 
@@ -296,7 +296,7 @@ def _checkServer(**_kw: Any) -> ReadinessResult:
                 ReadinessIssue(
                     kind=f"missing_{pkg}",
                     message=f"{label} 미설치",
-                    fixAction="pip install dartlab[server]",
+                    fixAction="pip install --upgrade dartlab",
                 )
             )
     status = ReadyStatus.NOT_READY if issues else ReadyStatus.READY
@@ -314,7 +314,7 @@ def _checkMcp(**_kw: Any) -> ReadinessResult:
             ReadinessIssue(
                 kind="missing_mcp",
                 message="MCP 패키지 미설치",
-                fixAction="pip install dartlab[server]",
+                fixAction="pip install --upgrade dartlab",
             )
         )
     status = ReadyStatus.NOT_READY if issues else ReadyStatus.READY
@@ -355,7 +355,7 @@ def _checkShare(*, persistent: bool = False, **_kw: Any) -> ReadinessResult:
                 ReadinessIssue(
                     kind=f"missing_{pkg}",
                     message=f"{label} 미설치",
-                    fixAction="pip install dartlab[server]",
+                    fixAction="pip install --upgrade dartlab",
                 )
             )
 

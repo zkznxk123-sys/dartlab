@@ -26,7 +26,7 @@ def _ensure_plotly():
 
         return go
     except ImportError:
-        raise ImportError("plotly 패키지가 필요합니다.\n  uv add dartlab[charts]") from None
+        raise ImportError("plotly 패키지가 필요합니다.\n  pip install --upgrade dartlab") from None
 
 
 def _apply_theme(fig) -> None:

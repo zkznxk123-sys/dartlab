@@ -427,7 +427,7 @@ def create_server():
         from mcp.server.lowlevel.server import ReadResourceContents
         from mcp.types import Resource, TextContent, Tool
     except ImportError as exc:
-        raise ImportError("MCP SDK 필요: pip install dartlab[server]") from exc
+        raise ImportError("MCP SDK 필요: pip install --upgrade dartlab") from exc
 
     app = Server("dartlab", instructions=_MCP_INSTRUCTIONS)
     _log.info("MCP 서버 초기화 -- %d 도구", len(_TOOLS))
@@ -554,7 +554,7 @@ def run_stdio():
     try:
         from mcp.server.stdio import stdio_server
     except ImportError as exc:
-        raise ImportError("MCP SDK 필요: pip install dartlab[server]") from exc
+        raise ImportError("MCP SDK 필요: pip install --upgrade dartlab") from exc
 
     app = create_server()
 

@@ -248,7 +248,7 @@ def run(args) -> int:
         import uvicorn  # noqa: F401
     except ImportError:
         print("\n  [오류] 서버 패키지가 설치되지 않았습니다.")
-        print("  설치: pip install dartlab[server]\n")
+        print("  설치: pip install --upgrade dartlab\n")
         return 1
 
     # CORS 전체 허용 (devtunnel URL 등 외부 origin 통과)

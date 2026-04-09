@@ -5,17 +5,10 @@ from __future__ import annotations
 import os
 import subprocess
 import webbrowser
-from pathlib import Path
 
 from dartlab.cli.services.errors import CLIError
 from dartlab.cli.services.output import print_warning
-
-# web.py 와 동일한 로직으로 UI 디렉토리 결정
-_UI_DIR = (
-    Path(os.environ["DARTLAB_UI_DIR"])
-    if os.environ.get("DARTLAB_UI_DIR")
-    else Path(__file__).resolve().parents[4] / "ui"
-)
+from dartlab.server._ui_path import resolve_ui_build_dir, resolve_ui_source_dir
 
 
 def configure_parser(subparsers) -> None:
@@ -73,14 +66,15 @@ def run(args) -> int:
 def _runDevMode(url: str) -> None:
     import threading
 
-    if not (_UI_DIR / "node_modules").exists():
+    ui_src = resolve_ui_source_dir()
+    if not (ui_src / "node_modules").exists():
         print("npm install 실행 중...")
-        result = subprocess.run(["npm", "install"], cwd=str(_UI_DIR), timeout=300)  # noqa: S603, S607
+        result = subprocess.run(["npm", "install"], cwd=str(ui_src), timeout=300)  # noqa: S603, S607
         if result.returncode != 0:
             raise CLIError("UI 의존성 설치에 실패했습니다.")
 
     def _vite() -> None:
-        result = subprocess.run(["npm", "run", "dev"], cwd=str(_UI_DIR))  # noqa: S603, S607
+        result = subprocess.run(["npm", "run", "dev"], cwd=str(ui_src))  # noqa: S603, S607
         if result.returncode != 0:
             print_warning("Svelte dev 서버가 비정상 종료되었습니다.")
 
@@ -93,14 +87,13 @@ def _runDevMode(url: str) -> None:
 
 
 def _checkBuiltUi() -> bool:
-    buildDir = _UI_DIR / "build"
-    if buildDir.exists():
+    build_dir = resolve_ui_build_dir()
+    if build_dir.is_dir() and (build_dir / "index.html").exists():
         return True
 
-    print("\n  UI가 빌드되지 않았습니다.")
-    print("  개발 모드로 실행하세요:\n")
-    print("    dartlab ai --dev\n")
-    print("  또는 빌드 후 실행:")
-    print("    cd ui && npm install && npm run build")
-    print("    dartlab ai\n")
+    print("\n  UI를 사용할 수 없습니다.")
+    print("  dartlab을 최신 버전으로 업그레이드하세요:\n")
+    print("    pip install --upgrade dartlab\n")
+    print("  또는 CLI에서 바로 사용하세요:")
+    print("    dartlab ask '삼성전자 분석해줘'\n")
     return False

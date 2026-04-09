@@ -143,7 +143,7 @@ def _do_oauth_login() -> None:
         )
     except ImportError:
         print("  OAuth 모듈을 불러올 수 없습니다.")
-        print('  dartlab[ai] 설치가 필요합니다: uv add "dartlab[ai]"\n')
+        print("  pip install --upgrade dartlab\n")
         return
 
     auth_url, verifier, state = build_auth_url()

@@ -136,6 +136,30 @@ CATALOG: dict[str, list[CatalogEntry]] = {
         CatalogEntry("GFDEBTN", "연방정부 부채", "credit", "Quarterly", "Millions of Dollars", "연방정부 총 공공부채"),
         CatalogEntry("TDSP", "부채서비스비율", "credit", "Quarterly", "Percent", "가계 부채 서비스 비율"),
         CatalogEntry("DRSFRMACBS", "부실대출비율", "credit", "Quarterly", "Percent", "상업은행 부실대출 비율"),
+        CatalogEntry(
+            "DRTSCLCC",
+            "대출태도",
+            "credit",
+            "Quarterly",
+            "Percent",
+            "Senior Loan Officer Survey — 대기업 대출기준 긴축 비율 (Verdad 신용사이클)",
+        ),
+        CatalogEntry(
+            "CORCCACBS",
+            "기업대출상각률",
+            "credit",
+            "Quarterly",
+            "Percent",
+            "상업은행 기업대출 Charge-off Rate (Verdad 신용사이클)",
+        ),
+        CatalogEntry(
+            "BAA10Y",
+            "BAA-10Y스프레드",
+            "credit",
+            "Daily",
+            "Percent",
+            "Moody's BAA - 10Y Treasury (Gilchrist-Zakrajšek EBP 근사용)",
+        ),
     ],
     "conditions": [
         CatalogEntry("NFCI", "시카고Fed NFCI", "conditions", "Weekly", "Index", "시카고Fed 금융상태지수"),
@@ -144,6 +168,14 @@ CATALOG: dict[str, list[CatalogEntry]] = {
             "WEI", "주간경제지수", "conditions", "Weekly", "Percent", "NY Fed 주간 경제지수 (GDP 성장률 스케일)"
         ),
         CatalogEntry("SAHMREALTIME", "Sahm Rule", "conditions", "Monthly", "Percentage Points", "Sahm 실시간 침체지표"),
+        CatalogEntry(
+            "WLEMUINDXD",
+            "매크로불확실성",
+            "conditions",
+            "Daily",
+            "Index",
+            "Jurado-Ludvigson-Ng 매크로 불확실성 지수 1개월 (JLN 2015 AER)",
+        ),
     ],
     "commodities": [
         CatalogEntry(

@@ -82,7 +82,7 @@ def _updateAll(console, args) -> int:
             downloadAll(cat, forceUpdate=True)
             console.print(f"[bold]{cat}[/] 갱신 완료")
         except ImportError:
-            console.print(f"[red]{cat}: huggingface_hub 필요 (pip install dartlab[hf])[/]")
+            console.print(f"[red]{cat}: huggingface_hub 필요 (pip install --upgrade dartlab)[/]")
             return 1
         except RuntimeError as e:
             console.print(f"[red]{cat}: {e}[/]")
