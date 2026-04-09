@@ -80,6 +80,40 @@
 - 첫 SVG가 글의 질문을 설명하지 못한다.
 - 본문 내용과 SVG 역할이 겹쳐서 새 정보를 주지 못한다.
 
+## 썸네일 (og:image)
+
+기업분석보고서(05-company-reports)는 커스텀 썸네일을 가진다.
+
+### 생성 방식
+- **배경**: FLUX 또는 유사 이미지 생성 API (종목 특성에 맞는 장면)
+- **합성**: Pillow로 텍스트 + dartlab 아바타 오버레이
+- **사이즈**: 1200x630 (og:image 표준)
+- **포맷**: WebP (quality 85~90)
+
+### 구성 요소
+- 좌상단: `종목명 (종목코드)` — 빨간색 (#EA4647)
+- 우상단: `dartlab` 배지
+- 중앙: 제목 2줄 (흰색, Bold 52px, 그림자)
+- 제목 아래: 부제 1줄 (회색, 22px)
+- 우하단: dartlab 아바타 (avatar-analyze.png, 120x120)
+- 최하단: 빨간색 4px 바
+
+### 저장 위치 (2곳)
+1. **원본**: `blog/05-company-reports/{folder}/assets/thumbnail.webp` — 포스트 폴더에 원본 보관
+2. **배포용**: `landing/static/thumbnails/{code}-{slug}.webp` — og:image URL로 서빙
+
+### frontmatter 연결
+```yaml
+thumbnail: /thumbnails/{code}-{slug}.webp
+```
+이 경로가 og:image, twitter:image로 자동 연결된다 (posts.ts → +page.svelte).
+
+### 새 기업분석보고서 추가 시
+1. 썸네일 생성 (배경 + 합성)
+2. `assets/thumbnail.webp`에 저장
+3. `landing/static/thumbnails/`에 복사
+4. frontmatter `thumbnail:` 경로 업데이트
+
 ## 검증 체크리스트
 
 1. 본문 자산 경로가 `./assets/...`인지 확인한다.
