@@ -20,7 +20,7 @@ tags:
   - 전자공시
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/068270-celltrion.webp
-youtubeId: ""
+youtubeId: "d7RUQIlimVM"
 ---
 
 > **인물 중심** | 헬스케어 > 바이오시밀러 | 2026-04-08 dartlab 실측
@@ -28,6 +28,10 @@ youtubeId: ""
 
 
 ---
+
+<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:1.5rem 0;border-radius:12px;">
+<iframe src="https://www.youtube.com/embed/d7RUQIlimVM" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
 
 ![서정진의 25년 시간선](./assets/06-seo-25year-timeline.svg)
 
