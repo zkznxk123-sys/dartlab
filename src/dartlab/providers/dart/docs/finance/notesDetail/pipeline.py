@@ -200,6 +200,11 @@ def _buildTableDf(
 
     from dartlab.core.finance.unitNormalize import normalizeFromUnitScale
 
+    # 이상치 상한 — 원 단위 기준 1,000조 (1e15).
+    # 한국 최대 기업(삼성전자) 총자산이 ~500조. 1,000조 초과값은 파싱 오류.
+    # 다중 통화 notes(NAVER 등)에서 외화 금액이 원화로 이중 변환되는 케이스 방지.
+    _ANOMALY_THRESHOLD = 1e15
+
     rows = []
     for name, vals in itemData.items():
         row: dict[str, object] = {"항목": name}
@@ -207,7 +212,11 @@ def _buildTableDf(
             raw = vals.get(col, "")
             parsed = parseAmount(raw)
             unit = colUnit.get(col, 1.0)
-            row[col] = normalizeFromUnitScale(parsed, unit)
+            normalized = normalizeFromUnitScale(parsed, unit)
+            # 비정상 큰 값 필터 — 파싱 오류로 판단하여 None
+            if normalized is not None and abs(normalized) > _ANOMALY_THRESHOLD:
+                normalized = None
+            row[col] = normalized
         rows.append(row)
 
     schema: dict[str, type] = {"항목": pl.Utf8}
