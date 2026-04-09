@@ -1109,9 +1109,15 @@
 		margin-top: 3rem;
 		padding-top: 2rem;
 		border-top: 1px solid rgba(30, 36, 51, 0.8);
-		text-align: center;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	.post-support a {
+		display: inline-block;
 	}
 	.post-support img {
+		display: block;
 		transition: opacity 0.2s;
 	}
 	.post-support img:hover {
