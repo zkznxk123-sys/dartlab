@@ -49,9 +49,7 @@ def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
     try:
         lf = pl.scan_parquet(str(path))
         snap = (
-            lf.filter(pl.col("fs_nm").str.contains("연결"))
-            .filter(pl.col("reprt_nm").str.contains("4분기"))
-            .collect()
+            lf.filter(pl.col("fs_nm").str.contains("연결")).filter(pl.col("reprt_nm").str.contains("4분기")).collect()
         )
     except (pl.exceptions.PolarsError, OSError) as e:
         log.warning("finance.parquet 스캔 실패: %s", e)
@@ -130,24 +128,36 @@ def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
     crossViews = []
     if profitability_pct is not None:
         if profitability_pct >= 80 and (growth_pct is None or growth_pct <= 40):
-            crossViews.append({"view": "성숙기 캐시카우", "basis": f"수익성 상위 {100-profitability_pct:.0f}% + 성장 하위권"})
+            crossViews.append(
+                {"view": "성숙기 캐시카우", "basis": f"수익성 상위 {100 - profitability_pct:.0f}% + 성장 하위권"}
+            )
         if profitability_pct >= 70 and growth_pct is not None and growth_pct >= 70:
-            crossViews.append({"view": "고성장 고마진", "basis": f"수익성 상위 {100-profitability_pct:.0f}% + 성장 상위 {100-growth_pct:.0f}%"})
+            crossViews.append(
+                {
+                    "view": "고성장 고마진",
+                    "basis": f"수익성 상위 {100 - profitability_pct:.0f}% + 성장 상위 {100 - growth_pct:.0f}%",
+                }
+            )
     if debt_pct is not None and profitability_pct is not None:
         if debt_pct >= 70 and profitability_pct >= 60:
-            crossViews.append({"view": "레버리지 수익형", "basis": f"부채 상위 {100-debt_pct:.0f}% + 수익성 상위 {100-profitability_pct:.0f}%"})
+            crossViews.append(
+                {
+                    "view": "레버리지 수익형",
+                    "basis": f"부채 상위 {100 - debt_pct:.0f}% + 수익성 상위 {100 - profitability_pct:.0f}%",
+                }
+            )
         if debt_pct <= 30:
             crossViews.append({"view": "무차입 안정형", "basis": f"부채 하위 {debt_pct:.0f}%"})
 
     # 서사
     parts = []
     if profitability_pct is not None:
-        parts.append(f"수익성 상위 {100-profitability_pct:.0f}%")
+        parts.append(f"수익성 상위 {100 - profitability_pct:.0f}%")
     if growth_pct is not None:
-        parts.append(f"성장성 상위 {100-growth_pct:.0f}%")
+        parts.append(f"성장성 상위 {100 - growth_pct:.0f}%")
     if debt_pct is not None:
         if debt_pct >= 70:
-            parts.append(f"부채 상위 {100-debt_pct:.0f}% (높음)")
+            parts.append(f"부채 상위 {100 - debt_pct:.0f}% (높음)")
         else:
             parts.append(f"부채 하위 {debt_pct:.0f}% (안정)")
     if crossViews:

@@ -1357,11 +1357,7 @@ def _analyze_inner(
                 _intent = classifyIntent(question, hasCompany=company is not None).intent.value
                 _sector = ""
                 if company is not None:
-                    _sector = (
-                        getattr(company, "sector", None)
-                        or getattr(company, "sectorName", None)
-                        or ""
-                    )
+                    _sector = getattr(company, "sector", None) or getattr(company, "sectorName", None) or ""
                 _grade = extractGrade(_full)
                 curate(
                     intent=_intent,

@@ -211,7 +211,7 @@ def narrateSignals(signals_data: dict | None) -> str:
     if events:
         recent = events[-2:]
         for ev in recent:
-            parts.append(f"{ev.get('type','')} {ev.get('direction','')}")
+            parts.append(f"{ev.get('type', '')} {ev.get('direction', '')}")
     if bullish > bearish + 1:
         parts.append("→ 단기 매수 우위")
     elif bearish > bullish + 1:
@@ -226,9 +226,14 @@ def narrateStrategyVerdict(strategy_data: dict | None) -> str:
     if not strategy_data:
         return "전략 데이터 없음."
     style_ko = {
-        "trendFollow": "추세추종", "meanReversion": "평균회귀", "breakout": "돌파",
-        "dipBuy": "눌림목매수", "eventDriven": "이벤트드리븐", "flowFollow": "수급추종",
-        "lowVolDefensive": "저변동방어", "seasonalKR": "한국캘린더",
+        "trendFollow": "추세추종",
+        "meanReversion": "평균회귀",
+        "breakout": "돌파",
+        "dipBuy": "눌림목매수",
+        "eventDriven": "이벤트드리븐",
+        "flowFollow": "수급추종",
+        "lowVolDefensive": "저변동방어",
+        "seasonalKR": "한국캘린더",
     }
     strong = []
     active = []

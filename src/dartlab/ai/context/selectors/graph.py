@@ -84,12 +84,7 @@ def selectGraphCauses(
     if not parts_text:
         return []
 
-    text = (
-        '<context source="graph:causes">\n'
-        + "\n\n".join(parts_text)
-        + f"\n\n그래프: {g.summary()}\n"
-        "</context>"
-    )
+    text = '<context source="graph:causes">\n' + "\n\n".join(parts_text) + f"\n\n그래프: {g.summary()}\n</context>"
 
     return [
         ContextPart(

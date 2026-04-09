@@ -121,7 +121,4 @@ class CompanyGraph:
         return sum(len(targets) for targets in self.edges.values())
 
     def summary(self) -> str:
-        return (
-            f"CompanyGraph({self.corpName}): "
-            f"{len(self)} nodes, {self.edgeCount()} edges"
-        )
+        return f"CompanyGraph({self.corpName}): {len(self)} nodes, {self.edgeCount()} edges"

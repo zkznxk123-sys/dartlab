@@ -1,4 +1,5 @@
 """Compare selector: scan 횡단분석 결과 주입."""
+
 from __future__ import annotations
 from typing import Any
 from dartlab.ai.context.bundle import ContextPart, PartPriority
@@ -14,6 +15,7 @@ def selectCompare(company: Any) -> list[ContextPart]:
         return []
     try:
         import dartlab
+
         df = dartlab.scan("profitability")
     except (ImportError, FileNotFoundError, OSError, RuntimeError):
         return []
@@ -42,15 +44,13 @@ def selectCompare(company: Any) -> list[ContextPart]:
     if not data:
         return []
     text_body = encodeAuto(data)
-    text = (
-        '<context source="scan:profitability">\n'
-        f"## 동종업계 수익성 비교 ({stockCode})\n{text_body}\n"
-        "</context>"
-    )
-    return [ContextPart(
-        key="compare.profitability",
-        text=text,
-        priority=PartPriority.HIGH,
-        estimatedTokens=estimateTokens(text),
-        source="scan:profitability",
-    )]
+    text = f'<context source="scan:profitability">\n## 동종업계 수익성 비교 ({stockCode})\n{text_body}\n</context>'
+    return [
+        ContextPart(
+            key="compare.profitability",
+            text=text,
+            priority=PartPriority.HIGH,
+            estimatedTokens=estimateTokens(text),
+            source="scan:profitability",
+        )
+    ]

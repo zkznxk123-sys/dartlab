@@ -153,10 +153,12 @@ class _FakeCompany:
 class TestGraphSelector:
     def test_non_why_question_returns_nothing(self):
         from dartlab.ai.context.selectors.graph import selectGraphCauses
+
         parts = selectGraphCauses("영업이익률 추세", _FakeCompany())
         assert parts == []
 
     def test_no_company_returns_nothing(self):
         from dartlab.ai.context.selectors.graph import selectGraphCauses
+
         parts = selectGraphCauses("왜 마진이 떨어졌나", None)
         assert parts == []

@@ -57,8 +57,7 @@ class ContextBuilder:
 
         # Company 메타 추출
         stockCode = (
-            getattr(self.company, "stockCode", None)
-            or getattr(self.company, "ticker", None)
+            getattr(self.company, "stockCode", None) or getattr(self.company, "ticker", None)
             if self.company is not None
             else None
         )
@@ -81,6 +80,7 @@ class ContextBuilder:
         # Phase 2: 인과 질문("왜") → graph traversal
         try:
             from dartlab.ai.context.selectors.graph import selectGraphCauses
+
             parts.extend(selectGraphCauses(self.question, self.company))
         except ImportError:
             pass
@@ -106,6 +106,7 @@ class ContextBuilder:
         if intentResult.intent == Intent.CONCEPT:
             try:
                 from dartlab.ai.context.selectors.concept import selectConcept
+
                 parts.extend(selectConcept(self.question))
             except ImportError:
                 pass
@@ -145,16 +146,19 @@ class ContextBuilder:
                 parts: list[ContextPart] = []
                 try:
                     from dartlab.ai.context.selectors.act2 import selectAct2
+
                     parts.extend(selectAct2(self.company))
                 except (ImportError, Exception):
                     pass
                 try:
                     from dartlab.ai.context.selectors.act3 import selectAct3
+
                     parts.extend(selectAct3(self.company))
                 except (ImportError, Exception):
                     pass
                 try:
                     from dartlab.ai.context.selectors.act4 import selectAct4
+
                     parts.extend(selectAct4(self.company))
                 except (ImportError, Exception):
                     pass
@@ -165,9 +169,14 @@ class ContextBuilder:
                 return []
 
             import importlib
+
             mod = importlib.import_module(module_path)
             # 함수 이름 규칙: selectAct{N}, selectCompare
-            fn_name = f"select{intent.value.split('_')[0].title()}" if "_" in intent.value else f"select{intent.value.title()}"
+            fn_name = (
+                f"select{intent.value.split('_')[0].title()}"
+                if "_" in intent.value
+                else f"select{intent.value.title()}"
+            )
             # 실제 함수명 매핑
             _FN_NAMES = {
                 Intent.ACT1_BUSINESS: "selectAct1",

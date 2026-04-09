@@ -1,4 +1,5 @@
 """Concept selector: dartlab 사용법/API 안내."""
+
 from __future__ import annotations
 from typing import Any
 from dartlab.ai.context.bundle import ContextPart, PartPriority
@@ -22,15 +23,13 @@ _CAPABILITIES_SUMMARY = """dartlab 주요 API:
 
 def selectConcept(question: str) -> list[ContextPart]:
     """dartlab API 요약을 컨텍스트에 주입."""
-    text = (
-        '<context source="capabilities">\n'
-        f"{_CAPABILITIES_SUMMARY}\n"
-        "</context>"
-    )
-    return [ContextPart(
-        key="concept.capabilities",
-        text=text,
-        priority=PartPriority.HIGH,
-        estimatedTokens=estimateTokens(text),
-        source="capabilities",
-    )]
+    text = f'<context source="capabilities">\n{_CAPABILITIES_SUMMARY}\n</context>'
+    return [
+        ContextPart(
+            key="concept.capabilities",
+            text=text,
+            priority=PartPriority.HIGH,
+            estimatedTokens=estimateTokens(text),
+            source="capabilities",
+        )
+    ]

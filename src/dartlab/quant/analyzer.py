@@ -592,16 +592,25 @@ def _categoryEdgeAudit(
         for t in range(252, n - max_h):
             # 카테고리 라벨 (t 시점까지의 데이터만 사용 — lookahead 방지)
             if category == "pattern":
-                sub_df = pl.DataFrame({
-                    "open": close[:t + 1], "high": high[:t + 1],
-                    "low": low[:t + 1], "close": close[:t + 1],
-                    "volume": volume[:t + 1] if volume is not None else np.zeros(t + 1),
-                })
+                sub_df = pl.DataFrame(
+                    {
+                        "open": close[: t + 1],
+                        "high": high[: t + 1],
+                        "low": low[: t + 1],
+                        "close": close[: t + 1],
+                        "volume": volume[: t + 1] if volume is not None else np.zeros(t + 1),
+                    }
+                )
                 cat_result = cat_fn(sub_df)
             elif category == "volume":
-                cat_result = cat_fn(close[:t + 1], volume[:t + 1] if volume is not None else np.zeros(t + 1), high[:t + 1], low[:t + 1])
+                cat_result = cat_fn(
+                    close[: t + 1],
+                    volume[: t + 1] if volume is not None else np.zeros(t + 1),
+                    high[: t + 1],
+                    low[: t + 1],
+                )
             else:
-                cat_result = cat_fn(close[:t + 1], high[:t + 1], low[:t + 1])
+                cat_result = cat_fn(close[: t + 1], high[: t + 1], low[: t + 1])
 
             lbl = cat_result.get("label", "")
             if not lbl:
@@ -648,7 +657,11 @@ def _categoryEdgeAudit(
             ratio = avg_fwd / avg_base if abs(avg_base) > 1e-9 else 0
             t_stat = _welch_t(rets, base)
 
-            passed = n_sig >= min_signals and (abs(ratio) >= ratio_threshold or abs(ratio) <= 1 / ratio_threshold) and abs(t_stat) >= t_threshold
+            passed = (
+                n_sig >= min_signals
+                and (abs(ratio) >= ratio_threshold or abs(ratio) <= 1 / ratio_threshold)
+                and abs(t_stat) >= t_threshold
+            )
             if passed:
                 passes_any = True
 
@@ -666,12 +679,14 @@ def _categoryEdgeAudit(
         # 첫 horizon 의 상세를 최상위에도 복사 (편의)
         first_h = horizons[0]
         d = lbl_result["horizon_details"].get(first_h, {})
-        lbl_result.update({
-            f"avg_forward_{first_h}d": d.get("avg_forward", 0),
-            f"baseline_{first_h}d": d.get("baseline", 0),
-            "ratio": d.get("ratio", 0),
-            "t_stat": d.get("t_stat", 0),
-        })
+        lbl_result.update(
+            {
+                f"avg_forward_{first_h}d": d.get("avg_forward", 0),
+                f"baseline_{first_h}d": d.get("baseline", 0),
+                "ratio": d.get("ratio", 0),
+                "t_stat": d.get("t_stat", 0),
+            }
+        )
         result[lbl] = lbl_result
 
     return result

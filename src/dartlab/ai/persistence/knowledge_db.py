@@ -624,8 +624,7 @@ class KnowledgeDB:
                 )
             else:
                 conn.execute(
-                    "UPDATE playbook SET last_used = ? "
-                    "WHERE intent = ? AND sector = ? AND bullet = ?",
+                    "UPDATE playbook SET last_used = ? WHERE intent = ? AND sector = ? AND bullet = ?",
                     (now, intent, sector or "", bullet),
                 )
             conn.commit()
@@ -681,9 +680,7 @@ class KnowledgeDB:
         """playbook 통계 — intent별 또는 전체 bullet 수."""
         conn = self._ensure_db()
         if intent:
-            row = conn.execute(
-                "SELECT COUNT(*) FROM playbook WHERE intent = ?", (intent,)
-            ).fetchone()
+            row = conn.execute("SELECT COUNT(*) FROM playbook WHERE intent = ?", (intent,)).fetchone()
         else:
             row = conn.execute("SELECT COUNT(*) FROM playbook").fetchone()
         return int(row[0]) if row else 0

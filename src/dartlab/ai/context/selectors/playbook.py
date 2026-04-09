@@ -30,11 +30,7 @@ def selectPlaybookBullets(
 
     sector = ""
     if company is not None:
-        sector = (
-            getattr(company, "sector", None)
-            or getattr(company, "sectorName", None)
-            or ""
-        )
+        sector = getattr(company, "sector", None) or getattr(company, "sectorName", None) or ""
 
     bullets = retrieveBullets(intent, sector=str(sector), limit=limit)
     if not bullets:

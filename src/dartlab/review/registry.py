@@ -923,9 +923,16 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
 
     # ── 매크로 (시장 환경 + 기업-매크로 연결) ──
     _MACRO_KEYS = {
-        "macroEnvironment", "macroCycle", "macroRates", "macroLiquidity",
-        "macroSentiment", "macroForecast", "macroCorporate", "macroTrade",
-        "macroFlags", "valuationBand",
+        "macroEnvironment",
+        "macroCycle",
+        "macroRates",
+        "macroLiquidity",
+        "macroSentiment",
+        "macroForecast",
+        "macroCorporate",
+        "macroTrade",
+        "macroFlags",
+        "valuationBand",
     }
     if keys is None or keys & _MACRO_KEYS:
         from dartlab.analysis.financial.macroExposure import calcValuationBand

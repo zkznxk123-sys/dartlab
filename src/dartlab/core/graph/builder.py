@@ -23,9 +23,18 @@ log = logging.getLogger(__name__)
 
 # calc 실패 시 잡아야 하는 예외
 _SAFE = (
-    KeyError, TypeError, ValueError, IndexError, AttributeError,
-    ZeroDivisionError, FileNotFoundError, OSError, RuntimeError,
-    ArithmeticError, StopIteration, ImportError,
+    KeyError,
+    TypeError,
+    ValueError,
+    IndexError,
+    AttributeError,
+    ZeroDivisionError,
+    FileNotFoundError,
+    OSError,
+    RuntimeError,
+    ArithmeticError,
+    StopIteration,
+    ImportError,
 )
 
 
@@ -52,14 +61,16 @@ def _addMetricNode(
 ) -> str:
     """메트릭 노드 추가 + ID 반환."""
     nid = _nid("metric", label, period)
-    g.addNode(Node(
-        id=nid,
-        type=NodeType.METRIC,
-        label=label,
-        value=value,
-        period=period,
-        unit=unit,
-    ))
+    g.addNode(
+        Node(
+            id=nid,
+            type=NodeType.METRIC,
+            label=label,
+            value=value,
+            period=period,
+            unit=unit,
+        )
+    )
     return nid
 
 
@@ -283,6 +294,7 @@ def buildGraph(company: Any, *, basePeriod: str | None = None) -> CompanyGraph:
     if bp is None:
         try:
             from dartlab.analysis.financial._helpers import resolveBasePeriod
+
             pr = resolveBasePeriod(company, None, maxYears=5, maxQuarters=8)
             bp = pr.basePeriod if pr else None
         except _SAFE:

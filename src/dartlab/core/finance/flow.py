@@ -33,22 +33,24 @@ from typing import Iterable
 # 이벤트성 계정 — 매 분기 발생하지 않는 항목.
 # 배당금은 반기 1~2회, 자사주는 비정기, 차입금 상환도 비정기.
 # 이런 항목은 4분기 strict 합산 대신 있는 분기만 합산해야 연간값이 나온다.
-_EVENT_ACCOUNTS = frozenset({
-    "dividends_paid",       # 배당금지급
-    "배당금지급",
-    "purchase_of_treasury_stock",  # 자사주 매입
-    "자기주식의취득",
-    "disposal_of_treasury_stock",  # 자사주 처분
-    "자기주식처분",
-    "proceeds_from_borrowings",    # 차입금 차입
-    "차입금의차입",
-    "repayment_of_borrowings",     # 차입금 상환
-    "차입금상환",
-    "decrease_in_lease_obligations",  # 리스부채 감소
-    "exercise_of_stock_options",     # 스톡옵션 행사
-    "increase_in_noncontrolling_interests",  # 비지배지분 증가
-    "government_grants_received",   # 정부보조금
-})
+_EVENT_ACCOUNTS = frozenset(
+    {
+        "dividends_paid",  # 배당금지급
+        "배당금지급",
+        "purchase_of_treasury_stock",  # 자사주 매입
+        "자기주식의취득",
+        "disposal_of_treasury_stock",  # 자사주 처분
+        "자기주식처분",
+        "proceeds_from_borrowings",  # 차입금 차입
+        "차입금의차입",
+        "repayment_of_borrowings",  # 차입금 상환
+        "차입금상환",
+        "decrease_in_lease_obligations",  # 리스부채 감소
+        "exercise_of_stock_options",  # 스톡옵션 행사
+        "increase_in_noncontrolling_interests",  # 비지배지분 증가
+        "government_grants_received",  # 정부보조금
+    }
+)
 
 
 def _isEventAccount(key: str) -> bool:

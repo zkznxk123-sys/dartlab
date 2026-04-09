@@ -51,7 +51,7 @@ def _resolveBase(company: Any) -> str | None:
 
         pr = resolveBasePeriod(company, None, maxYears=5, maxQuarters=8)
         return pr.basePeriod if pr else None
-    except (_SAFE_EXCEPTIONS + (Exception,)):
+    except _SAFE_EXCEPTIONS + (Exception,):
         return None
 
 
