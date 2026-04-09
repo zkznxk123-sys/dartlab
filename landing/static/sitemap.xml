@@ -665,39 +665,51 @@
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/000660-skhynix</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-    <lastmod>2026-04-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-04-01</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/003230-samyang-foods</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-    <lastmod>2026-04-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-04-03</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/034020-doosan-enerbility</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-    <lastmod>2026-04-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-04-05</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/196170-alteogen</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
     <lastmod>2026-04-08</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/011200-hmm</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
     <lastmod>2026-04-08</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/068270-celltrion</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
     <lastmod>2026-04-08</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/012450-hanwha-aerospace</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-04-09</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/267260-hd-hyundai-electric</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-04-09</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/04-kr</loc>

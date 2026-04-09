@@ -120,6 +120,25 @@ c.trace("BS")                   # where it came from -- source provenance
 c.diff()                        # what changed -- text changes across periods
 ```
 
+**Notes** — line items behind BS/IS totals. Same interface for DART (K-IFRS HTML) and EDGAR (US-GAAP XBRL).
+
+| Notes topic | What it shows | DART | EDGAR |
+|-------------|---------------|:----:|:-----:|
+| `inventory` | Raw materials / work-in-progress / finished goods | ✅ | ✅ |
+| `borrowings` | Short-term / long-term debt breakdown | ✅ | ✅ |
+| `tangibleAsset` | PPE gross / net / depreciation | ✅ | ✅ |
+| `intangibleAsset` | Goodwill / development costs | ✅ | ✅ |
+| `receivables` | Trade receivables + allowance | ✅ | ✅ |
+| `provisions` | Warranty / litigation / restructuring | ✅ | ✅ |
+| `eps` | Basic / diluted EPS | ✅ | ✅ |
+| `segments` | Revenue / profit by segment | ✅ | ✅ |
+| `costByNature` | Raw materials / wages / depreciation | ✅ | ✅ |
+| `lease` | Right-of-use assets / lease liabilities | ✅ | ✅ |
+| `affiliates` | Equity method investments | ✅ | △ |
+| `investmentProperty` | Fair value / carrying amount | ✅ | △ |
+
+> [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/01_company.py) [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_company.ipynb)
+
 ### Scan — Cross-Company Comparison
 
 > Design: [ops/scan.md](ops/scan.md)

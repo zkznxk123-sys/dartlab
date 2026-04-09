@@ -27,26 +27,3 @@
 	0%, 100% { transform: translateY(0); }
 	50% { transform: translateY(-8px); }
 }
-
-/* 전역 모바일 보호 — viewport 가로 스크롤 차단
-   Tailwind v4의 base layer를 우회하기 위해 일반 CSS로 작성
-   (@import "tailwindcss" 뒤에 와야 우선순위 보장) */
-html {
-	max-width: 100vw !important;
-	overflow-x: clip !important;
-}
-body {
-	max-width: 100vw !important;
-	overflow-x: clip !important;
-	word-break: keep-all;
-	overflow-wrap: anywhere;
-}
-img, svg, video, canvas, iframe {
-	max-width: 100%;
-	height: auto;
-}
-/* SvelteKit body wrapper도 강제 — display:contents지만 명시적으로 */
-body > div {
-	max-width: 100vw;
-	overflow-x: clip;
-}

@@ -120,6 +120,25 @@ c.trace("BS")                   # 어디서 왔는지 -- source provenance
 c.diff()                        # 뭐가 바뀌었는지 -- 기간 간 텍스트 변화
 ```
 
+**주석(Notes)** — BS/IS 총액 이면의 항목별 분해. DART(K-IFRS)와 EDGAR(US-GAAP) 동일 인터페이스.
+
+| 주석 항목 | 내용 | DART | EDGAR |
+|-----------|------|:----:|:-----:|
+| `inventory` | 원재료/재공품/제품 분해 | ✅ | ✅ |
+| `borrowings` | 단기/장기 차입금 분해 | ✅ | ✅ |
+| `tangibleAsset` | 유형자산 취득원가/감가상각/장부가 | ✅ | ✅ |
+| `intangibleAsset` | 영업권/개발비 등 | ✅ | ✅ |
+| `receivables` | 매출채권 + 대손충당금 | ✅ | ✅ |
+| `provisions` | 보증/소송/구조조정 충당부채 | ✅ | ✅ |
+| `eps` | 기본/희석 주당이익 | ✅ | ✅ |
+| `segments` | 부문별 매출/이익 | ✅ | ✅ |
+| `costByNature` | 원재료/급여/감가상각 성격별 비용 | ✅ | ✅ |
+| `lease` | 사용권자산/리스부채 | ✅ | ✅ |
+| `affiliates` | 관계기업 지분법 투자 | ✅ | △ |
+| `investmentProperty` | 투자부동산 공정가치/장부가 | ✅ | △ |
+
+> [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/01_company.py) [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_company.ipynb)
+
 ### Scan — 전 종목 횡단 비교
 
 > 설계: [ops/scan.md](ops/scan.md)
