@@ -138,6 +138,18 @@ def _isCurrentPeriod(period: str) -> bool:
     return bool(_CURRENT_PERIOD.search(period))
 
 
+# 비금액 행 — 이자율, 기술, 설명 등. 단위 변환하면 안 되는 항목.
+_NON_AMOUNT_PATTERNS = re.compile(
+    r"(연이자율|이자율|기술$|설명$|기술:$|에\s*대한\s*(기술|설명))",
+    re.IGNORECASE,
+)
+
+
+def _isNonAmountRow(name: str) -> bool:
+    """금액이 아닌 행(이자율, 텍스트 기술 등) 필터."""
+    return bool(_NON_AMOUNT_PATTERNS.search(name))
+
+
 def _buildTableDf(
     allTables: dict[str, list[NotesPeriod]],
     unitByYear: dict[str, float] | None = None,
@@ -150,6 +162,8 @@ def _buildTableDf(
     단위 정규화: 모든 값을 **원 단위(KRW)** 로 변환.
     `core/constants.py::UNIT_SCALE` 은 백만원=1.0 이라 colUnit 곱셈 후 백만원이 된다.
     여기서 추가로 ×1_000_000 하여 c.IS/c.BS/c.CF 와 동일한 원 단위로 노출.
+
+    비금액 행(연이자율, 기술/설명 텍스트)은 제외 — 단위 변환 시 의미 왜곡 방지.
     """
     itemData: dict[str, dict[str, str]] = {}
     colOrder: list[str] = []
@@ -173,6 +187,9 @@ def _buildTableDf(
 
         for item in currentBlock.items:
             normalized = _normalizeName(item.name)
+            # 비금액 행(이자율, 텍스트 기술) 제외 — 단위 변환 시 의미 왜곡 방지
+            if _isNonAmountRow(normalized):
+                continue
             if normalized not in itemData:
                 itemData[normalized] = {}
             if item.values:

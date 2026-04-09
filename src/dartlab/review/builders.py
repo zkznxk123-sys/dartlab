@@ -353,11 +353,9 @@ def revenueQualityBlock(data: dict) -> list:
     if gm is not None:
         metrics.append(("매출총이익률", f"{gm:.1f}%"))
 
-    gmTrend = data.get("grossMarginTrend", [])
     gmDir = data.get("grossMarginDirection", "안정")
-    if gmTrend:
-        trendStr = " → ".join(f"{v:.1f}%" for v in gmTrend)
-        metrics.append(("총이익률 추세", f"{trendStr} ({gmDir})"))
+    if gmDir and gmDir != "안정":
+        metrics.append(("총이익률 방향", gmDir))
 
     if not metrics:
         return []
@@ -2052,8 +2050,8 @@ def dcfValuationBlock(data: dict) -> list:
     # FCF 추정 테이블
     projections = data.get("fcfProjections", [])
     if projections:
-        rows = [{"연차": f"Y{i + 1}", "FCF": round(v / 1e8, 1)} for i, v in enumerate(projections)]
-        blocks.append(TableBlock("FCF 추정 (억원)", pl.DataFrame(rows)))
+        rows = [{"연차": f"Y{i + 1}", "FCF(조원)": round(v / 1e12, 1)} for i, v in enumerate(projections)]
+        blocks.append(TableBlock("FCF 추정", pl.DataFrame(rows)))
 
     for w in data.get("warnings", []):
         blocks.append(TextBlock(f"-- {w}", style="dim"))
@@ -3882,8 +3880,61 @@ def assetSignalsBlock(data: dict) -> list:
     return blocks
 
 
+def macroEnvironmentBlock(summary: dict) -> list:
+    """macro 종합 결과 → 경제 환경 신호등."""
+    if not summary:
+        return []
+
+    overall_label = summary.get("overallLabel", "")
+    score = summary.get("score", 0)
+    reasons = summary.get("reasons", []) or []
+    contributions = summary.get("contributions", {}) or {}
+    allocation = summary.get("allocation") or {}
+
+    if not overall_label:
+        return []
+
+    metrics = [
+        ("종합 판정", f"{overall_label} (score {score:+.1f})"),
+    ]
+    if reasons:
+        metrics.append(("핵심 근거", ", ".join(reasons[:3])))
+
+    contrib_parts = []
+    for axis, val in sorted(contributions.items(), key=lambda x: abs(x[1]), reverse=True):
+        if val != 0:
+            contrib_parts.append(f"{axis} {val:+.1f}")
+    if contrib_parts:
+        metrics.append(("축별 기여", ", ".join(contrib_parts[:5])))
+
+    if allocation:
+        eq = allocation.get("equity", 0)
+        bd = allocation.get("bond", 0)
+        gd = allocation.get("gold", 0)
+        cs = allocation.get("cash", 0)
+        metrics.append(("자산배분", f"주식 {eq}% / 채권 {bd}% / 금 {gd}% / 현금 {cs}%"))
+        regime = allocation.get("regime", "")
+        if regime:
+            metrics.append(("투자 국면", regime))
+
+    from dartlab.review.narrate import narrateMacroEnvironment
+
+    blocks: list = [
+        HeadingBlock(
+            _meta("macroEnvironment").label,
+            level=2,
+            helper="매크로 11축 종합 판정 — 경제 환경이 투자에 우호적인가",
+        ),
+        MetricBlock(metrics),
+    ]
+    narrative = narrateMacroEnvironment(summary)
+    if narrative:
+        blocks.append(TextBlock(narrative))
+    return blocks
+
+
 def macroCycleBlock(data: dict) -> list:
-    """dartlab.macro("사이클") 결과 → 경기 사이클 + 섹터 전략."""
+    """dartlab.macro("사이클") 결과 → 경기 사이클 + 전환 시퀀스 + 섹터 전략."""
     if not data:
         return []
 
@@ -3892,6 +3943,7 @@ def macroCycleBlock(data: dict) -> list:
     confidence = data.get("confidence", "")
     signals = data.get("signals", []) or []
     sector_strategy = data.get("sectorStrategy", {}) or {}
+    transition = data.get("transition") or {}
 
     if not phase:
         return []
@@ -3902,6 +3954,20 @@ def macroCycleBlock(data: dict) -> list:
     ]
     if signals:
         metrics.append(("핵심 신호", ", ".join(signals[:3])))
+
+    if transition:
+        t_from = transition.get("from", "")
+        t_to = transition.get("to", "")
+        progress = transition.get("progress")
+        if t_from and t_to:
+            prog_str = f" ({progress:.0%})" if isinstance(progress, (int, float)) else ""
+            metrics.append(("전환 시퀀스", f"{t_from} → {t_to}{prog_str}"))
+        triggered = transition.get("triggered", [])
+        pending = transition.get("pending", [])
+        if triggered:
+            metrics.append(("확인된 신호", ", ".join(triggered[:3])))
+        if pending:
+            metrics.append(("대기 신호", ", ".join(pending[:3])))
 
     sector_lines = []
     for k_label, k in [
@@ -3914,16 +3980,343 @@ def macroCycleBlock(data: dict) -> list:
         if v:
             sector_lines.append((k_label, v))
 
-    blocks = [
+    blocks: list = [
         HeadingBlock(
             _meta("macroCycle").label,
             level=2,
-            helper="회복/확장/둔화/침체 4국면 + 섹터별 전략 권고",
+            helper="회복/확장/둔화/침체 4국면 + 전환 시퀀스 + 섹터별 전략",
         ),
         MetricBlock(metrics),
     ]
     if sector_lines:
         blocks.append(MetricBlock(sector_lines))
+    return blocks
+
+
+def macroRatesBlock(data: dict) -> list:
+    """macro 금리 결과 → 금리 환경."""
+    if not data:
+        return []
+
+    outlook = data.get("outlook") or {}
+    expectation = data.get("expectation") or {}
+    yield_curve = data.get("yieldCurve") or {}
+    real_rate = data.get("realRateRegime", "")
+
+    direction = outlook.get("direction", "")
+    if not direction:
+        return []
+
+    _DIR_LABELS = {"cut": "인하 기대", "hold": "동결", "hike": "인상 가능"}
+    metrics: list[tuple[str, str]] = [
+        ("금리 방향", _DIR_LABELS.get(direction, direction)),
+    ]
+
+    spread_2y_ff = expectation.get("spread2yFf")
+    if spread_2y_ff is not None:
+        metrics.append(("2Y-FF 스프레드", f"{spread_2y_ff:+.2f}%p"))
+
+    slope = yield_curve.get("slope")
+    if slope is not None:
+        shape = "정상" if slope > 0 else "역전"
+        metrics.append(("수익률곡선", f"{shape} (Slope {slope:+.2f}%p)"))
+
+    if real_rate:
+        metrics.append(("실질금리 국면", real_rate))
+
+    return [
+        HeadingBlock(
+            _meta("macroRates").label,
+            level=2,
+            helper="금리 방향 + 수익률곡선 형태 → 기업 자금조달 비용 함의",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def macroLiquidityBlock(data: dict) -> list:
+    """macro 유동성 결과 → 유동성 환경."""
+    if not data:
+        return []
+
+    regime = data.get("regime", "")
+    if not regime:
+        return []
+
+    _REGIME_LABELS = {"abundant": "풍부", "normal": "보통", "tight": "긴축"}
+    metrics: list[tuple[str, str]] = [
+        ("유동성 국면", _REGIME_LABELS.get(regime, regime)),
+    ]
+
+    fci = data.get("fci")
+    if isinstance(fci, dict):
+        fci_val = fci.get("value")
+        fci_label = fci.get("label", "")
+        if fci_val is not None:
+            metrics.append(("FCI", f"{fci_val:+.2f} ({fci_label})"))
+    elif isinstance(fci, (int, float)):
+        label = "완화" if fci < 0 else "긴축"
+        metrics.append(("FCI", f"{fci:+.2f} ({label})"))
+
+    nfci = data.get("nfci")
+    if isinstance(nfci, dict):
+        nfci_val = nfci.get("value")
+        if nfci_val is not None:
+            metrics.append(("NFCI", f"{nfci_val:+.2f}"))
+    elif isinstance(nfci, (int, float)):
+        metrics.append(("NFCI", f"{nfci:+.2f}"))
+
+    capex = data.get("capexPressure")
+    if isinstance(capex, dict):
+        level = capex.get("level", "")
+        if level:
+            metrics.append(("설비투자 압력", level))
+
+    return [
+        HeadingBlock(
+            _meta("macroLiquidity").label,
+            level=2,
+            helper="유동성 환경 + FCI → 기업 자금 접근성",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def macroSentimentBlock(data: dict) -> list:
+    """macro 심리 결과 → 시장 심리."""
+    if not data:
+        return []
+
+    fg = data.get("fearGreed") or {}
+    vix = data.get("vixRegime") or {}
+
+    fg_score = fg.get("score")
+    if fg_score is None:
+        return []
+
+    fg_label = fg.get("label", "")
+    metrics: list[tuple[str, str]] = [
+        ("공포탐욕", f"{fg_score:.0f} ({fg_label})"),
+    ]
+
+    vix_level = vix.get("level", "")
+    vix_value = vix.get("value")
+    if vix_level:
+        vix_str = f"{vix_level}"
+        if vix_value is not None:
+            vix_str += f" ({vix_value:.1f})"
+        metrics.append(("VIX 구간", vix_str))
+
+    buy_signal = vix.get("buySignal")
+    if buy_signal is not None:
+        _BUY_LABELS = {0: "대기", 1: "1차 매수", 2: "2차 매수", 3: "3차 매수"}
+        metrics.append(("분할매수 신호", f"{buy_signal}차 ({_BUY_LABELS.get(buy_signal, '')})"))
+
+    return [
+        HeadingBlock(
+            _meta("macroSentiment").label,
+            level=2,
+            helper="공포탐욕 0-100 + VIX 구간 — 극단값에서 역투자 기회",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def macroForecastBlock(data: dict | None) -> list:
+    """macro 예측 결과 → 경기 전망."""
+    if not data:
+        return []
+
+    metrics: list[tuple[str, str]] = []
+
+    rp = data.get("recessionProb")
+    if rp and rp.get("probability") is not None:
+        prob = rp["probability"]
+        if prob > 0.4:
+            label = "경계"
+        elif prob > 0.2:
+            label = "주의"
+        elif prob > 0.1:
+            label = "보통"
+        else:
+            label = "낮음"
+        metrics.append(("침체확률", f"{prob * 100:.0f}% ({label})"))
+
+    lei = data.get("lei")
+    if isinstance(lei, dict):
+        signal = lei.get("signal", "")
+        _LEI_LABELS = {
+            "expansion": "확장 지속",
+            "caution": "주의",
+            "recession_warning": "침체 경고",
+        }
+        if signal:
+            metrics.append(("LEI 신호", _LEI_LABELS.get(signal, signal)))
+
+    sahm = data.get("sahmRule")
+    if isinstance(sahm, dict):
+        val = sahm.get("value")
+        triggered = sahm.get("triggered", False)
+        if val is not None:
+            status = "트리거" if triggered else "정상"
+            metrics.append(("Sahm Rule", f"{val:.2f}%p ({status})"))
+
+    momentum = data.get("momentumSignal")
+    if isinstance(momentum, dict):
+        direction = momentum.get("direction", "")
+        if direction:
+            metrics.append(("성장 모멘텀", direction))
+
+    if not metrics:
+        return []
+
+    return [
+        HeadingBlock(
+            _meta("macroForecast").label,
+            level=2,
+            helper="침체확률 + LEI + Sahm Rule → 경기 방향 선행 지표",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def macroCorporateBlock(data: dict | None) -> list:
+    """macro 기업집계 결과 → 시장 전체 이익사이클."""
+    if not data:
+        return []
+
+    metrics: list[tuple[str, str]] = []
+
+    ec = data.get("earningsCycle")
+    if ec:
+        direction = ec.get("currentDirection", "")
+        label = ec.get("currentLabel", direction)
+        yoy = ec.get("latestYoY")
+        yoy_str = f" (YoY {yoy:+.1f}%)" if yoy is not None else ""
+        if label:
+            metrics.append(("이익사이클", f"{label}{yoy_str}"))
+
+    pr = data.get("ponziRatio")
+    if pr:
+        ratio = pr.get("currentRatio")
+        if ratio is not None:
+            metrics.append(("Ponzi 비율", f"{ratio:.1%} (ICR<1 기업 비중)"))
+
+    lc = data.get("leverageCycle")
+    if lc:
+        median = lc.get("currentMedian")
+        if median is not None:
+            metrics.append(("레버리지 중간값", f"{median:.1f}%"))
+
+    if not metrics:
+        return []
+
+    return [
+        HeadingBlock(
+            _meta("macroCorporate").label,
+            level=2,
+            helper="전종목 재무제표 집계 — 시장 전체의 이익 건강도",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def macroTradeBlock(data: dict | None) -> list:
+    """macro 교역 결과 → 교역조건 (KR만)."""
+    if not data:
+        return []
+
+    metrics: list[tuple[str, str]] = []
+
+    tot = data.get("termsOfTrade")
+    if tot:
+        direction = tot.get("direction", "")
+        _DIR_LABELS = {"improving": "개선", "stable": "안정", "deteriorating": "악화"}
+        if direction:
+            metrics.append(("교역조건", _DIR_LABELS.get(direction, direction)))
+
+    ep = data.get("exportProfit")
+    if isinstance(ep, dict):
+        signal = ep.get("signal", "")
+        if signal:
+            metrics.append(("수출이익 함의", signal))
+
+    lrs = data.get("leadingRelativeStrength")
+    if isinstance(lrs, dict):
+        direction = lrs.get("direction", "")
+        if direction:
+            metrics.append(("양국 선행지수", direction))
+
+    if not metrics:
+        return []
+
+    return [
+        HeadingBlock(
+            _meta("macroTrade").label,
+            level=2,
+            helper="교역조건 + 수출이익 선행 — 한국 수출기업 영향",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def macroFlagsBlock(summary: dict) -> list:
+    """macro 종합에서 경고/기회 플래그 집계."""
+    if not summary:
+        return []
+
+    warnings: list[str] = []
+    opportunities: list[str] = []
+
+    crisis = summary.get("crisis")
+    if isinstance(crisis, dict):
+        cg = crisis.get("creditGap")
+        if cg and cg.get("zone") in ("warning", "danger"):
+            warnings.append(f"Credit-to-GDP gap {cg.get('zoneLabel', '경계')}")
+        ghs = crisis.get("ghsScore")
+        if isinstance(ghs, dict) and ghs.get("score", 0) > 50:
+            warnings.append(f"GHS 위기 점수 {ghs['score']:.0f}")
+        minsky = crisis.get("minskyPhase")
+        if isinstance(minsky, dict) and minsky.get("phase") in ("overtrading", "discredit", "revulsion"):
+            warnings.append(f"Minsky {minsky.get('phaseLabel', minsky['phase'])}")
+
+    corporate = summary.get("corporate")
+    if isinstance(corporate, dict):
+        pr = corporate.get("ponziRatio")
+        if pr and pr.get("currentRatio", 0) > 0.3:
+            warnings.append(f"Ponzi비율 {pr['currentRatio']:.0%} — 금융 취약")
+
+    sentiment = summary.get("sentiment")
+    if isinstance(sentiment, dict):
+        fg = sentiment.get("fearGreed")
+        if fg and fg.get("score") is not None:
+            s = fg["score"]
+            if s < 25:
+                opportunities.append(f"극단공포 ({s:.0f}) — 역투자 기회")
+            elif s > 75:
+                warnings.append(f"극단탐욕 ({s:.0f}) — 과열 경계")
+
+    forecast = summary.get("forecast")
+    if isinstance(forecast, dict):
+        rp = forecast.get("recessionProb")
+        if rp and rp.get("probability", 0) > 0.3:
+            warnings.append(f"침체확률 {rp['probability'] * 100:.0f}%")
+
+    overall = summary.get("overall", "")
+    score = summary.get("score", 0)
+    if overall == "favorable" and score >= 2.0:
+        cycle = summary.get("cycle", {})
+        phase = cycle.get("phaseLabel", "")
+        opportunities.append(f"사이클 {phase} + 종합 우호 — 위험자산 긍정")
+
+    if not warnings and not opportunities:
+        return []
+
+    blocks: list = []
+    if warnings:
+        blocks.append(FlagBlock(warnings, kind="warning"))
+    if opportunities:
+        blocks.append(FlagBlock(opportunities, kind="opportunity"))
     return blocks
 
 
