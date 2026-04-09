@@ -444,6 +444,3 @@ c.select("CF", ["영업활동현금흐름","유형자산의 취득"], freq="Y")
 
 ---
 
-<p align="center"><a href="https://buymeacoffee.com/eddmpython" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="180" height="50" /></a></p>
-
-**면책**: 이 글은 특정 종목의 매수·매도를 권유하지 않습니다. 모든 수치는 dartlab 실측 또는 명시된 외부 출처 기준이며, 투자 판단은 본인의 책임입니다.

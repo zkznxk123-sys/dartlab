@@ -336,6 +336,13 @@
 				{/if}
 			</article>
 
+			<div class="post-support">
+				<a href={brand.coffee} target="_blank" rel="noopener noreferrer">
+					<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="160" height="45" loading="lazy" decoding="async" />
+				</a>
+				<p class="post-disclaimer">이 글은 특정 종목의 매수·매도를 권유하지 않습니다. 모든 수치는 dartlab 실측 또는 명시된 외부 출처 기준이며, 투자 판단은 본인의 책임입니다.</p>
+			</div>
+
 			{#if seriesPrevNext.prev || seriesPrevNext.next}
 				<section class="series-nav">
 					<div class="series-nav-heading">같은 시리즈에서 이어 읽기</div>
@@ -1096,6 +1103,26 @@
 		color: #e2e8f0;
 	}
 	.post-nav-link:hover .post-nav-title { color: #ea4647; }
+
+	/* Support (coffee + disclaimer) */
+	.post-support {
+		margin-top: 3rem;
+		padding-top: 2rem;
+		border-top: 1px solid rgba(30, 36, 51, 0.8);
+		text-align: center;
+	}
+	.post-support img {
+		transition: opacity 0.2s;
+	}
+	.post-support img:hover {
+		opacity: 0.85;
+	}
+	.post-disclaimer {
+		margin-top: 1.5rem;
+		font-size: 0.8rem;
+		color: #64748b;
+		line-height: 1.5;
+	}
 
 	/* Giscus */
 	.giscus-container {
