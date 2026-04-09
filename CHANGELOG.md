@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.6] - 2026-04-10
+
+### Added
+
+- **Context Engineering + ACE Playbook**: `ai/context/` 모듈 — intent 분류(8타입, 100% 정확도), TOON 인코딩(토큰 60% 절감), ACE(ICLR 2026) evolving playbook, analysis calc selector 8개, 인과 그래프 traversal. A/B 검증 +31.6% 응답 풍부도
+- **Causal Graph**: `core/graph/` — 6 노드 + 5 엣지 타입. Company × analysis calc → CompanyGraph. "왜" 질문 시 graph causes 자동 주입
+- **5엔진 review 체계**: quant 5 narration 블록(6막-3 시장분석) + macro 10 블록(6막-4 매크로)
+- **관점별 템플릿**: bottomUp/topDown/cashflow/stability/growth 5개 분석 관점
+- **macro narration**: crisis/cycle/rates/sentiment/summary 블록 함수
+- **FinSLM 파이프라인 스크립트**: extractTraining/extractGraph/formatDataset/evalBaseline/trainLoRA/deploy (인프라)
+
+### Fixed
+
+- **이벤트성 계정 연간 합산 복원**: Plan v4 "4분기 strict 합산"이 배당금/자사주 등 이벤트성 계정도 잘라버린 문제 근본 fix. `_EVENT_ACCOUNTS` 14개 계정은 있는 분기만 합산
+- **notes 외화 차입금 파싱**: NAVER "합계 128,659조" → 1.7조 정상화. 외화 통화코드 필터(`_hasForeignCurrency`) + 같은 항목명 반복 시 첫 번째 원화 값 우선
+- **notes 비금액 행 필터**: "연이자율 33만" → 제거. `_isNonAmountRow`로 이자율/기술/설명 행 제외
+- **DCF FCF 단위**: "Y1 22만" → "Y1 22(조원)" 정상화
+- **매출품질 총이익률 추세**: 기간 라벨 없는 숫자 나열 제거 → 방향만 표시
+- **지주사 영업이익률 100%+**: "데이터 이상 가능" → "매출 대비 영업이익이 크다 (지주사 구조일 수 있음)"
+- **context 데이터 중복 조회 방지**: `<context>` 태그에 이미 데이터 있으면 코드 재실행 안 함
+- dependencies: openai/genai core에서 optional로 이동
+- provider/CLI/viz 소소 개선
+
+### Changed
+
+- **ContextBuilder 기본 ON**: `DARTLAB_CONTEXT_V2` feature flag 제거. legacy 복원은 `DARTLAB_CONTEXT_V1=1`
+- **축수 자랑 표기 전면 제거**: ops/코드에서 "14축/30축/7축" → 기능 설명으로 변경
+- **audit 체계 통합**: 파편 audit 10개 삭제, review audit 1개로 통합 (ops/review.md)
+- review audit Fix 원칙 명시: 근본 1곳만, 우회로/덕지덕지 금지
+
 ## [0.9.5] - 2026-04-09
 
 ### Fixed
