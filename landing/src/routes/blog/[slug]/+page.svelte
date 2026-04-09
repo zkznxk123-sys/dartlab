@@ -327,10 +327,12 @@
 			</article>
 
 			<div class="post-support">
+				<hr class="post-support-divider" />
+				<p class="post-disclaimer">이 글은 특정 종목의 매수·매도를 권유하지 않습니다.</p>
+				<p class="post-support-cta">양질의 기업분석을 계속 공유하기 위해 노력하고 있습니다. 도움이 되셨다면 dartlab을 후원해주세요.</p>
 				<a href={brand.coffee} target="_blank" rel="noopener noreferrer">
 					<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="160" height="45" loading="lazy" decoding="async" />
 				</a>
-				<p class="post-disclaimer">이 글은 특정 종목의 매수·매도를 권유하지 않습니다. 모든 수치는 dartlab 실측 또는 명시된 외부 출처 기준이며, 투자 판단은 본인의 책임입니다.</p>
 			</div>
 
 			{#if seriesPrevNext.prev || seriesPrevNext.next}
@@ -1087,14 +1089,31 @@
 	}
 	.post-nav-link:hover .post-nav-title { color: #ea4647; }
 
-	/* Support (coffee + disclaimer) */
+	/* Support (disclaimer + coffee) */
 	.post-support {
 		margin-top: 3rem;
-		padding-top: 2rem;
-		border-top: 1px solid rgba(30, 36, 51, 0.8);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		text-align: center;
+	}
+	.post-support-divider {
+		width: 100%;
+		border: none;
+		border-top: 1px solid rgba(30, 36, 51, 0.8);
+		margin-bottom: 1.5rem;
+	}
+	.post-disclaimer {
+		font-size: 0.8rem;
+		color: #94a3b8;
+		line-height: 1.5;
+		margin: 0;
+	}
+	.post-support-cta {
+		font-size: 0.85rem;
+		color: #cbd5e1;
+		line-height: 1.5;
+		margin: 0.75rem 0 1.2rem;
 	}
 	.post-support a {
 		display: inline-block;
@@ -1105,12 +1124,6 @@
 	}
 	.post-support img:hover {
 		opacity: 0.85;
-	}
-	.post-disclaimer {
-		margin-top: 1.5rem;
-		font-size: 0.8rem;
-		color: #64748b;
-		line-height: 1.5;
 	}
 
 	/* Giscus */
