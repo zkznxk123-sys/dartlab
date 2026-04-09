@@ -17,7 +17,7 @@ tags:
   - 메모리 사이클
   - 가격결정력
   - 전자공시
-thumbnail: /avatar-chart.png
+thumbnail: /thumbnails/000660-skhynix.webp
 youtubeId: ""
 ---
 
