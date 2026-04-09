@@ -394,6 +394,8 @@
 				</div>
 			</section>
 
+			<div class="giscus-container" bind:this={giscusEl}></div>
+
 			{#if prevNext.prev || prevNext.next}
 				<nav class="post-nav">
 					{#if prevNext.prev}
@@ -414,8 +416,6 @@
 					{/if}
 				</nav>
 			{/if}
-
-			<div class="giscus-container" bind:this={giscusEl}></div>
 
 			<footer class="post-footer" bind:this={footerEl}>
 				<a href="{base}/blog/" class="back-link">&larr; 모든 포스트 보기</a>
