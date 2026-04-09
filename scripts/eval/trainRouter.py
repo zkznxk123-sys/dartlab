@@ -16,7 +16,6 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import sys
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -154,8 +153,8 @@ def step_train():
     dataset = dataset.map(_format)
 
     # Trainer
-    from trl import SFTTrainer
     from transformers import TrainingArguments
+    from trl import SFTTrainer
 
     trainer = SFTTrainer(
         model=model,

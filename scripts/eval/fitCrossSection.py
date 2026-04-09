@@ -153,7 +153,7 @@ def main():
 
     # 패널 모델 (선택적)
     if args.panel:
-        print(f"[3/3] 패널 회귀 적합 중...")
+        print("[3/3] 패널 회귀 적합 중...")
         # 패널은 여러 연도 데이터 필요 — 현재는 단일 연도로 시도
         panelModel = fitPanel(features, minObs=30, minYears=1)
         if panelModel:

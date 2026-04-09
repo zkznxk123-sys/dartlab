@@ -179,7 +179,7 @@ def print_summary(results: list[dict] | None = None):
         results = json.loads(p.read_text(encoding="utf-8"))
 
     print(f"\n{'=' * 80}")
-    print(f"Scan Audit Summary — 2026-03-31")
+    print("Scan Audit Summary — 2026-03-31")
     print(f"{'=' * 80}")
     print(f"{'축':<16} {'상태':<8} {'종목수':>8} {'컬럼':>6} {'최악NaN컬럼':<20} {'NaN%':>6} {'시간':>6}")
     print("-" * 80)

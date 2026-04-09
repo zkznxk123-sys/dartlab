@@ -163,7 +163,7 @@ def main():
     upAcc = sum(1 for r in upPred if r["correct"]) / len(upPred) * 100 if upPred else 0
     downAcc = sum(1 for r in downPred if r["correct"]) / len(downPred) * 100 if downPred else 0
 
-    print(f"\n[4/4] 결과")
+    print("\n[4/4] 결과")
     print(f"  종목 수: {len(commonCodes)}")
     print(f"  관측치: {total}")
     print(f"  전체 방향 정확도: {accuracy:.1f}% ({correct}/{total})")
@@ -171,7 +171,7 @@ def main():
     print(f"  매출 정확도: {revAcc:.1f}% ({len(revResults)} obs)")
     print(f"  상승 예측 정확도: {upAcc:.1f}% ({len(upPred)} obs)")
     print(f"  하락 예측 정확도: {downAcc:.1f}% ({len(downPred)} obs)")
-    print(f"  (50% = 랜덤, 60%+ = 유의미)")
+    print("  (50% = 랜덤, 60%+ = 유의미)")
 
     # 결과 저장
     _AUDIT_DIR.mkdir(parents=True, exist_ok=True)

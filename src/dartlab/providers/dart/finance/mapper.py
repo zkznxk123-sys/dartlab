@@ -14,7 +14,6 @@ snakeId는 standardAccounts.json에 정의된 것을 그대로 사용.
 
 from __future__ import annotations
 
-import json
 import re
 from pathlib import Path
 from typing import Optional

@@ -20,9 +20,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-_ROOT = Path(__file__).resolve().parent.parent
-_BASELINE_PATH = _ROOT / "scripts" / "qualityBaseline.json"
-_HISTORY_PATH = _ROOT / "scripts" / "qualityHistory.jsonl"
+_ROOT = Path(__file__).resolve().parents[2]
+_BASELINE_PATH = _ROOT / "scripts" / "audit" / "qualityBaseline.json"
+_HISTORY_PATH = _ROOT / "scripts" / "audit" / "qualityHistory.jsonl"
 _SRC = str(_ROOT / "src" / "dartlab")
 
 # ── baseline ────────────────────────────────────────────────────

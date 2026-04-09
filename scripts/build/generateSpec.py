@@ -1590,7 +1590,7 @@ def generateApiReferenceMd() -> str:
             lines.append(f"\n{summary}")
 
         if args := e.get("args"):
-            lines.append(f"\n**Args:**\n")
+            lines.append("\n**Args:**\n")
             for argLine in args.split("\n"):
                 if argLine.strip():
                     lines.append(f"- {argLine.strip()}")
@@ -1628,7 +1628,7 @@ def generateApiReferenceMd() -> str:
             lines.append(f"\n{summary}")
 
         if args := e.get("args"):
-            lines.append(f"\n**Args:**\n")
+            lines.append("\n**Args:**\n")
             for argLine in args.split("\n"):
                 if argLine.strip():
                     lines.append(f"- {argLine.strip()}")
