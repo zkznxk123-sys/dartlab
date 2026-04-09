@@ -293,10 +293,11 @@
 		display: block;
 		width: 172px;
 		height: 172px;
-		object-fit: cover;
+		object-fit: contain;
 		object-position: center;
 		border-radius: 10px;
 		align-self: stretch;
+		background: #0f1219;
 	}
 
 	.category-post-title {
