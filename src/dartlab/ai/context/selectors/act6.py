@@ -1,7 +1,9 @@
 """Act 6 selector: 전망 (가치평가 + 신용)."""
 
 from __future__ import annotations
+
 from typing import Any
+
 from dartlab.ai.context.bundle import ContextPart, PartPriority
 from dartlab.ai.context.selectors._calc_base import _buildParts
 

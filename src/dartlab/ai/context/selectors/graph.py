@@ -5,7 +5,6 @@ intent가 어느 막이든, "왜" 키워드가 포함된 질문이면 추가로 
 
 from __future__ import annotations
 
-import re
 from typing import Any
 
 from dartlab.ai.context.bundle import ContextPart, PartPriority

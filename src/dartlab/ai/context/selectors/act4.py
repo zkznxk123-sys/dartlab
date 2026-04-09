@@ -1,7 +1,9 @@
 """Act 4 selector: 안정성 (자금조달 + 레버리지 + 부실판별)."""
 
 from __future__ import annotations
+
 from typing import Any
+
 from dartlab.ai.context.bundle import ContextPart, PartPriority
 from dartlab.ai.context.selectors._calc_base import _buildParts
 

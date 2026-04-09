@@ -9,9 +9,9 @@ FINOS ai-evals-framework + Microsoft GraphRAG 패턴.
     causes = g.causes("영업이익률")  # 마진 하락 원인 트리
 """
 
-from dartlab.analysis.graph.schema import CompanyGraph, Edge, EdgeType, Node, NodeType
 from dartlab.analysis.graph.builder import buildGraph
-from dartlab.analysis.graph.traverse import causes, ancestors, timeline, related
+from dartlab.analysis.graph.schema import CompanyGraph, Edge, EdgeType, Node, NodeType
+from dartlab.analysis.graph.traverse import ancestors, causes, related, timeline
 
 __all__ = [
     "CompanyGraph",

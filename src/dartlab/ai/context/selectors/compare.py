@@ -1,7 +1,9 @@
 """Compare selector: scan 횡단분석 결과 주입."""
 
 from __future__ import annotations
+
 from typing import Any
+
 from dartlab.ai.context.bundle import ContextPart, PartPriority
 from dartlab.ai.context.encoder import encodeAuto, estimateTokens
 

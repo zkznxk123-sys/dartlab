@@ -1,7 +1,9 @@
 """Act 3 selector: 현금흐름 + 이익품질."""
 
 from __future__ import annotations
+
 from typing import Any
+
 from dartlab.ai.context.bundle import ContextPart, PartPriority
 from dartlab.ai.context.selectors._calc_base import _buildParts
 

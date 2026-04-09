@@ -1,7 +1,9 @@
 """Act 2 selector: 수익성 (마진 + 수익률 + DuPont)."""
 
 from __future__ import annotations
+
 from typing import Any
+
 from dartlab.ai.context.bundle import ContextPart, PartPriority
 from dartlab.ai.context.selectors._calc_base import _buildParts
 

@@ -11,7 +11,6 @@ Growth↓ + Inflation↓ = deflation    → 장기 국채, 투자등급채
 
 from __future__ import annotations
 
-
 # ── 자산배분 매핑 (Bridgewater All Weather 원리) ──
 
 _ASSET_MAP: dict[str, dict[str, str]] = {

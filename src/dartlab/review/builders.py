@@ -3817,7 +3817,7 @@ def marketAnalysisFlagsBlock(data) -> list:
 # ── 매크로 블록 ──
 
 
-def macroEnvironmentBlock(data: dict) -> list:
+def macroPositionBlock(data: dict) -> list:
     """calcMacroEnvironment 결과 → 경제 사이클 + 기업 포지션."""
     if not data:
         return []
@@ -4353,9 +4353,9 @@ def macroFlagsBlock(summary: dict) -> list:
         if isinstance(cc, dict):
             cc_phase = cc.get("phase")
             if cc_phase == "trough":
-                opportunities.append(f"신용사이클 저점 — 역발상 매수 기회")
+                opportunities.append("신용사이클 저점 — 역발상 매수 기회")
             elif cc_phase == "peak":
-                warnings.append(f"신용사이클 정점 — 리스크 축소 시작")
+                warnings.append("신용사이클 정점 — 리스크 축소 시작")
 
     corporate = summary.get("corporate")
     if isinstance(corporate, dict):

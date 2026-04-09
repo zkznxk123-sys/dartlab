@@ -1,7 +1,9 @@
 """Act 1 selector: 사업이해 (수익구조 + 성장성)."""
 
 from __future__ import annotations
+
 from typing import Any
+
 from dartlab.ai.context.bundle import ContextPart, PartPriority
 from dartlab.ai.context.selectors._calc_base import _buildParts
 

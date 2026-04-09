@@ -18,8 +18,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from dartlab.ai.context.bundle import ContextBundle, ContextPart
 from dartlab.ai.context.budget import budgetFor, trim
+from dartlab.ai.context.bundle import ContextBundle, ContextPart
 from dartlab.ai.context.intent import Intent, classifyIntent
 from dartlab.ai.context.selectors import (
     selectCompanySearch,

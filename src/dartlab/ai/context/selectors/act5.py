@@ -1,7 +1,9 @@
 """Act 5 selector: 자본배분 (자산구조 + ROIC + 배당)."""
 
 from __future__ import annotations
+
 from typing import Any
+
 from dartlab.ai.context.bundle import ContextPart, PartPriority
 from dartlab.ai.context.selectors._calc_base import _buildParts
 

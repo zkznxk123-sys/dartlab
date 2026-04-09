@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from dartlab.analysis.graph.schema import CompanyGraph, Edge, EdgeType, Node, NodeType
+from dartlab.analysis.graph.schema import CompanyGraph, Edge, EdgeType, Node
 
 
 def causes(
@@ -163,6 +163,6 @@ def timelineNarrative(graph: CompanyGraph, label: str) -> str:
         elif vals[-1] < vals[0]:
             lines.append(f"\n→ **하락 추세** ({vals[0]} → {vals[-1]})")
         else:
-            lines.append(f"\n→ **보합**")
+            lines.append("\n→ **보합**")
 
     return "\n".join(lines)
