@@ -365,7 +365,7 @@ export function getCategoryGroups(): Array<CategoryDefinition & { posts: PostMet
 				seriesLabels
 			};
 		})
-		.filter((category) => category.posts.length > 0);
+		.filter((category) => category.posts.length > 0 && !category.hidden);
 }
 
 export function getLatestPosts(limit = 6): PostMeta[] {

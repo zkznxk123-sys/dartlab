@@ -35,10 +35,6 @@ export const navigation: NavItem[] = [
 		]
 	},
 	{
-		title: 'Credit Reports',
-		href: '/blog/category/credit-reports'
-	},
-	{
 		title: 'Notebooks',
 		href: '/docs/tutorials'
 	},
