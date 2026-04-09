@@ -30,6 +30,31 @@ from __future__ import annotations
 
 from typing import Iterable
 
+# 이벤트성 계정 — 매 분기 발생하지 않는 항목.
+# 배당금은 반기 1~2회, 자사주는 비정기, 차입금 상환도 비정기.
+# 이런 항목은 4분기 strict 합산 대신 있는 분기만 합산해야 연간값이 나온다.
+_EVENT_ACCOUNTS = frozenset({
+    "dividends_paid",       # 배당금지급
+    "배당금지급",
+    "purchase_of_treasury_stock",  # 자사주 매입
+    "자기주식의취득",
+    "disposal_of_treasury_stock",  # 자사주 처분
+    "자기주식처분",
+    "proceeds_from_borrowings",    # 차입금 차입
+    "차입금의차입",
+    "repayment_of_borrowings",     # 차입금 상환
+    "차입금상환",
+    "decrease_in_lease_obligations",  # 리스부채 감소
+    "exercise_of_stock_options",     # 스톡옵션 행사
+    "increase_in_noncontrolling_interests",  # 비지배지분 증가
+    "government_grants_received",   # 정부보조금
+})
+
+
+def _isEventAccount(key: str) -> bool:
+    """이벤트성 계정인지 판별."""
+    return key in _EVENT_ACCOUNTS
+
 
 def synthesizeAnnualFromQuarters(
     data: dict[str, dict],
@@ -66,7 +91,7 @@ def synthesizeAnnualFromQuarters(
     for q in qPeriods:
         yearMap.setdefault(q[:4], []).append(q)
     isStock = topic == "BS"
-    for row in data.values():
+    for key, row in data.items():
         for yr, qs in yearMap.items():
             if yr in row:
                 continue
@@ -80,7 +105,15 @@ def synthesizeAnnualFromQuarters(
             else:
                 vals = [row.get(q) for q in qs]
                 valid = [v for v in vals if v is not None]
-                annualVal = sum(valid) if len(valid) == 4 else None
+                if len(valid) == 4:
+                    # 4분기 모두 있으면 단순 합 (strict — 매출/비용/영업이익 등)
+                    annualVal = sum(valid)
+                elif len(valid) >= 1 and _isEventAccount(key):
+                    # 이벤트성 계정 (배당금, 자사주 등)은 있는 분기만 합산
+                    # 배당은 보통 반기 1~2회만 지급 → 4분기 strict 적용하면 항상 None
+                    annualVal = sum(valid)
+                else:
+                    annualVal = None
             row[yr] = annualVal
     addedYears = [yr for yr in yearMap.keys() if yr not in periods]
     if not addedYears:
