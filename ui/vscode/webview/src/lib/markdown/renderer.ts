@@ -147,7 +147,6 @@ renderer.table = function (token: {
     .join("");
 
   return `<div class="table-wrap" data-table-id="${id}">
-<button class="table-dl-btn" onclick="(function(){var t=document.querySelector('[data-table-id=\\'${id}\\'] table');if(!t)return;var r=[],h=t.querySelectorAll('th');var hr=[];h.forEach(function(c){hr.push(c.textContent)});r.push(hr.join(','));t.querySelectorAll('tbody tr').forEach(function(tr){var row=[];tr.querySelectorAll('td').forEach(function(c){row.push(c.textContent.replace(/,/g,''))});r.push(row.join(','))});var b=new Blob([r.join('\\n')],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='dartlab-table.csv';a.click()})()">CSV</button>
 <table><thead>${headerHtml}</thead><tbody>${rowsHtml}</tbody></table></div>`;
 };
 

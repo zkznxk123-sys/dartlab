@@ -262,13 +262,15 @@
         {/if}
       {/if}
 
-      <!-- CODE EXECUTION BLOCK (Claude Code tool_use 패턴) -->
+      <!-- CODE EXECUTION BLOCK (Claude Code 패턴: 코드 접힘, 결과 테이블은 바로 표시) -->
       {#if block.type === "code_execution"}
-        {@const expanded = expandedBlocks[blockIdx] === true}
+        {@const codeExpanded = expandedBlocks[blockIdx] === true}
         {@const firstLine = block.code?.split('\n').find((l: string) => l.trim() && !l.trim().startsWith('#') && !l.trim().startsWith('import')) || block.code?.split('\n')[0] || ''}
+        {@const hasTableResult = block.result ? /\|.*\|/.test(block.result) || block.result.includes('<table') : false}
+        <!-- 코드 헤더 (접힘) -->
         <div class="tool-block">
           <button class="tool-header" onclick={() => toggleBlock(blockIdx)}>
-            <svg class="tool-chevron" class:open={expanded} width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+            <svg class="tool-chevron" class:open={codeExpanded} width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
               <path d="M6 4l4 4-4 4"/>
             </svg>
             {#if block.status === "executing"}
@@ -276,12 +278,13 @@
             {:else}
               <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" class="tool-ok"><path d="M6.5 12L2 7.5l1.4-1.4L6.5 9.2l6.1-6.1L14 4.5z"/></svg>
             {/if}
-            <span class="tool-args">{truncate(firstLine, 100)}</span>
+            <span class="tool-name">Python</span>
+            <span class="tool-args">{truncate(firstLine, 80)}</span>
             {#if block.status === "done"}
               <span class="tool-annotation">완료</span>
             {/if}
           </button>
-          {#if expanded}
+          {#if codeExpanded}
             <div class="tool-body">
               {#if block.code}
                 <div class="tool-body-row">
@@ -289,7 +292,7 @@
                   <div class="tool-body-content"><pre>{block.code}</pre></div>
                 </div>
               {/if}
-              {#if block.result}
+              {#if block.result && !hasTableResult}
                 <div class="tool-body-row">
                   <div class="tool-body-label">OUT</div>
                   <div class="tool-body-content">{@html render(block.result)}</div>
@@ -298,6 +301,10 @@
             </div>
           {/if}
         </div>
+        <!-- 테이블 결과는 접힘 바깥에 바로 표시 -->
+        {#if block.result && hasTableResult && block.status === "done"}
+          <div class="content exec-result" onclick={copyCode}>{@html wrapCodeBlocks(render(block.result))}</div>
+        {/if}
       {/if}
 
       <!-- CHART BLOCK -->
@@ -331,10 +338,11 @@
             {/if}
           </button>
           {#if expanded && block.toolResult != null}
+            {@const resultStr = typeof block.toolResult === "string" ? block.toolResult : JSON.stringify(block.toolResult, null, 2)}
             <div class="tool-body">
               <div class="tool-body-row">
                 <div class="tool-body-label">OUT</div>
-                <div class="tool-body-content"><pre>{truncate(typeof block.toolResult === "string" ? block.toolResult : JSON.stringify(block.toolResult, null, 2), 2000)}</pre></div>
+                <div class="tool-body-content">{@html render(truncate(resultStr, 2000))}</div>
               </div>
             </div>
           {/if}
@@ -465,23 +473,6 @@
   .msg:first-child { padding-top: 0; }
   .msg.user { padding-left: 0; }
 
-  /* Timeline dot (Claude Code 정확한 값: 7px, left:9px, top:15px) */
-  .msg:not(.user)::before {
-    content: "";
-    position: absolute;
-    background-color: var(--vscode-descriptionForeground);
-    z-index: 1;
-    border-radius: 50%;
-    width: 7px;
-    height: 7px;
-    top: 15px;
-    left: 9px;
-  }
-  .msg:not(.user).dot-success::before { background-color: #74c991; }
-  .msg:not(.user).dot-failure::before { background-color: #c74e39; }
-  /* Claude Code: 진행 중이면 dot blink (opacity 0↔1) */
-  .msg:not(.user).dot-progress::before { animation: blink 1s linear infinite; }
-
   /* Timeline 세로선 (Claude Code: 1px, left:12px) */
   .msg:not(.user)::after {
     content: "";
@@ -492,10 +483,45 @@
     bottom: 0;
     left: 12px;
   }
-  /* 첫 번째 assistant: 세로선 top을 dot 아래부터 */
-  .msg:not(.user):first-of-type::after { top: 18px; }
-  /* 마지막 assistant: 세로선 bottom을 dot 위까지 */
-  .msg:not(.user):last-of-type::after { height: 18px; }
+  .msg:not(.user):first-of-type::after { top: 0; }
+  .msg:not(.user):last-of-type::after { bottom: 8px; }
+
+  /* 블록별 timeline dot (Claude Code 패턴: 각 블록마다 dot) */
+  .msg:not(.user) > :global(.content),
+  .msg:not(.user) > :global(.exec-result),
+  .msg:not(.user) > .tool-block,
+  .msg:not(.user) > .loading-block,
+  .msg:not(.user) > .snapshot-card,
+  .msg:not(.user) > .meta-badges,
+  .msg:not(.user) > .error-block {
+    position: relative;
+  }
+  .msg:not(.user) > :global(.content)::before,
+  .msg:not(.user) > .tool-block::before,
+  .msg:not(.user) > .loading-block::before,
+  .msg:not(.user) > .error-block::before {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    width: 7px;
+    height: 7px;
+    top: 8px;
+    left: -21px;
+    z-index: 1;
+    background-color: var(--vscode-descriptionForeground);
+  }
+  /* exec-result (테이블 결과)는 dot 불필요 — 바로 위 tool-block의 결과 */
+  /* 성공 dot (초록) */
+  .msg:not(.user).dot-success > :global(.content)::before { background-color: #74c991; }
+  .msg:not(.user) > .tool-block:has(.tool-ok)::before { background-color: #74c991; }
+  /* 에러 dot (빨강) */
+  .msg:not(.user).dot-failure > :global(.content)::before { background-color: #c74e39; }
+  .msg:not(.user) > .tool-block:has(.tool-err)::before { background-color: #c74e39; }
+  .msg:not(.user) > .error-block::before { background-color: #c74e39; }
+  /* 진행 중 dot (깜빡임) */
+  .msg:not(.user) > .tool-block:has(.tool-spinner-sm)::before { animation: blink 1s linear infinite; }
+  .msg:not(.user) > .loading-block::before { animation: blink 1s linear infinite; }
+  .msg:not(.user).dot-progress > :global(.content)::before { animation: blink 1s linear infinite; }
 
   /* === User message (Claude Code exact) === */
   .user-wrap {
@@ -840,7 +866,7 @@
     white-space: pre-wrap;
     word-break: break-word;
     padding: 4px;
-    max-height: 200px;
+    max-height: 400px;
     overflow-y: auto;
     overflow-x: auto;
     font-family: var(--vscode-editor-font-family, monospace);
@@ -963,28 +989,9 @@
     position: relative;
     margin: 10px 0;
   }
-  .content :global(.table-dl-btn) {
-    position: absolute;
-    top: -2px;
-    right: 4px;
-    padding: 1px 6px;
-    border: 1px solid var(--vscode-panel-border);
-    border-radius: 3px;
-    background: var(--vscode-editorWidget-background);
-    color: var(--vscode-descriptionForeground);
-    font-size: 10px;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.15s;
-    z-index: 2;
-  }
-  .content :global(.table-wrap:hover .table-dl-btn) {
-    opacity: 0.7;
-  }
-  .content :global(.table-dl-btn:hover) {
-    opacity: 1 !important;
-    border-color: var(--dl-primary);
-    color: var(--dl-primary-light);
+  /* 코드 실행 결과 테이블 — 접힘 바깥에 바로 표시 */
+  .exec-result {
+    margin-top: 4px;
   }
   .content :global(p) { margin: 8px 0; }
   .content :global(p:first-child) { margin-top: 0; }
