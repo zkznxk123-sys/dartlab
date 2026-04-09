@@ -50,15 +50,15 @@ export const categoryDefinitions = [
 	},
 	{
 		id: 'company-reports',
-		slug: 'company-reports',
+		slug: 'company-story',
 		folder: '05-company-reports',
-		label: '기업분석 보고서',
-		description: '6막 재무 서사 기반 기업별 종합 분석 보고서입니다.',
-		seoTitle: '기업분석 보고서 | 6막 재무 서사',
+		label: '기업이야기',
+		description: '재무제표로 풀어내는 기업의 이야기.',
+		seoTitle: '기업이야기 | dartlab',
 		seoDescription:
-			'dartlab 기업분석 보고서. 사업이해→수익성→현금전환→안정성→자본배분→전망의 6막 인과 구조로 기업을 분석합니다.',
+			'dartlab 기업이야기. 재무제표의 숫자가 왜 이상한지 파고 들어가면, 그 회사의 이야기가 보입니다.',
 		brandMessage:
-			'DartLab은 숫자 나열이 아니라, 기업의 스토리를 6막 인과 구조로 전달합니다.'
+			'숫자 나열이 아니라, "왜?"를 따라가는 기업 이야기.'
 	},
 	{
 		id: 'macro-reports',
@@ -177,11 +177,11 @@ export const seriesDefinitions = {
 	},
 	'company-reports': {
 		id: 'company-reports',
-		label: '기업분석 보고서',
-		description: '6막 재무 서사 기반 기업별 종합 분석 보고서입니다.',
-		seoTitle: '기업분석 보고서 | 6막 재무 서사',
-		seoDescription: 'dartlab 기업분석 보고서. 사업이해→수익성→현금전환→안정성→자본배분→전망의 6막 인과 구조로 기업을 분석합니다.',
-		brandMessage: 'DartLab은 숫자 나열이 아니라, 기업의 스토리를 6막 인과 구조로 전달합니다.'
+		label: '기업이야기',
+		description: '재무제표로 풀어내는 기업의 이야기.',
+		seoTitle: '기업이야기 | dartlab',
+		seoDescription: 'dartlab 기업이야기. 재무제표의 숫자가 왜 이상한지 파고 들어가면, 그 회사의 이야기가 보입니다.',
+		brandMessage: '숫자 나열이 아니라, "왜?"를 따라가는 기업 이야기.'
 	}
 } as const;
 
