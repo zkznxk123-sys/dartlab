@@ -1266,12 +1266,12 @@ def _analyze_inner(
         if _ground_executor is not None:
             _ground_executor.shutdown(wait=False)
 
-    # ── ContextBuilder v2 (feature flag) ──
-    # DARTLAB_CONTEXT_V2=1 시 ai/context/ 의 ContextBuilder 가 userParts 를 조립.
-    # Phase 1: legacy selectors 만 사용 → 동작 동등. A/B 비교 + 회귀 검증용.
-    # Phase 1.5: 14축 calc selectors 도입 시 본격 효과.
-    _use_context_v2 = os.environ.get("DARTLAB_CONTEXT_V2") == "1"
-    if _use_context_v2:
+    # ── ContextBuilder (기본 경로) ──
+    # ACE (arxiv.org/abs/2510.04618) + 14축 calc selector + graph traversal.
+    # A/B 검증 완료: +31.6% 응답 풍부도, 10/10 성공, 에러 0.
+    # DARTLAB_CONTEXT_V1=1 로 legacy 강제 가능 (디버깅용).
+    _use_legacy = os.environ.get("DARTLAB_CONTEXT_V1") == "1"
+    if not _use_legacy:
         try:
             from dartlab.ai.context import ContextBuilder
 
@@ -1280,22 +1280,21 @@ def _analyze_inner(
                 company=company,
                 provider=getattr(config_, "provider", None),
             ).build()
-            # legacy 라벨 (corp/stock) 은 ContextBuilder 가 CRITICAL 로 이미 포함.
             for _text in _bundle.toUserParts():
                 if _text and _text not in userParts:
                     userParts.append(_text)
             log.debug(
-                "context v2: intent=%s parts=%d tokens=%d dropped=%s",
+                "context: intent=%s parts=%d tokens=%d dropped=%s",
                 _bundle.intent,
                 len(_bundle.parts),
                 _bundle.totalTokens,
                 _bundle.droppedKeys,
             )
-        except Exception:  # noqa: BLE001 — v2 실패 시 legacy fallback
-            log.exception("ContextBuilder v2 failed, falling back to legacy")
-            _use_context_v2 = False
+        except Exception:  # noqa: BLE001 — ContextBuilder 실패 시 legacy fallback
+            log.exception("ContextBuilder failed, falling back to legacy")
+            _use_legacy = True
 
-    if not _use_context_v2:
+    if _use_legacy:
         if disclosureBrief:
             userParts.append(disclosureBrief)
         if groundingText:
@@ -1343,15 +1342,11 @@ def _analyze_inner(
             except (ImportError, OSError, sqlite3.Error, AttributeError, ValueError):
                 pass
 
-        # ── ACE Curator (DARTLAB_CONTEXT_V2 활성 시) ──
+        # ── ACE Curator (기본 활성) ──
         # 응답 + grade → playbook bullet 추출 → KnowledgeDB delta merge.
         # Generator/Reflector/Curator 폐쇄 루프의 마지막 단계.
         # arxiv.org/abs/2510.04618
-        if (
-            os.environ.get("DARTLAB_CONTEXT_V2") == "1"
-            and mode == "analysis"
-            and _full_response_parts
-        ):
+        if mode == "analysis" and _full_response_parts:
             try:
                 from dartlab.ai.context.intent import classifyIntent
                 from dartlab.ai.context.playbook import curate

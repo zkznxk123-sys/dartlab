@@ -190,11 +190,11 @@ arxiv.org/abs/2510.04618 — Generator/Reflector/Curator 폐쇄 루프 + delta m
 
 ### 활성화
 
-```bash
-DARTLAB_CONTEXT_V2=1 python -m dartlab ask "..."
-```
+**기본 ON** (2026-04-09 병합). ContextBuilder가 userParts를 조립하고 응답 종료 후 Curator가 playbook을 갱신한다.
 
-기본은 OFF (legacy 동작). v2 ON 시 ContextBuilder가 userParts를 조립하고 응답 종료 후 Curator가 playbook을 갱신한다.
+A/B 검증: v2 응답 풍부도 **+31.6%** (적정PER +618%, 사업구성 +333%), 10/10 성공, 에러 0.
+
+legacy 강제 복원: `DARTLAB_CONTEXT_V1=1` (디버깅 전용).
 
 ### 구조
 
@@ -243,11 +243,12 @@ Question
 - ContextBuilder 통합: bullets가 `ace.playbook` key로 HIGH 우선순위 주입
 - 회귀: test_ai_runtime 77 + test_ai_context 28 + test_ai_context_playbook 27 = **132 PASS**
 
-### Phase 1.5 (다음)
+### Phase 1.5 완료 (2026-04-09)
 
-- selectors/act1~6.py — 14축 calc 결과를 intent별로 선택 주입
-- A/B 평가: audit 30종 재실행, ACE 페이퍼 finance +8.6% 재현 시도
-- LLM Reflector 검토 (현재는 결정론 추출만)
+- selectors/act1~6.py — 14축 calc 결과를 intent별로 선택 주입 ✅
+- A/B 평가: 10질문 × v1/v2, **+31.6%** 응답 풍부도 ✅
+- Phase 2 Graph — 인과 질문 9/9 graph 주입 ✅
+- **기본 ON으로 병합** — feature flag 제거 ✅
 
 ## 관련 코드
 
