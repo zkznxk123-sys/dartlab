@@ -61,6 +61,22 @@ jobs:
             exit 1
           fi
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build Svelte UI
+        run: |
+          cd ui/web
+          npm ci
+          npm run build
+
+      - name: Copy UI build into package
+        run: |
+          mkdir -p src/dartlab/ui/build
+          cp -r ui/web/build/* src/dartlab/ui/build/
+
       - name: Install build tools
         run: pip install build
 
