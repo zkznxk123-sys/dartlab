@@ -75,7 +75,7 @@ c.reviewer(guide="...")
 | 6막-1 가치평가 | 가치평가, 매출전망 | **analysis**(forecast/valuation) | calcValuationSynthesis, calcRevenueDirection, ... |
 | 6막-2 비교분석 | 비교분석 | **scan** | calcPeerPosition (교차 조합 관점), calcGovernanceSummary |
 | 6막-3 시장분석 | 시장분석 | **quant** | calcTrendNarr, calcRiskNarr, calcSignalNarr, calcStrategyNarr, calcCrosscheckNarr, calcQuantConclusion |
-| 6막-4 매크로 | 매크로 | **macro** | calcMacroCycleNarrative, calcValuationBand |
+| 6막-4 매크로 | 매크로 | **macro** | macroEnvironment, macroCycle, macroRates, macroLiquidity, macroSentiment, macroForecast, macroCorporate, macroTrade, macroFlags, valuationBand (10블록, `macro("종합")` 1회 호출) |
 
 ## 관점별 템플릿 (PERSPECTIVE_TEMPLATES)
 
