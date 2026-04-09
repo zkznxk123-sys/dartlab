@@ -304,6 +304,61 @@ def analyze_crisis(*, market: str = "US", as_of: str | None = None, overrides: d
                 "signal": cr_signal,
             }
 
+    # ── Excess Bond Premium — Gilchrist & Zakrajšek (2012) AER ──
+    result["excessBondPremium"] = None
+    try:
+        from dartlab.core.finance.excessBondPremium import approximateEBP, classifyEBP
+        from dartlab.macro._helpers import fetch_latest as _fl
+        from dartlab.macro._helpers import get_gather as _gg
+
+        _g = _gg(as_of)
+        _hy = _fl(_g, "BAMLH0A0HYM2")
+        _baa_aaa = _fl(_g, "BAA10Y")  # BAA-AAA spread (부도 프리미엄 근사)
+        if _hy is not None and _baa_aaa is not None:
+            hy_bp = _hy * 100  # % → bp
+            # BAA-AAA spread를 기대부도프리미엄 근사치로 사용 (스케일: ×1.5)
+            default_proxy = _baa_aaa * 150  # %p → bp, 스케일 조정
+            ebp_val = approximateEBP(hy_bp, default_proxy)
+            result["excessBondPremium"] = classifyEBP(ebp_val)
+    except (KeyError, ValueError, TypeError, AttributeError):
+        pass
+
+    # ── Verdad Credit Cycle 4단계 — Greenwood, Hanson, Jin (2019) ──
+    result["creditCycle"] = None
+    try:
+        from dartlab.core.finance.creditCycle import classifyCreditCycle
+        from dartlab.macro._helpers import fetch_latest as _fl2
+        from dartlab.macro._helpers import get_gather as _gg2
+
+        _g2 = _gg2(as_of)
+        _hy2 = _fl2(_g2, "BAMLH0A0HYM2")
+        if _hy2 is not None:
+            hy_bp2 = _hy2 * 100
+            # 6개월 전 HY (방향 판별)
+            hy_6m = None
+            try:
+                from dartlab.macro._helpers import fetch_series_list as _fsl
+
+                hy_list = _fsl(_g2, "BAMLH0A0HYM2")
+                if hy_list and len(hy_list) > 125:
+                    hy_6m = hy_list[-125] * 100
+            except (KeyError, ValueError, TypeError):
+                pass
+
+            # Senior Loan Officer Survey (분기, % tightening)
+            loan = _fl2(_g2, "DRTSCLCC")
+            # Charge-off rate
+            co = _fl2(_g2, "CORCCACBS")
+
+            result["creditCycle"] = classifyCreditCycle(
+                hy_bp2,
+                hy_spread_6m_ago=hy_6m,
+                loan_tightening=loan,
+                charge_off=co,
+            )
+    except (KeyError, ValueError, TypeError, AttributeError):
+        pass
+
     from dartlab.macro._helpers import collect_timeseries, get_gather
 
     g_ts = get_gather(as_of)

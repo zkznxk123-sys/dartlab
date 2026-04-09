@@ -45,20 +45,27 @@ dartlab.macro("종합")
 
 ## macro → review 모듈 매핑
 
-macro 는 review 6막 매크로 섹션에 사이클/금리/자산/심리/유동성 분석을 제공한다.
+macro 는 review 6막 매크로 섹션(6-7)에 11축 종합 데이터를 제공한다.
+`dartlab.macro("종합")` **1회 호출**로 11축 전부 가져온 뒤, 각 builder가 해당 부분만 추출.
 
-| calc 함수 | review 블록 | 서사 내용 |
+| review 블록 | 소스 | 서사 내용 |
 |---|---|---|
-| `calcMacroCycleNarrative(company)` | macroCycle | 경기 사이클 4국면 + 섹터 전략 + 기업-매크로 연결 |
-| `calcValuationBand(company)` | valuationBand | PER/PBR 정규분포 밴드 현재 위치 |
-
-현재 registry 에서 `dartlab.macro("사이클")` 직접 호출 → calc 패턴으로 정규화 예정.
+| macroEnvironment | summary 전체 | 종합 판정 + 축별 기여도 + 자산배분 시사점 |
+| macroCycle | summary["cycle"] | 경기 사이클 4국면 + 전환 시퀀스 + **Bridgewater 4 Quadrant** + 섹터 전략 |
+| macroRates | summary["rates"] | 금리 방향 + 수익률곡선 + 실질금리 + **ACM 텀프리미엄** + **CP 팩터** |
+| macroLiquidity | summary["liquidity"] | 유동성 regime + FCI (Hatzius 실증 가중치) + 신용스프레드 |
+| macroSentiment | summary["sentiment"] | 공포탐욕 + VIX + **JLN 실물 불확실성** + VIX-JLN 괴리 |
+| macroForecast | summary["forecast"] | 침체확률 + LEI + Sahm + **Growth-at-Risk 5th%** |
+| macroCorporate | summary["corporate"] | 전종목 이익사이클 + Ponzi비율 + 레버리지 |
+| macroTrade | summary["trade"] | 교역조건 + 수출이익 함의 (KR만) |
+| macroFlags | summary 전체 | 위기 신호 + **EBP 침체 신호** + **신용사이클 경고** + 경고/기회 집계 |
+| valuationBand | calcValuationBand(company) | PER/PBR 정규분포 밴드 현재 위치 |
 
 ## 설계 원칙
 
 - **Company 불필요** — 종목코드 없이 동작 (macro 자체). 단 review 연동 시 company.market 참조
 - **macro ↛ analysis** — 같은 L2지만 상호 import 금지. 해석 조합은 AI(L3)의 몫
-- **numpy만** — Hamilton RS, Kalman DFM, Nelson-Siegel 전부 numpy 직접 구현. 외부 통계 라이브러리 0
+- **numpy만** — Hamilton RS, Kalman DFM, Nelson-Siegel, GaR 분위회귀, CP 팩터 전부 numpy 직접 구현. 외부 통계 라이브러리 0
 - 3계층: L0(core/finance 순수함수) → L1(gather 수집) → L2(macro 분석축)
 - 공통 헬퍼: `_helpers.py`의 `get_gather`, `fetch_latest`, `fetch_series_list`, `collect_timeseries` — 중복 코드 제거, 로깅 통합
 - **as_of/overrides 관통** — 전체 11축에 백테스트(`as_of`) + 시나리오(`overrides`) 지원
@@ -106,12 +113,13 @@ dartlab.macro("교역", market="KR")
 | `confidence` | high/medium/low | low = 전환기 = 가장 중요 |
 | `transition` | 전환 시퀀스 | 국면 전환 임박 신호 |
 | `sectorStrategy` | 업종별 overweight/neutral/underweight | 섹터 로테이션 |
+| `quadrant` | **Bridgewater 4 Quadrant** — reflation/goldilocks/stagflation/deflation | Growth×Inflation 2×2 체제 → 자산군 overweight/underweight. Dalio (2018) |
 
 주의: HY + 장단기차 동시 악화 → 침체 강화. VIX 단독 급등은 일시적 가능. KR은 CLI 의존(느림).
 
 ### 금리 (rates)
 
-금리 방향 + DKW 분해 + Nelson-Siegel + BEI/실질금리 4분면.
+금리 방향 + DKW 분해 + Nelson-Siegel + BEI/실질금리 4분면 + **ACM 텀프리미엄** + **CP 채권리스크프리미엄**.
 
 | 키 | 의미 | 활용 |
 |---|---|---|
@@ -121,6 +129,8 @@ dartlab.macro("교역", market="KR")
 | `yieldCurve` | Nelson-Siegel β0(Level)/β1(Slope)/β2(Curvature) | 수익률곡선 형태 |
 | `realRateRegime` | tightening/reflation/goldilocks/deflation | BEI×실질금리 4분면 |
 | `employment/inflation` | 고용/물가 상태 | 금리 방향의 근거 |
+| `termPremium` | **ACM Term Premium** — Adrian, Crump, Moench (2013) JFE | 압축(<0)=리스크 선호, 상승(>1)=경기 우려. NY Fed 일일 공개 |
+| `bondRiskPremium` | **Cochrane-Piazzesi Factor** — CP (2005) AER | 선도금리 tent-shaped 팩터 → 채권 초과수익 R²=0.44. 경기역행적 |
 
 ### 자산 (assets)
 
@@ -142,10 +152,11 @@ dartlab.macro("교역", market="KR")
 | `fearGreed.score` | 0-100. <25 극단공포(매수), >75 극단탐욕(경계) |
 | `ismAllocation` | ISM >55 risk-on, <50 risk-off |
 | `vixRegime.buySignal` | 0/1/2/3 분할매수 차수 |
+| `macroUncertainty` | **JLN Macro Uncertainty** — Jurado, Ludvigson, Ng (2015) AER. 실물 불확실성 (VIX와 다름). <0.8 낮음, >1.2 극단. VIX-JLN 괴리 시 금융/실물 불일치 |
 
 ### 유동성 (liquidity)
 
-M2 + 연준 B/S + 신용스프레드 + NFCI + 자체 FCI.
+M2 + 연준 B/S + 신용스프레드 + NFCI + 자체 FCI (Hatzius 2010 실증 가중치).
 
 | 키 | 의미 |
 |---|---|
@@ -155,12 +166,14 @@ M2 + 연준 B/S + 신용스프레드 + NFCI + 자체 FCI.
 | `capexPressure` | HY 스프레드 → 설비투자 압력 |
 
 FCI 구현: `fci = w₁z(정책금리) + w₂z(장기금리) + w₃z(HY) + w₄z(-주가) + w₅z(환율)`
-가중치: 금리 0.35, 스프레드 0.25, 주가 0.25, 환율 0.15 (GS 논문 참고).
+가중치 (Hatzius et al. 2010 impulse response 기반 교정):
+- US: 정책금리 0.25, 장기금리 0.20, **스프레드 0.30** (가장 큰 GDP 영향), 주가 0.15, 환율 0.10
+- KR: 정책금리 0.25, 장기금리 0.20, 스프레드 0.25, 주가 0.15, **환율 0.15** (수출 의존 반영)
 **한국 FCI — 오픈소스 최초**: 기준금리 + 국고3Y + 회사채AA + USDKRW.
 
 ### 예측 (forecast)
 
-LEI + 침체확률 + Sahm Rule + Hamilton RS + GDP Nowcast.
+LEI + 침체확률 + Sahm Rule + Hamilton RS + GDP Nowcast + **Growth-at-Risk**.
 
 | 키 | 의미 |
 |---|---|
@@ -169,10 +182,11 @@ LEI + 침체확률 + Sahm Rule + Hamilton RS + GDP Nowcast.
 | `sahmRule` | 실업률 3M MA - 12M 최저 MA. ≥0.5%p 침체 신호 |
 | `hamiltonRegime` | 2-regime Markov Switching. contraction 확률 |
 | `nowcast` | GDP 실시간 추정 (DFM Kalman) |
+| `growthAtRisk` | **Adrian, Boyarchenko, Giannone (2019) AER**. FCI → GDP 성장률 조건부 분위회귀 (5th/25th/50th/75th/95th). GaR 5th = worst-case GDP. tail_risk high = 하방 꼬리 리스크 확대. IMF 공식 도구, 20+ 중앙은행 사용. numpy IRLS 직접 구현 |
 
 ### 위기 (crisis)
 
-Credit-to-GDP gap + GHS + Minsky 5단계 + Koo BSR + Fisher Debt-Deflation.
+Credit-to-GDP gap + GHS + Minsky 5단계 + Koo BSR + Fisher + **EBP** + **신용사이클 4단계**.
 
 | 키 | 의미 |
 |---|---|
@@ -183,6 +197,8 @@ Credit-to-GDP gap + GHS + Minsky 5단계 + Koo BSR + Fisher Debt-Deflation.
 | `fisherDeflation` | DSR + CPI + NPL → 부채-디플레이션 악순환 위험 |
 | `krHousingStress` | 한국 아파트가격 YoY + 가계부채 (KR만) |
 | `recessionDashboard` | 프로빗+LEI+ISM+신용+스프레드 종합 |
+| `excessBondPremium` | **Gilchrist & Zakrajšek (2012) AER**. HY 스프레드에서 기대부도분 제거한 잔차. EBP>1.0 = 12개월 내 침체 강한 신호. HY 스프레드보다 우월한 예측력 |
+| `creditCycle` | **Verdad 신용사이클 4단계** — expansion(팽창)/peak(정점)/contraction(수축)/trough(저점). HY OAS + Senior Loan Officer + Charge-off Rate 조합. Greenwood-Hanson-Jin (2019) |
 
 ### 재고 (inventory)
 
@@ -375,7 +391,52 @@ displacement → boom → overtrading → discredit → revulsion.
 
 구현 2가지:
 1. NFCI 직접 소비 — FRED `NFCI` (Chicago Fed 105변수 DFM, 주간)
-2. 자체 FCI — GS 방식 5변수 z-score. `fci.py`.
+2. 자체 FCI — GS 방식 5변수 z-score. `fci.py`. **Hatzius (2010) impulse response 기반 가중치 교정 완료.**
+
+### Bridgewater 4 Quadrant (Dalio 2018)
+
+Growth × Inflation 2×2 → 4체제: reflation(리플레이션) / goldilocks(골디락스) / stagflation(스태그플레이션) / deflation(디플레이션).
+입력: ISM PMI - 50 (성장), CPI YoY 모멘텀 (인플레). 각 체제별 자산군 overweight/underweight 매핑.
+구현: `quadrant.py`. Ilmanen (2011) "Expected Returns" Ch.17 참조.
+
+### Growth-at-Risk (Adrian, Boyarchenko, Giannone 2019 AER)
+
+FCI → GDP 성장률의 조건부 분위회귀. 5th percentile = worst-case 성장률.
+**IMF 공식 도구, 20+ 중앙은행 사용.** 금융 긴축기에 5th percentile이 급락 → 하방 꼬리 리스크 확대.
+구현: `growthAtRisk.py` — IRLS(Iteratively Reweighted Least Squares) numpy 직접. scipy 불필요.
+입력: NFCI (또는 자체 FCI) 시계열 + GDP 성장률 시계열. horizon=4분기.
+
+### Excess Bond Premium (Gilchrist & Zakrajšek 2012 AER)
+
+회사채 스프레드 = 기대 부도 프리미엄 + EBP(잔차). EBP는 신용시장 투자심리.
+EBP > 1.0: 12개월 내 침체 강한 신호. HY 스프레드 단독보다 예측력 우월.
+구현: `excessBondPremium.py` — HY OAS - BAA-10Y spread(부도 프리미엄 근사)로 EBP 근사.
+Fed가 원본 EBP를 CSV로 직접 공개 (향후 직접 소비로 전환 가능).
+
+### Verdad Credit Cycle (Greenwood-Hanson-Jin 2019)
+
+신용사이클 4단계: expansion(팽창) → peak(정점) → contraction(수축) → trough(저점).
+구현: `creditCycle.py` — HY OAS + Senior Loan Officer Survey(`DRTSCLCC`) + Charge-off Rate(`CORCCACBS`).
+trough에서 역발상 매수, peak에서 리스크 축소.
+
+### Cochrane-Piazzesi Factor (2005 AER)
+
+5개 선도금리의 tent-shaped 선형 결합 → 단일 팩터. 이 팩터로 채권 초과수익률 R²=0.44.
+경기역행적: 불황기에 팩터 상승 → 기대 초과수익 상승 → 장기채 매수 기회.
+구현: `bondRiskPremia.py` — Table 2 계수 하드코딩 `γ = [-2.14, 0.81, 3.00, 0.80, -2.08]`.
+입력: DGS1~DGS5에서 선도금리 계산.
+
+### JLN Macro Uncertainty (Jurado, Ludvigson, Ng 2015 AER)
+
+132개 시계열의 예측 오차 공통 변동을 추출 → 실물 불확실성 측정.
+VIX(옵션 내재 = 금융 변동성)와 근본적으로 다름 — JLN은 실물 예측 불확실성.
+FRED 시리즈 `WLEMUINDXD` 1개로 직접 소비. VIX-JLN 괴리 감지.
+
+### ACM Term Premium (Adrian, Crump, Moench 2013 JFE)
+
+국채 수익률 = 기대 단기금리 경로 + 텀프리미엄. NY Fed가 일일 업데이트로 공개.
+텀프리미엄 < 0: 리스크 선호, 채권 수요 강. > 1.5: 경기 불확실성/인플레 우려.
+FRED 시리즈 `THREEFYTP10` 직접 소비 (계산하지 않고 공식 데이터 사용).
 
 ---
 
@@ -516,7 +577,7 @@ ops 이전 버전에 40개 전략 전체 테이블이 있으므로, 여기서는
 | 지표 | 수치 |
 |------|------|
 | L2 모듈 | 12개 파일, ~2,400줄 |
-| L0 순수함수 | 14개 파일, ~5,000줄 |
+| L0 순수함수 | **19개 파일**, ~5,700줄 (+5 신규: quadrant, growthAtRisk, excessBondPremium, creditCycle, bondRiskPremia) |
 | 단위 테스트 | 38개 (test_macro_l0.py) |
 | bare except (L2) | **0개** (구체적 예외 + logging) |
 | bare except (_helpers) | 6개 (의도적 — httpx/Polars 포함 전체 포착, log.debug) |
@@ -538,14 +599,19 @@ ops 이전 버전에 40개 전략 전체 테이블이 있으므로, 여기서는
 | `src/dartlab/core/finance/yieldCurve.py` | Nelson-Siegel |
 | `src/dartlab/core/finance/crisisDetector.py` | Credit-to-GDP + GHS + Minsky + Koo + Fisher |
 | `src/dartlab/core/finance/macroCycle.py` | 사이클 + Cu/Au + BEI 분해 |
-| `src/dartlab/core/finance/fci.py` | 자체 FCI (US + KR) |
+| `src/dartlab/core/finance/fci.py` | 자체 FCI (US + KR, Hatzius 2010 실증 가중치) |
+| `src/dartlab/core/finance/quadrant.py` | **Bridgewater 4 Quadrant** — Growth×Inflation 체제 (Dalio 2018) |
+| `src/dartlab/core/finance/growthAtRisk.py` | **IMF Growth-at-Risk** — 분위회귀 IRLS (Adrian 2019 AER) |
+| `src/dartlab/core/finance/excessBondPremium.py` | **Excess Bond Premium** — 신용 스트레스 (Gilchrist-Zakrajšek 2012 AER) |
+| `src/dartlab/core/finance/creditCycle.py` | **Verdad 신용사이클 4단계** — 팽창/정점/수축/저점 (Greenwood-Hanson-Jin 2019) |
+| `src/dartlab/core/finance/bondRiskPremia.py` | **Cochrane-Piazzesi Factor** — 채권 초과수익 R²=0.44 (CP 2005 AER) |
 | `src/dartlab/core/finance/inventoryCycle.py` | 재고순환 + ISM |
 | `src/dartlab/core/finance/termsOfTrade.py` | 교역조건 |
 | `src/dartlab/core/finance/corporateAggregate.py` | 기업집계 |
 | `src/dartlab/core/finance/strategyRules.py` | 40개 전략 룰엔진 |
 | `src/dartlab/core/finance/portfolioMapping.py` | regime → 자산배분 |
 | `src/dartlab/core/finance/macroBacktest.py` | walk-forward 백테스트 |
-| `src/dartlab/gather/fred/catalog.py` | FRED ~77개 시리즈 |
+| `src/dartlab/gather/fred/catalog.py` | FRED ~84개 시리즈 |
 | `src/dartlab/gather/ecos/catalog.py` | ECOS ~53개 지표 |
 | `src/dartlab/macro/report.py` | 경제분석 보고서 조립 (3막 서사) |
 | `src/dartlab/macro/mbuilders.py` | macro dict → review Block 변환 |

@@ -922,19 +922,57 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             b["marketAnalysisFlags"] = _safe(lambda: marketAnalysisFlagsBlock(calcMarketAnalysisFlags(company)))
 
     # ── 매크로 (시장 환경 + 기업-매크로 연결) ──
-    if keys is None or keys & {"macroCycle", "valuationBand"}:
+    _MACRO_KEYS = {
+        "macroEnvironment", "macroCycle", "macroRates", "macroLiquidity",
+        "macroSentiment", "macroForecast", "macroCorporate", "macroTrade",
+        "macroFlags", "valuationBand",
+    }
+    if keys is None or keys & _MACRO_KEYS:
         from dartlab.analysis.financial.macroExposure import calcValuationBand
-        from dartlab.review.builders import macroCycleBlock, valuationBandBlock
+        from dartlab.review.builders import (
+            macroCorporateBlock,
+            macroCycleBlock,
+            macroEnvironmentBlock,
+            macroFlagsBlock,
+            macroForecastBlock,
+            macroLiquidityBlock,
+            macroRatesBlock,
+            macroSentimentBlock,
+            macroTradeBlock,
+            valuationBandBlock,
+        )
 
-        if _need("macroCycle"):
+        # macro("종합") 1회 호출 + 캐시 — 11축 전부 포함
+        _macro_summary: list = [None]
 
-            def _build_macro_cycle():
+        def _ensure_summary():
+            if _macro_summary[0] is None:
                 import dartlab as _dl
 
                 market = getattr(company, "market", "KR")
-                return macroCycleBlock(_dl.macro("사이클", market=market))
+                _macro_summary[0] = _dl.macro("종합", market=market)
+            return _macro_summary[0]
 
-            b["macroCycle"] = _safe(_build_macro_cycle)
+        if _need("macroEnvironment"):
+            b["macroEnvironment"] = _safe(lambda: macroEnvironmentBlock(_ensure_summary()))
+        if _need("macroCycle"):
+            b["macroCycle"] = _safe(lambda: macroCycleBlock(_ensure_summary().get("cycle", {})))
+        if _need("macroRates"):
+            b["macroRates"] = _safe(lambda: macroRatesBlock(_ensure_summary().get("rates", {})))
+        if _need("macroLiquidity"):
+            b["macroLiquidity"] = _safe(lambda: macroLiquidityBlock(_ensure_summary().get("liquidity", {})))
+        if _need("macroSentiment"):
+            b["macroSentiment"] = _safe(lambda: macroSentimentBlock(_ensure_summary().get("sentiment", {})))
+        if _need("macroForecast"):
+            b["macroForecast"] = _safe(lambda: macroForecastBlock(_ensure_summary().get("forecast")))
+        if _need("macroCorporate"):
+            b["macroCorporate"] = _safe(lambda: macroCorporateBlock(_ensure_summary().get("corporate")))
+        if _need("macroTrade"):
+            _market = getattr(company, "market", "KR")
+            if _market == "KR":
+                b["macroTrade"] = _safe(lambda: macroTradeBlock(_ensure_summary().get("trade")))
+        if _need("macroFlags"):
+            b["macroFlags"] = _safe(lambda: macroFlagsBlock(_ensure_summary()))
         if _need("valuationBand"):
             b["valuationBand"] = _safe(lambda: valuationBandBlock(calcValuationBand(company, basePeriod=basePeriod)))
 

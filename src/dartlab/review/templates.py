@@ -342,7 +342,26 @@ _SECTION_CONFIG: dict[str, dict] = {
             "Pro-Forma 비율 가정이 과거와 크게 다르면 한계를 밝혀라."
         ),
     },
-    # ── 7부: 시장분석 ──
+    # ── 7부: 매크로 ──
+    "매크로": {
+        "visibleKeys": None,
+        "helper": (
+            "① 종합 매크로 환경 판정 (우호/중립/비우호)\n"
+            "② 경기 사이클 4국면 + 전환 시퀀스\n"
+            "③ 금리 방향 + 유동성 환경 → 기업 자금조달 여건\n"
+            "④ 침체확률 + LEI → 매출 전망 교차\n"
+            "⑤ 기업집계 → 시장 전체 이익사이클 속 이 회사 위치\n"
+            "⑥ 교역조건 (한국) → 수출기업 영향"
+        ),
+        "aiGuide": (
+            "매크로 환경은 기업 분석의 배경 — 숫자를 이 기업의 맥락으로 연결하라. "
+            "금리 인하 기대는 차입금 비중이 큰 기업에 긍정적, 현금부자에는 중립. "
+            "침체확률은 방향 지표 — 확률 자체보다 변화 추세가 중요. "
+            "기업집계의 Ponzi비율은 이 회사의 ICR과 비교하라. "
+            "교역조건은 수출기업에만 언급하라."
+        ),
+    },
+    # ── 8부: 시장분석 ──
     "시장분석": {
         "visibleKeys": None,
         "helper": (
@@ -401,7 +420,7 @@ PERSPECTIVE_TEMPLATES: dict[str, dict] = {
     "topDown": {
         "description": "매크로 → 시장 → 재무 순서 (거시환경 중심)",
         "order": [
-            "시장분석", "비교분석", "매출전망", "가치평가",
+            "매크로", "시장분석", "비교분석", "매출전망", "가치평가",
             "종합평가", "신용평가", "안정성", "자금조달",
             "현금흐름", "이익품질", "수익성", "비용구조",
             "수익구조", "성장성", "자산구조", "효율성",
@@ -410,9 +429,9 @@ PERSPECTIVE_TEMPLATES: dict[str, dict] = {
         ],
     },
     "cycle": {
-        "description": "사이클 관점 — 시장 위치 먼저, 기업이 어디에 있는지",
+        "description": "사이클 관점 — 매크로 + 시장 위치 먼저, 기업이 어디에 있는지",
         "order": [
-            "시장분석", "매출전망", "수익구조", "성장성",
+            "매크로", "시장분석", "매출전망", "수익구조", "성장성",
             "비용구조", "수익성", "현금흐름", "자금조달",
             "안정성", "가치평가", "종합평가", "비교분석",
         ],
@@ -435,9 +454,9 @@ PERSPECTIVE_TEMPLATES: dict[str, dict] = {
         ],
     },
     "crisis": {
-        "description": "위기 진단 관점 — 부채 + 유동성 + 신용 + 리스크 먼저",
+        "description": "위기 진단 관점 — 매크로 + 부채 + 유동성 + 신용 + 리스크 먼저",
         "order": [
-            "안정성", "자금조달", "현금흐름", "이익품질",
+            "매크로", "안정성", "자금조달", "현금흐름", "이익품질",
             "신용평가", "종합평가", "수익성", "수익구조",
             "가치평가", "시장분석",
         ],
@@ -487,6 +506,8 @@ STORY_TEMPLATES: dict[str, dict] = {
             "roicTree",
             "technicalSignals",
             "marketBeta",
+            "macroCycle",
+            "macroForecast",
         },
         "keyQuestions": [
             "현재 사이클 어디에 있는가 (정점/저점/회복/하강)?",
@@ -538,6 +559,8 @@ STORY_TEMPLATES: dict[str, dict] = {
             "growthTrend",
             "fundamentalDivergence",
             "technicalVerdict",
+            "macroRates",
+            "macroLiquidity",
         },
         "keyQuestions": [
             "흑자 전환이 구조적인가, 일시적인가?",
@@ -637,6 +660,7 @@ STORY_TEMPLATES: dict[str, dict] = {
             "shareholderReturn",
             "cashFlowOverview",
             "fcfUsage",
+            "macroRates",
         },
         "keyQuestions": [
             "현금을 왜 쌓고 있는가 (전략적 vs 비효율)?",

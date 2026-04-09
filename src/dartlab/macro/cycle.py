@@ -117,4 +117,31 @@ def analyze_cycle(*, market: str = "US", as_of: str | None = None, overrides: di
         },
     )
 
+    # ── Bridgewater 4 Quadrant (Growth × Inflation) ──
+    try:
+        from dartlab.core.finance.quadrant import classifyQuadrant
+
+        if market.upper() == "US":
+            # ISM PMI - 50 (성장 신호)
+            ism = fetch_latest(g, "NAPM")
+            # CPI YoY 3개월 모멘텀 (인플레 신호)
+            cpi_yoy = indicators.get("cpi_yoy")
+            cpi_yoy_prev = fetch_change_pct(g, "CPIAUCSL", 63)  # 3M ago
+            if ism is not None and cpi_yoy is not None:
+                growth_signal = ism - 50.0
+                # 인플레 모멘텀: 현재 CPI YoY 방향 (양수=상승 추세)
+                inflation_signal = cpi_yoy_prev if cpi_yoy_prev is not None else 0.0
+                result["quadrant"] = classifyQuadrant(growth_signal, inflation_signal)
+        elif market.upper() == "KR":
+            # BSI 제조업 (성장 대용치)
+            bsi = fetch_latest(g, "BSI")
+            cpi_yoy_kr = fetch_yoy(g, "CPI")
+            cpi_change = fetch_change_pct(g, "CPI", 3)
+            if bsi is not None and cpi_yoy_kr is not None:
+                growth_signal = bsi - 100.0  # BSI 100 기준
+                inflation_signal = cpi_change if cpi_change is not None else 0.0
+                result["quadrant"] = classifyQuadrant(growth_signal, inflation_signal)
+    except (KeyError, ValueError, TypeError, AttributeError):
+        pass
+
     return result

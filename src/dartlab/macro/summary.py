@@ -310,6 +310,42 @@ def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: 
     except (KeyError, ValueError, TypeError, AttributeError):
         pass
 
+    # ── Growth-at-Risk — Adrian, Boyarchenko, Giannone (2019) AER ──
+    # FCI → GDP 성장률 조건부 분위 추정 (summary 단계에서 축간 데이터 공유)
+    if forecast_result is not None:
+        try:
+            from dartlab.core.finance.growthAtRisk import growthAtRisk as _gar
+
+            fci_data = liquidity.get("fci") if isinstance(liquidity, dict) else None
+            fci_series = fci_data.get("history") if isinstance(fci_data, dict) else None
+            # fci_series가 없으면 단일 값으로는 분위회귀 불가 — skip
+            # GDP 성장률 시계열
+            from dartlab.macro._helpers import fetch_series_list, get_gather
+
+            _g = get_gather(as_of)
+            gdp_series = fetch_series_list(_g, "GDP")
+            if gdp_series and len(gdp_series) >= 20:
+                # GDP → YoY 성장률
+                gdp_growth = []
+                for i in range(4, len(gdp_series)):
+                    prev = gdp_series[i - 4]
+                    if prev and prev > 0:
+                        gdp_growth.append(((gdp_series[i] / prev) - 1) * 100)
+
+                # FCI 시계열 — liquidity에 history가 없으면 FCI 값 시계열 구축 시도
+                if not fci_series:
+                    # 단순 근사: NFCI 시계열을 FCI proxy로 사용
+                    nfci_series = fetch_series_list(_g, "NFCI")
+                    if nfci_series and len(nfci_series) >= 20:
+                        fci_series = nfci_series
+
+                if fci_series and gdp_growth:
+                    gar = _gar(fci_series, gdp_growth, horizon=4)
+                    if gar:
+                        forecast_result["growthAtRisk"] = gar
+        except (KeyError, ValueError, TypeError, AttributeError, ImportError):
+            pass
+
     return {
         "market": market.upper(),
         "overall": overall,

@@ -3990,6 +3990,28 @@ def macroCycleBlock(data: dict) -> list:
     ]
     if sector_lines:
         blocks.append(MetricBlock(sector_lines))
+
+    # Bridgewater 4 Quadrant (Growth × Inflation)
+    quadrant = data.get("quadrant")
+    if isinstance(quadrant, dict):
+        q_label = quadrant.get("quadrantLabel", "")
+        q_growth = "성장↑" if quadrant.get("growth") == "rising" else "성장↓"
+        q_infl = "인플레↑" if quadrant.get("inflation") == "rising" else "인플레↓"
+        q_conf = quadrant.get("confidence", "")
+        q_lines = [
+            ("매크로 체제", f"{q_label} ({q_growth}, {q_infl})"),
+            ("체제 신뢰도", q_conf),
+        ]
+        asset_impl = quadrant.get("assetImplication", {})
+        if asset_impl:
+            ow = [k for k, v in asset_impl.items() if v == "overweight"]
+            uw = [k for k, v in asset_impl.items() if v == "underweight"]
+            if ow:
+                q_lines.append(("Overweight", ", ".join(ow)))
+            if uw:
+                q_lines.append(("Underweight", ", ".join(uw)))
+        blocks.append(MetricBlock(q_lines))
+
     return blocks
 
 
@@ -4022,13 +4044,32 @@ def macroRatesBlock(data: dict) -> list:
         metrics.append(("수익률곡선", f"{shape} (Slope {slope:+.2f}%p)"))
 
     if real_rate:
-        metrics.append(("실질금리 국면", real_rate))
+        if isinstance(real_rate, dict):
+            metrics.append(("실질금리 국면", real_rate.get("regimeLabel", "")))
+        else:
+            metrics.append(("실질금리 국면", str(real_rate)))
+
+    # ACM Term Premium
+    tp = data.get("termPremium")
+    if isinstance(tp, dict):
+        tp_val = tp.get("value")
+        tp_label = tp.get("zoneLabel", "")
+        if tp_val is not None:
+            metrics.append(("텀프리미엄", f"{tp_val:+.2f}%p ({tp_label})"))
+
+    # Cochrane-Piazzesi Bond Risk Premium
+    cp = data.get("bondRiskPremium")
+    if isinstance(cp, dict):
+        cp_val = cp.get("cpFactor")
+        cp_label = cp.get("zoneLabel", "")
+        if cp_val is not None:
+            metrics.append(("CP 팩터", f"{cp_val:+.2f} ({cp_label})"))
 
     return [
         HeadingBlock(
             _meta("macroRates").label,
             level=2,
-            helper="금리 방향 + 수익률곡선 형태 → 기업 자금조달 비용 함의",
+            helper="금리 방향 + 수익률곡선 + 텀프리미엄 + 채권 리스크프리미엄",
         ),
         MetricBlock(metrics),
     ]
@@ -4112,11 +4153,22 @@ def macroSentimentBlock(data: dict) -> list:
         _BUY_LABELS = {0: "대기", 1: "1차 매수", 2: "2차 매수", 3: "3차 매수"}
         metrics.append(("분할매수 신호", f"{buy_signal}차 ({_BUY_LABELS.get(buy_signal, '')})"))
 
+    # JLN Macro Uncertainty
+    mu = data.get("macroUncertainty")
+    if isinstance(mu, dict):
+        mu_val = mu.get("value")
+        mu_label = mu.get("zoneLabel", "")
+        vs_vix = mu.get("vsVix", "")
+        if mu_val is not None:
+            metrics.append(("실물 불확실성", f"{mu_val:.3f} ({mu_label})"))
+            if vs_vix == "divergent":
+                metrics.append(("VIX-JLN 괴리", "금융과 실물 불확실성 방향 다름"))
+
     return [
         HeadingBlock(
             _meta("macroSentiment").label,
             level=2,
-            helper="공포탐욕 0-100 + VIX 구간 — 극단값에서 역투자 기회",
+            helper="공포탐욕 + VIX + JLN 실물 불확실성 — 극단값에서 역투자 기회",
         ),
         MetricBlock(metrics),
     ]
@@ -4167,6 +4219,17 @@ def macroForecastBlock(data: dict | None) -> list:
         if direction:
             metrics.append(("성장 모멘텀", direction))
 
+    # Growth-at-Risk (Adrian 2019)
+    gar = data.get("growthAtRisk")
+    if isinstance(gar, dict):
+        gar5 = gar.get("currentGaR5")
+        median = gar.get("median")
+        tail = gar.get("tailRiskLabel", "")
+        if gar5 is not None:
+            metrics.append(("GaR 5th", f"{gar5:+.1f}% ({tail})"))
+        if median is not None:
+            metrics.append(("GaR 중위", f"{median:+.1f}%"))
+
     if not metrics:
         return []
 
@@ -4174,7 +4237,7 @@ def macroForecastBlock(data: dict | None) -> list:
         HeadingBlock(
             _meta("macroForecast").label,
             level=2,
-            helper="침체확률 + LEI + Sahm Rule → 경기 방향 선행 지표",
+            helper="침체확률 + LEI + Sahm + Growth-at-Risk → 경기 방향 선행 지표",
         ),
         MetricBlock(metrics),
     ]
@@ -4279,6 +4342,20 @@ def macroFlagsBlock(summary: dict) -> list:
         minsky = crisis.get("minskyPhase")
         if isinstance(minsky, dict) and minsky.get("phase") in ("overtrading", "discredit", "revulsion"):
             warnings.append(f"Minsky {minsky.get('phaseLabel', minsky['phase'])}")
+        # Excess Bond Premium (Gilchrist 2012)
+        ebp = crisis.get("excessBondPremium")
+        if isinstance(ebp, dict) and ebp.get("recessionSignal"):
+            warnings.append(f"EBP {ebp.get('ebp', 0):.2f} — 침체 12개월 신호")
+        elif isinstance(ebp, dict) and ebp.get("zone") == "stress":
+            warnings.append(f"EBP {ebp.get('ebp', 0):.2f} — 신용 스트레스")
+        # Verdad Credit Cycle
+        cc = crisis.get("creditCycle")
+        if isinstance(cc, dict):
+            cc_phase = cc.get("phase")
+            if cc_phase == "trough":
+                opportunities.append(f"신용사이클 저점 — 역발상 매수 기회")
+            elif cc_phase == "peak":
+                warnings.append(f"신용사이클 정점 — 리스크 축소 시작")
 
     corporate = summary.get("corporate")
     if isinstance(corporate, dict):

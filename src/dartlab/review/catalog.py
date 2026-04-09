@@ -227,7 +227,15 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("quantConclusion", "시장 결론", "시장분석", "5 서사 방향 카운트 → 매수/매도/혼조"),
     BlockMeta("marketAnalysisFlags", "시장분석 플래그", "시장분석", "기술적 신호 경고/기회"),
     # ── 매크로 (시장 환경 + 기업-매크로 연결) ──
-    BlockMeta("macroCycle", "경기 사이클", "매크로", "회복/확장/둔화/침체 4국면 + 신뢰도 + 섹터 전략"),
+    BlockMeta("macroEnvironment", "경제 환경 종합", "매크로", "매크로 종합 판정 + 축별 기여도 + 자산배분 시사점"),
+    BlockMeta("macroCycle", "경기 사이클", "매크로", "회복/확장/둔화/침체 4국면 + 전환 시퀀스 + 섹터 전략"),
+    BlockMeta("macroRates", "금리 환경", "매크로", "금리 방향 + 수익률곡선 + 실질금리 국면"),
+    BlockMeta("macroLiquidity", "유동성 환경", "매크로", "유동성 regime + FCI + 신용스프레드"),
+    BlockMeta("macroSentiment", "시장 심리", "매크로", "공포탐욕 지수 + VIX 구간 + 분할매수 신호"),
+    BlockMeta("macroForecast", "경기 전망", "매크로", "침체확률 + LEI 신호 + 성장 모멘텀"),
+    BlockMeta("macroCorporate", "기업집계", "매크로", "전종목 이익사이클 + Ponzi비율 + 레버리지 추세"),
+    BlockMeta("macroTrade", "교역조건", "매크로", "교역조건 방향 + 수출이익 함의 (KR)"),
+    BlockMeta("macroFlags", "매크로 플래그", "매크로", "매크로 경고/기회 신호 집계"),
     BlockMeta("valuationBand", "밸류에이션 밴드", "매크로", "PER/PBR 과거 정규분포 대비 현재 위치"),
 ]
 

@@ -166,6 +166,55 @@ def analyze_rates(*, market: str = "US", as_of: str | None = None, overrides: di
             "description": rr.description,
         }
 
+    # ── ACM Term Premium — Adrian, Crump, Moench (2013) JFE ──
+    # NY Fed 일일 공개 또는 FRED THREEFYTP10
+    result["termPremium"] = None
+    if market.upper() == "US":
+        try:
+            tp = fetch_latest(g, "THREEFYTP10")
+            if tp is not None:
+                if tp < 0:
+                    tp_zone, tp_label = "compressed", "압축"
+                    tp_impl = "리스크 선호 — 채권 수요 강, 경기 낙관"
+                elif tp < 1.0:
+                    tp_zone, tp_label = "normal", "정상"
+                    tp_impl = "텀프리미엄 정상 범위"
+                else:
+                    tp_zone, tp_label = "elevated", "상승"
+                    tp_impl = "기간 보상 확대 — 경기 불확실성 또는 인플레 우려"
+                result["termPremium"] = {
+                    "value": round(tp, 3),
+                    "zone": tp_zone,
+                    "zoneLabel": tp_label,
+                    "implication": tp_impl,
+                    "description": f"10Y 텀프리미엄 {tp:+.2f}%p ({tp_label}). {tp_impl}.",
+                }
+        except (KeyError, ValueError, TypeError, AttributeError):
+            pass
+
+    # ── Cochrane-Piazzesi Factor — CP (2005) AER ──
+    # 선도금리 tent-shaped 팩터 → 채권 초과수익 R²=0.44
+    result["bondRiskPremium"] = None
+    if market.upper() == "US":
+        try:
+            from dartlab.core.finance.bondRiskPremia import cochranePiazzesiFactor, forwardRatesFromSpot
+
+            spot = {}
+            for mat, sid in [(1, "DGS1"), (2, "DGS2"), (3, "DGS3"), (5, "DGS5")]:
+                v = fetch_latest(g, sid)
+                if v is not None:
+                    spot[mat] = v
+            # 4Y는 3Y와 5Y 보간
+            if 3 in spot and 5 in spot:
+                spot[4] = (spot[3] + spot[5]) / 2
+            if len(spot) >= 5:
+                forwards = forwardRatesFromSpot(spot)
+                cp = cochranePiazzesiFactor(forwards)
+                if cp:
+                    result["bondRiskPremium"] = cp
+        except (KeyError, ValueError, TypeError, AttributeError):
+            pass
+
     # 시계열
     g = get_gather(as_of)
     result["timeseries"] = collect_timeseries(

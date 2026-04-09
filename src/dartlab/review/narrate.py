@@ -615,6 +615,30 @@ def narrateConcentration(data: dict) -> str | None:
     return text + "."
 
 
+def narrateMacroEnvironment(summary: dict) -> str | None:
+    """종합 매크로 환경 → 1-2문장 서술."""
+    if not summary:
+        return None
+    overall_label = summary.get("overallLabel", "")
+    score = summary.get("score", 0)
+    reasons = summary.get("reasons", [])
+    if not overall_label:
+        return None
+
+    if score >= 1.0:
+        tone = "경제 환경이 우호적이다"
+    elif score <= -1.0:
+        tone = "경제 환경이 비우호적이다"
+    else:
+        tone = "경제 환경이 혼조세다"
+
+    parts = [f"{tone} (종합 {score:+.1f})."]
+    if reasons:
+        top = ", ".join(reasons[:2])
+        parts.append(f"주요 근거: {top}.")
+    return " ".join(parts)
+
+
 # ── 막 결론 ──
 
 

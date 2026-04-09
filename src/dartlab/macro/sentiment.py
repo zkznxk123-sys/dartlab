@@ -81,4 +81,40 @@ def analyze_sentiment(*, market: str = "US", as_of: str | None = None, overrides
     g = get_gather(as_of)
     result["timeseries"] = collect_timeseries(g, {"vix": "VIXCLS", "sp500": "SP500", "hy_spread": "BAMLH0A0HYM2"})
 
+    # ── JLN Macro Uncertainty Index — Jurado, Ludvigson, Ng (2015) AER ──
+    # VIX = 금융 불확실성 (옵션 내재), JLN = 실물 불확실성 (132개 시계열 예측오차)
+    try:
+        jln = fetch_latest(g, "WLEMUINDXD")
+        if jln is not None:
+            if jln < 0.8:
+                zone, zone_label = "low", "낮음"
+            elif jln < 1.0:
+                zone, zone_label = "moderate", "보통"
+            elif jln < 1.2:
+                zone, zone_label = "high", "높음"
+            else:
+                zone, zone_label = "extreme", "극단"
+
+            # VIX-JLN 괴리 감지
+            vix_high = vix is not None and vix > 25
+            vix_low = vix is not None and vix < 15
+            jln_high = jln > 1.0
+            jln_low = jln < 0.8
+            if (vix_high and jln_low) or (vix_low and jln_high):
+                vs_vix = "divergent"
+                vs_desc = "금융(VIX)과 실물(JLN) 불확실성이 괴리"
+            else:
+                vs_vix = "aligned"
+                vs_desc = "금융과 실물 불확실성 방향 일치"
+
+            result["macroUncertainty"] = {
+                "value": round(jln, 3),
+                "zone": zone,
+                "zoneLabel": zone_label,
+                "vsVix": vs_vix,
+                "description": f"실물 불확실성 {jln:.3f} ({zone_label}). {vs_desc}.",
+            }
+    except (KeyError, ValueError, TypeError, AttributeError):
+        pass
+
     return result
