@@ -26,7 +26,6 @@ youtubeId: ""
 > **성장 + 사이클** | 산업재 > 항공우주와국방 | 2026-04-09 dartlab 실측
 > 같은 시리즈: [SK하이닉스](/blog/000660-skhynix) · [삼양식품](/blog/003230-samyang-foods) · [두산에너빌리티](/blog/034020-doosan-enerbility) · [알테오젠](/blog/196170-alteogen) · [HMM](/blog/011200-hmm) · [셀트리온](/blog/068270-celltrion) · [기업분석 시리즈 전체](/blog/series/company-reports)
 
-![한화에어로스페이스 — 삼성이 8,400억에 버린 무기가 수주잔고 37조가 됐다](./assets/07-thumbnail.webp)
 
 ---
 
