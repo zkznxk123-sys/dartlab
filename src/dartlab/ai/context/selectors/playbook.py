@@ -1,7 +1,7 @@
 """Playbook selector — ACE evolving playbook을 ContextPart로 주입.
 
 intent 별 retrieval된 bullet들을 한 ContextPart로 합쳐 HIGH 우선순위로 주입.
-Phase 1.5에서 14축 calc selectors와 함께 동작.
+analysis calc selectors와 함께 동작.
 """
 
 from __future__ import annotations

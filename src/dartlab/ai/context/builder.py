@@ -67,7 +67,7 @@ class ContextBuilder:
         # 1. Intent 분류
         intentResult = classifyIntent(self.question, hasCompany=self.company is not None)
 
-        # 2. selector 호출 (legacy + ACE playbook + 14축 calc)
+        # 2. selector 호출 (legacy + ACE playbook + analysis calc)
         parts: list[ContextPart] = []
         parts.extend(selectCompanySearch(self.question, self.company))
         parts.extend(selectDisclosureBrief(stockCode))
@@ -76,7 +76,7 @@ class ContextBuilder:
         parts.extend(selectInsightHints(stockCode, self.company))
         # ACE evolving playbook — intent별 학습된 분석 지침 주입
         parts.extend(selectPlaybookBullets(intentResult.intent.value, self.company))
-        # Phase 1.5: intent → 14축 calc selector 라우팅
+        # intent → analysis calc selector 라우팅
         parts.extend(self._selectCalcForIntent(intentResult.intent))
         # Phase 2: 인과 질문("왜") → graph traversal
         try:
@@ -123,7 +123,7 @@ class ContextBuilder:
         )
 
     def _selectCalcForIntent(self, intent: Intent) -> list[ContextPart]:
-        """intent → 14축 calc selector 라우팅.
+        """intent → analysis calc selector 라우팅.
 
         Company 없으면 빈 리스트. calc 실패 시 빈 리스트 (graceful).
         ACT_ALL → 핵심 3개(margin + cashflow + distress)만.

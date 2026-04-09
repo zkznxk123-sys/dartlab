@@ -752,9 +752,9 @@ revenue(c)  # 도메인 차트를 먼저 사용 — 1줄로 자동 생성
 **모든 분석 엔진은 무인자 호출 시 가이드 DataFrame을 반환한다.** 첫 번째로 이걸 시도하라.
 
 ```python
-print(c.analysis())     # 14축 가이드 (수익성/성장성/안정성 등)
-print(c.quant())        # 30축 가이드 (모멘텀/베타/팩터 등)
-print(c.credit())       # 7축 가이드 (채무상환/유동성 등)
+print(c.analysis())     # 분석 가이드 (수익성/성장성/안정성 등)
+print(c.quant())        # 기술적 분석 가이드 (모멘텀/베타/팩터 등)
+print(c.credit())       # 신용 가이드 (채무상환/유동성 등)
 print(dartlab.macro())  # 11축 가이드 (사이클/금리/심리 등)
 print(dartlab.scan())   # 20축 가이드 (전종목 횡단)
 ```
@@ -1267,7 +1267,7 @@ def _analyze_inner(
             _ground_executor.shutdown(wait=False)
 
     # ── ContextBuilder (기본 경로) ──
-    # ACE (arxiv.org/abs/2510.04618) + 14축 calc selector + graph traversal.
+    # ACE (arxiv.org/abs/2510.04618) + analysis calc selector + graph traversal.
     # A/B 검증 완료: +31.6% 응답 풍부도, 10/10 성공, 에러 0.
     # DARTLAB_CONTEXT_V1=1 로 legacy 강제 가능 (디버깅용).
     _use_legacy = os.environ.get("DARTLAB_CONTEXT_V1") == "1"

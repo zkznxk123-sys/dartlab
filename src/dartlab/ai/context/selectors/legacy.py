@@ -2,7 +2,7 @@
 
 Phase 1의 첫 마일스톤: 동작 변경 없이 ai/context/ 구조로 옮긴다.
 기존 ai/runtime/core.py 의 5개 헬퍼를 호출하여 ContextPart로 변환만 한다.
-회귀가 없는지 확인한 다음, Phase 1.5에서 14축 calc selector로 대체한다.
+회귀가 없는지 확인한 다음, analysis calc selector로 대체한다.
 
 대응 관계:
     _searchCompanyCodes      → selectCompanySearch       (CRITICAL — 종목코드 식별)

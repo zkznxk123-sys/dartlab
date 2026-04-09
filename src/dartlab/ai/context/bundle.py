@@ -18,7 +18,7 @@ class PartPriority(IntEnum):
     """
 
     CRITICAL = 100  # 분석 대상 종목/회사명 — 절대 트리밍 금지
-    HIGH = 80  # 14축 calc 결과 (intent 매칭)
+    HIGH = 80  # analysis calc 결과 (intent 매칭)
     MEDIUM = 60  # 인사이트, 그래프 traversal
     LOW = 40  # 외부 검색, 메모리 힌트
     OPTIONAL = 20  # few-shot 예시

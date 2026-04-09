@@ -13,7 +13,7 @@ selfai 폐기 학습 적용: ML 없음, 모든 규칙은 명시적 코드.
     compare          — 시장 비교 (scan)
     concept          — 개념질문 (capabilities, docs)
 
-오분류 fallback: act_all (전체 14축 요약 주입)
+오분류 fallback: act_all (핵심 축 요약 주입)
 """
 
 from __future__ import annotations

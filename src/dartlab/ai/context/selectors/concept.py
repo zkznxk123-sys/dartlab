@@ -8,7 +8,7 @@ _CAPABILITIES_SUMMARY = """dartlab 주요 API:
 - dartlab.Company("종목코드") → 회사 facade (show/select/analysis/review)
 - c.show("IS") / c.show("BS") / c.show("CF") — 재무제표
 - c.select("IS", ["매출액"]) — 행 필터
-- c.analysis("수익성") — 14축 재무분석
+- c.analysis("수익성") — 재무분석
 - c.review("수익성") — 보고서
 - c.credit() — 신용평가
 - dartlab.scan("profitability") — 전종목 횡단분석

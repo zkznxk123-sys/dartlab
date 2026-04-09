@@ -8,7 +8,7 @@ Phase 1 (현재):
                 (손실 없는 이주, A/B 비교 가능)
 
 Phase 1.5 (다음):
-    act1~6.py, compare.py, concept.py — 14축 calc 결과를 intent별로 선택 주입
+    act1~6.py, compare.py, concept.py — analysis calc 결과를 intent별로 선택 주입
 """
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-"""14축 Calc Selector 공통 헬퍼.
+"""Analysis Calc Selector 공통 헬퍼.
 
 모든 act selector가 사용하는 패턴:
 1. _safeCalc(fn, company, basePeriod) → dict | None

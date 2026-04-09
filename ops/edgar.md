@@ -70,7 +70,7 @@ EXEMPT에 **등록하면 안 되는** 경우:
 
 ## 구조적 한계 (SEC 데이터 없음 — 허용된 None)
 
-analysis 14축 중 4축에서 DART report 전용 서브키가 None:
+analysis 일부 축에서 DART report 전용 서브키가 None:
 
 | 축 | None 키 | 원인 | SEC 대안 |
 |---|---|---|---|

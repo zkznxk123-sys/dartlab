@@ -68,7 +68,7 @@ dartlab.chat("005930", "배당 추세는?")     # Company-bound
 
 > **벤치마크 숫자로 기본 모델을 정하지 않는다.**
 > 각 모델로 dartlab AI audit 30개 질문 실행 → G/P/C/V 등급 비교 → 충분한 품질이 나오는 모델만 권장.
-> 벤치마크 #3 이어도 14축 분석 + 6막 서사 + tool calling 이 잘 안 되면 권장 불가.
+> 벤치마크 #3 이어도 재무분석 + 6막 서사 + tool calling 이 잘 안 되면 권장 불가.
 
 ## API
 
@@ -245,7 +245,7 @@ Question
 
 ### Phase 1.5 완료 (2026-04-09)
 
-- selectors/act1~6.py — 14축 calc 결과를 intent별로 선택 주입 ✅
+- selectors/act1~6.py — 분석 calc 결과를 intent별로 선택 주입 ✅
 - A/B 평가: 10질문 × v1/v2, **+31.6%** 응답 풍부도 ✅
 - Phase 2 Graph — 인과 질문 9/9 graph 주입 ✅
 - **기본 ON으로 병합** — feature flag 제거 ✅
