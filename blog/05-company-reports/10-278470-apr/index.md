@@ -335,6 +335,15 @@ c.review()
 
 ---
 
+
+## 외부 출처
+
+- [2025 사상 최대 실적](https://www.insightkorea.co.kr/news/articleView.html?idxno=240537)
+- [메디큐브 TikTok $1억+](https://www.tramicheck.com/newsletter/premium-brands-win-big-on-tiktok-shop-medicubes-102m-case-study)
+- [코스맥스 역대 최대](https://biz.heraldcorp.com/article/10680761)
+- [아모레 영업익 47.6% 폭증](https://www.dailybizon.com/news/articleView.html?idxno=62388)
+- [LG생건 영업이익 62.8% 감소](https://www.insightkorea.co.kr/news/articleView.html?idxno=240117)
+
 ## 검증표
 
 | 본문 수치 | 출처 |

@@ -339,6 +339,15 @@ c.review()
 
 ---
 
+
+## 외부 출처
+
+- [연매출 3.3조 달성](https://www.krafton.com/news/press/%ED%81%AC%EB%9E%98%ED%94%84%ED%86%A4-2025%EB%85%84-%EC%97%B0%EA%B0%84-%EB%A7%A4%EC%B6%9C-3%EC%A1%B0-3266%EC%96%B5-%EC%9B%90-%EB%8B%AC%EC%84%B1/)
+- [일본 3대 광고회사 인수](https://www.hankookilbo.com/News/Read/A2025072023230004607)
+- [한국 패키지 게임 최단 기록](https://krafton.com/news/press/%ED%81%AC%EB%9E%98%ED%94%84%ED%86%A4-%EC%9D%B8%EC%A1%B0%EC%9D%B4-%EC%96%BC%EB%A6%AC-%EC%95%A1%EC%84%B8%EC%8A%A4-%EC%B6%9C%EC%8B%9C-1%EC%A3%BC-%EB%A7%8C%EC%97%90-%ED%8C%90%EB%A7%A4/)
+- [ChatGPT CEO 해임 시나리오](https://www.aitimes.com/news/articleView.html?idxno=208009)
+- [창사 최초 현금배당](https://www.krafton.com/news/press/%ED%81%AC%EB%9E%98%ED%94%84%ED%86%A4-3%EB%85%84%EA%B0%84-1%EC%A1%B0-%EC%9B%90-%EC%9D%B4%EC%83%81-%EC%A3%BC%EC%A3%BC%ED%99%98%EC%9B%90-%EC%B6%94%EC%A7%84/)
+
 ## 검증표
 
 | 본문 수치 | 출처 |

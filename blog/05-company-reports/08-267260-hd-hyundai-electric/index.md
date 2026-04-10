@@ -329,6 +329,15 @@ c.review()
 
 ---
 
+
+## 외부 출처
+
+- [미국 내 765kV 생산 가능 2곳](https://www.hankyung.com/article/2026021072111)
+- [숙련공의 손기술](https://v.daum.net/v/20260402120645320)
+- [중국 변압기 백도어 사건](https://www.vice.com/en/article/the-mysterious-case-of-the-missing-250-ton-chinese-power-transformer/)
+- [AI 전력 소비](https://www.pwc.com/kr/ko/insights/issue-brief/causes-and-implication-in-electricity-power-ai-age.html)
+- [역대 최대 단일 수주](https://www.hankookilbo.com/News/Read/A2025092211150005734)
+
 ## 검증표
 
 | 본문 수치 | 출처 |

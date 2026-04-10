@@ -419,6 +419,15 @@ c.select("CF", ["영업활동현금흐름","유형자산의 취득"], freq="Y")
 
 ---
 
+
+## 외부 출처
+
+- [K9 세계 점유율 52%](https://www.ebn.co.kr/news/articleView.html?idxno=1692751)
+- [삼성테크윈 인수](https://www.businesspost.co.kr/BP?command=article_view&num=6926)
+- [폴란드 672문 계약](https://biz.heraldcorp.com/article/10646280)
+- [누리호 엔진 52기 제작](https://www.fnnews.com/news/202506301834361453)
+- [SIPRI 세계 10위](https://economist.co.kr/article/view/ecn202504230066)
+
 ## 검증표
 
 | 본문 수치 | 출처 |

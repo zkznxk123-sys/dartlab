@@ -436,6 +436,15 @@ c.review()
 
 ---
 
+
+## 외부 출처
+
+- [경영권 분쟁 전체 타임라인](https://namu.wiki/w/%EA%B3%A0%EB%A0%A4%EC%95%84%EC%97%B0%20%EA%B2%BD%EC%98%81%EA%B6%8C%20%EB%B6%84%EC%9F%81)
+- [대법원 최종 판결](https://heraldk.com/2026/04/02/%EB%8C%80%EB%B2%95%EC%9B%90-%EA%B3%A0%EB%A0%A4%EC%95%84%EC%97%B0-%E2%80%98%EC%83%81%ED%98%B8%EC%A3%BC-%EC%9D%98%EA%B2%B0%EA%B6%8C-%EC%A0%9C%ED%95%9C%E2%80%99-%EC%A0%81%EB%B2%95-%ED%8C%90%EA%B2%B0/)
+- [세계 최대 단일 제련소](https://www.sedaily.com/article/20016663)
+- [전략광물 매출 3배](https://www.ferrotimes.com/news/articleView.html?idxno=44217)
+- [TC 역대 최저에도 사상 최대](https://www.creditnews.kr/news/articleView.html?idxno=2575)
+
 ## 검증표
 
 | 본문 수치 | 출처 |
