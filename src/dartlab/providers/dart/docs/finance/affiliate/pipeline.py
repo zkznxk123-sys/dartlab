@@ -38,7 +38,7 @@ def affiliates(
     corpName = extractCorpName(df)
 
     kinds = PERIOD_KINDS.get(period, PERIOD_KINDS["y"])
-    years = sorted(df["year"].unique().to_list(), reverse=True)
+    years = sorted(df["year"].unique().to_list(), reverse=True)[:5]  # 최근 5년
 
     allProfiles: dict[str, list[AffiliateProfile]] = {}
     allMovements: dict[str, list[AffiliateMovement]] = {}

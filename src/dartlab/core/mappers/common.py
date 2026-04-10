@@ -11,11 +11,20 @@ import re
 # ── 한글 정규화 ──
 
 _RE_KO_SPACE = re.compile(r"(?<=[\uAC00-\uD7A3])\s+(?=[\uAC00-\uD7A3])")
+_RE_NOTE_REF = re.compile(r"\(\*?\d+\)$|\(주\d*\)$")  # (*1), (주1), (*2) 등 주석번호
 
 
 def normalizeName(name: str) -> str:
-    """항목명 정규화. 한글 사이 공백 제거."""
-    return _RE_KO_SPACE.sub("", name.strip())
+    """항목명 정규화.
+
+    1. 앞뒤 공백 제거
+    2. 한글 사이 공백 제거 ("기 초" → "기초")
+    3. 주석번호 제거 ("담보부차입금(*1)" → "담보부차입금")
+    """
+    s = name.strip()
+    s = _RE_KO_SPACE.sub("", s)
+    s = _RE_NOTE_REF.sub("", s).strip()
+    return s
 
 
 # ── 기간 판정 ──

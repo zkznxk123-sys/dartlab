@@ -36,7 +36,7 @@ def notesDetail(
 
     keywords = NOTES_KEYWORDS.get(keyword, [keyword])
     kinds = PERIOD_KINDS.get(period, PERIOD_KINDS["y"])
-    years = sorted(df["year"].unique().to_list(), reverse=True)
+    years = sorted(df["year"].unique().to_list(), reverse=True)[:5]  # 최근 5년
 
     allTables: dict[str, list[NotesPeriod]] = {}
     unitByYear: dict[str, float] = {}

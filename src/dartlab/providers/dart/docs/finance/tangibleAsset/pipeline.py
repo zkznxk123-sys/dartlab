@@ -21,7 +21,7 @@ def tangibleAsset(stockCode: str) -> TangibleAssetResult | None:
     df = loadData(stockCode)
     corpName = extractCorpName(df)
 
-    years = sorted(df["year"].unique().to_list(), reverse=True)
+    years = sorted(df["year"].unique().to_list(), reverse=True)[:5]  # 최근 5년
 
     allMovements: dict[str, list[TangibleMovement]] = {}
     allWarnings: list[str] = []

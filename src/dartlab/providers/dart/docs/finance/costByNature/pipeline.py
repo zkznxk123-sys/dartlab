@@ -35,7 +35,7 @@ def costByNature(stockCode: str, period: str = "y") -> CostByNatureResult | None
     df = loadData(stockCode)
     corpName = extractCorpName(df)
 
-    years = sorted(df["year"].unique().to_list(), reverse=True)
+    years = sorted(df["year"].unique().to_list(), reverse=True)[:5]  # 최근 5년
     reportKinds = PERIOD_KINDS.get(period, ["annual"])
 
     yearData: dict[str, dict[str, float | None]] = {}
