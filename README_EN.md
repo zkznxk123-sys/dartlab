@@ -44,12 +44,7 @@ DartLab is built on one premise: **every period must be comparable, and every co
 ## Quick Start
 
 ```bash
-uv add dartlab
-
-pip install dartlab              # core + AI (openai, gemini included)
-pip install dartlab[server]      # + web server (FastAPI, MCP)
-pip install dartlab[viz]         # + charts (Plotly)
-pip install dartlab[all]         # everything
+pip install dartlab
 ```
 
 ```python
