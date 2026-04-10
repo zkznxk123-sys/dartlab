@@ -458,24 +458,9 @@ class RatioSeriesResult:
     operatingCashflow: list[float | None] = field(default_factory=list)
 
 
-def _safeDiv(a: float | None, b: float | None) -> float | None:
-    if a is None or b is None or b == 0:
-        return None
-    return a / b
-
-
-def _safePct(a: float | None, b: float | None) -> float | None:
-    r = _safeDiv(a, b)
-    if r is None:
-        return None
-    return round(r * 100, 2)
-
-
-def _safePctPositive(a: float | None, b: float | None) -> float | None:
-    """분모가 양수일 때만 비율 계산. 적자(음수) 분모는 None."""
-    if b is not None and b < 0:
-        return None
-    return _safePct(a, b)
+from dartlab.core.finance.calc import safeDiv as _safeDiv  # noqa: E402
+from dartlab.core.finance.calc import safePct as _safePct  # noqa: E402
+from dartlab.core.finance.calc import safePctPositive as _safePctPositive  # noqa: E402
 
 
 def _safeRound(v: float | None, n: int = 2) -> float | None:

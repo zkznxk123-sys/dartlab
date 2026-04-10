@@ -42,10 +42,7 @@ def _yoy(cur, prev) -> float | None:
     return round((cur - prev) / abs(prev) * 100, 2)
 
 
-def _pctOf(part, total) -> float | None:
-    if part is None or total is None or total == 0:
-        return None
-    return round(part / total * 100, 2)
+from dartlab.core.finance.calc import safePct as _pctOf  # noqa: E402
 
 
 # ── 레버리지 구조 시계열 ──

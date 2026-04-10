@@ -22,10 +22,7 @@ def _get(row: dict, col: str) -> float:
     return v if v is not None else 0
 
 
-def _pct(part: float, total: float) -> float | None:
-    if total is None or total == 0:
-        return None
-    return round(part / total * 100, 2)
+from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
 
 
 # ── 배당 정책 ──

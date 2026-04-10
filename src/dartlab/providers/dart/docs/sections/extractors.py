@@ -181,12 +181,6 @@ class ParsedSubtopicTable:
     failedPeriods: list[str] = field(default_factory=list)
 
 
-# 하위 호환 alias — 기존 호출자가 _normalizeName 등을 쓰는 경우
-_normalizeName = normalizeName
-_pickValue = pickValue
-_isCurrentPeriod = isCurrentPeriod
-
-
 def _parseOneCellTable(
     cellText: str,
     *,
@@ -216,7 +210,7 @@ def _parseOneCellTable(
         # 당기 블록 선택
         currentBlock = None
         for p in parsed:
-            if _isCurrentPeriod(p["period"]):
+            if isCurrentPeriod(p["period"]):
                 currentBlock = p
                 break
         if currentBlock is None:
@@ -224,10 +218,10 @@ def _parseOneCellTable(
 
         items: list[dict[str, str | float | None]] = []
         for item in currentBlock["items"]:
-            name = _normalizeName(item["name"])
+            name = normalizeName(item["name"])
             if not name:
                 continue
-            rawVal = _pickValue(item["values"])
+            rawVal = pickValue(item["values"])
             if numeric:
                 items.append({"name": name, "value": parseAmount(rawVal)})
             else:
@@ -241,11 +235,11 @@ def _parseOneCellTable(
 
     items = []
     for row in tables[0]["rows"]:
-        name = _normalizeName(row[0]) if row else ""
+        name = normalizeName(row[0]) if row else ""
         if not name:
             continue
         values = row[1:] if len(row) > 1 else []
-        rawVal = _pickValue(values) if values else ""
+        rawVal = pickValue(values) if values else ""
         if numeric:
             items.append({"name": name, "value": parseAmount(rawVal)})
         else:

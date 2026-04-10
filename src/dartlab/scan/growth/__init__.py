@@ -31,17 +31,7 @@ _NI_IDS = {
 _NI_NMS = {"당기순이익", "당기순이익(손실)"}
 
 
-def _cagr(old: float, new: float, years: int) -> float | None:
-    """CAGR 계산 (%). new/old가 음수면 None."""
-    if old is None or new is None or years <= 0 or old <= 0 or new <= 0:
-        return None
-    try:
-        result = ((new / old) ** (1 / years) - 1) * 100
-        if isinstance(result, complex):
-            return None
-        return round(result, 1)
-    except (ZeroDivisionError, ValueError, OverflowError, TypeError):
-        return None
+from dartlab.core.finance.calc import cagr as _cagr  # noqa: E402
 
 
 def _gradeGrowth(revCagr: float | None, opCagr: float | None) -> str:

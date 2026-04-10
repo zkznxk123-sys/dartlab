@@ -1,6 +1,6 @@
 """주석 세부항목 파이프라인.
 
-테이블 빌드는 core/mappers/masterParser.buildTableDf()에 위임.
+테이블 빌드는 notesDetail/tableBuilder.buildTableDf()에 위임.
 이 모듈은 데이터 로드 + 섹션 추출 + 테이블 파싱만 담당.
 """
 

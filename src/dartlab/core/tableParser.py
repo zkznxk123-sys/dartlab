@@ -1,6 +1,7 @@
 import re
 
 from dartlab.core.constants import DEFAULT_UNIT_SCALE, UNIT_SCALE
+from dartlab.core.mappers.common import normalizeName as _normalizeKoSpaces
 
 
 def extractTables(content: str) -> list[dict]:
@@ -442,7 +443,7 @@ def extractAccounts(content: str) -> tuple[dict[str, list[float | None]], list[s
                 continue
             if re.match(r"^\d{4}년", name):
                 continue
-            name = re.sub(r"(?<=[\uAC00-\uD7A3])\s+(?=[\uAC00-\uD7A3])", "", name)
+            name = _normalizeKoSpaces(name)
             name = re.sub(r"[\[\]ㆍ·]", "", name).strip()
             if not name:
                 continue

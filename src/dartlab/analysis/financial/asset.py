@@ -31,11 +31,7 @@ def _getFirst(data: dict, keys: list[str], col: str) -> float:
     return 0
 
 
-def _pct(part: float, total: float) -> float:
-    """퍼센트 계산 (0 division 안전)."""
-    if total is None or total == 0:
-        return 0.0
-    return part / total * 100
+from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
 
 
 # ── 영업/비영업 분류 매핑 ──

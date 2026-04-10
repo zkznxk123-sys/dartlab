@@ -47,11 +47,7 @@ class _Input:
 # ══════════════════════════════════════
 
 
-def _safeDiv(a: float | None, b: float | None) -> float | None:
-    """안전한 나누기."""
-    if a is None or b is None or b == 0:
-        return None
-    return a / b
+from dartlab.core.finance.calc import safeDiv as _safeDiv  # noqa: E402
 
 
 def _pct(v: float | None) -> str:

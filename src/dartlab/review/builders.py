@@ -38,7 +38,7 @@ def _notesDetailBlocks(data: dict, keyLabels: dict[str, str]) -> list:
     """notesDetail enrichment → TextBlock + TableBlock 리스트.
 
     calc 함수가 notesDetail 필드를 반환했을 때, 주석 테이블로 렌더링.
-    notes accessor 는 원 단위로 노출되므로(`masterParser.buildTableDf`에서 정규화)
+    notes accessor 는 원 단위로 노출되므로(`tableBuilder.buildTableDf`에서 정규화)
     추가 단위 변환 불필요.
 
     all-null row 제거 — parser 가 sub-row 헤더 (예: "OAT Nego", "Banker's Usance"

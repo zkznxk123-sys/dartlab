@@ -170,17 +170,8 @@ class ValuationSummary:
 # ── 내부 유틸 ──────────────────────────────────────────────
 
 
-def _safeDiv(a: Optional[float], b: Optional[float]) -> Optional[float]:
-    if a is None or b is None or b == 0:
-        return None
-    return a / b
-
-
-def _cagr(start: float, end: float, years: int) -> Optional[float]:
-    """CAGR (%) 계산."""
-    if start <= 0 or end <= 0 or years <= 0:
-        return None
-    return ((end / start) ** (1 / years) - 1) * 100
+from dartlab.core.finance.calc import cagr as _cagr  # noqa: E402
+from dartlab.core.finance.calc import safeDiv as _safeDiv  # noqa: E402
 
 
 def _getFcfFromSeries(series: dict, annual: bool = False) -> Optional[float]:
