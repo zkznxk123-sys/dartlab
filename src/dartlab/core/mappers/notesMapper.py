@@ -54,6 +54,9 @@ class NotesMapper(BaseMapper):
     def _items(self) -> dict[str, dict]:
         return self._data().get("items", {})
 
+    def _aliases(self) -> dict[str, str]:
+        return self._data().get("aliases", {})
+
     def reload(self) -> None:
         """캐시 무효화 — scanner 갱신 후 호출."""
         self._cache = None
@@ -88,8 +91,23 @@ class NotesMapper(BaseMapper):
             return True  # 미등록 항목은 금액으로 간주
         return info.get("type") == "amount"
 
+    def resolveAlias(self, itemName: str) -> str:
+        """항목명을 canonical로 정규화. 매핑 없으면 원본 반환.
+
+        alias에서 _skip_* 로 시작하면 제거 대상.
+        """
+        import re
+
+        normalized = re.sub(r"\s+", "", itemName)
+        aliases = self._aliases()
+        return aliases.get(normalized, itemName)
+
     def isSkip(self, itemName: str) -> bool:
         """파싱에서 제외할 항목인지."""
+        # alias에서 _skip_ 으로 시작하면 제거
+        resolved = self.resolveAlias(itemName)
+        if resolved.startswith("_skip_"):
+            return True
         info = self.lookup(itemName)
         if info is None:
             return False

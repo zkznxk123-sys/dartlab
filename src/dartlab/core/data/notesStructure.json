@@ -85,5 +85,19 @@
     "재고자산에대한기술": {"type": "text", "category": "inventory", "foreignCurrency": false, "frequency": 0.0, "skip": true},
     "리스에대한기술": {"type": "text", "category": "lease", "foreignCurrency": false, "frequency": 0.0, "skip": true},
     "무형자산에대한기술": {"type": "text", "category": "intangibleAsset", "foreignCurrency": false, "frequency": 0.0, "skip": true}
+  },
+  "aliases": {
+    "_metadata": "연도 간 같은 항목의 다른 이름 → canonical. AI 학습 대상.",
+    "재고자산계": "재고자산합계",
+    "제품및상품": "재고자산합계",
+    "재고자산": "재고자산합계",
+    "계": "_skip_ambiguous",
+    "소계": "_skip_ambiguous",
+    "단기차입금및유동성장기차입금": "단기차입금",
+    "무담보차입금": "일반차입금",
+    "담보부차입금": "담보차입금",
+    "인식면제규정이적용된소액자산리스및단기리스를포함한리스료에관련되는비용": "_skip_verbose",
+    "기간동안비용으로인식한재고자산의원가": "매출원가인식재고",
+    "기간비용으로인식한재고자산의원가": "매출원가인식재고"
   }
 }

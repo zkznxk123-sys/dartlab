@@ -75,6 +75,11 @@ def buildTableDf(
             if mapper.isSkip(normalized):
                 continue
 
+            # alias 정규화 — 연도 간 같은 항목의 다른 이름을 canonical로 통합
+            normalized = mapper.resolveAlias(normalized)
+            if normalized.startswith("_skip_"):
+                continue
+
             if normalized not in itemData:
                 itemData[normalized] = {}
             if item.values:
