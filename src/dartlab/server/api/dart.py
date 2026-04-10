@@ -1,7 +1,7 @@
-"""DART API 프록시 — 키 없는 사용자를 위한 서버 측 OpenDART 호출.
+"""DART 데이터 API — HuggingFace 사전빌드 데이터 기반 즉시 응답.
 
-서버에 DART_API_KEY를 두고, 사용자는 키 없이 실시간 공시 조회.
-Rate limit으로 남용 방지, crtfc_key 필드 제거로 키 노출 방지.
+재무제표, 보고서, 공시 목록 등 대부분의 데이터는 이미 HuggingFace에 있다.
+OpenDART API를 실시간 호출하지 않고, dartlab Company/listing으로 HF 데이터를 반환.
 """
 
 from __future__ import annotations
@@ -13,72 +13,93 @@ from fastapi import APIRouter, HTTPException, Query
 router = APIRouter(prefix="/api/dart", tags=["dart"])
 _log = logging.getLogger(__name__)
 
-_MAX_ROWS = 100
+_MAX_ROWS = 200
 
 
-def _get_client():
-    """서버 측 DartClient 싱글톤."""
-    from dartlab.providers.dart.openapi.client import DartClient
-
-    return DartClient()
-
-
-def _sanitize(data: dict | list) -> dict | list:
-    """응답에서 crtfc_key 필드를 제거."""
-    if isinstance(data, dict):
-        return {k: _sanitize(v) for k, v in data.items() if k != "crtfc_key"}
-    if isinstance(data, list):
-        return [_sanitize(item) if isinstance(item, (dict, list)) else item for item in data]
-    return data
+def _df_to_response(df, max_rows: int = _MAX_ROWS) -> dict:
+    """DataFrame → JSON 응답."""
+    if df is None or (hasattr(df, "is_empty") and df.is_empty()):
+        return {"count": 0, "total": 0, "rows": []}
+    total = df.height if hasattr(df, "height") else len(df)
+    rows = df.head(max_rows).to_dicts() if hasattr(df, "to_dicts") else []
+    return {"count": len(rows), "total": total, "rows": rows}
 
 
 @router.get("/filings")
 def dart_filings(
-    corp: str | None = Query(None, description="종목코드 또는 corp_code"),
-    start: str | None = Query(None, description="시작일 (YYYYMMDD)"),
-    end: str | None = Query(None, description="종료일 (YYYYMMDD)"),
-    type: str | None = Query(None, description="공시유형 필터"),
+    corp: str | None = Query(None, description="종목코드"),
+    topK: int = Query(20, description="최대 건수"),
 ):
-    """공시 목록 조회."""
+    """공시 목록 — HF 데이터 기반."""
     try:
-        from dartlab.providers.dart.openapi.dart import Dart
+        import dartlab
 
-        dart = Dart()
-        df = dart.filings(corp=corp, start=start or "20250101", end=end, type=type)
-        rows = df.head(_MAX_ROWS).to_dicts()
-        return _sanitize({"count": len(rows), "total": df.height, "rows": rows})
-    except (ValueError, KeyError, RuntimeError) as exc:
+        if corp:
+            c = dartlab.Company(corp)
+            df = c.filings(topK=topK)
+        else:
+            df = dartlab.listing("filings")
+        return _df_to_response(df, max_rows=topK)
+    except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/company/{corp}")
 def dart_company_info(corp: str):
-    """기업 기본 정보."""
+    """기업 기본 정보 — HF 데이터 기반."""
     try:
-        from dartlab.providers.dart.openapi.dart import Dart
+        import dartlab
 
-        dart = Dart()
-        info = dart.company(corp)
-        return _sanitize(info)
-    except (ValueError, KeyError, RuntimeError) as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        c = dartlab.Company(corp)
+        return {
+            "corpName": c.corpName,
+            "stockCode": c.stockCode,
+            "market": getattr(c, "market", None),
+            "currency": getattr(c, "currency", None),
+        }
+    except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.get("/finance/{corp}")
 def dart_finance(
     corp: str,
-    year: int | None = Query(None, description="사업연도"),
-    quarter: int | None = Query(None, description="분기 (0=연간, 1~3=분기)"),
+    statement: str = Query("IS", description="IS/BS/CF/CIS/SCE"),
+    freq: str = Query("Q", description="Q(분기)/Y(연간)"),
 ):
-    """재무제표 조회."""
+    """재무제표 — HF parquet 즉시 반환."""
     try:
-        from dartlab.providers.dart.openapi.dart import Dart
+        import dartlab
 
-        dart = Dart()
-        df = dart.finstate(corp, start=year, q=quarter)
-        rows = df.head(_MAX_ROWS).to_dicts()
-        return _sanitize({"count": len(rows), "total": df.height, "rows": rows})
-    except (ValueError, KeyError, RuntimeError) as exc:
+        c = dartlab.Company(corp)
+        if freq == "Y":
+            df = c.show(statement, freq="Y")
+        else:
+            df = c.show(statement)
+        return _df_to_response(df)
+    except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/show/{corp}/{topic}")
+def dart_show(
+    corp: str,
+    topic: str,
+    period: str | None = Query(None, description="기간 필터"),
+):
+    """공시 토픽 데이터 — HF parquet 즉시 반환."""
+    try:
+        import dartlab
+
+        c = dartlab.Company(corp)
+        if period:
+            result = c.show(topic, period=period)
+        else:
+            result = c.show(topic)
+        if hasattr(result, "to_dicts"):
+            return _df_to_response(result)
+        return {"data": str(result)[:5000]}
+    except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
@@ -86,15 +107,69 @@ def dart_finance(
 def dart_report(
     corp: str,
     category: str,
-    year: int | None = Query(None, description="사업연도"),
 ):
-    """보고서 API (배당, 직원, 임원 등 56개 카테고리)."""
+    """보고서 (배당, 직원, 임원 등) — HF parquet 즉시 반환."""
     try:
-        from dartlab.providers.dart.openapi.dart import Dart
+        import dartlab
 
-        dart = Dart()
-        df = dart.report(corp, category, start=year)
-        rows = df.head(_MAX_ROWS).to_dicts()
-        return _sanitize({"count": len(rows), "total": df.height, "rows": rows})
-    except (ValueError, KeyError, RuntimeError) as exc:
+        c = dartlab.Company(corp)
+        df = c.show(category)
+        if hasattr(df, "to_dicts"):
+            return _df_to_response(df)
+        return {"data": str(df)[:5000]}
+    except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/scan/{axis}")
+def dart_scan(
+    axis: str,
+    target: str | None = Query(None, description="축별 대상 (account: 계정명, ratio: 비율명)"),
+):
+    """전종목 횡단분석 — 프리빌드 parquet 즉시 반환."""
+    try:
+        import dartlab
+
+        if target:
+            df = dartlab.scan(axis, target)
+        else:
+            df = dartlab.scan(axis)
+        return _df_to_response(df)
+    except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/search")
+def dart_search(
+    q: str = Query(..., description="검색어"),
+    corp: str | None = Query(None, description="종목코드 필터"),
+):
+    """공시 원문 검색 — stemIndex 즉시 반환."""
+    try:
+        import dartlab
+
+        if corp:
+            df = dartlab.search(q, corp=corp)
+        else:
+            df = dartlab.search(q)
+        return _df_to_response(df)
+    except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/listing")
+def dart_listing(
+    kind: str = Query("companies", description="companies/filings/topics"),
+    corp: str | None = Query(None, description="filings 시 종목코드"),
+):
+    """상장 종목/공시 목록."""
+    try:
+        import dartlab
+
+        if kind == "filings" and corp:
+            df = dartlab.listing("filings", corp=corp)
+        else:
+            df = dartlab.listing(kind)
+        return _df_to_response(df)
+    except (ValueError, KeyError, RuntimeError, FileNotFoundError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
