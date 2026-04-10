@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.7] - 2026-04-11
+
+### Added
+
+- **AIView 정량 데이터 보강**: `autoEnrich()` — calc 결과에 5년평균/YoY/백분위 자동 주입. AI가 "영업이익률 13%"만 보던 것에서 "전기비 +2.2pp, 5년평균 위 1.2pp" 맥락까지 이해
+- **Returns 독스트링 표준화**: analysis 전 calc 함수에 numpydoc 표준 Returns (키:타입—설명(단위)) 적용. parseReturnsSchema() → autoEnrich 자동 연결
+- **예측신호 고도화**: 업종별 사전확률 41개 + 베이즈 연속 확률 + 매크로 민감도 매핑
+- **DartCompany/EdgarCompany**: notes 12항목 동기화, show/select 인터페이스 통합
+
+### Fixed
+
+- predictionSignals: 패키지 설치 환경 경로 호환 (parents[4]→parents[2])
+- standalone.py: deprecated `use_tools` 파라미터 제거
+
 ## [0.9.6] - 2026-04-10
 
 ### Added
