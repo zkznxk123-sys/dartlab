@@ -23,7 +23,6 @@ def _get(row: dict, col: str) -> float:
 
 from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
 
-
 # ── 비용 비중 분해 ──
 
 

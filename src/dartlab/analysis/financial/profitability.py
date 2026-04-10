@@ -22,7 +22,6 @@ def _yoy(cur, prev) -> float | None:
 
 from dartlab.core.finance.calc import safePct as _pctOf  # noqa: E402
 
-
 # ── 이익 구조 시계열 ──
 
 

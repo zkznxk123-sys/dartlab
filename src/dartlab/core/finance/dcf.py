@@ -171,7 +171,6 @@ class ValuationSummary:
 
 
 from dartlab.core.finance.calc import cagr as _cagr  # noqa: E402
-from dartlab.core.finance.calc import safeDiv as _safeDiv  # noqa: E402
 
 
 def _getFcfFromSeries(series: dict, annual: bool = False) -> Optional[float]:

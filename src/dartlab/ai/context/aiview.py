@@ -29,11 +29,29 @@ from typing import Any
 
 # ── 비율 필드 감지 키워드 ─────────────────────────────────
 
-_RATIO_KEYWORDS = frozenset({
-    "margin", "ratio", "rate", "roe", "roa", "roic", "turnover",
-    "pct", "yield", "percent", "coverage", "leverage", "yoy",
-    "dso", "dio", "dpo", "ccc", "dol", "payout",
-})
+_RATIO_KEYWORDS = frozenset(
+    {
+        "margin",
+        "ratio",
+        "rate",
+        "roe",
+        "roa",
+        "roic",
+        "turnover",
+        "pct",
+        "yield",
+        "percent",
+        "coverage",
+        "leverage",
+        "yoy",
+        "dso",
+        "dio",
+        "dpo",
+        "ccc",
+        "dol",
+        "payout",
+    }
+)
 
 
 def _isRatioField(field: str, value: Any) -> bool:
@@ -49,6 +67,7 @@ def _isRatioField(field: str, value: Any) -> bool:
 
 
 # ── 변화 판단 ─────────────────────────────────────────────
+
 
 def _judgeChange(delta: float | None, isRatio: bool) -> str:
     if delta is None:
@@ -67,18 +86,34 @@ def _judgeChange(delta: float | None, isRatio: bool) -> str:
 # ── 한글 필드명 ───────────────────────────────────────────
 
 _KOREAN = {
-    "operatingMargin": "영업이익률", "netMargin": "순이익률",
-    "grossMargin": "매출총이익률", "roe": "ROE", "roa": "ROA",
-    "roic": "ROIC", "revenue": "매출", "operatingIncome": "영업이익",
-    "netIncome": "순이익", "debtRatio": "부채비율",
-    "equityRatio": "자기자본비율", "ocf": "영업CF", "fcf": "FCF",
-    "capex": "CAPEX", "ccc": "CCC", "dso": "매출채권회수일",
-    "dio": "재고회전일", "dpo": "매입채무회전일",
-    "totalAssetTurnover": "총자산회전율", "revenueYoy": "매출YoY",
-    "operatingIncomeYoy": "영업이익YoY", "netIncomeYoy": "순이익YoY",
-    "costOfSalesRatio": "매출원가율", "sgaRatio": "판관비율",
-    "ocfToNi": "영업CF/순이익", "ocfMargin": "영업CF마진",
-    "interestCoverage": "이자보상배율", "pattern": "CF패턴",
+    "operatingMargin": "영업이익률",
+    "netMargin": "순이익률",
+    "grossMargin": "매출총이익률",
+    "roe": "ROE",
+    "roa": "ROA",
+    "roic": "ROIC",
+    "revenue": "매출",
+    "operatingIncome": "영업이익",
+    "netIncome": "순이익",
+    "debtRatio": "부채비율",
+    "equityRatio": "자기자본비율",
+    "ocf": "영업CF",
+    "fcf": "FCF",
+    "capex": "CAPEX",
+    "ccc": "CCC",
+    "dso": "매출채권회수일",
+    "dio": "재고회전일",
+    "dpo": "매입채무회전일",
+    "totalAssetTurnover": "총자산회전율",
+    "revenueYoy": "매출YoY",
+    "operatingIncomeYoy": "영업이익YoY",
+    "netIncomeYoy": "순이익YoY",
+    "costOfSalesRatio": "매출원가율",
+    "sgaRatio": "판관비율",
+    "ocfToNi": "영업CF/순이익",
+    "ocfMargin": "영업CF마진",
+    "interestCoverage": "이자보상배율",
+    "pattern": "CF패턴",
 }
 
 
@@ -101,6 +136,7 @@ def _formatNum(value: Any, field: str = "") -> str:
 
 
 # ── 핵심: autoEnrich ─────────────────────────────────────
+
 
 def autoEnrich(data: dict | list | None, *, company: Any = None, calc_fn: Any = None) -> dict | list | None:
     """엔진 반환값을 자동 감지해서 AI용 맥락 보강.
@@ -136,11 +172,9 @@ def autoEnrich(data: dict | list | None, *, company: Any = None, calc_fn: Any = 
 
     # 중첩 history — 전체 analysis dict: {"marginTrend": {"history": [...]}, ...}
     tsKeys = [
-        k for k, v in data.items()
-        if isinstance(v, dict)
-        and "history" in v
-        and isinstance(v["history"], list)
-        and v["history"]
+        k
+        for k, v in data.items()
+        if isinstance(v, dict) and "history" in v and isinstance(v["history"], list) and v["history"]
     ]
     if tsKeys:
         return _enrichDictWithHistory(data, tsKeys, company=company)
@@ -155,8 +189,12 @@ def autoEnrich(data: dict | list | None, *, company: Any = None, calc_fn: Any = 
 
 # ── 패턴 1: dict with history[] ──────────────────────────
 
+
 def _enrichDictWithHistory(
-    data: dict, tsKeys: list[str], *, company: Any = None,
+    data: dict,
+    tsKeys: list[str],
+    *,
+    company: Any = None,
 ) -> dict:
     """history[] 시계열을 자동 보강. 모든 analysis 축에 범용 적용."""
     summaries: list[str] = []
@@ -192,10 +230,7 @@ def _summarizeHistory(hist: list[dict], label: str, *, schema: dict | None = Non
     prev = hist[1]
 
     # 모든 숫자 필드 감지
-    numericFields = [
-        k for k, v in latest.items()
-        if isinstance(v, (int, float)) and k != "period"
-    ]
+    numericFields = [k for k, v in latest.items() if isinstance(v, (int, float)) and k != "period"]
     if not numericFields:
         return ""
 
@@ -227,15 +262,17 @@ def _summarizeHistory(hist: list[dict], label: str, *, schema: dict | None = Non
         elif avg5 != 0:
             vsAvg = (current - avg5) / abs(avg5) * 100
 
-        fieldInfos.append({
-            "field": field,
-            "current": current,
-            "isRatio": isRatio,
-            "yoy": round(yoy, 2) if yoy is not None else None,
-            "vsAvg": round(vsAvg, 2) if vsAvg is not None else None,
-            "judgment": _judgeChange(yoy, isRatio),
-            "avg5": round(avg5, 2),
-        })
+        fieldInfos.append(
+            {
+                "field": field,
+                "current": current,
+                "isRatio": isRatio,
+                "yoy": round(yoy, 2) if yoy is not None else None,
+                "vsAvg": round(vsAvg, 2) if vsAvg is not None else None,
+                "judgment": _judgeChange(yoy, isRatio),
+                "avg5": round(avg5, 2),
+            }
+        )
 
     # 비율 필드 우선, 변화가 큰 순
     ratios = [f for f in fieldInfos if f["isRatio"]]
@@ -260,6 +297,7 @@ def _summarizeHistory(hist: list[dict], label: str, *, schema: dict | None = Non
 
 
 # ── 패턴 2: flat dict ────────────────────────────────────
+
 
 def _enrichFlat(data: dict) -> dict:
     """flat dict 보강 — credit, quant 결과."""
@@ -315,8 +353,20 @@ def parseReturnsSchema(fn: Callable) -> dict[str, dict] | None:
             continue
         if inReturns:
             # 다른 섹션 시작 감지 (Raises, Examples, Notes, Guide, See Also)
-            if stripped and not stripped[0].isspace() and stripped[0] != " " and ":" not in stripped and stripped in (
-                "Raises", "Examples", "Notes", "Guide", "See Also", "Parameters",
+            if (
+                stripped
+                and not stripped[0].isspace()
+                and stripped[0] != " "
+                and ":" not in stripped
+                and stripped
+                in (
+                    "Raises",
+                    "Examples",
+                    "Notes",
+                    "Guide",
+                    "See Also",
+                    "Parameters",
+                )
             ):
                 break
             # 빈 줄 다음에 섹션 헤더가 올 수 있음

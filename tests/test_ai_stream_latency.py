@@ -38,6 +38,9 @@ def _make_mock_provider():
         supports_cache_control = False
         config = None
 
+        def check_available(self) -> bool:
+            return True
+
         def stream(self, messages):
             yield "first chunk"
 

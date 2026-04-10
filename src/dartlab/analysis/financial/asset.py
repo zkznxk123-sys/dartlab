@@ -33,7 +33,6 @@ def _getFirst(data: dict, keys: list[str], col: str) -> float:
 
 from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
 
-
 # ── 영업/비영업 분류 매핑 ──
 
 # 영업자산 — 이중 카운팅 방지를 위해 fallback 쌍 분리
