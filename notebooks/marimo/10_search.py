@@ -9,24 +9,18 @@ __generated_with = "0.22.0"
 app = marimo.App(width="medium")
 
 
-@app.cell(hide_code=True)
-def _():
-    import marimo as mo
-    mo.md("""# Search
-
-전체 공시 원문 검색 — stem ID 역인덱스. 모델 불필요, cold start 0ms.""")
-    return
-
 @app.cell
 def _():
     import dartlab
     dartlab.search("유상증자")
     return (dartlab,)
 
+
 @app.cell
 def _(dartlab):
     dartlab.search("대표이사 변경", corp="005930")
     return
+
 
 @app.cell
 def _(dartlab):

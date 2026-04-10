@@ -63,21 +63,42 @@ import dartlab
 c = dartlab.Company("005930")       # Samsung Electronics
 
 c.sections                          # every topic, every period, side by side
-# shape: (41, 12) — 41 topics across 12 periods
-#                     2025Q4  2024Q4  2024Q3  2023Q4  ...
-# companyOverview       v       v       v       v
-# businessOverview      v       v       v       v
-# riskManagement        v       v       v       v
+```
 
+> Text and numbers on a single timeline — the core of cross-period comparability
+>
+> <img src=".github/assets/sections-example.webp" alt="c.sections output — Samsung Electronics, 41 topics × 12 periods" width="720">
+
+```python
+
+c.show("IS")                        # income statement — quarterly by default
+```
+
+> Quarterly financials are the default — snakeId + Korean labels side by side
+>
+> <img src=".github/assets/show-is-quarterly.webp" alt="c.show('IS') — Samsung Electronics quarterly income statement" width="720">
+
+```python
+c.show("IS", freq="Y")             # freq="Y" for annual aggregation
+```
+
+> Same data, annualized — automatic 4-quarter summation
+>
+> <img src=".github/assets/show-is-annual.webp" alt="c.show('IS', freq='Y') — Samsung Electronics annual income statement" width="720">
+
+```python
 c.show("businessOverview")          # what this company actually does
 c.diff("businessOverview")          # what changed since last year
-c.show("BS")                        # standardized balance sheet
 c.show("ratios")                    # financial ratios, already calculated
-#                     2025    2024    2023    ...
-# ROE               15.7%   5.4%   -4.3%
-# Operating Margin   21.4%   8.6%   -0.9%
-# Debt Ratio        37.5%  36.5%   35.6%
 
+c.filings()                         # all reports — direct links to DART viewer
+```
+
+> From annual reports to quarterly filings, dartUrl links straight to the original
+>
+> <img src=".github/assets/show-filings.webp" alt="c.filings() — Samsung Electronics report list with DART viewer links" width="720">
+
+```python
 # Same interface, different country
 us = dartlab.Company("AAPL")
 us.show("business")
@@ -160,8 +181,12 @@ Cross-company analysis across all listed firms. Governance, workforce, capital, 
 ```python
 dartlab.scan("governance")            # governance across all firms
 dartlab.scan("ratio", "roe")          # ROE across all firms
-dartlab.scan("cashflow")              # OCF/ICF/FCF + 8-pattern classification
+dartlab.scan("account", "매출액")      # revenue time-series across all firms
 ```
+
+> 2,500+ companies at a glance — quarterly revenue side by side
+>
+> <img src=".github/assets/scan-account.webp" alt="dartlab.scan('account', '매출액') — cross-company revenue comparison" width="720">
 
 ### Gather — External Market Data
 

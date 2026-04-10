@@ -64,21 +64,42 @@ import dartlab
 c = dartlab.Company("005930")       # 삼성전자
 
 c.sections                          # 모든 topic, 모든 기간, 나란히
-# shape: (41, 12) — 41개 토픽 × 12개 기간
-#                     2025Q4  2024Q4  2024Q3  2023Q4  ...
-# companyOverview       v       v       v       v
-# businessOverview      v       v       v       v
-# riskManagement        v       v       v       v
+```
 
+> 텍스트와 숫자의 시계열 수평화 — 전 기간 비교 가능성의 핵심
+>
+> <img src=".github/assets/sections-example.webp" alt="c.sections 출력 예시 — 삼성전자 41개 토픽 × 12개 기간" width="720">
+
+```python
+
+c.show("IS")                        # 손익계산서 — 분기가 기본
+```
+
+> 분기별 재무제표가 기본 — snakeId + 한글 항목명 동시 제공
+>
+> <img src=".github/assets/show-is-quarterly.webp" alt="c.show('IS') — 삼성전자 분기 손익계산서" width="720">
+
+```python
+c.show("IS", freq="Y")             # freq="Y"로 연간 합산
+```
+
+> 같은 데이터, 연간으로 — 4분기 합산 자동 처리
+>
+> <img src=".github/assets/show-is-annual.webp" alt="c.show('IS', freq='Y') — 삼성전자 연간 손익계산서" width="720">
+
+```python
 c.show("businessOverview")          # 이 회사가 실제로 뭘 하는지
 c.diff("businessOverview")          # 작년 대비 뭐가 바뀌었는지
-c.show("BS")                        # 표준화된 재무상태표
 c.show("ratios")                    # 재무비율, 이미 계산됨
-#                     2025    2024    2023    ...
-# ROE               15.7%   5.4%   -4.3%
-# 영업이익률         21.4%   8.6%   -0.9%
-# 부채비율          37.5%  36.5%   35.6%
 
+c.filings()                         # 모든 보고서 — DART 뷰어로 바로 연결
+```
+
+> 사업보고서부터 분기보고서까지, dartUrl로 원문 즉시 확인
+>
+> <img src=".github/assets/show-filings.webp" alt="c.filings() — 삼성전자 보고서 목록 + DART 뷰어 링크" width="720">
+
+```python
 # 같은 인터페이스, 다른 나라
 us = dartlab.Company("AAPL")
 us.show("business")
@@ -161,8 +182,12 @@ c.diff()                        # 뭐가 바뀌었는지 -- 기간 간 텍스트
 ```python
 dartlab.scan("governance")            # 전종목 지배구조
 dartlab.scan("ratio", "roe")          # 전종목 ROE
-dartlab.scan("cashflow")              # OCF/ICF/FCF + 8유형 패턴 분류
+dartlab.scan("account", "매출액")      # 전종목 매출액 시계열
 ```
+
+> 2,500+ 종목의 매출액을 한 번에 — 분기별 시계열로 즉시 비교
+>
+> <img src=".github/assets/scan-account.webp" alt="dartlab.scan('account', '매출액') — 전종목 매출액 횡단 비교" width="720">
 
 ### Gather — 외부 시장 데이터
 
