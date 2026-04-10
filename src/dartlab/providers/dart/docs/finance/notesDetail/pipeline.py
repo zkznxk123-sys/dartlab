@@ -89,7 +89,7 @@ def notesDetail(
     if not allTables:
         return None
 
-    from dartlab.core.mappers.masterParser import buildTableDf
+    from dartlab.providers.dart.docs.finance.notesDetail.tableBuilder import buildTableDf
     from dartlab.core.mappers.notesMapper import NotesMapper
 
     tableDf = buildTableDf(allTables, unitByYear, mapper=NotesMapper())

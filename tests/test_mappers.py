@@ -23,12 +23,12 @@ def test_engine_singleton():
     assert e1 is e2
 
 
-def test_engine_has_5_mappers():
-    """엔진에 5개 매퍼 등록."""
+def test_engine_has_6_mappers():
+    """엔진에 6개 매퍼 등록."""
     from dartlab.core.mappers import getEngine
 
     engine = getEngine()
-    assert set(engine.mappers.keys()) == {"account", "topic", "alias", "flow", "notes"}
+    assert set(engine.mappers.keys()) == {"account", "topic", "alias", "flow", "notes", "parser"}
 
 
 def test_engine_summary():
@@ -45,7 +45,7 @@ def test_engine_allStats():
     from dartlab.core.mappers import getEngine
 
     stats = getEngine().allStats()
-    assert len(stats) == 5
+    assert len(stats) == 6
     for s in stats:
         assert s.coverage > 0
 
@@ -267,7 +267,7 @@ def test_snapshot_and_diff(tmp_path):
 
     # 스냅샷 저장
     snaps = engine.snapshot("2026Q1")
-    assert len(snaps) == 5
+    assert len(snaps) == 6
 
     # 같은 스냅샷 두 번 → diff에서 변화 없음
     engine.snapshot("2026Q2")
@@ -399,23 +399,103 @@ def test_scanner_hasForeignInName():
 # ── MasterParser ──
 
 
-def test_masterParser_pickValue():
-    """masterParser 값 선택."""
-    from dartlab.core.mappers.masterParser import _pickValue
-    from dartlab.core.mappers.notesMapper import NotesMapper
+def test_common_pickValue():
+    """common.pickValue 값 선택."""
+    from dartlab.core.mappers.common import pickValue
 
-    m = NotesMapper()
     # 원화 값 우선
-    assert _pickValue(["USD 1,000", "1,234,567"], m, "완제품") == "1,234,567"
+    assert pickValue(["USD 1,000", "1,234,567"]) == "1,234,567"
     # 빈 값 스킵
-    assert _pickValue(["", "-", "5,678"], m, "완제품") == "5,678"
+    assert pickValue(["", "-", "5,678"]) == "5,678"
 
 
-def test_masterParser_isCurrentPeriod():
+def test_common_isCurrentPeriod():
     """당기 판정."""
-    from dartlab.core.mappers.masterParser import _isCurrentPeriod
+    from dartlab.core.mappers.common import isCurrentPeriod
 
-    assert _isCurrentPeriod("당기말")
-    assert _isCurrentPeriod("당기")
-    assert not _isCurrentPeriod("전기말")
-    assert not _isCurrentPeriod("전반기")
+    assert isCurrentPeriod("당기말")
+    assert isCurrentPeriod("당기")
+    assert not isCurrentPeriod("전기말")
+    assert not isCurrentPeriod("전반기")
+
+
+def test_common_normalizeName():
+    """한글 사이 공백 제거."""
+    from dartlab.core.mappers.common import normalizeName
+
+    assert normalizeName("기 초") == "기초"
+    assert normalizeName("  기 말  ") == "기말"
+    assert normalizeName("ABC DEF") == "ABC DEF"  # 영문 공백은 유지
+
+
+# ── ParserMapper ──
+
+
+def test_parser_affiliateMovement():
+    """affiliate 변동내역 매핑."""
+    from dartlab.core.mappers import getEngine
+
+    m = getEngine().get("parser")
+    assert m.affiliateMovement("기초") == "opening"
+    assert m.affiliateMovement("취득") == "acquisition"
+    assert m.affiliateMovement("배당") == "dividend"
+    assert m.affiliateMovement("없는항목") is None
+
+
+def test_parser_affiliateProfile():
+    """affiliate 프로파일 매핑."""
+    from dartlab.core.mappers import getEngine
+
+    m = getEngine().get("parser")
+    assert m.affiliateProfile("지분율") == "ownership"
+    assert m.affiliateProfile("소재지") == "location"
+
+
+def test_parser_costNormalize():
+    """비용 항목 정규화."""
+    from dartlab.core.mappers import getEngine
+
+    m = getEngine().get("parser")
+    assert m.costNormalize("원재료") == "원재료사용"
+    assert m.costNormalize("인건비") == "종업원급여"
+    assert m.costNormalize("없는비용") is None
+
+
+def test_parser_isCostTotal():
+    """합계 행 판별."""
+    from dartlab.core.mappers import getEngine
+
+    m = getEngine().get("parser")
+    assert m.isCostTotal("합계")
+    assert m.isCostTotal("영업비용합계")
+    assert not m.isCostTotal("급여")
+
+
+def test_parser_sectionTopic():
+    """sections topic 매핑."""
+    from dartlab.core.mappers import getEngine
+
+    m = getEngine().get("parser")
+    assert m.sectionTopic("재고자산명세서") == "noteInventoryDetail"
+    assert m.sectionTopic("사채명세서") == "noteDebtDetail"
+    assert m.sectionTopic("없는명세서") is None
+
+
+def test_parser_chapterFromMajor():
+    """장번호 → 로마숫자."""
+    from dartlab.core.mappers import getEngine
+
+    m = getEngine().get("parser")
+    assert m.chapterFromMajor(1) == "I"
+    assert m.chapterFromMajor(12) == "XII"
+    assert m.chapterFromMajor(99) is None
+
+
+def test_parser_stats():
+    """parser 매퍼 통계."""
+    from dartlab.core.mappers import getEngine
+
+    m = getEngine().get("parser")
+    s = m.stats()
+    assert s.name == "parser"
+    assert s.totalEntries > 80  # affiliate(91) + cost(29) + sections(15)

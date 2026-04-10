@@ -25,6 +25,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from dartlab.core.mappers.common import normalizeName
+
 log = logging.getLogger(__name__)
 
 _STRUCTURE_PATH = Path(__file__).resolve().parents[1] / "data" / "notesStructure.json"
@@ -63,11 +65,6 @@ def _classifyType(name: str, values: list[str]) -> str:
 def _hasForeignInName(name: str) -> bool:
     """항목명에 외화 관련 키워드가 있는지."""
     return bool(_FOREIGN_NAME_PATTERNS.search(name))
-
-
-def _normalizeName(name: str) -> str:
-    """항목명 정규화."""
-    return re.sub(r"(?<=[\uAC00-\uD7A3])\s+(?=[\uAC00-\uD7A3])", "", name.strip())
 
 
 def scanNotes(stockCode: str) -> dict[str, dict[str, Any]]:
@@ -123,7 +120,7 @@ def scanNotes(stockCode: str) -> dict[str, dict[str, Any]]:
 
             for block in parsed:
                 for item in block.get("items", []):
-                    name = _normalizeName(item["name"])
+                    name = normalizeName(item["name"])
                     if not name:
                         continue
                     values = item.get("values", [])

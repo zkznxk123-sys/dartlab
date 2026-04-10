@@ -25,11 +25,12 @@ from dartlab.core.mappers.engine import BaseMapper, MapperEngine, MapperStats
 
 @lru_cache(maxsize=1)
 def getEngine() -> MapperEngine:
-    """매퍼 엔진 싱글턴. 5개 매퍼 자동 등록."""
+    """매퍼 엔진 싱글턴. 6개 매퍼 자동 등록."""
     from dartlab.core.mappers.accountMapper import AccountMapper
     from dartlab.core.mappers.aliasMapper import AliasMapper
     from dartlab.core.mappers.flowMapper import FlowMapper
     from dartlab.core.mappers.notesMapper import NotesMapper
+    from dartlab.core.mappers.parserMapper import ParserMapper
     from dartlab.core.mappers.topicMapper import TopicMapper
 
     engine = MapperEngine()
@@ -38,6 +39,7 @@ def getEngine() -> MapperEngine:
     engine.register(AliasMapper())
     engine.register(FlowMapper())
     engine.register(NotesMapper())
+    engine.register(ParserMapper())
     return engine
 
 

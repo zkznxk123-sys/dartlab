@@ -9,20 +9,9 @@ from dartlab.providers.dart.docs.sections.artifacts import loadProjectionRules
 
 _RE_MAJOR_HEADING = re.compile(r"^([가-힣])\.\s*(.+)$")
 _RE_TABLE_SEP = re.compile(r"^\|(?:\s*:?-{3,}:?\s*\|)+$")
-_CHAPTER_BY_MAJOR = {
-    1: "I",
-    2: "II",
-    3: "III",
-    4: "IV",
-    5: "V",
-    6: "VI",
-    7: "VII",
-    8: "VIII",
-    9: "IX",
-    10: "X",
-    11: "XI",
-    12: "XII",
-}
+from dartlab.core.mappers.parserMapper import loadSections
+
+_CHAPTER_BY_MAJOR = {int(k): v for k, v in loadSections().get("chapterByMajor", {}).items()}
 _CHAPTER_II_SPLIT_SOURCE = "주요제품및원재료등"
 _CHAPTER_II_SPLIT_FALLBACK_TARGETS = ("productService", "rawMaterial")
 _ATOMIC_SEMANTIC_TOPICS = {
@@ -42,34 +31,9 @@ _ATOMIC_SEMANTIC_TOPICS = {
     "fairValueRisk",
     "derivativeExposure",
 }
-_DETAIL_TOPIC_MAP = {
-    "재고자산명세서": "noteInventoryDetail",
-    "감가상각비등명세서": "noteDepreciationDetail",
-    "제조원가명세서": "noteManufacturingCostDetail",
-    "법인세등명세서": "noteTaxDetail",
-    "법인세비용명세서": "noteTaxDetail",
-    "개별재무제표에관한사항": "noteSeparateFinancialStatementsDetail",
-    "연결재무제표에관한사항": "noteConsolidatedFinancialStatementsDetail",
-    "유가증권명세서": "noteSecuritiesDetail",
-    "주요채권명세서": "noteReceivablesDetail",
-    "사채명세서": "noteDebtDetail",
-    "장기차입금명세서": "noteDebtDetail",
-    "단기차입금명세서": "noteDebtDetail",
-    "주요채무명세서": "noteDebtDetail",
-    "예금등명세서": "noteCashDetail",
-    "감사인의보수등에관한사항": "auditFeeDetail",
-}
-_DETAIL_TOPIC_KEYWORDS = {
-    "noteInventoryDetail": ("재고자산", "inventory"),
-    "noteDepreciationDetail": ("감가상각", "depreciation"),
-    "noteManufacturingCostDetail": ("제조원가", "manufacturing"),
-    "noteTaxDetail": ("법인세", "세무", "tax"),
-    "noteSecuritiesDetail": ("유가증권", "securities"),
-    "noteReceivablesDetail": ("채권", "매출채권", "receivables"),
-    "noteDebtDetail": ("차입금", "사채", "채무", "debt", "borrowings"),
-    "noteCashDetail": ("예금", "현금", "cash"),
-    "auditFeeDetail": ("감사보수", "보수", "비감사용역"),
-}
+_SEC = loadSections()
+_DETAIL_TOPIC_MAP = _SEC.get("detailTopicMap", {})
+_DETAIL_TOPIC_KEYWORDS = {k: tuple(v) for k, v in _SEC.get("detailTopicKeywords", {}).items()}
 
 
 def chapterFromMajorNum(majorNum: int) -> str | None:

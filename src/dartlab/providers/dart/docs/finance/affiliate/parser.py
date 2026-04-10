@@ -413,43 +413,9 @@ def extractProfiles(rows: list[list[str]]) -> list[AffiliateProfile]:
 # ── 변동내역 ──────────────────────────────────────────────────
 
 
-MOVEMENT_COL_MAP = {
-    "기초": "opening",
-    "기 초": "opening",
-    "기초금액": "opening",
-    "기말": "closing",
-    "기 말": "closing",
-    "기말금액": "closing",
-    "취득": "acquisition",
-    "취 득": "acquisition",
-    "취득(처분)": "acquisition",
-    "취득/처분": "acquisition",
-    "취득/처분/출자금의환급": "acquisition",
-    "취득/대체": "acquisition",
-    "처분": "disposal",
-    "처 분": "disposal",
-    "지분법손익": "equityIncome",
-    "지분법이익(손실)": "equityIncome",
-    "지분법이익": "equityIncome",
-    "지분법손실": "equityIncome",
-    "이익중지분해당액": "equityIncome",
-    "지분법자본변동": "equityCapChange",
-    "지분법 자본변동": "equityCapChange",
-    "(부의)지분법자본변동": "equityCapChange",
-    "배당": "dividend",
-    "배 당": "dividend",
-    "배당금": "dividend",
-    "배당및배분": "dividend",
-    "배당 및 배분": "dividend",
-    "손상": "impairment",
-    "손상차손": "impairment",
-    "기타": "other",
-    "기타증감액": "other",
-    "기타변동": "other",
-    "연결범위변동": "other",
-    "대 체": "other",
-    "원금회수": "other",
-}
+from dartlab.core.mappers.parserMapper import loadAffiliate
+
+MOVEMENT_COL_MAP = loadAffiliate().get("movement", {})
 
 _MOVEMENT_HEADER_KEYWORDS = ["기초", "기 초"]
 
@@ -684,63 +650,8 @@ def extractSimpleMovement(rows: list[list[str]]) -> list[dict]:
 # ── 횡전개(기업명=열) 파서 ────────────────────────────────────
 
 
-_TRANSPOSED_PROFILE_MAP = {
-    "지분율": "ownership",
-    "소유지분율": "ownership",
-    "장부금액": "bookValue",
-    "지분법적용 투자지분": "bookValue",
-    "지분법적용투자지분": "bookValue",
-    "관계기업투자 장부금액": "bookValue",
-    "관계기업투자장부금액": "bookValue",
-    "순자산 지분금액": "bookValue",
-    "순자산지분금액": "bookValue",
-    "취득원가": "acquisitionCost",
-    "소재지": "location",
-    "소재국가": "location",
-    "주요 사업 소재지": "location",
-    "주요사업소재지": "location",
-    "관계기업의 주요 사업 소재지": "location",
-    "공동기업의 주요 사업 소재지": "location",
-    "주된 사업장": "location",
-    "주요 영업활동": "activity",
-    "주요영업활동": "activity",
-}
-
-_TRANSPOSED_MOVEMENT_MAP = {
-    "기초": "opening",
-    "기초금액": "opening",
-    "기말": "closing",
-    "기말금액": "closing",
-    "취득": "acquisition",
-    "취득/처분": "acquisition",
-    "취득/처분/출자금의 환급": "acquisition",
-    "취득/처분/출자금의환급": "acquisition",
-    "처분": "disposal",
-    "지분법손익": "equityIncome",
-    "지분법이익(손실)": "equityIncome",
-    "이익 중 지분해당액": "equityIncome",
-    "이익중지분해당액": "equityIncome",
-    "지분법 자본변동": "equityCapChange",
-    "지분법자본변동": "equityCapChange",
-    "배당": "dividend",
-    "배당금수령": "dividend",
-    "배당금": "dividend",
-    "배당 및 배분": "dividend",
-    "손상": "impairment",
-    "손상차손": "impairment",
-    "기타": "other",
-    "기타증감액": "other",
-    "기타변동": "other",
-    "원금회수": "other",
-    # 현대차 2024 횡전개
-    "지분법적용 투자지분, 기초": "opening",
-    "지분법적용 투자지분, 기말": "closing",
-    "취득(처분), 공동기업 및 관계기업": "acquisition",
-    "배당금수취": "dividend",
-    "기타증감, 공동기업 및 관계기업": "other",
-    # 삼성전자 2024 횡전개
-    "관계기업 및 공동기업의 기타포괄손익에 대한 지분": "equityCapChange",
-}
+_TRANSPOSED_PROFILE_MAP = loadAffiliate().get("profile", {})
+_TRANSPOSED_MOVEMENT_MAP = loadAffiliate().get("transposedMovement", {})
 
 _TRANSPOSED_NON_NAME_KEYWORDS = [
     "장부금액",

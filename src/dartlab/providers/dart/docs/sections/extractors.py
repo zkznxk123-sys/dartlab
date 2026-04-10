@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 
 import polars as pl
 
+from dartlab.core.mappers.common import isCurrentPeriod, normalizeName, pickValue
 from dartlab.providers.dart.docs.sections._common import sortPeriods
 
 
@@ -168,11 +169,6 @@ def topicSubtables(blocks: pl.DataFrame | None, topic: str) -> TopicSubtables | 
 # ParsedSubtopicTable — subtopic wide 셀의 markdown table → 구조화 DataFrame
 # ---------------------------------------------------------------------------
 
-_RE_NORMALIZE_KO = re.compile(r"(?<=[\uAC00-\uD7A3])\s+(?=[\uAC00-\uD7A3])")
-_RE_CURRENT_PERIOD = re.compile(r"(당기|당기말|당반기|당분기|현재|전체)")
-_RE_PREV_PERIOD = re.compile(r"(전기|전반기|전분기)")
-
-
 @dataclass(frozen=True)
 class ParsedSubtopicTable:
     """subtopic wide 셀의 markdown table을 파싱한 결과."""
@@ -185,24 +181,10 @@ class ParsedSubtopicTable:
     failedPeriods: list[str] = field(default_factory=list)
 
 
-def _normalizeName(name: str) -> str:
-    """항목명 정규화. 한글 사이 공백 제거."""
-    return _RE_NORMALIZE_KO.sub("", name.strip())
-
-
-def _pickValue(values: list[str]) -> str:
-    """값 리스트에서 대표값 선택. 마지막 유효 숫자를 사용."""
-    for v in reversed(values):
-        if v and v.strip() and v.strip() not in ("-", ""):
-            return v
-    return values[0] if values else ""
-
-
-def _isCurrentPeriod(period: str) -> bool:
-    """당기 계열 period인지 판정. 전기/전기말은 제외."""
-    if _RE_PREV_PERIOD.search(period):
-        return False
-    return bool(_RE_CURRENT_PERIOD.search(period))
+# 하위 호환 alias — 기존 호출자가 _normalizeName 등을 쓰는 경우
+_normalizeName = normalizeName
+_pickValue = pickValue
+_isCurrentPeriod = isCurrentPeriod
 
 
 def _parseOneCellTable(

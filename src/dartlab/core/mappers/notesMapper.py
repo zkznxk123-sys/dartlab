@@ -18,32 +18,17 @@ from dartlab.core.mappers.engine import BaseMapper, MapperStats
 
 _STRUCTURE_PATH = Path(__file__).resolve().parents[1] / "data" / "notesStructure.json"
 
-# notes 키워드 → 검색 별칭 (types.py에서 L0로 이동 — import direction 준수)
-NOTES_KEYWORDS: dict[str, list[str]] = {
-    "재고자산": ["재고자산"],
-    "주당이익": ["주당이익", "주당순이익"],
-    "충당부채": ["충당부채"],
-    "차입금": ["차입금"],
-    "매출채권": ["매출채권"],
-    "리스": ["리스"],
-    "투자부동산": ["투자부동산"],
-    "무형자산": ["무형자산"],
-    "법인세": ["법인세"],
-    "특수관계자": ["특수관계자"],
-    "약정사항": ["약정사항"],
-    "금융자산": ["금융자산"],
-    "공정가치": ["공정가치"],
-    "이익잉여금": ["이익잉여금"],
-    "금융부채": ["금융부채"],
-    "기타포괄손익": ["기타포괄손익"],
-    "사채": ["사채"],
-    "종업원급여": ["종업원급여"],
-    "퇴직급여": ["퇴직급여"],
-    "확정급여": ["확정급여"],
-    "재무위험": ["재무위험"],
-    "우발부채": ["우발부채"],
-    "담보": ["담보"],
-}
+
+def _loadKeywords() -> dict[str, list[str]]:
+    """notesStructure.json에서 keywords 로드."""
+    if not _STRUCTURE_PATH.exists():
+        return {}
+    data = json.loads(_STRUCTURE_PATH.read_text(encoding="utf-8"))
+    return data.get("keywords", {})
+
+
+# 코드에 데이터 0줄 — JSON이 단일 진실의 원천
+NOTES_KEYWORDS: dict[str, list[str]] = _loadKeywords()
 
 
 class NotesMapper(BaseMapper):
