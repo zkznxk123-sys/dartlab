@@ -1,4 +1,4 @@
-name: Update KindList
+name: Update KindList + DartList
 
 on:
   schedule:
@@ -23,7 +23,8 @@ jobs:
       - name: Install dependencies
         run: pip install polars requests huggingface-hub
 
-      - name: Download existing asset hash
+      # ── KindList (KRX KIND) ──────────────────────────────
+      - name: Download existing KindList hash
         run: |
           mkdir -p dist
           gh release download kindlist-latest \
@@ -39,7 +40,7 @@ jobs:
       - name: Crawl KRX KIND
         run: python .github/scripts/updateKindList.py
 
-      - name: Upload to Release
+      - name: Upload KindList to Release
         if: ${{ !hashFiles('dist/SKIP') }}
         run: |
           if gh release view kindlist-latest > /dev/null 2>&1; then
@@ -59,7 +60,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload to HuggingFace
+      - name: Upload KindList to HuggingFace
         if: ${{ !hashFiles('dist/SKIP') }}
         run: |
           python -c "
@@ -72,7 +73,60 @@ jobs:
               path_in_repo='metadata/corpList.parquet',
               commit_message='auto-update kindList',
           )
-          print('HuggingFace 업로드 완료')
+          print('KindList HuggingFace 업로드 완료')
+          "
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      # ── DartList (OpenDART CORPCODE.xml) ─────────────────
+      - name: Download existing DartList hash
+        run: |
+          gh release download kindlist-latest \
+            --pattern "dartList.parquet" \
+            --dir dist/existing_dart \
+            --clobber 2>/dev/null || true
+          if [ -f dist/existing_dart/dartList.parquet ]; then
+            sha256sum dist/existing_dart/dartList.parquet | awk '{print $1}' > dist/dartList_previous.sha256
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch OpenDART CORPCODE.xml
+        run: python .github/scripts/updateDartList.py
+        env:
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+
+      - name: Upload DartList to Release
+        if: ${{ !hashFiles('dist/SKIP_DARTLIST') }}
+        run: |
+          if gh release view kindlist-latest > /dev/null 2>&1; then
+            gh release upload kindlist-latest \
+              dist/dartList.parquet \
+              --clobber
+          else
+            gh release create kindlist-latest \
+              dist/dartList.parquet \
+              --title "KindList (auto-updated)" \
+              --notes "KRX KIND + OpenDART 목록. 매일 자동 업데이트." \
+              --latest=false
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload DartList to HuggingFace
+        if: ${{ !hashFiles('dist/SKIP_DARTLIST') }}
+        run: |
+          python -c "
+          from huggingface_hub import HfApi
+          api = HfApi(token='${{ secrets.HF_TOKEN }}')
+          api.upload_file(
+              repo_id='eddmpython/dartlab-data',
+              repo_type='dataset',
+              path_or_fileobj='dist/dartList.parquet',
+              path_in_repo='metadata/dartList.parquet',
+              commit_message='auto-update dartList (CORPCODE.xml)',
+          )
+          print('DartList HuggingFace 업로드 완료')
           "
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}

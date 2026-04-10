@@ -1,4 +1,4 @@
-"""KRX KIND + KRX data 상장법인 목록 — 종목코드 ↔ 회사��� 매퍼."""
+"""KRX KIND + KRX data + OpenDART 상장법인 목록 — 종목코드 ↔ 회사명 매퍼."""
 
 from __future__ import annotations
 
@@ -362,6 +362,88 @@ def fuzzySearch(keyword: str, *, maxResults: int = 10) -> pl.DataFrame:
     scored.sort(key=lambda x: (x[1], x[2]))
     indices = [s[0] for s in scored[:maxResults]]
     return df[indices]
+
+
+# ── DART 전체 법인 목록 (OpenDART CORPCODE.xml) ───────────────────
+
+
+def _dartListCacheFile() -> Path:
+    from dartlab.core.dataLoader import _getDataRoot
+
+    return _getDataRoot() / "dartList" / "dartList.parquet"
+
+
+_dartMemory: pl.DataFrame | None = None
+_dartMemoryTs: float = 0.0
+_dartMemoryLock = threading.Lock()
+
+
+def _loadDartListFromHf() -> pl.DataFrame | None:
+    """HuggingFace에서 dartList.parquet 다운로드."""
+    try:
+        from huggingface_hub import hf_hub_download
+
+        path = hf_hub_download(
+            repo_id="eddmpython/dartlab-data",
+            repo_type="dataset",
+            filename="metadata/dartList.parquet",
+        )
+        return pl.read_parquet(path)
+    except Exception:
+        return None
+
+
+def getDartList(*, forceRefresh: bool = False) -> pl.DataFrame:
+    """OpenDART 전체 법인 목록 (corp_code 8자리 매핑 포함).
+
+    캐시 우선순위: 메모리 → 파일(24h TTL) → HuggingFace.
+    DART API 키 불필요 — HuggingFace에서 자동 다운로드.
+
+    Args:
+        forceRefresh: True면 캐시 무시하고 HF에서 새로 다운로드.
+
+    Returns:
+        DataFrame (corp_code, corp_name, stock_code, modify_date).
+    """
+    global _dartMemory, _dartMemoryTs
+
+    if not forceRefresh and _dartMemory is not None:
+        if (time.time() - _dartMemoryTs) < CACHE_TTL:
+            return _dartMemory
+
+    with _dartMemoryLock:
+        if not forceRefresh and _dartMemory is not None:
+            if (time.time() - _dartMemoryTs) < CACHE_TTL:
+                return _dartMemory
+
+        cacheFile = _dartListCacheFile()
+        if not forceRefresh and cacheFile.exists():
+            age = time.time() - cacheFile.stat().st_mtime
+            if age < CACHE_TTL:
+                _dartMemory = pl.read_parquet(str(cacheFile))
+                _dartMemoryTs = time.time()
+                return _dartMemory
+
+        from dartlab.core.guidance import emit
+
+        emit("listing:dartlist:download")
+        df = _loadDartListFromHf()
+        if df is None or df.height == 0:
+            log.warning("dartList HF 다운로드 실패")
+            if cacheFile.exists():
+                _dartMemory = pl.read_parquet(str(cacheFile))
+                _dartMemoryTs = time.time()
+                return _dartMemory
+            return pl.DataFrame(
+                schema={"corp_code": pl.Utf8, "corp_name": pl.Utf8, "stock_code": pl.Utf8, "modify_date": pl.Utf8}
+            )
+
+        cacheFile.parent.mkdir(parents=True, exist_ok=True)
+        df.write_parquet(str(cacheFile))
+        _dartMemory = df
+        _dartMemoryTs = time.time()
+        emit("listing:dartlist:done", count=df.height)
+        return df
 
 
 # ── KRX data.krx.co.kr 상장법인 목록 ──────────────────────────────

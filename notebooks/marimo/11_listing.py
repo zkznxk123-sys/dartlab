@@ -22,5 +22,12 @@ def _(dartlab):
     return
 
 
+@app.cell
+def _(dartlab):
+    # DART 전체 법인 (비상장 포함, corp_code 8자리)
+    dartlab.listing("dartlist")
+    return
+
+
 if __name__ == "__main__":
     app.run()

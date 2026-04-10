@@ -23,9 +23,12 @@ _ALIAS = {
     "filing": "filings",
     "토픽": "topics",
     "topic": "topics",
+    "법인": "dartlist",
+    "dart": "dartlist",
+    "all": "all",
 }
 
-_SUPPORTED = ("companies", "filings", "topics")
+_SUPPORTED = ("companies", "filings", "topics", "dartlist", "all")
 
 
 def listing(
@@ -38,8 +41,8 @@ def listing(
     """목록 조회 단일 진입점.
 
     Args:
-        kind: 조회 종류. "companies"(기본), "filings", "topics".
-            한글 alias 지원: "기업", "공시", "토픽".
+        kind: 조회 종류. "companies"(기본), "filings", "topics", "dartlist".
+            한글 alias 지원: "기업", "공시", "토픽", "법인", "dart".
         corp: 종목코드 또는 ticker. filings/topics에 필수.
         market: "KR" 또는 "US". companies에서만 사용.
 
@@ -53,6 +56,7 @@ def listing(
 
         import dartlab
         dartlab.listing()                              # 전 종목 (기존 호환)
+        dartlab.listing("dartlist")                    # DART 전체 법인 (비상장 포함, corp_code)
         dartlab.listing(market="US")                   # EDGAR 종목
         dartlab.listing("filings", corp="005930")      # DART 공시 메타
         dartlab.listing("filings", corp="AAPL")        # EDGAR 공시 메타
@@ -69,7 +73,18 @@ def listing(
         if not corp:
             raise ValueError("listing('topics') requires corp=")
         return _topics(corp)
+    if kind == "dartlist":
+        return _dartlist()
+    if kind == "all":
+        return _companies(market=market)
     raise ValueError(f"unknown kind: {kind!r} — supported: {', '.join(_SUPPORTED)}")
+
+
+def _dartlist() -> pl.DataFrame:
+    """OpenDART 전체 법인 목록 (상장+비상장, corp_code 8자리 포함)."""
+    from dartlab.gather.listing import getDartList
+
+    return getDartList()
 
 
 def _companies(market: str | None = None) -> pl.DataFrame:
