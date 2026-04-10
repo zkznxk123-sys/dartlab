@@ -24,7 +24,7 @@ youtubeId: ""
 
 > **장기 사이클 + 위기 탈출** | IT > 메모리반도체 | 2026-04-08 dartlab 실측
 > 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: review + analysis + credit + report
-> 같은 시리즈: [삼양식품 (003230)](/blog/003230-samyang-foods) · [두산에너빌리티 (034020)](/blog/034020-doosan-enerbility) · [알테오젠 (196170)](/blog/196170-alteogen) · [HMM (011200)](/blog/011200-hmm) · [셀트리온 (068270)](/blog/068270-celltrion) · [기업분석 시리즈 전체](/blog/series/company-reports)
+> 같은 시리즈: [SK하이닉스](/blog/000660-skhynix) · [삼양식품](/blog/003230-samyang-foods) · [두산에너빌리티](/blog/034020-doosan-enerbility) · [알테오젠](/blog/196170-alteogen) · [HMM](/blog/011200-hmm) · [셀트리온](/blog/068270-celltrion) · [한화에어로스페이스](/blog/012450-hanwha-aerospace) · [HD현대일렉트릭](/blog/267260-hd-hyundai-electric) · [고려아연](/blog/010130-korea-zinc) · [에이피알](/blog/278470-apr) · [기업이야기 시리즈 전체](/blog/series/company-reports)
 
 
 ---
