@@ -1,5 +1,5 @@
 <script>
-	import { Download } from "lucide-svelte";
+	import { Download, X } from "lucide-svelte";
 	import { summarizeDataReady } from "$lib/ai/dataReady.js";
 	import MessageBubble from "./MessageBubble.svelte";
 	import AutocompleteInput from "./AutocompleteInput.svelte";
@@ -48,6 +48,7 @@
 
 	let dataReadyInfo = $derived(summarizeDataReady(dataReady));
 	let promptChips = $derived(suggestions?.length > 0 ? suggestions : DEFAULT_COMPANY_PROMPTS);
+	let suggestionDismissed = $state(false);
 
 	function bridgeEvidence(msg) {
 		return (type, idx) => {
@@ -258,9 +259,16 @@
 					{/if}
 				</div>
 			{/if}
-			{#if !isLoading && selectedCompany?.stockCode}
-				<div class="mb-3 rounded-2xl border border-dl-border/40 bg-dl-bg-card/30 px-3 py-3">
-					<div class="flex flex-wrap items-center gap-2">
+			{#if !isLoading && selectedCompany?.stockCode && !suggestionDismissed}
+				<div class="relative mb-3 rounded-2xl border border-dl-border/40 bg-dl-bg-card/30 px-3 py-3">
+					<button
+						class="absolute right-2 top-2 rounded-full p-0.5 text-dl-text-dim hover:text-dl-text-muted transition-colors"
+						onclick={() => suggestionDismissed = true}
+						aria-label="추천 질문 닫기"
+					>
+						<X size={14} />
+					</button>
+					<div class="flex flex-wrap items-center gap-2 pr-6">
 						<span class="rounded-full border border-dl-accent/20 bg-dl-accent/10 px-2.5 py-0.5 text-[11px] font-medium text-dl-accent-light">
 							{selectedCompany.corpName || selectedCompany.company || selectedCompany.stockCode}
 						</span>
