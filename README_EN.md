@@ -44,7 +44,7 @@ DartLab is built on one premise: **every period must be comparable, and every co
 ## Quick Start
 
 ```bash
-pip install dartlab
+uv add dartlab
 ```
 
 ```python
