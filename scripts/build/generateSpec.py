@@ -24,7 +24,7 @@ import textwrap
 from pathlib import Path
 from typing import Any, get_type_hints
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent
 SRC = ROOT / "src"
 sys.path.insert(0, str(SRC))
 
