@@ -2,7 +2,7 @@
   <rect width="1080" height="350" fill="#0a0e1a"/>
 
   <!-- Title -->
-  <text x="540" y="36" text-anchor="middle" fill="#f1f5f9" font-size="18" font-weight="700">Financial Scorecard</text>
+  <text x="540" y="36" text-anchor="middle" fill="#f1f5f9" font-size="18" font-weight="700">경동나비엔 종합평가 — 3A와 3C의 공존</text>
 
   <!-- Top row: A badges -->
   <g transform="translate(160, 60)">

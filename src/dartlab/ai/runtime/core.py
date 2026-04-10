@@ -12,6 +12,7 @@ dartlab.ask(), server UI, CLI가 모두 이 코어를 소비한다.
 from __future__ import annotations
 
 import concurrent.futures
+import dataclasses
 import logging
 import os
 import re
@@ -346,6 +347,12 @@ def _resolveAnalysisConfig(
             provider = None
 
     config_ = get_config(role=role)
+
+    # LLMConfig 필드만 통과 — deprecated 파라미터(use_tools 등)가 kwargs로
+    # 흘러들어와도 LLMConfig.merge()에 전달되지 않도록 필터링
+    _LLMCONFIG_FIELDS = frozenset(f.name for f in dataclasses.fields(config_))
+    llm_kwargs = {k: v for k, v in kwargs.items() if k in _LLMCONFIG_FIELDS}
+
     overrides = {
         k: v
         for k, v in {
@@ -353,7 +360,7 @@ def _resolveAnalysisConfig(
             "model": model,
             "api_key": api_key,
             "base_url": base_url,
-            **kwargs,
+            **llm_kwargs,
         }.items()
         if v is not None
     }
@@ -489,6 +496,39 @@ def _formatResultForUser(result: str) -> str:
 
 
 _LOOP_SIMILARITY_THRESHOLD = 0.75  # R22-7: 0.85 → 0.75. 동일 코드 변형 반복 더 적극적 차단
+def _extractDataHint(result: str) -> str:
+    """코드 실행 결과에서 DataFrame/dict 구조 힌트를 추출.
+
+    Polars 테이블 → 컬럼명 + shape
+    dict 출력 → 키 목록
+    """
+    hints: list[str] = []
+
+    # Polars 테이블 감지 → 컬럼명 + shape 추출
+    if "┌" in result or ("│" in result and "┆" in result):
+        header_lines = [l for l in result.split("\n") if "│" in l and "┆" in l]
+        if header_lines:
+            cols = [c.strip() for c in header_lines[0].replace("│", "┆").split("┆") if c.strip()]
+            if cols:
+                hints.append(f"[DataFrame 컬럼: {', '.join(cols)}]")
+
+    # shape 정보 추출
+    import re as _re
+
+    shape_match = _re.search(r"shape:\s*\((\d+),\s*(\d+)\)", result)
+    if shape_match:
+        hints.append(f"[shape: {shape_match.group(1)}행 × {shape_match.group(2)}열]")
+
+    # dict keys 출력 감지
+    keys_match = _re.search(r"dict_keys\(\[([^\]]+)\]\)", result)
+    if keys_match:
+        hints.append(f"[dict 키: {keys_match.group(1)}]")
+
+    if not hints:
+        return ""
+    return "\n" + " ".join(hints) + " — 다음 코드에서 이 컬럼명/키를 정확히 사용하세요."
+
+
 _MAX_RESULT_CHARS = 8000  # LLM 피드백용 결과 상한 (사용자 UI에는 전체 표시)
 
 
@@ -577,6 +617,43 @@ def _streamWithCodeExecution(
         # 결과를 대화에 추가하여 LLM이 해석하도록 재요청
         messages.append({"role": "assistant", "content": buffer})
 
+        def _diagnoseNotesFailure(code_text: str) -> str:
+            """notes 호출 실패 시 매퍼에서 frequency 조회 → 대안 제시."""
+            import re as _re
+
+            _NOTES_ALTERNATIVES = {
+                "inventory": "analysis('자산구조')",
+                "borrowings": "analysis('자금조달')",
+                "tangibleAsset": "analysis('자산구조')",
+                "intangibleAsset": "analysis('자산구조')",
+                "receivables": "analysis('자산구조')",
+                "provisions": "analysis('안정성')",
+                "eps": "c.show('IS') 주당이익 행",
+                "lease": "analysis('안정성')",
+                "costByNature": "analysis('비용구조')",
+                "segments": "analysis('수익구조')",
+                "affiliates": "analysis('투자효율')",
+            }
+            match = _re.search(r'c\.notes\.(\w+)|c\.show\(["\'](\w+)', code_text)
+            if not match:
+                return ""
+            key = match.group(1) or match.group(2)
+            alt = _NOTES_ALTERNATIVES.get(key)
+            if not alt:
+                return ""
+            try:
+                from dartlab.core.mappers.notesMapper import NotesMapper
+
+                mapper = NotesMapper()
+                info = mapper.lookup(key)
+                freq = info.get("frequency", 0) if info else 0
+                return (
+                    f"**notes 진단**: `{key}` 항목은 전종목 {freq:.0%}만 보유.\n"
+                    f"→ 대안: `c.{alt}` 에 이미 포함된 데이터를 사용하세요.\n\n"
+                )
+            except ImportError:
+                return ""
+
         # LLM 피드백: 결과 크기 제한 (컨텍스트 화폐 절약)
         isError = "실행 오류" in result or "Error" in result or "Traceback" in result
         # 빈 결과 감지 — Polars (0, 0) shape, 빈 dict, None 단독 등은 "분석 실패 신호"
@@ -594,17 +671,41 @@ def _streamWithCodeExecution(
                 "결과가 잘렸습니다. .head()/.filter()로 범위를 좁혀 필요한 부분만 재조회하세요."
             )
         elif isError:
+            # 에러 유형별 구체적 복구 지침 (행동 지침 패턴)
+            _err_lower = result.lower()
+            _recovery_hints: list[str] = []
+            if "unknown topic" in _err_lower or "invalid topic" in _err_lower:
+                _recovery_hints.append("→ `print(c.topics)` 로 사용 가능한 topic 목록을 확인하세요.")
+            if "keyerror" in _err_lower or "key error" in _err_lower:
+                _recovery_hints.append("→ 먼저 `print(result.keys())` 또는 `print(df.columns)` 로 실제 키를 확인하세요.")
+            if "timeout" in _err_lower or "timed out" in _err_lower:
+                _recovery_hints.append("→ c.review() 전체 호출은 83초. `c.review('수익성')` 단일 섹션을 사용하세요.")
+            if "no data" in _err_lower or "데이터가 없" in _err_lower or "not found" in _err_lower:
+                _recovery_hints.append("→ `c.index` 로 이 종목의 가용 데이터를 확인하세요.")
+            if "attributeerror" in _err_lower:
+                _recovery_hints.append("→ `print(type(c))` 로 객체 타입을 확인하세요. Company가 아닐 수 있습니다.")
+            if "nameerror" in _err_lower:
+                _recovery_hints.append("→ 변수가 이전 라운드에서 정의됐을 수 있습니다. 한 블록 안에서 변수 정의부터 다시 하세요.")
+            if "import" in _err_lower and "error" in _err_lower:
+                _recovery_hints.append("→ import 금지. dartlab, pl(polars)은 이미 준비되어 있습니다.")
+            _recovery_text = "\n".join(_recovery_hints) if _recovery_hints else "API를 모르겠으면 무인자 호출로 가이드를 확인하세요: print(c.analysis())"
             feedback = (
                 "코드 실행 결과:\n\n"
                 f"```\n{result}\n```\n\n"
                 "에러를 읽고 원인을 진단하세요. 같은 코드를 반복하지 마세요.\n"
-                "API를 모르겠으면 `dartlab.capabilities(search='키워드')`로 검색하세요."
+                f"{_recovery_text}"
             )
         elif isEmpty:
+            # notes 호출 실패 시 매퍼 진단 추가
+            _notes_hint = ""
+            if "c.notes" in code or "c.show" in code:
+                _notes_hint = _diagnoseNotesFailure(code)
+
             feedback = (
                 "코드 실행 결과가 비어 있습니다 (빈 DataFrame / 빈 dict / None):\n\n"
                 f"```\n{result}\n```\n\n"
                 "**이건 분석 실패 신호다.** 같은 도구를 다른 인자로 재시도하지 마세요.\n"
+                f"{_notes_hint}"
                 "원인 진단 체크리스트:\n"
                 "1. **질문이 메타 지식인가?** (예: 'X와 Y 비교', 'X 엔진은 뭐 하는가') "
                 "→ 도구 호출 자체가 잘못. 코드 없이 ops/ 지식으로 직접 답변하세요.\n"
@@ -623,12 +724,14 @@ def _streamWithCodeExecution(
                 "커스터마이즈 포인트(종목코드 변경, 조건 변경 등)도 안내하세요."
             )
         else:
+            # 코드 실행 결과 AI 맥락 보강 (aiview 통합)
+            _data_hint = _extractDataHint(result)
             feedback = (
                 "코드 실행 결과:\n\n"
                 f"```\n{result}\n```\n\n"
                 "이 결과를 바탕으로 해석하세요. "
                 "**수치는 위 결과에서 정확히 인용하라. 기억으로 수치를 만들지 마라.** "
-                "결과가 잘렸으면 .head()/.filter()로 범위를 좁혀 재실행하세요."
+                f"결과가 잘렸으면 .head()/.filter()로 범위를 좁혀 재실행하세요.{_data_hint}"
             )
         messages.append({"role": "user", "content": feedback})
 
@@ -738,6 +841,26 @@ _SYSTEM_PROMPT = """\
 - `emit_chart(spec)`, `emit_diagram(type, source)` — 차트/다이어그램
 {env_block}
 
+## Polars 문법 — pandas 금지
+dartlab은 Polars만 사용한다. **pandas 문법(df.groupby, df.iloc, df.loc, df.apply, df.iterrows) 절대 금지.**
+```python
+# ✓ Polars 정확한 패턴
+df.filter(pl.col("영업이익률") > 10)
+df.select(["기간", "매출액"])
+df.group_by("업종").agg(pl.col("ROE").mean())
+df.with_columns((pl.col("매출액") / 1e8).alias("매출(억)"))
+df.sort("기간", descending=True)
+df.head(5)
+df.columns                    # 컬럼명 목록
+df.schema                     # 컬럼명 + 타입
+df.shape                      # (행, 열)
+
+# ✗ pandas 금지 — 이렇게 쓰면 에러
+# df.groupby(), df.iloc[], df.loc[], df.apply(), df.iterrows()
+# df.rename(columns={{}}), df.merge(), df.pivot_table()
+```
+한글 컬럼명이 많다. 컬럼명을 모르면 `print(df.columns)` 먼저 확인.
+
 ## 시각화
 테이블과 차트를 함께 제공하라. **실제 종목 데이터 (시계열, 비교, 분포) 만 차트화** —
 가이드/메타/스키마 dataframe (axis/items/partId 컬럼) 은 print 만 하고 차트 금지.
@@ -764,22 +887,87 @@ print(dartlab.scan())   # 20축 가이드 (전종목 횡단)
 가이드는 축마다 한 행이라 `group_by("axis").len()` 은 무조건 1 — items 컬럼을 직접 보라.
 계산 결과 dict 에 `displayHints` 가 있으면 그 `core` 컬럼을 표에 우선 포함하라.
 
-## 도구 선택 — 질문 유형으로 라우팅
+## 도구 레퍼런스 — 시그니처 + 반환 + 제약
 
-| 질문 유형 | 도구 | 호출 패턴 |
-|----------|------|----------|
-| 기업 분석/수익성/부채 등 | **analysis** | `c.analysis("financial", "수익성")` 또는 `c.analysis("수익성")` → dict |
-| 신용등급/건전도 | **credit** | `c.credit("등급")` → dict (종합), `c.credit("채무상환")` → 축별 |
-| 시장비교/순위/TOP N | **scan** | `dartlab.scan("profitability")` → DataFrame |
-| 경제사이클/금리방향/시장심리 | **macro** | `dartlab.macro("사이클")` → dict (Company 불필요) |
-| 주가/수급/뉴스 | **gather** | `c.gather("price")` → DataFrame |
-| 기술적분석/매매신호 | **quant** | `c.quant("종합")` → dict (verdict, RSI, ADX 등) |
-| 특정 계정 조회 | **show/select** | `c.select("IS", ["매출액"])` → DataFrame |
-| "보고서 뽑아줘" 명시 요청 | **review** | `c.review("수익성").toMarkdown()` (최대 2개) |
-| 공시 원문 검색 | **search** | `dartlab.search("유상증자", corp="005930")` → DataFrame |
-| 실시간 뉴스/이슈 | **검색** | `newsSearch("키워드")` |
-| "X vs Y 비교"/"X 엔진은 뭐야"/도구·기능 메타 지식 | **답변 직접** | 코드 호출 금지. ops/ 지식으로 직접 설명. 회사 데이터 조회 아님. |
-| 모르겠으면 | **self-discovery** | `print(c.analysis())` 등 무인자 호출 |
+### c.analysis(group?, axis?) → dict
+- 무인자 → 가이드 DataFrame (axis|label|description)
+- 축 이름은 반드시 가이드에서 확인. 추측 호출 금지
+- **history[0]의 키를 미리 알고 코드를 작성하라** — print(r.keys()) 탐색 라운드 낭비 금지
+
+**축별 반환 스키마** (dict 키 → 핵심 history 키):
+| 축 | dict 키 | 핵심 history 키 |
+|---|---------|---------------|
+| 수익성 | marginTrend, returnTrend, roicTree, profitabilityFlags | period, revenue, operatingMargin, netMargin, grossMargin, roe, roa |
+| 성장성 | growthTrend, cagrComparison, growthFlags | period, revenue, revenueYoy, operatingIncomeYoy, netIncomeYoy |
+| 안정성 | leverageTrend, coverageTrend, distressScore, stabilityFlags | period, debtRatio, equityRatio, netDebtRatio, totalBorrowing |
+| 현금흐름 | cashFlowOverview, cashQuality, cashFlowFlags | period, ocf, icf, capex, fcf, pattern |
+| 비용구조 | costBreakdown, operatingLeverage, costStructureFlags | period, revenue, costOfSales, sga, costOfSalesRatio, sgaRatio |
+| 효율성 | turnoverTrend, efficiencyFlags | period, totalAssetTurnover, dso, dio, dpo, ccc |
+| 자산구조 | assetStructure, workingCapital, capexPattern | period, totalAssets, receivables, inventory, ppe, cash |
+
+사용법: `r = c.analysis("수익성")` → `r["marginTrend"]["history"]` → 위 키로 바로 접근
+
+### c.credit(axis?, detail=False) → dict
+- 무인자 → 가이드 DataFrame + 종합 등급
+- `c.credit("등급")` → dict: grade, healthScore(0-100), pdEstimate
+- `c.credit("등급", detail=True)` → + narratives, divergenceExplanation 포함
+
+### dartlab.scan(axis?, param?) → DataFrame
+- 무인자 → 가이드 DataFrame (20축)
+- `dartlab.scan("profitability")` → **컬럼: 종목코드, 종목명, 영업이익률, 순이익률, ROE, ROA, 등급**
+- `dartlab.scan("ratio", "roe")` → **컬럼: 종목코드, 종목명, {연도별 값}**
+- `dartlab.scan("cashflow")` → **컬럼: 종목코드, 종목명, OCF, ICF, FCF, pattern**
+- 정렬: `df.sort("ROE", descending=True).head(10)` — 한글 컬럼명 정확히 사용
+- ⚠ scan DataFrame은 join 금지 (타임아웃)
+
+### dartlab.macro(axis?) → dict
+- 무인자 → 가이드 DataFrame (11축)
+- `dartlab.macro("사이클")` → dict: phase, signals 등
+- ⚠ Company 불필요. dartlab.macro()로 직접 호출
+- market="US"|"KR" 파라미터 지원
+
+### c.gather(axis?) → DataFrame | None
+- `c.gather("price")` → DataFrame (OHLCV) 또는 None
+- 축: price, flow, news, macro
+- ⚠ 반드시 None 체크. 데이터 없으면 None 반환
+
+### c.quant(axis?) → dict
+- 무인자 → 가이드 DataFrame
+- `c.quant("종합")` → dict: verdict(강세/중립/약세), score, rsi, adx 등
+
+### c.show(topic) / c.select(statement, rows) → DataFrame
+- `c.show("IS")` → 손익계산서. **컬럼: snakeId, 항목, 2025Q4, 2025Q3, ..., 2016Q1** (분기)
+- `c.show("IS", freq="Y")` → 연간 합산. **컬럼: snakeId, 항목, 2025, 2024, ..., 2016**
+- `c.select("IS", ["매출액"])` → 필터된 DataFrame (같은 컬럼 구조)
+- `c.show("inventory")` → 주석 상세 (12항목: inventory, borrowings, tangibleAsset 등)
+- 행 필터는 **"항목" 컬럼 기준** (한글): `df.filter(pl.col("항목") == "매출액")`
+- 기간 컬럼은 **문자열** ("2025Q4", "2024" 등). 값은 float (원 단위).
+- ⚠ c.sections 금지 (409MB, 19초). c.show(topic)으로 개별 조회
+
+### c.review(section?) → Review
+- `c.review("수익성")` → 단일 섹션 (~5초)
+- ⚠ c.review() 전체는 83초 → AI 코드 실행(60초)에서 타임아웃. 반드시 섹션 지정
+- 사용자가 "보고서"를 명시 요청한 경우만 사용. 분석 질문에는 analysis
+
+### dartlab.search(query, corp?) → DataFrame
+- `dartlab.search("유상증자")` → 전 상장사 공시 검색
+- `dartlab.search("대표이사 변경", corp="005930")` → 종목 필터
+
+### 질문 유형별 도구 선택
+| 질문 유형 | 도구 |
+|----------|------|
+| 기업 분석/수익성/부채 | analysis |
+| 신용등급/건전도 | credit |
+| 시장비교/순위 | scan |
+| 경제사이클/금리 | macro (Company 불필요) |
+| 주가/수급/뉴스 | gather |
+| 기술적분석/매매신호 | quant |
+| 특정 계정 조회 | show/select |
+| "보고서 뽑아줘" 명시 | review (섹션 지정 필수) |
+| 공시 원문 검색 | search |
+| 실시간 뉴스 | newsSearch() |
+| 도구·기능 메타 지식 | 코드 금지. ops/ 지식으로 직접 답변 |
+| 모르겠으면 | self-discovery: print(c.analysis()) 등 무인자 |
 
 ### 핵심 원칙
 - **[최우선] 메타 지식 질문에는 코드 절대 금지.** "X vs Y 차이/비교", "X 엔진은 뭐 하는가", "어느 걸 먼저 써야 해", "왜 Company 없이 호출해" 같은 **도구·엔진·기능 자체에 대한 질문**은 ops/ 지식으로 직접 답한다. `c.analysis()`, `c.credit()`, `c.review()`, `dartlab.macro()`, `dartlab.capabilities()` **모두 호출 금지**. 특정 회사(삼성전자 등) 데이터 인용 금지. 답변은 마크다운 표 + 한 줄 요약. 회사 분석을 끌어오면 **틀린 답이다**.
@@ -832,9 +1020,25 @@ df = dartlab.scan("ratio", "roe")        # 전종목 ROE 시계열
 ```python
 c.show("IS")                           # 재무제표
 c.select("IS", ["매출액"]).chart()     # 필터 + 차트
-c.notes.inventory                      # 주석 상세 (12항목: c.notes.keys())
+c.notes.inventory                      # 주석 상세 (12항목)
 # analysis에 주석이 이미 포함됨 — notes는 추가 상세 필요할 때만.
 ```
+
+#### notes 항목별 가용률 (전종목 기준)
+| 항목 | 가용률 | 없으면 대안 |
+|------|:---:|------|
+| receivables | 64% | analysis("자산구조") |
+| inventory | 59% | analysis("자산구조") |
+| lease | 44% | analysis("안정성") |
+| eps | 42% | c.show("IS") 주당이익 행 |
+| borrowings | 41% | analysis("자금조달") |
+| tangibleAsset | 41% | analysis("자산구조") |
+| investmentProperty | 40% | analysis("자산구조") |
+| provisions | 43% | analysis("안정성") |
+| costByNature | 22% | analysis("비용구조") |
+
+**가용률 < 50% 항목은 None일 수 있다.** None이면 analysis()에 이미 포함된 데이터를 사용한다.
+notes를 먼저 시도하지 말고, analysis 결과에 주석 상세가 필요할 때만 notes를 보충 호출한다.
 
 ### quant — 기술적 분석
 ```python

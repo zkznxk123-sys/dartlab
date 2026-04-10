@@ -2,7 +2,7 @@
   <rect width="1080" height="400" fill="#0a0e1a"/>
 
   <!-- Title -->
-  <text x="540" y="36" text-anchor="middle" fill="#f1f5f9" font-size="18" font-weight="700">CAPEX vs FCF 추이</text>
+  <text x="540" y="36" text-anchor="middle" fill="#f1f5f9" font-size="18" font-weight="700">경동나비엔 CAPEX vs FCF — 투자가 현금을 삼켰다</text>
 
   <!-- Grid -->
   <line x1="140" y1="70" x2="140" y2="320" stroke="#1e293b" stroke-width="1"/>

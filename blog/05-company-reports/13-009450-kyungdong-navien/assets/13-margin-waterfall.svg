@@ -2,7 +2,7 @@
   <rect width="1080" height="400" fill="#0a0e1a"/>
 
   <!-- Title -->
-  <text x="540" y="36" text-anchor="middle" fill="#f1f5f9" font-size="18" font-weight="700">마진 폭포 차트</text>
+  <text x="540" y="36" text-anchor="middle" fill="#f1f5f9" font-size="18" font-weight="700">경동나비엔 마진 폭포 — 매출 100% → 영업이익 9.5%</text>
 
   <!-- Y-axis baseline -->
   <line x1="100" y1="340" x2="980" y2="340" stroke="#334155" stroke-width="1"/>
