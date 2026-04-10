@@ -20,7 +20,7 @@ tags:
   - 전자공시
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/012450-hanwha-aerospace.webp
-youtubeId: ""
+youtubeId: "NvVg08Dzogk"
 ---
 
 > **성장 + 사이클** | 산업재 > 항공우주와국방 | 2026-04-09 dartlab 실측
@@ -28,6 +28,10 @@ youtubeId: ""
 
 
 ---
+
+<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:2rem 0 3rem;border-radius:12px;">
+<iframe src="https://www.youtube.com/embed/NvVg08Dzogk" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
 
 ![한화에어로스페이스 72년 타임라인](./assets/07-70year-timeline.svg)
 
