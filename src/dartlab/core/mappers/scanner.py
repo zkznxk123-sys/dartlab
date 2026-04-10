@@ -175,9 +175,7 @@ def scanAll(
         log.warning("docs 디렉토리 없음: %s", dataDir)
         return {"scanned": 0, "newItems": 0, "updatedItems": 0, "totalItems": len(existingItems)}
 
-    stockCodes = sorted(
-        p.stem for p in dataDir.glob("*.parquet") if len(p.stem) == 6 and p.stem.isdigit()
-    )
+    stockCodes = sorted(p.stem for p in dataDir.glob("*.parquet") if len(p.stem) == 6 and p.stem.isdigit())
     if limit:
         stockCodes = stockCodes[:limit]
 

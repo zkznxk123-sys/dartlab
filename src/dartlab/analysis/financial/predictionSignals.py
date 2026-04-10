@@ -27,8 +27,9 @@ import json
 from pathlib import Path as _Path
 
 _SECTOR_DATA = json.loads(
-    (_Path(__file__).resolve().parents[4] / "core" / "data" / "parserMappings" / "sectorPriors.json")
-    .read_text(encoding="utf-8")
+    (_Path(__file__).resolve().parents[4] / "core" / "data" / "parserMappings" / "sectorPriors.json").read_text(
+        encoding="utf-8"
+    )
 )
 _INDUSTRY_PRIOR: dict[str, float] = _SECTOR_DATA.get("priors", {})
 _DEFAULT_PRIOR: float = _SECTOR_DATA.get("_metadata", {}).get("defaultPrior", 0.721)

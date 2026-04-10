@@ -169,6 +169,7 @@ def topicSubtables(blocks: pl.DataFrame | None, topic: str) -> TopicSubtables | 
 # ParsedSubtopicTable — subtopic wide 셀의 markdown table → 구조화 DataFrame
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class ParsedSubtopicTable:
     """subtopic wide 셀의 markdown table을 파싱한 결과."""

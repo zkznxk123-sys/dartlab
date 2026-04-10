@@ -116,5 +116,3 @@ def _makePeriodKey(year: str, kind: str) -> str:
     """연도 + 보고서 종류 → 기간 키."""
     suffix = _KIND_SUFFIX.get(kind, "")
     return f"{year}{suffix}" if suffix else year
-
-

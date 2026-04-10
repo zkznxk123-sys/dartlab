@@ -93,5 +93,3 @@ def buildTableDf(
     for col in colOrder:
         schema[col] = pl.Float64
     return pl.DataFrame(rows, schema=schema)
-
-
