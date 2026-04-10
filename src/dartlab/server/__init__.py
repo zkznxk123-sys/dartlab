@@ -19,7 +19,16 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 import dartlab
 
-from .api import ai_router, analysis_router, ask_router, company_router, dart_router, data_router, macro_router, room_router
+from .api import (
+    ai_router,
+    analysis_router,
+    ask_router,
+    company_router,
+    dart_router,
+    data_router,
+    macro_router,
+    room_router,
+)
 from .embed import router as embed_router
 from .runtime import ensure_port, run_server  # noqa: F401 — re-exported
 from .services.ai_profile import should_preload_ollama as _should_preload_ollama

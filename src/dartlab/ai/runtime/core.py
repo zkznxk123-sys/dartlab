@@ -496,6 +496,8 @@ def _formatResultForUser(result: str) -> str:
 
 
 _LOOP_SIMILARITY_THRESHOLD = 0.75  # R22-7: 0.85 → 0.75. 동일 코드 변형 반복 더 적극적 차단
+
+
 def _extractDataHint(result: str) -> str:
     """코드 실행 결과에서 DataFrame/dict 구조 힌트를 추출.
 
@@ -677,7 +679,9 @@ def _streamWithCodeExecution(
             if "unknown topic" in _err_lower or "invalid topic" in _err_lower:
                 _recovery_hints.append("→ `print(c.topics)` 로 사용 가능한 topic 목록을 확인하세요.")
             if "keyerror" in _err_lower or "key error" in _err_lower:
-                _recovery_hints.append("→ 먼저 `print(result.keys())` 또는 `print(df.columns)` 로 실제 키를 확인하세요.")
+                _recovery_hints.append(
+                    "→ 먼저 `print(result.keys())` 또는 `print(df.columns)` 로 실제 키를 확인하세요."
+                )
             if "timeout" in _err_lower or "timed out" in _err_lower:
                 _recovery_hints.append("→ c.review() 전체 호출은 83초. `c.review('수익성')` 단일 섹션을 사용하세요.")
             if "no data" in _err_lower or "데이터가 없" in _err_lower or "not found" in _err_lower:
@@ -685,10 +689,16 @@ def _streamWithCodeExecution(
             if "attributeerror" in _err_lower:
                 _recovery_hints.append("→ `print(type(c))` 로 객체 타입을 확인하세요. Company가 아닐 수 있습니다.")
             if "nameerror" in _err_lower:
-                _recovery_hints.append("→ 변수가 이전 라운드에서 정의됐을 수 있습니다. 한 블록 안에서 변수 정의부터 다시 하세요.")
+                _recovery_hints.append(
+                    "→ 변수가 이전 라운드에서 정의됐을 수 있습니다. 한 블록 안에서 변수 정의부터 다시 하세요."
+                )
             if "import" in _err_lower and "error" in _err_lower:
                 _recovery_hints.append("→ import 금지. dartlab, pl(polars)은 이미 준비되어 있습니다.")
-            _recovery_text = "\n".join(_recovery_hints) if _recovery_hints else "API를 모르겠으면 무인자 호출로 가이드를 확인하세요: print(c.analysis())"
+            _recovery_text = (
+                "\n".join(_recovery_hints)
+                if _recovery_hints
+                else "API를 모르겠으면 무인자 호출로 가이드를 확인하세요: print(c.analysis())"
+            )
             feedback = (
                 "코드 실행 결과:\n\n"
                 f"```\n{result}\n```\n\n"

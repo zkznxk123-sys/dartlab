@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 from dartlab.core.mappers.common import isCurrentPeriod, normalizeName, pickValue
 from dartlab.core.mappers.notesMapper import NotesMapper
 
-
 _MAX_YEARS = 5  # 최근 N년만 반환 (sparse 방지)
 _SPARSE_THRESHOLD = 0.8  # None 비율 이 이상이면 행 제거
 

@@ -75,10 +75,10 @@ def scanNotes(stockCode: str) -> dict[str, dict[str, Any]]:
     """
     try:
         from dartlab.core.dataLoader import loadData
+        from dartlab.core.mappers.notesMapper import NOTES_KEYWORDS
         from dartlab.core.notesExtractor import extractNotesContent, findNumberedSection
         from dartlab.core.reportSelector import selectReport
         from dartlab.core.tableParser import parseNotesTable
-        from dartlab.core.mappers.notesMapper import NOTES_KEYWORDS
     except ImportError:
         return {}
 
@@ -158,7 +158,6 @@ def discoverAliases(
     Returns:
         {variant: canonical} — alias 후보
     """
-    from collections import Counter
 
     # category별 항목 출현 패턴 수집
     # {category: {item: {years: set, companies: int}}}
@@ -353,7 +352,7 @@ def scanAll(
     # alias 자동 탐지 + 흡수
     existingAliases = existing.get("aliases", {})
     if scanned >= 10:  # 최소 10종목 이상 스캔했을 때만
-        discovered = discoverAliases(stockCodes[:min(100, len(stockCodes))], minSupport=3)
+        discovered = discoverAliases(stockCodes[: min(100, len(stockCodes))], minSupport=3)
         newAliasCount = 0
         for variant, canonical in discovered.items():
             if variant not in existingAliases:
