@@ -82,6 +82,16 @@ def calcEarningsMomentum(company, *, basePeriod: str | None = None) -> dict | No
     """이익 모멘텀 — Sloan 분해(현금 vs 발생액) + DuPont 추세.
 
     이익이 가속/감속 중인지, 현금 뒷받침이 있는지를 판단한다.
+
+    Returns
+    -------
+    dict
+        history : list[dict] — 연도별 Sloan 분해 시계열 (netIncome, ocf, accrual, sloanAccrualRatio, ocfToNi, margin, turnover, leverage)
+        momentum : str — 이익 모멘텀 ("accelerating" | "decelerating" | "reversing" | "stable")
+        earningsDirection : str — 방향 ("up" | "down" | "flat")
+        persistenceScore : float — 현금 지속성 점수 (점)
+        highAccrualWarning : bool — 발생액 비율 경고 (|accrual/자산| > 10%)
+        confidence : str — 신뢰도 ("high" | "medium" | "low")
     """
     isResult = company.select("IS", ["당기순이익", "매출액", "영업이익"])
     cfResult = company.select("CF", ["영업활동현금흐름"])
@@ -207,6 +217,16 @@ def calcPeerPrediction(company, *, basePeriod: str | None = None) -> dict | None
 
     사전 적합된 횡단면/패널 모델로 이 회사의 매출 성장률을 예측하고,
     실제 성장률과의 괴리를 측정한다.
+
+    Returns
+    -------
+    dict
+        crossSectionPredicted : float | None — 횡단면 모델 예측 매출 성장률 (%)
+        panelPredicted : float | None — 패널 모델 예측 매출 성장률 (%)
+        ensemblePredicted : float — 앙상블 예측 매출 성장률 (%)
+        companyHistoricalGrowth : float | None — 실제 매출 성장률 (%)
+        divergence : float | None — 예측-실제 괴리 (%p)
+        modelR2 : float | None — 횡단면 모델 R-squared
     """
     stockCode = _getStockCode(company)
     if stockCode is None:
@@ -347,6 +367,19 @@ def calcStructuralBreak(company, *, basePeriod: str | None = None) -> dict | Non
     """구조변화 감지 — 매출/영업이익/마진/ROE 4대 지표.
 
     Chow Test 기반 구조적 변화점을 감지하여 추세 추정의 신뢰도를 판단한다.
+
+    Returns
+    -------
+    dict
+        metrics : list[dict] — 지표별 구조변화 결과
+            name : str — 지표명 (revenue, operatingIncome, operatingMargin, roe)
+            hasBreak : bool — 구조변화 존재 여부
+            breakYear : str | None — 변화점 기간
+            preBreakGrowth : float | None — 변화점 전 평균 성장률 (%)
+            postBreakGrowth : float | None — 변화점 후 평균 성장률 (%)
+            trendReliability : str — 추세 신뢰도 ("high" | "medium" | "low")
+            nObservations : int — 관측치 수
+        overallStability : str — 전체 안정성 ("stable" | "transitioning" | "volatile")
     """
     from dartlab.core.finance.ols import detectStructuralBreak, ols
 
@@ -490,6 +523,24 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
 
     라이브 매크로 데이터를 fetch하지 않는다.
     관련 지표명을 반환하여 AI가 gather.macro()로 조회할 수 있게 한다.
+
+    Returns
+    -------
+    dict
+        sectorKey : str | None — 업종 키
+        sectorCyclicality : str — 경기순환 민감도 ("high" | "moderate" | "low")
+        revenueToGdp : float — 매출-GDP 탄성치 (배수)
+        revenueToFx : float — 매출-환율 탄성치 (배수)
+        marginToGdp : float — 마진-GDP 탄성치 (배수)
+        fxExposure : str — 환율 노출 ("high" | "moderate" | "low")
+        commodityExposure : str — 원자재 노출 ("high" | "low")
+        rateSensitivity : str — 금리 민감도 ("high" | "low")
+        primaryDrivers : list[dict] — 1차 거시 동인 (indicator, source, direction, description)
+        secondaryDrivers : list[dict] — 2차 거시 동인
+        relevantIndicators : list[str] — 관련 지표 ID 목록
+        predictionAxes : dict | None — 라이브 축 상태 (PredictionSpace 캐시 있을 때)
+        axisImpact : dict | None — 업종별 축 영향도
+        netMacroEffect : float | None — 순 매크로 효과 합산
     """
     from dartlab.core.finance.scenario import getElasticity
 
@@ -587,15 +638,22 @@ def calcMacroRegression(company, *, basePeriod: str | None = None) -> dict | Non
     - Fama-MacBeth 1973: 횡단면 회귀로 팩터 프리미엄 추정
     - 시간차(lag) 효과: GDP t → 매출 t+1 (경기 전달 메커니즘)
 
-    반환:
-        dict with:
-        - betas: {gdp: float, rate: float, fx: float} — OLS 기울기 (기업별)
-        - staticBetas: {gdp: float, rate: float, fx: float} — 정적 탄성치 (비교용)
-        - lagEffects: {variable: {lag0: corr, lag1: corr}} — 시간차별 상관도
-        - rSquared: float — 설명력
-        - nObs: int — 관측치 수
-        - confidence: str — "high"/"medium"/"low"
-        - table: list[dict] — 연도별 매출 성장률 vs 거시 변화율 시계열 테이블
+    Returns
+    -------
+    dict
+        betas : dict[str, float] — OLS 기울기 (기업 고유 동적 베타, 변수별)
+        staticBetas : dict[str, float] — 정적 탄성치 (gdp, rate, fx) (배수)
+        usedIndicators : dict[str, str] — 사용된 지표 매핑 (v0→seriesId)
+        marginBetas : dict[str, float] | None — 마진 회귀 OLS 기울기
+        lagEffects : dict[str, dict] — 시간차별 상관도 (lag0, lag1, lag2)
+        rSquared : float — 매출 회귀 R-squared
+        marginR2 : float | None — 마진 회귀 R-squared
+        nObs : int — 관측치 수
+        nVars : int — 변수 수
+        degreesOfFreedom : int — 자유도
+        confidence : str — 신뢰도 ("high" | "medium" | "low")
+        sectorKey : str | None — 업종 키
+        table : list[dict] — 기간별 매출 성장률 vs 거시 변화율 시계열
     """
     isResult = company.select("IS", ["매출액", "영업이익"])
     isParsed = toDictBySnakeId(isResult)
@@ -1063,19 +1121,21 @@ def calcEventImpact(company, *, basePeriod: str | None = None) -> dict | None:
     과거에 공시 텍스트가 급변하거나 지배구조가 변한 시점을 식별하고,
     해당 시점 전후 매출/마진 변화 패턴을 추출한다.
 
-    반환:
-        dict with:
-        - events: list[dict] — 감지된 이벤트 목록
-          - period: str — 이벤트 발생 기간
-          - type: str — "disclosureShock" / "governanceChange" / "structuralBreak"
-          - magnitude: float — 변화 크기
-          - preRevGrowth: float — 이벤트 전 매출 성장률 (%)
-          - postRevGrowth: float — 이벤트 후 매출 성장률 (%)
-          - preMargin: float — 이벤트 전 영업마진 (%)
-          - postMargin: float — 이벤트 후 영업마진 (%)
-          - recoveryYears: int | None — 회복까지 걸린 기간
-        - averageImpact: dict — 이벤트 유형별 평균 충격
-        - resilience: str — "high"/"medium"/"low" — 기업의 충격 회복력
+    Returns
+    -------
+    dict
+        events : list[dict] — 감지된 이벤트 목록
+            period : str — 이벤트 발생 기간
+            type : str — 유형 ("disclosureShock" | "structuralBreak" | "revenueShock")
+            magnitude : float — 변화 크기
+            preRevGrowth : float | None — 이벤트 전 매출 성장률 (%)
+            postRevGrowth : float | None — 이벤트 후 매출 성장률 (%)
+            preMargin : float | None — 이벤트 전 영업마진 (%)
+            postMargin : float | None — 이벤트 후 영업마진 (%)
+            recoveryYears : int | None — 회복까지 걸린 기간 (일수)
+        averageImpact : dict[str, float] — 이벤트 유형별 평균 충격 (%p)
+        resilience : str — 충격 회복력 ("high" | "medium" | "low")
+        avgRecoveryYears : float | None — 평균 회복 기간
     """
     isResult = company.select("IS", ["매출액", "영업이익"])
     isParsed = toDictBySnakeId(isResult)
@@ -1269,6 +1329,17 @@ def calcDisclosureDelta(company, *, basePeriod: str | None = None) -> dict | Non
 
     공시 텍스트 변화량을 방향성 신호로 해석한다.
     FinBERT 등 톤 분석은 미적용 — 변화 크기만 사용.
+
+    Returns
+    -------
+    dict
+        overallChangeRate : float — 전체 공시 변화율 (%)
+        riskChangeRate : float — 리스크 관련 토픽 변화율 (%)
+        businessChangeRate : float — 사업 관련 토픽 변화율 (%)
+        revenueRelatedChange : float — 매출 관련 토픽 변화율 (%)
+        signalDirection : str — 방향성 ("positive" | "negative" | "neutral")
+        signalStrength : str — 신호 강도 ("strong" | "moderate" | "weak")
+        topChangedTopics : list[dict] — 변화율 상위 5개 토픽 (topic, changeRate)
     """
     try:
         diffResult = company._docs.diff()
@@ -1348,6 +1419,15 @@ def calcInventoryDivergence(company, *, basePeriod: str | None = None) -> dict |
     재고 증가율 > 매출 증가율 = 수요 둔화 (NYU Stern).
     매출채권 증가율 > 매출 증가율 = 회수 악화.
     NOA 급증 = 이익 조작 가능성 (Oler 2024).
+
+    Returns
+    -------
+    dict
+        history : list[dict] — 연도별 시계열 (inventory, receivables, revenue, inventoryGrowth(%), revenueGrowth(%), divergence(%p), arDivergence(%p), dso(일), dio(일), noa(원))
+        inventorySignal : str — 재고 신호 ("building" | "liquidating" | "stable")
+        receivableSignal : str — 매출채권 신호 ("deteriorating" | "improving" | "stable")
+        noaGrowth : float | None — NOA 성장률 (%)
+        riskScore : int — 리스크 점수 (점, 0-100)
     """
     bsResult = company.select(
         "BS", ["재고자산", "매출채권및기타채권", "매출채권", "매입채무및기타채무", "매입채무", "자산총계"]
@@ -1493,6 +1573,17 @@ def calcAnnouncementTiming(company, *, basePeriod: str | None = None) -> dict | 
 
     같은 업종에서 이미 실적을 발표한 기업들의 성장 방향을 집계한다.
     Ramnath 2002, Thomas & Zhang 2008 — 20년+ 검증된 anomaly.
+
+    Returns
+    -------
+    dict
+        sectorKey : str — 업종 키
+        sectorPeersReported : int — 실적 발표 동종 기업 수
+        sectorPeersTotal : int — 동종 업종 전체 기업 수
+        reportedDirection : dict — 방향별 기업 수 (up, down, flat)
+        bellwetherSignal : str — 벨웨더 신호 ("positive" | "negative" | "neutral")
+        peerConsensus : float — 피어 합의 점수 (-1.0 ~ +1.0)
+        confidence : str — 신뢰도 ("high" | "medium" | "low")
     """
     stockCode = _getStockCode(company)
     if stockCode is None:
@@ -1601,6 +1692,15 @@ def calcSupplyChainSignal(company, *, basePeriod: str | None = None) -> dict | N
     Cohen & Frazzini 2008 (J. Finance) — 고객사 실적이 공급사를 1-2분기 선행.
     DART 투자관계 + 관계사 거래에서 연결 기업을 식별하고,
     상장 관계사의 성장률로 이 회사에 대한 전파 신호를 계산.
+
+    Returns
+    -------
+    dict
+        linkedCompanies : list[dict] — 상장 관계사 목록 (code, name, relationship, revenueGrowth(%))
+        networkMomentum : float — 정규화 모멘텀 (-1.0 ~ +1.0)
+        nLinkedListed : int — 상장 관계사 수
+        supplyChainRisk : str — 공급망 리스크 ("high" | "moderate" | "low")
+        confidence : str — 신뢰도 ("high" | "medium" | "low")
     """
     stockCode = _getStockCode(company)
     if stockCode is None:
@@ -1773,6 +1873,17 @@ def calcConsensusDirection(company, *, basePeriod: str | None = None) -> dict | 
     직전 실적 대비 성장/하락 방향을 판단한다.
 
     Zacks 연구: 컨센서스 방향이 실적 방향의 가장 강력한 단일 예측자 (70%).
+
+    Returns
+    -------
+    dict
+        consensusRevenue : float — 컨센서스 추정 매출 (원)
+        lastActualRevenue : float — 직전 실적 매출 (원)
+        consensusPeriod : str — 컨센서스 기간
+        actualPeriod : str — 실적 기간
+        expectedGrowthPct : float — 예상 성장률 (%)
+        direction : str — 방향 ("up" | "down" | "flat")
+        confidence : str — 신뢰도 ("high" | "medium" | "low")
     """
     stockCode = _getStockCode(company)
     if not stockCode:
@@ -1853,6 +1964,16 @@ def calcFlowDirection(company, *, basePeriod: str | None = None) -> dict | None:
 
     최근 60거래일 기관+외국인 순매수 합계가 양이면 실적 개선 기대.
     "스마트머니는 실적을 안다" (Park et al., MDPI 2020).
+
+    Returns
+    -------
+    dict
+        foreignNet60d : int — 외국인 60거래일 순매수 (주)
+        institutionNet60d : int — 기관 60거래일 순매수 (주)
+        smartMoneyNet : int — 스마트머니 합계 (주)
+        direction : str — 방향 ("up" | "down" | "flat")
+        days : int — 집계 거래일 수 (일)
+        confidence : str — 신뢰도 ("high" | "medium" | "low")
     """
     stockCode = _getStockCode(company)
     if not stockCode:
@@ -1922,6 +2043,23 @@ def calcRevenueDirection(company, *, basePeriod: str | None = None) -> dict | No
     4. 2연속 같은 방향이면 74.7%
 
     학술 근거: M4/M5 Competition — 단순 방법이 최강.
+
+    Returns
+    -------
+    dict
+        latestPeriod : str — 최신 분기
+        latestYoyGrowth : float — 최신 분기 YoY 성장률 (%)
+        direction : str — 예측 방향 ("up" | "down")
+        streak : int — 연속 동일 방향 분기 수
+        margin : float | None — 최신 영업이익률 (%)
+        marginAgree : bool | None — 마진 방향 일치 여부
+        olsAgree : bool | None — OLS 외생변수 방향 일치 여부
+        confirms : int — 확인 신호 수 (0-3)
+        probability : float — 보정된 베이즈 사후확률 (0.0-1.0)
+        rawPosterior : float — 원시 사후확률 (0.0-1.0)
+        industryPrior : float — 업종별 모멘텀 사전확률 (0.0-1.0)
+        confidence : str — 신뢰도 ("very_high" | "high" | "medium" | "low")
+        history : list[dict] — 최근 4분기 YoY 방향 이력
     """
     isResult = company.select("IS", ["매출액", "영업이익"])
     isParsed = toDictBySnakeId(isResult)
@@ -2094,6 +2232,18 @@ def calcPredictionSynthesis(company, *, basePeriod: str | None = None) -> dict |
     """다중 신호 종합 — 5개 신호의 단순 평균 앙상블.
 
     학술 근거: 32편 논문, 97개 비교에서 단순 평균이 최적 (Green & Armstrong 2015).
+
+    Returns
+    -------
+    dict
+        signals : dict — 신호별 상세 (direction, strength, 개별 지표)
+        consensus : str — 종합 합의 ("bullish" | "bearish" | "neutral")
+        directionScore : float — 방향 점수 (-1.0 ~ +1.0)
+        agreementScore : float — 신호 합의도 (0.0 ~ 1.0)
+        confidence : str — 신뢰도 ("high" | "medium" | "low")
+        nSignals : int — 유효 신호 수
+        revenuePrediction : dict | None — 매출 방향 예측 (direction, confidence, streak, expectedAccuracy(%))
+        aiContext : dict — AI 소비용 요약 (directionBias, keyDrivers, keyRisks)
     """
     # 각 calc 독립 호출 (company._cache로 중복 방지는 호출자 레벨)
     momentum = calcEarningsMomentum(company, basePeriod=basePeriod)
@@ -2375,7 +2525,14 @@ def calcPredictionSynthesis(company, *, basePeriod: str | None = None) -> dict |
 
 @memoized_calc
 def calcPredictionFlags(company, *, basePeriod: str | None = None) -> list[tuple[str, str]] | None:
-    """예측신호 경고 플래그."""
+    """예측신호 경고 플래그.
+
+    Returns
+    -------
+    list[tuple[str, str]] | None
+        (코드, 메시지) 튜플 목록. 코드는 EARN_DECEL, HIGH_ACCRUAL 등 플래그 ID.
+        플래그가 없으면 None.
+    """
     flags = []
 
     # 이익 모멘텀

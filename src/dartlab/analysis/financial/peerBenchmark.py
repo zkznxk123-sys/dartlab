@@ -32,6 +32,18 @@ def calcPeerRanking(company, *, basePeriod: str | None = None) -> dict | None:
 
     scan 데이터에서 최신 기간 기준 백분위(percentile)와
     순위(rank)를 계산한다. 결과는 company._cache에 저장하여 재활용.
+
+    Returns
+    -------
+    dict
+        rankings : list[dict] — 비율별 순위 정보
+            ratioName : str — 비율 ID (roe, debtRatio 등)
+            label : str — 표시명
+            value : float — 해당 종목 값
+            percentile : float — 시장 내 백분위 (%)
+            rank : int — 순위 (1 = 최상위)
+            total : int — 전체 종목 수
+            period : str — 기준 기간
     """
     cache = getattr(company, "_cache", None)
     _KEY = "_peerRanking"
@@ -63,6 +75,16 @@ def calcRiskReturnPosition(company, *, basePeriod: str | None = None) -> dict | 
 
     ROE(수익) x 부채비율(위험)에서 시장 내 사분면 위치를 결정한다.
     calcPeerRanking 캐시가 있으면 재활용.
+
+    Returns
+    -------
+    dict
+        roe : float — ROE 값 (%)
+        roePercentile : float — ROE 시장 백분위 (%)
+        debtRatio : float — 부채비율 값 (%)
+        debtRatioPercentile : float — 부채비율 시장 백분위 (%)
+        quadrant : str — 사분면 ("고수익-저위험" | "고수익-고위험" | "저수익-저위험" | "저수익-고위험")
+        assessment : str — 평가 ("우량" | "레버리지 의존" | "보수적" | "구조 개선 필요")
     """
     # ranking 캐시에서 roe/debtRatio 추출 시도
     ranking = calcPeerRanking(company)
@@ -118,7 +140,13 @@ def calcRiskReturnPosition(company, *, basePeriod: str | None = None) -> dict | 
 
 @memoized_calc
 def calcPeerBenchmarkFlags(company, *, basePeriod: str | None = None) -> list[tuple[str, str]]:
-    """비교분석 경고/기회 플래그."""
+    """비교분석 경고/기회 플래그.
+
+    Returns
+    -------
+    list[tuple[str, str]]
+        (메시지, 유형) 튜플 목록. 유형은 "warning" | "opportunity".
+    """
     flags: list[tuple[str, str]] = []
 
     ranking = calcPeerRanking(company)

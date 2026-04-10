@@ -309,7 +309,13 @@ def calcAnomalyScore(company, *, basePeriod: str | None = None) -> dict | None:
 
 @memoized_calc
 def calcCrossStatementFlags(company, *, basePeriod: str | None = None) -> list[str]:
-    """교차검증 경고 신호."""
+    """교차검증 경고 신호.
+
+    Returns
+    -------
+    list[str]
+        경고 메시지 문자열 리스트 (IS-CF 괴리, 매출채권/재고 이상 증가, 종합 이상점수 등).
+    """
     flags = []
 
     isCf = calcIsCfDivergence(company, basePeriod=basePeriod)

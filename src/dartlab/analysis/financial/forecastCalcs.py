@@ -134,7 +134,25 @@ def _runForecastRevenue(company: Any):
 
 @memoized_calc
 def calcRevenueForecast(company: Any, *, basePeriod: str | None = None) -> dict | None:
-    """7-소스 앙상블 3-시나리오 매출 전망."""
+    """7-소스 앙상블 3-시나리오 매출 전망.
+
+    Returns
+    -------
+    dict
+        isEstimate : bool — 추정치 여부
+        method : str — 예측 방법론
+        confidence : str — 신뢰도 ("high" | "medium" | "low")
+        currency : str — 통화 코드
+        historical : list[float] — 과거 매출 시계열 (원)
+        projected : list[float] — 전망 매출 시계열 (원)
+        growthRates : list[float] — 전망 성장률 (%)
+        horizon : int — 전망 기간 (년)
+        scenarios : dict — 시나리오별 projected/growthRates/probability
+        lifecycle : str — 라이프사이클 단계
+        forecastable : bool — 예측 가능 여부
+        unforecastableReason : str — 예측 불가 사유 (forecastable=False 시)
+        disclaimer : str — 면책 문구
+    """
     result = _runForecastRevenue(company)
     if not result or not result.projected:
         return None
@@ -183,7 +201,22 @@ def calcRevenueForecast(company: Any, *, basePeriod: str | None = None) -> dict 
 
 @memoized_calc
 def calcSegmentForecast(company: Any, *, basePeriod: str | None = None) -> dict | None:
-    """세그먼트별 개별 매출 성장 전망."""
+    """세그먼트별 개별 매출 성장 전망.
+
+    Returns
+    -------
+    dict | None
+        None: 세그먼트 데이터 없음.
+        isEstimate : bool — 추정치 여부
+        currency : str — 통화 코드
+        segments : list[dict] — 세그먼트별 전망
+            name : str — 세그먼트명
+            projected : list[float] — 전망 매출 (원)
+            growthRates : list[float] — 전망 성장률 (%)
+            method : str — 예측 방법론
+            shareOfRevenue : float — 매출 비중 (%)
+            lifecycle : str — 라이프사이클 단계
+    """
     result = _runForecastRevenue(company)
     if not result or not result.segmentForecasts:
         return None
@@ -212,7 +245,25 @@ def calcSegmentForecast(company: Any, *, basePeriod: str | None = None) -> dict 
 
 @memoized_calc
 def calcProFormaHighlights(company: Any, *, basePeriod: str | None = None) -> dict | None:
-    """Pro-Forma IS 주요 항목 전망."""
+    """Pro-Forma IS 주요 항목 전망.
+
+    Returns
+    -------
+    dict
+        isEstimate : bool — 추정치 여부
+        currency : str — 통화 코드
+        wacc : float — 가중평균자본비용 (%)
+        revenueGrowthPath : list[float] — 연도별 매출 성장률 (%)
+        years : list[dict] — 연도별 전망
+            yearOffset : int — 기준연 대비 오프셋
+            revenue : float — 매출 (원)
+            operatingIncome : float — 영업이익 (원)
+            netIncome : float — 순이익 (원)
+            ebitda : float — EBITDA (원)
+            fcf : float — 잉여현금흐름 (원)
+        warnings : list[str] — 경고 메시지
+        disclaimer : str — 면책 문구
+    """
     result = _runForecastRevenue(company)
     if not result or not result.projected:
         return None
@@ -269,7 +320,21 @@ def calcProFormaHighlights(company: Any, *, basePeriod: str | None = None) -> di
 
 @memoized_calc
 def calcScenarioImpact(company: Any, *, basePeriod: str | None = None) -> dict | None:
-    """매크로 시나리오별 매출/마진 영향."""
+    """매크로 시나리오별 매출/마진 영향.
+
+    Returns
+    -------
+    dict
+        isEstimate : bool — 추정치 여부
+        currency : str — 통화 코드
+        scenarios : dict — 시나리오별 (baseline/bull/bear)
+            label : str — 시나리오 라벨
+            revenueChangePct : float — 매출 변화율 (%)
+            marginChangeBps : float — 마진 변화 (bps)
+            revenuePath : list[float] — 매출 경로 (원)
+            marginPath : list[float] — 마진 경로 (%)
+            warnings : list[str] — 경고 메시지
+    """
     series, _, sectorKey, _, currency = _getSeriesAndMeta(company)
     shares = _getShares(company)
     sp = _getSectorParams(company)
@@ -308,7 +373,19 @@ def calcScenarioImpact(company: Any, *, basePeriod: str | None = None) -> dict |
 
 @memoized_calc
 def calcForecastMethodology(company: Any, *, basePeriod: str | None = None) -> dict | None:
-    """예측 방법론 투명성 공개."""
+    """예측 방법론 투명성 공개.
+
+    Returns
+    -------
+    dict
+        method : str — 예측 방법론
+        confidence : str — 신뢰도 ("high" | "medium" | "low")
+        sources : list[str] — 사용된 데이터 소스
+        sourceWeights : dict — 소스별 가중치
+        assumptions : list[str] — 가정 목록
+        warnings : list[str] — 경고 메시지
+        lifecycle : str — 라이프사이클 단계
+    """
     result = _runForecastRevenue(company)
     if not result:
         return None
@@ -326,7 +403,24 @@ def calcForecastMethodology(company: Any, *, basePeriod: str | None = None) -> d
 
 @memoized_calc
 def calcHistoricalRatios(company: Any, *, basePeriod: str | None = None) -> dict | None:
-    """Pro-Forma 기반 과거 구조 비율."""
+    """Pro-Forma 기반 과거 구조 비율.
+
+    Returns
+    -------
+    dict
+        grossMargin : float — 매출총이익률 (%)
+        sgaRatio : float — 판관비율 (%)
+        effectiveTaxRate : float — 유효세율 (%)
+        depreciationRatio : float — 감가상각비율 (%)
+        capexToRevenue : float — CAPEX/매출 (%)
+        interestRateOnDebt : float — 부채이자율 (%)
+        nwcToRevenue : float — 순운전자본/매출 (%)
+        dividendPayout : float — 배당성향 (%)
+        yearsUsed : int — 사용 연도 수
+        confidence : str — 신뢰도
+        trends : dict — 비율 추세 정보
+        warnings : list[str] — 경고 메시지
+    """
     series, _, _, _, _ = _getSeriesAndMeta(company)
 
     from dartlab.core.finance.proforma import extract_historical_ratios
@@ -355,7 +449,13 @@ def calcHistoricalRatios(company: Any, *, basePeriod: str | None = None) -> dict
 
 @memoized_calc
 def calcForecastFlags(company: Any, *, basePeriod: str | None = None) -> dict | None:
-    """매출전망 플래그."""
+    """매출전망 플래그.
+
+    Returns
+    -------
+    dict
+        flags : list[tuple[str, str]] — (severity, message) 쌍 목록
+    """
     result = _runForecastRevenue(company)
     if not result:
         return None
@@ -403,6 +503,14 @@ def calcCalibrationReport(company: Any, *, basePeriod: str | None = None) -> dic
 
     forward test 레코드가 5건 미만이면 None 반환.
     데이터가 축적되면서 점진적으로 활성화된다.
+
+    Returns
+    -------
+    dict | None
+        None: 평가 레코드 5건 미만.
+        brierScore : float — Brier 점수 (0~1, 낮을수록 정확)
+        nRecords : int — 평가 레코드 수
+        bins : list[dict] — 캘리브레이션 구간별 통계
     """
     from dataclasses import asdict
 
@@ -445,6 +553,20 @@ def calcScenarioSimulation(company: Any, *, basePeriod: str | None = None) -> di
     bull/base/bear 3개 시나리오의 ProForma IS/BS/CF + 분기 목표 + DCF를 생성한다.
 
     사용자 지정 성장률이 필요하면 scenarioSim.createSimulation()을 직접 호출.
+
+    Returns
+    -------
+    dict
+        isEstimate : bool — 추정치 여부
+        currency : str — 통화 코드
+        baseYear : str — 기준 연도
+        targetYear : str — 목표 연도
+        revenueGrowthCAGR : float — 기준 CAGR (%)
+        scenarios : dict — 시나리오별 revenue/operatingIncome/netIncome/fcf/wacc (원)
+        quarterlyRevTargets : dict — 시나리오별 분기 매출 목표 (원)
+        quarterlyOITargets : dict — 시나리오별 분기 영업이익 목표 (원)
+        dcfPerShare : dict — 시나리오별 주당 DCF 가치 (원)
+        seasonality : dict — revenue/operatingIncome 분기 계절성 가중치
     """
     from dartlab.analysis.forecast.scenarioSim import createSimulation
 

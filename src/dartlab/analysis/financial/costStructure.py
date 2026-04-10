@@ -31,22 +31,18 @@ from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
 def calcCostBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
     """매출원가율, 판관비율, 영업비용률 시계열.
 
-    반환::
-
-        {
-            "history": [
-                {
-                    "period": str,
-                    "revenue": float,
-                    "costOfSales": float,
-                    "sga": float,
-                    "costOfSalesRatio": float | None,
-                    "sgaRatio": float | None,
-                    "operatingCostRatio": float | None,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict
+        history : list[dict] — 기간별 비용 비중 시계열
+            period : str — 회계연도
+            revenue : float — 매출액 (원)
+            costOfSales : float — 매출원가 (원)
+            sga : float — 판매비와관리비 (원)
+            costOfSalesRatio : float | None — 매출원가율 (%)
+            sgaRatio : float | None — 판관비율 (%)
+            operatingCostRatio : float | None — 영업비용률 (%)
+        notesDetail : dict | None — 비용 성격별 분류 주석 (있는 경우)
     """
     # snakeId 단일 + sumCostOfSales / sumSGA 분리 키 fallback
     accounts = ["매출액", "매출원가", "판매비와관리비"]
@@ -101,21 +97,16 @@ def calcCostBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
 def calcOperatingLeverage(company, *, basePeriod: str | None = None) -> dict | None:
     """영업레버리지(DOL) 시계열 — 매출 변동 대비 영업이익 민감도.
 
-    반환::
-
-        {
-            "history": [
-                {
-                    "period": str,
-                    "revenue": float,
-                    "operatingIncome": float,
-                    "grossProfit": float,
-                    "dol": float | None,
-                    "contributionProxy": float | None,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict
+        history : list[dict] — 기간별 영업레버리지 시계열
+            period : str — 회계연도
+            revenue : float — 매출액 (원)
+            operatingIncome : float — 영업이익 (원)
+            grossProfit : float — 매출총이익 (원)
+            dol : float | None — 영업레버리지 (배)
+            contributionProxy : float | None — 매출총이익/영업이익 (배)
     """
     accounts = ["매출액", "영업이익", "매출총이익"]
     isResult = company.select("IS", accounts)
@@ -183,21 +174,16 @@ def calcOperatingLeverage(company, *, basePeriod: str | None = None) -> dict | N
 def calcBreakevenEstimate(company, *, basePeriod: str | None = None) -> dict | None:
     """BEP 추정 — 고정비/(1-변동비율) 기반 손익분기 매출.
 
-    반환::
-
-        {
-            "history": [
-                {
-                    "period": str,
-                    "revenue": float,
-                    "fixedCostEstimate": float,
-                    "variableCostRatio": float | None,
-                    "bepRevenue": float | None,
-                    "marginOfSafety": float | None,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict
+        history : list[dict] — 기간별 손익분기점 추정 시계열
+            period : str — 회계연도
+            revenue : float — 매출액 (원)
+            fixedCostEstimate : float — 고정비 추정치 (원)
+            variableCostRatio : float | None — 변동비율 (%)
+            bepRevenue : float | None — 손익분기 매출액 (원)
+            marginOfSafety : float | None — 안전마진 (%)
     """
     accounts = ["매출액", "매출원가", "판매비와관리비"]
     isResult = company.select("IS", accounts)
@@ -261,21 +247,20 @@ def calcCostByNatureAnalysis(company, *, basePeriod: str | None = None) -> dict 
     원재료비·인건비·감가상각비 등 성격별 비중의 시계열 변화를 추적한다.
     173개사 이상 데이터 보유 (금융/REIT/지주회사 미공시).
 
-    반환::
-
-        {
-            "categories": [
-                {
-                    "name": str,
-                    "history": [{"period": str, "amount": float, "ratio": float}, ...],
-                    "latestRatio": float,
-                    "direction": str,
-                },
-                ...
-            ],
-            "periods": [str, ...],
-            "insight": str | None,
-        }
+    Returns
+    -------
+    dict | None
+        None이면 비용 성격별 분류 데이터 없음.
+        categories : list[dict] — 비용 카테고리별 시계열
+            name : str — 카테고리명 (원재료/인건비/감가상각 등)
+            history : list[dict] — 기간별 금액·비중
+                period : str — 회계연도
+                amount : float — 금액 (원)
+                ratio : float — 총비용 대비 비중 (%)
+            latestRatio : float — 최신 기간 비중 (%)
+            direction : str | None — 비중 추세 (비중 증가/비중 감소/안정)
+        periods : list[str] — 대상 회계연도 목록
+        insight : str | None — 주요 변화 요약 문장
     """
     from dartlab.analysis.financial._helpers import fetchNotesDetail, parseNumStr
 
@@ -416,6 +401,16 @@ def calcRawMaterialBreakdown(company, *, basePeriod: str | None = None) -> dict 
 
     부문/품목별 매입액 금액 행만 추출 (비중% 행 제외).
     계층적 테이블의 경우 부문별 첫 품목 금액이 대표값으로 나타남.
+
+    Returns
+    -------
+    dict | None
+        segments : list[dict] — 품목별 매입액 (최대 8개, 금액 내림차순)
+            name : str — 원재료 품목명
+            amount : float — 매입액 (원)
+            pct : float — 총매입액 대비 비중 (%)
+        totalAmount : float — 총매입액 (원)
+        period : str — 기준 회계연도
     """
     from dartlab.analysis.financial._helpers import parseNumStr
 
@@ -489,7 +484,13 @@ def calcRawMaterialBreakdown(company, *, basePeriod: str | None = None) -> dict 
 
 @memoized_calc
 def calcCostStructureFlags(company, *, basePeriod: str | None = None) -> list[str]:
-    """비용 구조 경고 신호."""
+    """비용 구조 경고 신호.
+
+    Returns
+    -------
+    list[str]
+        경고 메시지 목록 (매출원가율 연속 상승, 고DOL, 안전마진 부족 등).
+    """
     flags = []
 
     breakdown = calcCostBreakdown(company, basePeriod=basePeriod)

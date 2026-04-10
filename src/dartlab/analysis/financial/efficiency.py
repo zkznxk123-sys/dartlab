@@ -40,6 +40,26 @@ def calcTurnoverTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """자산 회전 시계열 -- 자산을 얼마나 효율적으로 쓰는가.
 
     IS(매출) + BS(자산/채권/재고)에서 원본 금액과 회전율을 동시에 본다.
+
+    Returns
+    -------
+    dict
+        history : list[dict]
+            period : str — 기간
+            revenue : float — 매출액 (원)
+            totalAssets : float — 자산총계 (원)
+            receivables : float — 매출채권 (원)
+            receivablesYoy : float — 매출채권 전년비 (%)
+            inventory : float — 재고자산 (원)
+            inventoryYoy : float — 재고자산 전년비 (%)
+            payables : float — 매입채무 (원)
+            totalAssetTurnover : float — 총자산회전율 (배)
+            receivablesTurnover : float — 매출채권회전율 (배)
+            inventoryTurnover : float — 재고자산회전율 (배)
+            dso : float — 매출채권 회수일수 (일)
+            dio : float — 재고자산 보유일수 (일)
+            dpo : float — 매입채무 지급일수 (일)
+            ccc : float — 현금전환주기 (일)
     """
     isResult = company.select("IS", ["매출액", "매출원가"])
     bsResult = company.select(
@@ -118,7 +138,13 @@ calcCccTrend = calcTurnoverTrend
 
 @memoized_calc
 def calcEfficiencyFlags(company, *, basePeriod: str | None = None) -> list[str]:
-    """효율성 경고/기회 플래그."""
+    """효율성 경고/기회 플래그.
+
+    Returns
+    -------
+    list[str]
+        경고/기회 플래그 문자열 목록.
+    """
     flags: list[str] = []
 
     trend = calcTurnoverTrend(company, basePeriod=basePeriod)

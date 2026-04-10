@@ -760,7 +760,13 @@ def calcDistressIndicators(company, *, basePeriod: str | None = None) -> dict | 
 
 @memoized_calc
 def calcCapitalFlags(company, *, basePeriod: str | None = None) -> list[tuple[str, str]]:
-    """자금조달 관련 경고/기회 플래그. [(텍스트, "warning"|"opportunity"), ...]."""
+    """자금조달 관련 경고/기회 플래그.
+
+    Returns
+    -------
+    list[tuple[str, str]]
+        각 원소는 (플래그 텍스트, "warning" | "opportunity").
+    """
     flags: list[tuple[str, str]] = []
 
     ratios = _getRatios(company)

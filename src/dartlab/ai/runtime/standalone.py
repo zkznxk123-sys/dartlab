@@ -102,7 +102,6 @@ def ask(
         exclude=exclude,
         provider=provider,
         model=model,
-        use_tools=True,
         reflect=reflect,
         report_mode=report_mode,
         history=history,
@@ -166,7 +165,6 @@ def chat(
         question,
         provider=provider,
         model=model,
-        use_tools=True,
         max_turns=max_turns,
         **kwargs,
     )

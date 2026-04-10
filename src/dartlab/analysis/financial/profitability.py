@@ -46,6 +46,25 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
 
     일반 기업: 매출/매출원가/매출총이익/판관비/영업이익/당기순이익
     금융업: 이자수익(revenue 대체)/금융이익/영업이익/당기순이익
+
+    Returns
+    -------
+    dict
+        history : list[dict]
+            period : str — 기간
+            revenue : float — 매출 (원)
+            revenueYoy : float — 매출 전기대비 (%)
+            operatingIncome : float — 영업이익 (원)
+            operatingMargin : float — 영업이익률 (%)
+            operatingIncomeYoy : float — 영업이익 전기대비 (%)
+            netIncome : float — 당기순이익 (원)
+            netMargin : float — 순이익률 (%)
+            netIncomeYoy : float — 순이익 전기대비 (%)
+            cogs : float — 매출원가 (원)
+            grossProfit : float — 매출총이익 (원)
+            grossMargin : float — 매출총이익률 (%)
+            sga : float — 판관비 (원)
+        displayHints : dict — core 컬럼 목록 + AI 표시 힌트
     """
     isFinancial = _isFinancialSector(company)
 
@@ -140,6 +159,22 @@ def calcReturnTrend(company, *, basePeriod: str | None = None) -> dict | None:
     IS + BS에서 원본 계정을 가져와서 듀퐁 5요소를 직접 계산.
     ROE = (NI/EBT) x (EBT/EBIT) x (EBIT/Rev) x (Rev/TA) x (TA/Equity)
         = 세금부담 x 이자부담 x 영업마진 x 자산회전 x 레버리지
+
+    Returns
+    -------
+    dict
+        history : list[dict]
+            period : str — 기간
+            netIncome : float — 당기순이익 (원)
+            equity : float — 자기자본 (원)
+            totalAssets : float — 총자산 (원)
+            roe : float — 자기자본이익률 (%)
+            roa : float — 총자산이익률 (%)
+            taxBurden : float — 세금부담률 (배)
+            interestBurden : float — 이자부담률 (배)
+            operatingMargin : float — 영업이익률 (%)
+            assetTurnover : float — 자산회전율 (배)
+            leverage : float — 재무레버리지 (배)
     """
     isResult = company.select("IS", ["매출액", "영업이익", "법인세차감전순이익", "당기순이익"])
     bsResult = company.select("BS", ["자산총계", "자본총계"])
@@ -212,6 +247,13 @@ def calcMarginWaterfall(company, *, basePeriod: str | None = None) -> dict | Non
     """매출 -> 순이익 마진 워터폴 분해.
 
     각 단계에서 얼마나 줄어드는지를 금액 + 비율(%)로 보여준다.
+
+    Returns
+    -------
+    dict
+        history : list[dict]
+            period : str — 기간
+            steps : list[dict] — 워터폴 단계별 (label, value, pct)
     """
     isResult = company.select(
         "IS",
@@ -340,7 +382,13 @@ def calcMarginWaterfall(company, *, basePeriod: str | None = None) -> dict | Non
 
 @memoized_calc
 def calcProfitabilityFlags(company, *, basePeriod: str | None = None) -> list[str]:
-    """수익성 경고/기회 플래그."""
+    """수익성 경고/기회 플래그.
+
+    Returns
+    -------
+    list[str]
+        경고/기회 메시지 리스트. 빈 리스트이면 이상 없음.
+    """
     flags: list[str] = []
     isFinancial = _isFinancialSector(company)
 
@@ -429,26 +477,17 @@ def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict |
     SPREAD = RNOA - NBC  (초과수익률)
     leverageEffect = FLEV × SPREAD  (레버리지 효과)
 
-    반환::
-
-        {
-            "history": [
-                {"period": str, "rnoa": float, "flev": float, "nbc": float,
-                 "spread": float, "leverageEffect": float, "roce": float},
-                ...
-            ],
-        }
-
-    Guide::
-
-        RNOA와 ROE를 비교하면 레버리지 효과를 알 수 있다.
-        RNOA > NBC이면 차입이 주주에게 유리 (양의 SPREAD).
-        RNOA < NBC이면 차입이 가치를 파괴.
-
-    SeeAlso::
-
-        - calcReturnTrend: 기존 5요소 DuPont
-        - calcRoicTimeline: ROIC 시계열
+    Returns
+    -------
+    dict
+        history : list[dict]
+            period : str — 기간
+            rnoa : float — 순영업자산수익률 (%)
+            flev : float — 금융레버리지 (배)
+            nbc : float — 순차입비용률 (%)
+            spread : float — 초과수익률 RNOA-NBC (%)
+            leverageEffect : float — 레버리지 효과 FLEV×SPREAD (%)
+            roce : float — 자기자본수익률 RNOA+leverageEffect (%)
 
     학술근거: Nissim & Penman (2001), Penman FSA&SV 5e.
     """
@@ -585,28 +624,21 @@ def calcRoicTree(company, *, basePeriod: str | None = None) -> dict | None:
     Capital Turnover = Revenue / Invested Capital
       IC = Working Capital (AR+Inv-AP) + Fixed Capital (PPE+Intangible)
 
-    반환::
-
-        {
-            "history": [
-                {
-                    "period": str,
-                    "roic": float,
-                    "operatingMargin": float,
-                    "capitalTurnover": float,
-                    "grossMargin": float,
-                    "sgaRatio": float,
-                    "effectiveTaxRate": float,
-                    "wcTurnover": float,
-                    "fixedTurnover": float,
-                    "marginDriver": str,
-                    "turnoverDriver": str,
-                },
-                ...
-            ],
-        }
-
-    학술근거: Koller, Goedhart, Wessels - Valuation (McKinsey).
+    Returns
+    -------
+    dict
+        history : list[dict]
+            period : str — 기간
+            roic : float — 투하자본수익률 (%)
+            operatingMargin : float — 영업이익률 (%)
+            capitalTurnover : float — 투하자본회전율 (배)
+            grossMargin : float — 매출총이익률 (%)
+            sgaRatio : float — 판관비율 (%)
+            effectiveTaxRate : float — 유효세율 (%)
+            wcTurnover : float — 운전자본회전율 (배)
+            fixedTurnover : float — 고정자본회전율 (배)
+            marginDriver : str — 마진 변동 주요인 ("cogs"|"sga"|"tax")
+            turnoverDriver : str — 회전율 변동 주요인 ("wc"|"fixed")
     """
     isResult = company.select(
         "IS", ["매출액", "매출원가", "판매비와관리비", "영업이익", "법인세비용", "법인세차감전순이익"]

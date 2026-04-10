@@ -37,6 +37,21 @@ def calcGrowthTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """성장 추이 -- 매출/영업이익/순이익/자산의 금액과 YoY.
 
     IS + BS에서 원본 금액을 가져와 규모감과 방향을 동시에 본다.
+
+    Returns
+    -------
+    dict
+        history : list[dict]
+            period : str — 기간
+            revenue : float — 매출 (원)
+            revenueYoy : float — 매출 전기대비 (%)
+            operatingIncome : float — 영업이익 (원)
+            operatingIncomeYoy : float — 영업이익 전기대비 (%)
+            netIncome : float — 당기순이익 (원)
+            netIncomeYoy : float — 순이익 전기대비 (%)
+            totalAssets : float — 총자산 (원)
+            totalAssetsYoy : float — 총자산 전기대비 (%)
+        cagr : dict — 3년 CAGR (revenue, operatingIncome, netIncome) (%)
     """
     isResult = company.select("IS", ["매출액", "영업이익", "당기순이익"])
     bsResult = company.select("BS", ["자산총계"])
@@ -112,6 +127,17 @@ def calcGrowthQuality(company, *, basePeriod: str | None = None) -> dict | None:
 
     매출 vs 영업이익 성장률 괴리를 본다.
     매출만 크고 이익이 안 따라오면 외형 위주.
+
+    Returns
+    -------
+    dict
+        quality : str — 성장 품질 판단 ("고품질"|"개선 중"|"외형 위주"|"둔화")
+        cagr : dict — 3년 CAGR (revenue, operatingIncome, netIncome) (%)
+        leverageEffect : list[dict]
+            period : str — 기간
+            revenueYoy : float — 매출 전기대비 (%)
+            operatingIncomeYoy : float — 영업이익 전기대비 (%)
+            operatingLeverage : float — 영업레버리지 (배)
     """
     trend = calcGrowthTrend(company, basePeriod=basePeriod)
     if trend is None or len(trend["history"]) < 2:
@@ -175,6 +201,20 @@ def calcSustainableGrowthRate(company, *, basePeriod: str | None = None) -> dict
     SGR = ROE x (1 - 배당성향/100)
     gap = 실제 매출성장률 - SGR
     - gap > 0: 외부 자본 필요 (성장이 내부 역량 초과)
+
+    Returns
+    -------
+    dict
+        history : list[dict]
+            period : str — 기간
+            revenue : float — 매출 (원)
+            netIncome : float — 순이익 (원)
+            equity : float — 자기자본 (원)
+            roe : float — ROE (%)
+            payoutRatio : float — 배당성향 (%)
+            sgr : float — 지속가능성장률 (%)
+            actualGrowth : float — 실제 매출성장률 (%)
+            gap : float — 실제-SGR 갭 (%)
     - gap < 0: 여유 (자사주/배당 확대 여력)
     """
     # snakeId 단일 패턴
@@ -246,7 +286,13 @@ def calcSustainableGrowthRate(company, *, basePeriod: str | None = None) -> dict
 
 @memoized_calc
 def calcGrowthFlags(company, *, basePeriod: str | None = None) -> list[str]:
-    """성장성 경고/기회 플래그."""
+    """성장성 경고/기회 플래그.
+
+    Returns
+    -------
+    list[str]
+        경고/기회 메시지 리스트. 빈 리스트이면 이상 없음.
+    """
     flags: list[str] = []
 
     trend = calcGrowthTrend(company, basePeriod=basePeriod)
@@ -290,16 +336,18 @@ def calcCagrComparison(company, *, basePeriod: str | None = None) -> dict | None
     자산 CAGR vs 매출 CAGR → 자산 효율 방향
     부채 CAGR vs 자본 CAGR → 레버리지 방향
 
-    반환::
-
-        {
-            "comparisons": [
-                {"label": str, "item1": str, "cagr1": float,
-                 "item2": str, "cagr2": float, "gap": float, "signal": str},
-                ...
-            ],
-            "period": str,
-        }
+    Returns
+    -------
+    dict
+        comparisons : list[dict]
+            label : str — 비교 레이블 ("매출 vs 영업이익")
+            item1 : str — 첫 번째 항목명
+            cagr1 : float — 첫 번째 CAGR (%)
+            item2 : str — 두 번째 항목명
+            cagr2 : float — 두 번째 CAGR (%)
+            gap : float — cagr1-cagr2 (%)
+            signal : str — 판단 ("양호"|"주의"|"경고")
+        period : str — CAGR 산출 기간 ("2017 → 2025")
     """
     isResult = company.select("IS", ["매출액", "영업이익"])
     bsResult = company.select("BS", ["자산총계", "부채총계", "자본총계"])

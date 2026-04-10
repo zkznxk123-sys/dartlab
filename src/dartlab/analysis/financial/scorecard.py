@@ -54,6 +54,14 @@ def calcScorecard(company, *, basePeriod: str | None = None) -> dict | None:
 
     기존 5영역(수익성/성장성/안정성/효율성/현금흐름)
     + 이익품질/투자효율/재무정합성.
+
+    Returns
+    -------
+    dict
+        items : list[dict] — 영역별 등급
+            area : str — 영역명
+            grade : str — 등급 ("A" | "B" | "C" | "D" | "F")
+        profile : str — 종합 프로필 ("premium" | "average" | "weak")
     """
     # insights — analyze() 직접 호출 (c.insights 는 P3 에서 제거됨)
     insights = None
@@ -262,7 +270,17 @@ def _calcCrossStatementGrade(company, *, basePeriod: str | None = None) -> str |
 
 @memoized_calc
 def calcPiotroskiDetail(company, *, basePeriod: str | None = None) -> dict | None:
-    """Piotroski F-Score 9개 항목 상세."""
+    """Piotroski F-Score 9개 항목 상세.
+
+    Returns
+    -------
+    dict
+        total : int — 총점 (점, 0~9)
+        interpretation : str — 해석 문구
+        items : list[dict] — 9개 신호별 결과
+            signal : str — 신호명
+            pass : bool — 충족 여부
+    """
     try:
         annual = company._buildFinanceSeries(freq="Y")
         if annual is None:
@@ -297,7 +315,13 @@ def calcPiotroskiDetail(company, *, basePeriod: str | None = None) -> dict | Non
 
 @memoized_calc
 def calcSummaryFlags(company, *, basePeriod: str | None = None) -> list[str]:
-    """전체 경고/기회 요약 -- 8영역 플래그 수집."""
+    """전체 경고/기회 요약 -- 8영역 플래그 수집.
+
+    Returns
+    -------
+    list[str]
+        경고/기회 메시지 목록
+    """
     flags: list[str] = []
 
     from dartlab.analysis.financial.efficiency import calcEfficiencyFlags

@@ -16,6 +16,20 @@ def calcDisclosureChangeSummary(company, *, basePeriod: str | None = None) -> di
 
     company.diff() DataFrame에서 changeRate 기준으로
     가장 많이 바뀐 topic을 추출한다.
+
+    Returns
+    -------
+    dict | None
+        totalChanges : int — 전체 변화 건수
+        totalTopics : int — 전체 topic 수
+        changedTopics : int — 변화가 있는 topic 수
+        unchangedTopics : int — 변화가 없는 topic 수
+        topChanged : list[dict] — 변화율 상위 topic 목록
+            topic : str — topic 이름
+            chapter : str — 장 이름
+            totalPeriods : int — 전체 기간 수
+            changedCount : int — 변화 기간 수
+            changeRate : float — 변화율 (0~1)
     """
     diffResult = _safeDiffResult(company)
     if diffResult is None:
@@ -76,6 +90,17 @@ def calcKeyTopicChanges(company, *, basePeriod: str | None = None) -> dict | Non
 
     사업개요/리스크/회계정책/우발부채/특수관계자/사업부문 등
     분석적으로 중요한 topic의 변화를 추적한다.
+
+    Returns
+    -------
+    dict | None
+        keyTopics : list[dict] — 핵심 topic별 변화 정보
+            topic : str — topic 이름
+            chapter : str — 장 이름
+            totalPeriods : int — 전체 기간 수
+            changedCount : int — 변화 기간 수
+            stableCount : int — 안정 기간 수
+            changeRate : float — 변화율 (0~1)
     """
     diffResult = _safeDiffResult(company)
     if diffResult is None:
@@ -119,6 +144,14 @@ def calcChangeIntensity(company, *, basePeriod: str | None = None) -> dict | Non
     """변화 크기(바이트) 분석 -- 어떤 topic이 얼마나 크게 바뀌었나.
 
     diff entries에서 바이트 변화량 기준 top topic을 추출한다.
+
+    Returns
+    -------
+    dict | None
+        topByDelta : list[dict] — 바이트 변화량 상위 topic
+            topic : str — topic 이름
+            totalDeltaBytes : int — 누적 바이트 변화량
+        totalDeltaBytes : int — 전체 누적 바이트 변화량
     """
     diffResult = _safeDiffResult(company)
     if diffResult is None:
@@ -150,7 +183,13 @@ def calcChangeIntensity(company, *, basePeriod: str | None = None) -> dict | Non
 
 @memoized_calc
 def calcDisclosureDeltaFlags(company, *, basePeriod: str | None = None) -> list[tuple[str, str]]:
-    """공시변화감지 경고/기회 플래그."""
+    """공시변화감지 경고/기회 플래그.
+
+    Returns
+    -------
+    list[tuple[str, str]]
+        각 원소는 (플래그 텍스트, "warning" | "opportunity").
+    """
     flags: list[tuple[str, str]] = []
 
     summary = calcDisclosureChangeSummary(company)

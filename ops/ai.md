@@ -250,8 +250,93 @@ Question
 - Phase 2 Graph — 인과 질문 9/9 graph 주입 ✅
 - **기본 ON으로 병합** — feature flag 제거 ✅
 
+## AIView — 정량 데이터 맥락 보강 (2026-04-10 도입)
+
+엔진 calc 결과(dict/DataFrame)를 AI가 **이해**하기 좋은 형태로 자동 변환하는 공통 레이어.
+
+### 문제
+
+AI에게 `영업이익률 13.07%`만 주면 "숫자"는 보지만 "의미"를 모른다.
+- 업종 평균 대비 높은지 낮은지?
+- 전기 대비 개선인지 악화인지?
+- 5년 평균 대비 어느 위치인지?
+
+### 해법
+
+calc 결과 → **autoEnrich()** → encodeAuto(TOON) → LLM
+
+모든 엔진의 반환값을 **구조 자동 감지**로 보강. 엔진별 수작업 0.
+
+| 패턴 | 감지 기준 | 보강 내용 |
+|------|----------|----------|
+| dict + `history[]` | `"history" in data` | 비율 필드 우선, 5년 평균, YoY(pp/%), 변화 판단 |
+| 중첩 history | `v["history"]` in sub-dict | 각 서브키별 요약 생성 |
+| flat dict | 숫자 키 존재 | 필드별 포맷 + 요약 |
+
+### 2단계 판별: 독스트링 확정 → 자동 감지 fallback
+
+1. **독스트링 스키마 (확정)**: `parseReturnsSchema(calc_fn)` → docstring의 Returns 섹션에서 `키 : 타입 — 설명 (단위)` 파싱. `(%)` → 비율, `(원)` → 금액, `(일)` → 일수 확정.
+2. **자동 감지 (fallback)**: 독스트링이 없는 함수에서 필드명(`margin`, `roe`) + 값 범위로 추측
+3. **비율은 pp 차이, 금액은 변화율(%)**: `영업이익률 +2.2pp` vs `매출 +10.9%`
+4. **비율 필드 우선 표시**: AI에게 비율이 금액보다 informative
+
+### 독스트링 → AI 체인
+
+```
+calc 함수 docstring (Returns 표준화: 키:타입—설명(단위))
+  ↓
+parseReturnsSchema(fn) — 런타임 docstring 파싱, LRU 캐시
+  ↓  {"operatingMargin": {"type": "float", "unit": "%", "desc": "영업이익률"}}
+_calcToContextPart() [selectors/_calc_base.py]
+  ↓
+autoEnrich(data, company=company, calc_fn=fn) — 스키마 기반 확정 보강
+  ↓  _summary: "영업이익률 13.1% · 전기비 +2.2pp(소폭 개선) · 5년평균 위 1.2pp"
+encodeAuto(enriched) → TOON
+  ↓
+ContextPart → LLM
+```
+
+**모든 selector(act1~6, compare)가 자동 적용** — _calcToContextPart 한 곳만 수정.
+**새 calc 함수를 추가해도**: docstring에 Returns만 쓰면 체인 자동 완성.
+
+### 독스트링 Returns 표준 규칙 (ops/code.md 연동)
+
+```
+Returns
+-------
+dict
+    history : list[dict]
+        period : str — 기간
+        operatingMargin : float — 영업이익률 (%)    ← (%) = 비율 확정
+        revenue : float — 매출 (원)                 ← (원) = 금액 확정
+        dso : float — 매출채권회수일 (일)            ← (일) = 일수 확정
+```
+
+141개 analysis calc + 12개 Company/dartlab 공개 API에 적용 완료.
+
+### 실측 (실험 110, 삼성전자 수익성)
+
+| 항목 | A (raw) | B (enriched) |
+|------|---------|-------------|
+| 응답 길이 | 3,339자 | **1,141자** |
+| 코드 실행 | 2라운드 | **0라운드** |
+| 판단 | "좋아지는 중" (모호) | "좋다, 역대 최고는 아닌 회복" (명확) |
+| 비교 맥락 | 없음 | 5년 평균 +1.2pp, 상위 79.9% |
+
+### 학술 근거
+
+- Kim et al. (시카고대, 2024): 재무제표 + CoT → 이익 방향 60% (인간 53-57% 초과)
+- TAP4LLM (EMNLP 2024): 서브테이블 + 보강 → +7.93%p
+- FinSheet-Bench (2026): "결정론적 계산과 LLM 해석을 분리하는 아키텍처 필요"
+
+### 확장성
+
+엔진이 새 축을 추가해도 `history + period + 숫자` 패턴만 유지하면 autoEnrich가 자동 적용.
+scan 업종 백분위 조회도 company가 있으면 자동.
+
 ## 관련 코드
 
+- `src/dartlab/ai/context/aiview.py` — autoEnrich 공통 변환 레이어
 - `src/dartlab/ai/context/` — Phase 1: ContextBuilder + ACE 폐쇄 루프 (intent/encoder/budget/builder/playbook/selectors)
 - `src/dartlab/ai/` — providers, tools, runtime, memory, persistence, conversation
 - `src/dartlab/ai/runtime/core.py` — 시스템 프롬프트, 코드 실행, 마크다운 변환, 인사이트 주입, preGround 백그라운드 thread

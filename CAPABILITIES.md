@@ -267,7 +267,7 @@ setup: AI provider 설정 (capabilities 확인 후 설정)
 
 ---
 
-## Server API (73개 엔드포인트)
+## Server API (77개 엔드포인트)
 
 FastAPI `/api/*` 엔드포인트. 모든 클라이언트의 단일 소비 경로.
 
@@ -321,6 +321,10 @@ FastAPI `/api/*` 엔드포인트. 모든 클라이언트의 단일 소비 경로
 | GET | `/api/company/{code}/scan/{axis}` | 6-Axis 스캔 단일 축 결과 + 시장 내 위치. |
 | GET | `/api/company/{code}/scan/position` | 6-Axis 전체 포지션 요약 — 사전 빌드 스냅샷 기반. |
 | GET | `/api/company/{code}/insights/unified` | 통합 인사이트 — 등급 + 스캔 + 피어 결합. |
+| GET | `/filings` | 공시 목록 조회. |
+| GET | `/company/{corp}` | 기업 기본 정보. |
+| GET | `/finance/{corp}` | 재무제표 조회. |
+| GET | `/report/{corp}/{category}` | 보고서 API (배당, 직원, 임원 등 56개 카테고리). |
 | GET | `/api/data/sources/{code}` | 경량 데이터 소스 목록 — registry 메타 + 파일 존재 여부만 확인 (빠름). |
 | GET | `/api/data/preview/{code}/{module}` | 데이터 미리보기 — 모듈 데이터를 JSON으로 반환 (테이블/텍스트). |
 | GET | `/api/data/stats` | 로컬 데이터 현황 — 문서/재무 파일 수, dartlab 버전. |

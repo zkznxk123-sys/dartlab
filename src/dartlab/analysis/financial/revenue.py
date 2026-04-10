@@ -254,7 +254,15 @@ def _selectDocsSalesOrder(company, keyword: str | None = None):
 
 @memoized_calc
 def calcCompanyProfile(company, *, basePeriod: str | None = None) -> dict | None:
-    """업종/주요제품 맥락. 반환: {"sector": str, "products": str} 또는 None."""
+    """업종/주요제품 맥락.
+
+    Returns
+    -------
+    dict | None
+        sector : str — 섹터 > 산업그룹 문자열
+        company : str — 기업명 (EDGAR만)
+        products : str — 주요제품 설명
+    """
     parts: dict[str, str] = {}
 
     market = getattr(company, "market", "KR")
@@ -757,7 +765,13 @@ def calcGrowthContribution(company, *, basePeriod: str | None = None) -> dict | 
 
 @memoized_calc
 def calcFlags(company, *, basePeriod: str | None = None) -> list[tuple[str, str]]:
-    """수익 관련 경고/기회 플래그. [(텍스트, "warning"|"opportunity"), ...]."""
+    """수익 관련 경고/기회 플래그.
+
+    Returns
+    -------
+    list[tuple[str, str]]
+        각 원소는 (플래그 텍스트, "warning" | "opportunity").
+    """
     flags: list[tuple[str, str]] = []
 
     revVals = _getDocsRevenueVals(company)

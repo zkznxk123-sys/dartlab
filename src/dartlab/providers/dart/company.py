@@ -1959,8 +1959,26 @@ class Company:
                 **finance topic 한정**.
             raw: True 면 원본 그대로 (정제 없이).
 
-        Returns:
-            pl.DataFrame | None — topic 데이터. 블록 목차 또는 실제 데이터.
+        Returns
+        -------
+        pl.DataFrame | None
+            finance topic (IS/BS/CF/CIS/SCE):
+                snakeId : str — 계정 식별자 (영문 snake_case)
+                항목 : str — 계정명 (한글)
+                2025Q4, 2025Q3, ... : float — 분기별 값 (원 단위, freq="Q" 기본)
+                2025, 2024, ... : float — 연간 합산 값 (원 단위, freq="Y")
+            ratios topic:
+                항목 : str — 비율명
+                2025Q4, 2025Q3, ... : float — 비율값 (%, 배)
+            notes topic (inventory, borrowings 등):
+                항목 : str — 세부 항목명
+                당기, 전기 또는 연도 컬럼 : float — 금액 (원 단위)
+            docs/report topic (dividend, employee 등):
+                topic별 컬럼 구조 — c.show(topic) 실행으로 확인
+            블록 미지정 + 멀티블록 topic:
+                block : int — 블록 번호
+                title : str — 블록 제목
+            데이터 없으면 None.
 
         Requires:
             데이터: docs (자동 다운로드). finance topic 은 finance parquet 도 필요.
@@ -2335,8 +2353,17 @@ class Company:
             freq: 시계열 주기 — ``"Q"`` (분기, 기본) / ``"Y"`` (연간) / ``"YTD"`` (누적).
             scope: 재무제표 범위 — ``"consolidated"`` (연결, 기본) / ``"separate"`` (별도).
 
-        Returns:
-            SelectResult — DataFrame 위임 + .chart() 체이닝. 없으면 ValueError.
+        Returns
+        -------
+        SelectResult
+            show()와 동일 컬럼 구조에서 indList/colList로 필터된 행/열.
+            .chart() 체이닝으로 시각화 가능.
+            내부 DataFrame 접근: result.df (pl.DataFrame).
+            finance topic 예시 (c.select("IS", ["매출액"])):
+                snakeId : str — 계정 식별자
+                항목 : str — 계정명
+                2025Q4, 2025Q3, ... : float — 분기별 값 (원 단위)
+            행 매칭 실패 시 ValueError.
 
         Example::
 
@@ -2995,8 +3022,34 @@ class Company:
             axis: 축 이름 ("price", "flow", "macro", "news"). None이면 가이드 반환.
             **kwargs: market, start, end, days 등 축별 옵션.
 
-        Returns:
-            pl.DataFrame — 축별 시계열 데이터. axis=None이면 4축 가이드 DataFrame.
+        Returns
+        -------
+        pl.DataFrame | None
+            axis=None (가이드):
+                axis : str — 축 이름
+                label : str — 한글 레이블
+                description : str — 설명
+                example : str — 사용 예시
+            axis="price":
+                date : date — 날짜
+                open : float — 시가 (원)
+                high : float — 고가 (원)
+                low : float — 저가 (원)
+                close : float — 종가 (원)
+                volume : int — 거래량
+            axis="flow":
+                date : date — 날짜
+                외국인순매수 : int — 외국인 순매수량
+                기관순매수 : int — 기관 순매수량
+                (KR 전용. EDGAR ticker는 None 반환)
+            axis="macro":
+                date : date — 날짜
+                지표별 컬럼 : float — ECOS/FRED 거시지표 값
+            axis="news":
+                title : str — 뉴스 제목
+                link : str — 기사 URL
+                pubDate : str — 발행일
+            데이터 없으면 None.
 
         Requires:
             price/flow/news: 없음 (공개 API)
@@ -3929,8 +3982,14 @@ class Company:
         Args:
             없음 (self 바인딩).
 
-        Returns:
-            dict — opinion, auditorChanges, goingConcern, kam, internalControl.
+        Returns
+        -------
+        dict
+            opinion : str — 감사의견 ("적정", "한정", "부적정", "의견거절")
+            auditorChanges : list[dict] — 감사인 변경 이력 (year, from, to, reason)
+            goingConcern : bool — 계속기업 불확실성 존재 여부
+            kam : list[str] — 핵심감사사항 목록
+            internalControl : str — 내부회계관리제도 검토의견
 
         Requires:
             데이터: docs + report (자동 다운로드)
@@ -4220,8 +4279,17 @@ class Company:
         Args:
             view: None → 이 회사 행, "all" → 전체, "market" → 시장별 요약.
 
-        Returns:
-            DataFrame 또는 데이터 없으면 None.
+        Returns
+        -------
+        pl.DataFrame | None
+            종목코드 : str — 6자리 종목코드
+            종목명 : str — 회사명
+            최대주주지분율 : float — 최대주주 + 특수관계인 지분율 (%)
+            사외이사비율 : float — 사외이사 비율 (%)
+            감사위원회 : str — 감사위원회 설치 여부
+            종합점수 : float — 거버넌스 종합 점수 (100점 만점)
+            등급 : str — A/B/C/D/E 등급
+            데이터 없으면 None.
 
         Requires:
             데이터: DART 정기보고서 (자동 수집)
@@ -4316,8 +4384,17 @@ class Company:
         Args:
             view: None → 이 회사 행, "all" → 전체, "market" → 시장별 요약.
 
-        Returns:
-            DataFrame 또는 데이터 없으면 None.
+        Returns
+        -------
+        pl.DataFrame | None
+            종목코드 : str — 6자리 종목코드
+            종목명 : str — 회사명
+            배당수익률 : float — 배당수익률 (%)
+            배당성향 : float — 배당성향 (%)
+            자사주매입 : int — 자사주 매입 주수
+            총환원율 : float — (배당 + 자사주) / 시가총액 (%)
+            분류 : str — 환원형/중립/희석형
+            데이터 없으면 None.
 
         Requires:
             데이터: DART 정기보고서 (자동 수집)
@@ -4365,8 +4442,16 @@ class Company:
         Args:
             view: None → 이 회사 행, "all" → 전체, "market" → 시장별 요약.
 
-        Returns:
-            DataFrame 또는 데이터 없으면 None.
+        Returns
+        -------
+        pl.DataFrame | None
+            종목코드 : str — 6자리 종목코드
+            종목명 : str — 회사명
+            부채비율 : float — 부채비율 (%)
+            차입금의존도 : float — 차입금의존도 (%)
+            ICR : float — 이자보상배율 (배)
+            위험등급 : str — 안전/주의/경고/위험
+            데이터 없으면 None.
 
         Requires:
             데이터: DART 정기보고서 (자동 수집)

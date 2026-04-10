@@ -90,6 +90,19 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
 
     exogenousAxes에서 업종 최적 3지표를 가져오고, 범용 3지표(금리/환율/IPI)와 비교.
     R-squared가 높은 쪽을 채택. 현재 외생변수 상태 × beta로 매출 방향 추정.
+
+    Returns
+    -------
+    dict
+        stockCode : str — 종목코드
+        optimalIndicators : list[dict] — 업종 최적 지표별 회귀 결과 (label, rSquared, impact)
+        genericIndicators : list[dict] — 범용 3지표 회귀 결과
+        selected : list[dict] — 채택된 지표 그룹 (R2 높은 쪽)
+        selectedSource : str — 채택 출처 ("업종최적" | "범용")
+        optimalBestR2 : float — 업종 최적 최고 R-squared
+        genericBestR2 : float — 범용 최고 R-squared
+        netDirection : str — 종합 매출 방향 ("positive" | "negative" | "neutral")
+        netDirectionLabel : str — 종합 방향 한글 라벨
     """
     import polars as pl
 
@@ -270,7 +283,14 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
 
 @memoized_calc
 def calcValuationBand(company, *, basePeriod: str | None = None) -> dict | None:
-    """PER/PBR 정규분포 밴드에서 현재 위치."""
+    """PER/PBR 정규분포 밴드에서 현재 위치.
+
+    Returns
+    -------
+    dict
+        bands : dict — PER/PBR별 밴드 정보 (metric, current, mean, std, percentile, zone, zoneLabel, dataPoints)
+        overallZone : str — 종합 판정 ("저평가" | "고평가" | "부분 저평가" | "부분 고평가" | "적정")
+    """
     from dartlab.core.finance.macroCycle import calcMultipleBand
 
     # ratioSeries에서 PER/PBR 과거 시계열 추출

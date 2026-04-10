@@ -54,6 +54,24 @@ def calcLeverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
 
     BS에서 부채/자본/자산 원본 금액을 가져와서
     부채비율 + 자기자본비율 + 순차입금비율을 금액과 함께 보여준다.
+
+    Returns
+    -------
+    dict
+        history : list[dict]
+            period : str — 기간
+            totalDebt : float — 부채총계 (원)
+            totalDebtYoy : float — 부채총계 전년비 (%)
+            equity : float — 자본총계 (원)
+            equityYoy : float — 자본총계 전년비 (%)
+            totalAssets : float — 자산총계 (원)
+            cash : float — 현금및현금성자산 (원)
+            totalBorrowing : float — 총차입금 (원)
+            netDebt : float — 순차입금 (원)
+            debtRatio : float — 부채비율 (%)
+            equityRatio : float — 자기자본비율 (%)
+            netDebtRatio : float — 순차입금비율 (%)
+        notesDetail : dict — 차입금/리스 주석 상세 (있을 때만)
     """
     bsResult = company.select(
         "BS",
@@ -145,6 +163,17 @@ def calcCoverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
     IS 영업이익 / 이자비용으로 산출.
     이자비용 소스 우선순위: IS 이자비용 → CF interest_paid → IS 금융비용.
     금융비용은 외환손실·파생상품 등 비이자 항목 포함하여 과대계상 위험.
+
+    Returns
+    -------
+    dict
+        history : list[dict]
+            period : str — 기간
+            operatingIncome : float — 영업이익 (원)
+            operatingIncomeYoy : float — 영업이익 전년비 (%)
+            interestExpense : float — 이자비용 (원)
+            interestExpenseSource : str — 이자비용 소스 ("이자비용"|"CF이자지급"|"금융비용")
+            interestCoverage : float — 이자보상배율 (배)
     """
     isResult = company.select("IS", ["영업이익", "금융비용", "이자비용"])
     parsed = toDictBySnakeId(isResult)
@@ -222,6 +251,35 @@ def calcDistressScore(company, *, basePeriod: str | None = None) -> dict | None:
     Z = 1.2*X1 + 1.4*X2 + 3.3*X3 + 0.6*X4 + 1.0*X5
     X1 = 운전자본/총자산, X2 = 이익잉여금/총자산, X3 = EBIT/총자산
     X4 = 시가총액/부채총계, X5 = 매출/총자산
+
+    Returns
+    -------
+    dict
+        history : list[dict]
+            period : str — 기간
+            totalAssets : float — 자산총계 (원)
+            workingCapital : float — 운전자본 (원)
+            retainedEarnings : float — 이익잉여금 (원)
+            ebit : float — EBIT (원)
+            revenue : float — 매출액 (원)
+            totalDebt : float — 부채총계 (원)
+            x1_wcTa : float — 운전자본/총자산
+            x2_reTa : float — 이익잉여금/총자산
+            x3_ebitTa : float — EBIT/총자산
+            x4_mcapTl : float — 시가총액/부채총계
+            x5_revTa : float — 매출/총자산
+            zScore : float — Z-Score (점)
+            zModel : str — 사용 모델 ("Z-Score"|"Z''-Score")
+            zone : str — 판정 구간 ("안전"|"회색"|"위험")
+        latestScore : float — 최신 Z-Score (점)
+        zone : str — 최신 판정 ("안전"|"회색"|"위험"|"판별 불가")
+        diagnosticMeta : dict
+            model : str — 모델명
+            precision : float — 정밀도
+            typeIError : float — 1종 오류율
+            reference : str — 학술 출처
+            marketNote : str — 시장 적용 참고
+        notesDetail : dict — 충당부채 주석 상세 (있을 때만)
     """
     bsResult = company.select(
         "BS", ["자산총계", "유동자산", "유동부채", "부채총계", "이익잉여금", "미처분이익잉여금(결손금)"]
@@ -353,6 +411,20 @@ def calcDistressEnsemble(company, *, basePeriod: str | None = None) -> dict | No
 
     Altman Z-Score, Ohlson O-Score, Springate S-Score, Zmijewski X-Score
     각 모델의 판정(safe/warning/danger)을 집계하여 종합 등급 산출.
+
+    Returns
+    -------
+    dict
+        models : list[dict]
+            model : str — 모델명
+            score : float — 모델 점수 (점)
+            verdict : str — 개별 판정 ("safe"|"warning"|"danger")
+            threshold : str — 임계값 설명
+        ensemble : str — 종합 판정 ("안전"|"주의"|"위험")
+        agreement : float — 모델 간 일치도 (%)
+        dangerCount : int — 위험 판정 모델 수
+        safeCount : int — 안전 판정 모델 수
+        total : int — 전체 모델 수
     """
     ratios = getRatios(company)
     if ratios is None:
@@ -461,6 +533,19 @@ def calcDebtMaturity(company, *, basePeriod: str | None = None) -> dict | None:
     """부채 만기 구조 분석.
 
     단기/장기 차입금 비율, 차환 리스크 지표.
+
+    Returns
+    -------
+    dict
+        history : list[dict]
+            period : str — 기간
+            shortTermBorrowing : float — 단기차입금 (원)
+            longTermBorrowing : float — 장기차입금 (원)
+            bonds : float — 사채 (원)
+            totalBorrowing : float — 총차입금 (원)
+            shortTermRatio : float — 단기차입금 비중 (%)
+            currentToTotalDebt : float — 유동부채/부채총계 (%)
+            refinancingRisk : float — 단기차입금/OCF (배)
     """
     bsResult = company.select(
         "BS",
@@ -566,7 +651,11 @@ def calcDebtMaturity(company, *, basePeriod: str | None = None) -> dict | None:
 def calcStabilityFlags(company, *, basePeriod: str | None = None) -> dict:
     """안정성 경고/기회 플래그.
 
-    반환: {"flags": list[str], "enrichedFlags": list[dict]}
+    Returns
+    -------
+    dict
+        flags : list[str] — 경고/기회 플래그 문자열 목록
+        enrichedFlags : list[dict] — 상세 진단 메타 포함 플래그 목록
     """
     flags: list[str] = []
     enriched: list[dict] = []

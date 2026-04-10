@@ -160,7 +160,28 @@ def _getSectorParams(company: Any):
 
 @memoized_calc
 def calcDcf(company: Any, *, basePeriod: str | None = None) -> dict | None:
-    """DCF (현금흐름 할인) 밸류에이션."""
+    """DCF (현금흐름 할인) 밸류에이션.
+
+    Returns
+    -------
+    dict
+        perShareValue : float — 주당 적정가 (원)
+        enterpriseValue : float — 기업가치 (원)
+        equityValue : float — 자기자본가치 (원)
+        discountRate : float — 할인율 (%)
+        growthRateInitial : float — 초기 성장률 (%)
+        terminalGrowth : float — 영구성장률 (%)
+        marginOfSafety : float — 안전마진 (%)
+        fcfProjections : list — FCF 예측 시계열 (원)
+        fcfHistorical : list — FCF 과거 시계열 (원)
+        exitMultipleTv : float — 출구배수 기반 터미널가치 (원)
+        exitMultipleEv : float — 출구배수 기반 기업가치 (원)
+        exitMultiplePerShare : float — 출구배수 기반 주당가치 (원)
+        assumptions : dict — 가정 파라미터
+        warnings : list[str] — 경고 메시지
+        currentPrice : float | None — 현재 주가 (원)
+        currency : str — 통화 (KRW | USD)
+    """
     from dartlab.core.finance.dcf import dcfValuation
 
     series, shares, currency = _getSeriesAndShares(company)
@@ -212,6 +233,20 @@ def calcDdm(company: Any, *, basePeriod: str | None = None) -> dict | None:
 
     calcDividendPolicy의 연간 배당 데이터를 우선 사용하여
     분기 CF 합산 오류를 방지한다.
+
+    Returns
+    -------
+    dict
+        intrinsicValue : float — 주당 내재가치 (원)
+        dividendPerShare : float — 주당배당금 (원)
+        dividendYield : float — 배당수익률 (%)
+        payoutRatio : float — 배당성향 (%)
+        dividendGrowth : float — 배당 성장률 (%)
+        modelUsed : str — 사용 모델 ("Gordon" | "H-Model" | "N/A")
+        discountRate : float — 할인율 (%)
+        warnings : list[str] — 경고 메시지
+        currentPrice : float | None — 현재 주가 (원)
+        currency : str — 통화 (KRW | USD)
     """
     from dartlab.analysis.financial.capitalAllocation import calcDividendPolicy
     from dartlab.core.finance.dcf import ddmValuation
@@ -271,7 +306,20 @@ def calcDdm(company: Any, *, basePeriod: str | None = None) -> dict | None:
 
 @memoized_calc
 def calcRelativeValuation(company: Any, *, basePeriod: str | None = None) -> dict | None:
-    """상대가치 (PER/PBR/EV-EBITDA/PSR/PEG) 밸류에이션."""
+    """상대가치 (PER/PBR/EV-EBITDA/PSR/PEG) 밸류에이션.
+
+    Returns
+    -------
+    dict
+        sectorMultiples : dict — 업종 평균 멀티플 (PER, PBR 등) (배수)
+        currentMultiples : dict — 현재 멀티플 (배수)
+        impliedValues : dict — 멀티플별 내재가치 (원)
+        premiumDiscount : dict — 업종 대비 할인/프리미엄 (%)
+        consensusValue : float — 합의 적정가 (원)
+        warnings : list[str] — 경고 메시지
+        currentPrice : float | None — 현재 주가 (원)
+        currency : str — 통화 (KRW | USD)
+    """
     from dartlab.core.finance.dcf import relativeValuation
 
     series, shares, currency = _getSeriesAndShares(company)
@@ -301,7 +349,21 @@ def calcRelativeValuation(company: Any, *, basePeriod: str | None = None) -> dic
 
 @memoized_calc
 def calcResidualIncome(company: Any, *, basePeriod: str | None = None) -> dict | None:
-    """RIM (잔여이익모델) 밸류에이션."""
+    """RIM (잔여이익모델) 밸류에이션.
+
+    Returns
+    -------
+    dict
+        bps : float — 주당순자산 (원)
+        coe : float — 자기자본비용 (%)
+        riHistory : list — 잔여이익 시계열 (원)
+        intrinsicValue : float — 주당 내재가치 (원)
+        upside : float — 상승여력 (%)
+        terminalValue : float — 터미널가치 (원)
+        warnings : list[str] — 경고 메시지
+        currentPrice : float | None — 현재 주가 (원)
+        currency : str — 통화 (KRW | USD)
+    """
     series, shares, currency = _getSeriesAndShares(company)
     sp = _getSectorParams(company)
     price = _fetchPriceContext(company)
@@ -358,7 +420,18 @@ _HOLDING_SUBS: dict[str, list[tuple[str, float]]] = {
 
 @memoized_calc
 def calcNavValuation(company: Any) -> dict | None:
-    """지주사 NAV = Sum(상장 자회사 시총 x 지분율) - 순차입금. 할인 30%."""
+    """지주사 NAV = Sum(상장 자회사 시총 x 지분율) - 순차입금. 할인 30%.
+
+    Returns
+    -------
+    dict
+        navGross : float — 할인 전 NAV (원)
+        navDiscounted : float — 할인 후 NAV (원)
+        navPerShare : float | None — 주당 NAV (원)
+        holdingDiscount : float — 지주사 할인율 (0.30)
+        subsidiaries : list[dict] — 자회사별 상세 (code, ratio(%), marketCap(원), value(원))
+        netDebt : float — 순차입금 (원)
+    """
     stockCode = getattr(company, "stockCode", "")
     subs = _HOLDING_SUBS.get(stockCode)
     if not subs:
@@ -418,7 +491,24 @@ def calcNavValuation(company: Any) -> dict | None:
 
 @memoized_calc
 def calcPriceTarget(company: Any, *, basePeriod: str | None = None) -> dict | None:
-    """확률 가중 주가 목표가 (5 시나리오 + Monte Carlo)."""
+    """확률 가중 주가 목표가 (5 시나리오 + Monte Carlo).
+
+    Returns
+    -------
+    dict
+        weightedTarget : float — 확률 가중 목표 주가 (원)
+        percentiles : dict — 백분위별 주가 (원)
+        expectedValue : float — 기대가치 (원)
+        upside : float | None — 상승여력 (%)
+        probabilityAboveCurrent : float — 현재가 초과 확률 (0.0-1.0)
+        signal : str — 투자 신호 ("buy" | "hold" | "sell")
+        confidence : str — 신뢰도 ("high" | "medium" | "low")
+        scenarios : list[dict] — 시나리오별 상세 (name, probability, perShareValue(원), enterpriseValue(원))
+        waccDetails : dict — WACC 상세
+        warnings : list[str] — 경고 메시지
+        currentPrice : float | None — 현재 주가 (원)
+        currency : str — 통화 (KRW | USD)
+    """
     series, shares, currency = _getSeriesAndShares(company)
     price = _fetchPriceContext(company)
     currentPrice = price["currentPrice"] if price else None
@@ -501,7 +591,22 @@ def calcPriceTarget(company: Any, *, basePeriod: str | None = None) -> dict | No
 
 @memoized_calc
 def calcReverseImplied(company: Any, *, basePeriod: str | None = None) -> dict | None:
-    """역내재성장률 -- 시장이 내재하는 매출 성장률 역산."""
+    """역내재성장률 -- 시장이 내재하는 매출 성장률 역산.
+
+    Returns
+    -------
+    dict
+        impliedGrowthRate : float — 내재 매출 성장률 (%)
+        impliedRevenue : float — 내재 매출 (원)
+        marketCap : float — 시가총액 (원)
+        latestRevenue : float — 최신 매출 (원)
+        assumedMargin : float — 가정 영업이익률 (%)
+        assumedWacc : float — 가정 WACC (%)
+        signal : str — 신호 ("overpriced" | "underpriced" | "fair")
+        warnings : list[str] — 경고 메시지
+        currentPrice : float | None — 현재 주가 (원)
+        currency : str — 통화 (KRW | USD)
+    """
     from dartlab.core.finance.priceImplied import reverseImpliedGrowth
 
     series, shares, currency = _getSeriesAndShares(company)
@@ -529,7 +634,18 @@ def calcReverseImplied(company: Any, *, basePeriod: str | None = None) -> dict |
 
 @memoized_calc
 def calcSensitivity(company: Any, *, basePeriod: str | None = None) -> dict | None:
-    """WACC x 영구성장률 민감도 그리드."""
+    """WACC x 영구성장률 민감도 그리드.
+
+    Returns
+    -------
+    dict
+        grid : list[list[float]] — WACC x 영구성장률 주가 그리드 (원)
+        baseWacc : float — 기준 WACC (%)
+        baseTerminalGrowth : float — 기준 영구성장률 (%)
+        baseValue : float — 기준 주가 (원)
+        currentPrice : float | None — 현재 주가 (원)
+        currency : str — 통화 (KRW | USD)
+    """
     from dartlab.core.finance.dcf import sensitivityAnalysis
 
     series, shares, currency = _getSeriesAndShares(company)
@@ -678,7 +794,23 @@ def _classifyCompanyType(company: Any, series: dict) -> tuple[str, dict[str, flo
 
 @memoized_calc
 def calcValuationSynthesis(company: Any, *, basePeriod: str | None = None) -> dict | None:
-    """종합 밸류에이션 -- 기업 유형별 자동 모델 선택 + 가중 합성."""
+    """종합 밸류에이션 -- 기업 유형별 자동 모델 선택 + 가중 합성.
+
+    Returns
+    -------
+    dict
+        fairValueRange : dict — 적정가 범위 (원)
+        verdict : str — 판정 ("저평가" | "적정" | "고평가")
+        currentPrice : float | None — 현재 주가 (원)
+        estimates : list[dict] — 모델별 추정 (method, value(원), weight)
+        companyType : str — 기업 유형 ("financial" | "growth" | "cyclical" | "dividend" | "holding" | "general" 등)
+        weightedFairValue : float | None — 가중 합성 적정가 (원)
+        modelWeights : dict[str, float] — 모델별 가중치
+        currency : str — 통화 (KRW | USD)
+        reverseImplied : dict | None — 역내재성장률 (모델 실패 시 보충)
+        warnings : list[str] — 경고 메시지
+        technicalContext : dict | None — 기술적 분석 컨텍스트 (verdict, score, rsi)
+    """
     from dartlab.core.finance.dcf import fullValuation
 
     series, shares, currency = _getSeriesAndShares(company)
@@ -834,7 +966,14 @@ def calcValuationSynthesis(company: Any, *, basePeriod: str | None = None) -> di
 
 @memoized_calc
 def calcValuationFlags(company: Any, *, basePeriod: str | None = None) -> list[dict]:
-    """가치평가 관련 플래그 집계."""
+    """가치평가 관련 플래그 집계.
+
+    Returns
+    -------
+    list[dict]
+        signal : str — 신호 유형 ("opportunity" | "warning" | "info")
+        label : str — 플래그 설명 메시지
+    """
     flags: list[dict] = []
 
     dcf = calcDcf(company, basePeriod=basePeriod)

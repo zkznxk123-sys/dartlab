@@ -46,8 +46,27 @@ def listing(
         corp: 종목코드 또는 ticker. filings/topics에 필수.
         market: "KR" 또는 "US". companies에서만 사용.
 
-    Returns:
-        pl.DataFrame.
+    Returns
+    -------
+    pl.DataFrame
+        kind="companies" (기본):
+            종목코드 : str — 6자리 종목코드
+            종목명 : str — 회사명
+            시장 : str — 유가/코스닥/코넥스
+            업종 : str — 업종명
+        kind="filings":
+            id : str — 공시 접수번호
+            date : str — 접수일
+            title : str — 공시 제목
+            url : str — 공시 URL
+        kind="topics":
+            topic : str — topic 이름
+            source : str — 데이터 출처 (docs/finance/report)
+            periods : str — 사용 가능 기간
+        kind="dartlist":
+            corp_code : str — DART 법인코드 (8자리)
+            corp_name : str — 법인명
+            stock_code : str | None — 종목코드 (비상장이면 None)
 
     Raises:
         ValueError: 지원하지 않는 kind, 또는 필수 인자 누락.

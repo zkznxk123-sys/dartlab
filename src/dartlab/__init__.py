@@ -68,10 +68,17 @@ def search(
         end: 종료일 (YYYYMMDD).
         topK: 반환 건수 (기본 10).
 
-    Returns:
-        pl.DataFrame — 검색 결과.
-        컬럼: score, rcept_no, corp_name, rcept_dt, report_nm,
-        section_title, text, dartUrl
+    Returns
+    -------
+    pl.DataFrame
+        score : float — 매칭 점수 (BM25F 가중)
+        rcept_no : str — 접수번호 (DART 고유 ID)
+        corp_name : str — 회사명
+        rcept_dt : str — 접수일 (YYYYMMDD)
+        report_nm : str — 공시 유형명
+        section_title : str — 섹션 제목
+        text : str — 본문 텍스트 (최대 2000자)
+        dartUrl : str — DART 공시 뷰어 URL
 
     Example::
 

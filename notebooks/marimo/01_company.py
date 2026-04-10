@@ -9,26 +9,13 @@ __generated_with = "0.22.0"
 app = marimo.App(width="medium")
 
 
-@app.cell(hide_code=True)
-def _():
-    import marimo as mo
-    mo.md("""# Company
-
-sections 사상 — `topic × period` 으로 모든 공시/재무 데이터에 단일 진입점.""")
-    return
-
 @app.cell
 def _():
     import dartlab
     c = dartlab.Company("005930")
     c.corpName
-    return (dartlab, c)
+    return (c,)
 
-@app.cell(hide_code=True)
-def _():
-    import marimo as mo
-    mo.md("""## 단일 진입점 — show / select""")
-    return
 
 @app.cell
 def _(c):
@@ -36,11 +23,13 @@ def _(c):
     c.topics
     return
 
+
 @app.cell
 def _(c):
     # 손익계산서 (분기)
     c.show("IS")
     return
+
 
 @app.cell
 def _(c):
@@ -48,11 +37,13 @@ def _(c):
     c.show("IS", freq="Y")
     return
 
+
 @app.cell
 def _(c):
     # 행 필터
-    c.select("IS", ["매출액", "영업이익", "당기순이익"])
+    c.select("IS")
     return
+
 
 @app.cell
 def _(c):
@@ -60,43 +51,31 @@ def _(c):
     c.show("inventory")
     return
 
+
 @app.cell
 def _(c):
     # 정형 공시 — 배당
     c.show("dividend")
     return
 
-@app.cell(hide_code=True)
-def _():
-    import marimo as mo
-    mo.md("""## sections / facts / trace""")
-    return
 
 @app.cell
 def _(c):
     c.sections.head(20)
     return
 
-@app.cell
-def _(c):
-    c.facts.head(20)
-    return
 
 @app.cell
 def _(c):
     c.trace("BS")
     return
 
-@app.cell(hide_code=True)
-def _():
-    import marimo as mo
-    mo.md("""## 공시 / 변화""")
-    return
 
 @app.cell
 def _(c):
     c.filings().head(10)
     return
+
 
 @app.cell
 def _(c):

@@ -481,7 +481,13 @@ def calcTreasuryStockStatus(company, *, basePeriod: str | None = None) -> dict |
 
 @memoized_calc
 def calcCapitalAllocationFlags(company, *, basePeriod: str | None = None) -> list[str]:
-    """자본배분 경고 신호."""
+    """자본배분 경고 신호.
+
+    Returns
+    -------
+    list[str]
+        경고 메시지 문자열 리스트 (배당 초과, FCF 초과 환원, 극소 투자 등).
+    """
     flags = []
 
     dividend = calcDividendPolicy(company, basePeriod=basePeriod)

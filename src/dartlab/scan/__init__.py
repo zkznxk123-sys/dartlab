@@ -527,8 +527,11 @@ class Scan:
         target: 축별 대상 (종목코드, 항목, 비율명 등).
         **kwargs: 축별 옵션 (annual, fsPref, market 등).
 
-    Returns:
-        pl.DataFrame — 전종목 횡단 데이터. axis=None이면 13축 가이드 DataFrame.
+    Returns
+    -------
+    pl.DataFrame
+        전종목 횡단 데이터. axis=None이면 가이드 DataFrame.
+        공통 컬럼: 종목코드 (str), 종목명 (str) + 축별 지표 컬럼.
 
     Example::
 
@@ -552,6 +555,32 @@ class Scan:
             scan("financial")              # 재무 8축 가이드
             scan("financial", "수익성")     # financial 그룹 내 수익성 축
             scan("profitability")          # 기존 flat 호출도 그대로 동작
+
+        Returns
+        -------
+        pl.DataFrame
+            axis=None (가이드):
+                axis : str — 축 이름
+                label : str — 한글 레이블
+                description : str — 설명
+                example : str — 사용 예시
+            axis="profitability":
+                종목코드 : str — 6자리 종목코드
+                종목명 : str — 회사명
+                영업이익률 : float — 영업이익률 (%)
+                순이익률 : float — 순이익률 (%)
+                ROE : float — 자기자본이익률 (%)
+                ROA : float — 총자산이익률 (%)
+                등급 : str — 수익성 등급
+            axis="account" (target="매출액"):
+                종목코드 : str — 6자리 종목코드
+                종목명 : str — 회사명
+                2024, 2023, ... : float — 연도별 값 (원 단위)
+            axis="ratio" (target="roe"):
+                종목코드 : str — 6자리 종목코드
+                종목명 : str — 회사명
+                2024, 2023, ... : float — 연도별 비율값 (%, 배)
+            기타 축: 종목코드 + 종목명 + 축별 지표 컬럼
         """
         if axis is None:
             return self._guide()

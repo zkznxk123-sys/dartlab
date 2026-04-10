@@ -214,6 +214,47 @@ class GatherEntry:
         target: str | None = None,
         **kwargs: Any,
     ) -> pl.DataFrame:
+        """외부 시장 데이터 수집 실행.
+
+        Returns
+        -------
+        pl.DataFrame
+            axis=None (가이드):
+                axis : str — 축 이름
+                label : str — 한글 레이블
+                description : str — 설명
+                example : str — 사용 예시
+            axis="price":
+                date : date — 날짜
+                open : float — 시가
+                high : float — 고가
+                low : float — 저가
+                close : float — 종가
+                volume : int — 거래량
+            axis="flow":
+                date : date — 날짜
+                외국인순매수 : int — 외국인 순매수량
+                기관순매수 : int — 기관 순매수량
+            axis="macro":
+                date : date — 날짜
+                지표별 컬럼 : float — ECOS/FRED 거시지표 값
+            axis="news":
+                title : str — 뉴스 제목
+                link : str — 기사 URL
+                pubDate : str — 발행일
+            axis="sector":
+                sectorCode : str — 업종코드
+                sectorName : str — 업종명
+                industryCode : str — 산업코드
+                industryName : str — 산업명
+                market : str — 시장 (KR/US)
+            axis="insider":
+                date : str — 거래일
+                name : str — 거래자명
+                position : str — 직위
+                tradeType : str — 거래유형
+                changeShares : int — 변동 주수
+        """
         if axis is None:
             return self._guide()
 

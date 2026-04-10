@@ -62,25 +62,37 @@ def _calcToContextPart(
     *,
     label: str = "",
     source: str = "",
+    company: Any = None,
 ) -> ContextPart | None:
-    """calc 결과(dict/list) → TOON 인코딩 → ContextPart. None이면 None."""
+    """calc 결과(dict/list) → AI 맥락 보강 → TOON 인코딩 → ContextPart. None이면 None."""
     if data is None:
         return None
+
+    # AI 맥락 보강 — 5년 평균, YoY 판단, 핵심 요약 자동 추가
+    from dartlab.ai.context.aiview import autoEnrich
+
+    enriched = autoEnrich(data, company=company)
+
+    # _summary가 있으면 헤더에 포함 (AI가 바로 해석 가능)
+    summary_line = ""
+    if isinstance(enriched, dict) and "_summary" in enriched:
+        summary_line = enriched.pop("_summary") + "\n"
+
     # history 키가 있으면 그것만 추출 (가장 유용한 시계열)
-    if isinstance(data, dict) and "history" in data:
-        rows = data["history"]
+    if isinstance(enriched, dict) and "history" in enriched:
+        rows = enriched["history"]
         if isinstance(rows, list) and rows:
             text_body = encodeAuto(rows)
         else:
-            text_body = encodeAuto(data)
+            text_body = encodeAuto(enriched)
     else:
-        text_body = encodeAuto(data)
+        text_body = encodeAuto(enriched)
 
     if not text_body or len(text_body) < 5:
         return None
 
     header = f"## {label}\n" if label else ""
-    text = f'<context source="{source}">\n{header}{text_body}\n</context>'
+    text = f'<context source="{source}">\n{header}{summary_line}{text_body}\n</context>'
     tokens = estimateTokens(text)
 
     return ContextPart(
@@ -105,7 +117,7 @@ def _buildParts(
     bp = basePeriod or _resolveBase(company)
     for key, label, fn, prio in calcs:
         result = _safeCalc(fn, company, basePeriod=bp) if bp else _safeCalc(fn, company)
-        part = _calcToContextPart(key, result, prio, label=label, source=f"calc:{key}")
+        part = _calcToContextPart(key, result, prio, label=label, source=f"calc:{key}", company=company)
         if part is not None:
             parts.append(part)
     return parts

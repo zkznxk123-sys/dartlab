@@ -34,22 +34,18 @@ def _safe(numerator: float, denominator: float) -> float | None:
 def calcAccrualAnalysis(company, *, basePeriod: str | None = None) -> dict | None:
     """발생액(Accrual) 시계열 — 이익 중 현금이 아닌 비중.
 
-    반환::
-
-        {
-            "history": [
-                {
-                    "period": str,
-                    "netIncome": float,
-                    "ocf": float,
-                    "totalAssets": float,
-                    "sloanAccrualRatio": float | None,
-                    "accrualToRevenue": float | None,
-                    "ocfToNi": float | None,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict
+        history : list[dict] — 기간별 발생액 시계열
+            period : str — 회계연도
+            netIncome : float — 당기순이익 (원)
+            ocf : float — 영업활동현금흐름 (원)
+            totalAssets : float — 자산총계 (원)
+            sloanAccrualRatio : float | None — Sloan 발생액비율 (배)
+            accrualToRevenue : float | None — 발생액/매출액 (%)
+            ocfToNi : float | None — 영업CF/순이익 (%)
+        notesDetail : dict | None — 매출채권 대손충당금 주석 (있는 경우)
     """
     isResult = company.select("IS", ["당기순이익", "매출액"])
     cfResult = company.select("CF", ["영업활동현금흐름"])
@@ -122,21 +118,16 @@ def calcAccrualAnalysis(company, *, basePeriod: str | None = None) -> dict | Non
 def calcEarningsPersistence(company, *, basePeriod: str | None = None) -> dict | None:
     """이익 지속성 — 영업이익 vs 영업외손익, 변동성.
 
-    반환::
-
-        {
-            "history": [
-                {
-                    "period": str,
-                    "operatingIncome": float,
-                    "preTaxIncome": float,
-                    "nonOperatingIncome": float,
-                    "nonOpRatio": float | None,
-                },
-                ...
-            ],
-            "earningsVolatility": float | None,
-        }
+    Returns
+    -------
+    dict
+        history : list[dict] — 기간별 이익 구성 시계열
+            period : str — 회계연도
+            operatingIncome : float — 영업이익 (원)
+            preTaxIncome : float — 법인세차감전순이익 (원)
+            nonOperatingIncome : float — 영업외손익 (원)
+            nonOpRatio : float | None — 영업외/영업이익 비율 (%)
+        earningsVolatility : float | None — 영업이익 변동계수 (배)
     """
     accounts = ["영업이익", "법인세차감전순이익", "세전이익"]
     isResult = company.select("IS", accounts)
@@ -206,12 +197,19 @@ def calcBeneishTimeline(company, *, basePeriod: str | None = None) -> dict | Non
     M = -4.84 + 0.920*DSRI + 0.528*GMI + 0.404*AQI + 0.892*SGI
         + 0.115*DEPI - 0.172*SGAI + 4.679*TATA - 0.327*LVGI
 
-    반환::
-
-        {
-            "history": [{"period": str, "mScore": float | None}, ...],
-            "threshold": float,
-        }
+    Returns
+    -------
+    dict
+        history : list[dict] — 기간별 M-Score 시계열
+            period : str — 회계연도
+            mScore : float | None — Beneish M-Score (점수)
+        threshold : float — 조작 판별 임계값 (-1.78)
+        diagnosticMeta : dict — 진단 메타데이터
+            precision : float — 정밀도
+            falsePositiveRate : float — 위양성률
+            reference : str — 학술 근거
+            sampleBase : str — 표본 기반
+            krNote : str — K-IFRS 환경 주의사항
     """
     # snakeId 단일 패턴 (alias 양방향이 EDGAR↔DART 변형 자동 처리)
     isResult = company.select(
@@ -351,8 +349,17 @@ def calcBeneishTimeline(company, *, basePeriod: str | None = None) -> dict | Non
 def calcEarningsQualityFlags(company, *, basePeriod: str | None = None) -> dict:
     """이익 품질 경고 신호.
 
-    반환: {"flags": list[str], "enrichedFlags": list[dict]}
-    enrichedFlags는 정밀도·기저율 등 진단 메타를 포함하는 구조화된 플래그.
+    Returns
+    -------
+    dict
+        flags : list[str] — 경고 메시지 목록 (발생액 과다, CF 부족, M-Score 초과 등)
+        enrichedFlags : list[dict] — 구조화된 플래그 (정밀도/기저율/학술근거 포함)
+            code : str — 플래그 코드
+            message : str — 경고 메시지
+            precision : float | None — 정밀도
+            baseRate : str — 표본 기반
+            reference : str — 학술 근거
+            sectorNote : str — 업종별 주의사항
     """
     flags: list[str] = []
     enriched: list[dict] = []
@@ -421,17 +428,18 @@ def calcRichardsonAccrual(company, *, basePeriod: str | None = None) -> dict | N
     LTOACC = delta_NCOA - delta_NCOL                            신뢰도 낮음
     FINACC = delta_STI + delta_LTI - delta_LTD - delta_PSTK    중간
 
-    반환::
-
-        {
-            "history": [
-                {"period": str, "wcacc": float, "ltoacc": float, "finacc": float,
-                 "totalAccrual": float, "reliabilityScore": str},
-                ...
-            ],
-        }
-
     학술근거: Richardson, Sloan, Soliman, Tuna (2005).
+
+    Returns
+    -------
+    dict
+        history : list[dict] — 기간별 3계층 발생액 시계열
+            period : str — 회계연도
+            wcacc : float | None — 운전자본 발생액/총자산 (%)
+            ltoacc : float | None — 비유동영업 발생액/총자산 (%)
+            finacc : float | None — 금융 발생액/총자산 (%)
+            totalAccrual : float | None — 총발생액/총자산 (%)
+            reliabilityScore : str | None — 이익 신뢰도 (high/medium/low)
     """
     bsResult = company.select(
         "BS",
@@ -541,17 +549,21 @@ def calcNonOperatingBreakdown(company, *, basePeriod: str | None = None) -> dict
     금융이익/비용, 지분법손익, 기타수익/비용을 개별 추적.
     영업외가 영업이익의 30% 이상이면 영업만으로 기업 판단 불가.
 
-    반환::
-
-        {
-            "history": [
-                {"period": str, "opIncome": float, "finIncome": float,
-                 "finCost": float, "netFinance": float, "associateIncome": float,
-                 "otherIncome": float, "otherExpense": float,
-                 "nonOpTotal": float, "nonOpRatio": float},
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict
+        history : list[dict] — 기간별 영업외손익 분해 시계열
+            period : str — 회계연도
+            opIncome : float — 영업이익 (원)
+            finIncome : float — 금융이익 (원)
+            finCost : float — 금융비용 (원)
+            netFinance : float — 순금융손익 (원)
+            associateIncome : float — 지분법손익 (원)
+            otherIncome : float — 기타수익 (원)
+            otherExpense : float — 기타비용 (원)
+            nonOpTotal : float | None — 영업외손익 합계 (원)
+            nonOpRatio : float | None — 영업외/영업이익 비율 (%)
+        notesDetail : dict | None — 관계기업 투자 주석 (있는 경우)
     """
     isResult = company.select(
         "IS",
@@ -634,21 +646,16 @@ def calcDilutionTrend(company, *, basePeriod: str | None = None) -> dict | None:
     희석 괴리율(%)의 추세를 추적한다.
     괴리율이 5% 이상이면 잠재 희석 리스크.
 
-    반환::
-
-        {
-            "history": [
-                {
-                    "period": str,
-                    "basicEps": float | None,
-                    "dilutedEps": float | None,
-                    "dilutionPct": float | None,
-                },
-                ...
-            ],
-            "latestDilution": float | None,
-            "trend": str | None,
-        }
+    Returns
+    -------
+    dict
+        history : list[dict] — 기간별 EPS 희석 시계열
+            period : str — 회계연도
+            basicEps : float | None — 기본주당이익 (원)
+            dilutedEps : float | None — 희석주당이익 (원)
+            dilutionPct : float | None — 희석 괴리율 (%)
+        latestDilution : float | None — 최신 기간 희석 괴리율 (%)
+        trend : str | None — 희석 추세 (희석 증가/희석 감소/안정)
     """
     from dartlab.analysis.financial._helpers import fetchNotesDetail
 

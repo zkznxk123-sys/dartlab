@@ -18,25 +18,32 @@ dartlab 전체에 적용되는 코드 스타일, 독스트링, 테스트, 릴리
 
 ## 독스트링 9섹션
 
-공개 API 함수는 아래 구조를 따른다:
+공개 API 함수는 아래 구조를 따른다. **Returns 섹션은 AI가 반환값을 정확히 이해하는 근본이므로 반드시 키+타입+단위를 명시한다.**
 
 ```python
-def analysis(axis: str, company: Company) -> dict:
-    """수익구조 분석.
-
-    축별 재무 데이터를 구조화하여 스토리 데이터로 변환한다.
+def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
+    """이익 구조 시계열 — 매출에서 순이익까지 금액과 마진.
 
     Parameters
     ----------
-    axis : str
-        분석 축 이름 (예: "수익구조", "수익성").
     company : Company
         분석 대상 기업.
+    basePeriod : str, optional
+        기준 기간.
 
     Returns
     -------
     dict
-        분석 결과. 키별 금액/비율/YoY/플래그.
+        marginTrend : dict
+            history : list[dict]
+                period : str — 기간 ("2025", "2024Q4")
+                revenue : float — 매출 (원)
+                operatingMargin : float — 영업이익률 (%)
+                netMargin : float — 순이익률 (%)
+                grossMargin : float — 매출총이익률 (%)
+                revenueYoy : float — 매출 전기 대비 (%)
+            displayHints : dict — core 컬럼 목록
+        profitabilityFlags : list[str] — 경고 플래그
 
     Raises
     ------
@@ -45,7 +52,7 @@ def analysis(axis: str, company: Company) -> dict:
 
     Examples
     --------
-    >>> c.analysis("financial", "수익구조")
+    >>> c.analysis("financial", "수익성")
 
     Notes
     -----
@@ -58,11 +65,51 @@ def analysis(axis: str, company: Company) -> dict:
     See Also
     --------
     review : analysis 결과를 보고서로 조립.
-    insight : 등급 카드 요약.
     """
 ```
 
 9섹션: Summary, Description, Parameters, Returns, Raises, Examples, Notes, Guide, See Also
+
+### [최우선] Returns 독스트링 작성 규칙
+
+**모든 공개 함수 + 모든 calc 함수**에 Returns를 반드시 작성한다. AI가 이 스키마를 읽어서 반환값의 구조, 단위, 의미를 확정한다.
+
+**포맷**: `키 : 타입 — 설명 (단위)`
+
+```
+Returns
+-------
+dict
+    key1 : str — 설명
+    key2 : float — 설명 (%)        ← 비율
+    key3 : float — 설명 (원)        ← 금액
+    key4 : float — 설명 (일)        ← 일수
+    key5 : list[dict]
+        subkey1 : str — 설명
+        subkey2 : float — 설명 (%)
+```
+
+**단위 표기 필수**:
+- 비율: `(%)` — operatingMargin, roe, debtRatio 등
+- 금액: `(원)` — revenue, totalAssets, ocf 등
+- 일수: `(일)` — dso, dio, dpo, ccc 등
+- 배수: `(배)` — per, pbr, interestCoverage 등
+- 점수: `(점)` — healthScore, score 등
+
+**DataFrame 반환 시**:
+```
+Returns
+-------
+pl.DataFrame
+    종목코드 : str — 6자리 코드
+    종목명 : str — 회사명
+    영업이익률 : float — (%)
+    {period} : float — 기간별 값 (원). 컬럼명 예: "2025Q4"
+```
+
+**금지**: `dict — 분석 결과.` 같은 한 줄 Returns. 키를 명시하지 않으면 AI가 추측해야 한다.
+
+**실행 결과 기반**: 독스트링은 추측이 아니라 실제 반환값을 실행해서 확인 후 작성한다.
 
 ## CAPABILITIES — 단일 진실의 원천
 

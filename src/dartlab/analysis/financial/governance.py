@@ -17,6 +17,20 @@ def calcOwnershipTrend(company, *, basePeriod: str | None = None) -> dict | None
 
     report.majorHolder에서 연도별 합산 지분율 추이와
     최신 시점 개별 주주(top 10)를 추출한다.
+
+    Returns
+    -------
+    dict | None
+        None: majorHolder 데이터 없음.
+        history : list[dict] — 연도별 지분율 추이
+            year : str — 연도
+            ratio : float — 합산 지분율 (%)
+            change : float — 전기 대비 변동 (%p)
+        latestHolders : list[dict] — 최근 주주 구성 (상위 10명)
+            name : str — 주주명
+            relate : str — 관계
+            ratio : float — 지분율 (%)
+            shares : int — 보유 주식수
     """
     result = _safePivotMajorHolder(company)
     if result is None:
@@ -52,6 +66,14 @@ def calcBoardComposition(company, *, basePeriod: str | None = None) -> dict | No
     """이사회 구성 -- 사외이사비율, 전체 임원 수.
 
     report.executive에서 최신 분기 기준 이사회 구성을 추출한다.
+
+    Returns
+    -------
+    dict
+        totalCount : int — 전체 임원 수
+        registeredCount : int — 등기임원 수
+        outsideCount : int — 사외이사 수
+        outsideRatio : float — 사외이사비율 (%)
     """
     result = _safePivotExecutive(company)
     if result is None:
@@ -82,6 +104,16 @@ def calcAuditOpinionTrend(company, *, basePeriod: str | None = None) -> dict | N
 
     report.audit에서 연도별 감사의견과 감사인을 추출한다.
     감사인 변경도 감지한다.
+
+    Returns
+    -------
+    dict | None
+        None: audit 데이터 없음.
+        history : list[dict] — 연도별 감사 이력
+            year : str — 연도
+            opinion : str — 감사의견
+            auditor : str — 감사인
+            auditorChanged : bool — 감사인 변경 여부
     """
     result = _safePivotAudit(company)
     if result is None:
@@ -114,7 +146,13 @@ def calcAuditOpinionTrend(company, *, basePeriod: str | None = None) -> dict | N
 
 @memoized_calc
 def calcGovernanceFlags(company, *, basePeriod: str | None = None) -> list[tuple[str, str]]:
-    """지배구조 경고/기회 플래그."""
+    """지배구조 경고/기회 플래그.
+
+    Returns
+    -------
+    list[tuple[str, str]]
+        (message, severity) 쌍 목록. severity: "warning" | "opportunity"
+    """
     flags: list[tuple[str, str]] = []
 
     # 최대주주 지분

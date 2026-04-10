@@ -191,8 +191,21 @@ class Macro:
             market: "US" | "KR" (기본 US)
             **kwargs: 축별 추가 파라미터
 
-        Returns:
-            가이드 DataFrame 또는 분석 결과 dict
+        Returns
+        -------
+        pl.DataFrame | dict
+            axis=None (가이드):
+                axis : str — 축 이름
+                label : str — 한글 레이블
+                description : str — 설명
+                example : str — 사용 예시
+            axis="사이클" 등 분석 축:
+                dict with keys:
+                    phase : str — 현재 경기 국면 (expansion/peak/contraction/trough)
+                    signals : list[dict] — 개별 신호 (name, value, direction)
+                    confidence : float — 판단 신뢰도 (0.0~1.0)
+                    narrative : str — 해석 문장
+                    data : pl.DataFrame — 지표별 시계열 데이터
         """
         if axis is None:
             return self._guide()

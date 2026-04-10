@@ -672,7 +672,13 @@ def calcIntangibleAssetDetail(company, *, basePeriod: str | None = None) -> dict
 
 @memoized_calc
 def calcAssetFlags(company, *, basePeriod: str | None = None) -> list[str]:
-    """자산 구조 경고 신호."""
+    """자산 구조 경고 신호.
+
+    Returns
+    -------
+    list[str]
+        경고 메시지 문자열 리스트 (비영업자산 과다, CCC 과다, CAPEX 부족/과잉, 자산효율 악화 등).
+    """
     flags = []
 
     structure = calcAssetStructure(company, basePeriod=basePeriod)

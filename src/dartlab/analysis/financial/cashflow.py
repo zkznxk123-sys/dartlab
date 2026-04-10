@@ -57,19 +57,17 @@ def _classifyCfPattern(ocf: float, icf: float, fcf: float) -> str | None:
 def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | None:
     """영업CF/투자CF/재무CF + FCF 시계열.
 
-    반환::
-
-        {
-            "history": [
-                {
-                    "period": str,
-                    "ocf": float, "icf": float, "fcf_financing": float,
-                    "capex": float, "fcf": float,
-                    "pattern": str | None,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict
+        history : list[dict]
+            period : str — 기간
+            ocf : float — 영업활동현금흐름 (원)
+            icf : float — 투자활동현금흐름 (원)
+            fcfFinancing : float — 재무활동현금흐름 (원)
+            capex : float — 설비투자 (원)
+            fcf : float — 잉여현금흐름 (원)
+            pattern : str — CF 패턴 분류 ("성숙형"|"확장형"|"위기형" 등)
     """
     # snakeId 단일 패턴 (alias 양방향 자동 매핑)
     cfAccounts = [
@@ -136,19 +134,16 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
 def calcCashQuality(company, *, basePeriod: str | None = None) -> dict | None:
     """영업CF/순이익, 영업CF/매출 — 이익이 현금으로 뒷받침되는가.
 
-    반환::
-
-        {
-            "history": [
-                {
-                    "period": str,
-                    "ocf": float, "netIncome": float, "revenue": float,
-                    "ocfToNi": float | None,
-                    "ocfMargin": float | None,
-                },
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict
+        history : list[dict]
+            period : str — 기간
+            ocf : float — 영업활동현금흐름 (원)
+            netIncome : float — 당기순이익 (원)
+            revenue : float — 매출액 (원)
+            ocfToNi : float — 영업CF/순이익 (%)
+            ocfMargin : float — 영업CF/매출 (%)
     """
     cfResult = company.select("CF", ["영업활동현금흐름"])
     isResult = company.select("IS", ["당기순이익", "매출액"])
@@ -206,7 +201,13 @@ def calcCashQuality(company, *, basePeriod: str | None = None) -> dict | None:
 
 @memoized_calc
 def calcCashFlowFlags(company, *, basePeriod: str | None = None) -> list[str]:
-    """현금흐름 경고 신호."""
+    """현금흐름 경고 신호.
+
+    Returns
+    -------
+    list[str]
+        경고 플래그 문자열 목록.
+    """
     flags = []
 
     overview = calcCashFlowOverview(company, basePeriod=basePeriod)
@@ -262,17 +263,19 @@ def calcOcfDecomposition(company, *, basePeriod: str | None = None) -> dict | No
     OCF ≈ 순이익 + 비현금비용(감가상각 추정) + 운전자본 변동
     운전자본 변동 = -(delta_AR) - (delta_Inv) + (delta_AP)
 
-    반환::
-
-        {
-            "history": [
-                {"period": str, "ni": float, "ocf": float,
-                 "depEstimate": float, "wcEffect": float,
-                 "arChange": float, "invChange": float, "apChange": float,
-                 "residual": float},
-                ...
-            ],
-        }
+    Returns
+    -------
+    dict
+        history : list[dict]
+            period : str — 기간
+            ni : float — 당기순이익 (원)
+            ocf : float — 영업활동현금흐름 (원)
+            depEstimate : float — 감가상각 추정치 (원)
+            wcEffect : float — 운전자본 변동 효과 (원)
+            arChange : float — 매출채권 변동 (원)
+            invChange : float — 재고자산 변동 (원)
+            apChange : float — 매입채무 변동 (원)
+            residual : float — 잔차 (원)
     """
     isResult = company.select("IS", ["당기순이익"])
     cfResult = company.select("CF", ["영업활동현금흐름"])

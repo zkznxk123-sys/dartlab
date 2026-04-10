@@ -969,8 +969,29 @@ class Company:
             axis: 수집 축 이름 (예: "price", "news"). None이면 축 목록.
             **kwargs: 축별 추가 파라미터.
 
-        Returns:
-            수집 결과 DataFrame 또는 축 목록.
+        Returns
+        -------
+        pl.DataFrame | None
+            axis=None (가이드):
+                axis : str — 축 이름
+                label : str — 한글 레이블
+                description : str — 설명
+                example : str — 사용 예시
+            axis="price":
+                date : date — 날짜
+                open : float — 시가 (USD)
+                high : float — 고가 (USD)
+                low : float — 저가 (USD)
+                close : float — 종가 (USD)
+                volume : int — 거래량
+            axis="news":
+                title : str — 뉴스 제목
+                link : str — 기사 URL
+                pubDate : str — 발행일
+            axis="macro":
+                date : date — 날짜
+                지표별 컬럼 : float — FRED 거시지표 값
+            데이터 없으면 None.
 
         Example::
 
@@ -1442,8 +1463,22 @@ class Company:
             block: blockOrder 인덱스. None이면 블록 목차.
             period: 특정 기간 필터. 리스트면 세로 뷰 (기간 x 항목).
 
-        Returns:
-            pl.DataFrame — 블록 목차 또는 실제 데이터. 없으면 None.
+        Returns
+        -------
+        pl.DataFrame | None
+            finance topic (IS/BS/CF/CIS):
+                account : str — 계정 식별자 (snakeId)
+                2024, 2023, ... : float — 연간 값 (USD)
+            ratios topic:
+                account : str — 비율명
+                2024, 2023, ... : float — 비율값 (%, 배)
+            notes topic (inventory, borrowings 등):
+                항목 : str — 세부 항목명
+                연도 컬럼 : float — 금액 (USD)
+            docs topic (10-K 항목):
+                block 미지정: block : int, title : str — 블록 목차
+                block 지정: 기간 컬럼에 텍스트 내용
+            데이터 없으면 None.
 
         Example::
 
@@ -1610,8 +1645,13 @@ class Company:
             indList: 행 필터 — 항목 문자열 또는 리스트.
             colList: 열 필터 — 기간 문자열 또는 리스트.
 
-        Returns:
-            SelectResult — 필터된 DataFrame 래퍼. 없으면 None.
+        Returns
+        -------
+        SelectResult
+            show()와 동일 컬럼 구조에서 indList/colList로 필터된 행/열.
+            .chart() 체이닝으로 시각화 가능.
+            내부 DataFrame 접근: result.df (pl.DataFrame).
+            행 매칭 실패 시 ValueError (strict=True).
 
         Example::
 
@@ -2372,6 +2412,17 @@ class Company:
 
         10-K Item 9A(Controls and Procedures) 텍스트에서 material weakness,
         going concern 등 핵심 키워드를 탐지한다.
+
+        Returns
+        -------
+        list[dict] | None
+            각 dict 키:
+                type : str — 발견 유형 (material_weakness/going_concern/
+                    ineffective_controls/clean/audit_fees)
+                period : str — 해당 기간 (예: "2024")
+                severity : str — 심각도 (critical/warning/ok)
+                amount : str — 감사 수수료 금액 (audit_fees 유형만)
+            발견 없으면 None.
         """
         import re
 
@@ -2413,6 +2464,15 @@ class Company:
 
         10-K Part III에서 이사회 구성, 소유 구조 텍스트를 제공한다.
         DART와 달리 구조화된 수치가 아닌 텍스트 데이터이다.
+
+        Returns
+        -------
+        pl.DataFrame | None
+            항목 : str — 분석 영역 (directors/ownership/compensation)
+            기간 : str — 데이터 기간 (예: "2024")
+            내용 : str — 10-K 텍스트 요약 (최대 500자)
+            view="all"/"market"이면 None (EDGAR 미지원).
+            데이터 없으면 None.
         """
         if view in ("all", "market"):
             return None
@@ -2519,6 +2579,16 @@ class Company:
         """주주환원/자본구조 — EDGAR BS/CF 기반 단일 회사 분석.
 
         DART와 달리 전종목 횡단비교(view="all")는 미지원.
+
+        Returns
+        -------
+        pl.DataFrame | None
+            종목코드 : str — ticker
+            회사명 : str — 회사명
+            total_stockholders_equity : float — 자기자본 (USD)
+            retained_earnings : float — 이익잉여금 (USD)
+            dividends_paid : float — 배당금 지급액 (USD, 있을 때만)
+            view="all"/"market"이면 None.
         """
         if view in ("all", "market"):
             return None  # 전종목 횡단비교 미지원
@@ -2549,6 +2619,18 @@ class Company:
         """부채구조 분석 — EDGAR BS 기반 단일 회사 분석.
 
         DART와 달리 전종목 횡단비교(view="all")는 미지원.
+
+        Returns
+        -------
+        pl.DataFrame | None
+            종목코드 : str — ticker
+            회사명 : str — 회사명
+            total_liabilities : float — 부채총계 (USD)
+            shortterm_borrowings : float — 단기차입금 (USD)
+            longterm_borrowings : float — 장기차입금 (USD)
+            current_liabilities : float — 유동부채 (USD)
+            noncurrent_liabilities : float — 비유동부채 (USD)
+            view="all"/"market"이면 None.
         """
         if view in ("all", "market"):
             return None

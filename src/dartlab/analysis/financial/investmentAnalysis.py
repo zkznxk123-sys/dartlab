@@ -98,6 +98,23 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
 
     IS에서 영업이익 + 세율, BS에서 자본 + 차입금으로 직접 계산.
     ROIC = NOPAT / Invested Capital
+
+    Returns
+    -------
+    dict | None
+        history : list[dict] — 기간별 ROIC 시계열
+            period : str — 기간
+            operatingIncome : float | None — 영업이익
+            effectiveTaxRate : float — 유효세율 (%)
+            nopat : float | None — 세후영업이익
+            equity : float | None — 자본총계
+            totalBorrowing : float | None — 이자부차입금 합계
+            cash : float | None — 현금및현금성자산
+            investedCapital : float | None — 투하자본
+            roic : float | None — ROIC (%)
+            roicYoy : float | None — ROIC YoY 변화율 (%)
+            waccEstimate : float | None — 추정 WACC (%)
+            spread : float | None — ROIC - WACC (%p)
     """
     isResult = company.select("IS", ["영업이익", "법인세비용", "법인세차감전순이익"])
     bsResult = company.select(
@@ -208,7 +225,22 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
 
 @memoized_calc
 def calcInvestmentIntensity(company, *, basePeriod: str | None = None) -> dict | None:
-    """투자 강도 시계열 -- CAPEX/매출, 유무형 비율."""
+    """투자 강도 시계열 -- CAPEX/매출, 유무형 비율.
+
+    Returns
+    -------
+    dict | None
+        history : list[dict] — 기간별 투자 강도 시계열
+            period : str — 기간
+            capex : float | None — CAPEX (유형+무형 취득)
+            revenue : float | None — 매출액
+            tangibleAssets : float | None — 유형자산
+            intangibleAssets : float | None — 무형자산
+            totalAssets : float | None — 자산총계
+            capexToRevenue : float | None — CAPEX/매출 (%)
+            tangibleRatio : float | None — 유형자산/총자산 (%)
+            intangibleRatio : float | None — 무형자산/총자산 (%)
+    """
     cfResult = company.select(
         "CF",
         ["purchase_of_property_plant_and_equipment", "purchase_of_intangible_assets"],
@@ -274,6 +306,17 @@ def calcEvaTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     """NOPAT + 투하자본 시계열.
 
     투하자본 = 자본총계 + 이자부차입금 - 현금 (ROIC와 동일 기준).
+
+    Returns
+    -------
+    dict | None
+        history : list[dict] — 기간별 EVA 시계열
+            period : str — 기간
+            nopat : float | None — 세후영업이익
+            investedCapital : float — 투하자본
+            nopatReturn : float | None — NOPAT/투하자본 (%)
+            waccEstimate : float | None — 추정 WACC (%)
+            eva : float | None — 경제적부가가치 (NOPAT - IC * WACC)
     """
     isResult = company.select("IS", ["영업이익", "법인세비용", "법인세차감전순이익"])
     bsResult = company.select(
@@ -435,7 +478,13 @@ def calcInvestmentInOther(company, *, basePeriod: str | None = None) -> dict | N
 
 @memoized_calc
 def calcInvestmentFlags(company, *, basePeriod: str | None = None) -> list[str]:
-    """투자 분석 경고 신호."""
+    """투자 분석 경고 신호.
+
+    Returns
+    -------
+    list[str]
+        경고 메시지 문자열 리스트 (저ROIC 지속, 무형자산비율 급등 등).
+    """
     flags = []
 
     roic = calcRoicTimeline(company, basePeriod=basePeriod)

@@ -204,7 +204,14 @@ def calcDeferredTax(company, *, basePeriod: str | None = None) -> dict | None:
 
 @memoized_calc
 def calcTaxFlags(company, *, basePeriod: str | None = None) -> list[str]:
-    """세금 관련 경고 신호."""
+    """세금 관련 경고 신호.
+
+    Returns
+    -------
+    list[str]
+        경고 메시지 문자열 리스트 (극저/고세율, 세금혜택 의존, 세금현금 과대납부,
+        이연법인세 급증/연속 증가 등).
+    """
     flags = []
 
     etr = calcEffectiveTaxRate(company, basePeriod=basePeriod)
