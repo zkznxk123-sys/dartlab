@@ -63,6 +63,11 @@ import dartlab
 c = dartlab.Company("005930")       # Samsung Electronics
 
 c.sections                          # every topic, every period, side by side
+# shape: (41, 12) — 41 topics across 12 periods
+#                     2025Q4  2024Q4  2024Q3  2023Q4  ...
+# companyOverview       v       v       v       v
+# businessOverview      v       v       v       v
+# riskManagement        v       v       v       v
 ```
 
 > Text and numbers on a single timeline — the core of cross-period comparability

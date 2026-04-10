@@ -64,6 +64,11 @@ import dartlab
 c = dartlab.Company("005930")       # 삼성전자
 
 c.sections                          # 모든 topic, 모든 기간, 나란히
+# shape: (41, 12) — 41개 토픽 × 12개 기간
+#                     2025Q4  2024Q4  2024Q3  2023Q4  ...
+# companyOverview       v       v       v       v
+# businessOverview      v       v       v       v
+# riskManagement        v       v       v       v
 ```
 
 > 텍스트와 숫자의 시계열 수평화 — 전 기간 비교 가능성의 핵심
