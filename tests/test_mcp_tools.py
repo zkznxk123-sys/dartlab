@@ -53,10 +53,14 @@ def test_tool_descriptions_nonempty():
 def test_stock_param_type():
     """stockCode 파라미터는 항상 type=string이다."""
     from dartlab.mcp import _TOOLS
+    from dartlab.mcp._generated_tools import _STOCK
 
     for tool in _TOOLS:
         if "stockCode" in tool["params"]:
-            assert tool["params"]["stockCode"]["type"] == "string"
+            param = tool["params"]["stockCode"]
+            # 문자열 참조('_STOCK')이면 실제 정의를 사용
+            resolved = _STOCK if param == "_STOCK" else param
+            assert resolved["type"] == "string"
 
 
 # ── _fmtDict ──

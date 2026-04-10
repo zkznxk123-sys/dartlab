@@ -76,8 +76,16 @@ def patch_runtime(monkeypatch):
 
     monkeypatch.setattr("dartlab.ai.providers.create_provider", fake_create_provider)
 
-    # config mock
+    # config mock — dataclass 이어야 dataclasses.fields() 동작
+    import dataclasses
+
+    @dataclasses.dataclass
     class FakeConfig:
+        provider: str = "mock"
+        model: str = "mock"
+        api_key: str = ""
+        base_url: str = ""
+
         def merge(self, _):
             return self
 
