@@ -279,11 +279,7 @@ def calcGrowthFlags(company, *, basePeriod: str | None = None) -> list[str]:
 # ── 계정별 CAGR 비교 ──
 
 
-def _cagr(start: float, end: float, years: int) -> float | None:
-    """CAGR 계산. 시작/끝이 양수일 때만."""
-    if start <= 0 or end <= 0 or years <= 0:
-        return None
-    return round(((end / start) ** (1 / years) - 1) * 100, 2)
+from dartlab.core.finance.calc import cagr as _cagr  # noqa: E402
 
 
 @memoized_calc
