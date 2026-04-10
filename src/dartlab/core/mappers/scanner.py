@@ -277,9 +277,9 @@ def scanAll(
 
     # 종목 목록 가져오기
     try:
-        from dartlab.core.dataConfig import DATA_RELEASES
+        from dartlab.core.dataLoader import _dataDir
 
-        dataDir = Path(DATA_RELEASES["docs"]["localDir"])
+        dataDir = _dataDir("docs")
     except (ImportError, KeyError):
         log.warning("데이터 디렉토리 없음 — 스캔 불가")
         return {"scanned": 0, "newItems": 0, "updatedItems": 0, "totalItems": len(existingItems)}
