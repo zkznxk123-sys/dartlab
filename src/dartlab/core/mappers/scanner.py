@@ -71,7 +71,7 @@ def scanNotes(stockCode: str) -> dict[str, dict[str, Any]]:
     """단일 종목의 notes 구조 패턴 추출.
 
     Returns:
-        {항목명: {"type": ..., "category": ..., "foreignCurrency": bool, "values_sample": [...]}}
+        {항목명: {"type", "category", "foreignCurrency", "count", "years": set[str]}}
     """
     try:
         from dartlab.core.dataLoader import loadData
@@ -87,7 +87,7 @@ def scanNotes(stockCode: str) -> dict[str, dict[str, Any]]:
     except (FileNotFoundError, OSError, ValueError):
         return {}
 
-    years = sorted(df["year"].unique().to_list(), reverse=True)[:3]  # 최근 3년만
+    years = sorted(df["year"].unique().to_list(), reverse=True)[:5]
     items: dict[str, dict[str, Any]] = {}
 
     for keyword, aliases in NOTES_KEYWORDS.items():
@@ -133,11 +133,124 @@ def scanNotes(stockCode: str) -> dict[str, dict[str, Any]]:
                             "category": keyword,
                             "foreignCurrency": foreign,
                             "count": 0,
+                            "years": set(),
                         }
                     items[name]["count"] += 1
-            break  # 첫 연도만 (구조 파악 목적)
+                    items[name]["years"].add(year)
 
     return items
+
+
+def discoverAliases(
+    stockCodes: list[str],
+    *,
+    minSupport: int = 3,
+) -> dict[str, str]:
+    """다종목 스캔으로 alias 후보 자동 탐지.
+
+    같은 category에서 상호배타적으로 출현하는 항목 쌍을 alias로 제안.
+    예: "재고자산" (2025-2024)과 "제품및상품" (2023-2021) → 같은 것.
+
+    Args:
+        stockCodes: 스캔 대상 종목 리스트
+        minSupport: 최소 지지 종목 수 (이 이상에서 발견돼야 alias 등록)
+
+    Returns:
+        {variant: canonical} — alias 후보
+    """
+    from collections import Counter
+
+    # category별 항목 출현 패턴 수집
+    # {category: {item: {years: set, companies: int}}}
+    catItems: dict[str, dict[str, dict]] = defaultdict(lambda: defaultdict(lambda: {"years": set(), "companies": 0}))
+
+    for code in stockCodes:
+        try:
+            items = scanNotes(code)
+        except (MemoryError, OSError):
+            continue
+
+        for name, info in items.items():
+            cat = info.get("category", "")
+            if not cat:
+                continue
+            entry = catItems[cat][name]
+            entry["years"] |= info.get("years", set())
+            entry["companies"] += 1
+
+    # 상호배타적 쌍 탐지 — 같은 종류의 "합계/총계" 행끼리만
+    # 예: "재고자산" vs "제품및상품" vs "재고자산계" (합계 행 역할)
+    aliases: dict[str, str] = {}
+
+    # 합계/총계 역할 키워드 — 이 키워드가 포함된 항목끼리만 alias 후보
+    _TOTAL_HINTS = {"합계", "계", "총액", "총계"}
+
+    # alias 탐지 대상 category — 이름 4글자 이상 (법인세, 리스 등 짧은 건 과잉매칭)
+    _ALIAS_CATEGORIES = {"재고자산", "차입금", "충당부채", "매출채권", "투자부동산", "무형자산"}
+
+    for cat, items in catItems.items():
+        catName = cat.replace(" ", "")
+        if catName not in _ALIAS_CATEGORIES:
+            continue
+
+        # category 이름을 포함하는 짧은 항목만 (합계/총계 역할)
+        candidates = [
+            (name, data)
+            for name, data in items.items()
+            if data["companies"] >= minSupport and catName in name and len(name) <= 20
+        ]
+
+        for i, (name1, data1) in enumerate(candidates):
+            for name2, data2 in candidates[i + 1 :]:
+                years1 = data1["years"]
+                years2 = data2["years"]
+
+                # 상호배타적: 연도 겹침 없음
+                if years1 & years2:
+                    continue
+
+                # 합치면 최소 3년 커버
+                if len(years1 | years2) < 3:
+                    continue
+
+                # 이름 길이/관계 조건
+                shorter = min(name1, name2, key=len)
+                longer = max(name1, name2, key=len)
+                if len(shorter) <= 3:
+                    continue
+
+                # 핵심 규칙: suffix 변형만 alias
+                # "재고자산" ↔ "재고자산계" ↔ "재고자산합계"
+                # suffix: 계, 합계, 총계, 소계
+                _TOTAL_SUFFIXES = ("계", "합계", "총계", "소계")
+                isVariant = False
+                for sfx in _TOTAL_SUFFIXES:
+                    base1 = name1.removesuffix(sfx) if name1.endswith(sfx) else None
+                    base2 = name2.removesuffix(sfx) if name2.endswith(sfx) else None
+                    # 한쪽이 suffix 제거하면 다른쪽과 같아짐
+                    if base1 and base1 == name2:
+                        isVariant = True
+                        break
+                    if base2 and base2 == name1:
+                        isVariant = True
+                        break
+                    # 둘 다 suffix가 있고 base가 같으면
+                    if base1 and base2 and base1 == base2:
+                        isVariant = True
+                        break
+                if not isVariant:
+                    continue
+
+                # 더 많은 종목에서 출현한 쪽이 canonical
+                if data1["companies"] >= data2["companies"]:
+                    canonical, variant = name1, name2
+                else:
+                    canonical, variant = name2, name1
+
+                aliases[variant] = canonical
+                log.info("alias 발견: %s → %s (category=%s)", variant, canonical, cat)
+
+    return aliases
 
 
 def scanAll(
@@ -237,15 +350,31 @@ def scanAll(
             existingItems[name] = entry
             newCount += 1
 
+    # alias 자동 탐지 + 흡수
+    existingAliases = existing.get("aliases", {})
+    if scanned >= 10:  # 최소 10종목 이상 스캔했을 때만
+        discovered = discoverAliases(stockCodes[:min(100, len(stockCodes))], minSupport=3)
+        newAliasCount = 0
+        for variant, canonical in discovered.items():
+            if variant not in existingAliases:
+                existingAliases[variant] = canonical
+                newAliasCount += 1
+        if newAliasCount:
+            log.info("alias %d건 자동 흡수", newAliasCount)
+    else:
+        newAliasCount = 0
+
     # 저장
     result = {
         "_metadata": {
-            "version": "1.0.0",
+            "version": "1.1.0",
             "lastScan": datetime.now().strftime("%Y-%m-%d"),
             "companiesScanned": scanned,
             "description": "notes 항목 구조 매퍼 — Scanner 자동 생성",
         },
+        "keywords": existing.get("keywords", {}),
         "items": dict(sorted(existingItems.items())),
+        "aliases": existingAliases,
     }
     outPath.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -253,7 +382,9 @@ def scanAll(
         "scanned": scanned,
         "newItems": newCount,
         "updatedItems": updatedCount,
+        "newAliases": newAliasCount,
         "totalItems": len(existingItems),
+        "totalAliases": len(existingAliases),
     }
     log.info("스캔 완료: %s", stats)
     return stats
