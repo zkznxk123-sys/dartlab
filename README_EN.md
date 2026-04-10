@@ -31,6 +31,16 @@
 
 </div>
 
+## Every Company Has a Story
+
+Line up numbers and you get a dashboard. Connect their causes and you get a story. DartLab gives you two ways to read that story.
+
+**Read it yourself** — pull financials, filings, and ratios with a single stock code, then trace "why is this company's margin at this level" through a six-act causal structure. One line of code, and the data tells a story.
+
+**Let AI read it for you** — the same engines, orchestrated by AI to design an analysis flow tailored to your question, showing every line of code and every result. You don't just get an answer — you learn the method.
+
+Both paths run on the same engines.
+
 ## The Problem
 
 Have you ever tried to compare Samsung's "Revenue" across five years?
