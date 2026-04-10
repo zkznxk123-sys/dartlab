@@ -32,7 +32,7 @@ _NOTES_DISPATCH: OrderedDict[str, tuple[str, str, Any]] = OrderedDict(
         ("tangibleAsset", ("tangibleAsset", "유형자산", lambda r: r.movementDf)),
         ("intangibleAsset", ("notesDetail", "무형자산", lambda r: r.tableDf)),
         ("investmentProperty", ("notesDetail", "투자부동산", lambda r: r.tableDf)),
-        ("affiliates", ("affiliates", "관계기업", lambda r: r.movementDf)),
+        ("affiliates", ("affiliate", "관계기업", lambda r: r.movementDf)),
         ("borrowings", ("notesDetail", "차입금", lambda r: r.tableDf)),
         ("provisions", ("notesDetail", "충당부채", lambda r: r.tableDf)),
         ("eps", ("notesDetail", "주당이익", lambda r: r.tableDf)),

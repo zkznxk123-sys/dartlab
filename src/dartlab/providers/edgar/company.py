@@ -1463,6 +1463,15 @@ class Company:
                 return None
             return self._transposeToVertical(wide, period)
 
+        # Notes 12 항목 — DART show("inventory") 와 동일 패턴 (XBRL 수치 태그 기반)
+        try:
+            from dartlab.providers.edgar.docs.notesParsers import availableCategories
+
+            if topic in availableCategories():
+                return self._docs.notesByCategory(topic)
+        except (ImportError, AttributeError):
+            pass
+
         sec = self.sections
         if sec is None:
             # silent None 대신 명시적 ValueError 로 안내

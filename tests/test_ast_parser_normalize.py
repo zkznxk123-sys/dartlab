@@ -21,13 +21,15 @@ import pytest
 pytestmark = pytest.mark.unit
 
 _ROOT = Path(__file__).resolve().parent.parent / "src" / "dartlab" / "providers" / "dart" / "docs" / "finance"
+_MAPPERS = Path(__file__).resolve().parent.parent / "src" / "dartlab" / "core" / "mappers"
 
 # Plan v4 root fix 가 적용된 파일 — normalize 헬퍼 경유 강제
+# notesDetail_pipeline → masterParser로 이동 (Plan 017 매퍼 엔진)
 _ENFORCED_PARSERS = {
     "costByNature": _ROOT / "costByNature" / "parser.py",
     "tangibleAsset": _ROOT / "tangibleAsset" / "parser.py",
     "segment": _ROOT / "segment" / "parser.py",
-    "notesDetail_pipeline": _ROOT / "notesDetail" / "pipeline.py",
+    "masterParser": _MAPPERS / "masterParser.py",
 }
 
 
