@@ -219,6 +219,23 @@ from dartlab.review.publisher import publishReport
 publishReport("005930")               # 6막 보고서 (credit narrative + audit 포함)
 ```
 
+### Macro — 종목코드 없이 경제를 읽다
+
+> 설계: [ops/macro.md](ops/macro.md)
+
+Company 없이 경제 환경을 분석한다. `import dartlab` 하나로.
+
+```python
+dartlab.macro("사이클")          # 경기 4국면 판별
+dartlab.macro("금리")            # 금리 + Nelson-Siegel 수익률곡선
+dartlab.macro("예측")            # LEI + 침체확률 + Hamilton RS + GDP Nowcast
+dartlab.macro("종합")            # 매크로 종합 + 투자전략 + 포트폴리오 매핑
+```
+
+시장 사이클·금리·유동성·심리·자산 신호와 글로벌 거시 분석 방법론(Hamilton EM, Kalman DFM, Nelson-Siegel, Cleveland Fed 프로빗, Sahm Rule, BIS Credit-to-GDP)을 **numpy만으로 직접 구현**.
+
+백테스트 실증 (2000-2024, FRED): Cleveland Fed 프로빗이 **미국 3/3 침체를 2-16개월 전에 사전 감지**, recall 90%.
+
 ### Review — 분석을 보고서로
 
 > 설계: [ops/review.md](ops/review.md)
@@ -407,31 +424,6 @@ c.show("BS")                            c.show("BS")
 c.show("ratios")                        c.show("ratios")
 c.diff("businessOverview")              c.diff("10-K::item7Mdna")
 ```
-
-## Macro — 종목코드 없이 경제를 읽다
-
-> 설계: [ops/macro.md](ops/macro.md)
-
-Company 없이 경제 환경을 분석합니다. `import dartlab` 하나로.
-
-```python
-dartlab.macro("사이클")          # 경기 4국면 판별
-dartlab.macro("금리")            # 금리 + Nelson-Siegel 수익률곡선
-dartlab.macro("예측")            # LEI + 침체확률 + Hamilton RS + GDP Nowcast
-dartlab.macro("위기")            # Credit-to-GDP + Minsky + Koo + Fisher
-dartlab.macro("기업집계")        # 전종목 이익사이클, Ponzi비율, 레버리지
-dartlab.macro("종합")            # 매크로 종합 + 투자전략 + 포트폴리오 매핑
-
-# 시나리오
-dartlab.macro("사이클", overrides={"hy_spread": 600})
-
-# 백테스트
-dartlab.macro("금리", as_of="2022-01-01")
-```
-
-시장 사이클·금리·유동성·심리·자산 신호와 글로벌 거시 분석 방법론(Hamilton EM, Kalman DFM, Nelson-Siegel, Cleveland Fed 프로빗, Sahm Rule, BIS Credit-to-GDP, GHS, Minsky, Koo, Fisher, Cu/Au, FCI)을 **numpy만으로 직접 구현** (statsmodels/scipy 0).
-
-백테스트 실증 (2000-2024, FRED): Cleveland Fed 프로빗이 **미국 3/3 침체를 2-16개월 전에 사전 감지**, recall 90%.
 
 ## MCP — AI 어시스턴트 연동
 

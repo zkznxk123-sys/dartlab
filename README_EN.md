@@ -218,6 +218,23 @@ from dartlab.review.publisher import publishReport
 publishReport("005930")               # 6막 report including credit narrative + audit
 ```
 
+### Macro — Economy Without a Ticker
+
+> Design: [ops/macro.md](ops/macro.md)
+
+Analyze the economic environment without a Company. Just `import dartlab`.
+
+```python
+dartlab.macro("사이클")          # business cycle — 4 phases
+dartlab.macro("금리")            # rates + Nelson-Siegel yield curve
+dartlab.macro("예측")            # LEI + recession prob + Hamilton RS + GDP Nowcast
+dartlab.macro("종합")            # macro synthesis + strategy + portfolio mapping
+```
+
+Market cycle, rates, liquidity, sentiment, and asset signals with global macro methodologies (Hamilton EM, Kalman DFM, Nelson-Siegel, Cleveland Fed probit, Sahm Rule, BIS Credit-to-GDP) — **pure numpy, zero statsmodels/scipy**.
+
+Backtest (2000-2024, FRED): Cleveland Fed probit **detected all 3/3 US recessions 2-16 months ahead**, recall 90%.
+
 ### Review — Analysis to Report
 
 > Design: [ops/review.md](ops/review.md)
@@ -406,31 +423,6 @@ c.show("BS")                            c.show("BS")
 c.show("ratios")                        c.show("ratios")
 c.diff("businessOverview")              c.diff("10-K::item7Mdna")
 ```
-
-## Macro — Economy Without a Ticker
-
-> Design: [ops/macro.md](ops/macro.md)
-
-No Company needed. Read the economy with `import dartlab`.
-
-```python
-dartlab.macro("사이클")          # Business cycle — 4 phases
-dartlab.macro("금리")            # Rates + Nelson-Siegel yield curve
-dartlab.macro("예측")            # LEI + Cleveland Fed probit + Hamilton RS + GDP Nowcast
-dartlab.macro("위기")            # Credit-to-GDP gap + Minsky + Koo + Fisher
-dartlab.macro("기업집계")        # Bottom-up: earnings cycle, Ponzi ratio, leverage
-dartlab.macro("종합")            # Macro summary + investment strategies + portfolio allocation
-
-# Scenario
-dartlab.macro("사이클", overrides={"hy_spread": 600})
-
-# Backtest
-dartlab.macro("금리", as_of="2022-01-01")
-```
-
-Cycle, rates, assets, sentiment, liquidity, forecast, crisis, inventory, corporate, trade signals — global macro methods (Hamilton EM, Kalman DFM, Nelson-Siegel, Cleveland Fed probit, Sahm Rule, BIS Credit-to-GDP, GHS, Minsky, Koo, Fisher, Cu/Au, FCI) implemented in **numpy only** (zero statsmodels/scipy).
-
-Backtest result (2000-2024, FRED): Cleveland Fed probit detected **3/3 US recessions** with 2-16 month lead time, recall 90% at threshold 0.20.
 
 ## MCP — AI Assistant Integration
 
