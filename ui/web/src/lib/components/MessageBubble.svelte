@@ -324,7 +324,7 @@
 					</div>
 				</div>
 			{:else}
-				<div class="flex items-start gap-2 justify-end">
+				<div class="flex items-start gap-2">
 					{#if onEditResend}
 						<button
 							class="p-1 rounded text-dl-text-dim opacity-0 group-hover/user:opacity-60 hover:!opacity-100 hover:text-dl-text transition-all flex-shrink-0 mt-0.5"

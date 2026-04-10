@@ -24,6 +24,7 @@
 | [experiments.md](experiments.md) | — | experiments/ | 실험 규칙, 흡수 판단 |
 | [edgar.md](edgar.md) | L1 | providers/edgar/ | EDGAR 동기화 규칙, EXEMPT 관리 (데이터/분석 동작은 각 엔진 문서에 통합) |
 | [code.md](code.md) | — | 전체 | camelCase, 독스트링 9섹션, 릴리즈, Git |
+| [spaces.md](spaces.md) | L4 | server/ + mcp/ | HuggingFace Spaces — 설치 없이 API + MCP 서버, DART 키 프록시, 자동 배포 |
 | [vscode.md](vscode.md) | L4 | vscode/ | VSCode 확장 — 프로바이더 연결, stdio 프로토콜, 배포 |
 | [ui.md](ui.md) | L4 | ui/ | Svelte SPA — 패리티 규칙 (VSCode 선행) |
 | [viz.md](viz.md) | 교차 | viz/ | 차트 + 다이어그램 시각화 엔진 |

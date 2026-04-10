@@ -257,12 +257,18 @@ class Dart:
     """
 
     def __init__(self, keys: str | list[str] | None = None):
-        if isinstance(keys, list):
-            self._client = DartClient(apiKeys=keys)
-        elif isinstance(keys, str):
-            self._client = DartClient(apiKey=keys)
-        else:
-            self._client = DartClient()
+        try:
+            if isinstance(keys, list):
+                self._client = DartClient(apiKeys=keys)
+            elif isinstance(keys, str):
+                self._client = DartClient(apiKey=keys)
+            else:
+                self._client = DartClient()
+        except ValueError:
+            # DART 키 없음 → 원격 서버 프록시 fallback
+            from dartlab.providers.dart.openapi.remote import RemoteDartClient
+
+            self._client = RemoteDartClient()
 
     # ── 공시 검색 ──────────────────────────────────────────
 

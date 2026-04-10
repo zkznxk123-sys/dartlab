@@ -70,28 +70,32 @@ jobs:
         run: uv sync
 
       - name: Restore finance cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/dart/finance
-          key: dartlab-data-finance
+          key: dartlab-data-finance-${{ github.run_id }}
+          restore-keys: dartlab-data-finance-
 
       - name: Restore report cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/dart/report
-          key: dartlab-data-report
+          key: dartlab-data-report-${{ github.run_id }}
+          restore-keys: dartlab-data-report-
 
       - name: Restore docs cache (비교용)
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/dart/docs
-          key: dartlab-data-docs
+          key: dartlab-data-docs-${{ github.run_id }}
+          restore-keys: dartlab-data-docs-
 
       - name: Restore collect state (pending.txt)
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/dart/_collect_state
-          key: dartlab-collect-state
+          key: dartlab-collect-state-${{ github.run_id }}
+          restore-keys: dartlab-collect-state-
 
       - name: Sync recent (finance + report)
         run: uv run python .github/scripts/syncRecent.py
@@ -129,19 +133,19 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: data/dart/finance
-          key: dartlab-data-finance
+          key: dartlab-data-finance-${{ github.run_id }}
 
       - name: Save report cache
         uses: actions/cache/save@v4
         with:
           path: data/dart/report
-          key: dartlab-data-report
+          key: dartlab-data-report-${{ github.run_id }}
 
       - name: Save collect state
         uses: actions/cache/save@v4
         with:
           path: data/dart/_collect_state
-          key: dartlab-collect-state
+          key: dartlab-collect-state-${{ github.run_id }}
 
   # ── Job 2: docs (느림, 별도 타임아웃) ──
   sync-docs:
@@ -162,10 +166,11 @@ jobs:
         run: uv sync
 
       - name: Restore docs cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/dart/docs
-          key: dartlab-data-docs
+          key: dartlab-data-docs-${{ github.run_id }}
+          restore-keys: dartlab-data-docs-
 
       - name: Sync recent (docs)
         run: uv run python .github/scripts/syncRecent.py
@@ -191,7 +196,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: data/dart/docs
-          key: dartlab-data-docs
+          key: dartlab-data-docs-${{ github.run_id }}
 
   # ── Job 3 (workflow_dispatch full 전용): 88분기 차집합 (heavy) ──
   full-collect:
@@ -217,10 +222,11 @@ jobs:
         run: uv sync
 
       - name: Restore data cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/dart/${{ matrix.category }}
-          key: dartlab-data-${{ matrix.category }}
+          key: dartlab-data-${{ matrix.category }}-${{ github.run_id }}
+          restore-keys: dartlab-data-${{ matrix.category }}-
 
       - name: Full collect (88-quarter diff)
         run: uv run python .github/scripts/syncData.py
@@ -233,7 +239,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: data/dart/${{ matrix.category }}
-          key: dartlab-data-${{ matrix.category }}
+          key: dartlab-data-${{ matrix.category }}-${{ github.run_id }}
 
       - name: Upload to HuggingFace
         run: uv run python .github/scripts/uploadData.py --target hf

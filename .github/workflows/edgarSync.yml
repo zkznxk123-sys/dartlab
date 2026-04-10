@@ -47,18 +47,18 @@ jobs:
         run: uv sync
 
       - name: Restore EDGAR finance cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/edgar/finance
-          key: dartlab-edgar-finance
-          restore-keys: dartlab-edgar-finance
+          key: dartlab-edgar-finance-${{ github.run_id }}
+          restore-keys: dartlab-edgar-finance-
 
       - name: Restore EDGAR docs cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/edgar/docs
-          key: dartlab-edgar-docs
-          restore-keys: dartlab-edgar-docs
+          key: dartlab-edgar-docs-${{ github.run_id }}
+          restore-keys: dartlab-edgar-docs-
 
       - name: Collect EDGAR data
         run: |
@@ -105,14 +105,14 @@ jobs:
         if: always()
         with:
           path: data/edgar/finance
-          key: dartlab-edgar-finance
+          key: dartlab-edgar-finance-${{ github.run_id }}
 
       - name: Save EDGAR docs cache
         uses: actions/cache/save@v4
         if: always()
         with:
           path: data/edgar/docs
-          key: dartlab-edgar-docs
+          key: dartlab-edgar-docs-${{ github.run_id }}
 
       - name: Summary
         if: always()

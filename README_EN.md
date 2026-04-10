@@ -456,7 +456,25 @@ c.diff("businessOverview")              c.diff("10-K::item7Mdna")
 
 ## MCP — AI Assistant Integration
 
-Built-in [MCP](https://modelcontextprotocol.io/) server for Claude Desktop, Claude Code, Cursor, and any MCP-compatible client.
+Built-in [MCP](https://modelcontextprotocol.io/) server with 25 tools covering all dartlab engines.
+
+### No Install Required (Remote MCP)
+
+No need to install dartlab. Add to Claude Desktop `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "dartlab": {
+      "url": "https://eddmpython-dartlab.hf.space/mcp/sse"
+    }
+  }
+}
+```
+
+Hosted on HuggingFace Spaces. No DART API key needed. → [Details](ops/spaces.md)
+
+### Local Install (stdio MCP)
 
 ```bash
 # Claude Code — one line setup
@@ -485,6 +503,34 @@ Add to `claude_desktop_config.json` or `.cursor/mcp.json`:
 Or auto-generate: `dartlab mcp --config claude-desktop`
 
 </details>
+
+### 25 Tools
+
+| Category | Tools |
+|----------|-------|
+| Analysis | companyInsights, companyAnalysis, companyReview, companyValuation, companyForecast, companyCredit |
+| Data | companyFinancials, companyRatios, companyShow, companyTopics, companyDiff, companyFilings |
+| Company | companyGovernance, companyAudit, companyProfile, companySections, companyGather, companyQuant |
+| Market | macroAnalysis, marketScan, gatherData, quantAnalysis, topdownScreen |
+| Search | searchCompany, dartlabSearch, dartlabListing |
+
+## REST API — No API Key Required
+
+DART API proxy on HuggingFace Spaces. Access real-time disclosure data without an API key:
+
+```bash
+# Filing list
+curl "https://eddmpython-dartlab.hf.space/api/dart/filings?corp=005930&start=20260101"
+
+# Company info
+curl "https://eddmpython-dartlab.hf.space/api/dart/company/005930"
+
+# Financial statements
+curl "https://eddmpython-dartlab.hf.space/api/dart/finance/005930?year=2024"
+
+# Reports (dividend, employee, executive — 56 categories)
+curl "https://eddmpython-dartlab.hf.space/api/dart/report/005930/배당?year=2023"
+```
 
 ## OpenAPI — Raw Public APIs
 

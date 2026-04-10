@@ -73,6 +73,33 @@ def _uploadScan(dataDir: str) -> None:
     print("[prebuild] HF 업로드 완료")
 
 
+def _validateFinanceParquet(dataDir: str, sourceFileCount: int) -> None:
+    """프리빌드 finance.parquet 품질 검증.
+
+    원본 finance 파일 수 대비 프리빌드 종목 수가 50% 미만이면 에러로 빌드 실패 처리.
+    """
+    from dartlab.core.dataConfig import DATA_RELEASES
+
+    scanDir = Path(dataDir) / DATA_RELEASES["scan"]["dir"]
+    fp = scanDir / "finance.parquet"
+    if not fp.exists():
+        print("[prebuild] finance.parquet 없음 → 검증 스킵")
+        return
+
+    import polars as pl
+
+    df = pl.read_parquet(str(fp))
+    scCol = "stockCode" if "stockCode" in df.columns else "stock_code"
+    prebuildStocks = df.select(scCol).unique().height
+    ratio = prebuildStocks / sourceFileCount if sourceFileCount > 0 else 0
+
+    print(f"[prebuild] 품질: 원본 {sourceFileCount}종목, 프리빌드 {prebuildStocks}종목 ({ratio:.0%})")
+
+    if ratio < 0.5:
+        print(f"[prebuild] ❌ 커버리지 {ratio:.0%} < 50% — 캐시가 stale한 것으로 판단")
+        sys.exit(1)
+
+
 def main():
     if "DARTLAB_DATA_DIR" not in os.environ:
         os.environ["DARTLAB_DATA_DIR"] = os.path.join(os.getcwd(), "data")
@@ -97,6 +124,9 @@ def main():
         results = _buildScan(dataDir)
         elapsed = time.time() - start
         print(f"[prebuild] scan 빌드 완료: {elapsed:.0f}초")
+
+        # 2.5단계: 데이터 품질 검증
+        _validateFinanceParquet(dataDir, counts["finance"])
 
         # 3단계: HF 업로드
         _uploadScan(dataDir)

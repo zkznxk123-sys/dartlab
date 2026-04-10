@@ -1,0 +1,84 @@
+name: Deploy to HF Spaces
+
+# dartlab 릴리즈 시 HuggingFace Spaces 자동 업데이트.
+# spaces/ 디렉토리 + src/ 를 HF Space repo에 push.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Regenerate MCP tools
+        run: uv run python scripts/build/generateSpec.py
+
+      - name: Verify MCP tools
+        run: |
+          uv run python -X utf8 -c "
+          from dartlab.mcp._generated_tools import TOOLS, TOOL_FEATURE_MAP
+          print(f'MCP 도구: {len(TOOLS)}개')
+          for t in TOOLS:
+              print(f'  {t[\"name\"]}')
+          assert len(TOOLS) >= 20, f'도구 수 부족: {len(TOOLS)}'
+          assert len(TOOL_FEATURE_MAP) == len(TOOLS), 'feature map 불일치'
+          print('검증 통과')
+          "
+
+      - name: Prepare Space files
+        run: |
+          mkdir -p _space_build
+          cp spaces/Dockerfile _space_build/
+          cp spaces/README.md _space_build/
+          cp pyproject.toml _space_build/
+          cp LICENSE _space_build/
+          cp README.md _space_build/PROJECT_README.md
+          cp -r src/ _space_build/src/
+          [ -f uv.lock ] && cp uv.lock _space_build/ || true
+
+      - name: Push to HuggingFace Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          cd _space_build
+          git init
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "deploy: ${{ github.event.release.tag_name || 'manual' }}"
+          git push --force "https://eddmpython:${HF_TOKEN}@huggingface.co/spaces/eddmpython/dartlab" main
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "## HF Spaces 배포" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "**상태**: 성공" >> $GITHUB_STEP_SUMMARY
+            TOOL_COUNT=$(uv run python -X utf8 -c "from dartlab.mcp._generated_tools import TOOLS; print(len(TOOLS))" 2>/dev/null || echo "?")
+            echo "**MCP 도구**: ${TOOL_COUNT}개" >> $GITHUB_STEP_SUMMARY
+            echo "**URL**: https://eddmpython-dartlab.hf.space" >> $GITHUB_STEP_SUMMARY
+            echo "**MCP SSE**: https://eddmpython-dartlab.hf.space/mcp/sse" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**상태**: 실패" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "버전: ${{ github.event.release.tag_name || 'manual' }}" >> $GITHUB_STEP_SUMMARY

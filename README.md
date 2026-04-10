@@ -457,7 +457,25 @@ c.diff("businessOverview")              c.diff("10-K::item7Mdna")
 
 ## MCP — AI 어시스턴트 연동
 
-[MCP](https://modelcontextprotocol.io/) 서버 내장. Claude Desktop, Claude Code, Cursor에서 사용 가능.
+[MCP](https://modelcontextprotocol.io/) 서버 내장. 25개 도구로 dartlab 전체 엔진에 접근.
+
+### 설치 없이 사용 (원격 MCP)
+
+dartlab을 설치하지 않아도 됩니다. Claude Desktop `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "dartlab": {
+      "url": "https://eddmpython-dartlab.hf.space/mcp/sse"
+    }
+  }
+}
+```
+
+HuggingFace Spaces에서 호스팅. DART API 키도 불필요. → [상세](ops/spaces.md)
+
+### 로컬 설치 (stdio MCP)
 
 ```bash
 # Claude Code — 한 줄 설정
@@ -486,6 +504,34 @@ codex mcp add dartlab -- uv run dartlab mcp
 자동 생성: `dartlab mcp --config claude-desktop`
 
 </details>
+
+### 25개 도구
+
+| 카테고리 | 도구 |
+|---------|------|
+| 종목 분석 | companyInsights, companyAnalysis, companyReview, companyValuation, companyForecast, companyCredit |
+| 데이터 | companyFinancials, companyRatios, companyShow, companyTopics, companyDiff, companyFilings |
+| 기업 정보 | companyGovernance, companyAudit, companyProfile, companySections, companyGather, companyQuant |
+| 시장/거시 | macroAnalysis, marketScan, gatherData, quantAnalysis, topdownScreen |
+| 검색 | searchCompany, dartlabSearch, dartlabListing |
+
+## REST API — 키 없이 공시 조회
+
+HuggingFace Spaces에서 DART API 프록시 제공. API 키 없이 실시간 공시 데이터 접근:
+
+```bash
+# 공시 목록
+curl "https://eddmpython-dartlab.hf.space/api/dart/filings?corp=005930&start=20260101"
+
+# 기업 정보
+curl "https://eddmpython-dartlab.hf.space/api/dart/company/005930"
+
+# 재무제표
+curl "https://eddmpython-dartlab.hf.space/api/dart/finance/005930?year=2024"
+
+# 보고서 (배당, 직원, 임원 등 56개 카테고리)
+curl "https://eddmpython-dartlab.hf.space/api/dart/report/005930/배당?year=2023"
+```
 
 ## OpenAPI — 원본 공공 API
 

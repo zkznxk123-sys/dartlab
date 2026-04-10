@@ -16,7 +16,6 @@ from datetime import datetime, timezone
 
 MONITORED_WORKFLOWS = [
     "Data Sync",
-    "Daily Data Sync",
     "EDGAR Data Sync",
     "Update KindList",
     "Data Prebuild",

@@ -716,12 +716,36 @@ button, a, input, textarea {
 	left: 12px;
 	background-color: rgba(148, 163, 184, 0.12);
 }
-.msg-timeline:first-child::after { top: 18px; }
-.msg-timeline:last-child::after { height: 18px; }
+.msg-timeline:first-child::after,
+.msg-user:first-child::after { top: 18px; }
+.msg-timeline:last-child::after,
+.msg-user:last-child::after { height: 18px; }
 
-/* User message — no timeline */
+/* User message — same timeline, hollow dot */
 .msg-user {
-	padding: 6px 0;
+	position: relative;
+	padding: 6px 0 6px 30px;
+}
+.msg-user::before {
+	content: "";
+	position: absolute;
+	border-radius: 50%;
+	width: 7px;
+	height: 7px;
+	top: 13px;
+	left: 9px;
+	background-color: transparent;
+	border: 1.5px solid var(--color-dl-text-dim);
+	z-index: 1;
+}
+.msg-user::after {
+	content: "";
+	position: absolute;
+	width: 1px;
+	top: 0;
+	bottom: 0;
+	left: 12px;
+	background-color: rgba(148, 163, 184, 0.12);
 }
 
 /* ── Stagger animation ── */

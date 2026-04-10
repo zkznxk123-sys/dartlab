@@ -19,7 +19,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 import dartlab
 
-from .api import ai_router, analysis_router, ask_router, company_router, data_router, macro_router, room_router
+from .api import ai_router, analysis_router, ask_router, company_router, dart_router, data_router, macro_router, room_router
 from .embed import router as embed_router
 from .runtime import ensure_port, run_server  # noqa: F401 — re-exported
 from .services.ai_profile import should_preload_ollama as _should_preload_ollama
@@ -134,6 +134,18 @@ app.include_router(company_router)
 app.include_router(data_router)
 app.include_router(macro_router)
 app.include_router(room_router)
+app.include_router(dart_router)
 app.include_router(embed_router)
+
+# ── MCP SSE 마운트 (HF Spaces 또는 명시적 활성화 시) ──
+if os.environ.get("SPACE_ID") or os.environ.get("DARTLAB_MCP_HTTP") == "1":
+    try:
+        from dartlab.mcp import create_sse_app
+
+        _mcp_sse = create_sse_app()
+        app.mount("/mcp", _mcp_sse)
+        logger.info("MCP SSE 엔드포인트 활성화: /mcp/sse")
+    except ImportError:
+        logger.info("MCP SDK 미설치 — MCP SSE 비활성")
 
 register_spa(app)

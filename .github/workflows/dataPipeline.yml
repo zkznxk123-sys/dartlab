@@ -64,10 +64,11 @@ jobs:
         run: uv sync
 
       - name: Restore data cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/dart/${{ matrix.category }}
-          key: dartlab-data-${{ matrix.category }}
+          key: dartlab-data-${{ matrix.category }}-${{ github.run_id }}
+          restore-keys: dartlab-data-${{ matrix.category }}-
 
       - name: Collect data (incremental)
         run: uv run python .github/scripts/syncData.py
@@ -110,22 +111,25 @@ jobs:
         run: uv sync
 
       - name: Restore finance cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/dart/finance
-          key: dartlab-data-finance
+          key: dartlab-data-finance-
+          restore-keys: dartlab-data-finance-
 
       - name: Restore report cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/dart/report
-          key: dartlab-data-report
+          key: dartlab-data-report-
+          restore-keys: dartlab-data-report-
 
       - name: Restore docs cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/dart/docs
-          key: dartlab-data-docs
+          key: dartlab-data-docs-
+          restore-keys: dartlab-data-docs-
 
       - name: Build scan prebuilds + upload
         run: uv run python .github/scripts/prebuildData.py

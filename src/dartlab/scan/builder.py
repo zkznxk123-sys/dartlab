@@ -32,6 +32,87 @@ SCAN_API_TYPES = [
 _BATCH = 200
 
 
+def _fiscalMonthMap() -> dict[str, int]:
+    """종목코드 → 결산월(int) 매핑. 12월 결산은 포함하지 않음 (기본값이므로).
+
+    listing + 데이터 패턴 양쪽에서 비12월 결산을 판별.
+    """
+    result: dict[str, int] = {}
+
+    # 1. listing 기반
+    try:
+        from dartlab.gather.listing import getKindList
+
+        li = getKindList()
+        if li is not None and not li.is_empty():
+            if "결산월" in li.columns and "종목코드" in li.columns:
+                nonDec = li.filter(pl.col("결산월") != "12월")
+                for row in nonDec.select(["종목코드", "결산월"]).iter_rows():
+                    code, month_str = row
+                    try:
+                        result[code] = int(month_str.replace("월", ""))
+                    except (ValueError, AttributeError):
+                        pass
+    except (ImportError, FileNotFoundError, OSError):
+        pass
+
+    # 2. 데이터 기반 — listing에 없는 종목(상폐 등)은 bsns_year 패턴으로 추론
+    from datetime import date
+
+    today = date.today()
+    calYear = today.year
+    # 12월 결산이면 4월 현재 maxBsnsYear=작년(2025)
+    maxBsnsYear12 = str(calYear - 1) if today.month <= 4 else str(calYear)
+
+    finDir = _financeDir()
+    if finDir.exists():
+        for pf in finDir.glob("*.parquet"):
+            code = pf.stem
+            if code in result:
+                continue  # listing에서 이미 파악
+            try:
+                lz = pl.scan_parquet(str(pf))
+                if "bsns_year" not in lz.collect_schema().names():
+                    continue
+                maxYear = (
+                    lz.select(pl.col("bsns_year").cast(pl.Utf8).max())
+                    .collect()
+                    .item()
+                )
+                if maxYear is not None and maxYear > maxBsnsYear12:
+                    # 정확한 결산월은 모르지만, 비12월 결산 확정
+                    # 보수적으로 6월(가장 흔한 비12월)로 추정
+                    result[code] = 6
+            except (pl.exceptions.PolarsError, OSError):
+                continue
+
+    return result
+
+
+def _toCalendarPeriod(bsnsYear: int, fiscalQ: int, fiscalMonth: int) -> tuple[int, int]:
+    """사업연도 분기 → 달력 (연도, 분기) 변환.
+
+    Args:
+        bsnsYear: 사업연도 (예: 2026)
+        fiscalQ: 사업연도 분기 (1~4)
+        fiscalMonth: 결산월 (1~12)
+
+    Returns:
+        (calYear, calQ) — 달력 연도와 분기
+
+    예: 3월 결산(M=3), bsns_year=2026
+        Q1→2025Q2, Q2→2025Q3, Q3→2025Q4, Q4→2026Q1
+    """
+    import math
+
+    endMonth = (fiscalMonth + fiscalQ * 3) % 12
+    if endMonth == 0:
+        endMonth = 12
+    calQ = math.ceil(endMonth / 3)
+    calYear = bsnsYear - 1 if endMonth > fiscalMonth else bsnsYear
+    return calYear, calQ
+
+
 def _scanDir() -> Path:
     """scan 출력 디렉토리."""
     from dartlab.core.dataLoader import _dataDir
@@ -253,6 +334,11 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
             _log("finance parquet 없음 — 빌드 건너뜀")
         return None
 
+    # 비12월 결산 종목 → 달력 분기 변환 준비
+    fmMap = _fiscalMonthMap()
+    if verbose and fmMap:
+        _log(f"[finance] 비12월 결산 {len(fmMap)}종목 → 달력 분기 변환")
+
     if verbose:
         _log(f"[finance] {len(allFiles)}종목, sinceYear={sinceYear}")
 
@@ -278,6 +364,27 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
 
         if df.height == 0:
             continue
+
+        # 비12월 결산 → bsns_year/reprt_nm을 달력 기준으로 변환
+        code = pf.stem
+        if code in fmMap and "bsns_year" in df.columns and "reprt_nm" in df.columns:
+            fm = fmMap[code]
+            _FQ_MAP = {"1분기": 1, "2분기": 2, "3분기": 3, "4분기": 4}
+            rows = []
+            for row in df.iter_rows(named=True):
+                fq = _FQ_MAP.get(row["reprt_nm"])
+                if fq is not None:
+                    try:
+                        calY, calQ = _toCalendarPeriod(int(row["bsns_year"]), fq, fm)
+                        r = dict(row)
+                        r["bsns_year"] = str(calY)
+                        r["reprt_nm"] = f"{calQ}분기"
+                        rows.append(r)
+                    except (ValueError, TypeError):
+                        rows.append(row)
+                else:
+                    rows.append(row)
+            df = pl.DataFrame(rows, schema=df.schema)
 
         batchChunks.append(df)
         totalRows += df.height
