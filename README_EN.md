@@ -33,11 +33,11 @@
 
 ## The Problem
 
-A public company files hundreds of pages every quarter. Revenue trends, risk warnings, management strategy, competitive position — the complete truth about a company, written by the company itself.
+Have you ever tried to compare Samsung's "Revenue" across five years?
 
-**Nobody reads it.**
+Open a DART annual report and the same number appears as `ifrs-full_Revenue`, `dart_Revenue`, `매출액`, `영업수익` — four different names. Last year's table of contents doesn't match this year's. Comparing with SK Hynix means starting from scratch.
 
-Not because they don't want to. Because the same information is named differently by every company, structured differently every year, and scattered across formats designed for regulators, not readers. The same "revenue" appears as `ifrs-full_Revenue`, `dart_Revenue`, `SalesRevenue`, or dozens of Korean variations. The same "business overview" is titled differently in every filing.
+**The real problem isn't missing data. It's the same data existing under too many names.**
 
 DartLab is built on one premise: **every period must be comparable, and every company must be comparable.** It normalizes disclosure sections into a topic-period grid (~95% mapping rate) and standardizes XBRL accounts into canonical names (~97% mapping rate) — so you compare companies, not filing formats.
 
@@ -68,6 +68,10 @@ c.show("businessOverview")          # what this company actually does
 c.diff("businessOverview")          # what changed since last year
 c.show("BS")                        # standardized balance sheet
 c.show("ratios")                    # financial ratios, already calculated
+#                     2025    2024    2023    ...
+# ROE               15.7%   5.4%   -4.3%
+# Operating Margin   21.4%   8.6%   -0.9%
+# Debt Ratio        37.5%  36.5%   35.6%
 
 # Same interface, different country
 us = dartlab.Company("AAPL")
@@ -76,6 +80,7 @@ us.show("ratios")
 
 # Ask in natural language
 dartlab.ask("Analyze Samsung Electronics financial health")
+# → AI executes code and analyzes: "Operating margin rebounded from 8.6% to 21.4%..."
 ```
 
 No API key needed. Data auto-downloads from [HuggingFace](https://huggingface.co/datasets/eddmpython/dartlab-data) on first use, then loads instantly from local cache.
@@ -83,6 +88,8 @@ No API key needed. Data auto-downloads from [HuggingFace](https://huggingface.co
 ## What DartLab Is
 
 One calling convention. Each engine: `dartlab.engine()` for the guide, `dartlab.engine("axis")` to run.
+
+> **New here?** Start with `Company` → `Review` → `Ask`. Load data, generate a report, then ask AI.
 
 | Layer | Engine | What it does | Entry point | Notebook |
 |-------|--------|--------------|-------------|:--------:|
@@ -217,7 +224,39 @@ c.review()              # full report
 c.reviewer()            # report + AI interpretation
 ```
 
+> Samsung report preview: *"Revenue +23.8%, operating margin 8.6%→21.4%. FCF turned positive, ROIC > WACC — reinvestment is creating value."*
+
 **Sample reports:** [Samsung Electronics](docs/samples/005930.md) · [SK Hynix](docs/samples/000660.md) · [Kia](docs/samples/000270.md) · [HD Hyundai Heavy Industries](docs/samples/042660.md) · [SK Telecom](docs/samples/017670.md) · [LG Chem](docs/samples/051910.md) · [NCSoft](docs/samples/036570.md) · [Amorepacific](docs/samples/090430.md)
+
+### Storyteller — Numbers Tell Stories
+
+> Design: [ops/review.md](ops/review.md) · Series: [Company Stories](https://eddmpython.github.io/dartlab/blog/series/company-reports)
+
+Financial analysis isn't ratio tables. DartLab combines 5 engines (analysis, credit, scan, quant, macro) into a **6-act storytelling structure** that auto-generates publishable company stories.
+
+```python
+from dartlab.review.publisher import publishReport
+publishReport("068270")    # Celltrion — auto-publish 6-act company story
+```
+
+**Published stories:**
+
+| Company | Story |
+|---------|-------|
+| [SK Hynix](https://eddmpython.github.io/dartlab/blog/000660-skhynix) | 30-year Korean semiconductor mystery, 58% operating margin |
+| [Samyang Foods](https://eddmpython.github.io/dartlab/blog/003230-samyang-foods) | From last place in Korea's ramen Big 3 to a ₩2.3T global food giant |
+| [Doosan Enerbility](https://eddmpython.github.io/dartlab/blog/034020-doosan-enerbility) | Debt ratio from 305% to 129% — the real story of a 9-year diet |
+| [Alteogen](https://eddmpython.github.io/dartlab/blog/196170-alteogen) | 9 years of losses, then one license deal turned ₩106.9B operating profit |
+| [HMM](https://eddmpython.github.io/dartlab/blog/011200-hmm) | The company where cycles, not markets, decide the stock price |
+| [Celltrion](https://eddmpython.github.io/dartlab/blog/068270-celltrion) | Laid off at 41 during IMF crisis, started with $50K — 25 years later, ₩13.78T in intangibles |
+| [Hanwha Aerospace](https://eddmpython.github.io/dartlab/blog/012450-hanwha-aerospace) | Samsung dumped it for ₩840B — now it has ₩37T in order backlog |
+| [HD Hyundai Electric](https://eddmpython.github.io/dartlab/blog/267260-hd-hyundai-electric) | ₩100.6B loss 7 years ago became ₩1T this year — with one product: transformers |
+| [Korea Zinc](https://eddmpython.github.io/dartlab/blog/010130-korea-zinc) | First net loss in 50 years at ₩245.7B, yet operating profit hit all-time high |
+| [APR](https://eddmpython.github.io/dartlab/blog/278470-apr) | A cosmetics company sold ₩407B in home appliances — that was just the start |
+
+<a href="https://www.youtube.com/watch?v=d7RUQIlimVM"><img src="https://img.youtube.com/vi/d7RUQIlimVM/hqdefault.jpg" alt="Celltrion Company Story" width="320"></a>
+
+> [Watch Celltrion Story](https://www.youtube.com/watch?v=d7RUQIlimVM) · [DartLab 30s Demo](https://www.youtube.com/shorts/97lYLWMWzvA) · [YouTube Channel](https://www.youtube.com/@eddmpython)
 
 ### Search — Find Filings by Meaning *(alpha)*
 
@@ -269,12 +308,14 @@ L0  core/        Protocols, finance utils, docs utils, registry
 L1  providers/   Country-specific data (DART, EDGAR, EDINET)
     gather/      External market data (Naver, Yahoo, FRED)
     scan/        Market-wide analysis — scan("group", "axis")
-L2  analysis/    Financial + forecast + valuation + quant — analysis("group", "axis")
+    quant/       Technical analysis — c.quant()
+L2  analysis/    Financial + forecast + valuation — analysis("group", "axis")
     credit/      Independent credit rating — c.credit()
     macro/       Market-level macro — dartlab.macro()
-    review/      Block composition (analysis + credit)
+    review/      5-engine composition (analysis + credit + scan + quant + macro)
 L3  ai/          Active analyst — dartlab.ask()
 L4  vscode/      VSCode extension (dartlab chat --stdio)
+    ui/web/      Svelte SPA web interface
 ```
 
 Import direction enforced by CI. Adding a new country means one provider package — zero core changes.
@@ -314,6 +355,9 @@ flowchart TB
     AI --> SCN
     REV --> ANA
     REV --> CRD
+    REV --> SCN
+    REV --> QNT
+    REV --> MAC
     ANA --> PRV
     ANA --> GAT
     CRD --> PRV
@@ -449,7 +493,9 @@ Pipeline: local cache (instant) → HuggingFace (auto-download) → DART API (wi
 
 ## Documentation
 
-[Docs](https://eddmpython.github.io/dartlab/) · [Quick Start](https://eddmpython.github.io/dartlab/docs/getting-started/quickstart) · [API Overview](https://eddmpython.github.io/dartlab/docs/api/overview) · [Blog (120+ articles)](https://eddmpython.github.io/dartlab/blog/)
+[Docs](https://eddmpython.github.io/dartlab/) · [Quick Start](https://eddmpython.github.io/dartlab/docs/getting-started/quickstart) · [API Overview](https://eddmpython.github.io/dartlab/docs/api/overview)
+
+**Blog (120+ articles):** [All](https://eddmpython.github.io/dartlab/blog/) · [Company Stories](https://eddmpython.github.io/dartlab/blog/series/company-reports) · [Credit Reports](https://eddmpython.github.io/dartlab/blog/credit-reports) · [Macro Reports](https://eddmpython.github.io/dartlab/blog/macro-reports)
 
 ## Stability
 

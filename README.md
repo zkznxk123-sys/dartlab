@@ -33,11 +33,11 @@
 
 ## 문제
 
-상장 기업은 매 분기 수백 페이지를 공시한다. 매출 추세, 리스크 경고, 경영 전략, 경쟁 포지션 — 기업이 직접 쓴, 기업에 대한 완전한 진실.
+삼성전자의 "매출액"을 5년간 비교하려고 한 적 있는가?
 
-**아무도 읽지 않는다.**
+DART에서 사업보고서를 열면 같은 숫자가 `ifrs-full_Revenue`, `dart_Revenue`, `매출액`, `영업수익` 네 가지 이름으로 나온다. 작년과 올해의 목차 구조가 다르다. SK하이닉스와 비교하려면 같은 작업을 처음부터 다시 해야 한다.
 
-읽고 싶지 않아서가 아니다. 같은 정보가 회사마다 다른 이름으로, 연도마다 다른 구조로, 규제기관용 포맷에 흩어져 있기 때문이다. 같은 "매출액"이 `ifrs-full_Revenue`, `dart_Revenue`, `SalesRevenue`로 표기된다. 같은 "사업의 내용"이 공시마다 다른 제목으로 올라온다.
+**진짜 문제는 데이터가 없는 게 아니다. 같은 데이터가 너무 많은 이름으로 존재하는 것이다.**
 
 DartLab은 하나의 전제 위에 서 있다: **모든 기간은 비교 가능해야 하고, 모든 회사는 비교 가능해야 한다.** 공시 섹션을 토픽-기간 그리드로 정규화하고(~95% 매핑율), XBRL 계정을 표준 이름으로 통일한다(~97% 매핑율) — 양식이 아니라 기업을 비교한다.
 
@@ -68,6 +68,10 @@ c.show("businessOverview")          # 이 회사가 실제로 뭘 하는지
 c.diff("businessOverview")          # 작년 대비 뭐가 바뀌었는지
 c.show("BS")                        # 표준화된 재무상태표
 c.show("ratios")                    # 재무비율, 이미 계산됨
+#                     2025    2024    2023    ...
+# ROE               15.7%   5.4%   -4.3%
+# 영업이익률         21.4%   8.6%   -0.9%
+# 부채비율          37.5%  36.5%   35.6%
 
 # 같은 인터페이스, 다른 나라
 us = dartlab.Company("AAPL")
@@ -76,6 +80,7 @@ us.show("ratios")
 
 # 자연어로 질문
 dartlab.ask("삼성전자 재무건전성 분석해줘")
+# → AI가 코드를 실행하며 분석: "영업이익률이 8.6%→21.4%로 반등..."
 ```
 
 API 키 불필요. [HuggingFace](https://huggingface.co/datasets/eddmpython/dartlab-data)에서 자동 다운로드, 로컬 캐시로 즉시 로드.
@@ -83,6 +88,8 @@ API 키 불필요. [HuggingFace](https://huggingface.co/datasets/eddmpython/dart
 ## DartLab은 무엇인가
 
 하나의 호출 계약. `dartlab.엔진()` 으로 가이드 보고 `dartlab.엔진("축")` 으로 실행.
+
+> **처음이라면?** `Company` → `Review` → `Ask` 순서로. 종목코드로 데이터를 보고, 보고서를 만들고, AI에게 물어본다.
 
 | 레이어 | 엔진 | 하는 일 | 진입점 | 노트북 |
 |--------|------|---------|--------|:------:|
@@ -217,7 +224,39 @@ c.review()              # 전체 보고서
 c.reviewer()            # 보고서 + AI 종합의견
 ```
 
+> 삼성전자 보고서 미리보기: *"매출 +23.8% 성장, 영업이익률 8.6%→21.4% 반등. FCF 양수 전환, ROIC > WACC — 재투자가 가치를 창출하는 구간."*
+
 **샘플 보고서:** [삼성전자](docs/samples/005930.md) · [SK하이닉스](docs/samples/000660.md) · [기아](docs/samples/000270.md) · [한화오션](docs/samples/042660.md) · [SK텔레콤](docs/samples/017670.md) · [LG화학](docs/samples/051910.md) · [엔씨소프트](docs/samples/036570.md) · [아모레퍼시픽](docs/samples/090430.md)
+
+### 이야기꾼 — 숫자가 아니라 이야기다
+
+> 설계: [ops/review.md](ops/review.md) · 시리즈: [기업이야기](https://eddmpython.github.io/dartlab/blog/series/company-reports)
+
+기업분석은 비율 나열이 아니다. DartLab은 5개 엔진(analysis, credit, scan, quant, macro)의 결과를 **6막 스토리텔링 구조**로 조합해 블로그에 발간 가능한 기업이야기를 자동 생성한다.
+
+```python
+from dartlab.review.publisher import publishReport
+publishReport("068270")    # 셀트리온 — 6막 기업이야기 자동 발간
+```
+
+**발간된 기업이야기:**
+
+| 기업 | 이야기 |
+|------|--------|
+| [SK하이닉스](https://eddmpython.github.io/dartlab/blog/000660-skhynix) | 한국 반도체 30년의 미스터리, 영업이익률 58% |
+| [삼양식품](https://eddmpython.github.io/dartlab/blog/003230-samyang-foods) | 라면 빅3 꼴등이 매출 2.3조 글로벌 식품 거인이 되기까지 |
+| [두산에너빌리티](https://eddmpython.github.io/dartlab/blog/034020-doosan-enerbility) | 부채비율 305%에서 129%까지, 9년 다이어트의 진짜 모습 |
+| [알테오젠](https://eddmpython.github.io/dartlab/blog/196170-alteogen) | 9년 적자 바이오텍이 한 건의 라이선스로 영업이익 +1,069억 |
+| [HMM](https://eddmpython.github.io/dartlab/blog/011200-hmm) | 시장이 아니라 사이클이 주가를 결정하는 회사 |
+| [셀트리온](https://eddmpython.github.io/dartlab/blog/068270-celltrion) | IMF로 직장 잃은 41세, 5천만원으로 시작해 25년 후 무형자산 13.78조 |
+| [한화에어로스페이스](https://eddmpython.github.io/dartlab/blog/012450-hanwha-aerospace) | 삼성이 8,400억에 버린 무기가 수주잔고 37조가 됐다 |
+| [HD현대일렉트릭](https://eddmpython.github.io/dartlab/blog/267260-hd-hyundai-electric) | 7년 전 적자 1,006억이 올해 1조가 됐다, 변압기 하나로 |
+| [고려아연](https://eddmpython.github.io/dartlab/blog/010130-korea-zinc) | 50년 만에 첫 순손실 2,457억, 그런데 영업이익은 사상 최대 |
+| [에이피알](https://eddmpython.github.io/dartlab/blog/278470-apr) | 화장품 회사가 가전을 4,070억 팔았다, 그게 시작이었다 |
+
+<a href="https://www.youtube.com/watch?v=d7RUQIlimVM"><img src="https://img.youtube.com/vi/d7RUQIlimVM/hqdefault.jpg" alt="셀트리온 기업이야기" width="320"></a>
+
+> [셀트리온 이야기 보기](https://www.youtube.com/watch?v=d7RUQIlimVM) · [DartLab 30초 데모](https://www.youtube.com/shorts/97lYLWMWzvA) · [유튜브 채널](https://www.youtube.com/@eddmpython)
 
 ### Search — 공시를 의미로 검색 *(alpha)*
 
@@ -269,12 +308,14 @@ L0  core/        프로토콜, 재무 유틸, docs 유틸, 레지스트리
 L1  providers/   국가별 데이터 (DART, EDGAR, EDINET)
     gather/      외부 시장 데이터 (Naver, Yahoo, FRED)
     scan/        시장 횡단분석 — scan("그룹", "축")
-L2  analysis/    재무 + 전망 + 가치평가 + 기술적 — analysis("그룹", "축")
+    quant/       기술적 분석 — c.quant()
+L2  analysis/    재무 + 전망 + 가치평가 — analysis("그룹", "축")
     credit/      독립 신용평가 — c.credit()
     macro/       시장 레벨 매크로 — dartlab.macro()
-    review/      블록식 조합 보고서 (analysis + credit)
+    review/      5엔진 조합 보고서 (analysis + credit + scan + quant + macro)
 L3  ai/          적극적 분석가 — dartlab.ask()
 L4  vscode/      VSCode 확장 (dartlab chat --stdio)
+    ui/web/      Svelte SPA 웹 인터페이스
 ```
 
 import 방향은 CI 강제. 새 국가 추가 = provider 패키지 하나, core 수정 0줄.
@@ -314,6 +355,9 @@ flowchart TB
     AI --> SCN
     REV --> ANA
     REV --> CRD
+    REV --> SCN
+    REV --> QNT
+    REV --> MAC
     ANA --> PRV
     ANA --> GAT
     CRD --> PRV
@@ -449,7 +493,9 @@ e.filings("AAPL", forms=["10-K", "10-Q"])
 
 ## 문서
 
-[문서](https://eddmpython.github.io/dartlab/) · [빠른 시작](https://eddmpython.github.io/dartlab/docs/getting-started/quickstart) · [API 개요](https://eddmpython.github.io/dartlab/docs/api/overview) · [블로그 (120+ 글)](https://eddmpython.github.io/dartlab/blog/)
+[문서](https://eddmpython.github.io/dartlab/) · [빠른 시작](https://eddmpython.github.io/dartlab/docs/getting-started/quickstart) · [API 개요](https://eddmpython.github.io/dartlab/docs/api/overview)
+
+**블로그 (120+ 글):** [전체](https://eddmpython.github.io/dartlab/blog/) · [기업이야기](https://eddmpython.github.io/dartlab/blog/series/company-reports) · [신용평가 보고서](https://eddmpython.github.io/dartlab/blog/credit-reports) · [매크로 보고서](https://eddmpython.github.io/dartlab/blog/macro-reports)
 
 ## 안정성
 
