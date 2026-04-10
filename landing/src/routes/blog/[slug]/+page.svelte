@@ -722,6 +722,12 @@
 		max-width: 320px;
 	}
 
+	/* 숫자 컬럼 우측 정렬 — 첫 컬럼(항목명) 제외 */
+	.blog-article :global(td:not(:first-child)),
+	.blog-article :global(th:not(:first-child)) {
+		text-align: right;
+	}
+
 	/* 표 안의 inline code는 줄바꿈 허용 — 코드가 컬럼을 옆으로 밀어내지 않도록 */
 	.blog-article :global(td code:not(pre code)),
 	.blog-article :global(th code:not(pre code)) {
