@@ -235,28 +235,9 @@ def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | N
     opm = base.get("opm")
     roe = base.get("roe")
 
-    # baseCase에 내부 값이 없으면 재계산 시도
+    # baseCase에 내부 값이 없으면 포기 (company.select 추가 호출 금지 — 메모리 압박 방어)
     if revenue is None:
-        from dartlab.analysis.financial._helpers import toDictBySnakeId
-        from dartlab.core.finance.helpers import annualColsFromPeriods
-
-        parsed = toDictBySnakeId(company.select("IS", ["sales", "operating_income", "net_profit"]))
-        if not parsed:
-            return None
-        isData, periods = parsed
-        yCols = annualColsFromPeriods(periods, basePeriod=basePeriod, maxYears=1)
-        if not yCols:
-            return None
-        col = yCols[0]
-        revenue = float(isData.get("sales", {}).get(col) or 0)
-        op_income = float(isData.get("operating_income", {}).get(col) or 0)
-
-        bs_parsed = toDictBySnakeId(company.select("BS", ["total_equity", "total_liabilities"]))
-        if bs_parsed:
-            bsData, bsPeriods = bs_parsed
-            bsCols = annualColsFromPeriods(bsPeriods, basePeriod=basePeriod, maxYears=1)
-            if bsCols:
-                equity = float(bsData.get("total_equity", {}).get(bsCols[0]) or 0)
+        return None
 
     if not revenue or revenue <= 0:
         return None

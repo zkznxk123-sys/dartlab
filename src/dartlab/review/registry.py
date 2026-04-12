@@ -1098,10 +1098,10 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             try:
                 _il_data = calcImprovementLevers(company, basePeriod=basePeriod)
                 b["improvementLevers"] = improvementLeversBlock(_il_data) if _il_data else []
-            except (KeyError, ValueError, TypeError, AttributeError) as _e:
-                import logging
+            except Exception as _e:
+                import logging, traceback
 
-                logging.getLogger("dartlab.review").debug("improvementLevers 실패: %s", _e)
+                logging.getLogger("dartlab.review").warning("improvementLevers 실패: %s\n%s", _e, traceback.format_exc())
                 b["improvementLevers"] = []
         if _need("gradeUpgradePath"):
             from dartlab.credit.calcs import calcGradeImprovement
