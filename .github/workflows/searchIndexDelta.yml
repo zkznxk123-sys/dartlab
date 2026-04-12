@@ -1,0 +1,91 @@
+name: Search Index Delta (daily)
+
+# ──────────────────────────────────────────────────────────────
+# content 인덱스 delta 세그먼트 증분 빌드 + HF 업로드.
+#
+# 매일 KST 04:00 실행:
+#   1. 최근 30일 allFilings 수집 (collectMeta + fillContent)
+#   2. content delta 세그먼트 빌드 (rebuildContentDelta)
+#   3. HF dart/contentIndex/delta.* 업로드
+#
+# main 풀리빌드는 searchIndexMain.yml (월 1회).
+# ──────────────────────────────────────────────────────────────
+
+on:
+  schedule:
+    - cron: '0 19 * * *'  # UTC 19:00 = KST 04:00 (dataSync 03:00 다음)
+  workflow_dispatch:
+    inputs:
+      lookback_days:
+        description: '증분 대상 일수'
+        default: '30'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: search-index-delta
+  cancel-in-progress: false
+
+jobs:
+  build-delta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Restore allFilings cache
+        uses: actions/cache@v4
+        with:
+          path: data/dart/allFilings
+          key: dartlab-allFilings-${{ github.run_id }}
+          restore-keys: |
+            dartlab-allFilings-
+
+      - name: Pull existing content index from HF
+        run: |
+          uv run python -c "
+          from huggingface_hub import HfApi, hf_hub_download
+          from pathlib import Path
+          out = Path('data/dart/contentIndex')
+          out.mkdir(parents=True, exist_ok=True)
+          api = HfApi()
+          for name in ['main.npz', 'main_stems.json', 'main_meta.parquet', 'main_info.json']:
+              try:
+                  p = hf_hub_download(
+                      repo_id='eddmpython/dartlab-data',
+                      repo_type='dataset',
+                      filename=f'dart/contentIndex/{name}',
+                      local_dir='data',
+                  )
+                  print(f'pulled {name}')
+              except Exception as e:
+                  print(f'skip {name}: {e}')
+          "
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Build content delta + upload
+        run: uv run python .github/scripts/buildSearchDelta.py
+        env:
+          DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '30' }}
+
+      - name: Save allFilings cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/dart/allFilings
+          key: dartlab-allFilings-${{ github.run_id }}

@@ -1,0 +1,63 @@
+name: Search Index Main (monthly)
+
+# ──────────────────────────────────────────────────────────────
+# content 인덱스 main 세그먼트 풀리빌드 + HF 업로드.
+#
+# 매월 1일 KST 05:00 실행 (또는 수동):
+#   1. 전체 docs + allFilings → main 세그먼트 풀리빌드 (약 18분)
+#   2. HF dart/contentIndex/main.* 업로드
+#   3. delta 파일 제거 (main에 흡수)
+#
+# docs 데이터(8GB)를 HF에서 pull해야 하므로 오래 걸린다.
+# delta는 searchIndexDelta.yml (매일 04:00).
+# ──────────────────────────────────────────────────────────────
+
+on:
+  schedule:
+    - cron: '0 20 1 * *'  # UTC 20:00 on 1st = KST 05:00 on 1st
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: search-index-main
+  cancel-in-progress: false
+
+jobs:
+  build-main:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180  # 3시간 (docs 다운로드 + 빌드)
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Pull all data from HF
+        run: |
+          uv run python -c "
+          from huggingface_hub import snapshot_download
+          for folder in ['dart/docs', 'dart/allFilings']:
+              snapshot_download(
+                  repo_id='eddmpython/dartlab-data',
+                  repo_type='dataset',
+                  allow_patterns=f'{folder}/*',
+                  local_dir='data',
+              )
+              print(f'pulled {folder}')
+          "
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Build content main + upload
+        run: uv run python .github/scripts/buildSearchMain.py
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}

@@ -428,6 +428,12 @@ dependencies = [
     { name = "uvicorn", extra = ["standard"] },
 ]
 
+[package.optional-dependencies]
+pyodide = [
+    { name = "diff-match-patch" },
+    { name = "openpyxl" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "build" },
@@ -450,6 +456,7 @@ requires-dist = [
     { name = "anthropic", specifier = ">=0.30.0,<2" },
     { name = "beautifulsoup4", specifier = ">=4.14.3,<5" },
     { name = "diff-match-patch", specifier = ">=20230430" },
+    { name = "diff-match-patch", marker = "extra == 'pyodide'", specifier = ">=20230430" },
     { name = "fastapi", specifier = ">=0.135.1,<1" },
     { name = "google-genai", specifier = ">=1.0.0,<2" },
     { name = "httpx", specifier = ">=0.28.1,<1" },
@@ -460,6 +467,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=1.26.0,<3" },
     { name = "openai", specifier = ">=1.0.0,<3" },
     { name = "openpyxl", specifier = ">=3.1.5,<4" },
+    { name = "openpyxl", marker = "extra == 'pyodide'", specifier = ">=3.1.5,<4" },
     { name = "plotly", specifier = ">=5.0.0,<6" },
     { name = "polars", specifier = ">=1.0.0,<2" },
     { name = "qrcode", specifier = ">=7.0,<9" },
@@ -467,6 +475,7 @@ requires-dist = [
     { name = "sse-starlette", specifier = ">=2.0.0,<3" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.30.0,<1" },
 ]
+provides-extras = ["pyodide"]
 
 [package.metadata.requires-dev]
 dev = [

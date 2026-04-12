@@ -1,9 +1,7 @@
 """Ngram+Synonym 검색 엔진 — stem ID 역인덱스, CSR 구조, bincount 검색.
 
-agiPath의 posting 방식 적용:
-- 텍스트 → stem(ngram) ID 정수 → CSR 역인덱스
-- 검색: numpy bincount (vectorized, 400만 문서에서 140ms)
-- 저장: numpy int32 CSR (stemIndex.npz) — JSON 대비 8.5x 축소
+report_nm + section_title 대상 bigram/trigram 역인덱스.
+scope="title" 검색에서 사용.
 
 allFilings(수시공시) + docs(사업보고서) 통합 인덱스 지원.
 """

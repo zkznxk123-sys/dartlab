@@ -4,22 +4,26 @@ import sys
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _pkg_version
 
-from dartlab import ai as llm  # noqa: F401 — 하위호환
-from dartlab import config, core  # noqa: F401 — 하위호환
-from dartlab.audit import queryAudit, runAudit  # noqa: F401 — 하위호환
-from dartlab.company import Company
-from dartlab.core.env import loadEnv as _loadEnv
-from dartlab.core.select import ChartResult, SelectResult
-from dartlab.gather.fred import Fred
-from dartlab.gather.listing import codeToName, fuzzySearch, getKindList, nameToCode  # noqa: F401
-from dartlab.listing import listing  # noqa: F401 — 목록 조회 단일 진입점
-from dartlab.providers.dart.company import Company as _DartEngineCompany
-from dartlab.providers.dart.openapi.dart import OpenDart
-from dartlab.providers.edgar.openapi.edgar import OpenEdgar
-from dartlab.review import Review
+_IS_PYODIDE = sys.platform == "emscripten"
 
-# .env 자동 로드 — API 키 등 환경변수
-_loadEnv()
+from dartlab import config, core  # noqa: F401 — 하위호환
+from dartlab.company import Company
+from dartlab.core.select import ChartResult, SelectResult
+
+if not _IS_PYODIDE:
+    from dartlab import ai as llm  # noqa: F401 — 하위호환
+    from dartlab.audit import queryAudit, runAudit  # noqa: F401 — 하위호환
+    from dartlab.core.env import loadEnv as _loadEnv
+    from dartlab.gather.fred import Fred
+    from dartlab.gather.listing import codeToName, fuzzySearch, getKindList, nameToCode  # noqa: F401
+    from dartlab.listing import listing  # noqa: F401 — 목록 조회 단일 진입점
+    from dartlab.providers.dart.company import Company as _DartEngineCompany
+    from dartlab.providers.dart.openapi.dart import OpenDart
+    from dartlab.providers.edgar.openapi.edgar import OpenEdgar
+    from dartlab.review import Review
+
+    # .env 자동 로드 — API 키 등 환경변수
+    _loadEnv()
 
 try:
     __version__ = _pkg_version("dartlab")
@@ -34,58 +38,59 @@ def search(
     start: str | None = None,
     end: str | None = None,
     topK: int = 10,
+    scope: str = "auto",
 ):
-    """공시 원문 검색. *(alpha)*
+    """공시 검색. *(alpha)*
 
-    Ngram+Synonym 기반 검색. 모델 불필요, cold start 0ms.
+    제목형 쿼리와 본문형 쿼리를 자동 판별하여 검색.
     DART 공시 뷰어 링크(dartUrl) 포함.
 
     Capabilities:
-        - 전체 공시 원문 검색 (수시공시 포함)
-        - 자연어 동의어 확장 ("돈을 빌렸다" → 사채/차입/전환사채)
+        - 제목 검색: 공시 유형명/섹션 제목에서 매칭 ("유상증자", "대표이사 변경")
+        - 본문 검색: 사업보고서 등 본문에서 개념 매칭 ("반도체 HBM 투자", "환율 리스크")
         - 종목/기간 필터 지원
         - DART 공시 뷰어 링크 포함 (dartUrl 컬럼)
 
     Requires:
-        데이터: allFilings (수집 + buildIndex 필요)
+        데이터: stemIndex (scope=title) + contentIndex (scope=content)
 
     AIContext:
-        공시 내용을 자연어로 찾을 때 사용. 결과의 dartUrl로 원문 확인 가능.
-        종목 찾기는 Company("삼성전자")를 사용.
+        공시를 찾을 때 사용. 공시 유형명으로 찾으면 제목 검색, 내용으로 찾으면 본문 검색.
+        scope 지정 없이 자동 판별.
 
     Guide:
-        - "유상증자 한 회사?" -> search("유상증자 결정")
-        - "삼성전자 최근 공시?" -> search("공시", corp="005930")
+        - "유상증자 한 회사?" -> search("유상증자")
+        - "반도체 투자 트렌드?" -> search("반도체 HBM 투자")
 
     SeeAlso:
         - Company: 종목코드/회사명으로 Company 생성
         - listing: 전체 상장법인 목록
 
     Args:
-        query: 검색어 (한국어). "유상증자 결정", "대표이사 변경" 등.
+        query: 검색어 (한국어). "유상증자", "반도체 HBM 투자" 등.
         corp: 종목 필터 (종목코드 "005930" 또는 회사명 "삼성전자").
         start: 시작일 (YYYYMMDD).
         end: 종료일 (YYYYMMDD).
         topK: 반환 건수 (기본 10).
+        scope: ``"auto"`` (기본), ``"title"``, ``"content"``, ``"both"``.
 
     Returns
     -------
     pl.DataFrame
-        score : float — 매칭 점수 (BM25F 가중)
+        score : float — 매칭 점수
         rcept_no : str — 접수번호 (DART 고유 ID)
         corp_name : str — 회사명
-        rcept_dt : str — 접수일 (YYYYMMDD)
         report_nm : str — 공시 유형명
-        section_title : str — 섹션 제목
-        text : str — 본문 텍스트 (최대 2000자)
+        scope : str — 검색 소스 ("title" 또는 "content", auto/both 모드)
         dartUrl : str — DART 공시 뷰어 URL
 
     Example::
 
         import dartlab
-        dartlab.search("유상증자 결정")
-        dartlab.search("대표이사 변경", corp="005930")
-        dartlab.search("전환사채", start="20240101", topK=5)
+        dartlab.search("유상증자")                                # 제목 매칭
+        dartlab.search("반도체 HBM 투자")                          # 본문 자동 매칭
+        dartlab.search("환율 리스크", scope="content")              # 본문 강제
+        dartlab.search("대표이사 변경", corp="005930")              # 종목 필터
     """
     # R33-1: 빈 query 거부
     if not query or not query.strip():
@@ -94,7 +99,7 @@ def search(
         )
     from dartlab.core.search import search as _search
 
-    return _search(query, corp=corp, start=start, end=end, topK=topK)
+    return _search(query, corp=corp, start=start, end=end, topK=topK, scope=scope)
 
 
 def searchName(keyword: str):
@@ -860,82 +865,80 @@ class _Module(sys.modules[__name__].__class__):
 
 sys.modules[__name__].__class__ = _Module
 
-# gather 모듈을 GatherEntry callable로 덮어쓰기
-# (gather 서브모듈이 top-level import로 이미 로드되므로 __getattr__ lazy 불가)
-from dartlab.gather.entry import GatherEntry as _GatherEntry
+# ── 모듈 callable 패치 (Pyodide 제외 — 서버/CLI/네트워크 의존) ──
 
-sys.modules[__name__].gather = _GatherEntry()
+if not _IS_PYODIDE:
+    # gather 모듈을 GatherEntry callable로 덮어쓰기
+    # (gather 서브모듈이 top-level import로 이미 로드되므로 __getattr__ lazy 불가)
+    from dartlab.gather.entry import GatherEntry as _GatherEntry
 
-# topdown도 같은 문제 — 모듈 import가 __getattr__보다 우선이라 callable로 덮어쓴다
-from dartlab.topdown import _TopdownEntry as _TopdownEntry
+    sys.modules[__name__].gather = _GatherEntry()
 
-sys.modules[__name__].topdown = _TopdownEntry()
+    # topdown도 같은 문제 — 모듈 import가 __getattr__보다 우선이라 callable로 덮어쓴다
+    from dartlab.topdown import _TopdownEntry as _TopdownEntry
 
-# scan/analysis/credit/quant — 어떤 import 체인이 모듈을 먼저 로드하면
-# 모듈 클래스의 __getattr__이 동작 안 함 (CI에서 발견된 회귀).
-# 해결: 모듈 자체를 callable로 패치 — 모듈 객체에 __call__을 직접 부여.
-import types as _types
+    sys.modules[__name__].topdown = _TopdownEntry()
 
+    # scan/analysis/credit/quant — 어떤 import 체인이 모듈을 먼저 로드하면
+    # 모듈 클래스의 __getattr__이 동작 안 함 (CI에서 발견된 회귀).
+    # 해결: 모듈 자체를 callable로 패치 — 모듈 객체에 __call__을 직접 부여.
+    import types as _types
 
-def _makeCallableModule(modName: str, instanceFactory):
-    """이미 로드된 서브모듈에 __call__을 부여하여 callable하게 만든다.
+    def _makeCallableModule(modName: str, instanceFactory):
+        """이미 로드된 서브모듈에 __call__을 부여하여 callable하게 만든다.
 
-    서브모듈(rank, _helpers 등)도 그대로 import 가능. instance 메소드는 lazy 호출.
-    """
-    mod = sys.modules.get(modName)
-    if mod is None:
-        return
+        서브모듈(rank, _helpers 등)도 그대로 import 가능. instance 메소드는 lazy 호출.
+        """
+        mod = sys.modules.get(modName)
+        if mod is None:
+            return
 
-    class _CallableModule(_types.ModuleType):
-        _instance = None
+        class _CallableModule(_types.ModuleType):
+            _instance = None
 
-        def __call__(self, *args, **kwargs):
-            if self._instance is None:
-                self._instance = instanceFactory()
-            return self._instance(*args, **kwargs)
+            def __call__(self, *args, **kwargs):
+                if self._instance is None:
+                    self._instance = instanceFactory()
+                return self._instance(*args, **kwargs)
 
-        def __getattr__(self, name):
-            if self._instance is None:
-                self._instance = instanceFactory()
-            try:
-                return getattr(self._instance, name)
-            except AttributeError:
-                raise AttributeError(f"module '{modName}' has no attribute '{name}'") from None
+            def __getattr__(self, name):
+                if self._instance is None:
+                    self._instance = instanceFactory()
+                try:
+                    return getattr(self._instance, name)
+                except AttributeError:
+                    raise AttributeError(f"module '{modName}' has no attribute '{name}'") from None
 
-    mod.__class__ = _CallableModule
+        mod.__class__ = _CallableModule
 
+    def _scanFactory():
+        from dartlab.scan import Scan
 
-def _scanFactory():
-    from dartlab.scan import Scan
+        return Scan()
 
-    return Scan()
+    def _analysisFactory():
+        from dartlab.analysis.financial import Analysis
 
+        return Analysis()
 
-def _analysisFactory():
-    from dartlab.analysis.financial import Analysis
+    def _quantFactory():
+        from dartlab.quant import Quant
 
-    return Analysis()
+        return Quant()
 
+    # scan/analysis/quant — 모듈 자체를 callable로 변환
+    import dartlab.analysis.financial as _analysis_mod  # noqa: F401
+    import dartlab.quant as _quant_mod  # noqa: F401
+    import dartlab.scan as _scan_mod  # noqa: F401
 
-def _quantFactory():
-    from dartlab.quant import Quant
+    _makeCallableModule("dartlab.scan", _scanFactory)
+    _makeCallableModule("dartlab.analysis.financial", _analysisFactory)
+    _makeCallableModule("dartlab.quant", _quantFactory)
 
-    return Quant()
+    # credit은 함수형 (이미 callable)
+    from dartlab.credit import credit as _credit_callable
 
-
-# scan/analysis/quant — 모듈 자체를 callable로 변환
-import dartlab.analysis.financial as _analysis_mod  # noqa: F401
-import dartlab.quant as _quant_mod  # noqa: F401
-import dartlab.scan as _scan_mod  # noqa: F401
-
-_makeCallableModule("dartlab.scan", _scanFactory)
-_makeCallableModule("dartlab.analysis.financial", _analysisFactory)
-_makeCallableModule("dartlab.quant", _quantFactory)
-
-# credit은 함수형 (이미 callable)
-from dartlab.credit import credit as _credit_callable
-
-sys.modules[__name__].credit = _credit_callable
+    sys.modules[__name__].credit = _credit_callable
 
 
 __all__ = [

@@ -1,3 +1,5 @@
+import sys
+
 from dartlab.core.dataLoader import (
     DART_VIEWER,
     PERIOD_KINDS,
@@ -8,13 +10,15 @@ from dartlab.core.dataLoader import (
 from dartlab.core.notesExtractor import extractNotesContent, findNumberedSection
 from dartlab.core.reportSelector import extractReportYear, selectReport
 from dartlab.core.tableParser import detectUnit, extractAccounts, extractTables, parseAmount
-from dartlab.gather.listing import (
-    codeToName,
-    fuzzySearch,
-    getKindList,
-    nameToCode,
-    searchName,
-)
+
+if sys.platform != "emscripten":
+    from dartlab.gather.listing import (
+        codeToName,
+        fuzzySearch,
+        getKindList,
+        nameToCode,
+        searchName,
+    )
 
 __all__ = [
     "DART_VIEWER",

@@ -115,6 +115,10 @@ def _fetchKind() -> pl.DataFrame:
 
 
 def _loadCache() -> pl.DataFrame | None:
+    import sys
+
+    if sys.platform == "emscripten":
+        return None  # Pyodide: 로컬 캐시 없음
     path = _cacheFile()
     if not path.exists():
         return None
@@ -125,6 +129,10 @@ def _loadCache() -> pl.DataFrame | None:
 
 
 def _saveCache(df: pl.DataFrame) -> None:
+    import sys
+
+    if sys.platform == "emscripten":
+        return  # Pyodide: write_parquet 비활성 + 영속 FS 없음
     path = _cacheFile()
     path.parent.mkdir(parents=True, exist_ok=True)
     df.write_parquet(str(path))

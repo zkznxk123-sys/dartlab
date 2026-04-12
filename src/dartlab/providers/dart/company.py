@@ -296,7 +296,9 @@ class Company:
         self._hasFinanceParquet = _dataStatus.get("finance", False)
         self._hasReport = _dataStatus.get("report", False)
 
-        corpName = codeToName(self.stockCode)
+        import sys
+
+        corpName = None if sys.platform == "emscripten" else codeToName(self.stockCode)
         if corpName:
             self.corpName = corpName
         elif self._hasDocs:

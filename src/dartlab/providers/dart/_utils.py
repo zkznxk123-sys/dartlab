@@ -118,6 +118,12 @@ def _ensureData(stockCode: str, category: str) -> bool:
 
 def _ensureAllData(stockCode: str) -> dict[str, bool]:
     """docs/finance/report를 한번에 확인 + 수집."""
+    import sys
+
+    if sys.platform == "emscripten":
+        # Pyodide: 로컬 파일시스템 없음. loadData()가 on-demand로 HF fetch.
+        return {"docs": True, "finance": True, "report": True}
+
     from dartlab.core.dataLoader import _dataDir
 
     categories = ["docs", "finance", "report"]
@@ -135,14 +141,22 @@ def _ensureAllData(stockCode: str) -> dict[str, bool]:
     if not missing:
         return result
 
-    # 2단계: 카테고리 병렬 수집 (I/O 바운드, 최대 2 워커)
-    from concurrent.futures import ThreadPoolExecutor, as_completed
+    # 2단계: 카테고리 수집
+    import sys
 
-    with ThreadPoolExecutor(max_workers=min(len(missing), 2)) as pool:
-        futures = {pool.submit(_ensureData, stockCode, cat): cat for cat in missing}
-        for future in as_completed(futures):
-            cat = futures[future]
-            result[cat] = future.result()
+    if sys.platform == "emscripten":
+        # Pyodide: threading 불가 → 순차 실행
+        for cat in missing:
+            result[cat] = _ensureData(stockCode, cat)
+    else:
+        # 병렬 수집 (I/O 바운드, 최대 2 워커)
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        with ThreadPoolExecutor(max_workers=min(len(missing), 2)) as pool:
+            futures = {pool.submit(_ensureData, stockCode, cat): cat for cat in missing}
+            for future in as_completed(futures):
+                cat = futures[future]
+                result[cat] = future.result()
     return result
 
 

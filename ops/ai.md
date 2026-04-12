@@ -41,16 +41,16 @@ dartlab.chat("005930", "배당 추세는?")     # Company-bound
 
 ## Provider
 
-**무료 API 키 provider:**
+**API 키 provider:**
 
-| Provider | 무료 티어 | 모델 |
-|----------|-----------|-------|
-| `gemini` | Gemini 2.5 Pro/Flash | Gemini 2.5 |
-| `groq` | 6K-30K TPM | LLaMA 3.3 70B |
-| `cerebras` | 1M tokens/day | LLaMA 3.3 70B |
-| `mistral` | 1B tokens/month | Mistral Small |
+| Provider | 모델 |
+|----------|-------|
+| `gemini` | Gemini 2.5 Pro/Flash |
+| `groq` | LLaMA 3.3 70B |
+| `cerebras` | LLaMA 3.3 70B |
+| `mistral` | Mistral Small |
 
-**유료/기타:**
+**기타:**
 
 | Provider | 인증 | Tool Calling |
 |----------|------|:---:|

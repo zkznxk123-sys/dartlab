@@ -3,12 +3,10 @@
 import inspect
 import json
 import re
-import socket
+import sys
 import time
 from contextlib import contextmanager
 from pathlib import Path
-from urllib.error import URLError
-from urllib.request import Request, urlopen, urlretrieve
 
 import polars as pl
 
@@ -17,6 +15,13 @@ from dartlab.core.dataConfig import (
     HF_REPO,
     hfBaseUrl,
 )
+
+_IS_PYODIDE = sys.platform == "emscripten"
+
+if not _IS_PYODIDE:
+    import socket
+    from urllib.error import URLError
+    from urllib.request import Request, urlopen, urlretrieve
 
 
 def _getDataRoot() -> Path:
@@ -307,6 +312,8 @@ def loadData(
     columns: list[str] | None = None,
 ) -> pl.DataFrame:
     """종목코드 → DataFrame. 로컬에 없으면 릴리즈에서 자동 다운로드."""
+    if _IS_PYODIDE:
+        return _loadDataPyodide(stockCode, category, sinceYear=sinceYear, columns=columns)
     from dartlab.core.memory import check_memory_and_gc
 
     check_memory_and_gc(f"loadData({stockCode},{category})")
@@ -1044,3 +1051,54 @@ def _inferEdgarPeriodKeyMap(filings: list[dict]) -> dict[str, str | None]:
                 periodMap[row["accession_no"]] = row["year"]
 
     return periodMap
+
+
+# ── Pyodide (emscripten) 전용 경로 ──────────────────────────────────
+
+
+def _loadDataPyodide(
+    stockCode: str,
+    category: str,
+    *,
+    sinceYear: int | None = None,
+    columns: list[str] | None = None,
+) -> pl.DataFrame:
+    """Pyodide 환경: pre-fetched FS 파일 → pyarrow → polars.
+
+    JS 측에서 HF parquet을 fetch → pyodide FS에 미리 기록.
+    Python은 로컬 파일처럼 pyarrow로 읽는다.
+    polars WASM wheel은 read_parquet 비활성이므로 pyarrow 경유.
+    """
+    import io
+
+    import pyarrow.parquet as pq
+
+    dirPath = DATA_RELEASES[category]["dir"]
+    path = Path(f"/data/{dirPath}/{stockCode}.parquet")
+
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Pyodide FS에 {path} 없음. "
+            f"JS에서 prefetchParquet(py, '{stockCode}')를 먼저 호출하세요."
+        )
+
+    arrow_table = pq.read_table(io.BytesIO(path.read_bytes()))
+    df = pl.from_arrow(arrow_table)
+
+    # sinceYear 필터
+    if sinceYear is not None:
+        for colName in ("year", "bsns_year"):
+            if colName in df.columns:
+                yearCol = pl.col(colName)
+                if df.schema[colName] == pl.Utf8:
+                    yearCol = yearCol.cast(pl.Int32, strict=False)
+                df = df.filter(yearCol >= sinceYear)
+                break
+
+    # 컬럼 프로젝션
+    if columns:
+        available = [c for c in columns if c in df.columns]
+        if available:
+            df = df.select(available)
+
+    return _normalizeLoadedFrame(df, category)

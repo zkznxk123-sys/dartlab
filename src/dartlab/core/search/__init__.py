@@ -1,15 +1,18 @@
-"""공시 원문 검색 엔진. *(alpha)*
+"""공시 검색 엔진. *(alpha)*
 
-Ngram+Synonym 기본 검색 (모델 불필요, cold start 0ms, precision 95%).
-벡터 검색은 optional 보강.
+scope 분리 검색:
+- title: report_nm + section_title ngram (제목형 쿼리)
+- content: section_content word BM25 (본문형 쿼리)
+- auto (기본): 자동 판별
 
 사용법::
 
     import dartlab
 
-    dartlab.search("유상증자 결정")                    # 공시 검색
-    dartlab.search("대표이사 변경", corp="005930")      # 종목 필터
-    dartlab.search("전환사채", start="20240101")        # 기간 필터
+    dartlab.search("유상증자")                                # 제목 자동 매칭
+    dartlab.search("반도체 HBM 투자")                          # 본문 자동 매칭
+    dartlab.search("대표이사 변경", corp="005930")              # 종목 필터
+    dartlab.search("환율 리스크", scope="content")              # 본문 검색 강제
 """
 
 from __future__ import annotations
@@ -24,11 +27,18 @@ def search(
     start: str | None = None,
     end: str | None = None,
     topK: int = 10,
+    scope: str = "auto",
 ) -> pl.DataFrame:
-    """공시 원문 검색 — Ngram+Synonym 기본, 벡터 보강.
+    """공시 검색.
 
-    모델 불필요. cold start 0ms.
-    DART 공시 전용 — EDGAR(US) 공시 검색은 SEC EDGAR Full-Text Search 이용.
+    scope 파라미터:
+    - ``"auto"`` (기본): title 먼저 검색, topK 미달이면 content 결과로 보강.
+      제목형/본문형 쿼리 모두 커버. 중복은 rcept_no 기준 제거.
+    - ``"title"``: report_nm + section_title ngram (빠름, 제목형 쿼리용).
+    - ``"content"``: section_content 본문 BM25 (개념/내용형 쿼리용).
+    - ``"both"``: title + content 결과를 scope 컬럼과 함께 합쳐 반환.
+
+    DART 공시 전용 — EDGAR 공시 검색은 SEC EDGAR Full-Text Search 이용.
     """
     # EDGAR ticker 감지 → 안내 메시지
     if corp and not str(corp).isdigit() and len(corp) <= 6:
@@ -42,21 +52,90 @@ def search(
             }
         )
 
+    if scope not in ("auto", "title", "content", "both"):
+        raise ValueError(f"scope는 'auto', 'title', 'content', 'both' 중 하나. 받은 값: {scope!r}")
+
     corpCode, stockCode = _resolveCorp(corp)
 
-    # Ngram 검색 (기본 — 모델 불필요)
-    from dartlab.core.search.ngramIndex import searchNgram
-
-    result = searchNgram(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
+    if scope == "title":
+        result = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
+    elif scope == "content":
+        result = _searchContent(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
+    elif scope == "auto":
+        result = _searchAuto(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
+    else:  # both
+        titleHits = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
+        contentHits = _searchContent(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
+        titleHits = titleHits.with_columns(pl.lit("title").alias("scope"))
+        contentHits = contentHits.with_columns(pl.lit("content").alias("scope"))
+        commonCols = [c for c in titleHits.columns if c in contentHits.columns]
+        if commonCols:
+            result = pl.concat([titleHits.select(commonCols), contentHits.select(commonCols)])
+        else:
+            result = titleHits
 
     # 날짜 필터
-    if result.height > 0:
-        if start and "rcept_dt" in result.columns:
+    if result.height > 0 and "rcept_dt" in result.columns:
+        if start:
             result = result.filter(pl.col("rcept_dt") >= start)
-        if end and "rcept_dt" in result.columns:
+        if end:
             result = result.filter(pl.col("rcept_dt") <= end)
 
     return result
+
+
+def _searchTitle(query, *, corpCode, stockCode, topK):
+    from dartlab.core.search.ngramIndex import searchNgram
+
+    return searchNgram(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
+
+
+def _searchContent(query, *, corpCode, stockCode, topK):
+    from dartlab.core.search.fieldIndex import searchContent
+
+    return searchContent(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
+
+
+def _searchAuto(query, *, corpCode, stockCode, topK):
+    """auto 모드 — 쿼리 유형 자동 판별 후 맞는 엔진 선택.
+
+    판별: 쿼리 전체가 어느 문서의 report_nm에 substring으로 들어가면 제목형,
+    아니면 본문형으로 취급. 둘 다 실행해서 substring 히트가 있는 쪽을 우선.
+    """
+    titleHits = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, topK=topK * 2)
+    contentHits = _searchContent(query, corpCode=corpCode, stockCode=stockCode, topK=topK * 2)
+
+    tValid = titleHits is not None and titleHits.height > 0 and "info" not in titleHits.columns
+    cValid = contentHits is not None and contentHits.height > 0 and "info" not in contentHits.columns
+
+    if not tValid and not cValid:
+        return titleHits if titleHits is not None else contentHits
+    if not cValid:
+        return titleHits.head(topK)
+    if not tValid:
+        return contentHits.head(topK)
+
+    # 쿼리 전체가 report_nm에 들어간 결과만 — 제목형 매칭의 정의
+    queryNorm = query.strip()
+    titleStrict = titleHits.filter(pl.col("report_nm").str.contains(queryNorm, literal=True))
+    titleStrictCount = titleStrict.height
+
+    commonCols = [c for c in titleHits.columns if c in contentHits.columns]
+
+    if titleStrictCount >= topK:
+        # 제목에 쿼리 전체 들어간 결과로 충분
+        return titleStrict.select(commonCols).with_columns(pl.lit("title").alias("scope")).head(topK)
+
+    # 제목 strict 부족 — content로 보강. rcept_no 중복 제거
+    tagged_title = titleStrict.select(commonCols).with_columns(pl.lit("title").alias("scope"))
+    tagged_content = contentHits.select(commonCols).with_columns(pl.lit("content").alias("scope"))
+    if "rcept_no" in commonCols and titleStrictCount > 0:
+        usedRcepts = set(titleStrict["rcept_no"].to_list())
+        tagged_content = tagged_content.filter(~pl.col("rcept_no").is_in(list(usedRcepts)))
+
+    needed = max(topK - titleStrictCount, 0)
+    result = pl.concat([tagged_title, tagged_content.head(needed)])
+    return result.head(topK)
 
 
 def _resolveCorp(corp: str | None) -> tuple[str | None, str | None]:
@@ -91,6 +170,30 @@ def buildIndex(parquetPaths: list[str] | None = None, *, includeDocs: bool = Fal
 def rebuildIndex(**kwargs) -> int:
     """전체 인덱스 리빌드 — allFilings + docs 통합. (~220초)"""
     return buildIndex(includeDocs=True, **kwargs)
+
+
+# ── content 인덱스 (scope="content" 검색용) ──
+
+
+def rebuildContent(**kwargs) -> int:
+    """content 인덱스 main 세그먼트 풀리빌드 (월 1회).
+
+    실험 116 검증: docs + allFilings 전체로 BM25 인덱스 구축.
+    4M 문서 기준 약 18분 소요.
+    """
+    from dartlab.core.search.fieldIndex import rebuildMain
+
+    return rebuildMain(**kwargs)
+
+
+def rebuildContentDelta(**kwargs) -> int:
+    """content 인덱스 delta 세그먼트 빌드 (일 단위 증분).
+
+    최근 N일 allFilings만 인덱싱. main 이후 추가분 병합 검색용.
+    """
+    from dartlab.core.search.fieldIndex import rebuildDelta
+
+    return rebuildDelta(**kwargs)
 
 
 # ── 수집 편의 함수 ──
@@ -136,10 +239,18 @@ def pushIndex(**kwargs) -> str:
 
 
 def pullIndex(**kwargs):
-    """HuggingFace에서 stemIndex 다운로드."""
+    """HuggingFace에서 검색 인덱스 다운로드 (stemIndex + contentIndex)."""
+    from dartlab.core.search.fieldIndex import pullContentIndex
     from dartlab.core.search.ngramIndex import pullStemIndex
 
-    return pullStemIndex(**kwargs)
+    ngramResult = pullStemIndex(**kwargs)
+    try:
+        nContent = pullContentIndex()
+        if nContent > 0:
+            print(f"  content 인덱스 {nContent}개 파일 다운로드")
+    except Exception as e:
+        print(f"  content 인덱스 다운로드 건너뜀: {e}")
+    return ngramResult
 
 
 # ── 파생 지식 API ──
