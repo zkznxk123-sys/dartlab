@@ -59,7 +59,9 @@ def fmt_억(val: float | None) -> str:
 
 def build_table(rows: list[tuple[str, list[str]]], years: list[str], title: str) -> str:
     """마크다운 테이블 생성."""
-    lines = [f"### {title}\n"]
+    lines = []
+    if title:
+        lines.append(f"### {title}\n")
     header = "| 항목 | " + " | ".join(years) + " |"
     sep = "|---|" + "|".join(["---:" for _ in years]) + "|"
     lines.append(header)
@@ -196,21 +198,22 @@ def extract_data(stock_code: str) -> dict | None:
 
 
 def _build_chart_data_is(data: dict) -> str:
-    """IS 데이터로 LineChart data prop 문자열 생성."""
+    """IS 데이터로 ComboChart data prop (매출=라인, 영업이익/당기순이익=막대)."""
     d = data.get("IS")
     if not d:
         return ""
     years = d["years"]
-    # rows를 dict로 변환
     row_map = {name: vals for name, vals in d["rows"]}
     매출 = row_map.get("매출액", ["—"] * len(years))
     영업이익 = row_map.get("영업이익", ["—"] * len(years))
+    순이익 = row_map.get("당기순이익", ["—"] * len(years))
 
     items = []
     for i, y in enumerate(years):
         rev = 매출[i].replace(",", "").replace("—", "null")
         op = 영업이익[i].replace(",", "").replace("—", "null")
-        items.append(f'{{year:"{y}",매출:{rev},영업이익:{op}}}')
+        ni = 순이익[i].replace(",", "").replace("—", "null")
+        items.append(f'{{year:"{y}",매출액:{rev},영업이익:{op},당기순이익:{ni}}}')
     return "[" + ",".join(items) + "]"
 
 
@@ -236,18 +239,22 @@ def _build_chart_data_bs(data: dict) -> str:
 
 
 def _build_chart_data_cf(data: dict) -> str:
-    """CF 데이터로 BarChart data prop 문자열 생성 (영업CF)."""
+    """CF 데이터로 ComboChart data prop (영업/투자/재무 3항목 막대)."""
     d = data.get("CF")
     if not d:
         return ""
     years = d["years"]
     row_map = {name: vals for name, vals in d["rows"]}
     ocf = row_map.get("영업활동현금흐름", ["—"] * len(years))
+    icf = row_map.get("투자활동현금흐름", ["—"] * len(years))
+    fcf = row_map.get("재무활동현금흐름", ["—"] * len(years))
 
     items = []
     for i, y in enumerate(years):
-        v = ocf[i].replace(",", "").replace("—", "0")
-        items.append(f'{{label:"{y}",value:{v}}}')
+        o = ocf[i].replace(",", "").replace("—", "0")
+        inv = icf[i].replace(",", "").replace("—", "0")
+        fin = fcf[i].replace(",", "").replace("—", "0")
+        items.append(f'{{year:"{y}",영업CF:{o},투자CF:{inv},재무CF:{fin}}}')
     return "[" + ",".join(items) + "]"
 
 
@@ -258,8 +265,7 @@ def build_auto_section(data: dict) -> str:
 
     # --- Svelte 차트 import ---
     parts.append("<script>")
-    parts.append("import LineChart from '$lib/components/blog/LineChart.svelte';")
-    parts.append("import BarChart from '$lib/components/blog/BarChart.svelte';")
+    parts.append("import ComboChart from '$lib/components/blog/ComboChart.svelte';")
     parts.append("import StackBar from '$lib/components/blog/StackBar.svelte';")
     parts.append("</script>")
     parts.append("")
@@ -296,32 +302,45 @@ def build_auto_section(data: dict) -> str:
     parts.append("> ```")
     parts.append("")
 
-    # IS + 차트
+    # IS: 제목 → 차트(매출=라인, 영업이익/당기순이익=막대) → 테이블
     if data.get("IS"):
         d = data["IS"]
+        parts.append("### 손익계산서 (IS) — 단위 억원\n")
         chart_data = _build_chart_data_is(data)
         if chart_data:
-            parts.append(f'<LineChart data={{{chart_data}}} title="매출 vs 영업이익 추이" unit="억원" />')
+            parts.append(
+                f'<ComboChart data={{{chart_data}}} '
+                f'lineKeys={{["매출액"]}} barKeys={{["영업이익","당기순이익"]}} '
+                f'lineColors={{["#22c55e"]}} barColors={{["#3b82f6","#f59e0b"]}} '
+                f'title="매출(라인) vs 영업이익·당기순이익(막대)" unit="억원" />'
+            )
             parts.append("")
-        parts.append(build_table(d["rows"], d["years"], "손익계산서 (IS) — 단위 억원"))
+        parts.append(build_table(d["rows"], d["years"], ""))
 
-    # BS + 차트
+    # BS: 제목 → 차트(부채/자본 스택) → 테이블
     if data.get("BS"):
         d = data["BS"]
+        parts.append("### 재무상태표 (BS) — 단위 억원\n")
         chart_data = _build_chart_data_bs(data)
         if chart_data:
             parts.append(f'<StackBar data={{{chart_data}}} title="부채 vs 자본 구조" unit="억원" />')
             parts.append("")
-        parts.append(build_table(d["rows"], d["years"], "재무상태표 (BS) — 단위 억원"))
+        parts.append(build_table(d["rows"], d["years"], ""))
 
-    # CF + 차트
+    # CF: 제목 → 차트(영업/투자/재무 3막대) → 테이블
     if data.get("CF"):
         d = data["CF"]
+        parts.append("### 현금흐름표 (CF) — 단위 억원\n")
         chart_data = _build_chart_data_cf(data)
         if chart_data:
-            parts.append(f'<BarChart data={{{chart_data}}} title="영업활동 현금흐름" unit="억원" />')
+            parts.append(
+                f'<ComboChart data={{{chart_data}}} '
+                f'barKeys={{["영업CF","투자CF","재무CF"]}} '
+                f'barColors={{["#22c55e","#ef4444","#3b82f6"]}} '
+                f'title="영업·투자·재무 현금흐름" unit="억원" />'
+            )
             parts.append("")
-        parts.append(build_table(d["rows"], d["years"], "현금흐름표 (CF) — 단위 억원"))
+        parts.append(build_table(d["rows"], d["years"], ""))
 
     # SCE
     if data.get("SCE") and len(data["SCE"]["rows"]) > 0:

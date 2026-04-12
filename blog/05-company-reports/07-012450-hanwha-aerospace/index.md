@@ -395,8 +395,7 @@ c.review()
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
 <script>
-import LineChart from '$lib/components/blog/LineChart.svelte';
-import BarChart from '$lib/components/blog/BarChart.svelte';
+import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
 </script>
 
@@ -436,9 +435,9 @@ import StackBar from '$lib/components/blog/StackBar.svelte';
 > c.show("ratios")          # 재무비율
 > ```
 
-<LineChart data={[{year:"2025",매출:267029,영업이익:30893},{year:"2024",매출:120906,영업이익:17731},{year:"2023",매출:91381,영업이익:7019},{year:"2022",매출:69648,영업이익:4221},{year:"2021",매출:64151,영업이익:3830}]} title="매출 vs 영업이익 추이" unit="억원" />
-
 ### 손익계산서 (IS) — 단위 억원
+
+<ComboChart data={[{year:"2025",매출액:267029,영업이익:30893,당기순이익:14897},{year:"2024",매출액:120906,영업이익:17731,당기순이익:25399},{year:"2023",매출액:91381,영업이익:7019,당기순이익:9818},{year:"2022",매출액:69648,영업이익:4221,당기순이익:1520},{year:"2021",매출액:64151,영업이익:3830,당기순이익:3018}]} lineKeys={["매출액"]} barKeys={["영업이익","당기순이익"]} lineColors={["#22c55e"]} barColors={["#3b82f6","#f59e0b"]} title="매출(라인) vs 영업이익·당기순이익(막대)" unit="억원" />
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
 |---|---:|---:|---:|---:|---:|
@@ -451,9 +450,9 @@ import StackBar from '$lib/components/blog/StackBar.svelte';
 | 금융비용 | — | — | — | — | — |
 | 당기순이익 | 14,897 | 25,399 | 9,818 | 1,520 | 3,018 |
 
-<StackBar data={[{year:"2025",segments:[{label:"부채",value:371655,color:"#ef4444"},{label:"자본",value:167882,color:"#22c55e"}]},{year:"2024",segments:[{label:"부채",value:319726,color:"#ef4444"},{label:"자본",value:113643,color:"#22c55e"}]},{year:"2023",segments:[{label:"부채",value:148587,color:"#ef4444"},{label:"자본",value:46842,color:"#22c55e"}]},{year:"2022",segments:[{label:"부채",value:112335,color:"#ef4444"},{label:"자본",value:39238,color:"#22c55e"}]},{year:"2021",segments:[{label:"부채",value:71143,color:"#ef4444"},{label:"자본",value:39316,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="억원" />
-
 ### 재무상태표 (BS) — 단위 억원
+
+<StackBar data={[{year:"2025",segments:[{label:"부채",value:371655,color:"#ef4444"},{label:"자본",value:167882,color:"#22c55e"}]},{year:"2024",segments:[{label:"부채",value:319726,color:"#ef4444"},{label:"자본",value:113643,color:"#22c55e"}]},{year:"2023",segments:[{label:"부채",value:148587,color:"#ef4444"},{label:"자본",value:46842,color:"#22c55e"}]},{year:"2022",segments:[{label:"부채",value:112335,color:"#ef4444"},{label:"자본",value:39238,color:"#22c55e"}]},{year:"2021",segments:[{label:"부채",value:71143,color:"#ef4444"},{label:"자본",value:39316,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="억원" />
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
 |---|---:|---:|---:|---:|---:|
@@ -465,9 +464,9 @@ import StackBar from '$lib/components/blog/StackBar.svelte';
 | 비유동부채 | 71,891 | 64,564 | 27,821 | 29,634 | 27,842 |
 | 자본총계 | 167,882 | 113,643 | 46,842 | 39,238 | 39,316 |
 
-<BarChart data={[{label:"2025",value:40498},{label:"2024",value:13930},{label:"2023",value:13902},{label:"2022",value:15243},{label:"2021",value:9900}]} title="영업활동 현금흐름" unit="억원" />
-
 ### 현금흐름표 (CF) — 단위 억원
+
+<ComboChart data={[{year:"2025",영업CF:40498,투자CF:-40208,재무CF:0},{year:"2024",영업CF:13930,투자CF:-13673,재무CF:0},{year:"2023",영업CF:13902,투자CF:-30291,재무CF:0},{year:"2022",영업CF:15243,투자CF:-12249,재무CF:0},{year:"2021",영업CF:9900,투자CF:-6071,재무CF:0}]} barKeys={["영업CF","투자CF","재무CF"]} barColors={["#22c55e","#ef4444","#3b82f6"]} title="영업·투자·재무 현금흐름" unit="억원" />
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
 |---|---:|---:|---:|---:|---:|
