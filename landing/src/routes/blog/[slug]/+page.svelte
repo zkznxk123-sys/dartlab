@@ -20,7 +20,7 @@
 
 	function extractToc() {
 		if (!articleEl) return;
-		const headings = articleEl.querySelectorAll('h2, h3');
+		const headings = articleEl.querySelectorAll('h2');
 		const items: TocItem[] = [];
 		headings.forEach((h) => {
 			if (!h.id) {
@@ -33,7 +33,7 @@
 			items.push({
 				id: h.id,
 				text: (h.textContent ?? '').trim(),
-				level: h.tagName === 'H2' ? 2 : 3
+				level: 2
 			});
 		});
 		tocItems = items;
@@ -41,7 +41,7 @@
 
 	function observeHeadings() {
 		if (!articleEl) return;
-		const headings = articleEl.querySelectorAll('h2, h3');
+		const headings = articleEl.querySelectorAll('h2');
 		if (headings.length === 0) return;
 
 		const observer = new IntersectionObserver(
