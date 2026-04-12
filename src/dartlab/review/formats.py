@@ -6,8 +6,8 @@ import json
 from typing import Any
 
 
-def renderHtml(review) -> str:
-    """HTML 렌더링."""
+def renderHtml(review, *, chart_dir: str | None = None) -> str:
+    """HTML 렌더링. chart_dir 지정 시 ChartBlock을 SVG 이미지로 삽입."""
     from dartlab.review.blocks import (
         ChartBlock,
         FlagBlock,
@@ -75,12 +75,26 @@ def renderHtml(review) -> str:
                 if hasattr(block.df, "_repr_html_"):
                     parts.append(block.df._repr_html_())
             elif isinstance(block, ChartBlock):
-                spec_json = json.dumps(block.spec, ensure_ascii=False, default=str)
                 title = block.spec.get("title", "") if isinstance(block.spec, dict) else ""
-                parts.append(
-                    f"<div class='dl-chart' data-spec='{spec_json}'>"
-                    f"<p style='color:#888;font-size:0.85em'>[chart: {title}]</p></div>"
-                )
+                rendered_chart = False
+                if chart_dir and isinstance(block.spec, dict):
+                    from dartlab.viz.spec import VizSpec
+
+                    key = title.replace(" ", "_")[:30] or "chart"
+                    img_path = f"{chart_dir}/chart-{key}.svg"
+                    try:
+                        vs = VizSpec.fromDict(block.spec)
+                        if vs.toImage(img_path):
+                            parts.append(f"<img src='assets/chart-{key}.svg' alt='{title}' style='max-width:100%'>")
+                            rendered_chart = True
+                    except (ImportError, ValueError, OSError, TypeError):
+                        pass
+                if not rendered_chart:
+                    spec_json = json.dumps(block.spec, ensure_ascii=False, default=str)
+                    parts.append(
+                        f"<div class='dl-chart' data-spec='{spec_json}'>"
+                        f"<p style='color:#888;font-size:0.85em'>[chart: {title}]</p></div>"
+                    )
             elif isinstance(block, FlagBlock):
                 for f in block.flags:
                     parts.append(f"<p>{block.icon} {f}</p>")

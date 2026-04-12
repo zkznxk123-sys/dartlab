@@ -230,6 +230,8 @@ _ALIASES: dict[str, str] = {
     "지배구조": "governance",
     "매크로": "macro",
     "논제": "thesis",
+    "가설": "thesis",
+    "검증": "thesis",
 }
 
 

@@ -1443,6 +1443,21 @@ def scenarioSensitivityBlock(data: dict | None) -> list:
             txt += f" — 현재 안전마진 {safety:.1f}%p"
         blocks.append(TextBlock(txt))
 
+    # 인과 연쇄 narrate — OPM shock에서 파생 지표 변화 자동 문장
+    opm_shock = shocks.get("opm_minus_5pp", {})
+    if opm_shock and base:
+        from dartlab.review.narrate import narrateCausalChain
+
+        metrics = {}
+        if base.get("opm") is not None and opm_shock.get("opm") is not None:
+            metrics["opm_delta"] = opm_shock["opm"] - base["opm"]
+        if base.get("roe") is not None and opm_shock.get("roe") is not None:
+            base_roe = base["roe"]
+            metrics["debt_delta_pp"] = opm_shock["roe"] - base_roe  # ROE 변화를 proxy로
+        chain = narrateCausalChain(metrics)
+        if chain:
+            blocks.append(TextBlock(chain))
+
     return blocks
 
 
@@ -3044,8 +3059,9 @@ def revenueForecastBlock(data: dict) -> list:
         from dartlab.review.blocks import ChartBlock
         from dartlab.viz.generators import spec_revenue_scenario_band
 
-        hist = data.get("historicalRevenue", []) or []
-        history_dicts = [{"period": str(h.get("period", "")), "revenue": h.get("value")} for h in hist] if hist else []
+        # historical: calc가 반환하는 과거 매출 시계열 (list[float])
+        hist_vals = data.get("historical", []) or []
+        history_dicts = [{"period": f"Y-{len(hist_vals) - i}", "revenue": v} for i, v in enumerate(hist_vals) if v is not None] if hist_vals else []
         forecasts = {}
         for key in ("base", "bull", "bear"):
             sc = scenarios.get(key, {})

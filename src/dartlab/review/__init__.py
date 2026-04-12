@@ -280,7 +280,7 @@ class Review:
         if fmt == "html":
             from dartlab.review.formats import renderHtml
 
-            return renderHtml(self)
+            return renderHtml(self, chart_dir=getattr(self, "chartDir", None))
         if fmt == "markdown":
             from dartlab.review.formats import renderMarkdown
 
