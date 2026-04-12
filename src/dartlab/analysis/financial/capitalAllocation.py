@@ -436,6 +436,12 @@ def calcTreasuryStockStatus(company, *, basePeriod: str | None = None) -> dict |
         }
     """
     result = company.show("treasuryStock")
+
+    # EDGAR fallback: XBRL companyfacts에서 자사주 데이터 추출
+    market = getattr(company, "market", "KR")
+    if result is None and market == "US":
+        return _edgarTreasuryStockFallback(company)
+
     if result is None:
         return None
 
@@ -473,6 +479,37 @@ def calcTreasuryStockStatus(company, *, basePeriod: str | None = None) -> dict |
         rows.append(entry)
 
     return {"rows": rows} if rows else None
+
+
+def _edgarTreasuryStockFallback(company) -> dict | None:
+    """EDGAR: companyfacts XBRL에서 자사주 관련 태그 추출."""
+    try:
+        from dartlab.analysis.financial._helpers import toDictBySnakeId
+        from dartlab.core.finance.helpers import annualColsFromPeriods
+
+        # CF에서 자사주 매입 금액 추출
+        parsed = toDictBySnakeId(company.select("CF", ["purchase_of_treasury_stock", "share_repurchase"]))
+        if parsed is None:
+            return None
+        cfData, cfPeriods = parsed
+        yCols = annualColsFromPeriods(cfPeriods, maxYears=5)
+        if not yCols:
+            return None
+
+        tsRow = cfData.get("purchase_of_treasury_stock", cfData.get("share_repurchase", {}))
+        rows = []
+        for col in yCols:
+            v = tsRow.get(col)
+            if v is not None:
+                rows.append({
+                    "method": f"Share Repurchase ({col})",
+                    "acquired": abs(float(v)),
+                    "endShares": None,
+                })
+
+        return {"rows": rows, "source": "XBRL"} if rows else None
+    except (AttributeError, ValueError, TypeError, KeyError):
+        return None
 
 
 # ── 플래그 ──

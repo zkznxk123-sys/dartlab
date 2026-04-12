@@ -487,6 +487,7 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             calcReinvestment,
             calcShareholderReturn,
         )
+        from dartlab.analysis.financial.capitalAllocation import calcTreasuryStockStatus
         from dartlab.review.builders import (
             capitalAllocationFlagsBlock,
             dividendPolicyBlock,
@@ -495,6 +496,7 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             reinvestmentBlock,
             shareholderReturnBlock,
             totalShareholderReturnBlock,
+            treasuryStockStatusBlock,
         )
 
         _divCache: dict = {}
@@ -522,6 +524,10 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             b["dividendSustainability"] = _safe(lambda: dividendSustainabilityBlock(_getDiv(), _getSh()))
         if _need("totalShareholderReturn"):
             b["totalShareholderReturn"] = _safe(lambda: totalShareholderReturnBlock(_getSh()))
+        if _need("treasuryStockStatus"):
+            b["treasuryStockStatus"] = _safe(
+                lambda: treasuryStockStatusBlock(calcTreasuryStockStatus(company, basePeriod=basePeriod))
+            )
         if _need("capitalAllocationFlags"):
             b["capitalAllocationFlags"] = _safe(
                 lambda: capitalAllocationFlagsBlock(calcCapitalAllocationFlags(company, basePeriod=basePeriod))

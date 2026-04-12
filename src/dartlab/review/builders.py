@@ -1915,6 +1915,41 @@ def fcfUsageBlock(data: dict) -> list:
     ]
 
 
+def treasuryStockStatusBlock(data: dict | None) -> list:
+    """calcTreasuryStockStatus 결과 → 자사주 현황 테이블."""
+    if not data:
+        return []
+    rows = data.get("rows", [])
+    if not rows:
+        return []
+
+    table_rows = []
+    for r in rows:
+        row: dict = {"구분": r.get("method", "")}
+        if r.get("acquired") is not None:
+            row["취득"] = f"{r['acquired']:,.0f}"
+        if r.get("disposed") is not None:
+            row["처분"] = f"{r['disposed']:,.0f}"
+        if r.get("retired") is not None:
+            row["소각"] = f"{r['retired']:,.0f}"
+        if r.get("endShares") is not None:
+            row["잔량"] = f"{r['endShares']:,.0f}"
+        table_rows.append(row)
+
+    if not table_rows:
+        return []
+
+    source = data.get("source", "")
+    helper = "자사주 취득/처분/소각 현황"
+    if source == "XBRL":
+        helper += " (EDGAR XBRL 기반)"
+
+    return [
+        HeadingBlock(_meta("treasuryStockStatus").label, level=2, helper=helper),
+        TableBlock("자사주 현황", pl.DataFrame(table_rows)),
+    ]
+
+
 def capitalAllocationFlagsBlock(flags: list[str]) -> list:
     """calcCapitalAllocationFlags 결과 → FlagBlock."""
     return _flagsBlock(flags)

@@ -17,6 +17,10 @@ DartCompany ↔ EdgarCompany 인터페이스 동기화의 단일 규칙 문서.
 | Provider | `providers/edgar/` — CompanyProtocol 완전 구현 |
 | 방어막 | `test_protocol.py::test_edgar_has_all_dart_public_methods` |
 | 데이터 | HuggingFace `eddmpython/dartlab-data` (`edgar/docs`, `edgar/scan` 프리빌드). `edgar/finance`는 SEC companyfacts on-demand로 충분하므로 HF 미러링 제외 |
+| **수집 주기** | **매일 2회** (03:00/15:00 KST) + 일요일 전체 정산 — DART dataSync와 동일 리듬 |
+| **대상** | 나스닥+NYSE ~5,600종목 (SP500 매일 전체, 나머지 증분) |
+| **프리빌드** | `edgar/scan/finance.parquet` — 32계정 전종목 연간 (2021~) |
+| **sectorKpi** | XBRL segments fallback으로 EDGAR도 4업종 KPI 부분 지원 |
 | 안내 | EDGAR 배치(`batchCollectEdgar`)는 `edgar:bulk_start/done/partial` 이벤트로 시작·완료를 알린다. 자세히 ops/guide.md |
 
 ## 핵심 규칙: DartCompany ↔ EdgarCompany 동기화
@@ -72,14 +76,14 @@ EXEMPT에 **등록하면 안 되는** 경우:
 
 analysis 일부 축에서 DART report 전용 서브키가 None:
 
-| 축 | None 키 | 원인 | SEC 대안 |
-|---|---|---|---|
-| 수익구조 | segmentComposition, segmentTrend, growthContribution, concentration | DART docs `productService`/`salesOrder` topic 전용 | XBRL segment fallback 구현했지만 비표준 |
-| 비용구조 | rawMaterialBreakdown | DART report `rawMaterial` API 전용 | SEC에 없음 |
-| 자본배분 | treasuryStockStatus | DART report `treasuryStock` 상세 API 전용 | XBRL에 총수량만 |
-| 투자효율 | investmentInOther | DART report `investedCompany` API 전용 | SEC에 없음 |
+| 축 | None 키 | 원인 | SEC 대안 | 상태 |
+|---|---|---|---|---|
+| 수익구조 | segmentComposition | DART docs `productService` 전용 | **XBRL segment revenue fallback 동작** (`revenue.py:80-169`) | ✅ 해결 |
+| 비용구조 | rawMaterialBreakdown | DART report `rawMaterial` API 전용 | SEC에 구조화 데이터 없음 | ⚠ 한계 인정 |
+| 자본배분 | treasuryStockStatus | DART report `treasuryStock` 상세 API 전용 | **XBRL `purchase_of_treasury_stock` fallback 추가** | ✅ 해결 |
+| 투자효율 | investmentInOther | DART report `investedCompany` API 전용 | SEC에 구조화 데이터 없음 | ⚠ 한계 인정 |
 
-**이 4건은 SEC 공시 구조의 근본적 차이로 인한 것이며, 허용된 None이다.**
+**4건 중 2건 해결** (segmentComposition XBRL + treasuryStockStatus XBRL). 나머지 2건은 SEC 구조적 한계.
 DART report는 OpenDART API가 구조화 테이블을 직접 제공하지만, SEC에는 동등한 구조화 API가 없다.
 
 ## 테스트

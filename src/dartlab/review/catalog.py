@@ -152,6 +152,7 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("fcfUsage", "FCF 사용처", "자본배분", "배당/부채상환/잔여 분해"),
     BlockMeta("dividendSustainability", "배당 지속성", "자본배분", "배당성향 5Y + FCF 커버리지 + 순이익 변동성"),
     BlockMeta("totalShareholderReturn", "총 주주환원율", "자본배분", "배당+자사주+감자 합산 5Y 총환원율"),
+    BlockMeta("treasuryStockStatus", "자사주 현황", "자본배분", "자사주 취득/처분/소각 현황 (EDGAR: XBRL fallback)"),
     BlockMeta("capitalAllocationFlags", "자본배분 플래그", "자본배분", "자본배분 경고 신호"),
     # ── 3-4 투자효율 ──
     BlockMeta("roicTimeline", "ROIC 시계열", "투자효율", "ROIC, WACC 추정, Spread"),
