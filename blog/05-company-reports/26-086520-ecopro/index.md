@@ -8,7 +8,7 @@ stockCode: "086520"
 corpName: "에코프로"
 exchange: "KRX"
 storyTemplate: "사이클"
-thumbnail: "/thumbnails/avatar-chart.webp"
+thumbnail: /avatar-chart.png
 ogImage: "/thumbnails/086520-ecopro.webp"
 description: "시총 78조, 창업주는 감옥, 매출 반토막, 매출원가율 102%. 2차전지 대장주 에코프로의 재무제표를 뜯어보면 — 시장이 산 건 숫자가 아니라 서사였다."
 tags:
@@ -22,15 +22,11 @@ tags:
   - 재무분석
 ---
 
-<script>
-import dartlabCode from '$lib/components/DartlabCode.svelte';
-</script>
-
 ## 관통선
 
 > **시총 78조를 찍은 회사의 영업이익은 864억이었다 — 숫자가 아니라 서사를 산 시장.**
 
-![에코프로 양극재 공장](./assets/26-ecopro-cathode-factory.webp)
+![에코프로 양극재 공장](./assets/26-ecopro-battery-factory.webp)
 
 ---
 
@@ -80,7 +76,7 @@ c.select("IS", ["매출액", "매출원가"], freq="Y")
 | 2023 | 72,602 | 67,580 | 93.1% | 4.1% |
 | 2024 | 31,279 | 32,062 | 102.5% | -9.4% |
 
-![매출원가율 5년 추이](./assets/26-cost-ratio-trend.svg)
+![매출원가율 5년 추이](./assets/26-cost-ratio-reversal.svg)
 
 ### 매출원가율 102.5% — 팔수록 적자
 
@@ -256,7 +252,7 @@ c.analysis("이익품질")
 | 2023 | 1,353 | 809 | 60% | 불량 |
 | 2024 | -2,954 | 4,888 | — | 적자인데 현금 유입 |
 
-![OCF vs 순이익 괴리](./assets/26-ocf-vs-ni-gap.svg)
+![OCF vs 순이익 괴리](./assets/26-ocf-ni-disconnect.svg)
 
 ### 재고자산 폭증 — 리튬 가격이 재고를 팽창시켰다
 
@@ -332,7 +328,7 @@ OCF가 마이너스인 원인을 운전자본 3요소로 분해한다.
 
 ---
 
-![에코프로 개인투자자 열풍](./assets/26-ecopro-retail-frenzy.webp)
+![에코프로 주가 폭락](./assets/26-ecopro-stock-crash.webp)
 
 # 제4막: "시총 78조, 창업주는 감옥" — 서사가 만든 주가
 
@@ -455,7 +451,7 @@ c.select("IS", ["영업이익", "당기순이익"], freq="Y")
 | 2024 | -2,930 | **-5,912** | -9.4% |
 | 2025 | 2,138 | **+5,068** | 6.3% |
 
-![영업이익 스윙 차트](./assets/26-op-swing-chart.svg)
+![영업이익 스윙 차트](./assets/26-market-cap-vs-oi.svg)
 
 에코프로의 영업이익은 5년간 +6,132(최대) ~ -2,930(최소). **진폭 9,062억.** 연간 매출 대비 진폭이 이 정도인 기업은 흔하지 않다. 이것은 경영의 문제가 아니라 **사이클의 숙명**이다. 리튬 가격이 오르면 이익이 폭등하고, 떨어지면 적자로 전환한다.
 
@@ -555,7 +551,7 @@ c.analysis("수익성")
 
 *2021년 순이익에는 중단사업이익 8,520억 포함
 
-![에코프로 5년 사이클 종합](./assets/26-five-year-cycle.svg)
+![에코프로 5년 사이클 종합](./assets/26-lithium-price-vs-revenue.svg)
 
 이 표에서 보이는 패턴은 단순하다:
 - **리튬 상승기**: 매출 급등, OPM 확대, OCF 마이너스(재고 팽창)

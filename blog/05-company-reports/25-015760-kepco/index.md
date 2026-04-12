@@ -8,7 +8,7 @@ stockCode: "015760"
 corpName: "한국전력공사"
 exchange: "KRX"
 storyTemplate: "자본집약"
-thumbnail: "/thumbnails/avatar-chart.webp"
+thumbnail: /avatar-chart.png
 ogImage: "/thumbnails/015760-kepco.webp"
 description: "매출 93조인데 영업적자 32조. 전기요금 11분기 동결. 부채 206조인데 신용등급 AA+. 이자 하루 249억(2024). 한국전력의 재무제표는 CEO가 아니라 정부가 쓴다."
 tags:
@@ -21,10 +21,6 @@ tags:
   - 유틸리티
   - 재무분석
 ---
-
-<script>
-import dartlabCode from '$lib/components/DartlabCode.svelte';
-</script>
 
 ## 관통선
 
