@@ -6,13 +6,14 @@
 
 <h3>DartLab</h3>
 
-<p><b>종목코드 하나. 기업의 전체 이야기.</b></p>
-<p>DART 전자공시와 EDGAR 공시, 한 줄의 Python으로 구조화하고 비교한다.</p>
+<p><b>1 stock code → full company story</b></p>
+<p>Korean DART + US SEC EDGAR filings, structured. 2,700+ KR / 970+ US companies, one line of Python.</p>
+<p><b>종목코드 하나. 기업의 전체 이야기.</b> — DART·EDGAR 공시를 읽고 비교한다.</p>
 
 <p>
 <a href="https://pypi.org/project/dartlab/"><img src="https://img.shields.io/pypi/v/dartlab?style=for-the-badge&color=ea4647&labelColor=050811&logo=pypi&logoColor=white" alt="PyPI"></a>
 <a href="https://pypi.org/project/dartlab/"><img src="https://img.shields.io/pypi/pyversions/dartlab?style=for-the-badge&color=c83232&labelColor=050811&logo=python&logoColor=white" alt="Python"></a>
-<a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-94a3b8?style=for-the-badge&labelColor=050811" alt="License"></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-94a3b8?style=for-the-badge&labelColor=050811" alt="License"></a>
 <a href="https://github.com/eddmpython/dartlab/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/eddmpython/dartlab/ci.yml?branch=master&style=for-the-badge&labelColor=050811&logo=github&logoColor=white&label=CI" alt="CI"></a>
 <a href="https://codecov.io/gh/eddmpython/dartlab"><img src="https://img.shields.io/codecov/c/github/eddmpython/dartlab?style=for-the-badge&labelColor=050811&logo=codecov&logoColor=white&label=Coverage" alt="Coverage"></a>
 <a href="https://eddmpython.github.io/dartlab/"><img src="https://img.shields.io/badge/Docs-GitHub_Pages-38bdf8?style=for-the-badge&labelColor=050811&logo=github-pages&logoColor=white" alt="Docs"></a>
@@ -128,13 +129,13 @@ API 키 불필요. [HuggingFace](https://huggingface.co/datasets/eddmpython/dart
 | Data | [Data](ops/data.md) | HuggingFace 사전 구축, 자동 다운로드 | `Company("005930")` | — |
 | L0/L1 | [Company](ops/company.md) | 공시 + 재무제표 + 정형 데이터를 종목코드 하나로 통합 | `c.show()`, `c.select()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_company.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/01_company.py) |
 | L1 | [Gather](ops/gather.md) | 외부 시장 데이터 (주가/수급/매크로/뉴스) | `dartlab.gather()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/02_gather.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/02_gather.py) |
-| L1 | [Scan](ops/scan.md) | 전 종목 횡단 비교 (거버넌스/비율/현금흐름 등) | `dartlab.scan()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/03_scan.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/03_scan.py) |
-| L1 | [Quant](ops/quant.md) | 기술적·정량 분석 (모멘텀/팩터/패턴) | `c.quant()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/04_quant.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/04_quant.py) |
-| L2 | [Analysis](ops/analysis.md) | 수익성/안정성/현금흐름 등 재무 인과 분석 + 가치평가 + 전망 | `c.analysis("financial", "수익성")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/05_analysis.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/05_analysis.py) |
-| L2 | [Macro](ops/macro.md) | 시장 레벨 매크로 (사이클/금리/유동성/심리/자산) | `dartlab.macro("사이클")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/06_macro.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/06_macro.py) |
+| L1.5 | [Scan](ops/scan.md) | 전 종목 사전 빌드 (거버넌스/비율/현금흐름 등 parquet) | `dartlab.scan()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/03_scan.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/03_scan.py) |
+| L2 | [Analysis](ops/analysis.md) | 재무 심층 분석 (수익성/안정성/현금흐름) + 가치평가 + 전망 | `c.analysis("financial", "수익성")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/05_analysis.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/05_analysis.py) |
+| L2 | [Quant](ops/quant.md) | 가격 기반 정량 신호 (기술/리스크/팩터/백테스트) | `c.quant()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/04_quant.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/04_quant.py) |
 | L2 | [Credit](ops/credit.md) | 독립 신용평가 (dCR 등급, 부도확률, 건전도) | `c.credit("등급")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/07_credit.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/07_credit.py) |
-| L2 | [Review](ops/review.md) | 분석 엔진을 조합한 보고서 (rich/html/markdown/json) | `c.review("수익성")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/08_review.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/08_review.py) |
-| L3 | [AI](ops/ai.md) | 적극적 분석가 — 코드 실행 + 해석 | `dartlab.ask()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/09_ai.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/09_ai.py) |
+| L2 | [Macro](ops/macro.md) | 시장 레벨 매크로 (사이클/금리/유동성/심리/자산 + 시나리오 110) | `dartlab.macro("사이클")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/06_macro.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/06_macro.py) |
+| L3 | [Review](ops/review.md) | 이야기꾼 — L2 4엔진 + scan 소비, 보고서 조립 (rich/html/markdown/json) | `c.review("수익성")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/08_review.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/08_review.py) |
+| L4 | [AI](ops/ai.md) | 적극적 분석가 — 코드 실행 + 해석 (사람도 L4 소비자) | `dartlab.ask()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/09_ai.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/09_ai.py) |
 | L4 | [Channel](ops/channel.md) | 외부 공유 — `dartlab channel` 한 줄로 폰에서 PC dartlab 사용 | `dartlab channel` | — |
 | core | [Search](ops/search.md) | 공시 시맨틱 검색 *(alpha)* | `dartlab.search()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/10_search.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/10_search.py) |
 | facade | [Listing](ops/listing.md) | 종목/공시/topic 카탈로그 API | `dartlab.listing()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/11_listing.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/11_listing.py) |
@@ -358,88 +359,108 @@ dartlab channel
 
 ### 아키텍처
 
+**"엔진 = 도구 (숫자만), review = 이야기꾼, AI/사람 = 소비자"** — 1.0.0 전 근본 구조.
+
 ```
-L0  core/        프로토콜, 재무 유틸, docs 유틸, 레지스트리
-L1  providers/   국가별 데이터 (DART, EDGAR, EDINET)
-    gather/      외부 시장 데이터 (Naver, Yahoo, FRED)
-    scan/        시장 횡단분석 — scan("그룹", "축")
-    quant/       기술적 분석 — c.quant()
-L2  analysis/    재무 + 전망 + 가치평가 — analysis("그룹", "축")
-    credit/      독립 신용평가 — c.credit()
-    macro/       시장 레벨 매크로 — dartlab.macro()
-    review/      5엔진 조합 보고서 (analysis + credit + scan + quant + macro)
-L3  ai/          적극적 분석가 — dartlab.ask()
-L4  vscode/      VSCode 확장 (dartlab chat --stdio)
-    ui/web/      Svelte SPA 웹 인터페이스
+L0     core/         SSOT 인프라 (protocols, finance, memory, docs, search)
+                     공용 헬퍼: toDictBySnakeId, memoized_calc, parseNumStr, safeDiv, fmtBig
+L1     providers/    국가별 공시 데이터 (DART, EDGAR, EDINET)
+       gather/       외부 시장 데이터 (Naver, Yahoo, FRED, ECOS)
+L1.5   scan/         전종목 사전 빌드 (parquet) — 데이터 빌더, 분석 아님
+L2     analysis/     재무 심층 (14축 + forecast + valuation)
+       quant/        가격 기반 정량 신호 (기술/리스크/팩터/백테스트)
+       credit/       독립 신용등급 (dCR 20단계, 7축)
+       macro/        거시 지표 (11축 + scenarios 110 + historicalContext)
+                     — 4개 엔진 동등, 상호 import 금지. dict/숫자만 반환.
+L3     review/       이야기꾼 — L2 4엔진 + scan 소비, 보고서 조립
+                     narrate (문장) + builders (블록) + templates (관점/성격)
+L4     ai/ + 사람    소비자 — review 보고서를 해석하고 판단
+       vscode/       VSCode 확장 (dartlab chat --stdio)
+       ui/web/       Svelte SPA 웹 인터페이스
+
+교차   guide/        안내 데스크 (모든 레이어에서 import 가능)
 ```
 
-import 방향은 CI 강제. 새 국가 추가 = provider 패키지 하나, core 수정 0줄.
+**import 방향**: `L0 ← L1 ← L1.5 ← L2 ← L3 ← L4` (CI 강제, 역방향 0건).
 
 #### 레이어 간 소비 흐름
 
-각 레이어가 누구를 소비하고 누구에게 소비되는지:
-
 ```mermaid
 flowchart TB
-    subgraph L4["L4 · 사용자 인터페이스"]
+    subgraph L4["L4 · 소비자 (해석과 판단)"]
+        direction LR
+        HUMAN["🧑 사람<br/>투자자/분석가"]
+        AI["ai<br/>dartlab.ask()"]
         UI["vscode / CLI / web"]
     end
-    subgraph L3["L3 · LLM 분석가"]
-        AI["ai<br/>dartlab.ask()"]
+    subgraph L3["L3 · 이야기꾼"]
+        REV["review<br/>narrate + builders + templates<br/>보고서 조립 (6막 서사)"]
     end
-    subgraph L2["L2 · 분석"]
-        ANA["analysis<br/>재무 인과 + 전망 + 가치평가"]
-        CRD["credit<br/>독립 신용평가"]
-        MAC["macro<br/>시장 해석"]
-        REV["review<br/>블록식 보고서"]
+    subgraph L2["L2 · 분석 엔진 (dict만 반환, 상호 독립)"]
+        ANA["analysis<br/>재무 14축 + forecast + valuation"]
+        QNT["quant<br/>기술/리스크/팩터/백테스트"]
+        CRD["credit<br/>dCR 20단계 · 7축"]
+        MAC["macro<br/>11축 + scenarios 110"]
+    end
+    subgraph L15["L1.5 · 데이터 빌더"]
+        SCN["scan<br/>전종목 parquet 사전 빌드"]
     end
     subgraph L1["L1 · 데이터 수집"]
         PRV["providers<br/>DART / EDGAR / EDINET"]
         GAT["gather<br/>FRED / ECOS / Naver / Yahoo"]
-        SCN["scan<br/>전종목 횡단"]
-        QNT["quant<br/>기술적 25지표"]
     end
-    subgraph L0["L0 · 인프라"]
-        CORE["core<br/>protocols + finance + docs + search"]
+    subgraph L0["L0 · 인프라 (SSOT)"]
+        CORE["core<br/>finance.helpers · memory · docs · search"]
     end
 
+    HUMAN --> UI
     UI --> AI
+    UI --> REV
     AI --> REV
     AI --> ANA
+    AI --> QNT
     AI --> MAC
-    AI --> SCN
     REV --> ANA
-    REV --> CRD
-    REV --> SCN
     REV --> QNT
+    REV --> CRD
     REV --> MAC
+    REV --> SCN
+    ANA --> SCN
     ANA --> PRV
     ANA --> GAT
+    QNT --> SCN
+    QNT --> GAT
+    CRD --> SCN
     CRD --> PRV
     MAC --> GAT
     SCN --> PRV
-    QNT --> GAT
+    SCN --> CORE
     PRV --> CORE
     GAT --> CORE
-    SCN --> CORE
+    ANA --> CORE
     QNT --> CORE
+    CRD --> CORE
+    MAC --> CORE
 
     classDef l0 fill:#f5f5f5,stroke:#999
     classDef l1 fill:#e8f4ff,stroke:#4a90e2
+    classDef l15 fill:#dbeafe,stroke:#3b82f6
     classDef l2 fill:#fff4e6,stroke:#e67e22
     classDef l3 fill:#f0e6ff,stroke:#8e44ad
     classDef l4 fill:#e6ffe6,stroke:#27ae60
     class CORE l0
-    class PRV,GAT,SCN,QNT l1
-    class ANA,CRD,MAC,REV l2
-    class AI l3
-    class UI l4
+    class PRV,GAT l1
+    class SCN l15
+    class ANA,QNT,CRD,MAC l2
+    class REV l3
+    class AI,UI,HUMAN l4
 ```
 
 **핵심 규칙**:
-- 화살표는 항상 위→아래 (L4→L3→L2→L1→L0). 역방향 import 금지 (CI 검증)
-- L2 엔진끼리는 서로 import 금지 — analysis ↛ credit, macro ↛ analysis. 조합은 review 또는 ai의 몫
-- 새 기능 추가 시 적합한 레이어를 먼저 결정한 뒤 한 방향으로만 데이터가 흐르게 한다
+- **L2 엔진 상호 import 금지** — analysis↛quant, macro↛credit 등 (0건 유지, CI 검증)
+- **L2 → L3 역방향 금지** — 엔진은 dict만, 해석/블록/보고서 생성은 review의 책임 (0건 유지)
+- **L2 → L1.5(scan) 하향 참조 허용** — scan은 순수 데이터 빌더
+- **새 국가 추가** = providers/ 패키지 하나, core 수정 0줄
 
 ## EDGAR (미국)
 
@@ -596,4 +617,4 @@ e.filings("AAPL", forms=["10-K", "10-Q"])
 
 ## 라이선스
 
-MIT
+[Apache License 2.0](LICENSE) — 자유롭게 사용하되, [NOTICE](NOTICE) 파일의 출처 표기를 포함해주세요.

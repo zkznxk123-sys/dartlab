@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.8] - 2026-04-12
+
+### Added
+
+- **매크로 역사적 팩트 엔진** (`core/finance/historicalContext.py`): HY 스프레드 급등/YC 역전/실업률 반등/CPI 가속 시점별 침체 선행 통계, 호황 신호, 10개 역사적 시대 매칭, 현재와 유사한 과거 시기의 후속 위험 자동 추론
+- **매크로 시나리오 시뮬레이션 110개 프리셋** (`macro/scenarios/`): 역사적 재현 15 (1973 오일쇼크 ~ 2023 SVB), Fed DFAST 3단계, 유형별 × 심각도 24, 현대적 리스크 24 (AI 버블/중국 디플레/일본식 침체/대만 해협/무역전쟁/미국 국채), 구조적 20 (스태그플레이션/디플레이션/골디락스/경착륙/연착륙), 한국 특화 24 — `dartlab.macro("시나리오", "2008 금융위기")` 호출로 baseline 대비 자동 비교
+- **매크로 6막 인과 서사 구조**: "경제는 어디에 있나 → 왜 여기에 있나 → 정책은 → 금융은 → 시장은 → 앞으로는" — FOMC/ECB/Bernanke/Dalio 학술 근거
+- **core SSOT 헬퍼 이동**: `toDictBySnakeId`, `toDict`, `parseNumStr`, `sumBorrowingsKorean` 등 범용 재무 헬퍼를 `core/finance/helpers.py`로 이동. `memoized_calc`를 `core/memory.py`로 통합
+- **analysis 임계값 중앙 관리** (`analysis/financial/_constants.py`): OCF/NI, 발생액, R², FX 민감도 등 6개 임계값 SSOT
+- **core/finance/fmt.fmtBig 확장**: 조/억/만 자동 단위 전환 + None 처리
+
+### Changed
+
+- **엔진 책임 재정의 — 6레이어 구조 확립**: `L0 core ← L1 providers/gather ← L1.5 scan ← L2 analysis/quant/credit/macro ← L3 review ← L4 ai+사람`. L2 엔진 4개는 동등하고 상호 독립, review가 이야기꾼, AI/사람이 소비자
+- **엔진 = 도구, review = 이야기꾼**: L2 엔진은 dict/숫자만 반환. 해석 문장/Block/보고서 생성은 review(L3)의 책임
+- **macro 보고서 조립을 review로 이동**: `macro/narrative.py`, `macro/mbuilders.py`, `macro/mcatalog.py`, `macro/report.py`, `macro/charts.py` → `review/macro/` 하위 패키지로 물리 이동
+- **quant 서사 함수 분리**: `calcXxxNarrative` 6개를 `calcXxxData` (숫자만)로 교체. 서사 생성은 `review/registry.py`가 담당
+- **import 위반 26건 → 0건**: L2↔L2 상호 import 0건, L2→L3 역방향 import 0건 달성 (CI 검증)
+- **macro API 통합**: `macro.report()`, `macro.scenario()` 별도 메서드 제거 → 축 계약 `macro("시나리오", "2008 금융위기")` 로 통일
+- **SSOT 위반 정리**: 숫자 파싱 5곳 중복, `_safe` 나눗셈 2곳 중복, 포맷 함수 3곳 중복, `_memoized_calc` 중복 구현 → 전부 core SSOT 경유
+
+### Removed
+
+- **`macro/narrative.py`, `mbuilders.py`, `mcatalog.py`, `report.py`, `charts.py`**: review/macro/로 이동
+- **`credit/publisher.py`**: deprecated, review.publisher가 단일 진입점
+- **`analysis/financial/creditRating.py`**: deprecated stub, `credit/calcs.py`가 SSOT
+- **quant의 `calcTrendNarrative` 등 6개 함수**: `calcTrendData` 등으로 대체
+
+### Fixed
+
+- **macro `recessionDashboard`** `historicalFacts` 필드 추가 — 규칙 기반 "resembles_2008" → 역사적 팩트 dict 기반 매칭
+- **analysis → quant/credit 교차 의존 제거** (valuation 내 quant 참조, creditRating의 credit 호출)
+- **credit 엔진의 analysis._helpers 의존 제거** → core 경유
+- **macro/\_\_init\_\_.py** _AxisEntry에 `act: int` 필드 추가 — 6막 메타데이터 선언적
+
 ## [0.9.7] - 2026-04-11
 
 ### Added

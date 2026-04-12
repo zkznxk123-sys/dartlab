@@ -8,17 +8,17 @@
 |------|--------|------|----------|
 | [company.md](company.md) | L0/L1 | Company facade | sections 사상, 4 namespace, canHandle 라우팅 |
 | [data.md](data.md) | L0 | core/dataConfig | HF 데이터셋, 수집 파이프라인, 카테고리 관리 |
-| [scan.md](scan.md) | L1 | scan/ | 13축 시장 횡단분석 |
+| [scan.md](scan.md) | L1.5 | scan/ | 13축 시장 횡단분석 — 전종목 사전 빌드 (parquet) |
 | [gather.md](gather.md) | L1 | gather/ | 외부 시장 데이터 (주가/수급/매크로/뉴스) |
-| [quant.md](quant.md) | L1 | quant/ | 기술적 분석 독립 엔진 — c.quant(), dartlab.quant() |
+| [quant.md](quant.md) | L2 | quant/ | 가격 기반 정량 신호 — c.quant(), dartlab.quant() |
 | [search.md](search.md) | L0 | core/search/ | 공시 시맨틱 검색 *(alpha)* |
 | [mappers.md](mappers.md) | L0 | core/mappers/ | 매퍼 통합 엔진 — 계정/topic/alias/flow/notes, 학습 메커니즘 |
 | [listing.md](listing.md) | facade | listing.py | 목록 조회 단일 진입점 — `dartlab.listing(kind, ...)` |
 | [analysis.md](analysis.md) | L2 | analysis/ | 재무 심층분석 + 전망 + 가치평가, 6막 인과 구조 |
 | [macro.md](macro.md) | L2 | macro/ | 시장 레벨 매크로 분석 — Company 불필요 |
-| [review.md](review.md) | L2 | review/ | 블록-템플릿 보고서 렌더링, 4 출력 형식 |
+| [review.md](review.md) | L3 | review/ | 이야기꾼 — L2 엔진 4개 + scan 소비, 보고서 조립 + 4 출력 형식 |
 | [credit.md](credit.md) | L2 | credit/ | 독립 신용평가 (dCR 20단계, 7축, 투명 공개) |
-| [ai.md](ai.md) | L3 | ai/ | 적극적 분석가, 5 provider |
+| [ai.md](ai.md) | L4 | ai/ | 적극적 분석가, 5 provider (AI + 사람 둘 다 L4 소비자) |
 | [guide.md](guide.md) | 교차 | guide/ | 안내 데스크 + 교육 안내자, 4층위 |
 | [channel.md](channel.md) | L4 | channel/ | 외부 공유 — Microsoft DevTunnels 자동 셋업, `dartlab channel` |
 | [experiments.md](experiments.md) | — | experiments/ | 실험 규칙, 흡수 판단 |
@@ -35,27 +35,46 @@
 
 ## 레이어 아키텍처
 
+"엔진 = 도구 (숫자만), review = 이야기꾼, AI/사람 = 소비자" (1.0.0 리팩토링)
+
 ```
-L0 (인프라)     core/          protocols, finance, docs, registry, search
-L1 (데이터)     providers/     DART, EDGAR, EDINET
-                gather/        주가, 수급, 매크로, 뉴스
-                scan/          시장 횡단분석 — scan("그룹", "축")
-L2 (분석)       analysis/      재무+전망+가치평가 — analysis("그룹", "축")
-                macro/         시장 레벨 매크로 분석 — dartlab.macro("축")
-                credit/        독립 신용평가 엔진 — c.credit()
-                review/        블록식 조합 보고서 (analysis + credit 블록)
-L3 (AI)         ai/            적극적 분석가
-L4 (표현)       ui/ + vscode/  Svelte SPA + VSCode 확장
-
-교차 관심사     guide/         안내 데스크 (모든 레이어에서 import 가능)
+┌──────────────────────────────────────────────────────────────────────┐
+│ L4  소비자          ai/  +  사람 (투자자/분석가)                      │
+│                     해석과 판단 (review 보고서를 읽고 판단)            │
+├──────────────────────────────────────────────────────────────────────┤
+│ L3  이야기꾼        review/                                           │
+│                     L2 4엔진 + scan 소비 → 보고서 조립 (6막 서사)     │
+│                     narrate/builders/catalog/templates/formats       │
+├──────────────────────────────────────────────────────────────────────┤
+│ L2  분석 엔진       analysis/  quant/  credit/  macro/                │
+│                     (4개 동등, 상호 import 금지)                       │
+│                     dict/숫자/DataFrame만 반환 — 해석/블록 생성 금지   │
+│  ├── analysis/     financial(14축) + forecast + valuation             │
+│  ├── quant/        기술적 신호 + 리스크 + 전략 백테스트               │
+│  ├── credit/       독립 신용등급 (dCR 20단계, 7축)                    │
+│  └── macro/        거시 11축 + scenarios(110) + historicalContext     │
+├──────────────────────────────────────────────────────────────────────┤
+│ L1.5 데이터 빌더    scan/        전종목 사전 빌드 (parquet)            │
+│                     L2가 scan을 읽는 것은 하향 참조로 허용            │
+├──────────────────────────────────────────────────────────────────────┤
+│ L1  데이터 수집     providers/   DART, EDGAR, EDINET                  │
+│                     gather/      주가, 수급, FRED/ECOS 매크로, 뉴스   │
+├──────────────────────────────────────────────────────────────────────┤
+│ L0  인프라          core/        helpers, finance, docs, memory, ...  │
+│                     SSOT 헬퍼: toDictBySnakeId, memoized_calc,        │
+│                                parseNumStr, safeDiv, fmtBig, ...     │
+└──────────────────────────────────────────────────────────────────────┘
+                       교차 관심사: guide/ (모든 레이어 가능)
 ```
 
-## 엔진 독립 규칙
+## 엔진 독립 규칙 (import 방향)
 
-- **analysis ↛ credit, credit ↛ analysis** — 같은 L2지만 서로 참조하지 않는다
-- **macro ↛ analysis, analysis ↛ macro** — 같은 L2지만 서로 참조하지 않는다
-- analysis가 신용 지표 필요하면 자체 체계로 만든다. credit도 재무비율 필요하면 Company(finance)에서 직접 가져온다
-- **review가 조합한다** — analysis 블록과 credit 블록을 성격별로 블록식으로 조합하여 보고서 구성
+- **L0 ← L1 ← L1.5 ← L2 ← L3 ← L4** (하향만 허용)
+- **L2 엔진 간 상호 import 금지** (analysis↛quant, macro↛credit 등 — 0건 유지)
+- **L2 엔진 → L3 역방향 금지** — 엔진은 dict만, 서사/블록/보고서 생성 금지 (0건 유지)
+- **L2 → L1.5(scan) 하향 참조 허용** — scan은 순수 데이터 빌더
+- 공유 데이터는 L0/L1에서 가져온다. 공유 헬퍼는 core SSOT (`core/finance/helpers.py` 등)
+- **review가 조합한다** — 4개 엔진의 결과를 6막 서사로 조립, narrate 문장 생성
 
 ## 엔진 호출 패턴
 
@@ -93,4 +112,4 @@ dartlab.scan("financial", "profitability") # 영문
 - **README 동기화**: 기능 변경 시 영문+한국어 동시 반영
 - **노트북 감사**: 노트북 코드는 실행 확인 후에만 커밋
 - **DART/EDGAR 동시**: 모든 개선은 DART/EDGAR 양쪽 반영 (protocol 테스트 강제)
-- **import 방향**: L0 ← L1 ← L2 ← L3 (CI 검증)
+- **import 방향**: L0 ← L1 ← L1.5 ← L2 ← L3 ← L4 (CI 검증)

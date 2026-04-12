@@ -175,13 +175,64 @@ db.pull()                  # HF → 로컬 DB merge (upsert)
 - 인사이트 90일 만료 시 경고 태그 부착
 - HF pull 실패 시 로컬 JSON fallback → 그것도 없으면 무시
 
-## Audit
+## AI Audit 체계
 
-- 저장: `data/dart/auditAi/`
-- AI audit = dartlab 최종 레이어 품질 검증
-- 모든 하위 엔진(Company, sections, notes, analysis, scan, gather) 문제가 여기서 표면화
-- 실행 → 분류(P/T/C/V) → 수정 → 재실행 → 기록
-- auditAnalysis 마크다운 → KnowledgeDB insights 테이블로 자동 파싱 (마이그레이션 시)
+> AI를 실제로 돌려서 응답 품질을 직접 확인 → 문제 발견 → 시스템 프롬프트/코드 수정 → 재실행.
+> review audit이 데이터/엔진 품질을 잡는다면, AI audit은 **AI가 그 엔진을 제대로 쓰는지** 잡는다.
+
+### 핵심 원칙
+
+- **AI audit = 사람이 AI 응답을 읽고 판단.** 자동 메트릭(토큰/길이)만으로 품질 주장 금지.
+- **provider = oauth-codex** (GPT OAuth). gemini 아님.
+- 모든 하위 엔진(Company, sections, notes, analysis, scan, gather) 문제가 여기서 표면화.
+
+### 파이프라인
+
+```
+1단계: AI 실행
+   dartlab.ask("삼성전자 수익성 분석해줘", provider="oauth-codex")
+
+2단계: 응답 읽고 판단 (P/T/C/V 등급)
+   P(Pass) — 정확한 수치 + 인과 해석 + 코드 실행 성공
+   T(Tolerable) — 수치 맞지만 해석 부족 또는 코드 비효율
+   C(Critical) — 수치 오류, 코드 실행 실패, "해석 불가" 면피
+   V(Violation) — 엔진 미사용, hallucination, 규칙 위반
+
+3단계: 문제 분류
+   시스템 프롬프트 문제 → core.py _SYSTEM_PROMPT 수정
+   코드 실행 문제 → coding.py (preamble, _wrapForCapture) 수정
+   context 문제 → context/ (selectors, builder) 수정
+   엔진 데이터 문제 → analysis/review 수정 (→ review audit으로 위임)
+
+4단계: 수정 + 재실행 (P 나올 때까지)
+
+5단계: KnowledgeDB에 기록
+   executions 테이블: 질문, 등급, 메트릭
+   insights 테이블: 기업별 분석 서사
+```
+
+### 체크리스트 (응답 읽을 때)
+
+- [ ] 코드를 실행했는가? (변수 저장만 하고 print 안 한 건 아닌가)
+- [ ] analysis dict를 마크다운 테이블로 변환했는가?
+- [ ] 수치가 코드 실행 결과에서 나온 것인가? (hallucination 아닌가)
+- [ ] "해석 불가" 면피를 하지 않았는가?
+- [ ] context 데이터를 활용했는가, 코드를 중복 실행했는가?
+- [ ] notes enrichment 메시지가 결과에 섞이지 않았는가?
+- [ ] 6막 인과 구조로 해석했는가? (숫자 나열이 아닌가)
+
+### 실행 주기
+
+| 주기 | 대상 | 목적 |
+|------|------|------|
+| 시스템 프롬프트 변경 시 | 삼성전자 수익성/현금흐름/안정성 | 프롬프트 회귀 확인 |
+| provider 추가/변경 시 | 3개 질문 × 해당 provider | provider별 품질 비교 |
+| 릴리즈 전 | 삼성전자 + 1개 추가 | 전체 회귀 |
+
+### 저장
+
+- KnowledgeDB `executions` + `insights` 테이블에 저장
+- 레거시: `data/dart/auditAi/` (파일 기반, 폐기 예정)
 
 ## ContextBuilder + ACE Playbook (2026-04-09 도입)
 

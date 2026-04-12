@@ -53,10 +53,10 @@ c.reviewer(guide="...")
 
 | 항목 | 내용 |
 |------|------|
-| 레이어 | L2 |
-| 사상 | **기업이야기꾼의 대본** — 데이터 배치, 해석은 AI/사람 |
+| 레이어 | **L3** (1.0.0 리팩토링 이후) — L2 4엔진 + L1.5(scan) 소비 |
+| 사상 | **이야기꾼** — 엔진이 제공한 숫자를 서사로 조립. 해석 문장 생성 포함. |
 | 진입점 | `c.review()`, `c.review(perspective=...)`, `c.reviewer()` |
-| 소비 | **analysis + credit + scan + quant + macro** 5엔진 (블록식 조합) |
+| 소비 | **analysis + credit + quant + macro** (L2) + **scan** (L1.5) |
 | 생산 | ai(reviewer), 사용자(터미널/HTML/마크다운/JSON), 블로그 보고서 |
 | 출력 | rich, html, markdown, json |
 | 템플릿 | 3단계: 관점(순서) × 기업유형(강조) × 프리셋(부분집합) |
@@ -74,7 +74,7 @@ c.reviewer(guide="...")
 | 5막 자본배분 | 자산구조 ~ 신용평가 | **analysis** + **credit** | calcCapitalAllocation, calcCreditScore, calcCreditNarrative, ... |
 | 6막-1 가치평가 | 가치평가, 매출전망 | **analysis**(forecast/valuation) | calcValuationSynthesis, calcRevenueDirection, ... |
 | 6막-2 비교분석 | 비교분석 | **scan** | calcPeerPosition (교차 조합 관점), calcGovernanceSummary |
-| 6막-3 시장분석 | 시장분석 | **quant** | calcTrendNarr, calcRiskNarr, calcSignalNarr, calcStrategyNarr, calcCrosscheckNarr, calcQuantConclusion |
+| 6막-3 시장분석 | 시장분석 | **quant** | calcTrendData, calcRiskData, calcSignalData, calcStrategyData, calcCrosscheckData, calcQuantConclusionData (엔진=숫자만, review가 narrate 호출) |
 | 6막-4 매크로 | 매크로 | **macro** | macroEnvironment, macroCycle, macroRates, macroLiquidity, macroSentiment, macroForecast, macroCorporate, macroTrade, macroFlags, valuationBand (10블록, `macro("종합")` 1회 호출) |
 
 ## 관점별 템플릿 (PERSPECTIVE_TEMPLATES)

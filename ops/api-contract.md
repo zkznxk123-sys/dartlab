@@ -222,20 +222,46 @@ return dict 에서 `or 0` 사용을 AST 로 감지하여 차단한다.
 
 ## 7. 엔진 독립 (L2 간 상호 import 금지)
 
-- `analysis ↛ credit, credit ↛ analysis` — 같은 L2 지만 서로 호출 안 함
-- `analysis ↛ macro, macro ↛ analysis` — 같은 L2 지만 서로 호출 안 함
+dartlab은 6레이어 구조. L2 엔진 4개(analysis/quant/credit/macro)는 **동등하고 상호 독립**.
+
+### 레이어 구조
+
+```
+L0    core/                               ← 순수 유틸 + 공통 타입
+L1    providers/ gather/                  ← 데이터 수집
+L1.5  scan/                               ← 전종목 사전 빌드 (parquet)
+L2    analysis/ quant/ credit/ macro/     ← 4개 분석 엔진 (동등, 상호 import 금지)
+L3    review/                             ← 이야기꾼 (보고서 조립)
+L4    ai/ + 사람                          ← 소비자 (해석과 판단)
+교차 관심사: guide/
+```
+
+### 규칙
+
+- **L2 엔진 간 상호 import 금지** (analysis↛quant, macro↛credit 등)
+- **L2 → L1.5(scan) 하향 참조 허용** (scan은 순수 데이터 빌더)
+- **L3(review)만 L2를 import** — 모든 엔진 결과를 소비해 보고서 조립
+- **L4(ai) → L3/L2 import 허용** — AI는 review + 엔진 직접 호출 가능
+- **L2 엔진은 L3(review)를 import 금지** — 엔진은 dict/숫자만 반환, 서사 생성 금지
 - 공유 데이터는 L0/L1 (core/, providers/, gather/) 에서 직접 가져온다
-- 공유 헬퍼 (예: `toDictBySnakeId`, `sumBorrowingsKorean`) 는 한 위치에서 import — SSOT 단일 함수
-- 해석의 조합은 review (L2 조립) 또는 AI (L3) 의 몫
+- 공유 헬퍼는 한 위치에서 import — SSOT 단일 함수 (예: `core/finance/helpers.py::toDictBySnakeId`)
+- 해석의 조합은 review (L3) 또는 AI (L4) 의 몫
 
 ### import 방향
 
 ```
-L0 (core) ← L1 (providers/gather/scan/quant) ← L2 (analysis/macro/credit) ← review ← L3 (ai)
-교차 관심사: guide/ (모든 레이어에서 import 가능)
+L0 ← L1 ← L1.5 ← L2 ← L3 ← L4
 ```
 
 CI sentinel `tests/test_imports.py` 가 강제.
+
+### 엔진 출력 규약
+
+각 엔진은 **dict/숫자/DataFrame만 반환.** 다음은 엔진에서 금지:
+- 해석 문장 (narrative string)
+- Block 객체 (HeadingBlock, TextBlock 등 — review.blocks)
+- Section / Review 객체 (review 전용)
+- 렌더링 로직 (review/renderer에서만)
 
 ---
 

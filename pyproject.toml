@@ -1,7 +1,7 @@
 [project]
 name = "dartlab"
-version = "0.9.7"
-description = "DART 전자공시 + EDGAR 공시를 하나의 회사 맵으로 — Python 재무 분석 라이브러리"
+version = "0.9.8"
+description = "One stock code → full company story. Korean DART & US SEC EDGAR filings as structured Python data."
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.12"
@@ -35,7 +35,7 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Intended Audience :: Financial and Insurance Industry",
     "Intended Audience :: End Users/Desktop",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
