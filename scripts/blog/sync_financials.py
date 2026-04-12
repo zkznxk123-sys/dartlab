@@ -47,10 +47,16 @@ def parse_frontmatter(text: str) -> dict:
     return fm
 
 
-def fmt_억(val: float | None) -> str:
-    """원 단위 float → 억원 단위 문자열 (천단위 콤마)."""
+def fmt_억(val: float | None, is_edgar: bool = False) -> str:
+    """원 단위 float → 억원 단위 문자열. EDGAR는 달러 그대로($M)."""
     if val is None:
         return "—"
+    if is_edgar:
+        # EDGAR: 이미 달러 단위. $M으로 표시
+        v = val / 1e6
+        if abs(v) >= 1:
+            return f"{v:,.0f}"
+        return f"{v:,.1f}"
     v = val / 1e8
     if abs(v) >= 1:
         return f"{v:,.0f}"
@@ -83,11 +89,13 @@ def extract_data(stock_code: str) -> dict | None:
         print(f"  [WARN] Company({stock_code}) 로드 실패: {e}")
         return None
 
-    result = {"stockCode": stock_code, "corpName": getattr(c, "corpName", stock_code)}
+    is_edgar = getattr(c, "market", "KR") == "US"
+    result = {"stockCode": stock_code, "corpName": getattr(c, "corpName", stock_code), "isEdgar": is_edgar}
+    freq_kw = {} if is_edgar else {"freq": "Y"}
 
     # --- IS ---
     try:
-        df = c.select("IS", IS_ITEMS, freq="Y")
+        df = c.select("IS", IS_ITEMS, **freq_kw)
         years = [col for col in df.columns if col not in ("항목", "snakeId")][:5]
         rows = []
         for item in IS_ITEMS:
@@ -98,7 +106,7 @@ def extract_data(stock_code: str) -> dict | None:
                 vals = []
                 for y in years:
                     v = filtered[y][0] if y in filtered.columns else None
-                    vals.append(fmt_억(v))
+                    vals.append(fmt_억(v, is_edgar))
                 rows.append((item, vals))
         result["IS"] = {"years": years, "rows": rows}
     except Exception as e:
@@ -107,7 +115,7 @@ def extract_data(stock_code: str) -> dict | None:
 
     # --- BS ---
     try:
-        df = c.select("BS", BS_ITEMS, freq="Y")
+        df = c.select("BS", BS_ITEMS, **freq_kw)
         years = [col for col in df.columns if col not in ("항목", "snakeId")][:5]
         rows = []
         for item in BS_ITEMS:
@@ -118,7 +126,7 @@ def extract_data(stock_code: str) -> dict | None:
                 vals = []
                 for y in years:
                     v = filtered[y][0] if y in filtered.columns else None
-                    vals.append(fmt_억(v))
+                    vals.append(fmt_억(v, is_edgar))
                 rows.append((item, vals))
         result["BS"] = {"years": years, "rows": rows}
     except Exception as e:
@@ -127,7 +135,7 @@ def extract_data(stock_code: str) -> dict | None:
 
     # --- CF ---
     try:
-        df = c.select("CF", CF_ITEMS, freq="Y")
+        df = c.select("CF", CF_ITEMS, **freq_kw)
         years = [col for col in df.columns if col not in ("항목", "snakeId")][:5]
         rows = []
         for item in CF_ITEMS:
@@ -138,7 +146,7 @@ def extract_data(stock_code: str) -> dict | None:
                 vals = []
                 for y in years:
                     v = filtered[y][0] if y in filtered.columns else None
-                    vals.append(fmt_억(v))
+                    vals.append(fmt_억(v, is_edgar))
                 rows.append((item, vals))
         result["CF"] = {"years": years, "rows": rows}
     except Exception as e:
@@ -147,7 +155,7 @@ def extract_data(stock_code: str) -> dict | None:
 
     # --- SCE ---
     try:
-        df = c.show("SCE", freq="Y")
+        df = c.show("SCE", **freq_kw) if not is_edgar else None
         if df is not None and len(df) > 0:
             years = [col for col in df.columns if re.match(r"^\d{4}", col)][:5]
             item_col = "항목" if "항목" in df.columns else df.columns[0]
@@ -159,7 +167,7 @@ def extract_data(stock_code: str) -> dict | None:
                 vals = []
                 for y in years:
                     v = row.get(y)
-                    vals.append(fmt_억(v) if isinstance(v, (int, float)) else str(v or "—"))
+                    vals.append(fmt_억(v, is_edgar) if isinstance(v, (int, float)) else str(v or "—"))
                 # "cause / detail" 형태면 cause만 사용
                 display_name = name.split(" / ")[0].strip() if " / " in name else name
                 rows.append((display_name, vals))
@@ -261,6 +269,8 @@ def _build_chart_data_cf(data: dict) -> str:
 def build_auto_section(data: dict) -> str:
     """AUTO 영역 전체 마크다운 생성."""
     sc = data["stockCode"]
+    is_edgar = data.get("isEdgar", False)
+    unit_label = "$M" if is_edgar else "억원"
     parts = [AUTO_START, ""]
 
     # --- Svelte 차트 import ---
@@ -305,14 +315,14 @@ def build_auto_section(data: dict) -> str:
     # IS: 제목 → 차트(매출=라인, 영업이익/당기순이익=막대) → 테이블
     if data.get("IS"):
         d = data["IS"]
-        parts.append("### 손익계산서 (IS) — 단위 억원\n")
+        parts.append("### 손익계산서 (IS) — 단위 "+unit_label+"\n")
         chart_data = _build_chart_data_is(data)
         if chart_data:
             parts.append(
                 f'<ComboChart data={{{chart_data}}} '
                 f'lineKeys={{["매출액"]}} barKeys={{["영업이익","당기순이익"]}} '
                 f'lineColors={{["#22c55e"]}} barColors={{["#3b82f6","#f59e0b"]}} '
-                f'title="매출(라인) vs 영업이익·당기순이익(막대)" unit="억원" />'
+                f'title="매출(라인) vs 영업이익·당기순이익(막대)" unit="'+unit_label+'" />'
             )
             parts.append("")
         parts.append(build_table(d["rows"], d["years"], ""))
@@ -320,24 +330,24 @@ def build_auto_section(data: dict) -> str:
     # BS: 제목 → 차트(부채/자본 스택) → 테이블
     if data.get("BS"):
         d = data["BS"]
-        parts.append("### 재무상태표 (BS) — 단위 억원\n")
+        parts.append("### 재무상태표 (BS) — 단위 "+unit_label+"\n")
         chart_data = _build_chart_data_bs(data)
         if chart_data:
-            parts.append(f'<StackBar data={{{chart_data}}} title="부채 vs 자본 구조" unit="억원" />')
+            parts.append(f'<StackBar data={{{chart_data}}} title="부채 vs 자본 구조" unit="'+unit_label+'" />')
             parts.append("")
         parts.append(build_table(d["rows"], d["years"], ""))
 
     # CF: 제목 → 차트(영업/투자/재무 3막대) → 테이블
     if data.get("CF"):
         d = data["CF"]
-        parts.append("### 현금흐름표 (CF) — 단위 억원\n")
+        parts.append("### 현금흐름표 (CF) — 단위 "+unit_label+"\n")
         chart_data = _build_chart_data_cf(data)
         if chart_data:
             parts.append(
                 f'<ComboChart data={{{chart_data}}} '
                 f'barKeys={{["영업CF","투자CF","재무CF"]}} '
                 f'barColors={{["#22c55e","#ef4444","#3b82f6"]}} '
-                f'title="영업·투자·재무 현금흐름" unit="억원" />'
+                f'title="영업·투자·재무 현금흐름" unit="'+unit_label+'" />'
             )
             parts.append("")
         parts.append(build_table(d["rows"], d["years"], ""))
@@ -345,7 +355,7 @@ def build_auto_section(data: dict) -> str:
     # SCE
     if data.get("SCE") and len(data["SCE"]["rows"]) > 0:
         d = data["SCE"]
-        parts.append(build_table(d["rows"], d["years"], "자본변동표 (SCE) — 단위 억원"))
+        parts.append(build_table(d["rows"], d["years"], "자본변동표 (SCE) — 단위 "+unit_label+""))
 
     now = datetime.now().strftime("%Y-%m-%d")
     parts.append(f"*최종 갱신: {now} | dartlab 실측 (DART 공시 기준)*")
