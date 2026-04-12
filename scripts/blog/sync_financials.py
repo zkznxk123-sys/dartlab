@@ -184,13 +184,29 @@ def extract_data(stock_code: str) -> dict | None:
         df = c.filings()
         if df is not None and len(df) > 0:
             filings = []
-            for row in df.head(10).iter_rows(named=True):
-                filings.append({
-                    "year": row.get("year", ""),
-                    "rceptDate": row.get("rceptDate", ""),
-                    "reportType": row.get("reportType", ""),
-                    "dartUrl": row.get("dartUrl", ""),
-                })
+            if is_edgar:
+                # EDGAR: period_key, form_type, accession_no
+                for row in df.head(10).iter_rows(named=True):
+                    acc = row.get("accession_no", "").replace("-", "")
+                    sec_url = f"https://www.sec.gov/Archives/edgar/data/{acc}" if acc else ""
+                    # 더 정확한 SEC 뷰어 URL
+                    acc_dash = row.get("accession_no", "")
+                    sec_url = f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={stock_code}&type={row.get('form_type','')}&dateb=&owner=include&count=10" if acc_dash else ""
+                    filings.append({
+                        "year": row.get("period_key", ""),
+                        "reportType": row.get("form_type", ""),
+                        "url": sec_url,
+                        "linkText": "SEC에서 보기",
+                    })
+            else:
+                # DART: year, rceptDate, rceptNo, reportType, dartUrl
+                for row in df.head(10).iter_rows(named=True):
+                    filings.append({
+                        "year": row.get("year", ""),
+                        "reportType": row.get("reportType", ""),
+                        "url": row.get("dartUrl", ""),
+                        "linkText": "DART에서 보기",
+                    })
             result["filings"] = filings
         else:
             result["filings"] = []
@@ -286,8 +302,9 @@ def build_auto_section(data: dict) -> str:
         parts.append("| 기간 | 보고서 | 링크 |")
         parts.append("|------|--------|------|")
         for f in data["filings"]:
-            url = f["dartUrl"]
-            parts.append(f"| {f['year']} | {f['reportType']} | [DART에서 보기]({url}) |")
+            url = f.get("url", "")
+            link_text = f.get("linkText", "보기")
+            parts.append(f"| {f['year']} | {f['reportType']} | [{link_text}]({url}) |")
         parts.append("")
         parts.append("> 전체 공시 목록은 dartlab에서 확인:")
         parts.append("> ```python")
