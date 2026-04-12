@@ -476,21 +476,38 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         from dartlab.review.builders import (
             capitalAllocationFlagsBlock,
             dividendPolicyBlock,
+            dividendSustainabilityBlock,
             fcfUsageBlock,
             reinvestmentBlock,
             shareholderReturnBlock,
+            totalShareholderReturnBlock,
         )
 
+        _divCache: dict = {}
+        _shCache: dict = {}
+
+        def _getDiv():
+            if "v" not in _divCache:
+                _divCache["v"] = calcDividendPolicy(company, basePeriod=basePeriod)
+            return _divCache["v"]
+
+        def _getSh():
+            if "v" not in _shCache:
+                _shCache["v"] = calcShareholderReturn(company, basePeriod=basePeriod)
+            return _shCache["v"]
+
         if _need("dividendPolicy"):
-            b["dividendPolicy"] = _safe(lambda: dividendPolicyBlock(calcDividendPolicy(company, basePeriod=basePeriod)))
+            b["dividendPolicy"] = _safe(lambda: dividendPolicyBlock(_getDiv()))
         if _need("shareholderReturn"):
-            b["shareholderReturn"] = _safe(
-                lambda: shareholderReturnBlock(calcShareholderReturn(company, basePeriod=basePeriod))
-            )
+            b["shareholderReturn"] = _safe(lambda: shareholderReturnBlock(_getSh()))
         if _need("reinvestment"):
             b["reinvestment"] = _safe(lambda: reinvestmentBlock(calcReinvestment(company, basePeriod=basePeriod)))
         if _need("fcfUsage"):
             b["fcfUsage"] = _safe(lambda: fcfUsageBlock(calcFcfUsage(company, basePeriod=basePeriod)))
+        if _need("dividendSustainability"):
+            b["dividendSustainability"] = _safe(lambda: dividendSustainabilityBlock(_getDiv(), _getSh()))
+        if _need("totalShareholderReturn"):
+            b["totalShareholderReturn"] = _safe(lambda: totalShareholderReturnBlock(_getSh()))
         if _need("capitalAllocationFlags"):
             b["capitalAllocationFlags"] = _safe(
                 lambda: capitalAllocationFlagsBlock(calcCapitalAllocationFlags(company, basePeriod=basePeriod))
@@ -703,17 +720,28 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             b["valuationFlags"] = _safe(lambda: valuationFlagsBlock(calcValuationFlags(company, basePeriod=basePeriod)))
 
     # ── 5부: 비재무 심화 ──
-    if keys is None or keys & {"ownershipTrend", "boardComposition", "auditOpinionTrend", "governanceFlags"}:
+    if keys is None or keys & {
+        "ownershipTrend",
+        "boardComposition",
+        "auditOpinionTrend",
+        "governanceFlags",
+        "executivePayDivergence",
+        "independentDirectorQuality",
+    }:
         from dartlab.analysis.financial.governance import (
             calcAuditOpinionTrend,
             calcBoardComposition,
+            calcExecutivePayDivergence,
             calcGovernanceFlags,
+            calcIndependentDirectorQuality,
             calcOwnershipTrend,
         )
         from dartlab.review.builders import (
             auditOpinionTrendBlock,
             boardCompositionBlock,
+            executivePayDivergenceBlock,
             governanceFlagsBlock,
+            independentDirectorQualityBlock,
             ownershipTrendBlock,
         )
 
@@ -726,6 +754,14 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         if _need("auditOpinionTrend"):
             b["auditOpinionTrend"] = _safe(
                 lambda: auditOpinionTrendBlock(calcAuditOpinionTrend(company, basePeriod=basePeriod))
+            )
+        if _need("executivePayDivergence"):
+            b["executivePayDivergence"] = _safe(
+                lambda: executivePayDivergenceBlock(calcExecutivePayDivergence(company, basePeriod=basePeriod))
+            )
+        if _need("independentDirectorQuality"):
+            b["independentDirectorQuality"] = _safe(
+                lambda: independentDirectorQualityBlock(calcIndependentDirectorQuality(company, basePeriod=basePeriod))
             )
         if _need("governanceFlags"):
             b["governanceFlags"] = _safe(
@@ -959,6 +995,7 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         "macroTrade",
         "macroFlags",
         "valuationBand",
+        "companyCyclePosition",
     }
     if keys is None or keys & _MACRO_KEYS:
         from dartlab.analysis.financial.macroExposure import calcValuationBand
@@ -1008,6 +1045,12 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             b["macroFlags"] = _safe(lambda: macroFlagsBlock(_ensure_summary()))
         if _need("valuationBand"):
             b["valuationBand"] = _safe(lambda: valuationBandBlock(calcValuationBand(company, basePeriod=basePeriod)))
+        if _need("companyCyclePosition"):
+            from dartlab.review.builders import companyCyclePositionBlock
+
+            b["companyCyclePosition"] = _safe(
+                lambda: companyCyclePositionBlock(_ensure_summary().get("crisis", {}))
+            )
 
     from dartlab.review.blockMap import BlockMap
 
@@ -1024,6 +1067,7 @@ def buildReview(
     template: str | None = None,
     detail: bool | None = None,
     basePeriod: str | None = None,
+    hypothesis: str | None = None,  # thesis 타입 전용
     # ── deprecated (한 릴리즈 경고 후 제거) ──
     preset: str | None = None,
     perspective: str | None = None,
@@ -1065,6 +1109,18 @@ def buildReview(
 
     # ── ReportType 해석 ──
     reportType = resolveReportType(type)
+
+    # ── thesis 타입: 서사 주도 특수 경로 (블록화 예외) ──
+    if reportType.key == "thesis":
+        from dartlab.review import Section
+        from dartlab.review.builders import thesisReportBlocks
+
+        corpName = getattr(company, "corpName", "")
+        stockCode = getattr(company, "stockCode", "")
+        review = Review(stockCode=stockCode, corpName=corpName, layout=ly)
+        thesis_blocks = thesisReportBlocks(company, hypothesis)
+        review.sections = [Section(key="thesisReport", partId="T", title="논제 검증", blocks=thesis_blocks)]
+        return review
 
     # ── 스토리 템플릿 판별 (기업유형, ReportType과 독립) ──
     detectedTemplate: str | None = None

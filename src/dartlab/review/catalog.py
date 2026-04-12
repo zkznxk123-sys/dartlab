@@ -64,6 +64,8 @@ SECTIONS: list[SectionMeta] = [
     SectionMeta("매출전망", "6-5", "매출 전망 -- 이 회사의 매출은 어디로 가는가"),
     SectionMeta("시장분석", "6-6", "시장 분석 -- 시장은 이 회사를 어떻게 보는가"),
     SectionMeta("매크로", "6-7", "매크로 환경 -- 경제 사이클이 이 회사에 어떤 의미인가"),
+    # ── AI 주도 서사 보고서 (thesis) ──
+    SectionMeta("thesisReport", "T", "논제 검증 -- 가설을 증거로 검증한다"),
 ]
 
 # ── 블록 정의 (리스트 순서 = 렌더링 순서. 순서 변경은 여기서만.) ──
@@ -144,6 +146,8 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("shareholderReturn", "주주환원", "자본배분", "배당+자사주 vs FCF"),
     BlockMeta("reinvestment", "재투자", "자본배분", "CAPEX/매출, 유보율 시계열"),
     BlockMeta("fcfUsage", "FCF 사용처", "자본배분", "배당/부채상환/잔여 분해"),
+    BlockMeta("dividendSustainability", "배당 지속성", "자본배분", "배당성향 5Y + FCF 커버리지 + 순이익 변동성"),
+    BlockMeta("totalShareholderReturn", "총 주주환원율", "자본배분", "배당+자사주+감자 합산 5Y 총환원율"),
     BlockMeta("capitalAllocationFlags", "자본배분 플래그", "자본배분", "자본배분 경고 신호"),
     # ── 3-4 투자효율 ──
     BlockMeta("roicTimeline", "ROIC 시계열", "투자효율", "ROIC, WACC 추정, Spread"),
@@ -185,6 +189,8 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("ownershipTrend", "최대주주 지분 추이", "지배구조", "최대주주 지분율 시계열과 주주 구성"),
     BlockMeta("boardComposition", "이사회 구성", "지배구조", "사외이사비율, 전체 임원 수"),
     BlockMeta("auditOpinionTrend", "감사의견 시계열", "지배구조", "감사의견과 감사인 변경 이력"),
+    BlockMeta("executivePayDivergence", "임원보수 괴리", "지배구조", "임원보수 5Y 증가율 vs 매출/순이익 증가율"),
+    BlockMeta("independentDirectorQuality", "외부이사 독립성", "지배구조", "외부이사 재임기간/비율 + 독립성 플래그"),
     BlockMeta("governanceFlags", "지배구조 플래그", "지배구조", "지배구조 관련 경고/기회 신호"),
     # ── 5-2 공시변화 ──
     BlockMeta("disclosureChangeSummary", "공시변화 종합", "공시변화", "전체 topic 변화 요약과 상위 변화"),
@@ -237,6 +243,17 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("macroTrade", "교역조건", "매크로", "교역조건 방향 + 수출이익 함의 (KR)"),
     BlockMeta("macroFlags", "매크로 플래그", "매크로", "매크로 경고/기회 신호 집계"),
     BlockMeta("valuationBand", "밸류에이션 밴드", "매크로", "PER/PBR 과거 정규분포 대비 현재 위치"),
+    BlockMeta(
+        "companyCyclePosition",
+        "사이클 위치 + 역사적 유사",
+        "매크로",
+        "현재 매크로 환경과 유사했던 과거 에포크 + 그 시점의 귀결",
+    ),
+    # ── thesisReport (AI 서사) ──
+    BlockMeta("thesisStatement", "가설 선언", "thesisReport", "사용자 가설 + 측정 가능 명제 분해"),
+    BlockMeta("evidenceFor", "지지 증거", "thesisReport", "가설을 뒷받침하는 수치/팩트"),
+    BlockMeta("evidenceAgainst", "반박 증거", "thesisReport", "가설을 반박하는 수치/팩트"),
+    BlockMeta("verdict", "판정", "thesisReport", "지지/반박/미결 + 신뢰도"),
 ]
 
 # ── 파생 인덱스 (자동 생성, 직접 수정 금지) ──

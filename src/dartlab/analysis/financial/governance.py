@@ -199,6 +199,163 @@ def calcGovernanceFlags(company, *, basePeriod: str | None = None) -> list[tuple
     return flags
 
 
+# ── 임원보수 괴리 ──
+
+
+@memoized_calc
+def calcExecutivePayDivergence(company, *, basePeriod: str | None = None) -> dict | None:
+    """임원 총보수 5Y 증가율 vs 매출/순이익 증가율 괴리.
+
+    실적 부진에도 임원보수만 증가하는 패턴을 감지한다.
+
+    Returns
+    -------
+    dict | None
+        history : list[dict]
+            year : str
+            execPayTotal : float — 전체 임원 보수 총액 (원)
+            revenue : float — 매출 (원)
+            netIncome : float — 순이익 (원)
+        cagr : dict
+            execPay : float — 5Y CAGR (%)
+            revenue : float — 5Y CAGR (%)
+            netIncome : float — 5Y CAGR (%)
+        divergence : float | None — execPay CAGR - 매출 CAGR (%p). 양수 = 매출보다 빨리 증가.
+    """
+    pay = _safePivotExecutivePay(company)
+    if pay is None or pay.payByTypeDf is None:
+        return None
+
+    import polars as pl
+
+    df = pay.payByTypeDf
+    if df is None or df.is_empty():
+        return None
+
+    # category 합산 → year별 전체 임원보수
+    try:
+        yearly = df.group_by("year").agg(pl.col("totalPay").sum().alias("total")).sort("year")
+        payByYear: dict[str, float] = {str(r["year"]): float(r["total"] or 0) for r in yearly.to_dicts()}
+    except (KeyError, TypeError, ValueError, pl.exceptions.PolarsError):
+        return None
+
+    if not payByYear:
+        return None
+
+    # 매출/순이익 매핑
+    from dartlab.analysis.financial._helpers import toDictBySnakeId
+    from dartlab.core.finance.helpers import annualColsFromPeriods
+
+    parsed = toDictBySnakeId(company.select("IS", ["sales", "net_profit"]))
+    if parsed is None:
+        return None
+    isData, periods = parsed
+    yCols = annualColsFromPeriods(periods, basePeriod=basePeriod, maxYears=5)
+
+    # 분기 컬럼 → 연도 매핑 (annual cols: "2024" 혹은 "2024Q4")
+    def _yearOf(col: str) -> str:
+        return col[:4]
+
+    salesRow = isData.get("sales", {})
+    niRow = isData.get("net_profit", {})
+
+    history = []
+    years = sorted(payByYear.keys())[-5:]  # 최근 5년 pay 데이터 기준
+    for y in years:
+        col = next((c for c in yCols if _yearOf(c) == y), None)
+        rev = salesRow.get(col) if col else None
+        ni = niRow.get(col) if col else None
+        history.append(
+            {
+                "year": y,
+                "execPayTotal": payByYear.get(y),
+                "revenue": rev,
+                "netIncome": ni,
+            }
+        )
+
+    if len(history) < 2:
+        return None
+
+    def _cagr(vals: list[float | None]) -> float | None:
+        vv = [v for v in vals if v is not None and v > 0]
+        if len(vv) < 2:
+            return None
+        first, last = vv[0], vv[-1]
+        n = len(vv) - 1
+        return round(((last / first) ** (1 / n) - 1) * 100, 2) if n > 0 else None
+
+    cagr = {
+        "execPay": _cagr([h["execPayTotal"] for h in history]),
+        "revenue": _cagr([h["revenue"] for h in history]),
+        "netIncome": _cagr([h["netIncome"] for h in history]),
+    }
+
+    divergence = None
+    if cagr["execPay"] is not None and cagr["revenue"] is not None:
+        divergence = round(cagr["execPay"] - cagr["revenue"], 2)
+
+    return {"history": history, "cagr": cagr, "divergence": divergence}
+
+
+# ── 외부이사 독립성 ──
+
+
+@memoized_calc
+def calcIndependentDirectorQuality(company, *, basePeriod: str | None = None) -> dict | None:
+    """외부이사 독립성 — 비율 시계열 + 독립성 플래그.
+
+    Returns
+    -------
+    dict | None
+        history : list[dict]
+            year : str
+            total : int
+            outside : int
+            ratio : float — 사외이사 비율 (%)
+        latest : dict — 최신 구성
+        flags : list[str] — 독립성 우려 신호
+    """
+    from dartlab.core.finance.helpers import parseNumStr  # noqa: F401 (consistency)
+
+    exec_ = _safePivotExecutive(company)
+    if exec_ is None:
+        return None
+
+    # executivePayAllTotal / boardOfDirectors 등에서 연도별 구성이 제공될 수 있다
+    # 간략히 현재 구성만 활용 — 시계열은 report.executive에 있는 경우만
+    total = getattr(exec_, "totalCount", 0) or 0
+    outside = getattr(exec_, "outsideCount", 0) or 0
+    if total == 0:
+        return None
+
+    ratio = round(outside / total * 100, 1)
+
+    flags: list[str] = []
+    if ratio < 25:
+        flags.append(f"사외이사비율 {ratio:.0f}% — 이사회 독립성 취약 (25% 기준)")
+    elif ratio < 33:
+        flags.append(f"사외이사비율 {ratio:.0f}% — 독립성 기준(1/3) 미달")
+    if outside <= 2 and total >= 6:
+        flags.append(f"사외이사 {outside}명 — 절대수 부족")
+
+    latest = {"total": total, "outside": outside, "ratio": ratio}
+    return {
+        "history": [{"year": "latest", "total": total, "outside": outside, "ratio": ratio}],
+        "latest": latest,
+        "flags": flags,
+    }
+
+
+def _safePivotExecutivePay(company):
+    """report.executivePay를 안전하게 가져온다."""
+    try:
+        result = company._report.executivePay
+        return result
+    except (AttributeError, ValueError, KeyError, TypeError):
+        return None
+
+
 # ── 내부 헬퍼 ──
 
 

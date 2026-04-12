@@ -2765,6 +2765,7 @@ class Company:
         template: str | None = None,
         detail: bool | None = None,
         basePeriod: str | None = None,
+        hypothesis: str | None = None,
         preset: str | None = None,  # deprecated
         perspective: str | None = None,  # deprecated
     ):
@@ -2831,6 +2832,7 @@ class Company:
             template=template,
             detail=detail,
             basePeriod=basePeriod,
+            hypothesis=hypothesis,
             preset=preset,
             perspective=perspective,
         )

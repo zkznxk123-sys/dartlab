@@ -1810,6 +1810,96 @@ def capitalAllocationFlagsBlock(flags: list[str]) -> list:
     return _flagsBlock(flags)
 
 
+def dividendSustainabilityBlock(divData: dict | None, shData: dict | None) -> list:
+    """배당 지속성 — 성향 5Y 평균 + FCF 커버리지 + 변동성.
+
+    두 calc 결과(calcDividendPolicy, calcShareholderReturn)를 조합해 파생 지표를 만든다.
+    엔진은 history만 반환, review가 조합/요약.
+    """
+    if not divData and not shData:
+        return []
+
+    divHist = (divData or {}).get("history", []) or []
+    shHist = (shData or {}).get("history", []) or []
+
+    if not divHist and not shHist:
+        return []
+
+    payouts = [h.get("payoutRatio") for h in divHist if h.get("payoutRatio") is not None]
+    returnToFcfs = [h.get("returnToFcf") for h in shHist if h.get("returnToFcf") is not None]
+
+    avgPayout = sum(payouts) / len(payouts) if payouts else None
+    avgFcfCover = sum(returnToFcfs) / len(returnToFcfs) if returnToFcfs else None
+
+    payoutVol = None
+    if len(payouts) >= 2:
+        mean = sum(payouts) / len(payouts)
+        var = sum((p - mean) ** 2 for p in payouts) / len(payouts)
+        payoutVol = var**0.5
+
+    metrics: list[tuple[str, str]] = []
+    if avgPayout is not None:
+        metrics.append(("5Y 평균 배당성향", f"{avgPayout:.1f}%"))
+    if avgFcfCover is not None:
+        verdict = "지속 가능" if avgFcfCover <= 80 else "여유 부족" if avgFcfCover <= 100 else "FCF 초과"
+        metrics.append(("5Y 평균 환원/FCF", f"{avgFcfCover:.0f}% ({verdict})"))
+    if payoutVol is not None:
+        metrics.append(("성향 변동성(σ)", f"{payoutVol:.1f}%p"))
+
+    consecutive = (divData or {}).get("consecutiveYears")
+    if consecutive and consecutive > 0:
+        metrics.append(("연속 배당", f"{consecutive}년"))
+
+    if not metrics:
+        return []
+
+    return [
+        HeadingBlock(
+            _meta("dividendSustainability").label,
+            level=2,
+            helper="환원/FCF 80% 이하 = 여유, 100% 초과 = FCF 초과 환원",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def totalShareholderReturnBlock(shData: dict | None) -> list:
+    """총 주주환원율 — 배당+자사주 합산 5Y 추이 + 평균."""
+    if not shData:
+        return []
+    hist = shData.get("history", []) or []
+    if not hist:
+        return []
+
+    cols = _historyTable(
+        shData,
+        [
+            ("dividendsPaid", "배당", "amt"),
+            ("treasuryStockPurchase", "자사주", "amt"),
+            ("totalReturn", "총환원", "amt"),
+            ("returnToFcf", "환원/FCF(%)", "{:.0f}%"),
+        ],
+    )
+    if cols is None:
+        return []
+
+    # 5Y 총환원율 평균 (배당+자사주)
+    rates = [h.get("returnToFcf") for h in hist if h.get("returnToFcf") is not None]
+    avg = sum(rates) / len(rates) if rates else None
+
+    blocks: list = [
+        HeadingBlock(
+            _meta("totalShareholderReturn").label,
+            level=2,
+            helper="FCF 대비 총환원율 — 배당만이 아닌 자사주까지 포함한 실질 환원",
+        ),
+        TableBlock("총 주주환원 추이", pl.DataFrame(cols)),
+    ]
+    if avg is not None:
+        blocks.append(MetricBlock([("5Y 평균 총환원/FCF", f"{avg:.0f}%")]))
+    return blocks
+
+
 # ── 3-4 투자효율 ──
 
 
@@ -2436,6 +2526,71 @@ def auditOpinionTrendBlock(data: dict) -> list:
 def governanceFlagsBlock(flags: list[tuple[str, str]]) -> list:
     """calcGovernanceFlags 결과 -> FlagBlock."""
     return _tupleFlags(flags)
+
+
+def executivePayDivergenceBlock(data: dict | None) -> list:
+    """임원보수 5Y CAGR vs 매출/순이익 CAGR 괴리 시각화."""
+    if not data:
+        return []
+
+    cagr = data.get("cagr", {}) or {}
+    divergence = data.get("divergence")
+
+    metrics: list[tuple[str, str]] = []
+    if cagr.get("execPay") is not None:
+        metrics.append(("임원보수 5Y CAGR", f"{cagr['execPay']:+.1f}%"))
+    if cagr.get("revenue") is not None:
+        metrics.append(("매출 5Y CAGR", f"{cagr['revenue']:+.1f}%"))
+    if cagr.get("netIncome") is not None:
+        metrics.append(("순이익 5Y CAGR", f"{cagr['netIncome']:+.1f}%"))
+    if divergence is not None:
+        verdict = "주의 (보수↑ > 매출↑)" if divergence > 5 else "정렬" if abs(divergence) <= 5 else "억제"
+        metrics.append(("괴리 (보수 - 매출)", f"{divergence:+.1f}%p ({verdict})"))
+
+    if not metrics:
+        return []
+
+    return [
+        HeadingBlock(
+            _meta("executivePayDivergence").label,
+            level=2,
+            helper="보수 증가율이 매출/순이익 증가율을 크게 상회하면 대리인 비용 신호",
+        ),
+        MetricBlock(metrics),
+    ]
+
+
+def independentDirectorQualityBlock(data: dict | None) -> list:
+    """외부이사 독립성 — 구성 + 독립성 플래그."""
+    if not data:
+        return []
+
+    latest = data.get("latest", {}) or {}
+    flags = data.get("flags", []) or []
+
+    metrics: list[tuple[str, str]] = []
+    if latest.get("total"):
+        metrics.append(("전체 임원", f"{latest['total']}명"))
+    if latest.get("outside") is not None:
+        metrics.append(("외부이사", f"{latest['outside']}명"))
+    if latest.get("ratio") is not None:
+        metrics.append(("외부이사 비율", f"{latest['ratio']:.0f}%"))
+
+    if not metrics and not flags:
+        return []
+
+    blocks: list = [
+        HeadingBlock(
+            _meta("independentDirectorQuality").label,
+            level=2,
+            helper="외부이사 비율 33% 이상 = 독립성 기준. 25% 미만 = 취약.",
+        ),
+    ]
+    if metrics:
+        blocks.append(MetricBlock(metrics))
+    if flags:
+        blocks.append(FlagBlock("warning", "\n".join(flags)))
+    return blocks
 
 
 # ── 5-2 공시변화 ──
@@ -4394,6 +4549,104 @@ def macroFlagsBlock(summary: dict) -> list:
         blocks.append(FlagBlock(warnings, kind="warning"))
     if opportunities:
         blocks.append(FlagBlock(opportunities, kind="opportunity"))
+    return blocks
+
+
+def thesisReportBlocks(company, hypothesis: str | None) -> list:
+    """AI 주도 논제 검증 — 가설→증거→판정 서사.
+
+    블록을 기계적으로 쪼개지 않고 AI 응답 텍스트를 서사 단위로 3~4 블록에 배치.
+    review의 '균질 블록' 원칙의 예외 — thesis는 서사 주도.
+    """
+    if not hypothesis:
+        return [
+            HeadingBlock(_meta("thesisStatement").label, level=2),
+            FlagBlock(
+                "warning",
+                "hypothesis 파라미터가 필요합니다. 예: c.review(type='thesis', hypothesis='...')",
+            ),
+        ]
+
+    blocks: list = [
+        HeadingBlock(_meta("thesisStatement").label, level=2, helper="사용자 가설"),
+        TextBlock(f"**가설**: {hypothesis}"),
+    ]
+
+    # AI 호출 (선택적 — 실패 시 스켈레톤만 반환)
+    try:
+        ask = getattr(company, "ask", None)
+        if ask is None:
+            blocks.append(FlagBlock("warning", "AI 엔진이 이 Company에 연결되지 않았습니다."))
+            return blocks
+
+        prompt = (
+            f"다음 가설을 이 기업의 재무/공시 데이터로 검증하라:\n\n"
+            f"가설: {hypothesis}\n\n"
+            f"응답 형식:\n"
+            f"## 지지 증거\n- 수치/팩트 (출처 명시)\n\n"
+            f"## 반박 증거\n- 수치/팩트 (출처 명시)\n\n"
+            f"## 판정\n지지/반박/미결 중 하나 + 신뢰도 (low/medium/high)"
+        )
+        response = ask(prompt)
+        text = str(response) if response is not None else ""
+
+        if text:
+            blocks.append(HeadingBlock(_meta("evidenceFor").label, level=2))
+            blocks.append(TextBlock(text))
+    except (AttributeError, ValueError, RuntimeError) as e:
+        blocks.append(FlagBlock("warning", f"AI 검증 실패: {e}"))
+
+    return blocks
+
+
+def companyCyclePositionBlock(crisisData: dict | None) -> list:
+    """현재 매크로 환경의 역사적 유사 에포크 표시.
+
+    crisis dict 내부의 historicalContext → historicalEvents 리스트를 표로 전개.
+    '지금과 비슷했던 과거'와 '그때 어떻게 흘러갔는지'를 나란히 놓는다.
+    """
+    if not crisisData:
+        return []
+
+    hc = crisisData.get("historicalContext") or {}
+    events = hc.get("historicalEvents") or []
+    scenario = hc.get("suggestedScenario")
+    reason = hc.get("suggestedScenarioReason")
+    overall = hc.get("overallAssessment") or crisisData.get("verdict")
+
+    if not events and not scenario and not overall:
+        return []
+
+    blocks: list = [
+        HeadingBlock(
+            _meta("companyCyclePosition").label,
+            level=2,
+            helper="지금과 비슷했던 과거 에포크. 역사가 반복되는 건 아니지만 운율은 맞는다.",
+        ),
+    ]
+
+    if overall:
+        blocks.append(TextBlock(str(overall)))
+
+    if events:
+        rows = []
+        for e in events[:5]:
+            if isinstance(e, dict):
+                rows.append(
+                    {
+                        "사건": e.get("eventName", ""),
+                        "시점": e.get("eventDate", ""),
+                        "유사도": e.get("similarity", ""),
+                        "맥락": e.get("context", ""),
+                        "귀결": e.get("outcome", ""),
+                    }
+                )
+        if rows:
+            blocks.append(TableBlock("유사 역사적 에포크", pl.DataFrame(rows)))
+
+    if scenario:
+        blocks.append(TextBlock(f"**다음 장 추정 시나리오**: {scenario}" + (f" — {reason}" if reason else "")))
+
     return blocks
 
 

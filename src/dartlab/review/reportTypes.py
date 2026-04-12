@@ -173,8 +173,8 @@ REPORT_TYPES: dict[str, ReportType] = {
     "macro": ReportType(
         key="macro",
         label="매크로 사이클 위치",
-        description="탑다운 투자자용 — 사이클/민감도 + 역사적 팩트로 이 기업의 위치",
-        sectionOrder=("매크로", "매크로민감도", "시장분석", "매출전망", "가치평가"),
+        description="탑다운 투자자용 — 사이클 + 역사적 팩트로 이 기업의 위치",
+        sectionOrder=("매크로", "시장분석", "매출전망", "가치평가"),
         emphasize=frozenset(
             {
                 "macroCycle",
