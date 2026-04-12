@@ -1095,7 +1095,14 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         if _need("improvementLevers"):
             from dartlab.analysis.financial.scenarioSensitivity import calcImprovementLevers
 
-            b["improvementLevers"] = _safe(lambda: improvementLeversBlock(calcImprovementLevers(company, basePeriod=basePeriod)))
+            try:
+                _il_data = calcImprovementLevers(company, basePeriod=basePeriod)
+                b["improvementLevers"] = improvementLeversBlock(_il_data) if _il_data else []
+            except (KeyError, ValueError, TypeError, AttributeError) as _e:
+                import logging
+
+                logging.getLogger("dartlab.review").debug("improvementLevers 실패: %s", _e)
+                b["improvementLevers"] = []
         if _need("gradeUpgradePath"):
             from dartlab.credit.calcs import calcGradeImprovement
 
