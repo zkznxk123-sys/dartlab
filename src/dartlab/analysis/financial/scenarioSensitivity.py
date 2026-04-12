@@ -336,16 +336,138 @@ def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | N
             "effect_score": saved / revenue * 100 if revenue else 0,
         })
 
+    # ── 기업유형별 특수 레버 (storyTemplate 연동) ──
+    situational = _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, interest_abs)
+    levers.extend(situational)
+
     # 영향도 순 정렬
     levers.sort(key=lambda x: x.get("effect_score", 0), reverse=True)
     for lv in levers:
         lv.pop("effect_score", None)
 
+    # 기업유형 라벨
+    template_name = None
+    try:
+        from dartlab.review.templates import detectTemplate
+
+        template_name = detectTemplate(company)
+    except (ImportError, AttributeError):
+        pass
+
     return {
         "baseCase": base,
         "levers": levers,
         "topLever": levers[0]["driver"] if levers else None,
+        "companyType": template_name,
     }
+
+
+def _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, interest_abs) -> list[dict]:
+    """기업 상태에 따른 특수 레버 — 7종 유형별 분기."""
+    levers: list[dict] = []
+
+    # ── 적자 기업: 흑자 전환 breakeven ──
+    if opm is not None and opm < 0 and revenue:
+        breakeven_rev = interest_abs / 0.05 if interest_abs > 0 else abs(op_income) / 0.10  # OPM 5% 가정
+        growth_needed = (breakeven_rev - revenue) / revenue * 100 if revenue > 0 else None
+        levers.append({
+            "name": f"흑자 전환 — 매출 {growth_needed:+.0f}% 필요 (OPM 5% 가정)" if growth_needed else "흑자 전환 경로",
+            "driver": "breakeven_revenue",
+            "impact": {"breakeven_revenue": round(breakeven_rev), "required_growth": round(growth_needed, 1) if growth_needed else None},
+            "difficulty": "hard",
+            "timeframe": "2-3년",
+            "effect_score": 100,  # 적자 기업에게 최우선
+        })
+
+    # ── 현금부자: 배당 확대 vs 재투자 ──
+    debt_ratio = base.get("debtRatio")
+    if debt_ratio is not None and debt_ratio < 50 and fcf and fcf > 0 and equity and equity > 0:
+        # FLEV 마이너스 = 순현금
+        # 배당성향 20%p 확대 시 ROE 변화 (Penman FLEV 효과)
+        dividend_increase = fcf * 0.20
+        # 자본 감소 → ROE 분모 감소 → ROE 증가
+        reduced_equity = equity - dividend_increase
+        ni = base.get("roe", 0) / 100 * equity if base.get("roe") else None
+        new_roe = ni / reduced_equity * 100 if ni and reduced_equity > 0 else None
+        if new_roe and base.get("roe"):
+            levers.append({
+                "name": f"배당 확대 (FCF의 20%) → ROE {base['roe']:.1f}% → {new_roe:.1f}%",
+                "driver": "dividend_expansion",
+                "impact": {"roe": round(new_roe, 1), "dividendIncrease": round(dividend_increase)},
+                "difficulty": "easy",
+                "timeframe": "즉시 가능",
+                "effect_score": abs(new_roe - base["roe"]),
+            })
+
+    # ── 턴어라운드: 생존 가능 기간 ──
+    if opm is not None and opm > 0 and opm < 5 and fcf is not None:
+        cash = base.get("_cash")
+        if cash is None:
+            try:
+                from dartlab.analysis.financial._helpers import toDictBySnakeId
+                from dartlab.core.finance.helpers import annualColsFromPeriods
+
+                bs_p = toDictBySnakeId(company.select("BS", ["cash_and_cash_equivalents"]))
+                if bs_p:
+                    bsD, bsP = bs_p
+                    bsC = annualColsFromPeriods(bsP, maxYears=1)
+                    if bsC:
+                        cash = float(bsD.get("cash_and_cash_equivalents", {}).get(bsC[0]) or 0)
+            except (AttributeError, ValueError, TypeError):
+                pass
+
+        if cash and cash > 0 and fcf < 0:
+            months = round(cash / abs(fcf) * 12)
+            levers.append({
+                "name": f"현금 소진까지 약 {months}개월 — 구조조정 시급",
+                "driver": "cash_runway",
+                "impact": {"cashRunwayMonths": months, "currentCash": round(cash)},
+                "difficulty": "critical",
+                "timeframe": f"{months}개월",
+                "effect_score": 200,  # 생존 이슈는 최우선
+            })
+
+    # ── 사이클 기업: 다운턴 방어 OPM ──
+    if opm is not None and opm > 10 and interest_abs > 0 and revenue:
+        min_opm = interest_abs / revenue * 100  # 이자비용 감당 최소 OPM
+        buffer = opm - min_opm
+        if buffer < 10:
+            levers.append({
+                "name": f"다운턴 방어선 OPM {min_opm:.1f}% (현재 대비 -{buffer:.1f}%p 여유)",
+                "driver": "cycle_defense_opm",
+                "impact": {"minOPM": round(min_opm, 1), "bufferPP": round(buffer, 1)},
+                "difficulty": "awareness",
+                "timeframe": "사이클 하강 시",
+                "effect_score": 50,
+            })
+
+    # ── 고성장 기업: 재투자 ROI ─��
+    if opm is not None and opm > 15 and revenue:
+        try:
+            from dartlab.analysis.financial._helpers import toDictBySnakeId
+            from dartlab.core.finance.helpers import annualColsFromPeriods
+
+            cf_p = toDictBySnakeId(company.select("CF", ["purchase_of_property_plant_and_equipment"]))
+            if cf_p:
+                cfD, cfP = cf_p
+                cfC = annualColsFromPeriods(cfP, maxYears=1)
+                if cfC:
+                    capex = abs(float(cfD.get("purchase_of_property_plant_and_equipment", {}).get(cfC[0]) or 0))
+                    if capex > 0:
+                        capex_to_rev = capex / revenue * 100
+                        roic = opm * (revenue / equity) if equity and equity > 0 else None
+                        levers.append({
+                            "name": f"CAPEX/매출 {capex_to_rev:.1f}% — ROIC 대비 재투자 효율",
+                            "driver": "reinvestment_efficiency",
+                            "impact": {"capexToRevenue": round(capex_to_rev, 1), "estimatedROIC": round(roic, 1) if roic else None},
+                            "difficulty": "medium",
+                            "timeframe": "지속",
+                            "effect_score": 30,
+                        })
+        except (AttributeError, ValueError, TypeError):
+            pass
+
+    return levers
 
 
 def _verdict_opm(opm: float, ic: float | None) -> str:
