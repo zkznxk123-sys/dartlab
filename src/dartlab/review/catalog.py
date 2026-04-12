@@ -64,6 +64,8 @@ SECTIONS: list[SectionMeta] = [
     SectionMeta("매출전망", "6-5", "매출 전망 -- 이 회사의 매출은 어디로 가는가"),
     SectionMeta("시장분석", "6-6", "시장 분석 -- 시장은 이 회사를 어떻게 보는가"),
     SectionMeta("매크로", "6-7", "매크로 환경 -- 경제 사이클이 이 회사에 어떤 의미인가"),
+    # ── 스토리 검증 (Damodaran 3-test) ──
+    SectionMeta("storyValidation", "SV", "스토리 검증 -- 이 서사는 신뢰할 수 있는가"),
     # ── AI 주도 서사 보고서 (thesis) ──
     SectionMeta("thesisReport", "T", "논제 검증 -- 가설을 증거로 검증한다"),
 ]
@@ -120,6 +122,8 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("coverageTrend", "이자보상 추이", "안정성", "이자보상배율 시계열"),
     BlockMeta("distressScore", "부실 판별", "안정성", "Altman Z-Score 시계열과 종합 등급"),
     BlockMeta("marketRisk", "시장 리스크", "안정성", "베타, 변동성(ATR), 상대강도 — 시장 관점 리스크"),
+    BlockMeta("scenarioSensitivity", "시나리오 민감도", "안정성", "OPM/매출/금리 shock별 핵심 지표 변화"),
+    BlockMeta("criticalAssumptions", "핵심 가정", "안정성", "현 판단을 지탱하는 핵심 가정 + 위반 시 영향"),
     BlockMeta("stabilityFlags", "안정성 플래그", "안정성", "안정성 관련 경고/기회 신호"),
     # ── 효율성 ──
     BlockMeta("turnoverTrend", "회전율 추이", "효율성", "총자산/매출채권/재고 회전율 시계열"),
@@ -249,6 +253,8 @@ _BLOCKS: list[BlockMeta] = [
         "매크로",
         "현재 매크로 환경과 유사했던 과거 에포크 + 그 시점의 귀결",
     ),
+    # ── storyValidation (Damodaran 3-test) ──
+    BlockMeta("damodaran3test", "스토리 3-test", "storyValidation", "History/Experience/CommonSense 3단 검증 결과"),
     # ── thesisReport (AI 서사) ──
     BlockMeta("thesisStatement", "가설 선언", "thesisReport", "사용자 가설 + 측정 가능 명제 분해"),
     BlockMeta("evidenceFor", "지지 증거", "thesisReport", "가설을 뒷받침하는 수치/팩트"),

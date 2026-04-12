@@ -1383,6 +1383,87 @@ def distressScoreBlock(data: dict) -> list:
     return blocks
 
 
+def scenarioSensitivityBlock(data: dict | None) -> list:
+    """calcScenarioSensitivity 결과 → shock별 지표 변화 + 해석."""
+    if not data:
+        return []
+
+    base = data.get("baseCase", {})
+    shocks = data.get("shocks", {})
+    if not shocks:
+        return []
+
+    blocks: list = [
+        HeadingBlock(
+            _meta("scenarioSensitivity").label,
+            level=2,
+            helper="핵심 가정이 무너지면 어떻게 되는가 — 3가지 하방 shock",
+        ),
+    ]
+
+    # Base case metrics
+    base_metrics = []
+    if base.get("opm") is not None:
+        base_metrics.append(("현재 OPM", f"{base['opm']:.1f}%"))
+    if base.get("roe") is not None:
+        base_metrics.append(("현재 ROE", f"{base['roe']:.1f}%"))
+    if base.get("interestCoverage") is not None:
+        base_metrics.append(("이자보상배율", f"{base['interestCoverage']:.1f}x"))
+    if base_metrics:
+        blocks.append(MetricBlock(base_metrics))
+
+    # Shock table
+    rows = []
+    shock_labels = {
+        "opm_minus_5pp": "OPM -5%p",
+        "revenue_minus_15pct": "매출 -15%",
+        "interest_plus_2pp": "금리 +2%p",
+    }
+    for key, label in shock_labels.items():
+        s = shocks.get(key)
+        if not s:
+            continue
+        row: dict = {"시나리오": label}
+        if s.get("roe") is not None:
+            row["ROE"] = f"{s['roe']:.1f}%"
+        if s.get("interestCoverage") is not None:
+            row["이자보상"] = f"{s['interestCoverage']:.1f}x"
+        row["판정"] = s.get("verdict", "")
+        rows.append(row)
+
+    if rows:
+        blocks.append(TableBlock("하방 시나리오 영향", pl.DataFrame(rows)))
+
+    # breakdown point
+    bp = data.get("breakdownPoint")
+    if bp and bp.get("value") is not None:
+        safety = bp.get("safetyMargin")
+        txt = f"**손익분기점**: OPM {bp['value']:.1f}% ({bp['meaning']})"
+        if safety is not None:
+            txt += f" — 현재 안전마진 {safety:.1f}%p"
+        blocks.append(TextBlock(txt))
+
+    return blocks
+
+
+def criticalAssumptionsBlock(data: dict | None) -> list:
+    """calcScenarioSensitivity 결과 → 핵심 가정 목록."""
+    if not data:
+        return []
+    assumptions = data.get("criticalAssumptions", [])
+    if not assumptions:
+        return []
+
+    return [
+        HeadingBlock(
+            _meta("criticalAssumptions").label,
+            level=2,
+            helper="이 보고서의 결론을 지탱하는 가정. 하나라도 무너지면 재평가 필요.",
+        ),
+        TextBlock("\n".join(f"- {a}" for a in assumptions)),
+    ]
+
+
 def stabilityFlagsBlock(data) -> list:
     """calcStabilityFlags 결과 → FlagBlock."""
     if isinstance(data, dict):
@@ -4672,6 +4753,36 @@ def macroFlagsBlock(summary: dict) -> list:
         blocks.append(FlagBlock(warnings, kind="warning"))
     if opportunities:
         blocks.append(FlagBlock(opportunities, kind="opportunity"))
+    return blocks
+
+
+def damodaran3testBlock(company) -> list:
+    """Damodaran 3-test 결과 → 스토리 검증 블록."""
+    try:
+        from dartlab.review.narrative.validators import damodaranTest
+
+        result = damodaranTest(company)
+    except (ImportError, AttributeError, ValueError):
+        return []
+
+    blocks: list = [
+        HeadingBlock(
+            _meta("damodaran3test").label,
+            level=2,
+            helper="Damodaran: 모든 스토리는 History/Experience/Common Sense 3시험을 통과해야 한다",
+        ),
+    ]
+
+    for test in [result.historyTest, result.experienceTest, result.commonSenseTest]:
+        if test is None:
+            continue
+        icon = "✓" if test.passed else "✗"
+        blocks.append(TextBlock(f"**{icon} {test.name}**: {test.detail}"))
+
+    blocks.append(MetricBlock([("통과", f"{result.passCount}/{result.totalCount}")]))
+    if result.passCount < 3:
+        blocks.append(FlagBlock("warning", "3-test 일부 미통과 — 스토리 재검토 권고"))
+
     return blocks
 
 

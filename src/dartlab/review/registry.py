@@ -313,7 +313,7 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         if _need("growthFlags"):
             b["growthFlags"] = _safe(lambda: growthFlagsBlock(calcGrowthFlags(company, basePeriod=basePeriod)))
 
-    if keys is None or keys & {"leverageTrend", "coverageTrend", "distressScore", "stabilityFlags", "marketRisk"}:
+    if keys is None or keys & {"leverageTrend", "coverageTrend", "distressScore", "stabilityFlags", "marketRisk", "scenarioSensitivity", "criticalAssumptions"}:
         from dartlab.analysis.financial.stability import (
             calcCoverageTrend,
             calcDistressScore,
@@ -335,6 +335,15 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             b["distressScore"] = _safe(lambda: distressScoreBlock(calcDistressScore(company, basePeriod=basePeriod)))
         if _need("stabilityFlags"):
             b["stabilityFlags"] = _safe(lambda: stabilityFlagsBlock(calcStabilityFlags(company, basePeriod=basePeriod)))
+        if _need("scenarioSensitivity") or _need("criticalAssumptions"):
+            from dartlab.analysis.financial.scenarioSensitivity import calcScenarioSensitivity
+            from dartlab.review.builders import criticalAssumptionsBlock, scenarioSensitivityBlock
+
+            _ss = _safe(lambda: calcScenarioSensitivity(company, basePeriod=basePeriod))
+            if _need("scenarioSensitivity"):
+                b["scenarioSensitivity"] = _safe(lambda: scenarioSensitivityBlock(_ss))
+            if _need("criticalAssumptions"):
+                b["criticalAssumptions"] = _safe(lambda: criticalAssumptionsBlock(_ss))
         if _need("marketRisk"):
             from dartlab.quant.extended import calcMarketRisk
             from dartlab.review.builders import marketRiskBlock
@@ -1053,6 +1062,13 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             )
 
     from dartlab.review.blockMap import BlockMap
+
+    # ── Damodaran 3-test (스토리 검증) ──
+    if keys is None or keys & {"damodaran3test"}:
+        from dartlab.review.builders import damodaran3testBlock
+
+        if _need("damodaran3test"):
+            b["damodaran3test"] = _safe(lambda: damodaran3testBlock(company))
 
     return BlockMap(b)
 
