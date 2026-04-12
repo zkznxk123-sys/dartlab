@@ -798,8 +798,9 @@ def forecastRevenue(
     horizon: int = 3,
     companyData: CompanyDataBundle | None = None,
     currency: str = "KRW",
+    overrides: dict | None = None,
 ) -> RevenueForecastResult:
-    """매출액 앙상블 예측."""
+    """매출액 앙상블 예측. overrides로 AI/사용자 가정 조율 가능."""
     warnings: list[str] = []
     assumptions: list[str] = []
 
@@ -913,6 +914,11 @@ def forecastRevenue(
             consensusProj[fy] = revWon
             consensusRevenue.append(revWon)
 
+    # ── override 적용 ──
+    from dartlab.core.overrides import validateOverrides
+
+    _ov = validateOverrides(overrides)
+
     # 기준 연도: 컨센서스 actual 중 가장 최근
     baseYear = 0
     lastActualRevenue: float | None = None
@@ -929,6 +935,20 @@ def forecastRevenue(
     # lastRevenue를 컨센서스 actual과 동기화 (더 신뢰할 수 있으므로)
     if lastActualRevenue:
         lastRevenue = lastActualRevenue
+
+    # override: baseRevenue
+    if "baseRevenue" in _ov:
+        lastRevenue = _ov["baseRevenue"]
+        warnings.append(f"baseRevenue override: {lastRevenue/1e12:.1f}조")
+
+    # mid-cycle 정규화 (사이클 기업 자동, override 없을 때)
+    if "baseRevenue" not in _ov and lifecycle in ("cyclical", "mature_cyclical"):
+        historicals = [v for v in (tsResult.historical if tsAvailable and tsResult else []) if v and v > 0]
+        if len(historicals) >= 3:
+            midCycleRevenue = sum(historicals[-5:]) / len(historicals[-5:])
+            if lastRevenue and abs(lastRevenue - midCycleRevenue) / midCycleRevenue > 0.15:
+                lastRevenue = midCycleRevenue
+                warnings.append(f"사이클 기업 → mid-cycle 매출 {midCycleRevenue/1e12:.1f}조 적용")
 
     # 시계열 성장률: projected 간 YoY 성장률 (분기 데이터이므로 자체 기준 비교)
     tsGrowthRates: list[float] = []
@@ -972,13 +992,33 @@ def forecastRevenue(
                 f"ROIC 내재 성장률({roicGrowthRate:.1f}%)과 시계열 성장률({avgTsG:.1f}%) 괴리 {roicTsGap:+.1f}%p"
             )
 
-    # 앙상블: 성장률 기반 블렌딩 (스케일 불일치 방지)
-    prevRevenue = lastRevenue or 0
-    for yrOffset in range(1, horizon + 1):
-        if prevRevenue <= 0:
-            break
+    # override: growthRates (AI/사용자 직접 지정 → 앙상블 전체 교체)
+    if "growthRates" in _ov:
+        ovGrowth = _ov["growthRates"]
+        projected = []
+        prevR = lastRevenue or 0
+        for i in range(horizon):
+            g = ovGrowth[i] if i < len(ovGrowth) else (ovGrowth[-1] if ovGrowth else 3.0)
+            prevR = prevR * (1 + g / 100)
+            projected.append(prevR)
+        warnings.append(f"growthRates override: {ovGrowth}")
+        # growthRates → projected 직접 산출 후 아래 앙상블 건너뜀
+        growthRates = list(ovGrowth[:horizon])
+        while len(growthRates) < horizon:
+            growthRates.append(growthRates[-1] if growthRates else 3.0)
+    else:
+        projected = []
 
-        # 시계열 성장률
+    # 앙상블: 성장률 기반 블렌딩 (override 시 이미 projected 채워짐 → 건너뜀)
+    prevRevenue = lastRevenue or 0
+    if projected:
+        pass  # override에서 이미 채움
+    else:
+        for yrOffset in range(1, horizon + 1):
+            if prevRevenue <= 0:
+                break
+
+            # 시계열 성장률
         tsG = (
             tsGrowthRates[yrOffset - 1]
             if yrOffset <= len(tsGrowthRates)
