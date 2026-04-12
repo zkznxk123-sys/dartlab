@@ -59,7 +59,7 @@
 		</div>
 
 		<div class="flex flex-col md:flex-row justify-between items-center pt-4 border-t border-dl-border text-[11px] text-dl-text-dim gap-1">
-			<span>MIT License</span>
+			<span>Apache License 2.0</span>
 			<span>Made by <a href="https://github.com/eddmpython" class="text-dl-text-muted hover:text-dl-text transition-colors no-underline">eddmpython</a></span>
 		</div>
 	</div>

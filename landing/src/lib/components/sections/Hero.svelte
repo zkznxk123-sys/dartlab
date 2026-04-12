@@ -32,27 +32,36 @@
 		</Badge>
 
 		<h1 class="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.1] mb-6">
-			<span class="text-dl-text">Every Company Tells Its Story</span><br />
-			<span class="text-dl-text">in Filings. </span><span
+			<span class="text-dl-text">1 stock code →</span><br />
+			<span
 				class="bg-gradient-to-r from-dl-primary via-dl-primary-light to-dl-primary bg-clip-text text-transparent"
-				>We Make It Readable</span
+				>full company story</span
 			>
 		</h1>
 
-		<p class="text-lg md:text-xl text-dl-text-muted max-w-2xl mx-auto mb-10 leading-relaxed">
-			Hundreds of pages per quarter. Thousands of inconsistent formats.<br />
-			One stock code turns it all into structured, comparable data.
+		<p class="text-lg md:text-xl text-dl-text-muted max-w-2xl mx-auto mb-6 leading-relaxed">
+			Korean DART + US SEC EDGAR filings, structured.<br />
+			2,700+ KR / 970+ US companies, one line of Python.
 		</p>
 
-		<div class="flex flex-wrap items-center justify-center gap-3 mb-16">
-			<Button href={brand.desktop}>
-				<Download class="w-4 h-4" />
-				Windows Download
-			</Button>
-			<Button variant="secondary" href="#install">pip / uv Install</Button>
+		<div class="mb-10 inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-dl-bg-card/70 border border-dl-border/50 font-mono text-sm md:text-base text-dl-text">
+			<span class="text-dl-text-dim">&gt;&gt;&gt;</span>
+			<span class="text-dl-primary">dartlab</span><span class="text-dl-text-muted">.Company(</span><span class="text-dl-accent">"005930"</span><span class="text-dl-text-muted">)</span><span class="text-dl-text-muted">.review()</span>
+		</div>
+
+		<div class="flex flex-wrap items-center justify-center gap-3 mb-4">
+			<Button href={brand.colab}>Try in Colab — 0 setup</Button>
+			<Button variant="secondary" href="#install">pip install dartlab</Button>
 			<Button variant="secondary" href="{base}/docs/">Docs</Button>
-			<Button variant="secondary" href={brand.colab}>Open in Colab</Button>
-			<Button variant="secondary" href={brand.molab}>Open in Molab</Button>
+		</div>
+		<div class="flex flex-wrap items-center justify-center gap-4 mb-16 text-xs text-dl-text-dim">
+			<a href={brand.desktop} class="hover:text-dl-text transition-colors inline-flex items-center gap-1">
+				<Download class="w-3 h-3" /> Windows
+			</a>
+			<span>·</span>
+			<a href={brand.molab} class="hover:text-dl-text transition-colors">Molab</a>
+			<span>·</span>
+			<a href={brand.spaces} class="hover:text-dl-text transition-colors">Live demo</a>
 		</div>
 
 		<div class="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto">

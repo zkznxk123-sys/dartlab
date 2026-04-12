@@ -104,7 +104,7 @@ export function buildSoftwareApplicationJsonLd(): SeoThing {
 		author: { '@type': 'Person', name: 'eddmpython', url: 'https://github.com/eddmpython' },
 		publisher: { '@id': organizationId },
 		offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-		license: 'https://opensource.org/licenses/MIT',
+		license: 'https://www.apache.org/licenses/LICENSE-2.0',
 		programmingLanguage: 'Python',
 		codeRepository: brand.repo,
 		keywords: ['DART', 'disclosure', 'OpenDART', 'EDGAR', 'financial statements', 'annual report', 'Python', '전자공시', '사업보고서', '재무제표', '공시분석']
@@ -131,7 +131,7 @@ export function buildSourceCodeJsonLd(): SeoThing {
 			name: 'DartLab',
 			operatingSystem: 'Windows, macOS, Linux'
 		},
-		license: 'https://opensource.org/licenses/MIT',
+		license: 'https://www.apache.org/licenses/LICENSE-2.0',
 		version: brand.version,
 		author: { '@id': `${brand.url}#author` },
 		publisher: { '@id': organizationId }

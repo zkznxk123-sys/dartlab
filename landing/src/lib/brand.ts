@@ -1,9 +1,9 @@
 export const brand = {
 	name: 'DartLab',
 	tagline: '종목코드 하나. 기업의 전체 이야기.',
-	taglineEn: 'One stock code. The whole story.',
-	description: 'DART 전자공시와 EDGAR 공시를 한 줄의 Python으로 구조화하고 비교한다',
-	descriptionEn: 'DART + EDGAR filings, structured and comparable — in one line of Python',
+	taglineEn: 'One stock code. Full company story.',
+	description: '종목코드 하나로 DART·EDGAR 공시를 읽고 비교한다. 2,700+ 한국 기업, 970+ 미국 기업, Python 한 줄.',
+	descriptionEn: 'One stock code → structured Korean DART & US SEC EDGAR filings. 2,700+ KR, 970+ US companies, one line of Python.',
 	version: '0.9.6',
 	url: 'https://eddmpython.github.io/dartlab/',
 	repo: 'https://github.com/eddmpython/dartlab',
