@@ -872,18 +872,18 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         "marketAnalysisFlags",
     }:
         from dartlab.quant.extended import (
-            calcCrosscheckNarrative,
+            calcCrosscheckData,
             calcFundamentalDivergence,
             calcMarketAnalysisFlags,
             calcMarketBeta,
-            calcQuantConclusion,
-            calcRiskNarrative,
-            calcSignalNarrative,
-            calcStrategyNarrative,
+            calcQuantConclusionData,
+            calcRiskData,
+            calcSignalData,
+            calcStrategyData,
             calcStrategySnapshot,
             calcTechnicalSignals,
             calcTechnicalVerdict,
-            calcTrendNarrative,
+            calcTrendData,
         )
         from dartlab.review.builders import (
             fundamentalDivergenceBlock,
@@ -894,22 +894,38 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             technicalSignalsBlock,
             technicalVerdictBlock,
         )
+        from dartlab.review.narrate import (
+            narrateCrosscheck,
+            narrateQuantConclusion,
+            narrateQuantRisk,
+            narrateSignals,
+            narrateStrategyVerdict,
+            narrateTrend,
+        )
 
         if _need("technicalVerdict"):
             b["technicalVerdict"] = _safe(lambda: technicalVerdictBlock(calcTechnicalVerdict(company)))
         if _need("technicalSignals"):
             b["technicalSignals"] = _safe(lambda: technicalSignalsBlock(calcTechnicalSignals(company)))
-        # quant 서사 모듈 5+1 — analysis calc 패턴 (각각 독립, review 가 조합)
-        for qkey, qcalc in [
-            ("trendNarrative", calcTrendNarrative),
-            ("riskNarrative", calcRiskNarrative),
-            ("signalNarrative", calcSignalNarrative),
-            ("strategyNarrative", calcStrategyNarrative),
-            ("crosscheckNarrative", calcCrosscheckNarrative),
-            ("quantConclusion", calcQuantConclusion),
-        ]:
+        # quant 서사 모듈 5+1 — review가 서사를 생성 (엔진=숫자만, review=이야기꾼)
+        _narrate_map = {
+            "trendNarrative": (calcTrendData, lambda d: narrateTrend(d.get("verdict", {})) if d else ""),
+            "riskNarrative": (calcRiskData, lambda d: narrateQuantRisk(d.get("data"), d.get("verdict")) if d else ""),
+            "signalNarrative": (calcSignalData, lambda d: narrateSignals(d.get("data")) if d else ""),
+            "strategyNarrative": (calcStrategyData, lambda d: narrateStrategyVerdict(d.get("data")) if d else ""),
+            "crosscheckNarrative": (calcCrosscheckData, lambda d: narrateCrosscheck(d.get("data")) if d else ""),
+            "quantConclusion": (calcQuantConclusionData, lambda d: narrateQuantConclusion(
+                d.get("trend_label", ""), d.get("bullish", 0), d.get("bearish", 0),
+                d.get("active_styles", []), d.get("diagnosis", "")
+            ) if d else ""),
+        }
+        for qkey, (qcalc, qnarrate) in _narrate_map.items():
             if _need(qkey):
-                b[qkey] = _safe(lambda c=qcalc: quantModuleBlock(qkey, c(company)))
+                def _build(c=qcalc, n=qnarrate):
+                    data = c(company)
+                    narrative = n(data) if data else ""
+                    return quantModuleBlock(qkey, {"narrative": narrative, "data": data})
+                b[qkey] = _safe(_build)
         if _need("strategySnapshot"):
             b["strategySnapshot"] = _safe(lambda: strategySnapshotBlock(calcStrategySnapshot(company)))
         if _need("marketBeta"):

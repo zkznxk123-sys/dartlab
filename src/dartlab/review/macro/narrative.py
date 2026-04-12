@@ -177,6 +177,38 @@ def _narrate_crisis(crisis: dict) -> str:
             f"GHS 모델 기준 3년 내 금융위기 확률이 {prob * 100:.0f}%이다 — 신용 팽창과 자산가격 급등이 동시에 진행 중이다."
         )
 
+    # ── 역사적 맥락 ──
+    hist = crisis.get("historicalContext") or {}
+
+    hy_hist = hist.get("hySpike") or {}
+    if hy_hist.get("totalSpikes", 0) > 0 and hy_hist.get("currentDelta") and hy_hist["currentDelta"] > 0.5:
+        parts.append(
+            f"HY 스프레드 급등은 과거 {hy_hist['totalSpikes']}회 발생했으며 "
+            f"{hy_hist['recessionRate12m'] * 100:.0f}%가 12개월 내 침체로 이어졌다."
+        )
+        if hy_hist.get("nearestMatch"):
+            parts.append(f"현재와 가장 유사한 시기는 {hy_hist['nearestMatch']}이다 ({hy_hist.get('nearestMatchOutcome', '')}).")
+
+    yc_hist = hist.get("yieldCurveInversion") or {}
+    if yc_hist.get("currentInversionStart"):
+        parts.append(
+            f"수익률곡선은 {yc_hist['currentInversionStart']}부터 역전 중이다. "
+            f"과거 역전→침체 중위 기간은 {yc_hist.get('medianLeadMonths', 0):.0f}개월이다."
+        )
+
+    ur_hist = hist.get("unemploymentBounce") or {}
+    if ur_hist.get("currentBounce") is not None and ur_hist["currentBounce"] >= 0.3:
+        parts.append(
+            f"실업률이 12개월 저점에서 {ur_hist['currentBounce']:.1f}%p 반등했다. "
+            f"과거 유사 반등 {ur_hist['totalBounces']}회 중 {ur_hist['recessionRate12m'] * 100:.0f}%가 12개월 내 침체로 이어졌다."
+        )
+
+    sw = hist.get("simultaneousWarnings") or {}
+    if sw.get("flagCount", 0) >= 3:
+        parts.append(
+            f"현재 {sw['flagCount']}개 경고등이 동시 점등 중이다 ({', '.join(sw.get('activeFlags', []))})."
+        )
+
     if not parts:
         parts.append("현재 구조적 위기 징후는 관측되지 않는다.")
 
@@ -324,53 +356,86 @@ def generate_circulation_summary(summary: dict, template: str = "normal") -> str
 
 
 def generate_act_transition(act: int, summary: dict) -> str:
-    """막 간 인과 연결."""
+    """6막 인과 전환 — "앞 막이 뒷 막의 원인".
+
+    1→2: 국면 → 실물 인과 ("이 국면에서 기업 이익은?")
+    2→3: 실물 → 정책 ("기업/물가 상태가 정책을 결정")
+    3→4: 정책 → 금융 ("정책금리가 금융상태를 결정")
+    4→5: 금융 → 시장 ("금융상태가 자산/심리를 결정")
+    5→6: 시장 → 전망 ("현재 시장 상태가 지속될 것인가")
+    """
+    cycle = summary.get("cycle") or {}
+    corporate = summary.get("corporate") or {}
+    rates = summary.get("rates") or {}
+    liquidity = summary.get("liquidity") or {}
+    crisis = summary.get("crisis") or {}
+    assets = summary.get("assets") or {}
+    sentiment = summary.get("sentiment") or {}
+    forecast = summary.get("forecast") or {}
+
     if act == 1:
-        # 1막→2막: 국면의 원인
-        parts = []
-        crisis = summary.get("crisis") or {}
-        liquidity = summary.get("liquidity") or {}
-
-        minsky = crisis.get("minskyPhase") or {}
-        if minsky.get("phaseLabel"):
-            parts.append(f"Minsky 관점에서 현재는 {minsky['phaseLabel']} 국면이다")
-
-        fci = liquidity.get("fci") or {}
-        if fci.get("regimeLabel"):
-            parts.append(f"금융환경은 {fci['regimeLabel']}적이다")
-
-        corporate = summary.get("corporate") or {}
-        ponzi = (corporate.get("ponziRatio") or {}).get("currentRatio")
-        if ponzi is not None and ponzi > 0.25:
-            parts.append(f"기업 Ponzi비율이 {ponzi:.1%}로 취약하다")
-
-        if parts:
-            return "이 국면의 구조적 배경: " + ", ".join(parts) + "."
-        return ""
+        # 1→2: "경제 국면에서 기업 이익은?"
+        phase = cycle.get("phase", "")
+        phase_label = cycle.get("phaseLabel", phase)
+        ec = corporate.get("earningsCycle") or {}
+        yoys = ec.get("yoyChanges") or []
+        last_yoy = yoys[-1] if yoys and yoys[-1] is not None else None
+        if last_yoy is not None:
+            return f"{phase_label} 국면에서 전종목 영업이익은 YoY {last_yoy:+.1f}% — 이 성장의 동력은?"
+        return f"{phase_label} 국면 — 기업 이익과 교역은 이 국면을 뒷받침하는가?"
 
     if act == 2:
-        # 2막→3막: 원인에서 전망으로
-        forecast = summary.get("forecast") or {}
-        rp = forecast.get("recessionProb") or {}
-        prob = _safe(rp.get("probability"), "probability")
-
-        hamilton = forecast.get("hamiltonRegime") or {}
-        hamilton.get("currentRegime", "")
-
+        # 2→3: "기업/물가 상태가 정책을 결정"
+        outlook = (rates.get("outlook") or {}).get("direction", "")
+        cpi = (rates.get("employment") or {}).get("cpi_yoy")
+        ponzi = (corporate.get("ponziRatio") or {}).get("currentRatio")
         parts = []
-        if prob is not None:
-            if prob > 0.3:
-                parts.append(f"침체확률이 {prob * 100:.0f}%로 경계 수준이다")
-            else:
-                parts.append(f"침체확률은 {prob * 100:.0f}%로 낮다")
+        if cpi is not None:
+            parts.append(f"CPI {cpi:.1f}%")
+        if ponzi is not None:
+            parts.append(f"Ponzi비율 {ponzi:.1%}")
+        ctx = " + ".join(parts) if parts else "실물 상태"
+        direction_label = {"cut": "인하", "hold": "동결", "hike": "인상"}.get(outlook, outlook)
+        return f"{ctx} → 연준은 금리 {direction_label}로 대응하고 있다. 이 정책이 금융 시스템에 미치는 영향은?"
+
+    if act == 3:
+        # 3→4: "정책금리가 금융상태를 결정"
+        ff = (rates.get("outlook") or {}).get("level")
+        fci = (liquidity.get("fci") or {}).get("value")
+        hy = (crisis.get("capexPressure") or {}).get("spreadLevel")
+        parts = []
+        if ff is not None:
+            parts.append(f"기준금리 {ff:.1f}%")
+        if fci is not None:
+            parts.append(f"FCI {fci:+.2f}")
+        if hy is not None:
+            parts.append(f"HY {hy:.0f}bp")
+        return f"{' + '.join(parts)} — 금융 시스템에 균열이 있는가?"
+
+    if act == 4:
+        # 4→5: "금융상태가 자산/심리를 결정"
+        fci = (liquidity.get("fci") or {}).get("regimeLabel", "")
+        fg = (sentiment.get("fearGreed") or {}).get("zoneLabel", "")
+        return f"금융환경 {fci} → 시장 심리 {fg} — 자산가격은 이를 어떻게 반영하나?"
+
+    if act == 5:
+        # 5→6: "시장 상태가 지속될 것인가"
+        rp = (forecast.get("recessionProb") or {}).get("probability")
+        hist = (crisis.get("historicalContext") or {})
+        suggested = hist.get("suggestedScenario")
+        parts = []
+        if rp is not None:
+            parts.append(f"침체확률 {rp * 100:.0f}%")
+        if suggested:
+            parts.append(f"다음 장 주의: {suggested}")
 
         conflicts = detect_conflicts(summary)
         if conflicts:
-            parts.append("다만 " + conflicts[0])
+            parts.append(conflicts[0])
 
         if parts:
-            return "전망: " + ". ".join(parts) + "."
-        return "전망: 현재 추세가 지속될 가능성이 높다."
+            return "이 상태가 지속될 것인가? " + ". ".join(parts) + "."
+        return "이 상태가 지속될 것인가?"
 
     return ""
 

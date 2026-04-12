@@ -21,10 +21,8 @@ def _get(row: dict, col: str) -> float:
     return v if v is not None else 0
 
 
-def _safe(numerator: float, denominator: float) -> float | None:
-    if denominator is None or denominator == 0:
-        return None
-    return numerator / denominator
+from dartlab.analysis.financial._constants import ACCRUAL_RATIO_WARNING
+from dartlab.core.finance.calc import safeDiv as _safe
 
 
 # ── 발생액 분석 ──
@@ -368,7 +366,7 @@ def calcEarningsQualityFlags(company, *, basePeriod: str | None = None) -> dict:
     if accrual and accrual["history"]:
         h0 = accrual["history"][0]
         sar = h0.get("sloanAccrualRatio")
-        if sar is not None and sar > 0.10:
+        if sar is not None and sar > ACCRUAL_RATIO_WARNING:
             flags.append(f"Sloan 발생액비율 {sar:.1%} — 이익 현금화 부족")
         ocfNi = h0.get("ocfToNi")
         if ocfNi is not None and 0 < ocfNi < 40:

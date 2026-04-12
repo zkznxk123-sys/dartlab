@@ -687,20 +687,47 @@ def build_outlook_blocks(summary: dict) -> list:
     if tot_chart:
         blocks.append(ChartBlock(tot_chart))
 
-    # ── 리스크 경고 ──
+    # ── 리스크 경고 (역사적 팩트 포함) ──
     flags = []
     if dashboard.get("composite", 0) > 0.3:
         flags.append(f"침체 종합확률 {dashboard.get('composite', 0) * 100:.0f}%")
-    if dashboard.get("historicalMatch"):
-        flags.append(f"역사 패턴: {dashboard['historicalMatch']}년과 유사")
+
+    # 역사적 팩트 기반 경고 (기존 규칙 기반 "resembles_XXXX" 교체)
+    hist = crisis.get("historicalContext") or {}
+    hy_hist = hist.get("hySpike") or {}
+    if hy_hist.get("currentDelta") and hy_hist["currentDelta"] > 0.5:
+        flags.append(
+            f"HY 급등 — 과거 {hy_hist.get('totalSpikes', 0)}회 중 "
+            f"{hy_hist.get('recessionRate12m', 0) * 100:.0f}%가 12개월 내 침체"
+        )
+    yc_hist = hist.get("yieldCurveInversion") or {}
+    if yc_hist.get("currentInversionStart"):
+        flags.append(
+            f"YC 역전 {yc_hist['currentInversionStart']}~ "
+            f"(과거 중위 {yc_hist.get('medianLeadMonths', 0):.0f}개월 후 침체)"
+        )
+    sw = hist.get("simultaneousWarnings") or {}
+    if sw.get("flagCount", 0) >= 3:
+        flags.append(
+            f"동시 경고등 {sw['flagCount']}개 — "
+            f"과거 유사 시기 {sw.get('recessionRate18m', 0) * 100:.0f}%가 18개월 내 침체"
+        )
+
+    # 기존 경고 유지
     cg = crisis.get("creditGap") or {}
     if cg.get("zone") in ("warning", "danger"):
         flags.append(f"Credit-to-GDP gap {cg.get('zoneLabel', '')} ({cg.get('gap', 0):+.1f}%p)")
     ghs = crisis.get("ghsScore") or {}
     if ghs.get("crisisProb", 0) > 0.2:
         flags.append(f"GHS 위기확률 {ghs.get('crisisProb', 0) * 100:.0f}%")
+
     if flags:
         blocks.append(FlagBlock(flags, kind="warning"))
+
+    # 역사적 맥락 요약 (있으면)
+    hist_desc = hist.get("description")
+    if hist_desc and hist.get("riskLevel") in ("moderate", "elevated", "high"):
+        blocks.append(TextBlock(f"역사적 맥락: {hist_desc}"))
 
     return blocks
 

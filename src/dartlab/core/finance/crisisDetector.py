@@ -53,6 +53,7 @@ class RecessionDashboard:
     components: dict[str, float | None]  # 개별 신호 확률/점수
     historicalMatch: str | None  # "resembles_2001" | "resembles_2008" | "normal" 등
     description: str
+    historicalFacts: dict | None = None  # 역사적 팩트 (HistoricalContext 결과)
 
 
 # ══════════════════════════════════════

@@ -934,20 +934,10 @@ def calcValuationSynthesis(company: Any, *, basePeriod: str | None = None) -> di
         if minVal > 0 and maxVal / minVal > 10:
             warnings.append(f"모델 간 극단 괴리 ({maxVal / minVal:.0f}배) — 합성 신뢰도 낮음")
 
-    # 기술적 분석 컨텍스트 (선택적 — quant 실패 시 무시)
+    # 기술적 분석 컨텍스트 — review가 주입 (analysis ↛ quant: L2↔L2 금지)
+    # valuation은 순수 재무 데이터만으로 가치 산출. 기술적 컨텍스트가 필요한 경우
+    # review 레이어에서 calcTechnicalVerdict 결과를 주입한다.
     technicalContext = None
-    try:
-        from dartlab.quant.extended import calcTechnicalVerdict
-
-        tv = calcTechnicalVerdict(company)
-        if tv and tv.get("verdict"):
-            technicalContext = {
-                "verdict": tv["verdict"],
-                "score": tv.get("score", 0),
-                "rsi": tv.get("rsi"),
-            }
-    except (ImportError, ValueError, TypeError, AttributeError):
-        pass
 
     return {
         "fairValueRange": result.fairValueRange,

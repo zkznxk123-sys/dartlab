@@ -328,32 +328,10 @@ class NarrativeAnalysis:
 # ══════════════════════════════════════
 
 
-def _fmtNum(v: float | None, suffix: str = "", precision: int = 1) -> str:
-    """숫자 포맷."""
-    if v is None:
-        return "-"
-    return f"{v:,.{precision}f}{suffix}"
-
-
-def _fmtBig(v: float | None) -> str:
-    """자동 단위 포맷 (조/억/만)."""
-    if v is None:
-        return "-"
-    av = abs(v)
-    if av >= 1e12:
-        return f"{v / 1e12:,.1f}조"
-    if av >= 1e8:
-        return f"{v / 1e8:,.0f}억"
-    if av >= 1e4:
-        return f"{v / 1e4:,.0f}만"
-    return f"{v:,.0f}"
-
-
-def _fmtPrice(v: float | None) -> str:
-    """주가 포맷."""
-    if v is None:
-        return "-"
-    return f"{v:,.0f}원"
+# core SSOT re-export (하위 호환)
+from dartlab.core.finance.fmt import fmtBig as _fmtBig
+from dartlab.core.finance.fmt import fmtNum as _fmtNum
+from dartlab.core.finance.fmt import fmtPrice as _fmtPrice
 
 
 def _opinionColor(opinion: str) -> str:

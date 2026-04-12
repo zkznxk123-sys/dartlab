@@ -7,7 +7,7 @@
 
 from __future__ import annotations
 
-from dartlab.analysis.financial._helpers import (
+from dartlab.core.finance.helpers import (
     annualColsFromPeriods,
     sumBorrowingsKorean,
     toDictBySnakeId,

@@ -16,12 +16,12 @@ log = logging.getLogger(__name__)
 
 
 def _parse(val) -> float | None:
-    if val is None:
-        return None
-    try:
-        return float(str(val).replace(",", ""))
-    except (ValueError, TypeError):
-        return None
+    """문자열/숫자 → float. core SSOT 사용."""
+    if isinstance(val, (int, float)):
+        return float(val)
+    from dartlab.core.finance.helpers import parseNumStr
+
+    return parseNumStr(val)
 
 
 def _load_account(lf: pl.LazyFrame, sj: str, account: str, year: str) -> dict[str, float]:

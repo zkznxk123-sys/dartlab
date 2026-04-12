@@ -129,12 +129,12 @@ def _screen_price_based(preset: str, market: str, universe: list[str] | None = N
 
 
 def _parse(val) -> float | None:
-    if val is None:
-        return None
-    try:
-        return float(str(val).replace(",", ""))
-    except (ValueError, TypeError):
-        return None
+    """문자열/숫자 → float. core SSOT 사용."""
+    if isinstance(val, (int, float)):
+        return float(val)
+    from dartlab.core.finance.helpers import parseNumStr
+
+    return parseNumStr(val)
 
 
 def analyze_screen(*, market: str = "KR", preset: str = "quality", stockCode: str | None = None, **kwargs) -> dict:

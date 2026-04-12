@@ -11,7 +11,7 @@ from typing import Any
 import numpy as np
 import polars as pl
 
-from dartlab.analysis.financial._memoize import memoized_calc as _memoized_calc
+from dartlab.core.memory import memoized_calc as _memoized_calc
 
 # ── OHLCV 캐싱 헬퍼 ──
 
@@ -244,16 +244,15 @@ def calcFundamentalDivergence(company, *, basePeriod: str | None = None) -> dict
     """
     from dartlab.quant.analyzer import technicalVerdict
 
-    # 재무 등급 가져오기
+    # 재무 등급: Company._cache에서 읽기 (analysis가 이미 계산했다면 재사용).
+    # analysis를 직접 import하지 않는다 (L2↔L2 금지).
+    # review가 두 엔진을 조합할 때 scorecard를 주입한다.
     financialGrade = None
-    try:
-        from dartlab.analysis.financial.scorecard import calcScorecard
-
-        sc = calcScorecard(company, basePeriod=basePeriod)
+    cache = getattr(company, "_cache", None)
+    if cache is not None:
+        sc = cache.get("_calcScorecard:None") or cache.get("_calcScorecard:" + str(basePeriod))
         if sc:
             financialGrade = sc.get("overallGrade") or sc.get("grade")
-    except (ImportError, KeyError, ValueError, TypeError, AttributeError):
-        pass
 
     # 기술적 판단
     ohlcv = _fetchOHLCV(company)
@@ -449,58 +448,46 @@ def calcMarketAnalysisFlags(company) -> list[str]:
 
 
 @_memoized_calc
-def calcTrendNarrative(company) -> dict | None:
-    """추세 서사 — MA 정배열 + ADX + 12년 audit 근거."""
-    from dartlab.review.narrate import narrateTrend
-
+def calcTrendData(company) -> dict | None:
+    """추세 데이터 — MA 정배열 + ADX. 서사는 review가 생성."""
     verdict = calcTechnicalVerdict(company)
     if verdict is None:
         return None
-    return {"narrative": narrateTrend(verdict), "data": verdict.get("categories", {}).get("trend")}
+    return {"data": verdict.get("categories", {}).get("trend"), "verdict": verdict}
 
 
 @_memoized_calc
-def calcRiskNarrative(company) -> dict | None:
-    """리스크 서사 — ATR + 베타 + 변동성 등급."""
-    from dartlab.review.narrate import narrateQuantRisk
-
+def calcRiskData(company) -> dict | None:
+    """리스크 데이터 — ATR + 베타 + 변동성. 서사는 review가 생성."""
     verdict = calcTechnicalVerdict(company)
     risk = calcMarketRisk(company)
-    return {"narrative": narrateQuantRisk(risk, verdict), "data": risk}
+    return {"data": risk, "verdict": verdict}
 
 
 @_memoized_calc
-def calcSignalNarrative(company) -> dict | None:
-    """수급 신호 서사 — 최근 20일 매수/매도 신호."""
-    from dartlab.review.narrate import narrateSignals
-
+def calcSignalData(company) -> dict | None:
+    """수급 신호 데이터 — 최근 20일 매수/매도. 서사는 review가 생성."""
     signals = calcTechnicalSignals(company)
-    return {"narrative": narrateSignals(signals), "data": signals}
+    return {"data": signals}
 
 
 @_memoized_calc
-def calcStrategyNarrative(company) -> dict | None:
-    """전략 검증 서사 — 스타일별 Sharpe + 진입 신호."""
-    from dartlab.review.narrate import narrateStrategyVerdict
-
+def calcStrategyData(company) -> dict | None:
+    """전략 검증 데이터 — 스타일별 Sharpe + 진입. 서사는 review가 생성."""
     strategy = calcStrategySnapshot(company)
-    return {"narrative": narrateStrategyVerdict(strategy), "data": strategy}
+    return {"data": strategy}
 
 
 @_memoized_calc
-def calcCrosscheckNarrative(company) -> dict | None:
-    """재무-시장 교차 서사 — analysis 등급 vs 기술적 판단."""
-    from dartlab.review.narrate import narrateCrosscheck
-
+def calcCrosscheckData(company) -> dict | None:
+    """교차 검증 데이터 — analysis 등급 vs 기술적 판단. 서사는 review가 생성."""
     divergence = calcFundamentalDivergence(company)
-    return {"narrative": narrateCrosscheck(divergence), "data": divergence}
+    return {"data": divergence}
 
 
 @_memoized_calc
-def calcQuantConclusion(company) -> dict | None:
-    """결론 — 5 서사 방향 카운트 (가중치 X). review 가 마지막에 호출."""
-    from dartlab.review.narrate import narrateQuantConclusion
-
+def calcQuantConclusionData(company) -> dict | None:
+    """결론 데이터 — 5축 방향 집계. 서사는 review가 생성."""
     verdict = calcTechnicalVerdict(company)
     signals = calcTechnicalSignals(company)
     strategy = calcStrategySnapshot(company)
@@ -520,7 +507,15 @@ def calcQuantConclusion(company) -> dict | None:
             if isinstance(v, dict) and v.get("entry_today") and v.get("status") == "ok":
                 active_styles.append(k)
     diagnosis = (divergence or {}).get("diagnosis", "")
-    return {"narrative": narrateQuantConclusion(trend_label, bullish, bearish, active_styles, diagnosis)}
+    return {
+        "trend_label": trend_label,
+        "bullish": bullish,
+        "bearish": bearish,
+        "active_styles": active_styles,
+        "diagnosis": diagnosis,
+    }
+
+
 
 
 @_memoized_calc

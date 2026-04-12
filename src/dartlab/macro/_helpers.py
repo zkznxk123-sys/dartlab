@@ -165,6 +165,27 @@ def fetch_with_history(g, series_id: str) -> dict[str, float | None]:
     return result
 
 
+def fetch_monthly_dict(g, series_id: str) -> dict[str, float] | None:
+    """시리즈를 {YYYY-MM: value} dict로 반환. 역사적 분석용.
+
+    gather DataFrame을 월간 dict로 변환. 같은 달에 여러 값이면 마지막 값.
+    """
+    try:
+        df = g.macro(series_id)
+        if df is None or len(df) == 0:
+            return None
+        dates = df.get_column("date").to_list()
+        values = df.get_column("value").to_list()
+        monthly: dict[str, float] = {}
+        for d, v in zip(dates, values):
+            if v is not None:
+                monthly[str(d)[:7]] = float(v)
+        return monthly if monthly else None
+    except Exception as e:  # noqa: BLE001
+        log.debug("fetch_monthly_dict(%s) 실패: %s", series_id, e)
+        return None
+
+
 def collect_timeseries(g, series_map: dict[str, str]) -> dict[str, list[dict] | None]:
     """여러 시리즈의 최근 시계열을 일괄 수집."""
     ts: dict[str, list[dict] | None] = {}

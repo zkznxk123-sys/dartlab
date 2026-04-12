@@ -318,3 +318,39 @@ def memory_guard(threshold_pct: float = 60) -> Callable[[F], F]:
         return wrapper  # type: ignore[return-value]
 
     return decorator
+
+
+# ── calc 함수 메모이제이션 ──
+
+
+def memoized_calc(fn: Callable[..., Any]) -> Callable[..., Any]:
+    """calc 함수 결과를 Company._cache에 메모이제이션.
+
+    analysis/credit/quant의 calc 함수가 공통으로 사용.
+    key: ``_{함수명}:{basePeriod}``
+    Company._cache(BoundedCache)가 없으면 캐시 없이 실행.
+    결과가 None이면 캐시하지 않는다.
+    """
+    import inspect
+
+    _has_base_period = "basePeriod" in inspect.signature(fn).parameters
+
+    @functools.wraps(fn)
+    def wrapper(company: Any, *, basePeriod: str | None = None) -> Any:
+        cache = getattr(company, "_cache", None)
+        key = f"_{fn.__name__}:{basePeriod}"
+
+        if cache is not None and key in cache:
+            return cache[key]
+
+        if _has_base_period:
+            result = fn(company, basePeriod=basePeriod)
+        else:
+            result = fn(company)
+
+        if cache is not None and result is not None:
+            cache[key] = result
+
+        return result
+
+    return wrapper

@@ -13,40 +13,7 @@ analysis-credit 간 순환 의존 제거를 위해 credit/ 내부로 이동.
 
 from __future__ import annotations
 
-import functools
-import inspect
-from typing import Any, Callable
-
-# ── memoized_calc 자체 구현 (analysis 의존 제거) ──
-
-
-def _memoized_calc(fn: Callable[..., Any]) -> Callable[..., Any]:
-    """calc 함수 결과를 Company._cache에 메모이제이션.
-
-    analysis/_memoize.py와 동일 로직. credit 독립성을 위해 자체 구현.
-    """
-    _has_base_period = "basePeriod" in inspect.signature(fn).parameters
-
-    @functools.wraps(fn)
-    def wrapper(company: Any, *, basePeriod: str | None = None) -> Any:
-        cache = getattr(company, "_cache", None)
-        key = f"_{fn.__name__}:{basePeriod}"
-
-        if cache is not None and key in cache:
-            return cache[key]
-
-        if _has_base_period:
-            result = fn(company, basePeriod=basePeriod)
-        else:
-            result = fn(company)
-
-        if cache is not None:
-            cache[key] = result
-
-        return result
-
-    return wrapper
-
+from dartlab.core.memory import memoized_calc as _memoized_calc
 
 # ── credit 엔진 호출 ──
 

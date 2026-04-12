@@ -22,11 +22,21 @@ from dartlab.core.finance.crisisDetector import (
     recessionDashboard,
 )
 from dartlab.core.finance.liquidity import capexPressure
+from dartlab.macro._helpers import get_gather
+
+
+def _frozen_to_dict(obj) -> dict | None:
+    """frozen dataclass → dict. None이면 None."""
+    if obj is None:
+        return None
+    from dataclasses import asdict
+
+    return asdict(obj)
 
 
 def _fetch_crisis_data(market: str, as_of: str | None = None) -> dict[str, float | list | None]:
     """gather에서 위기 감지 지표 수집."""
-    from dartlab.macro._helpers import fetch_latest, fetch_series_list, fetch_yoy, get_gather
+    from dartlab.macro._helpers import fetch_latest, fetch_series_list, fetch_yoy
 
     g = get_gather(as_of)
     data: dict[str, float | list | None] = {}
@@ -189,6 +199,57 @@ def analyze_crisis(*, market: str = "US", as_of: str | None = None, overrides: d
     else:
         result["dollarSafeHaven"] = None
 
+    # ── 역사적 맥락 (L0 순수함수) ──
+    result["historicalContext"] = None
+    if market.upper() == "US":
+        try:
+            from dartlab.core.finance.historicalContext import buildHistoricalContext
+            from dartlab.macro._helpers import fetch_monthly_dict
+
+            g_hist = get_gather(as_of)
+            hist_data: dict = {}
+            for key, sid in [
+                ("hy_spread", "BAMLH0A0HYM2"),
+                ("spread_10y3m", "T10Y3M"),
+                ("spread_10y2y", "T10Y2Y"),
+                ("unrate", "UNRATE"),
+                ("cpi_raw", "CPIAUCSL"),
+                ("indpro", "INDPRO"),
+                ("vix", "VIXCLS"),
+                ("nfci", "NFCI"),
+                ("fedfunds", "FEDFUNDS"),
+            ]:
+                md = fetch_monthly_dict(g_hist, sid)
+                if md:
+                    hist_data[key] = md
+
+            if hist_data:
+                hc = buildHistoricalContext(hist_data)
+                result["historicalContext"] = {
+                    # 위기
+                    "hySpike": _frozen_to_dict(hc.hySpike),
+                    "yieldCurveInversion": _frozen_to_dict(hc.yieldCurveInversion),
+                    "unemploymentBounce": _frozen_to_dict(hc.unemploymentBounce),
+                    "cpiAcceleration": hc.cpiAcceleration,
+                    "simultaneousWarnings": _frozen_to_dict(hc.simultaneousWarnings),
+                    # 호황
+                    "bullishSignals": _frozen_to_dict(hc.bullishSignals),
+                    "hyCompression": _frozen_to_dict(hc.hyCompression),
+                    # 역사적 사건
+                    "historicalEvents": [_frozen_to_dict(e) for e in hc.historicalEvents] if hc.historicalEvents else None,
+                    # 종합
+                    "riskLevel": hc.riskLevel,
+                    "riskLabel": hc.riskLabel,
+                    "opportunityLevel": hc.opportunityLevel,
+                    "opportunityLabel": hc.opportunityLabel,
+                    # 다음 장
+                    "suggestedScenario": hc.suggestedScenario,
+                    "suggestedScenarioReason": hc.suggestedScenarioReason,
+                    "description": hc.description,
+                }
+        except (ImportError, KeyError, ValueError, TypeError) as e:
+            log.debug("역사적 맥락 계산 실패: %s", e)
+
     # 침체 대시보드 (다른 축 결과 필요 — 독립 실행 시 가용 데이터만 사용)
     probit_prob = kwargs.get("probitProb")
     lei_signal = kwargs.get("leiSignal")
@@ -207,6 +268,7 @@ def analyze_crisis(*, market: str = "US", as_of: str | None = None, overrides: d
         "zoneLabel": dashboard.zoneLabel,
         "components": dashboard.components,
         "historicalMatch": dashboard.historicalMatch,
+        "historicalFacts": result.get("historicalContext"),
         "description": dashboard.description,
     }
 
@@ -359,7 +421,7 @@ def analyze_crisis(*, market: str = "US", as_of: str | None = None, overrides: d
     except (KeyError, ValueError, TypeError, AttributeError):
         pass
 
-    from dartlab.macro._helpers import collect_timeseries, get_gather
+    from dartlab.macro._helpers import collect_timeseries
 
     g_ts = get_gather(as_of)
     result["timeseries"] = collect_timeseries(g_ts, {"hy_spread": "BAMLH0A0HYM2", "vix": "VIXCLS", "dxy": "DTWEXBGS"})

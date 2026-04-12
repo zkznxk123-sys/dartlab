@@ -338,12 +338,12 @@ _ACCOUNT_SJ: dict[str, list[str]] = {
 
 
 def _parse_amount(val) -> float | None:
-    if val is None:
-        return None
-    try:
-        return float(str(val).replace(",", ""))
-    except (ValueError, TypeError):
-        return None
+    """문자열/숫자 → float. core.finance.helpers.parseNumStr SSOT."""
+    if isinstance(val, (int, float)):
+        return float(val)
+    from dartlab.core.finance.helpers import parseNumStr
+
+    return parseNumStr(val)
 
 
 def extract_account(df, key: str) -> float | None:

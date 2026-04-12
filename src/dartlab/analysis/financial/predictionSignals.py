@@ -48,10 +48,13 @@ def _get(row: dict, col: str) -> float:
     return v if v is not None else 0
 
 
-def _safe(num: float, den: float) -> float | None:
-    if den is None or den == 0:
-        return None
-    return num / den
+from dartlab.analysis.financial._constants import (
+    FX_SENSITIVITY_HIGH,
+    FX_SENSITIVITY_MODERATE,
+    TREND_RSQUARED_HIGH,
+    TREND_RSQUARED_MEDIUM,
+)
+from dartlab.core.finance.calc import safeDiv as _safe
 
 
 def _getStockCode(company) -> str | None:
@@ -455,7 +458,7 @@ def calcStructuralBreak(company, *, basePeriod: str | None = None) -> dict | Non
         else:
             # 변화점 없음 — 추세 일관
             _, _, r2 = ols(list(range(len(clean))), clean)
-            reliability = "high" if r2 > 0.7 else ("medium" if r2 > 0.4 else "low")
+            reliability = "high" if r2 > TREND_RSQUARED_HIGH else ("medium" if r2 > TREND_RSQUARED_MEDIUM else "low")
             metrics.append(
                 {
                     "name": name,
@@ -549,7 +552,8 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
 
     # 민감도 분류
     fxExposure = (
-        "high" if abs(elasticity.revenueToFx) >= 0.5 else ("moderate" if abs(elasticity.revenueToFx) >= 0.2 else "low")
+        "high" if abs(elasticity.revenueToFx) >= FX_SENSITIVITY_HIGH
+        else ("moderate" if abs(elasticity.revenueToFx) >= FX_SENSITIVITY_MODERATE else "low")
     )
     commodityExposure = "high" if sectorKey in _COMMODITY_SECTORS else "low"
     rateSensitivity = "high" if (sectorKey in _RATE_SENSITIVE_SECTORS or elasticity.nimToRate > 0) else "low"

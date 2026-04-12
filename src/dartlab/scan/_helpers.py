@@ -116,18 +116,12 @@ def scan_parquets(api_type: str, keep_cols: list[str]) -> pl.DataFrame:
 
 
 def parse_num(s) -> float | None:
-    """문자열/숫자 → float. '-', '', None → None."""
-    if s is None:
-        return None
+    """문자열/숫자 → float. core.finance.helpers.parseNumStr SSOT."""
     if isinstance(s, (int, float)):
         return float(s)
-    s = str(s).strip().replace(",", "")
-    if s in ("", "-"):
-        return None
-    try:
-        return float(s)
-    except ValueError:
-        return None
+    from dartlab.core.finance.helpers import parseNumStr
+
+    return parseNumStr(s)
 
 
 def extractAccount(sub: pl.DataFrame, ids: set, nms: set, amtCol: str = "thstrm_amount") -> float | None:
