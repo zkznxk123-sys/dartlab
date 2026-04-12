@@ -274,6 +274,12 @@ def renderMarkdown(review, *, chart_dir: str | None = None) -> str:
                 icon = {"critical": "[!!]", "warning": "[!]", "positive": "[+]", "neutral": "[-]"}
                 parts.append(f"**{icon.get(t.severity, '')} {t.title}**")
 
+        # ── 빈 섹션 안내 ──
+        if not section.blocks:
+            parts.append(f"_{section.title}: 데이터가 부족하여 이 섹션은 생략되었습니다._\n")
+            currentActSections.append(section)
+            continue
+
         # ── 블록 렌더링 ──
         for block in section.blocks:
             isEmphasized = getattr(block, "emphasized", False)

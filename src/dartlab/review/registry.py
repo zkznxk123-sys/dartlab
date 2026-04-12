@@ -1311,6 +1311,22 @@ def buildReview(
         for sec in review.sections:
             sec.summary = buildSectionSummary(sec)
 
+    # ── type=None(기본)일 때 보고서 상단에 타입 가이드 삽입 ──
+    if type is None and section is None:
+        from dartlab.review.blocks import TextBlock
+
+        guide = (
+            "보고서 타입 안내: "
+            "c.review(type='executive') 경영 3분컷 / "
+            "type='credit' 신용분석 / "
+            "type='dividend' 배당 / "
+            "type='governance' 지배구조 / "
+            "type='macro' 매크로 / "
+            "type='thesis' 가설 검증"
+        )
+        if review.sections:
+            review.sections[0].blocks.insert(0, TextBlock(guide, style="dim"))
+
     return review
 
 
