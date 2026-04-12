@@ -1169,7 +1169,6 @@ def buildReview(
 
     # ── thesis 타입: 서사 주도 특수 경로 (블록화 예외) ──
     if reportType.key == "thesis":
-        from dartlab.review import Section
         from dartlab.review.builders import thesisReportBlocks
 
         corpName = getattr(company, "corpName", "")
