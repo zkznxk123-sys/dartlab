@@ -24,7 +24,6 @@ def _get(row: dict, col: str) -> float:
 from dartlab.analysis.financial._constants import ACCRUAL_RATIO_WARNING
 from dartlab.core.finance.calc import safeDiv as _safe
 
-
 # ── 발생액 분석 ──
 
 

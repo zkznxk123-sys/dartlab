@@ -16,7 +16,6 @@ from dartlab.review.blocks import TextBlock
 from dartlab.review.section import Section
 
 from .builders import (
-    build_allocation_blocks,
     build_causation_blocks,
     build_dashboard_blocks,
     build_outlook_blocks,
@@ -26,7 +25,6 @@ from .catalog import SECTIONS
 from .narrative import (
     generate_act_transition,
     generate_circulation_summary,
-    generate_so_what,
     narrate_overall_story,
 )
 
