@@ -111,7 +111,6 @@ def test_parallel_ground_total_under_2s(patch_runtime, monkeypatch):
     """
     from dartlab.ai.runtime.core import analyze
 
-    monkeypatch.delenv("DARTLAB_AI_PREGROUND_SYNC", raising=False)
 
     company = _make_mock_company()
     start = time.monotonic()
@@ -125,23 +124,6 @@ def test_parallel_ground_total_under_2s(patch_runtime, monkeypatch):
     elapsed = time.monotonic() - start
     assert chunks_received, "첫 chunk 받지 못함"
     assert elapsed < 5.0, f"병렬 fire 가 작동하지 않음. 첫 chunk 까지 {elapsed:.2f}초 (목표 < 5초)"
-
-
-def test_sync_mode_falls_back_to_sequential(patch_runtime, monkeypatch):
-    """DARTLAB_AI_PREGROUND_SYNC=1 시 동기 경로 (fallback) 동작 확인."""
-    from dartlab.ai.runtime.core import analyze
-
-    monkeypatch.setenv("DARTLAB_AI_PREGROUND_SYNC", "1")
-
-    company = _make_mock_company()
-    start = time.monotonic()
-    for event in analyze(company, "최근 실적 알려줘"):
-        if event.kind == "chunk":
-            break
-
-    elapsed = time.monotonic() - start
-    # 동기 모드 = 1+1+1 = 약 3초 이상이어야 함 (병렬 아니므로)
-    assert elapsed >= 2.5, f"sync 모드가 동기적으로 동작하지 않음. {elapsed:.2f}초 (>= 2.5초 기대)"
 
 
 def test_ground_timeout_does_not_block(patch_runtime, monkeypatch):
@@ -158,7 +140,6 @@ def test_ground_timeout_does_not_block(patch_runtime, monkeypatch):
     monkeypatch.setattr(core, "_preGroundSearch", very_slow)
     monkeypatch.setattr(core, "_gatherInsightHints", very_slow)
     monkeypatch.setenv("DARTLAB_PREGROUND_TIMEOUT", "0.5")
-    monkeypatch.delenv("DARTLAB_AI_PREGROUND_SYNC", raising=False)
 
     company = _make_mock_company()
     start = time.monotonic()
