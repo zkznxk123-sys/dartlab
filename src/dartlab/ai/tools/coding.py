@@ -365,6 +365,17 @@ class DartlabCodeExecutor(LocalPythonBackend):
             preamble += f'c = Company("{stockCode}")\n'
             preamble += "company = c\n"
 
+        # 엔진 가이드 동적 로드 — AI가 어떤 축/기능이 있는지 미리 안다.
+        # scan 20축, macro 11축 등 하부 엔진이 바뀌어도 자동 반영.
+        preamble += (
+            "try:\n"
+            "    _SCAN_GUIDE = str(dartlab.scan())\n"
+            "    _MACRO_GUIDE = str(dartlab.macro())\n"
+            "except Exception:\n"
+            "    _SCAN_GUIDE = ''\n"
+            "    _MACRO_GUIDE = ''\n"
+        )
+
         # 결과 캡처 래퍼: 마지막 expression의 결과를 출력
         wrappedCode = self._wrapForCapture(cleanCode)
         fullCode = preamble + wrappedCode
