@@ -12,15 +12,40 @@
 > 해석은 AI (`c.reviewer()`) 또는 사람의 몫이다.
 > 세상에 대해서도 이야기 할 수 있고, 세상이 이래서 기업이 이렇게 간다는 관점도 다룬다.
 
-## 3단계 템플릿 체계
+## 보고서 타입 + 기업유형 2축 체계
 
-| 레벨 | 이름 | 결정하는 것 | 예시 |
+기존 3단계 (perspective / preset / template) → **reportType 단일축**으로 통합.
+기업유형(template)은 자동 감지 보조로만 독립 유지.
+
+### 1축 — reportType (무엇을 집중적으로 볼 것인가)
+
+11종. 각 타입 = `{sectionOrder, emphasize, focusQuestions, detail}`.
+
+| key | 집중 관점 | 대상 | 구조 |
 |---|---|---|---|
-| **1. 관점 (perspective)** | PERSPECTIVE_TEMPLATES | **섹션 순서** | 바텀업/탑다운/사이클/가치/성장/위기 |
-| **2. 기업유형 (template)** | STORY_TEMPLATES | **강조 블록** (★) | 사이클/프랜차이즈/턴어라운드/성장/자본집약/지주/현금부자 |
-| **3. 프리셋 (preset)** | PRESETS | **섹션 부분집합** | 경영진/감사/신용/성장/밸류에이션 |
+| `full` | 전체 6막 인과 | 일반 분석 | 블록 |
+| `executive` | 결론/수익/현금/가치 3분컷 | 의사결정자 | 블록 |
+| `credit` | 안정성/현금/자금/7축등급 | 채권/여신 | 블록 |
+| `valuation` | DCF/상대가치/매출전망 | 가치투자 | 블록 |
+| `growth` | CAGR/마진확장/투자효율 | 성장투자 | 블록 |
+| `crisis` | 부실/레버리지/유동성 | 위험 진단 | 블록 |
+| `audit` | 이익품질/재무정합성/공시변화 | 감사/포렌식 | 블록 |
+| `dividend` | 배당지속성/FCF커버리지/총환원 | 인컴 투자자 | 블록 |
+| `governance` | 임원보수 괴리/외부이사 독립성/지분구조 | 거버넌스 리스크 | 블록 |
+| `macro` | 사이클 + 역사적 팩트 (10 macro 블록 + companyCyclePosition) | 탑다운 | 블록 |
+| `thesis` | 가설 → 증거 수집 → 판정 | 논제 점검 | **NarrativeSection** (서사 주도) |
 
-perspective × template × preset 은 **독립 차원**. 동시 사용 가능.
+### 2축 — template (이 기업은 어떤 유형인가, 자동 감지)
+
+7종. reportType과 **독립 차원**으로 `emphasize`를 추가 오버레이:
+사이클/프랜차이즈/턴어라운드/성장/자본집약/지주/현금부자.
+
+`c.review(type="full", template="사이클")` 동시 사용 가능 — 6막 순서 + 사이클 강조.
+
+### 블록화 vs 서사화
+
+블록은 **표+숫자+경고 반복의 균질 보고서**에 최적. 10/11 타입은 블록 기반.
+`thesis`만 예외 — 가설→증거→판정은 블록으로 쪼개면 서사가 깨져 **NarrativeSection**(Text 중심) 단위로 렌더링.
 
 ## 호출 계약
 
@@ -28,21 +53,30 @@ perspective × template × preset 은 **독립 차원**. 동시 사용 가능.
 import dartlab
 c = dartlab.Company("005930")
 
-# 기본 (바텀업 6막)
+# 기본 (full = 6막 전체)
 c.review()
-c.review("수익성")                    # 단일 섹션
+c.review("수익성")                       # 단일 섹션 (기존 유지)
 
-# 기업유형 템플릿 (강조 블록 ★)
-c.review(template="사이클")
+# 보고서 타입 지정
+c.review(type="credit")                   # 신용분석
+c.review(type="dividend")                 # 배당 지속성 + 총환원
+c.review(type="governance")               # 임원보수 괴리 + 외부이사 독립성
+c.review(type="macro")                    # 사이클 + 역사적 유사 에포크
+c.review(type="thesis", hypothesis="...") # AI 논제 검증 (서사)
 
-# 관점별 순서 (섹션 재배치)
-c.review(perspective="topDown")       # 매크로→시장→재무 순서
-c.review(perspective="가치")          # 한글도 가능
-c.review(perspective="crisis", template="턴어라운드")  # 동시 사용
+# 기업유형 자동 감지 (독립 차원)
+c.review(template="auto")
+c.review(type="full", template="사이클")
+
+# (deprecated — 다음 릴리즈에 제거)
+c.review(perspective="crisis")   # DeprecationWarning → type="crisis"로 매핑
+c.review(preset="audit")         # DeprecationWarning → type="audit"로 매핑
 
 # AI 종합의견
 c.reviewer(guide="...")
 ```
+
+한글 alias: `c.review(type="신용")`, `c.review(type="배당")`, `c.review(type="지배구조")` 등.
 
 ## 노트북
 
