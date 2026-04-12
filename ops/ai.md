@@ -221,18 +221,89 @@ db.pull()                  # HF → 로컬 DB merge (upsert)
 - [ ] notes enrichment 메시지가 결과에 섞이지 않았는가?
 - [ ] 6막 인과 구조로 해석했는가? (숫자 나열이 아닌가)
 
+### 표준 질문 세트 (규격)
+
+기본 세트 — 매 audit마다 동일한 질문을 돌려야 비교 가능.
+
+| 종목 | 축 | 표준 질문 |
+|------|------|----------|
+| 삼성전자(005930) | 수익성 | "삼성전자 수익성 분석해줘" |
+| 삼성전자(005930) | 현금흐름 | "삼성전자 현금흐름 분석해줘" |
+| 삼성전자(005930) | 안정성 | "삼성전자 안정성 분석해줘" |
+| 대우건설(047040) | 수익성 | "대우건설 수익성 분석해줘" |
+| 대우건설(047040) | 현금흐름 | "대우건설 현금흐름 분석해줘" |
+| 대우건설(047040) | 안정성 | "대우건설 안정성 분석해줘" |
+| 삼양식품(003230) | 수익성 | "삼양식품 수익성 분석해줘" |
+| 삼양식품(003230) | 현금흐름 | "삼양식품 현금흐름 분석해줘" |
+| 삼양식품(003230) | 안정성 | "삼양식품 안정성 분석해줘" |
+
+확장 세트 (선택): scan 질문, macro 질문, compare 질문, 메타 지식 질문.
+
+### 등급 판정 기준 (상세)
+
+| 등급 | 수치 정확도 | 코드 실행 | 해석 품질 | 응답 길이 | 특징 |
+|------|:---:|:---:|:---:|:---:|---|
+| **P** (Pass) | 정확 | 0~2라운드, 에러 없음 | 수치 + 인과 + 한 줄 결론 | 1,000~3,500자 | 6막 구조, SuperMaster 활용 확인 |
+| **T** (Tolerable) | 정확 | 2~3라운드 또는 비효율 | 수치는 있으나 인과 해석 약함 | 3,500~6,000자 | 코드 선제출 + 가정 프레임, 중복 출력 |
+| **C** (Critical) | 오류 또는 "-" 반복 | 3라운드 소진 또는 실행 실패 | "해석 불가" 면피 | 임의 | dict 키 잘못 추측, hallucination |
+| **V** (Violation) | - | 엔진 미사용 | 규칙 위반 | 임의 | 메타 질문에 회사 데이터 인용, review() 남용 |
+
+### 자동화 출력 포맷
+
+각 audit 결과는 구조화된 JSON으로 저장한다.
+
+```json
+{
+  "timestamp": "2026-04-12T13:45:00",
+  "provider": "oauth-codex",
+  "question": "삼성전자 수익성 분석해줘",
+  "stockCode": "005930",
+  "axis": "수익성",
+  "grade": "P",
+  "metrics": {
+    "responseLength": 1049,
+    "codeRounds": 1,
+    "hasError": false,
+    "mentionsPlaybook": true,
+    "hasTableStructure": true
+  },
+  "issues": [],
+  "response": "..."
+}
+```
+
 ### 실행 주기
 
 | 주기 | 대상 | 목적 |
 |------|------|------|
-| 시스템 프롬프트 변경 시 | 삼성전자 수익성/현금흐름/안정성 | 프롬프트 회귀 확인 |
-| provider 추가/변경 시 | 3개 질문 × 해당 provider | provider별 품질 비교 |
-| 릴리즈 전 | 삼성전자 + 1개 추가 | 전체 회귀 |
+| 시스템 프롬프트 변경 시 | 표준 세트 9개 | 프롬프트 회귀 확인 |
+| provider 추가/변경 시 | 표준 세트 3~9개 × 해당 provider | provider별 품질 비교 |
+| 릴리즈 전 | 표준 세트 전체 9개 | 전체 회귀 |
+| 일상 (주 1회) | 랜덤 샘플 3개 | 장기 품질 드리프트 감지 |
+
+### 실행 방법
+
+```bash
+uv run python -X utf8 scripts/audit/aiAudit.py               # 표준 세트 9개 전체
+uv run python -X utf8 scripts/audit/aiAudit.py --quick       # 3개만 (삼성전자 3축)
+uv run python -X utf8 scripts/audit/aiAudit.py --provider gemini  # provider 지정
+uv run python -X utf8 scripts/audit/aiAudit.py --stock 005930     # 단일 종목
+```
+
+결과는 `data/audit/ai/{YYYY-MM-DD}/` 에 JSON + 요약 md 저장.
+
+### 발견 시 처리 규칙
+
+- **C/V 등급 나오면 즉시 중단** + 원인 분석
+- 문제 분류 → 해당 파일 근본 수정 (feedback_code_quality.md)
+- 수정 후 같은 질문으로 재실행 → P 나올 때까지
+- T 등급은 용납 (완벽하지 않아도 사용 가능). 3회 연속 T면 개선 대상으로 등록.
 
 ### 저장
 
-- KnowledgeDB `executions` + `insights` 테이블에 저장
-- 레거시: `data/dart/auditAi/` (파일 기반, 폐기 예정)
+- 구조화된 결과: `data/audit/ai/{YYYY-MM-DD}/results.json`
+- 요약 리포트: `data/audit/ai/{YYYY-MM-DD}/report.md`
+- KnowledgeDB `executions` + `insights` 테이블 (기존)
 
 ## ContextBuilder + ACE Playbook (2026-04-09 도입)
 

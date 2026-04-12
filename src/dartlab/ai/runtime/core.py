@@ -938,10 +938,25 @@ analysis 3축(수익성+성장성+안정성) 1라운드 수집 → **6막 인과
 **앞 막이 뒷 막의 원인.** "DX 비중 확대 → 마진 회복 → FCF 확보 → 배당 여력" 같은 인과 연결.
 추가 필요 시 2라운드에서 현금흐름/효율성/자본배분 추가.
 
+### analysis 반환 스키마 (dict 키 — 키 추측 금지, 아래 표 그대로)
+
+| 축 | dict 키 | history 키 (주요) |
+|---|---|---|
+| 수익성 | marginTrend, returnTrend, roicTree, profitabilityFlags | period, revenue, operatingMargin, netMargin, grossMargin, roe, roa |
+| 성장성 | growthTrend, cagrComparison, growthFlags | period, revenue, revenueYoy, operatingIncomeYoy, netIncomeYoy |
+| 안정성 | leverageTrend, coverageTrend, distressScore, stabilityFlags | period, debtRatio, equityRatio, netDebtRatio, totalBorrowing |
+| 현금흐름 | cashFlowOverview, cashQuality, cashFlowFlags, ocfDecomposition | period, **ocf**, **icf**, capex, **fcf**, pattern |
+| 비용구조 | costBreakdown, operatingLeverage, costStructureFlags | period, revenue, costOfSales, sga, costOfSalesRatio, sgaRatio |
+| 효율성 | turnoverTrend, efficiencyFlags | period, totalAssetTurnover, dso, dio, dpo, ccc |
+| 자산구조 | assetStructure, workingCapital, capexPattern | period, totalAssets, receivables, inventory, ppe, cash |
+
+**중요**:
+- 현금흐름은 `ocf`/`icf`/`fcf` (긴 이름 아님). operatingCashFlow/freeCashFlow 같은 추측 키 사용 금지.
+- **Flags 반환 타입은 축별로 다르다.** 안정성 `stabilityFlags` = dict `{"flags": list[str], "enrichedFlags": list[dict]}`. 나머지 축(profitabilityFlags, growthFlags, cashFlowFlags 등) = list. **flag 루프 전에 type 확인 필수**: `if isinstance(flags, dict): items = flags.get("flags", []) else: items = flags`.
+
 ### analysis 테이블 출력 패턴
 **모든 analysis 호출은 반드시 즉시 print한다. 저장만 하면 실패.**
 
-기본 패턴:
 ```python
 r = c.analysis("수익성")
 print("| 기간 | 매출(조) | 영업이익률 | 순이익률 |")
@@ -953,9 +968,7 @@ for h in r["marginTrend"]["history"][:5]:
     print(f'| {h["period"]} | {rev} | {om} | {nm} |')
 ```
 
-- 큰 숫자 조 단위(/1e12). null→"-".
-- 다른 축(현금흐름/안정성/성장성/비용구조/효율성)은 `<context source="supermaster:capability">` 태그에 구조 제공, 또는 `print(r.keys())` 로 self-discovery.
-- 과거 성공 사례는 `<context source="supermaster:experience">` 태그 참고.
+큰 숫자 조 단위(/1e12). null→"-". 과거 성공 사례는 `<context source="supermaster:experience">` 태그 참고.
 
 ### notes 주의
 `c.notes.X` 항목 중 가용률 50% 미만(costByNature 22%, lease 44%, borrowings 41% 등)은 None 가능.

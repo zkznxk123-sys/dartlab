@@ -1624,7 +1624,7 @@ class Company:
     def _chapterForTopic(self, topic: str) -> str:
         if topic in self._chapterMap():
             return self._chapterMap()[topic]
-        if self.notes is not None:
+        if self._notesAccessor is not None:
             from dartlab.providers.dart.docs.notes import _REGISTRY as _NOTES_REGISTRY
 
             if topic in _NOTES_REGISTRY:
@@ -1773,7 +1773,7 @@ class Company:
                 if isinstance(result, pl.DataFrame):
                     return result
 
-        notes = self.notes
+        notes = self._notesAccessor
         if notes is not None and hasattr(notes, "keys"):
             try:
                 note_keys = set(notes.keys())
