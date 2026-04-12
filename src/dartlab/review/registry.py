@@ -914,17 +914,27 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             "signalNarrative": (calcSignalData, lambda d: narrateSignals(d.get("data")) if d else ""),
             "strategyNarrative": (calcStrategyData, lambda d: narrateStrategyVerdict(d.get("data")) if d else ""),
             "crosscheckNarrative": (calcCrosscheckData, lambda d: narrateCrosscheck(d.get("data")) if d else ""),
-            "quantConclusion": (calcQuantConclusionData, lambda d: narrateQuantConclusion(
-                d.get("trend_label", ""), d.get("bullish", 0), d.get("bearish", 0),
-                d.get("active_styles", []), d.get("diagnosis", "")
-            ) if d else ""),
+            "quantConclusion": (
+                calcQuantConclusionData,
+                lambda d: narrateQuantConclusion(
+                    d.get("trend_label", ""),
+                    d.get("bullish", 0),
+                    d.get("bearish", 0),
+                    d.get("active_styles", []),
+                    d.get("diagnosis", ""),
+                )
+                if d
+                else "",
+            ),
         }
         for qkey, (qcalc, qnarrate) in _narrate_map.items():
             if _need(qkey):
+
                 def _build(c=qcalc, n=qnarrate):
                     data = c(company)
                     narrative = n(data) if data else ""
                     return quantModuleBlock(qkey, {"narrative": narrative, "data": data})
+
                 b[qkey] = _safe(_build)
         if _need("strategySnapshot"):
             b["strategySnapshot"] = _safe(lambda: strategySnapshotBlock(calcStrategySnapshot(company)))

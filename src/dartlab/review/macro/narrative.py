@@ -187,7 +187,9 @@ def _narrate_crisis(crisis: dict) -> str:
             f"{hy_hist['recessionRate12m'] * 100:.0f}%가 12개월 내 침체로 이어졌다."
         )
         if hy_hist.get("nearestMatch"):
-            parts.append(f"현재와 가장 유사한 시기는 {hy_hist['nearestMatch']}이다 ({hy_hist.get('nearestMatchOutcome', '')}).")
+            parts.append(
+                f"현재와 가장 유사한 시기는 {hy_hist['nearestMatch']}이다 ({hy_hist.get('nearestMatchOutcome', '')})."
+            )
 
     yc_hist = hist.get("yieldCurveInversion") or {}
     if yc_hist.get("currentInversionStart"):
@@ -205,9 +207,7 @@ def _narrate_crisis(crisis: dict) -> str:
 
     sw = hist.get("simultaneousWarnings") or {}
     if sw.get("flagCount", 0) >= 3:
-        parts.append(
-            f"현재 {sw['flagCount']}개 경고등이 동시 점등 중이다 ({', '.join(sw.get('activeFlags', []))})."
-        )
+        parts.append(f"현재 {sw['flagCount']}개 경고등이 동시 점등 중이다 ({', '.join(sw.get('activeFlags', []))}).")
 
     if not parts:
         parts.append("현재 구조적 위기 징후는 관측되지 않는다.")
@@ -421,7 +421,7 @@ def generate_act_transition(act: int, summary: dict) -> str:
     if act == 5:
         # 5→6: "시장 상태가 지속될 것인가"
         rp = (forecast.get("recessionProb") or {}).get("probability")
-        hist = (crisis.get("historicalContext") or {})
+        hist = crisis.get("historicalContext") or {}
         suggested = hist.get("suggestedScenario")
         parts = []
         if rp is not None:

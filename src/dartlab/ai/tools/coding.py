@@ -498,12 +498,14 @@ class DartlabCodeExecutor(LocalPythonBackend):
             parts.append("        print(f'dict keys: {list(_result.keys())}')")
             parts.append("        for _k, _v in list(_result.items())[:3]:")
             parts.append("            if isinstance(_v, dict) and 'history' in _v:")
-            parts.append("                print(f'  {_k}.history[0] keys: {list(_v[\"history\"][0].keys()) if _v[\"history\"] else \"empty\"}')")
+            parts.append(
+                '                print(f\'  {_k}.history[0] keys: {list(_v["history"][0].keys()) if _v["history"] else "empty"}\')'
+            )
             parts.append("            elif isinstance(_v, list) and _v:")
             parts.append("                print(f'  {_k}: list[{len(_v)}]')")
             parts.append("            else:")
             parts.append("                print(f'  {_k}: {type(_v).__name__}')")
-            parts.append("        print('→ history가 있으면: for h in r[\"키\"][\"history\"][:5]: print(h)')")
+            parts.append('        print(\'→ history가 있으면: for h in r["키"]["history"][:5]: print(h)\')')
             parts.append("    else:")
             parts.append("        print(_result)")
             return "\n".join(parts)

@@ -71,9 +71,12 @@ def macroReport(
     m = meta["dashboard"]
     sections.append(
         Section(
-            key=m.key, partId=m.partId, title=m.title,
+            key=m.key,
+            partId=m.partId,
+            title=m.title,
             blocks=build_dashboard_blocks(summary),
-            helper=m.helper, aiGuide=m.aiGuide,
+            helper=m.helper,
+            aiGuide=m.aiGuide,
         )
     )
 
@@ -86,9 +89,12 @@ def macroReport(
         phase_blocks.append(TextBlock(t1, style="transition"))
     sections.append(
         Section(
-            key=m.key, partId=m.partId, title=m.title,
+            key=m.key,
+            partId=m.partId,
+            title=m.title,
             blocks=phase_blocks,
-            helper=m.helper, aiGuide=m.aiGuide,
+            helper=m.helper,
+            aiGuide=m.aiGuide,
         )
     )
 
@@ -101,9 +107,12 @@ def macroReport(
         causation_blocks.append(TextBlock(t2, style="transition"))
     sections.append(
         Section(
-            key=m.key, partId=m.partId, title=m.title,
+            key=m.key,
+            partId=m.partId,
+            title=m.title,
             blocks=causation_blocks,
-            helper=m.helper, aiGuide=m.aiGuide,
+            helper=m.helper,
+            aiGuide=m.aiGuide,
         )
     )
 
@@ -117,9 +126,12 @@ def macroReport(
         policy_blocks.append(TextBlock(t3, style="transition"))
     sections.append(
         Section(
-            key=m.key, partId=m.partId, title=m.title,
+            key=m.key,
+            partId=m.partId,
+            title=m.title,
             blocks=policy_blocks,
-            helper=m.helper, aiGuide=m.aiGuide,
+            helper=m.helper,
+            aiGuide=m.aiGuide,
         )
     )
 
@@ -132,9 +144,12 @@ def macroReport(
         financial_blocks.append(TextBlock(t4, style="transition"))
     sections.append(
         Section(
-            key=m.key, partId=m.partId, title=m.title,
+            key=m.key,
+            partId=m.partId,
+            title=m.title,
             blocks=financial_blocks,
-            helper=m.helper, aiGuide=m.aiGuide,
+            helper=m.helper,
+            aiGuide=m.aiGuide,
         )
     )
 
@@ -146,9 +161,12 @@ def macroReport(
         market_blocks.append(TextBlock(t5, style="transition"))
     sections.append(
         Section(
-            key=m.key, partId=m.partId, title=m.title,
+            key=m.key,
+            partId=m.partId,
+            title=m.title,
             blocks=market_blocks,
-            helper=m.helper, aiGuide=m.aiGuide,
+            helper=m.helper,
+            aiGuide=m.aiGuide,
         )
     )
 
@@ -157,9 +175,12 @@ def macroReport(
     outlook_blocks = build_outlook_blocks(summary)
     sections.append(
         Section(
-            key=m.key, partId=m.partId, title=m.title,
+            key=m.key,
+            partId=m.partId,
+            title=m.title,
             blocks=outlook_blocks,
-            helper=m.helper, aiGuide=m.aiGuide,
+            helper=m.helper,
+            aiGuide=m.aiGuide,
         )
     )
 

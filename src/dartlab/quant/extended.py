@@ -516,8 +516,6 @@ def calcQuantConclusionData(company) -> dict | None:
     }
 
 
-
-
 @_memoized_calc
 def calcStrategySnapshot(company) -> dict | None:
     """전략별 진입 진단 — 8 검증된 스타일 일괄 백테스트.

@@ -85,6 +85,11 @@ experiments/105_filingSemanticMap/docsStore/stemIndex.npz
 
 # Video production artifacts
 video/
+
+# SNS carousel outputs (pipeline lives in scripts/sns/, outputs only here)
+dartlab-sns/
+scripts/sns/remotion-sns/node_modules/
+scripts/sns/remotion-sns/out/
 tests/fixtures/dart/docs/034730.parquet
 tests/fixtures/dart/docs/055550.parquet
 unsloth_compiled_cache/

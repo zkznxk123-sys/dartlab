@@ -270,8 +270,22 @@ MODERN_RISK_SCENARIOS: dict[str, dict] = {
         "reference": "Koo (2009) Balance Sheet Recession, 일본 1990~2010",
         "mild": {"fedfunds": 0.5, "cpi_yoy": 0.5, "indpro_yoy": 0.0, "term_spread": 0.5},
         "moderate": {"fedfunds": 0.1, "cpi_yoy": 0.0, "indpro_yoy": -1.0, "term_spread": 0.3, "unrate": 5.5},
-        "severe": {"fedfunds": 0.0, "cpi_yoy": -0.5, "indpro_yoy": -3.0, "term_spread": 0.2, "unrate": 7.0, "hy_spread": 400},
-        "extreme": {"fedfunds": 0.0, "cpi_yoy": -1.5, "indpro_yoy": -5.0, "term_spread": 0.1, "unrate": 8.0, "hy_spread": 600},
+        "severe": {
+            "fedfunds": 0.0,
+            "cpi_yoy": -0.5,
+            "indpro_yoy": -3.0,
+            "term_spread": 0.2,
+            "unrate": 7.0,
+            "hy_spread": 400,
+        },
+        "extreme": {
+            "fedfunds": 0.0,
+            "cpi_yoy": -1.5,
+            "indpro_yoy": -5.0,
+            "term_spread": 0.1,
+            "unrate": 8.0,
+            "hy_spread": 600,
+        },
     },
     "대만 해협 분쟁": {
         "description": "미중 군사 대치 — 반도체 공급망 단절 + 글로벌 무역 마비",
@@ -318,7 +332,14 @@ STRUCTURAL_SCENARIOS: dict[str, dict] = {
         "mild": {"cpi_yoy": 5.0, "indpro_yoy": -1.0, "fedfunds": 5.0, "unrate": 5.0},
         "moderate": {"cpi_yoy": 7.0, "indpro_yoy": -3.0, "fedfunds": 6.0, "unrate": 6.0, "hy_spread": 500},
         "severe": {"cpi_yoy": 9.0, "indpro_yoy": -6.0, "fedfunds": 7.0, "unrate": 8.0, "hy_spread": 700, "vix": 40},
-        "extreme": {"cpi_yoy": 14.0, "indpro_yoy": -12.0, "fedfunds": 12.0, "unrate": 10.0, "hy_spread": 1000, "vix": 55},
+        "extreme": {
+            "cpi_yoy": 14.0,
+            "indpro_yoy": -12.0,
+            "fedfunds": 12.0,
+            "unrate": 10.0,
+            "hy_spread": 1000,
+            "vix": 55,
+        },
     },
     "디플레이션": {
         "description": "물가 하락 + 경기 위축 — 유동성 함정",
@@ -338,7 +359,15 @@ STRUCTURAL_SCENARIOS: dict[str, dict] = {
         "mild": {"cpi_yoy": 2.5, "unrate": 4.5, "fedfunds": 3.0, "vix": 18, "hy_spread": 350},
         "moderate": {"cpi_yoy": 2.0, "unrate": 4.0, "fedfunds": 2.5, "vix": 14, "hy_spread": 300, "indpro_yoy": 3.0},
         "severe": {"cpi_yoy": 1.8, "unrate": 3.5, "fedfunds": 2.0, "vix": 12, "hy_spread": 250, "indpro_yoy": 4.0},
-        "extreme": {"cpi_yoy": 1.5, "unrate": 3.0, "fedfunds": 1.5, "vix": 10, "hy_spread": 200, "indpro_yoy": 5.0, "nfci": -1.0},
+        "extreme": {
+            "cpi_yoy": 1.5,
+            "unrate": 3.0,
+            "fedfunds": 1.5,
+            "vix": 10,
+            "hy_spread": 200,
+            "indpro_yoy": 5.0,
+            "nfci": -1.0,
+        },
     },
     "경착륙": {
         "description": "급격한 긴축 후 침체 진입",
@@ -358,7 +387,15 @@ STRUCTURAL_SCENARIOS: dict[str, dict] = {
         "mild": {"cpi_yoy": 3.0, "fedfunds": 4.5, "unrate": 4.5, "vix": 18, "hy_spread": 380},
         "moderate": {"cpi_yoy": 2.5, "fedfunds": 4.0, "unrate": 4.2, "vix": 15, "hy_spread": 340, "indpro_yoy": 2.0},
         "severe": {"cpi_yoy": 2.2, "fedfunds": 3.5, "unrate": 4.0, "vix": 13, "hy_spread": 300, "indpro_yoy": 3.0},
-        "extreme": {"cpi_yoy": 2.0, "fedfunds": 3.0, "unrate": 3.8, "vix": 12, "hy_spread": 280, "indpro_yoy": 4.0, "nfci": -0.8},
+        "extreme": {
+            "cpi_yoy": 2.0,
+            "fedfunds": 3.0,
+            "unrate": 3.8,
+            "vix": 12,
+            "hy_spread": 280,
+            "indpro_yoy": 4.0,
+            "nfci": -0.8,
+        },
     },
 }
 
@@ -421,7 +458,14 @@ TYPED_SCENARIOS: dict[str, dict] = {
         "mild": {"cpi_yoy": 5.0, "fedfunds": 5.5, "term_spread": -0.3},
         "moderate": {"cpi_yoy": 7.0, "fedfunds": 7.0, "term_spread": -0.8, "hy_spread": 500},
         "severe": {"cpi_yoy": 9.0, "fedfunds": 9.0, "term_spread": -1.5, "hy_spread": 700, "vix": 40},
-        "extreme": {"cpi_yoy": 14.0, "fedfunds": 15.0, "term_spread": -2.0, "hy_spread": 1000, "vix": 50, "unrate": 10.0},
+        "extreme": {
+            "cpi_yoy": 14.0,
+            "fedfunds": 15.0,
+            "term_spread": -2.0,
+            "hy_spread": 1000,
+            "vix": 50,
+            "unrate": 10.0,
+        },
     },
 }
 
@@ -663,65 +707,77 @@ def list_all_scenarios(market: str = "US") -> list[dict]:
     result: list[dict] = []
 
     for name, val in HISTORICAL_SCENARIOS.items():
-        result.append({
-            "name": name,
-            "category": "역사적 재현",
-            "type": val.get("type", ""),
-            "severity": val.get("severity", ""),
-            "description": val["description"],
-        })
+        result.append(
+            {
+                "name": name,
+                "category": "역사적 재현",
+                "type": val.get("type", ""),
+                "severity": val.get("severity", ""),
+                "description": val["description"],
+            }
+        )
 
     for name, val in DFAST_SCENARIOS.items():
-        result.append({
-            "name": name,
-            "category": "Fed DFAST",
-            "type": val.get("type", ""),
-            "severity": val.get("severity", ""),
-            "description": val["description"],
-        })
+        result.append(
+            {
+                "name": name,
+                "category": "Fed DFAST",
+                "type": val.get("type", ""),
+                "severity": val.get("severity", ""),
+                "description": val["description"],
+            }
+        )
 
     for type_name, val in TYPED_SCENARIOS.items():
         for sev in SEVERITIES:
             if sev in val:
-                result.append({
-                    "name": f"{type_name} ({sev})",
-                    "category": "유형별",
-                    "type": type_name,
-                    "severity": sev,
-                    "description": val["description"],
-                })
+                result.append(
+                    {
+                        "name": f"{type_name} ({sev})",
+                        "category": "유형별",
+                        "type": type_name,
+                        "severity": sev,
+                        "description": val["description"],
+                    }
+                )
 
     for name, val in MODERN_RISK_SCENARIOS.items():
         for sev in SEVERITIES:
             if sev in val:
-                result.append({
-                    "name": f"{name} ({sev})",
-                    "category": "현대적 리스크",
-                    "type": val.get("type", name),
-                    "severity": sev,
-                    "description": val["description"],
-                })
+                result.append(
+                    {
+                        "name": f"{name} ({sev})",
+                        "category": "현대적 리스크",
+                        "type": val.get("type", name),
+                        "severity": sev,
+                        "description": val["description"],
+                    }
+                )
 
     for name, val in STRUCTURAL_SCENARIOS.items():
         for sev in SEVERITIES:
             if sev in val:
-                result.append({
-                    "name": f"{name} ({sev})",
-                    "category": "구조적",
-                    "type": val.get("type", name),
-                    "severity": sev,
-                    "description": val["description"],
-                })
+                result.append(
+                    {
+                        "name": f"{name} ({sev})",
+                        "category": "구조적",
+                        "type": val.get("type", name),
+                        "severity": sev,
+                        "description": val["description"],
+                    }
+                )
 
     for name, val in KR_SCENARIOS.items():
         for sev in SEVERITIES:
             if sev in val:
-                result.append({
-                    "name": f"{name} ({sev})",
-                    "category": "한국 특화",
-                    "type": name,
-                    "severity": sev,
-                    "description": val["description"],
-                })
+                result.append(
+                    {
+                        "name": f"{name} ({sev})",
+                        "category": "한국 특화",
+                        "type": name,
+                        "severity": sev,
+                        "description": val["description"],
+                    }
+                )
 
     return result

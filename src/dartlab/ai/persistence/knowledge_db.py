@@ -682,7 +682,17 @@ class KnowledgeDB:
             "SELECT intent, sector, bullet, success_count, fail_count, quality, source, created_at, last_used FROM playbook"
         ).fetchall()
         playbook_data = [
-            {"intent": r[0], "sector": r[1], "bullet": r[2], "success_count": r[3], "fail_count": r[4], "quality": r[5], "source": r[6], "created_at": r[7], "last_used": r[8]}
+            {
+                "intent": r[0],
+                "sector": r[1],
+                "bullet": r[2],
+                "success_count": r[3],
+                "fail_count": r[4],
+                "quality": r[5],
+                "source": r[6],
+                "created_at": r[7],
+                "last_used": r[8],
+            }
             for r in pb_rows
         ]
         (out / "playbook.json").write_text(json.dumps(playbook_data, ensure_ascii=False, indent=2), encoding="utf-8")

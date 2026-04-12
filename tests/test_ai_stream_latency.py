@@ -111,7 +111,6 @@ def test_parallel_ground_total_under_2s(patch_runtime, monkeypatch):
     """
     from dartlab.ai.runtime.core import analyze
 
-
     company = _make_mock_company()
     start = time.monotonic()
     chunks_received = []

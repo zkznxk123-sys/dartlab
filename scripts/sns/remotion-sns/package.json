@@ -1,0 +1,21 @@
+{
+  "name": "dartlab-remotion-sns",
+  "version": "0.1.0",
+  "private": true,
+  "description": "dartlab Instagram carousel card renderer (1080x1350)",
+  "scripts": {
+    "studio": "remotion studio",
+    "render:all": "bash ../render_carousel.sh"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.300",
+    "remotion": "^4.0.300",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}

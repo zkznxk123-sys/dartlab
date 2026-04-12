@@ -552,7 +552,8 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
 
     # 민감도 분류
     fxExposure = (
-        "high" if abs(elasticity.revenueToFx) >= FX_SENSITIVITY_HIGH
+        "high"
+        if abs(elasticity.revenueToFx) >= FX_SENSITIVITY_HIGH
         else ("moderate" if abs(elasticity.revenueToFx) >= FX_SENSITIVITY_MODERATE else "low")
     )
     commodityExposure = "high" if sectorKey in _COMMODITY_SECTORS else "low"

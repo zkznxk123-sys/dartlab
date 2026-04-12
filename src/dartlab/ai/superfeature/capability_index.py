@@ -50,6 +50,7 @@ class CapabilityIndex:
         """CAPABILITIES dict 로드 (캐시)."""
         try:
             from dartlab.guide._generated import CAPABILITIES
+
             return CAPABILITIES
         except ImportError:
             return {}

@@ -236,7 +236,9 @@ def analyze_crisis(*, market: str = "US", as_of: str | None = None, overrides: d
                     "bullishSignals": _frozen_to_dict(hc.bullishSignals),
                     "hyCompression": _frozen_to_dict(hc.hyCompression),
                     # 역사적 사건
-                    "historicalEvents": [_frozen_to_dict(e) for e in hc.historicalEvents] if hc.historicalEvents else None,
+                    "historicalEvents": [_frozen_to_dict(e) for e in hc.historicalEvents]
+                    if hc.historicalEvents
+                    else None,
                     # 종합
                     "riskLevel": hc.riskLevel,
                     "riskLabel": hc.riskLabel,

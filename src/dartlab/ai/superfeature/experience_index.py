@@ -31,10 +31,7 @@ class ExperienceHit:
     def toPromptText(self) -> str:
         """프롬프트 주입용 형식. 질문 + 성공 코드."""
         code_preview = self.code[:800]
-        return (
-            f"### 유사 질문: {self.question[:120]}\n"
-            f"성공한 코드:\n```python\n{code_preview}\n```\n"
-        )
+        return f"### 유사 질문: {self.question[:120]}\n성공한 코드:\n```python\n{code_preview}\n```\n"
 
 
 class ExperienceIndex:

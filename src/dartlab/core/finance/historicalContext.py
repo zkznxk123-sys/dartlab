@@ -69,7 +69,7 @@ def _yoy(d: dict[str, float]) -> dict[str, float]:
     result: dict[str, float] = {}
     for m, v in d.items():
         y, mo = int(m[:4]), int(m[5:7])
-        prev = f"{y-1:04d}-{mo:02d}"
+        prev = f"{y - 1:04d}-{mo:02d}"
         if prev in d and abs(d[prev]) > 1e-10:
             result[m] = ((v - d[prev]) / abs(d[prev])) * 100
     return result
@@ -238,9 +238,9 @@ def hySpikesToRecession(
                 else:
                     nearest_outcome = "침체 없음"
 
-    desc_parts = [f"HY 스프레드 3개월 +{threshold_bp*100:.0f}bp 이상 급등: 과거 {len(spikes)}회"]
+    desc_parts = [f"HY 스프레드 3개월 +{threshold_bp * 100:.0f}bp 이상 급등: 과거 {len(spikes)}회"]
     if pre_rec:
-        desc_parts.append(f"12개월 내 침체 {within_12}/{len(pre_rec)} ({rate*100:.0f}%)")
+        desc_parts.append(f"12개월 내 침체 {within_12}/{len(pre_rec)} ({rate * 100:.0f}%)")
     if nearest:
         desc_parts.append(f"가장 유사: {nearest} ({nearest_outcome})")
 
@@ -297,8 +297,7 @@ def yieldCurveInversionsToRecession(
     desc_parts = [f"Yield Curve 역전: 과거 {len(inversions)}회"]
     if leads:
         desc_parts.append(
-            f"역전→침체 평균 {np.mean(leads):.0f}개월, 중위 {np.median(leads):.0f}개월 "
-            f"(범위 {min(leads)}~{max(leads)})"
+            f"역전→침체 평균 {np.mean(leads):.0f}개월, 중위 {np.median(leads):.0f}개월 (범위 {min(leads)}~{max(leads)})"
         )
     if current_start:
         desc_parts.append(f"현재 {current_start}부터 역전 중 ({current_dur}개월째)")
@@ -336,9 +335,7 @@ def unemploymentBounceToRecession(
         bounce = ur_monthly[m] - low
         if bounce >= threshold_pp:
             # 이번 달에 처음 돌파?
-            prev_bounce = ur_monthly[months[i - 1]] - min(
-                ur_monthly[months[j]] for j in range(max(0, i - 13), i)
-            )
+            prev_bounce = ur_monthly[months[i - 1]] - min(ur_monthly[months[j]] for j in range(max(0, i - 13), i))
             if prev_bounce < threshold_pp:
                 mtr = _months_to_next_recession(m)
                 bounces.append((m, ur_monthly[m], low, mtr))
@@ -359,7 +356,7 @@ def unemploymentBounceToRecession(
 
     desc_parts = [f"실업률 12개월 저점 대비 +{threshold_pp}%p 이상 반등: 과거 {len(bounces)}회"]
     if pre_rec:
-        desc_parts.append(f"12개월 내 침체 {within_12}/{len(pre_rec)} ({rate*100:.0f}%)")
+        desc_parts.append(f"12개월 내 침체 {within_12}/{len(pre_rec)} ({rate * 100:.0f}%)")
     if current_bounce is not None and current_bounce >= threshold_pp:
         desc_parts.append(f"현재 저점 대비 +{current_bounce}%p 반등 중")
 
@@ -482,9 +479,7 @@ def simultaneousWarningFlags(
 
     # 18개월 내 침체 비율
     pre_rec = [
-        (m, flags)
-        for m, flags in multi_warn_months
-        if not _is_recession(m) and _months_to_next_recession(m) < 999
+        (m, flags) for m, flags in multi_warn_months if not _is_recession(m) and _months_to_next_recession(m) < 999
     ]
     within_18 = sum(1 for m, _ in pre_rec if _months_to_next_recession(m) <= 18)
     rate = within_18 / len(pre_rec) if pre_rec else 0.0
@@ -499,14 +494,8 @@ def simultaneousWarningFlags(
             overlap = set(flags) & active_set
             if len(overlap) >= 2:
                 mtr = _months_to_next_recession(m)
-                outcome = (
-                    "침체 중"
-                    if _is_recession(m)
-                    else (f"{mtr}개월 후 침체" if mtr < 24 else "침체 없음")
-                )
-                similar.append(
-                    {"month": m, "flags": flags, "outcome": outcome, "overlap": list(overlap)}
-                )
+                outcome = "침체 중" if _is_recession(m) else (f"{mtr}개월 후 침체" if mtr < 24 else "침체 없음")
+                similar.append({"month": m, "flags": flags, "outcome": outcome, "overlap": list(overlap)})
             if len(similar) >= 5:
                 break
 
@@ -515,7 +504,7 @@ def simultaneousWarningFlags(
         desc += f" ({', '.join(active)})"
     desc += f". 과거 3개+ 동시 점등 {len(multi_warn_months)}회"
     if pre_rec:
-        desc += f", 18개월 내 침체 {within_18}/{len(pre_rec)} ({rate*100:.0f}%)"
+        desc += f", 18개월 내 침체 {within_18}/{len(pre_rec)} ({rate * 100:.0f}%)"
 
     return SimultaneousWarnings(
         activeFlags=active,
@@ -584,11 +573,13 @@ def hyCompressionToExpansion(
     latest = max(d3.keys()) if d3 else None
     current_delta = d3.get(latest) if latest else None
 
-    desc_parts = [f"HY 스프레드 3개월 -{abs(threshold_bp)*100:.0f}bp 이상 급락 (신용 완화): 과거 {len(compressions)}회"]
+    desc_parts = [
+        f"HY 스프레드 3개월 -{abs(threshold_bp) * 100:.0f}bp 이상 급락 (신용 완화): 과거 {len(compressions)}회"
+    ]
     if avg_exp:
         desc_parts.append(f"회복 초기 급락 후 평균 {avg_exp:.0f}개월 확장 지속")
     if current_delta is not None and current_delta < threshold_bp:
-        desc_parts.append(f"현재 3개월 {current_delta*100:+.0f}bp — 신용 완화 진행 중")
+        desc_parts.append(f"현재 3개월 {current_delta * 100:+.0f}bp — 신용 완화 진행 중")
 
     return HYCompressionHistory(
         totalCompressions=len(compressions),
@@ -687,12 +678,8 @@ def bullishSignalFlags(
             overlap = set(signals) & active_set
             if len(overlap) >= 3:
                 mtr = _months_to_next_recession(m)
-                outcome = (
-                    f"{mtr}개월 확장 지속" if mtr < 999 and not _is_recession(m) else "확장 중"
-                )
-                similar.append(
-                    {"month": m, "signals": signals, "outcome": outcome, "overlap": list(overlap)}
-                )
+                outcome = f"{mtr}개월 확장 지속" if mtr < 999 and not _is_recession(m) else "확장 중"
+                similar.append({"month": m, "signals": signals, "outcome": outcome, "overlap": list(overlap)})
             if len(similar) >= 5:
                 break
 
@@ -1109,10 +1096,7 @@ def buildHistoricalContext(
     # 역사적 사건
     if events:
         top = events[0]
-        desc_parts.append(
-            f"역사적 유사 사건: {top.eventName} (유사도 {top.similarity}). "
-            f"당시 결과: {top.outcome}"
-        )
+        desc_parts.append(f"역사적 유사 사건: {top.eventName} (유사도 {top.similarity}). 당시 결과: {top.outcome}")
 
     if not desc_parts:
         desc_parts.append(f"역사적 맥락: 위험 {label}, 기회 {opp_label}")
@@ -1130,8 +1114,7 @@ def buildHistoricalContext(
                 if nr:
                     suggested_scenario = nr
                     suggested_reason = (
-                        f"현재 = {top_event.eventName} 유사 ({top_event.similarity}). "
-                        f"당시 다음 장: {ne or nr}"
+                        f"현재 = {top_event.eventName} 유사 ({top_event.similarity}). 당시 다음 장: {ne or nr}"
                     )
                 break
 

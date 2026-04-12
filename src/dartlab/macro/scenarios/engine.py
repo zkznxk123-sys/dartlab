@@ -36,10 +36,7 @@ def run_scenario(
 
     preset = get_scenario(name, severity=severity, market=market)
     if preset is None:
-        msg = (
-            f"시나리오 '{name}'을 찾을 수 없습니다. "
-            "dartlab.macro.scenario()로 목록을 확인하세요."
-        )
+        msg = f"시나리오 '{name}'을 찾을 수 없습니다. dartlab.macro.scenario()로 목록을 확인하세요."
         raise ValueError(msg)
 
     overrides = preset["overrides"]
@@ -111,20 +108,20 @@ def compare_scenarios(
 
     for name, r in results.items():
         sc = r["scenario"]
-        comparison.append({
-            "scenario": name,
-            "severity": r["meta"].get("severity", ""),
-            "type": r["meta"].get("type", ""),
-            "score": sc.get("score", 0),
-            "score_delta": round(sc.get("score", 0) - baseline_score, 2),
-            "overall": sc.get("overall", ""),
-            "cycle_phase": (sc.get("cycle") or {}).get("phase", ""),
-            "crisis_zone": (
-                (sc.get("crisis") or {}).get("recessionDashboard") or {}
-            ).get("zone", ""),
-            "transmission": r["meta"].get("transmission", ""),
-            "outcome": r["meta"].get("outcome", ""),
-        })
+        comparison.append(
+            {
+                "scenario": name,
+                "severity": r["meta"].get("severity", ""),
+                "type": r["meta"].get("type", ""),
+                "score": sc.get("score", 0),
+                "score_delta": round(sc.get("score", 0) - baseline_score, 2),
+                "overall": sc.get("overall", ""),
+                "cycle_phase": (sc.get("cycle") or {}).get("phase", ""),
+                "crisis_zone": ((sc.get("crisis") or {}).get("recessionDashboard") or {}).get("zone", ""),
+                "transmission": r["meta"].get("transmission", ""),
+                "outcome": r["meta"].get("outcome", ""),
+            }
+        )
 
     return {
         "baseline": {
