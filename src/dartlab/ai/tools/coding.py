@@ -365,31 +365,8 @@ class DartlabCodeExecutor(LocalPythonBackend):
             preamble += f'c = Company("{stockCode}")\n'
             preamble += "company = c\n"
 
-        # 엔진 가이드 동적 로드 — AI가 모든 엔진의 축/기능을 미리 안다.
-        # 하부 엔진이 바뀌어도 자동 반영. 하드코딩 0.
-        preamble += (
-            "try:\n"
-            "    _SCAN_GUIDE = str(dartlab.scan())\n"
-            "    _MACRO_GUIDE = str(dartlab.macro())\n"
-            "    _CAPABILITIES = dartlab.capabilities()\n"
-            "except Exception:\n"
-            "    _SCAN_GUIDE = ''\n"
-            "    _MACRO_GUIDE = ''\n"
-            "    _CAPABILITIES = {}\n"
-        )
-        if stockCode:
-            preamble += (
-                "try:\n"
-                f"    _ANALYSIS_GUIDE = str(c.analysis())\n"
-                f"    _CREDIT_GUIDE = str(c.credit())\n"
-                f"    _QUANT_GUIDE = str(c.quant())\n"
-                f"    _GATHER_GUIDE = str(c.gather())\n"
-                "except Exception:\n"
-                "    _ANALYSIS_GUIDE = ''\n"
-                "    _CREDIT_GUIDE = ''\n"
-                "    _QUANT_GUIDE = ''\n"
-                "    _GATHER_GUIDE = ''\n"
-            )
+        # 엔진 가이드는 ContextBuilder._injectEngineGuides()가 LLM 프롬프트에 직접 주입.
+        # preamble에서 중복 로드 불필요.
 
         # 결과 캡처 래퍼: 마지막 expression의 결과를 출력
         wrappedCode = self._wrapForCapture(cleanCode)

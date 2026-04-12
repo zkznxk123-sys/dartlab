@@ -77,6 +77,8 @@ class ContextBuilder:
         parts.extend(selectPlaybookBullets(intentResult.intent.value, self.company))
         # SuperMaster — 질문 관련 API top-k + 과거 성공 사례 top-k 동적 주입
         parts.extend(self._gatherSuperMaster(stockCode))
+        # 엔진 가이드 — scan/macro/analysis 등 무인자 가이드를 LLM에 직접 주입
+        parts.extend(self._injectEngineGuides())
         # intent → analysis calc selector 라우팅
         parts.extend(self._selectCalcForIntent(intentResult.intent))
 
@@ -213,6 +215,69 @@ class ContextBuilder:
                         source="supermaster:experience",
                     )
                 )
+            return parts
+        except (ImportError, Exception):
+            return []
+
+    def _injectEngineGuides(self) -> list[ContextPart]:
+        """모든 엔진의 무인자 가이드를 LLM에 직접 주입.
+
+        scan 20축, macro 11축, analysis 15축, credit, quant, gather —
+        AI가 어떤 기능이 있는지 코드 실행 전에 안다.
+        하부 엔진 변화 시 자동 반영. 하드코딩 0.
+        """
+        try:
+            import dartlab
+            from dartlab.ai.context.bundle import PartPriority
+            from dartlab.ai.context.encoder import estimateTokens
+
+            parts: list[ContextPart] = []
+
+            # scan 가이드 (Company 불필요)
+            try:
+                scan_guide = dartlab.scan()
+                if scan_guide is not None:
+                    text = f'<context source="guide:scan">\n## scan 가이드 (전종목 횡단분석)\n{scan_guide}\n</context>'
+                    parts.append(ContextPart(
+                        key="guide.scan", text=text,
+                        priority=PartPriority.MEDIUM,
+                        estimatedTokens=estimateTokens(text),
+                        source="guide:scan",
+                    ))
+            except Exception:
+                pass
+
+            # macro 가이드 (Company 불필요)
+            try:
+                macro_guide = dartlab.macro()
+                if macro_guide is not None:
+                    text = f'<context source="guide:macro">\n## macro 가이드 (경제/시장)\n{macro_guide}\n</context>'
+                    parts.append(ContextPart(
+                        key="guide.macro", text=text,
+                        priority=PartPriority.MEDIUM,
+                        estimatedTokens=estimateTokens(text),
+                        source="guide:macro",
+                    ))
+            except Exception:
+                pass
+
+            # Company-bound 가이드
+            if self.company is not None:
+                for name, fn_name in [("analysis", "analysis"), ("credit", "credit"), ("quant", "quant")]:
+                    try:
+                        fn = getattr(self.company, fn_name)
+                        guide = fn()
+                        if guide is not None:
+                            text = f'<context source="guide:{name}">\n## {name} 가이드\n{guide}\n</context>'
+                            parts.append(ContextPart(
+                                key=f"guide.{name}", text=text,
+                                priority=PartPriority.LOW,
+                                estimatedTokens=estimateTokens(text),
+                                source=f"guide:{name}",
+                            ))
+                    except Exception:
+                        pass
+
             return parts
         except (ImportError, Exception):
             return []
