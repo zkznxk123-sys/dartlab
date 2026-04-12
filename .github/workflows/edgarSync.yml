@@ -2,7 +2,9 @@ name: EDGAR Data Sync
 
 on:
   schedule:
-    - cron: '0 3 * * 0'  # 일요일 UTC 03:00 (KST 12:00)
+    - cron: '0 18 * * *'  # 매일 UTC 18:00 (KST 03:00) — SP500 + 증분
+    - cron: '0 6 * * *'   # 매일 UTC 06:00 (KST 15:00) — 증분 only
+    - cron: '0 3 * * 0'   # 일요일 UTC 03:00 (KST 12:00) — 전체 정산
   workflow_dispatch:
     inputs:
       tier:
@@ -15,7 +17,7 @@ on:
         type: string
       mode:
         description: '수집 모드 (new=미수집만/all=전체 증분)'
-        default: 'new'
+        default: 'all'
         type: string
       limit:
         description: '최대 ticker 수 (0=무제한)'
@@ -62,9 +64,21 @@ jobs:
 
       - name: Collect EDGAR data
         run: |
-          TIER="${{ github.event.inputs.tier || 'sp500' }}"
+          # 스케줄 트리거: 일요일=all tier 전체, 평일=sp500 증분
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            DAY=$(date -u +%u)
+            if [ "$DAY" = "7" ]; then
+              TIER="all"
+              MODE="all"
+            else
+              TIER="sp500"
+              MODE="all"
+            fi
+          else
+            TIER="${{ github.event.inputs.tier || 'sp500' }}"
+            MODE="${{ github.event.inputs.mode || 'all' }}"
+          fi
           CATS="${{ github.event.inputs.categories || 'finance,docs' }}"
-          MODE="${{ github.event.inputs.mode || 'new' }}"
           LIMIT="${{ github.event.inputs.limit || '0' }}"
 
           CMD="uv run python -X utf8 -m dartlab collect --tier ${TIER} -c ${CATS} --mode ${MODE}"

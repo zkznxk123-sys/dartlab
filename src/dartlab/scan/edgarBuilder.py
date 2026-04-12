@@ -43,28 +43,41 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
 
     # 주요 계정
     targetAccounts = [
+        # IS
         "sales",
+        "cost_of_goods_sold",
+        "gross_profit",
         "operating_profit",
         "net_profit",
+        "research_and_development",
+        "selling_general_and_administrative",
+        "interest_expense",
+        "depreciation_amortization",
+        "ebitda",
+        # BS
         "total_assets",
         "current_assets",
         "total_liabilities",
         "current_liabilities",
         "total_stockholders_equity",
+        "cash_and_cash_equivalents",
+        "inventories",
+        "trade_and_other_receivables",
+        "trade_and_other_payables",
+        "property_plant_and_equipment",
+        "goodwill",
+        "intangible_assets",
+        "treasury_stock",
+        "retained_earnings",
+        "shortterm_borrowings",
+        "longterm_borrowings",
+        # CF
         "operating_cashflow",
         "investing_cashflow",
         "financing_cash_flow",
         "capex",
         "dividends_paid",
-        "cash_and_cash_equivalents",
-        "inventories",
-        "trade_and_other_receivables",
-        "trade_and_other_payables",
-        "interest_expense",
-        "treasury_stock",
-        "shortterm_borrowings",
-        "longterm_borrowings",
-        "depreciation_amortization",
+        "share_repurchase",
     ]
 
     # snakeId → XBRL 태그 역조회 테이블 (사전 빌드, map_elements 회피)

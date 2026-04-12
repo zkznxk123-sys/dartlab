@@ -22,6 +22,8 @@ def calcGamingKpis(company, *, basePeriod: str | None = None) -> dict | None:
 
     try:
         ps = company.show("productService")
+        if ps is None:
+            ps = company.show("segments")
         if ps is not None and hasattr(ps, "to_dicts"):
             rows = ps.to_dicts()
             if not rows:

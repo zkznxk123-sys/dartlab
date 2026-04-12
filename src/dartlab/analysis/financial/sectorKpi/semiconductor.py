@@ -58,17 +58,20 @@ def calcSemiconductorKpis(company, *, basePeriod: str | None = None) -> dict | N
     except (AttributeError, ValueError, TypeError):
         pass
 
-    # ── 생산실적에서 ASP 추정 (사업보고서 sections) ──
+    # ── 세그먼트에서 반도체 관련 매출 추정 ──
     try:
+        # DART: productService, EDGAR: segments fallback
         ps = company.show("productService")
+        if ps is None:
+            ps = company.show("segments")
         if ps is not None and hasattr(ps, "to_dicts"):
             rows = ps.to_dicts()
-            semi_kw = ["반도체", "메모리", "DRAM", "NAND", "파운드리", "웨이퍼"]
-            semi_rows = [r for r in rows if any(k in str(r) for k in semi_kw)]
+            semi_kw = ["반도체", "메모리", "DRAM", "NAND", "파운드리", "웨이퍼", "Semiconductor", "Memory", "DRAM", "NAND", "Foundry"]
+            semi_rows = [r for r in rows if any(k.lower() in str(r).lower() for k in semi_kw)]
             if semi_rows:
                 result["aspProxy"] = {
                     "segmentCount": len(semi_rows),
-                    "note": "productService에서 반도체 관련 세그먼트 감지 — ASP 직접 추정은 생산수량 데이터 필요",
+                    "note": "세그먼트에서 반도체 관련 항목 감지",
                 }
     except (AttributeError, ValueError, TypeError, KeyError):
         pass

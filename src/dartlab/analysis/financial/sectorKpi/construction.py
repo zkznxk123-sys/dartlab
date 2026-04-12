@@ -43,6 +43,8 @@ def calcConstructionKpis(company, *, basePeriod: str | None = None) -> dict | No
     # ── 도급 vs 자체개발 비중 (sections productService에서 키워드 추출) ──
     try:
         ps = company.show("productService")
+        if ps is None:
+            ps = company.show("segments")
         if ps is not None and hasattr(ps, "to_dicts"):
             rows = ps.to_dicts()
             contract_kw = ["도급", "시공", "건축"]
