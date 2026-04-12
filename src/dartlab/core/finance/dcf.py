@@ -317,10 +317,14 @@ def dcfValuation(
         initialGrowth = sectorGrowth
         warnings.append("매출 3Y CAGR 미확인 → 섹터 평균 성장률 적용")
 
-    # 추정재무제표 FCF 우선 사용 (없으면 기존 성장률 복사)
-    if proformaFCF and len(proformaFCF) >= projectionYears:
-        projections = [float(f) for f in proformaFCF[:projectionYears]]
-        warnings.append("추정재무제표(Pro Forma) 기반 FCF 사용")
+    # 추정재무제표 FCF 우선 사용 (부족한 연도는 마지막 FCF × 터미널 성장률로 연장)
+    if proformaFCF and len(proformaFCF) > 0:
+        pf = [float(f) for f in proformaFCF if f is not None and float(f) != 0]
+        if pf:
+            while len(pf) < projectionYears:
+                pf.append(pf[-1] * (1 + tg / 100))
+            projections = pf[:projectionYears]
+            warnings.append(f"추정재무제표(Pro Forma) 기반 FCF 사용 ({len(proformaFCF)}년 원본 + 연장)")
     else:
         projections: list[float] = []
         prevFcf = fcfCurrent
