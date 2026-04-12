@@ -4992,7 +4992,7 @@ def cyclicalActionPlanBlock(data: dict | None) -> list:
 def damodaran3testBlock(company) -> list:
     """Damodaran 3-test 결과 → 스토리 검증 블록."""
     try:
-        from dartlab.review.narrative.validators import damodaranTest
+        from dartlab.review.validators.validators import damodaranTest
 
         result = damodaranTest(company)
     except (ImportError, AttributeError, ValueError):
