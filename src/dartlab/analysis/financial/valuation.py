@@ -199,6 +199,19 @@ def calcDcf(company: Any, *, basePeriod: str | None = None) -> dict | None:
         currency=currency,
     )
 
+    # 추정재무제표(Pro Forma) FCF → DCF 입력 (있으면 우선 사용)
+    pfFCF = None
+    try:
+        from dartlab.analysis.financial.forecastCalcs import calcProFormaHighlights
+
+        pf = calcProFormaHighlights(company, basePeriod=basePeriod)
+        if pf and pf.get("years"):
+            pfFCF = [yr["fcf"] for yr in pf["years"] if yr.get("fcf") is not None]
+            if not pfFCF:
+                pfFCF = None
+    except (ImportError, AttributeError, ValueError, TypeError, KeyError):
+        pfFCF = None
+
     result = dcfValuation(
         series,
         shares=shares,
@@ -206,6 +219,7 @@ def calcDcf(company: Any, *, basePeriod: str | None = None) -> dict | None:
         currentPrice=currentPrice,
         currency=currency,
         discountRate=wacc,
+        proformaFCF=pfFCF,
     )
     return {
         "perShareValue": result.perShareValue,

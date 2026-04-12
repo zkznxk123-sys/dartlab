@@ -221,6 +221,7 @@ def dcfValuation(
     terminalGrowth: Optional[float] = None,
     projectionYears: int = 5,
     currency: str = "KRW",
+    proformaFCF: Optional[list[float]] = None,
 ) -> DCFResult:
     """2-Stage DCF 밸류에이션."""
     warnings: list[str] = []
@@ -316,14 +317,19 @@ def dcfValuation(
         initialGrowth = sectorGrowth
         warnings.append("매출 3Y CAGR 미확인 → 섹터 평균 성장률 적용")
 
-    projections: list[float] = []
-    prevFcf = fcfCurrent
-    for yr in range(1, projectionYears + 1):
-        blend = (yr - 1) / max(projectionYears - 1, 1)
-        growth = initialGrowth * (1 - blend) + tg * blend
-        proj = prevFcf * (1 + growth / 100)
-        projections.append(proj)
-        prevFcf = proj
+    # 추정재무제표 FCF 우선 사용 (없으면 기존 성장률 복사)
+    if proformaFCF and len(proformaFCF) >= projectionYears:
+        projections = [float(f) for f in proformaFCF[:projectionYears]]
+        warnings.append("추정재무제표(Pro Forma) 기반 FCF 사용")
+    else:
+        projections: list[float] = []
+        prevFcf = fcfCurrent
+        for yr in range(1, projectionYears + 1):
+            blend = (yr - 1) / max(projectionYears - 1, 1)
+            growth = initialGrowth * (1 - blend) + tg * blend
+            proj = prevFcf * (1 + growth / 100)
+            projections.append(proj)
+            prevFcf = proj
 
     finalFcf = projections[-1]
     # Gordon Growth TV
