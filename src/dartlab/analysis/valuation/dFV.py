@@ -61,23 +61,9 @@ def calcDFV(company: Any, *, basePeriod: str | None = None) -> dict | None:
     if not qualified:
         return None
 
-    # 3b. 이상치 제거: 중앙값 대비 ±100% 벗어나는 방법론 제거
-    vals = [v for v, _ in qualified.values()]
-    median = sorted(vals)[len(vals) // 2]
-    filtered = {}
-    for key, (value, fit) in qualified.items():
-        if median > 0 and abs(value - median) / median > 1.0:
-            method_details[key]["excluded"] = True
-            method_details[key]["excludeReason"] = f"중앙값({median:,.0f}) 대비 ±100% 이상 이탈"
-        else:
-            filtered[key] = (value, fit)
-
-    if not filtered:
-        filtered = qualified  # 이상치 제거로 전부 없어지면 복원
-
-    # 3c. 적합도 가중 합산
-    weighted_sum = sum(v * f for v, f in filtered.values())
-    fitness_sum = sum(f for _, f in filtered.values())
+    # 3b. 적합도 가중 합산 (이상치 제거 안 함 — 적합도 필터로 충분)
+    weighted_sum = sum(v * f for v, f in qualified.values())
+    fitness_sum = sum(f for _, f in qualified.values())
 
     if fitness_sum == 0:
         return None
