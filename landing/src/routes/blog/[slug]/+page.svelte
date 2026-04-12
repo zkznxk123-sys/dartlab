@@ -20,7 +20,7 @@
 
 	function extractToc() {
 		if (!articleEl) return;
-		const headings = articleEl.querySelectorAll('h2');
+		const headings = articleEl.querySelectorAll('h1, h2');
 		const items: TocItem[] = [];
 		headings.forEach((h) => {
 			if (!h.id) {
@@ -30,10 +30,14 @@
 					.replace(/[^a-z0-9가-힣]+/g, '-')
 					.replace(/(^-|-$)/g, '');
 			}
+			// 간결한 TOC 텍스트: "제1막: 제목 — 부제" → "1막: 제목"
+			let text = (h.textContent ?? '').trim();
+			const dashIdx = text.indexOf(' — ');
+			if (dashIdx > 0 && text.length > 30) text = text.substring(0, dashIdx);
 			items.push({
 				id: h.id,
-				text: (h.textContent ?? '').trim(),
-				level: 2
+				text,
+				level: h.tagName === 'H1' ? 1 : 2
 			});
 		});
 		tocItems = items;
@@ -41,7 +45,7 @@
 
 	function observeHeadings() {
 		if (!articleEl) return;
-		const headings = articleEl.querySelectorAll('h2');
+		const headings = articleEl.querySelectorAll('h1, h2');
 		if (headings.length === 0) return;
 
 		const observer = new IntersectionObserver(
@@ -583,13 +587,15 @@
 	}
 
 	.blog-article :global(h1) {
-		font-size: 2rem;
+		font-size: 1.75rem;
 		font-weight: 800;
+		margin-top: 5rem;
 		margin-bottom: 2rem;
+		padding-top: 2rem;
+		border-top: 1px solid rgba(148, 163, 184, 0.12);
 		background: linear-gradient(135deg, #f1f5f9, #94a3b8);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
-		text-align: center;
 	}
 
 	.blog-article :global(h2) {
