@@ -1,17 +1,5 @@
 export const categoryDefinitions = [
 	{
-		id: 'reading-disclosures',
-		slug: 'reading-disclosures',
-		folder: '01-reading-disclosures',
-		label: '공시 읽기',
-		description: 'DART와 EDGAR 공시, 사업보고서, 감사보고서, 지배구조를 실전 판단으로 연결하는 글입니다.',
-		seoTitle: '공시 읽기 | DART·EDGAR 사업보고서와 감사 신호 읽는 법',
-		seoDescription:
-			'DartLab 공시 읽기 카테고리. DART, EDGAR, 사업보고서, 감사보고서, 지배구조, 위험 신호, 업종별 읽기, 한미 비교까지 실전 판단으로 연결하는 글을 모았습니다.',
-		brandMessage:
-			'DartLab은 공시를 검색 결과가 아니라 판단의 중심으로 읽습니다. 사업보고서, 감사 문구, 지배구조, 위험 신호를 실제 투자 해석으로 연결합니다.'
-	},
-	{
 		id: 'dartlab-news',
 		slug: 'dartlab-news',
 		folder: '02-dartlab-news',
@@ -22,6 +10,30 @@ export const categoryDefinitions = [
 			'DartLab 소식 카테고리. dartlab 설치 방법, 새 기능 소개, 업데이트 내역, 초보자 가이드를 모았습니다.',
 		brandMessage:
 			'DartLab은 누구나 전자공시 분석을 시작할 수 있도록, 설치부터 활용까지 쉽게 안내합니다.'
+	},
+	{
+		id: 'company-reports',
+		slug: 'company-story',
+		folder: '05-company-reports',
+		label: '기업이야기',
+		description: '재무제표로 풀어내는 기업의 이야기.',
+		seoTitle: '기업이야기 | dartlab',
+		seoDescription:
+			'dartlab 기업이야기. 재무제표의 숫자가 왜 이상한지 파고 들어가면, 그 회사의 이야기가 보입니다.',
+		brandMessage:
+			'숫자 나열이 아니라, "왜?"를 따라가는 기업 이야기.'
+	},
+	{
+		id: 'reading-disclosures',
+		slug: 'reading-disclosures',
+		folder: '01-reading-disclosures',
+		label: '공시 읽기',
+		description: 'DART와 EDGAR 공시, 사업보고서, 감사보고서, 지배구조를 실전 판단으로 연결하는 글입니다.',
+		seoTitle: '공시 읽기 | DART·EDGAR 사업보고서와 감사 신호 읽는 법',
+		seoDescription:
+			'DartLab 공시 읽기 카테고리. DART, EDGAR, 사업보고서, 감사보고서, 지배구조, 위험 신호, 업종별 읽기, 한미 비교까지 실전 판단으로 연결하는 글을 모았습니다.',
+		brandMessage:
+			'DartLab은 공시를 검색 결과가 아니라 판단의 중심으로 읽습니다. 사업보고서, 감사 문구, 지배구조, 위험 신호를 실제 투자 해석으로 연결합니다.'
 	},
 	{
 		id: 'corporate-analysis',
@@ -47,18 +59,6 @@ export const categoryDefinitions = [
 		brandMessage:
 			'DartLab은 공시 데이터만으로 재현 가능한 독립 신용등급을 산출합니다.',
 		hidden: true
-	},
-	{
-		id: 'company-reports',
-		slug: 'company-story',
-		folder: '05-company-reports',
-		label: '기업이야기',
-		description: '재무제표로 풀어내는 기업의 이야기.',
-		seoTitle: '기업이야기 | dartlab',
-		seoDescription:
-			'dartlab 기업이야기. 재무제표의 숫자가 왜 이상한지 파고 들어가면, 그 회사의 이야기가 보입니다.',
-		brandMessage:
-			'숫자 나열이 아니라, "왜?"를 따라가는 기업 이야기.'
 	},
 	{
 		id: 'macro-reports',
