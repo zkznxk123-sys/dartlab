@@ -378,6 +378,131 @@ def spec_diff_heatmap(company: Any) -> dict | None:
 
 # ── 레지스트리 ──
 
+# ── Phase A 신규 spec ──
+
+
+def spec_peer_radar(peer_data: dict) -> dict | None:
+    """4축(수익성/성장/품질/부채) 백분위 레이더 차트 spec.
+
+    peer_data: calcPeerPosition 반환 dict.
+    """
+    axes = [
+        ("수익성", peer_data.get("profitability_pct")),
+        ("성장성", peer_data.get("growth_pct")),
+        ("이익품질", peer_data.get("quality_pct")),
+        ("안정성", 100 - peer_data.get("debt_pct", 50) if peer_data.get("debt_pct") is not None else None),
+    ]
+    vals = [v if v is not None else 50 for _, v in axes]
+    labels = [a[0] for a in axes]
+
+    return {
+        "type": "radar",
+        "title": "시장 내 위치 (백분위)",
+        "data": {"labels": labels, "values": vals, "fill": True},
+        "meta": {"source": "scan/extended::calcPeerPosition", "total_stocks": peer_data.get("total_stocks")},
+    }
+
+
+def spec_sensitivity_heatmap(grid: list[dict]) -> dict | None:
+    """DCF 민감도 히트맵 spec.
+
+    grid: sensitivityAnalysis 반환 list[{wacc, g, fairValue}].
+    """
+    if not grid:
+        return None
+    waccs = sorted({r["wacc"] for r in grid})
+    gs = sorted({r["g"] for r in grid})
+    matrix = []
+    for g_val in gs:
+        row = []
+        for w_val in waccs:
+            fv = next((r["fairValue"] for r in grid if r["wacc"] == w_val and r["g"] == g_val), None)
+            row.append(fv)
+        matrix.append(row)
+
+    return {
+        "type": "heatmap",
+        "title": "DCF 민감도 (WACC × 성장률)",
+        "data": {"x_labels": [f"{w:.1f}%" for w in waccs], "y_labels": [f"{g:.1f}%" for g in gs], "matrix": matrix},
+        "meta": {"source": "core/finance/dcf::sensitivityAnalysis"},
+    }
+
+
+def spec_margin_trend(history: list[dict]) -> dict | None:
+    """마진 3축(매출총이익/영업이익/순이익률) 시계열 line spec."""
+    if not history:
+        return None
+    periods = [h.get("period", "") for h in history]
+    return {
+        "type": "line",
+        "title": "마진 추이",
+        "data": {
+            "x": periods,
+            "series": [
+                {"name": "매출총이익률", "values": [h.get("grossMargin") for h in history], "color": COLORS[0]},
+                {"name": "영업이익률", "values": [h.get("operatingMargin") for h in history], "color": COLORS[1]},
+                {"name": "순이익률", "values": [h.get("netMargin") for h in history], "color": COLORS[2]},
+            ],
+        },
+    }
+
+
+def spec_leverage_trend(history: list[dict]) -> dict | None:
+    """부채비율 시계열 line spec."""
+    if not history:
+        return None
+    return {
+        "type": "line",
+        "title": "레버리지 추이",
+        "data": {
+            "x": [h.get("period", "") for h in history],
+            "series": [
+                {"name": "부채비율", "values": [h.get("debtRatio") for h in history], "color": COLORS[3]},
+            ],
+        },
+    }
+
+
+def spec_growth_yoy_bar(history: list[dict]) -> dict | None:
+    """매출/영업이익/순이익 YoY bar chart spec."""
+    if not history:
+        return None
+    return {
+        "type": "bar",
+        "title": "성장률 YoY",
+        "data": {
+            "x": [h.get("period", "") for h in history],
+            "series": [
+                {"name": "매출 YoY", "values": [h.get("revenueYoY") for h in history], "color": COLORS[0]},
+                {"name": "영업이익 YoY", "values": [h.get("opYoY") for h in history], "color": COLORS[1]},
+            ],
+        },
+    }
+
+
+def spec_revenue_scenario_band(history: list[dict], forecasts: dict | None) -> dict | None:
+    """매출 과거 실적 + Base/Bull/Bear 전망 밴드 spec."""
+    if not history:
+        return None
+    periods = [h.get("period", "") for h in history]
+    actuals = [h.get("revenue") for h in history]
+
+    data: dict = {"x": periods, "series": [{"name": "실적", "values": actuals, "color": COLORS[0]}]}
+
+    if forecasts:
+        fwd_periods = forecasts.get("periods", [])
+        data["x"] = periods + fwd_periods
+        actuals_ext = actuals + [None] * len(fwd_periods)
+        data["series"][0]["values"] = actuals_ext
+
+        for key, label, color in [("base", "Base", COLORS[1]), ("bull", "Bull", COLORS[4]), ("bear", "Bear", COLORS[3])]:
+            vals = forecasts.get(key, [])
+            if vals:
+                data["series"].append({"name": label, "values": [None] * len(periods) + vals, "color": color})
+
+    return {"type": "line", "title": "매출 전망 시나리오 밴드", "data": data}
+
+
 SPEC_GENERATORS = {
     "revenue_trend": spec_revenue_trend,
     "cashflow": spec_cashflow_waterfall,

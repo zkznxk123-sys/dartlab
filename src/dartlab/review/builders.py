@@ -1122,6 +1122,16 @@ def marginTrendBlock(data: dict) -> list:
         blocks.append(TextBlock(narration))
 
     blocks.append(TableBlock("마진 추이", pl.DataFrame(cols)))
+
+    # 마진 시계열 차트
+    history = data.get("history", [])
+    if history:
+        from dartlab.review.blocks import ChartBlock
+        from dartlab.viz.generators import spec_margin_trend
+
+        chart = spec_margin_trend(history)
+        if chart:
+            blocks.append(ChartBlock(spec=chart))
     return blocks
 
 
@@ -1202,7 +1212,7 @@ def growthTrendBlock(data: dict) -> list:
     if cols is None:
         return []
 
-    return [
+    blocks: list = [
         HeadingBlock(
             _meta("growthTrend").label,
             level=2,
@@ -1210,6 +1220,16 @@ def growthTrendBlock(data: dict) -> list:
         ),
         TableBlock("성장률 추이", pl.DataFrame(cols)),
     ]
+
+    history = data.get("history", [])
+    if history:
+        from dartlab.review.blocks import ChartBlock
+        from dartlab.viz.generators import spec_growth_yoy_bar
+
+        chart = spec_growth_yoy_bar(history)
+        if chart:
+            blocks.append(ChartBlock(spec=chart))
+    return blocks
 
 
 def growthQualityBlock(data: dict) -> list:
@@ -1286,6 +1306,15 @@ def leverageTrendBlock(data: dict) -> list:
 
     blocks.append(TableBlock("레버리지 추이", pl.DataFrame(cols)))
     blocks.extend(_notesDetailBlocks(data, {"borrowings": "차입금 구성", "lease": "리스부채"}))
+
+    history = data.get("history", [])
+    if history:
+        from dartlab.review.blocks import ChartBlock
+        from dartlab.viz.generators import spec_leverage_trend
+
+        chart = spec_leverage_trend(history)
+        if chart:
+            blocks.append(ChartBlock(spec=chart))
     return blocks
 
 
@@ -2346,6 +2375,24 @@ def sensitivityBlock(data: dict) -> list:
     baseVal = data.get("baseValue")
     if baseVal is not None:
         blocks.append(MetricBlock([("기준 적정가", f"{baseVal:,.0f}원")]))
+
+    # heatmap ChartBlock
+    if grid:
+        from dartlab.review.blocks import ChartBlock
+        from dartlab.viz.generators import spec_sensitivity_heatmap
+
+        hm_grid = [{"wacc": g["wacc"], "g": g.get("terminalGrowth", 0), "fairValue": g.get("perShareValue")} for g in grid]
+        hm = spec_sensitivity_heatmap(hm_grid)
+        if hm:
+            blocks.append(ChartBlock(spec=hm))
+
+        # 자동 문장: 편차 범위
+        vals = [g.get("perShareValue") for g in grid if g.get("perShareValue") is not None]
+        if vals and baseVal:
+            min_v, max_v = min(vals), max(vals)
+            pct_range = (max_v - min_v) / baseVal * 100 if baseVal > 0 else 0
+            label = "높음" if pct_range > 80 else "보통" if pct_range > 40 else "낮음"
+            blocks.append(TextBlock(f"가정 민감도: 적정가 편차 {pct_range:.0f}% ({label}) — 가정 변화에 가치가 크게 흔들리{'면 주의' if label == '높음' else '지 않음'}"))
     return blocks
 
 
@@ -2679,6 +2726,60 @@ def disclosureDeltaFlagsBlock(flags: list[tuple[str, str]]) -> list:
 # ── 5-3 비교분석 ──
 
 
+def peerPositionBlock(data: dict | None) -> list:
+    """calcPeerPosition 결과 → 시장 내 위치 + 교차 관점 + 레이더 차트."""
+    if not data:
+        return []
+
+    from dartlab.review.blocks import ChartBlock
+    from dartlab.viz.generators import spec_peer_radar
+
+    blocks: list = [HeadingBlock(_meta("peerPosition").label, level=2, helper="전종목 횡단 비교 — 4축 백분위 + 교차 관점")]
+
+    total = data.get("total_stocks", 0)
+    metrics: list[tuple[str, str]] = []
+    for key, label in [
+        ("profitability_pct", "수익성 백분위"),
+        ("growth_pct", "성장성 백분위"),
+        ("quality_pct", "이익품질 백분위"),
+        ("debt_pct", "부채 백분위"),
+    ]:
+        v = data.get(key)
+        if v is not None:
+            metrics.append((label, f"상위 {100 - v:.0f}% ({v:.0f}%ile, {total}개사 중)"))
+
+    if data.get("op_margin") is not None:
+        metrics.append(("영업이익률", f"{data['op_margin']:.1f}%"))
+    if data.get("roe") is not None:
+        metrics.append(("ROE", f"{data['roe']:.1f}%"))
+    if data.get("debt_ratio") is not None:
+        metrics.append(("부채비율", f"{data['debt_ratio']:.1f}%"))
+
+    if metrics:
+        blocks.append(MetricBlock(metrics))
+
+    # 교차 관점
+    crossViews = data.get("crossViews", [])
+    if crossViews:
+        for cv in crossViews:
+            blocks.append(TextBlock(f"**{cv['view']}**: {cv['basis']}"))
+
+    # narrative 요약
+    narrative = data.get("narrative", "")
+    if narrative and not narrative.endswith("데이터 부족."):
+        blocks.append(TextBlock(narrative))
+
+    # radar chart
+    try:
+        radar = spec_peer_radar(data)
+        if radar:
+            blocks.append(ChartBlock(spec=radar))
+    except (KeyError, TypeError, ValueError):
+        pass
+
+    return blocks
+
+
 def peerRankingBlock(data: dict) -> list:
     """calcPeerRanking 결과 -> 백분위 순위 테이블."""
     if not data:
@@ -2820,6 +2921,28 @@ def revenueForecastBlock(data: dict) -> list:
             blocks.append(TableBlock("[추정] 매출 전망", pl.DataFrame(rows)))
 
     blocks.append(TextBlock(data.get("disclaimer", ""), style="dim"))
+
+    # scenario band chart
+    scenarios = data.get("scenarios", {})
+    if scenarios:
+        from dartlab.review.blocks import ChartBlock
+        from dartlab.viz.generators import spec_revenue_scenario_band
+
+        hist = data.get("historicalRevenue", []) or []
+        history_dicts = [{"period": str(h.get("period", "")), "revenue": h.get("value")} for h in hist] if hist else []
+        forecasts = {}
+        for key in ("base", "bull", "bear"):
+            sc = scenarios.get(key, {})
+            if sc and sc.get("projected"):
+                forecasts[key] = sc["projected"]
+                if not forecasts.get("periods"):
+                    forecasts["periods"] = [f"+{i + 1}Y" for i in range(len(sc["projected"]))]
+
+        if history_dicts or forecasts:
+            band_spec = spec_revenue_scenario_band(history_dicts, forecasts if forecasts else None)
+            if band_spec:
+                blocks.append(ChartBlock(spec=band_spec))
+
     return blocks
 
 

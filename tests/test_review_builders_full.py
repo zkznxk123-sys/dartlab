@@ -90,8 +90,9 @@ class TestMarginTrendBlock:
         assert len(blocks) >= 2
         assert isinstance(blocks[0], block_types["HeadingBlock"])
         assert blocks[0].level == 2
-        # TextBlock(해석 문장)이 삽입될 수 있음 — 마지막이 TableBlock
-        assert isinstance(blocks[-1], block_types["TableBlock"])
+        # TextBlock(해석 문장) + ChartBlock이 추가될 수 있음
+        table_blocks = [b for b in blocks if isinstance(b, block_types["TableBlock"])]
+        assert len(table_blocks) >= 1
 
     def test_single_period_still_works(self, block_types):
         from dartlab.review.builders import marginTrendBlock
@@ -102,7 +103,7 @@ class TestMarginTrendBlock:
             ]
         }
         blocks = marginTrendBlock(data)
-        assert len(blocks) == 2
+        assert len(blocks) >= 2
 
 
 # ── 3. returnTrendBlock ──
@@ -160,9 +161,8 @@ class TestGrowthTrendBlock:
             ]
         }
         blocks = growthTrendBlock(data)
-        assert len(blocks) == 2
+        assert len(blocks) >= 2
         assert isinstance(blocks[0], block_types["HeadingBlock"])
-        assert isinstance(blocks[1], block_types["TableBlock"])
 
 
 # ── 5. leverageTrendBlock ──

@@ -890,11 +890,11 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
 
     # ── 비교분석 (scan 교차 조합 관점 → review 통합) ──
     if keys is None or keys & {"peerPosition", "governanceSummary"}:
-        from dartlab.review.builders import quantModuleBlock as _scanBlock
+        from dartlab.review.builders import peerPositionBlock, quantModuleBlock as _scanBlock
         from dartlab.scan.extended import calcGovernanceSummary, calcPeerPosition
 
         if _need("peerPosition"):
-            b["peerPosition"] = _safe(lambda: _scanBlock("peerPosition", calcPeerPosition(company)))
+            b["peerPosition"] = _safe(lambda: peerPositionBlock(calcPeerPosition(company)))
         if _need("governanceSummary"):
             b["governanceSummary"] = _safe(lambda: _scanBlock("governanceSummary", calcGovernanceSummary(company)))
 
