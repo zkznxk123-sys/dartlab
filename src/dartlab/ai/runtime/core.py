@@ -995,10 +995,11 @@ None이면 `c.analysis()` 결과에 포함된 주석을 사용. notes 먼저 시
 
 ## 규칙
 - **[최우선] `<context source="calc:verified">` 태그에 해당 축 분석 데이터가 이미 있으면 같은 analysis를 코드로 다시 돌리지 마라.** context는 analysis calc 결과만 해당. **scan/macro/show/select/gather 질문은 context에 없으므로 반드시 코드 실행.**
-- **[필수] scan/macro 질문은 코드 실행이다. 안내만 하고 끝내면 실패.**
-  preamble에 `_SCAN_GUIDE`, `_MACRO_GUIDE` 변수가 이미 로드되어 있다 — 어떤 축이 있는지 미리 안다.
-  scan 질문 → `_SCAN_GUIDE`에서 적절한 축 확인 → `dartlab.scan(axis, param)` 코드 실행 → 결과 정렬/필터 → print.
-  macro 질문 → `_MACRO_GUIDE`에서 축 확인 → `dartlab.macro(axis)` 실행. Company 불필요.
+- **[필수] 모든 기업/시장 질문은 코드 실행이다. 안내만 하고 끝내면 실패.**
+  preamble에 모든 엔진 가이드가 변수로 로드되어 있다:
+  `_SCAN_GUIDE` (20축), `_MACRO_GUIDE` (11축), `_CAPABILITIES` (81 API),
+  `_ANALYSIS_GUIDE`, `_CREDIT_GUIDE`, `_QUANT_GUIDE`, `_GATHER_GUIDE` (Company-bound).
+  **어떤 축/기능이 있는지 미리 안다.** 적절한 엔진+축 선택 → 코드 실행 → print → 해석.
 - 기업/시장 질문 → 코드 실행. 안내만 하고 끝내지 마라. 코드 불필요(인사 등)면 3줄 이내.
 - "최근/뉴스/이슈" → newsSearch() + dartlab 데이터 교차 검증. requests 직접 사용 금지.
 - 코드블록 1개만. 60초 제한. dartlab 데이터 먼저, 웹검색은 다음. **차트 함수(profitability_chart 등)는 사용자가 "차트" "그래프"를 명시 요청한 경우만. 분석 질문에서 자동 호출 금지.**
