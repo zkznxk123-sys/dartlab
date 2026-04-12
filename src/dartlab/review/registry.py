@@ -1020,28 +1020,62 @@ def buildReview(
     layout: ReviewLayout | None = None,
     helper: bool | None = None,
     *,
-    preset: str | None = None,
+    type: str | None = None,
     template: str | None = None,
-    perspective: str | None = None,
     detail: bool | None = None,
     basePeriod: str | None = None,
+    # ── deprecated (한 릴리즈 경고 후 제거) ──
+    preset: str | None = None,
+    perspective: str | None = None,
 ):
-    """Company에서 Review를 생성."""
+    """Company에서 Review를 생성.
+
+    Parameters
+    ----------
+    type : str, optional
+        보고서 타입. full/executive/credit/valuation/growth/crisis/audit/
+        dividend/governance/macro/thesis. 기본 full.
+    template : str, optional
+        기업유형 감지 (독립 축). "auto" 또는 사이클/프랜차이즈/턴어라운드/...
+    preset, perspective : deprecated
+        type= 로 이전. 임시로 매핑 지원.
+    """
+    import warnings
+
     from dartlab.review import Review
+    from dartlab.review.reportTypes import resolveReportType
 
     ly = layout or ReviewLayout()
 
-    # ── 스토리 템플릿 판별 ──
+    # ── deprecated 파라미터 매핑 ──
+    if perspective is not None and type is None:
+        warnings.warn(
+            "review(perspective=...) 는 deprecated. review(type=...) 를 사용하세요.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        type = perspective
+    if preset is not None and type is None:
+        warnings.warn(
+            "review(preset=...) 는 deprecated. review(type=...) 를 사용하세요.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        type = preset
+
+    # ── ReportType 해석 ──
+    reportType = resolveReportType(type)
+
+    # ── 스토리 템플릿 판별 (기업유형, ReportType과 독립) ──
     detectedTemplate: str | None = None
     detectedTemplates: list[str] = []
-    emphasizedKeys: set[str] = set()
-    if template is not None and preset is None:
+    emphasizedKeys: set[str] = set(reportType.emphasize)
+    if template is not None:
         from dartlab.review.templates import STORY_TEMPLATES
         from dartlab.review.templates import detectTemplate as _detect
 
         if template == "auto":
             detectedTemplate = _detect(company)
-            # 복수 매칭도 수집
             from dartlab.review.templates import detectTemplates as _detectMulti
 
             try:
@@ -1055,21 +1089,16 @@ def buildReview(
             detectedTemplates = []
 
         if detectedTemplate and detectedTemplate in STORY_TEMPLATES:
-            # 주 템플릿의 emphasize + 보조 템플릿의 emphasize 합산
             for tmplName in detectedTemplates:
                 if tmplName in STORY_TEMPLATES:
                     emphasizedKeys |= STORY_TEMPLATES[tmplName].get("emphasize", set())
 
-    # ── 프리셋 적용 ──
-    if preset is not None:
-        from dartlab.review.presets import PRESETS
-
-        if preset not in PRESETS:
-            raise ValueError(f"알 수 없는 프리셋: {preset}. 사용 가능: {', '.join(PRESETS)}")
-        cfg = PRESETS[preset]
-        ly.sectionOrder = cfg["sections"]
-        if detail is None:
-            ly.detail = cfg.get("detail", True)
+    # ── ReportType의 섹션 순서 적용 ──
+    # (section 단일 지정이 아니고, layout.sectionOrder가 명시되지 않은 경우만)
+    if section is None and ly.sectionOrder is None and type is not None:
+        ly.sectionOrder = list(reportType.sectionOrder)
+    if detail is None:
+        ly.detail = reportType.detail
 
     # detail 명시 오버라이드
     if detail is not None:
@@ -1104,16 +1133,6 @@ def buildReview(
 
             live.update(Spinner("dots", text="블록 사전 생성 중..."))
 
-        # 관점별 순서 결정 (perspective)
-        perspectiveOrder: list[str] | None = None
-        if perspective is not None:
-            from dartlab.review.templates import PERSPECTIVE_TEMPLATES, resolvePerspective
-
-            pkey = resolvePerspective(perspective)
-            if pkey and pkey in PERSPECTIVE_TEMPLATES:
-                perspectiveOrder = PERSPECTIVE_TEMPLATES[pkey]["order"]
-            # resolve 실패 시 기본 6막 순서 유지
-
         # 템플릿 순서 결정 (블록 빌드 전에 필요한 keys 산출)
         if section is not None:
             if section not in TEMPLATES:
@@ -1126,8 +1145,6 @@ def buildReview(
             templateKeys = [section]
         elif ly.sectionOrder is not None:
             templateKeys = [k for k in ly.sectionOrder if k in TEMPLATES]
-        elif perspectiveOrder is not None:
-            templateKeys = [k for k in perspectiveOrder if k in TEMPLATES]
         else:
             templateKeys = list(TEMPLATE_ORDER)
 

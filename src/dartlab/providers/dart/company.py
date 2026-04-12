@@ -2761,11 +2761,12 @@ class Company:
         layout=None,
         helper: bool | None = None,
         *,
-        preset: str | None = None,
+        type: str | None = None,
         template: str | None = None,
-        perspective: str | None = None,
         detail: bool | None = None,
         basePeriod: str | None = None,
+        preset: str | None = None,  # deprecated
+        perspective: str | None = None,  # deprecated
     ):
         """재��제표 구조화 보고서 — 기업이야��꾼의 대본 (내부 구현).
 
@@ -2826,11 +2827,12 @@ class Company:
             section=section,
             layout=layout,
             helper=helper,
-            preset=preset,
+            type=type,
             template=template,
-            perspective=perspective,
             detail=detail,
             basePeriod=basePeriod,
+            preset=preset,
+            perspective=perspective,
         )
 
     def reviewer(

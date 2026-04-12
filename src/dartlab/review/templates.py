@@ -408,9 +408,9 @@ TEMPLATES = _buildTemplates()
 TEMPLATE_ORDER = [s.key for s in SECTIONS]
 
 
-# ── 관점별 템플릿 (perspective) — 섹션 순서 재배치 ──────────────
-# 기업유형 STORY_TEMPLATES (강조) 와 독립 차원.
-# perspective × template 동시 사용 가능.
+# ── (deprecated) 관점별 템플릿 ─────────────────────────────
+# review.reportTypes.REPORT_TYPES 로 통합됨. 외부 참조 하위호환용 dict만 유지.
+# 2026-Q3 제거 예정.
 
 PERSPECTIVE_TEMPLATES: dict[str, dict] = {
     "bottomUp": {
@@ -683,7 +683,6 @@ STORY_TEMPLATES: dict[str, dict] = {
         "emphasize": {
             "nonOperatingBreakdown",
             "ownershipTrend",
-            "investmentInOther",
             "dividendPolicy",
             "assetStructure",
         },
