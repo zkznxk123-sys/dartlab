@@ -92,7 +92,7 @@ def _calcToContextPart(
         return None
 
     header = f"## {label}\n" if label else ""
-    text = f'<context source="{source}">\n{header}{summary_line}{text_body}\n</context>'
+    text = f'<context source="calc:verified" calc="{source}">\n{header}{summary_line}{text_body}\n</context>'
     tokens = estimateTokens(text)
 
     return ContextPart(

@@ -339,6 +339,7 @@ class DartlabCodeExecutor(LocalPythonBackend):
         # dartlab context preamble — LLM이 읽을 수 있는 크기로 제한
         preamble = (
             "import dartlab\n"
+            "dartlab.verbose = False\n"
             "import polars as pl\n"
             "import re\n"
             "pl.Config.set_fmt_float('full')\n"
@@ -471,7 +472,11 @@ class DartlabCodeExecutor(LocalPythonBackend):
                 )
 
     def _wrapForCapture(self, code: str) -> str:
-        """마지막 expression의 결과를 자동으로 print한다."""
+        """마지막 expression의 결과를 자동으로 print한다.
+
+        dict 결과는 통째로 print하면 읽기 어려우므로
+        keys + 첫 번째 키의 구조 힌트를 출력한다.
+        """
         try:
             tree = ast.parse(code)
         except SyntaxError:
@@ -482,7 +487,6 @@ class DartlabCodeExecutor(LocalPythonBackend):
 
         lastNode = tree.body[-1]
         if isinstance(lastNode, ast.Expr):
-            # AST 기반: preceding 노드들을 unparse하고 마지막만 _result로 변환
             exprSource = ast.unparse(lastNode.value)
             preceding = tree.body[:-1]
             parts: list[str] = []
@@ -490,7 +494,18 @@ class DartlabCodeExecutor(LocalPythonBackend):
                 parts.append(ast.unparse(node))
             parts.append(f"_result = {exprSource}")
             parts.append("if _result is not None:")
-            parts.append("    print(_result)")
+            parts.append("    if isinstance(_result, dict):")
+            parts.append("        print(f'dict keys: {list(_result.keys())}')")
+            parts.append("        for _k, _v in list(_result.items())[:3]:")
+            parts.append("            if isinstance(_v, dict) and 'history' in _v:")
+            parts.append("                print(f'  {_k}.history[0] keys: {list(_v[\"history\"][0].keys()) if _v[\"history\"] else \"empty\"}')")
+            parts.append("            elif isinstance(_v, list) and _v:")
+            parts.append("                print(f'  {_k}: list[{len(_v)}]')")
+            parts.append("            else:")
+            parts.append("                print(f'  {_k}: {type(_v).__name__}')")
+            parts.append("        print('→ history가 있으면: for h in r[\"키\"][\"history\"][:5]: print(h)')")
+            parts.append("    else:")
+            parts.append("        print(_result)")
             return "\n".join(parts)
         return code
 

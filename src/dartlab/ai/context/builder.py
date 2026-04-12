@@ -75,15 +75,10 @@ class ContextBuilder:
         parts.extend(selectInsightHints(stockCode, self.company))
         # ACE evolving playbook — intent별 학습된 분석 지침 주입
         parts.extend(selectPlaybookBullets(intentResult.intent.value, self.company))
+        # SuperMaster — 질문 관련 API top-k + 과거 성공 사례 top-k 동적 주입
+        parts.extend(self._gatherSuperMaster(stockCode))
         # intent → analysis calc selector 라우팅
         parts.extend(self._selectCalcForIntent(intentResult.intent))
-        # Phase 2: 인과 질문("왜") → graph traversal
-        try:
-            from dartlab.ai.context.selectors.graph import selectGraphCauses
-
-            parts.extend(selectGraphCauses(self.question, self.company))
-        except ImportError:
-            pass
 
         # 3. 분석 대상 라벨 (CRITICAL — 항상 포함)
         if corpName and stockCode:
@@ -139,7 +134,6 @@ class ContextBuilder:
                 Intent.ACT4_STABILITY: "dartlab.ai.context.selectors.act4",
                 Intent.ACT5_CAPITAL: "dartlab.ai.context.selectors.act5",
                 Intent.ACT6_OUTLOOK: "dartlab.ai.context.selectors.act6",
-                Intent.COMPARE: "dartlab.ai.context.selectors.compare",
             }
             if intent == Intent.ACT_ALL:
                 # 핵심 3축만 주입 (마진 + 현금흐름 + 안정성)
@@ -171,13 +165,6 @@ class ContextBuilder:
             import importlib
 
             mod = importlib.import_module(module_path)
-            # 함수 이름 규칙: selectAct{N}, selectCompare
-            fn_name = (
-                f"select{intent.value.split('_')[0].title()}"
-                if "_" in intent.value
-                else f"select{intent.value.title()}"
-            )
-            # 실제 함수명 매핑
             _FN_NAMES = {
                 Intent.ACT1_BUSINESS: "selectAct1",
                 Intent.ACT2_PROFIT: "selectAct2",
@@ -185,11 +172,47 @@ class ContextBuilder:
                 Intent.ACT4_STABILITY: "selectAct4",
                 Intent.ACT5_CAPITAL: "selectAct5",
                 Intent.ACT6_OUTLOOK: "selectAct6",
-                Intent.COMPARE: "selectCompare",
             }
             fn = getattr(mod, _FN_NAMES[intent])
-            if intent == Intent.COMPARE:
-                return fn(self.company)
             return fn(self.company)
         except (ImportError, AttributeError, KeyError, Exception):
+            return []
+
+    def _gatherSuperMaster(self, stockCode: str | None) -> list[ContextPart]:
+        """SuperMaster — CAPABILITIES + Experience retrieval.
+
+        질문 관련 API 상위 5개 + 과거 성공 사례 상위 3개를 HIGH priority로 주입.
+        하부 엔진이 바뀌어도 동적 적응.
+        """
+        try:
+            from dartlab.ai.context.bundle import PartPriority
+            from dartlab.ai.context.encoder import estimateTokens
+            from dartlab.ai.superfeature import getSuperMaster
+
+            master = getSuperMaster()
+            api_text, example_text = master.gather(self.question, stockCode=stockCode)
+
+            parts: list[ContextPart] = []
+            if api_text:
+                parts.append(
+                    ContextPart(
+                        key="supermaster.apis",
+                        text=api_text,
+                        priority=PartPriority.HIGH,
+                        estimatedTokens=estimateTokens(api_text),
+                        source="supermaster:capability",
+                    )
+                )
+            if example_text:
+                parts.append(
+                    ContextPart(
+                        key="supermaster.examples",
+                        text=example_text,
+                        priority=PartPriority.HIGH,
+                        estimatedTokens=estimateTokens(example_text),
+                        source="supermaster:experience",
+                    )
+                )
+            return parts
+        except (ImportError, Exception):
             return []

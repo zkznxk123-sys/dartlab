@@ -1,15 +1,11 @@
-"""KnowledgeDB - dartlab AI의 자기성장형 영속성 단일 DB.
+"""KnowledgeDB - dartlab AI의 영속성 단일 DB.
 
-5개 분산 저장소(analysisMemory.db, skill_library.db, error_patterns.db,
-audit_log.jsonl, auditAnalysis/*.md)를 하나의 SQLite DB로 통합한다.
-
-DB 위치: ~/.dartlab/ai_knowledge.db
+DB 위치: ~/.dartlab/dartlab_knowledge.db
 
 핵심 테이블:
 - executions: 모든 AI 실행 기록 (질문, 결과, 등급, 메트릭)
-- skills: 성공한 코드 패턴 (few-shot 라이브러리)
-- error_patterns: 에러 패턴 + 복구 코드
 - insights: 기업별 심층 분석 서사 (auditAnalysis에서 축적)
+- playbook: ACE 폐쇄 루프 bullet (intent별 학습)
 - meta: DB 버전/마이그레이션 상태
 """
 
@@ -76,35 +72,6 @@ CREATE TABLE IF NOT EXISTS executions (
 CREATE INDEX IF NOT EXISTS idx_exec_stock ON executions(stock_code);
 CREATE INDEX IF NOT EXISTS idx_exec_mode ON executions(mode);
 CREATE INDEX IF NOT EXISTS idx_exec_ts ON executions(created_at);
-
-CREATE TABLE IF NOT EXISTS skills (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    question TEXT NOT NULL,
-    category TEXT NOT NULL DEFAULT 'general',
-    tools_used TEXT NOT NULL DEFAULT '[]',
-    code_template TEXT NOT NULL,
-    result_keys TEXT NOT NULL DEFAULT '[]',
-    success_count INTEGER NOT NULL DEFAULT 1,
-    quality_score REAL NOT NULL DEFAULT 0.8,
-    mode TEXT DEFAULT 'analysis',
-    created_at REAL NOT NULL,
-    last_used REAL NOT NULL
-);
-CREATE INDEX IF NOT EXISTS idx_skill_cat ON skills(category);
-CREATE INDEX IF NOT EXISTS idx_skill_mode ON skills(mode);
-
-CREATE TABLE IF NOT EXISTS error_patterns (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    error_type TEXT NOT NULL,
-    error_signature TEXT NOT NULL,
-    wrong_code TEXT NOT NULL DEFAULT '',
-    correct_code TEXT NOT NULL DEFAULT '',
-    tool_name TEXT NOT NULL DEFAULT '',
-    frequency INTEGER NOT NULL DEFAULT 1,
-    last_seen REAL NOT NULL
-);
-CREATE INDEX IF NOT EXISTS idx_ep_sig ON error_patterns(error_signature);
-CREATE INDEX IF NOT EXISTS idx_ep_tool ON error_patterns(tool_name);
 
 CREATE TABLE IF NOT EXISTS insights (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -302,182 +269,6 @@ class KnowledgeDB:
             }
             for r in rows
         ]
-
-    # ── skills ─────────────────────────────────────────────
-
-    def save_skill(
-        self,
-        question: str,
-        code_template: str,
-        *,
-        category: str = "general",
-        tools_used: str = "[]",
-        result_keys: str = "[]",
-        quality_score: float = 0.8,
-        mode: str = "analysis",
-    ) -> int | None:
-        """성공한 코드 패턴을 ``skills`` 테이블에 저장 (few-shot 학습 자료).
-
-        Args:
-            question: 원본 질문 (500자로 절단).
-            code_template: 실행에 성공한 코드 (5000자로 절단).
-            category: skill 분류 ("financial"/"docs"/"market" 등).
-            tools_used: 사용한 도구 목록 JSON.
-            result_keys: 결과 dict 의 키 목록 JSON.
-            quality_score: 0.0~1.0 품질 점수 (높을수록 우수).
-            mode: "analysis" | "coding".
-
-        Returns:
-            INSERT 된 row 의 id, 실패 시 None.
-        """
-        conn = self._ensure_db()
-        now = time.time()
-        cursor = conn.execute(
-            "INSERT INTO skills "
-            "(question, category, tools_used, code_template, result_keys, "
-            "success_count, quality_score, mode, created_at, last_used) "
-            "VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?)",
-            (
-                question[:500],
-                category,
-                tools_used,
-                code_template[:5000],
-                result_keys,
-                quality_score,
-                mode,
-                now,
-                now,
-            ),
-        )
-        conn.commit()
-        return cursor.lastrowid
-
-    def search_skills(
-        self,
-        category: str,
-        *,
-        limit: int = 2,
-        mode: str | None = None,
-    ) -> list[tuple]:
-        """카테고리 별 상위 품질 skill 검색 (few-shot 주입용).
-
-        category 매칭 우선, 부족하면 mode 전체에서 보충.
-        품질 점수 / 성공 횟수 내림차순 정렬.
-
-        Args:
-            category: skill 분류 키.
-            limit: 반환 건수.
-            mode: "analysis" | "coding" 중 하나로 제한 (None = 둘 다).
-
-        Returns:
-            sqlite row 튜플 리스트. 컬럼 순서는 ``skills`` 테이블 schema 기준.
-        """
-        conn = self._ensure_db()
-        if mode:
-            rows = conn.execute(
-                "SELECT * FROM skills WHERE category = ? AND mode = ? "
-                "ORDER BY quality_score DESC, success_count DESC LIMIT ?",
-                (category, mode, limit),
-            ).fetchall()
-            if len(rows) < limit:
-                existing_ids = {r[0] for r in rows}
-                extra = conn.execute(
-                    "SELECT * FROM skills WHERE mode = ? ORDER BY quality_score DESC, success_count DESC LIMIT ?",
-                    (mode, limit * 3),
-                ).fetchall()
-                for r in extra:
-                    if r[0] not in existing_ids and len(rows) < limit:
-                        rows.append(r)
-        else:
-            rows = conn.execute(
-                "SELECT * FROM skills WHERE category = ? ORDER BY quality_score DESC, success_count DESC LIMIT ?",
-                (category, limit),
-            ).fetchall()
-            if len(rows) < limit:
-                existing_ids = {r[0] for r in rows}
-                extra = conn.execute(
-                    "SELECT * FROM skills ORDER BY quality_score DESC, success_count DESC LIMIT ?",
-                    (limit * 3,),
-                ).fetchall()
-                for r in extra:
-                    if r[0] not in existing_ids and len(rows) < limit:
-                        rows.append(r)
-        return rows
-
-    def record_skill_success(self, skill_id: int) -> None:
-        """skill 의 ``success_count`` 증가 + ``last_used`` 갱신.
-
-        skill 을 재사용하여 성공할 때마다 호출 — 점진적 품질 신호.
-        """
-        conn = self._ensure_db()
-        conn.execute(
-            "UPDATE skills SET success_count = success_count + 1, last_used = ? WHERE id = ?",
-            (time.time(), skill_id),
-        )
-        conn.commit()
-
-    def adjust_skill_quality(self, skill_id: int, success: bool) -> None:
-        """EMA 방식 품질 점수 업데이트."""
-        alpha = 0.3
-        conn = self._ensure_db()
-        row = conn.execute("SELECT quality_score FROM skills WHERE id = ?", (skill_id,)).fetchone()
-        if row:
-            current = row[0]
-            new_score = current * (1 - alpha) + (1.0 if success else 0.0) * alpha
-            conn.execute(
-                "UPDATE skills SET quality_score = ?, last_used = ? WHERE id = ?",
-                (new_score, time.time(), skill_id),
-            )
-            conn.commit()
-
-    # ── error_patterns ─────────────────────────────────────
-
-    def lookup_error(self, signature: str, error_type: str, *, limit: int = 3) -> list[tuple]:
-        conn = self._ensure_db()
-        rows = conn.execute(
-            "SELECT * FROM error_patterns WHERE error_signature = ? ORDER BY frequency DESC LIMIT ?",
-            (signature, limit),
-        ).fetchall()
-        if len(rows) < limit and error_type != "Unknown":
-            existing_ids = {r[0] for r in rows}
-            type_rows = conn.execute(
-                "SELECT * FROM error_patterns WHERE error_type = ? ORDER BY frequency DESC LIMIT ?",
-                (error_type, limit * 2),
-            ).fetchall()
-            for r in type_rows:
-                if r[0] not in existing_ids and len(rows) < limit:
-                    rows.append(r)
-        return rows
-
-    def record_error(
-        self,
-        error_type: str,
-        signature: str,
-        wrong_code: str,
-        correct_code: str = "",
-        tool_name: str = "",
-    ) -> None:
-        conn = self._ensure_db()
-        now = time.time()
-        existing = conn.execute(
-            "SELECT id, frequency FROM error_patterns WHERE error_signature = ? AND wrong_code = ?",
-            (signature, wrong_code[:2000]),
-        ).fetchone()
-        if existing:
-            conn.execute(
-                "UPDATE error_patterns SET frequency = ?, last_seen = ?, "
-                "correct_code = CASE WHEN ? != '' THEN ? ELSE correct_code END "
-                "WHERE id = ?",
-                (existing[1] + 1, now, correct_code, correct_code, existing[0]),
-            )
-        else:
-            conn.execute(
-                "INSERT INTO error_patterns "
-                "(error_type, error_signature, wrong_code, correct_code, tool_name, frequency, last_seen) "
-                "VALUES (?, ?, ?, ?, ?, 1, ?)",
-                (error_type, signature, wrong_code[:2000], correct_code[:2000], tool_name, now),
-            )
-        conn.commit()
 
     # ── insights ───────────────────────────────────────────
 
@@ -718,16 +509,10 @@ class KnowledgeDB:
         # 1. analysisMemory.db → executions
         stats["analysisMemory"] = self._migrate_analysis_memory(conn)
 
-        # 2. skill_library.db → skills
-        stats["skill_library"] = self._migrate_skill_library(conn)
-
-        # 3. error_patterns.db → error_patterns
-        stats["error_patterns"] = self._migrate_error_patterns(conn)
-
-        # 4. audit_log.jsonl → executions
+        # 2. audit_log.jsonl → executions
         stats["audit_log"] = self._migrate_audit_log(conn)
 
-        # 5. auditAnalysis/*.md → insights
+        # 3. auditAnalysis/*.md → insights
         stats["audit_analysis"] = self._migrate_audit_analysis(conn)
 
         self.set_meta("migration_version", str(_MIGRATION_VERSION))
@@ -770,57 +555,6 @@ class KnowledgeDB:
             legacy.close()
         except (sqlite3.OperationalError, OSError) as e:
             log.warning("analysisMemory 마이그레이션 실패: %s", e)
-        return count
-
-    def _migrate_skill_library(self, conn: sqlite3.Connection) -> int:
-        legacy_path = Path.home() / ".dartlab" / "selfai" / "skill_library.db"
-        if not legacy_path.exists():
-            return 0
-        count = 0
-        try:
-            legacy = sqlite3.connect(str(legacy_path), timeout=5)
-            rows = legacy.execute(
-                "SELECT question, category, tools_used, code_template, result_keys, "
-                "success_count, quality_score, created_at, last_used FROM skill"
-            ).fetchall()
-            for r in rows:
-                conn.execute(
-                    "INSERT INTO skills "
-                    "(question, category, tools_used, code_template, result_keys, "
-                    "success_count, quality_score, mode, created_at, last_used) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, 'analysis', ?, ?)",
-                    r,
-                )
-                count += 1
-            conn.commit()
-            legacy.close()
-        except (sqlite3.OperationalError, OSError) as e:
-            log.warning("skill_library 마이그레이션 실패: %s", e)
-        return count
-
-    def _migrate_error_patterns(self, conn: sqlite3.Connection) -> int:
-        legacy_path = Path.home() / ".dartlab" / "selfai" / "error_patterns.db"
-        if not legacy_path.exists():
-            return 0
-        count = 0
-        try:
-            legacy = sqlite3.connect(str(legacy_path), timeout=5)
-            rows = legacy.execute(
-                "SELECT error_type, error_signature, wrong_code, correct_code, "
-                "tool_name, frequency, last_seen FROM error_pattern"
-            ).fetchall()
-            for r in rows:
-                conn.execute(
-                    "INSERT INTO error_patterns "
-                    "(error_type, error_signature, wrong_code, correct_code, "
-                    "tool_name, frequency, last_seen) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    r,
-                )
-                count += 1
-            conn.commit()
-            legacy.close()
-        except (sqlite3.OperationalError, OSError) as e:
-            log.warning("error_patterns 마이그레이션 실패: %s", e)
         return count
 
     def _migrate_audit_log(self, conn: sqlite3.Connection) -> int:
@@ -894,7 +628,7 @@ class KnowledgeDB:
     def stats(self) -> dict[str, int]:
         conn = self._ensure_db()
         result = {}
-        for table in ("executions", "skills", "error_patterns", "insights"):
+        for table in ("executions", "insights", "playbook"):
             row = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()  # noqa: S608
             result[table] = row[0] if row else 0
         return result
@@ -943,48 +677,15 @@ class KnowledgeDB:
         ]
         (out / "insights.json").write_text(json.dumps(insights_data, ensure_ascii=False, indent=2), encoding="utf-8")
 
-        # skills
-        rows = conn.execute(
-            "SELECT question, category, tools_used, code_template, result_keys, "
-            "success_count, quality_score, mode, created_at, last_used FROM skills"
+        # playbook
+        pb_rows = conn.execute(
+            "SELECT intent, sector, bullet, success_count, fail_count, quality, source, created_at, last_used FROM playbook"
         ).fetchall()
-        skills_data = [
-            {
-                "question": r[0],
-                "category": r[1],
-                "tools_used": r[2],
-                "code_template": r[3],
-                "result_keys": r[4],
-                "success_count": r[5],
-                "quality_score": r[6],
-                "mode": r[7],
-                "created_at": r[8],
-                "last_used": r[9],
-            }
-            for r in rows
+        playbook_data = [
+            {"intent": r[0], "sector": r[1], "bullet": r[2], "success_count": r[3], "fail_count": r[4], "quality": r[5], "source": r[6], "created_at": r[7], "last_used": r[8]}
+            for r in pb_rows
         ]
-        (out / "skills.json").write_text(json.dumps(skills_data, ensure_ascii=False, indent=2), encoding="utf-8")
-
-        # error_patterns
-        rows = conn.execute(
-            "SELECT error_type, error_signature, wrong_code, correct_code, "
-            "tool_name, frequency, last_seen FROM error_patterns"
-        ).fetchall()
-        errors_data = [
-            {
-                "error_type": r[0],
-                "error_signature": r[1],
-                "wrong_code": r[2],
-                "correct_code": r[3],
-                "tool_name": r[4],
-                "frequency": r[5],
-                "last_seen": r[6],
-            }
-            for r in rows
-        ]
-        (out / "error_patterns.json").write_text(
-            json.dumps(errors_data, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+        (out / "playbook.json").write_text(json.dumps(playbook_data, ensure_ascii=False, indent=2), encoding="utf-8")
 
         # meta
         meta_data = {
@@ -992,19 +693,12 @@ class KnowledgeDB:
             "exported_at": time.time(),
             "stats": {
                 "insights": len(insights_data),
-                "skills": len(skills_data),
-                "error_patterns": len(errors_data),
+                "playbook": len(playbook_data),
             },
         }
         (out / "meta.json").write_text(json.dumps(meta_data, ensure_ascii=False, indent=2), encoding="utf-8")
 
-        log.info(
-            "export 완료 → %s (insights=%d, skills=%d, errors=%d)",
-            out,
-            len(insights_data),
-            len(skills_data),
-            len(errors_data),
-        )
+        log.info("export 완료 → %s (insights=%d, playbook=%d)", out, len(insights_data), len(playbook_data))
         return out
 
     def push(self, token: str | None = None) -> str:
@@ -1039,7 +733,7 @@ class KnowledgeDB:
             folder_path=str(out),
             path_in_repo=hf_dir,
             repo_type="dataset",
-            commit_message=f"sync aiKnowledge: {st.get('insights', 0)} insights, {st.get('skills', 0)} skills, {st.get('error_patterns', 0)} errors",
+            commit_message=f"sync aiKnowledge: {st.get('insights', 0)} insights, {st.get('playbook', 0)} playbook",
         )
 
         url = f"https://huggingface.co/datasets/{HF_REPO}/tree/main/{hf_dir}"
@@ -1072,7 +766,7 @@ class KnowledgeDB:
         merge_stats: dict[str, int] = {}
 
         # 1. HF → data/ai/knowledge/ 다운로드
-        for filename in ("insights.json", "skills.json", "error_patterns.json", "meta.json"):
+        for filename in ("insights.json", "playbook.json", "meta.json"):
             try:
                 hf_hub_download(
                     repo_id=HF_REPO,
@@ -1087,8 +781,6 @@ class KnowledgeDB:
 
         # 2. data/ai/knowledge/*.json → DB merge
         merge_stats["insights"] = self._merge_json_to_insights(out / "insights.json", conn)
-        merge_stats["skills"] = self._merge_json_to_skills(out / "skills.json", conn)
-        merge_stats["error_patterns"] = self._merge_json_to_errors(out / "error_patterns.json", conn)
 
         log.info("KnowledgeDB pull 완료: %s", merge_stats)
         return merge_stats
@@ -1123,74 +815,6 @@ class KnowledgeDB:
         conn.commit()
         return count
 
-    def _merge_json_to_skills(self, path: Path, conn: sqlite3.Connection) -> int:
-        if not path.exists():
-            return 0
-        data = json.loads(path.read_text(encoding="utf-8"))
-        count = 0
-        for r in data:
-            existing = conn.execute(
-                "SELECT id FROM skills WHERE question = ? AND mode = ?",
-                (r["question"], r.get("mode", "analysis")),
-            ).fetchone()
-            if not existing:
-                conn.execute(
-                    "INSERT INTO skills "
-                    "(question, category, tools_used, code_template, result_keys, "
-                    "success_count, quality_score, mode, created_at, last_used) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    (
-                        r["question"],
-                        r.get("category", "general"),
-                        r.get("tools_used", "[]"),
-                        r["code_template"],
-                        r.get("result_keys", "[]"),
-                        r.get("success_count", 1),
-                        r.get("quality_score", 0.8),
-                        r.get("mode", "analysis"),
-                        r.get("created_at", time.time()),
-                        r.get("last_used", time.time()),
-                    ),
-                )
-                count += 1
-        conn.commit()
-        return count
-
-    def _merge_json_to_errors(self, path: Path, conn: sqlite3.Connection) -> int:
-        if not path.exists():
-            return 0
-        data = json.loads(path.read_text(encoding="utf-8"))
-        count = 0
-        for r in data:
-            existing = conn.execute(
-                "SELECT id, frequency FROM error_patterns WHERE error_signature = ? AND wrong_code = ?",
-                (r["error_signature"], r.get("wrong_code", "")),
-            ).fetchone()
-            if not existing:
-                conn.execute(
-                    "INSERT INTO error_patterns "
-                    "(error_type, error_signature, wrong_code, correct_code, "
-                    "tool_name, frequency, last_seen) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    (
-                        r["error_type"],
-                        r["error_signature"],
-                        r.get("wrong_code", ""),
-                        r.get("correct_code", ""),
-                        r.get("tool_name", ""),
-                        r.get("frequency", 1),
-                        r.get("last_seen", time.time()),
-                    ),
-                )
-                count += 1
-            elif existing and r.get("correct_code"):
-                conn.execute(
-                    "UPDATE error_patterns SET correct_code = ?, frequency = MAX(frequency, ?) WHERE id = ?",
-                    (r["correct_code"], r.get("frequency", 1), existing[0]),
-                )
-        conn.commit()
-        return count
-
     # ── 싱글턴 ─────────────────────────────────────────────
 
     def _auto_pull(self) -> None:
@@ -1200,7 +824,7 @@ class KnowledgeDB:
         2순위: HF에서 pull (실패해도 무시)
         """
         current = self.stats()
-        if current.get("insights", 0) > 0 or current.get("skills", 0) > 0:
+        if current.get("insights", 0) > 0:
             return  # 이미 데이터가 있으면 skip
 
         conn = self._ensure_db()
@@ -1211,8 +835,6 @@ class KnowledgeDB:
         if local_insights.exists():
             merged = 0
             merged += self._merge_json_to_insights(local_insights, conn)
-            merged += self._merge_json_to_skills(local_dir / "skills.json", conn)
-            merged += self._merge_json_to_errors(local_dir / "error_patterns.json", conn)
             if merged > 0:
                 log.info("auto-pull: 로컬 JSON에서 %d건 merge", merged)
                 return
