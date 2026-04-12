@@ -191,6 +191,9 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("reverseImplied", "역내재성장률", "가치평가", "시장이 내재하는 매출 성장률 역산"),
     BlockMeta("sensitivity", "민감도 분석", "가치평가", "WACC x 성장률 그리드"),
     BlockMeta("valuationSynthesis", "종합 적정가치", "가치평가", "DCF+DDM+상대가치 통합 판정"),
+    BlockMeta("dFV", "dartlab 적정주가", "가치평가", "dFV — 적합도 가중 + 질적 조정 종합 적정가"),
+    BlockMeta("methodFitness", "방법론 적합도", "가치평가", "DCF/RIM/DDM/상대가치 적합도 비교"),
+    BlockMeta("qualityFactors", "질적 조정 요인", "가치평가", "신용/이익품질/거버넌스/사이클 할인·프리미엄"),
     BlockMeta("valuationFlags", "가치평가 플래그", "가치평가", "가치평가 관련 경고/기회 신호"),
     # ── 5-1 지배구조 ──
     BlockMeta("ownershipTrend", "최대주주 지분 추이", "지배구조", "최대주주 지분율 시계열과 주주 구성"),

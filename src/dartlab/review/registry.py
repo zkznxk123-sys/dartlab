@@ -754,6 +754,18 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             )
         if _need("valuationFlags"):
             b["valuationFlags"] = _safe(lambda: valuationFlagsBlock(calcValuationFlags(company, basePeriod=basePeriod)))
+        # dFV (dartlab Fair Value) — 4엔진 통합 적정주가
+        if _need("dFV") or _need("methodFitness") or _need("qualityFactors"):
+            from dartlab.analysis.valuation.dFV import calcDFV
+            from dartlab.review.builders import dFVBlock, methodFitnessBlock, qualityFactorsBlock
+
+            _dfv_data = _safe(lambda: calcDFV(company, basePeriod=basePeriod))
+            if _need("dFV"):
+                b["dFV"] = dFVBlock(_dfv_data) if _dfv_data else []
+            if _need("methodFitness"):
+                b["methodFitness"] = methodFitnessBlock(_dfv_data) if _dfv_data else []
+            if _need("qualityFactors"):
+                b["qualityFactors"] = qualityFactorsBlock(_dfv_data) if _dfv_data else []
 
     # ── 5부: 비재무 심화 ──
     if keys is None or keys & {

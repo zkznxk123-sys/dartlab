@@ -2469,6 +2469,101 @@ def reverseImpliedBlock(data: dict) -> list:
     return blocks
 
 
+# ── dFV (dartlab Fair Value) ──
+
+
+def dFVBlock(data: dict | None) -> list:
+    """calcDFV 결과 → dartlab 적정주가 블록."""
+    if not data:
+        return []
+
+    from dartlab.review.narrate import narrateDFV
+
+    blocks: list = [HeadingBlock(_meta("dFV").label, level=2, helper="dartlab 적정주가 — 적합도 가중 + 질적 조정")]
+
+    narration = narrateDFV(data)
+    if narration:
+        blocks.append(TextBlock(narration))
+
+    metrics = []
+    if data.get("dFV"):
+        metrics.append(("dFV 적정주가", f"{data['dFV']:,}원"))
+    if data.get("currentPrice"):
+        metrics.append(("현재가", f"{data['currentPrice']:,}원"))
+    if data.get("upside") is not None:
+        metrics.append(("업사이드", f"{data['upside']:+.1f}%"))
+    if data.get("opinion"):
+        metrics.append(("투자 의견", data["opinion"]))
+    if data.get("confidence"):
+        metrics.append(("신뢰도", data["confidence"]))
+    ci = data.get("confidenceInterval")
+    if ci:
+        metrics.append(("68% 구간", f"{ci[0]:,} ~ {ci[1]:,}원"))
+    if metrics:
+        blocks.append(MetricBlock(metrics))
+
+    return blocks
+
+
+def methodFitnessBlock(data: dict | None) -> list:
+    """calcDFV의 methods → 방법론별 적합도 비교 테이블."""
+    if not data:
+        return []
+    methods = data.get("methods", {})
+    if not methods:
+        return []
+
+    rows = []
+    for key, m in methods.items():
+        rows.append({
+            "방법론": key.upper(),
+            "적정가": f"{m['value']:,}원" if m.get("value") else "-",
+            "적합도": f"{m['fitness']:.2f}",
+            "가중치": f"{m['weight']:.0%}",
+            "판정 근거": m.get("fitnessReason", ""),
+        })
+
+    return [
+        HeadingBlock(_meta("methodFitness").label, level=2, helper="각 방법론이 이 기업에 얼마나 적합한가"),
+        TableBlock("방법론 적합도 비교", pl.DataFrame(rows)),
+    ]
+
+
+def qualityFactorsBlock(data: dict | None) -> list:
+    """calcDFV의 adjustmentFactors → 질적 조정 요인 분해."""
+    if not data:
+        return []
+    factors = data.get("adjustmentFactors", [])
+    total = data.get("qualityAdjustment", 0)
+
+    if not factors:
+        return []
+
+    rows = []
+    for f in factors:
+        adj = f.get("adjustment", 0)
+        if adj == 0:
+            label = "—"
+        elif adj > 0:
+            label = f"+{adj:.0%}"
+        else:
+            label = f"{adj:.0%}"
+        rows.append({
+            "요인": f.get("name", ""),
+            "엔진": f.get("source", ""),
+            "조정": label,
+            "근거": f.get("reason", ""),
+        })
+
+    blocks: list = [
+        HeadingBlock(_meta("qualityFactors").label, level=2, helper="4엔진 데이터 기반 질적 할인/프리미엄"),
+        TableBlock("질적 조정 요인", pl.DataFrame(rows)),
+    ]
+    if total != 0:
+        blocks.append(MetricBlock([("합산 조정", f"{total:+.1%}")]))
+    return blocks
+
+
 def sensitivityBlock(data: dict) -> list:
     """calcSensitivity 결과 -> TableBlock(그리드)."""
     if not data:

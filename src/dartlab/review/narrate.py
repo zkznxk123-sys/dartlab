@@ -859,3 +859,41 @@ def narrateCyclicalAction(data: dict) -> str | None:
     if precedent:
         parts.append(f"역사적 선례: {precedent}.")
     return " ".join(parts)
+
+
+# ── dFV narrate ──
+
+
+def narrateDFV(data: dict) -> str | None:
+    """dFV 종합 판정 → 자연어."""
+    dfv = data.get("dFV")
+    current = data.get("currentPrice")
+    upside = data.get("upside")
+    opinion = data.get("opinion", "")
+    confidence = data.get("confidence", "")
+    methods = data.get("methods", {})
+
+    if not dfv:
+        return None
+
+    parts = [f"**dartlab 적정주가 {dfv:,}원**"]
+    if current:
+        parts.append(f"(현재 {current:,}원 대비 {upside:+.1f}%)." if upside is not None else ".")
+    if opinion:
+        parts.append(f"투자 의견: **{opinion}**.")
+    if confidence:
+        parts.append(f"신뢰도 **{confidence}**.")
+
+    # 적합도 높은 방법론 언급
+    high_fit = [(k, m) for k, m in methods.items() if m.get("fitness", 0) >= 0.7]
+    if high_fit:
+        names = [f"{k.upper()}({m['fitness']:.2f})" for k, m in high_fit]
+        parts.append(f"적합도 높은 방법론: {', '.join(names)}.")
+
+    # 질적 조정
+    qa = data.get("qualityAdjustment", 0)
+    if qa != 0:
+        direction = "프리미엄" if qa > 0 else "할인"
+        parts.append(f"질적 {direction} {abs(qa):.1%} 반영.")
+
+    return " ".join(parts)
