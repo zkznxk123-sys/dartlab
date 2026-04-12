@@ -119,6 +119,12 @@ def calcScenarioSensitivity(company, *, basePeriod: str | None = None) -> dict |
         "interestCoverage": round(ic, 1) if ic else None,
         "debtRatio": round(debt_ratio, 1) if debt_ratio else None,
         "fcf": fcf,
+        # 내부 값 (calcImprovementLevers에서 재사용)
+        "_revenue": revenue,
+        "_op_income": op_income,
+        "_equity": equity,
+        "_interest_abs": interest_abs,
+        "_cash": None,  # 추후 BS에서 채움
     }
 
     shocks = {}
