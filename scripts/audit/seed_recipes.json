@@ -1,7 +1,7 @@
 [
   {
     "question": "삼성전자 수익성 분석해줘",
-    "code": "r = c.analysis('수익성')\nprint('| 기간 | 매출(조) | 영업이익률 | 순이익률 |')\nprint('| --- | --- | --- | --- |')\nfor h in r['marginTrend']['history'][:8]:\n    rev = f'{h[\"revenue\"]/1e12:.1f}' if h.get('revenue') else '-'\n    om = f'{h[\"operatingMargin\"]:.1f}%' if h.get('operatingMargin') is not None else '-'\n    nm = f'{h[\"netMargin\"]:.1f}%' if h.get('netMargin') is not None else '-'\n    print(f'| {h[\"period\"]} | {rev} | {om} | {nm} |')",
+    "code": "r = c.analysis('수익성')\nmt = r['marginTrend']['history']\nrt = {h['period']: h for h in r['returnTrend']['history']}\nprint('| 기간 | 매출(조) | 영업이익률 | 순이익률 | ROE | ROA |')\nprint('| --- | --- | --- | --- | --- | --- |')\nfor h in mt[:8]:\n    p = h['period']\n    rev = f'{h[\"revenue\"]/1e12:.1f}' if h.get('revenue') else '-'\n    om = f'{h[\"operatingMargin\"]:.1f}%' if h.get('operatingMargin') is not None else '-'\n    nm = f'{h[\"netMargin\"]:.1f}%' if h.get('netMargin') is not None else '-'\n    rh = rt.get(p, {})\n    roe = f'{rh[\"roe\"]:.1f}%' if rh.get('roe') is not None else '-'\n    roa = f'{rh[\"roa\"]:.1f}%' if rh.get('roa') is not None else '-'\n    print(f'| {p} | {rev} | {om} | {nm} | {roe} | {roa} |')",
     "intent": "act2_profit"
   },
   {
