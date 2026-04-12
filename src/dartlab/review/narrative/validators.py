@@ -88,9 +88,17 @@ def _historyTest(company) -> TestResult:
                 passed=True,
                 detail=f"유사 포지션 기업 확인됨: {', '.join(views[:2])} 유형에서 동종 사례 존재",
             )
-        return TestResult(name="History", passed=False, detail="peer 비교 데이터 부족 — 유사 사례 매칭 불가")
+        return TestResult(
+            name="History",
+            passed=False,
+            detail="peer 비교 데이터 부족. scan 프리빌드 필요: dartlab.downloadAll('scan') 실행 후 재시도",
+        )
     except (ImportError, AttributeError, ValueError):
-        return TestResult(name="History", passed=False, detail="scan 데이터 접근 불가")
+        return TestResult(
+            name="History",
+            passed=False,
+            detail="scan 데이터 접근 불가. dartlab.downloadAll('scan') 실행 필요",
+        )
 
 
 def _experienceTest(company) -> TestResult:
@@ -109,10 +117,14 @@ def _experienceTest(company) -> TestResult:
         return TestResult(
             name="Experience",
             passed=False,
-            detail=f"동종업계 {total}개사 — 비교 표본 부족 (50개 미만)",
+            detail=f"동종업계 {total}개사 — 비교 표본 부족 (50개 미만). dartlab.downloadAll('scan') 실행 후 재시도",
         )
     except (ImportError, AttributeError, ValueError):
-        return TestResult(name="Experience", passed=False, detail="scan 데이터 접근 불가")
+        return TestResult(
+            name="Experience",
+            passed=False,
+            detail="scan 데이터 접근 불가. dartlab.downloadAll('scan') 실행 필요",
+        )
 
 
 # ── Common Sense Invariants ──

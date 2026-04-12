@@ -4775,6 +4775,12 @@ def sectorKpiBlock(data: dict | None) -> list:
         ),
     ]
 
+    from dartlab.review.narrate import narrateSectorContext
+
+    context = narrateSectorContext(sector, kpis)
+    if context:
+        blocks.append(TextBlock(context))
+
     for key, val in kpis.items():
         if not val or not isinstance(val, dict):
             continue

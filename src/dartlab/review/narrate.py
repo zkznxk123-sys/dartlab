@@ -665,3 +665,116 @@ def buildActSummary(actNum: str, sections: list, threads: list, usedIds: set[str
     if summaries:
         return f"**{actNum}막 결론**: {' / '.join(summaries[:2])}"
     return None
+
+
+# ── 인과 연쇄 narrate ──
+
+
+def narrateCausalChain(metrics: dict) -> str | None:
+    """핵심 비율 간 인과 방향을 감지하여 3막 인과 문장 생성.
+
+    metrics: {opm_delta, fcf_delta_pct, debt_delta_pp, roe_delta, ic_delta} 변화량 dict.
+    """
+    if not metrics:
+        return None
+
+    parts = []
+
+    opm_d = metrics.get("opm_delta")
+    fcf_d = metrics.get("fcf_delta_pct")
+    debt_d = metrics.get("debt_delta_pp")
+
+    def _mag(v: float | None) -> str:
+        if v is None:
+            return ""
+        return "급격히 " if abs(v) > 10 else "" if abs(v) < 3 else ""
+
+    def _dir(v: float | None) -> str:
+        if v is None:
+            return ""
+        return "상승" if v > 0 else "하락"
+
+    if opm_d is not None and abs(opm_d) >= 2:
+        parts.append(f"영업이익률이 {_mag(opm_d)}{abs(opm_d):.1f}%p {_dir(opm_d)}하면서")
+
+    if fcf_d is not None and abs(fcf_d) >= 10:
+        parts.append(f"FCF가 {abs(fcf_d):.0f}% {_dir(fcf_d)}")
+
+    if debt_d is not None and abs(debt_d) >= 5:
+        parts.append(f"부채비율이 {abs(debt_d):.0f}%p {_dir(debt_d)}")
+
+    if len(parts) >= 2:
+        chain = " → ".join(parts)
+        conclusion = ""
+        if opm_d and opm_d < -3 and debt_d and debt_d > 5:
+            conclusion = " — 수익성 악화가 재무 부담으로 전이되는 구조"
+        elif opm_d and opm_d > 3 and fcf_d and fcf_d > 15:
+            conclusion = " — 수익성 개선이 현금흐름으로 확인되는 선순환"
+        return chain + conclusion
+
+    return None
+
+
+# ── 업종 맥락 narrate ──
+
+
+_SECTOR_CONTEXT: dict[str, str] = {
+    "construction": (
+        "건설업은 수주→시공→정산의 장기 사이클을 가진다. "
+        "수주잔고 회전(잔고/매출)이 핵심 선행지표이며, "
+        "도급(시공)과 자체개발(분양) 마진 갭이 수익성을 결정한다. "
+        "PF(프로젝트파이낸싱) 노출은 하방 리스크의 핵심."
+    ),
+    "semiconductor": (
+        "반도체는 3-5년 CAPEX 사이클에 지배된다. "
+        "확장기에는 CAPEX/매출이 30%+로 급등하고, "
+        "축소기에는 유지투자만으로 FCF가 급증한다. "
+        "웨이퍼 ASP와 가동률이 분기 실적의 핵심 변수."
+    ),
+    "gaming": (
+        "게임·엔터는 IP 포트폴리오의 집중도가 수익 변동성을 결정한다. "
+        "단일 IP 의존(HHI>4000)은 신작 실패 시 급락 리스크. "
+        "DAU/MAU 추이와 ARPU가 매출 방향의 선행지표."
+    ),
+    "pharma": (
+        "제약·바이오는 R&D 투자→임상→승인→매출의 10년+ 사이클. "
+        "Phase별 성공확률(Phase I 10%, Phase III 50%)이 파이프라인 가치를 결정한다. "
+        "마일스톤/로열티 수익 구조와 특허 만료(patent cliff)가 핵심 리스크."
+    ),
+}
+
+
+def narrateSectorContext(sector: str, kpis: dict | None) -> str | None:
+    """업종 고정 맥락 + KPI 수치 동적 삽입."""
+    base = _SECTOR_CONTEXT.get(sector)
+    if not base:
+        return None
+
+    parts = [base]
+
+    if kpis:
+        if sector == "semiconductor":
+            cc = kpis.get("capexCycle", {})
+            if cc.get("phase"):
+                parts.append(f"현재 CAPEX 사이클: **{cc['phase']}** (CAPEX/매출 {cc.get('latest', '?')}%, 5Y 평균 {cc.get('avg', '?')}%)")
+        elif sector == "construction":
+            cm = kpis.get("contractMix", {})
+            if cm.get("contractRatio"):
+                parts.append(f"매출 구성: 도급 {cm['contractRatio']:.0f}% / 자체개발 {cm.get('selfDevRatio', 0):.0f}%")
+            pf = kpis.get("pfExposure", {})
+            if pf.get("pfRelatedItems"):
+                parts.append(f"PF 관련 충당부채 항목: {pf['pfRelatedItems']}건 감지")
+        elif sector == "gaming":
+            cc = kpis.get("contentConcentration", {})
+            if cc.get("topIp"):
+                parts.append(f"주력 IP: {cc['topIp']} (매출 비중 {cc.get('topShare', '?')}%, 집중도 {cc.get('verdict', '?')})")
+        elif sector == "pharma":
+            ps = kpis.get("pipelineStages", {})
+            if ps.get("stages"):
+                stage_str = ", ".join(f"{k} {v}건" for k, v in ps["stages"].items())
+                parts.append(f"파이프라인 감지: {stage_str} (추정 평균 POS {ps.get('avgPOS', '?')}%)")
+            rd = kpis.get("rdIntensity", {})
+            if rd.get("latest"):
+                parts.append(f"R&D 집중도: {rd['latest']:.1f}% ({rd.get('verdict', '')})")
+
+    return " ".join(parts)

@@ -93,6 +93,18 @@ class VizSpec:
         fig = self.toPlotly()
         return fig.to_html(include_plotlyjs="cdn", full_html=False)
 
+    def toImage(self, path: str, fmt: str = "svg") -> bool:
+        """Plotly → 정적 이미지 저장. kaleido 필요.
+
+        Returns True on success, False on failure (kaleido 미설치 등).
+        """
+        try:
+            fig = self.toPlotly()
+            fig.write_image(path, format=fmt, width=800, height=400)
+            return True
+        except (ImportError, ValueError, OSError):
+            return False
+
     @staticmethod
     def fromDict(d: dict[str, Any]) -> "VizSpec":
         """dict → VizSpec 변환."""

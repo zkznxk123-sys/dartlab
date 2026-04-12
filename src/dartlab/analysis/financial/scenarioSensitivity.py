@@ -49,6 +49,7 @@ def calcScenarioSensitivity(company, *, basePeriod: str | None = None) -> dict |
                 "operating_income",
                 "net_profit",
                 "interest_expense",
+                "finance_cost",
             ],
         )
     )
@@ -68,7 +69,10 @@ def calcScenarioSensitivity(company, *, basePeriod: str | None = None) -> dict |
     revenue = _get("sales")
     op_income = _get("operating_income")
     ni = _get("net_profit")
-    interest = _get("interest_expense")
+    # 이자비용 다중 키 fallback
+    interest = _get("interest_expense") or _get("finance_cost")
+    if interest is None and op_income is not None and ni is not None:
+        interest = op_income - ni  # 조세+이자 합산 근사
 
     if revenue is None or op_income is None:
         return None

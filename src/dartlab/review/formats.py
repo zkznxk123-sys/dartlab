@@ -114,8 +114,11 @@ def _polarsToMarkdown(df) -> str:
         return str(df)
 
 
-def renderMarkdown(review) -> str:
-    """마크다운 렌더링."""
+def renderMarkdown(review, *, chart_dir: str | None = None) -> str:
+    """마크다운 렌더링.
+
+    chart_dir 지정 시 ChartBlock을 SVG로 저장하고 이미지 참조 생성.
+    """
     from dartlab.review.blocks import (
         ChartBlock,
         FlagBlock,
@@ -283,8 +286,23 @@ def renderMarkdown(review) -> str:
                 if not rendered:
                     parts.append(_polarsToMarkdown(block.df))
             elif isinstance(block, ChartBlock):
-                title = block.spec.get("title", "\ucc28\ud2b8") if isinstance(block.spec, dict) else "\ucc28\ud2b8"
-                parts.append(f"*[chart: {title}]*")
+                title = block.spec.get("title", "차트") if isinstance(block.spec, dict) else "차트"
+                rendered_chart = False
+                if chart_dir and isinstance(block.spec, dict):
+                    from dartlab.viz.spec import VizSpec
+
+                    key = block.spec.get("title", "chart").replace(" ", "_")[:30]
+                    img_path = f"{chart_dir}/chart-{key}.svg"
+                    try:
+                        vs = VizSpec.fromDict(block.spec)
+                        if vs.toImage(img_path):
+                            rel = f"assets/chart-{key}.svg"
+                            parts.append(f"![{title}]({rel})")
+                            rendered_chart = True
+                    except (ImportError, ValueError, OSError, TypeError):
+                        pass
+                if not rendered_chart:
+                    parts.append(f"*[chart: {title}]*")
             elif isinstance(block, FlagBlock):
                 for f in block.flags:
                     parts.append(f"- {block.icon} {f}")

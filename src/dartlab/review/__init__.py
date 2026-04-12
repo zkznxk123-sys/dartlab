@@ -284,7 +284,7 @@ class Review:
         if fmt == "markdown":
             from dartlab.review.formats import renderMarkdown
 
-            return renderMarkdown(self)
+            return renderMarkdown(self, chart_dir=getattr(self, "chartDir", None))
         if fmt == "json":
             from dartlab.review.formats import renderJson
 
