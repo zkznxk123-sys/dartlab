@@ -147,24 +147,28 @@ def buildContentSegment(
     for row in rows:
         content = (row.get("section_content") or "")[:contentLimit]
         builder.addDoc(content)
-        metaRecs.append({
-            "rcept_no": row.get("rcept_no") or "",
-            "section_order": int(row.get("section_order") or 0),
-            "corp_code": row.get("corp_code") or "",
-            "corp_name": row.get("corp_name") or "",
-            "stock_code": row.get("stock_code") or "",
-            "rcept_dt": str(row.get("rcept_dt") or ""),
-            "report_nm": row.get("report_nm") or "",
-            "section_title": row.get("section_title") or "",
-            "text": content[:500],  # 스니펫용
-            "source": row.get("source") or "",
-        })
+        metaRecs.append(
+            {
+                "rcept_no": row.get("rcept_no") or "",
+                "section_order": int(row.get("section_order") or 0),
+                "corp_code": row.get("corp_code") or "",
+                "corp_name": row.get("corp_name") or "",
+                "stock_code": row.get("stock_code") or "",
+                "rcept_dt": str(row.get("rcept_dt") or ""),
+                "report_nm": row.get("report_nm") or "",
+                "section_title": row.get("section_title") or "",
+                "text": content[:500],  # 스니펫용
+                "source": row.get("source") or "",
+            }
+        )
 
     idx = builder.finalize()
     meta = pl.DataFrame(metaRecs)
     if showProgress:
         elapsed = time.perf_counter() - t0
-        print(f"  [content] {idx['nDocs']:,}문서, {len(idx['stemDict']):,} stems, {idx['offsets'][-1]:,} postings, {elapsed:.1f}초")
+        print(
+            f"  [content] {idx['nDocs']:,}문서, {len(idx['stemDict']):,} stems, {idx['offsets'][-1]:,} postings, {elapsed:.1f}초"
+        )
     return idx, meta
 
 
@@ -183,15 +187,18 @@ def saveSegment(idx: dict, meta: pl.DataFrame, name: str, outDir: Path | None = 
         docLengths=idx["docLengths"],
     )
     (outDir / f"{name}_stems.json").write_text(
-        json.dumps(idx["stemDict"], ensure_ascii=False), encoding="utf-8",
+        json.dumps(idx["stemDict"], ensure_ascii=False),
+        encoding="utf-8",
     )
     meta.write_parquet(outDir / f"{name}_meta.parquet")
     (outDir / f"{name}_info.json").write_text(
-        json.dumps({
-            "nDocs": idx["nDocs"],
-            "avgDocLength": idx["avgDocLength"],
-            "builtAt": time.strftime("%Y-%m-%dT%H:%M:%S"),
-        }),
+        json.dumps(
+            {
+                "nDocs": idx["nDocs"],
+                "avgDocLength": idx["avgDocLength"],
+                "builtAt": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            }
+        ),
         encoding="utf-8",
     )
 
@@ -288,7 +295,9 @@ def searchContent(
 
     segments = _getSegments()
     if not segments:
-        return pl.DataFrame({"info": ["content 인덱스가 없습니다. dartlab.core.search.fieldIndex.rebuildContent() 실행 필요."]})
+        return pl.DataFrame(
+            {"info": ["content 인덱스가 없습니다. dartlab.core.search.fieldIndex.rebuildContent() 실행 필요."]}
+        )
 
     allHits: list[dict] = []
     deltaRcepts: set[tuple[str, int]] = set()
@@ -359,7 +368,7 @@ def rebuildMain(
     """
     import gc
 
-    from dartlab.providers.dart.openapi.allFilingsCollector import _allFilingsDir, _META_SUFFIX
+    from dartlab.providers.dart.openapi.allFilingsCollector import _META_SUFFIX, _allFilingsDir
 
     builder = _IncrementalBuilder()
     metaRecs: list[dict] = []
@@ -370,18 +379,20 @@ def rebuildMain(
         for row in df.iter_rows(named=True):
             content = (row.get("section_content") or "")[:contentLimit]
             builder.addDoc(content)
-            metaRecs.append({
-                "rcept_no": row.get("rcept_no") or "",
-                "section_order": int(row.get("section_order") or 0),
-                "corp_code": row.get("corp_code") or "",
-                "corp_name": row.get("corp_name") or "",
-                "stock_code": row.get("stock_code") or "",
-                "rcept_dt": str(row.get("rcept_dt") or ""),
-                "report_nm": row.get("report_nm") or "",
-                "section_title": row.get("section_title") or "",
-                "text": content[:500],
-                "source": source,
-            })
+            metaRecs.append(  # noqa: F821
+                {
+                    "rcept_no": row.get("rcept_no") or "",
+                    "section_order": int(row.get("section_order") or 0),
+                    "corp_code": row.get("corp_code") or "",
+                    "corp_name": row.get("corp_name") or "",
+                    "stock_code": row.get("stock_code") or "",
+                    "rcept_dt": str(row.get("rcept_dt") or ""),
+                    "report_nm": row.get("report_nm") or "",
+                    "section_title": row.get("section_title") or "",
+                    "text": content[:500],
+                    "source": source,
+                }
+            )
             added += 1
         return added
 
@@ -403,7 +414,7 @@ def rebuildMain(
                 gc.collect()
                 if showProgress:
                     elapsed = time.perf_counter() - t0
-                    print(f"  allFilings {i+1}/{len(files)}: {totalDocs:,} docs, {elapsed:.0f}초")
+                    print(f"  allFilings {i + 1}/{len(files)}: {totalDocs:,} docs, {elapsed:.0f}초")
 
     if includeDocs:
         from dartlab import config as _cfg
@@ -423,7 +434,7 @@ def rebuildMain(
                 gc.collect()
                 if showProgress:
                     elapsed = time.perf_counter() - t0
-                    print(f"  docs {i+1}/{len(docsFiles)}: {totalDocs:,} docs, {elapsed:.0f}초")
+                    print(f"  docs {i + 1}/{len(docsFiles)}: {totalDocs:,} docs, {elapsed:.0f}초")
 
     if showProgress:
         print(f"[main] 축적 완료: {totalDocs:,} 문서, finalize 시작")
@@ -439,7 +450,7 @@ def rebuildMain(
 
     if showProgress:
         elapsed = time.perf_counter() - t0
-        print(f"[main] 저장 완료. 총 {elapsed/60:.1f}분, {idx['nDocs']:,} 문서.")
+        print(f"[main] 저장 완료. 총 {elapsed / 60:.1f}분, {idx['nDocs']:,} 문서.")
 
     return idx["nDocs"]
 
@@ -456,16 +467,13 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
     """
     from datetime import datetime, timedelta
 
-    from dartlab.providers.dart.openapi.allFilingsCollector import _allFilingsDir, _META_SUFFIX
+    from dartlab.providers.dart.openapi.allFilingsCollector import _META_SUFFIX, _allFilingsDir
 
     if sinceDate is None:
         sinceDate = (datetime.now() - timedelta(days=daysBack)).strftime("%Y%m%d")
 
     outDir = _allFilingsDir()
-    files = sorted(
-        f for f in outDir.glob("*.parquet")
-        if _META_SUFFIX not in f.stem and f.stem >= sinceDate
-    )
+    files = sorted(f for f in outDir.glob("*.parquet") if _META_SUFFIX not in f.stem and f.stem >= sinceDate)
 
     if showProgress:
         print(f"[delta] {sinceDate} 이후: {len(files)}개 파일")
@@ -512,8 +520,14 @@ def pushContentIndex(token: str | None = None) -> None:
     outDir = _contentIndexDir()
     api = HfApi(token=token)
     names = [
-        "main.npz", "main_stems.json", "main_meta.parquet", "main_info.json",
-        "delta.npz", "delta_stems.json", "delta_meta.parquet", "delta_info.json",
+        "main.npz",
+        "main_stems.json",
+        "main_meta.parquet",
+        "main_info.json",
+        "delta.npz",
+        "delta_stems.json",
+        "delta_meta.parquet",
+        "delta_info.json",
     ]
     for name in names:
         src = outDir / name
@@ -543,8 +557,14 @@ def pullContentIndex() -> int:
     dataDir = Path(_cfg.dataDir)  # dart/contentIndex/ 앞의 루트
 
     names = [
-        "main.npz", "main_stems.json", "main_meta.parquet", "main_info.json",
-        "delta.npz", "delta_stems.json", "delta_meta.parquet", "delta_info.json",
+        "main.npz",
+        "main_stems.json",
+        "main_meta.parquet",
+        "main_info.json",
+        "delta.npz",
+        "delta_stems.json",
+        "delta_meta.parquet",
+        "delta_info.json",
     ]
     ok = 0
     for name in names:

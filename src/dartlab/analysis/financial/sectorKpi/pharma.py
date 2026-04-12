@@ -98,7 +98,11 @@ def calcPharmaKpis(company, *, basePeriod: str | None = None) -> dict | None:
                 result["rdIntensity"] = {
                     "history": history,
                     "latest": history[-1]["rdToRevenue"],
-                    "verdict": "고R&D" if history[-1]["rdToRevenue"] > 20 else "중R&D" if history[-1]["rdToRevenue"] > 10 else "저R&D",
+                    "verdict": "고R&D"
+                    if history[-1]["rdToRevenue"] > 20
+                    else "중R&D"
+                    if history[-1]["rdToRevenue"] > 10
+                    else "저R&D",
                 }
     except (AttributeError, ValueError, TypeError):
         pass

@@ -939,7 +939,7 @@ def forecastRevenue(
     # override: baseRevenue
     if "baseRevenue" in _ov:
         lastRevenue = _ov["baseRevenue"]
-        warnings.append(f"baseRevenue override: {lastRevenue/1e12:.1f}조")
+        warnings.append(f"baseRevenue override: {lastRevenue / 1e12:.1f}조")
 
     # mid-cycle 정규화 (사이클 기업 자동, override 없을 때)
     if "baseRevenue" not in _ov and lifecycle in ("cyclical", "mature_cyclical"):
@@ -948,7 +948,7 @@ def forecastRevenue(
             midCycleRevenue = sum(historicals[-5:]) / len(historicals[-5:])
             if lastRevenue and abs(lastRevenue - midCycleRevenue) / midCycleRevenue > 0.15:
                 lastRevenue = midCycleRevenue
-                warnings.append(f"사이클 기업 → mid-cycle 매출 {midCycleRevenue/1e12:.1f}조 적용")
+                warnings.append(f"사이클 기업 → mid-cycle 매출 {midCycleRevenue / 1e12:.1f}조 적용")
 
     # 시계열 성장률: projected 간 YoY 성장률 (분기 데이터이므로 자체 기준 비교)
     tsGrowthRates: list[float] = []

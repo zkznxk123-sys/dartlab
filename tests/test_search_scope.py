@@ -69,17 +69,34 @@ def test_build_content_segment_smoke():
 
 def test_bm25_ranks_relevant_doc():
     """BM25 스코어링이 관련 문서를 상위로 올리는지."""
-    import numpy as np
 
     from dartlab.core.search.fieldIndex import _scoreBM25, buildContentSegment
 
     rows = [
-        {"rcept_no": "a", "section_order": 0, "section_content": "반도체 HBM 투자",
-         "corp_name": "", "stock_code": "", "rcept_dt": "", "report_nm": "",
-         "section_title": "", "corp_code": "", "source": ""},
-        {"rcept_no": "b", "section_order": 0, "section_content": "화장품 유통 계약",
-         "corp_name": "", "stock_code": "", "rcept_dt": "", "report_nm": "",
-         "section_title": "", "corp_code": "", "source": ""},
+        {
+            "rcept_no": "a",
+            "section_order": 0,
+            "section_content": "반도체 HBM 투자",
+            "corp_name": "",
+            "stock_code": "",
+            "rcept_dt": "",
+            "report_nm": "",
+            "section_title": "",
+            "corp_code": "",
+            "source": "",
+        },
+        {
+            "rcept_no": "b",
+            "section_order": 0,
+            "section_content": "화장품 유통 계약",
+            "corp_name": "",
+            "stock_code": "",
+            "rcept_dt": "",
+            "report_nm": "",
+            "section_title": "",
+            "corp_code": "",
+            "source": "",
+        },
     ]
     idx, _ = buildContentSegment(rows, showProgress=False)
     scores = _scoreBM25(idx, ["반도체", "HBM"])
@@ -96,9 +113,18 @@ def test_segment_save_load_roundtrip(tmp_path):
     )
 
     rows = [
-        {"rcept_no": "x", "section_order": 0, "section_content": "테스트 문서 내용",
-         "corp_name": "테스트", "stock_code": "", "rcept_dt": "", "report_nm": "",
-         "section_title": "", "corp_code": "", "source": ""},
+        {
+            "rcept_no": "x",
+            "section_order": 0,
+            "section_content": "테스트 문서 내용",
+            "corp_name": "테스트",
+            "stock_code": "",
+            "rcept_dt": "",
+            "report_nm": "",
+            "section_title": "",
+            "corp_code": "",
+            "source": "",
+        },
     ]
     idx, meta = buildContentSegment(rows, showProgress=False)
     saveSegment(idx, meta, "test_main", outDir=tmp_path)
@@ -129,4 +155,5 @@ def test_search_scope_title_works():
         pytest.skip("stemIndex 없음")
     # 결과가 DataFrame이면 OK (빈 결과 허용)
     import polars as pl
+
     assert isinstance(r, pl.DataFrame)

@@ -591,8 +591,6 @@ def calcActionableTargets(company, *, overrides: dict | None = None) -> dict | N
     if ohlcv is None or ohlcv.is_empty():
         return None
 
-    import polars as pl
-
     closes = ohlcv["close"].to_list()
     if not closes or len(closes) < 20:
         return None
@@ -616,12 +614,14 @@ def calcActionableTargets(company, *, overrides: dict | None = None) -> dict | N
 
     # 볼린저 하단 접근
     if current > bb_lower:
-        targets.append({
-            "signal": "볼린저 하단 접근",
-            "triggerPrice": round(bb_lower),
-            "action": "분할 매수 검토",
-            "confidence": "medium",
-        })
+        targets.append(
+            {
+                "signal": "볼린저 하단 접근",
+                "triggerPrice": round(bb_lower),
+                "action": "분할 매수 검토",
+                "confidence": "medium",
+            }
+        )
 
     # RSI 과매도 (간략 계산)
     if len(closes) >= 14:
@@ -634,12 +634,14 @@ def calcActionableTargets(company, *, overrides: dict | None = None) -> dict | N
         if rsi > 30:
             # RSI가 30 이하가 될 가격 역산 (근사)
             rsi_target = round(current * 0.90)  # 약 10% 하락 시 과매도 근접
-            targets.append({
-                "signal": "RSI 과매도 접근",
-                "triggerPrice": rsi_target,
-                "action": "적극 매수 검토",
-                "confidence": "high" if rsi < 40 else "medium",
-            })
+            targets.append(
+                {
+                    "signal": "RSI 과매도 접근",
+                    "triggerPrice": rsi_target,
+                    "action": "적극 매수 검토",
+                    "confidence": "high" if rsi < 40 else "medium",
+                }
+            )
 
     verdict = calcTechnicalVerdict(company)
     tech_label = verdict.get("verdict", "중립") if verdict else "중립"

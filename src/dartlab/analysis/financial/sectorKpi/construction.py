@@ -50,10 +50,14 @@ def calcConstructionKpis(company, *, basePeriod: str | None = None) -> dict | No
             contract_kw = ["도급", "시공", "건축"]
             self_dev_kw = ["자체", "분양", "개발", "매각"]
             contract_rev = sum(
-                abs(float(r.get("amount", 0) or 0)) for r in rows if any(k in str(r.get("product", "")) for k in contract_kw)
+                abs(float(r.get("amount", 0) or 0))
+                for r in rows
+                if any(k in str(r.get("product", "")) for k in contract_kw)
             )
             selfdev_rev = sum(
-                abs(float(r.get("amount", 0) or 0)) for r in rows if any(k in str(r.get("product", "")) for k in self_dev_kw)
+                abs(float(r.get("amount", 0) or 0))
+                for r in rows
+                if any(k in str(r.get("product", "")) for k in self_dev_kw)
             )
             total = contract_rev + selfdev_rev
             if total > 0:

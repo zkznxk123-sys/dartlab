@@ -495,7 +495,11 @@ def spec_revenue_scenario_band(history: list[dict], forecasts: dict | None) -> d
         actuals_ext = actuals + [None] * len(fwd_periods)
         data["series"][0]["values"] = actuals_ext
 
-        for key, label, color in [("base", "Base", COLORS[1]), ("bull", "Bull", COLORS[4]), ("bear", "Bear", COLORS[3])]:
+        for key, label, color in [
+            ("base", "Base", COLORS[1]),
+            ("bull", "Bull", COLORS[4]),
+            ("bear", "Bear", COLORS[3]),
+        ]:
             vals = forecasts.get(key, [])
             if vals:
                 data["series"].append({"name": label, "values": [None] * len(periods) + vals, "color": color})

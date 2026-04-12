@@ -26,9 +26,7 @@ def calcSemiconductorKpis(company, *, basePeriod: str | None = None) -> dict | N
 
     # ── CAPEX/매출 사이클 ──
     try:
-        parsed = toDictBySnakeId(
-            company.select("CF", ["purchase_of_property_plant_and_equipment"])
-        )
+        parsed = toDictBySnakeId(company.select("CF", ["purchase_of_property_plant_and_equipment"]))
         is_parsed = toDictBySnakeId(company.select("IS", ["sales"]))
         if parsed and is_parsed:
             cfData, cfPeriods = parsed
@@ -66,7 +64,19 @@ def calcSemiconductorKpis(company, *, basePeriod: str | None = None) -> dict | N
             ps = company.show("segments")
         if ps is not None and hasattr(ps, "to_dicts"):
             rows = ps.to_dicts()
-            semi_kw = ["반도체", "메모리", "DRAM", "NAND", "파운드리", "웨이퍼", "Semiconductor", "Memory", "DRAM", "NAND", "Foundry"]
+            semi_kw = [
+                "반도체",
+                "메모리",
+                "DRAM",
+                "NAND",
+                "파운드리",
+                "웨이퍼",
+                "Semiconductor",
+                "Memory",
+                "DRAM",
+                "NAND",
+                "Foundry",
+            ]
             semi_rows = [r for r in rows if any(k.lower() in str(r).lower() for k in semi_kw)]
             if semi_rows:
                 result["aspProxy"] = {

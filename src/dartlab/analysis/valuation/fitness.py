@@ -13,7 +13,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 # ── 기업유형별 모델 선택 매트릭스 ──
 
 _MODEL_MATRIX: dict[str | None, dict] = {

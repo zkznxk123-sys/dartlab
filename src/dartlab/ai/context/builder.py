@@ -238,12 +238,15 @@ class ContextBuilder:
                 scan_guide = dartlab.scan()
                 if scan_guide is not None:
                     text = f'<context source="guide:scan">\n## scan 가이드 (전종목 횡단분석)\n{scan_guide}\n</context>'
-                    parts.append(ContextPart(
-                        key="guide.scan", text=text,
-                        priority=PartPriority.MEDIUM,
-                        estimatedTokens=estimateTokens(text),
-                        source="guide:scan",
-                    ))
+                    parts.append(
+                        ContextPart(
+                            key="guide.scan",
+                            text=text,
+                            priority=PartPriority.MEDIUM,
+                            estimatedTokens=estimateTokens(text),
+                            source="guide:scan",
+                        )
+                    )
             except Exception:
                 pass
 
@@ -252,12 +255,15 @@ class ContextBuilder:
                 macro_guide = dartlab.macro()
                 if macro_guide is not None:
                     text = f'<context source="guide:macro">\n## macro 가이드 (경제/시장)\n{macro_guide}\n</context>'
-                    parts.append(ContextPart(
-                        key="guide.macro", text=text,
-                        priority=PartPriority.MEDIUM,
-                        estimatedTokens=estimateTokens(text),
-                        source="guide:macro",
-                    ))
+                    parts.append(
+                        ContextPart(
+                            key="guide.macro",
+                            text=text,
+                            priority=PartPriority.MEDIUM,
+                            estimatedTokens=estimateTokens(text),
+                            source="guide:macro",
+                        )
+                    )
             except Exception:
                 pass
 
@@ -269,12 +275,15 @@ class ContextBuilder:
                         guide = fn()
                         if guide is not None:
                             text = f'<context source="guide:{name}">\n## {name} 가이드\n{guide}\n</context>'
-                            parts.append(ContextPart(
-                                key=f"guide.{name}", text=text,
-                                priority=PartPriority.LOW,
-                                estimatedTokens=estimateTokens(text),
-                                source=f"guide:{name}",
-                            ))
+                            parts.append(
+                                ContextPart(
+                                    key=f"guide.{name}",
+                                    text=text,
+                                    priority=PartPriority.LOW,
+                                    estimatedTokens=estimateTokens(text),
+                                    source=f"guide:{name}",
+                                )
+                            )
                     except Exception:
                         pass
 

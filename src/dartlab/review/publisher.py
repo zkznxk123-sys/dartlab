@@ -146,13 +146,8 @@ def _buildFullReport(
     header += f"> 데이터: {periodLabel} 연결 | 엔진: dartlab review\n"
     header += "\n---\n"
 
-    # 차트 디렉토리 설정 → toMarkdown에서 SVG 자동 저장
-    assets_dir = str(outDir / "assets")
-    from pathlib import Path
-    Path(assets_dir).mkdir(parents=True, exist_ok=True)
-    review.chartDir = assets_dir
-
     # 본문 — 신용평가 섹션에 creditNarrative + creditAudit 자동 포함됨
+    # (chartDir은 publishReportFromCompany에서 설정)
     body = review.toMarkdown()
 
     # 면책

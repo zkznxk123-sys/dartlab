@@ -436,13 +436,15 @@ def calcGradeImprovement(company, *, basePeriod: str | None = None) -> dict | No
         if target_val != current_val:
             direction = "감소" if target_val < current_val else "증가"
             pct_change = abs(target_val - current_val) / abs(current_val) * 100 if current_val != 0 else 0
-            improvements.append({
-                "axis": axis_name,
-                "metric": t_key,
-                "current": round(current_val, 2),
-                "target": round(target_val, 2),
-                "change": f"{t_key} {current_val:.1f} → {target_val:.1f} ({pct_change:.0f}% {direction})",
-            })
+            improvements.append(
+                {
+                    "axis": axis_name,
+                    "metric": t_key,
+                    "current": round(current_val, 2),
+                    "target": round(target_val, 2),
+                    "change": f"{t_key} {current_val:.1f} → {target_val:.1f} ({pct_change:.0f}% {direction})",
+                }
+            )
 
     return {
         "currentGrade": grade,

@@ -756,7 +756,9 @@ def narrateSectorContext(sector: str, kpis: dict | None) -> str | None:
         if sector == "semiconductor":
             cc = kpis.get("capexCycle", {})
             if cc.get("phase"):
-                parts.append(f"현재 CAPEX 사이클: **{cc['phase']}** (CAPEX/매출 {cc.get('latest', '?')}%, 5Y 평균 {cc.get('avg', '?')}%)")
+                parts.append(
+                    f"현재 CAPEX 사이클: **{cc['phase']}** (CAPEX/매출 {cc.get('latest', '?')}%, 5Y 평균 {cc.get('avg', '?')}%)"
+                )
         elif sector == "construction":
             cm = kpis.get("contractMix", {})
             if cm.get("contractRatio"):
@@ -767,7 +769,9 @@ def narrateSectorContext(sector: str, kpis: dict | None) -> str | None:
         elif sector == "gaming":
             cc = kpis.get("contentConcentration", {})
             if cc.get("topIp"):
-                parts.append(f"주력 IP: {cc['topIp']} (매출 비중 {cc.get('topShare', '?')}%, 집중도 {cc.get('verdict', '?')})")
+                parts.append(
+                    f"주력 IP: {cc['topIp']} (매출 비중 {cc.get('topShare', '?')}%, 집중도 {cc.get('verdict', '?')})"
+                )
         elif sector == "pharma":
             ps = kpis.get("pipelineStages", {})
             if ps.get("stages"):

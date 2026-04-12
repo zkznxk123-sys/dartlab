@@ -10,7 +10,7 @@ review 보고서 끝에 3-test 결과를 부착하여 스토리의 신뢰도를 
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass
@@ -138,6 +138,7 @@ def _register(desc: str):
     def deco(fn):
         _INVARIANTS.append((desc, fn))
         return fn
+
     return deco
 
 

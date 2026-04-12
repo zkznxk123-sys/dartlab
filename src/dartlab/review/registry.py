@@ -313,7 +313,15 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         if _need("growthFlags"):
             b["growthFlags"] = _safe(lambda: growthFlagsBlock(calcGrowthFlags(company, basePeriod=basePeriod)))
 
-    if keys is None or keys & {"leverageTrend", "coverageTrend", "distressScore", "stabilityFlags", "marketRisk", "scenarioSensitivity", "criticalAssumptions"}:
+    if keys is None or keys & {
+        "leverageTrend",
+        "coverageTrend",
+        "distressScore",
+        "stabilityFlags",
+        "marketRisk",
+        "scenarioSensitivity",
+        "criticalAssumptions",
+    }:
         from dartlab.analysis.financial.stability import (
             calcCoverageTrend,
             calcDistressScore,
@@ -502,8 +510,8 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             calcFcfUsage,
             calcReinvestment,
             calcShareholderReturn,
+            calcTreasuryStockStatus,
         )
-        from dartlab.analysis.financial.capitalAllocation import calcTreasuryStockStatus
         from dartlab.review.builders import (
             capitalAllocationFlagsBlock,
             dividendPolicyBlock,
@@ -938,7 +946,8 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
 
     # ── 비교분석 (scan 교차 조합 관점 → review 통합) ──
     if keys is None or keys & {"peerPosition", "governanceSummary"}:
-        from dartlab.review.builders import peerPositionBlock, quantModuleBlock as _scanBlock
+        from dartlab.review.builders import peerPositionBlock
+        from dartlab.review.builders import quantModuleBlock as _scanBlock
         from dartlab.scan.extended import calcGovernanceSummary, calcPeerPosition
 
         if _need("peerPosition"):
@@ -1102,9 +1111,7 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         if _need("companyCyclePosition"):
             from dartlab.review.builders import companyCyclePositionBlock
 
-            b["companyCyclePosition"] = _safe(
-                lambda: companyCyclePositionBlock(_ensure_summary().get("crisis", {}))
-            )
+            b["companyCyclePosition"] = _safe(lambda: companyCyclePositionBlock(_ensure_summary().get("crisis", {})))
 
     from dartlab.review.blockMap import BlockMap
 
@@ -1119,7 +1126,9 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         if _need("gradeUpgradePath"):
             from dartlab.credit.calcs import calcGradeImprovement
 
-            b["gradeUpgradePath"] = _safe(lambda: gradeUpgradePathBlock(calcGradeImprovement(company, basePeriod=basePeriod)))
+            b["gradeUpgradePath"] = _safe(
+                lambda: gradeUpgradePathBlock(calcGradeImprovement(company, basePeriod=basePeriod))
+            )
         if _need("technicalActionTargets"):
             from dartlab.quant.extended import calcActionableTargets
 
@@ -1176,7 +1185,6 @@ def buildReview(
 
     from dartlab.review import Review
     from dartlab.review.reportTypes import resolveReportType
-    from dartlab.review.section import Section
 
     ly = layout or ReviewLayout()
 

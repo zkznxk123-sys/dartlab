@@ -1078,8 +1078,7 @@ def _loadDataPyodide(
 
     if not path.exists():
         raise FileNotFoundError(
-            f"Pyodide FS에 {path} 없음. "
-            f"JS에서 prefetchParquet(py, '{stockCode}')를 먼저 호출하세요."
+            f"Pyodide FS에 {path} 없음. JS에서 prefetchParquet(py, '{stockCode}')를 먼저 호출하세요."
         )
 
     arrow_table = pq.read_table(io.BytesIO(path.read_bytes()))

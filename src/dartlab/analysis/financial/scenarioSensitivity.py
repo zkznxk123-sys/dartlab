@@ -251,18 +251,20 @@ def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | N
         improved_ni = improved_op - interest_abs if interest_abs else improved_op * 0.75
         improved_roe = improved_ni / equity * 100 if equity and equity > 0 else None
         fcf_change = ((improved_op - op_income) / abs(fcf) * 100) if fcf and fcf != 0 else None
-        levers.append({
-            "name": "매출원가 3%p 절감",
-            "driver": "cogs_reduction_3pp",
-            "impact": {
-                "opm": round(improved_opm, 1),
-                "roe": round(improved_roe, 1) if improved_roe else None,
-                "fcf_change_pct": round(fcf_change, 0) if fcf_change else None,
-            },
-            "difficulty": "medium",
-            "timeframe": "1-2년",
-            "effect_score": abs(fcf_change) if fcf_change else 0,
-        })
+        levers.append(
+            {
+                "name": "매출원가 3%p 절감",
+                "driver": "cogs_reduction_3pp",
+                "impact": {
+                    "opm": round(improved_opm, 1),
+                    "roe": round(improved_roe, 1) if improved_roe else None,
+                    "fcf_change_pct": round(fcf_change, 0) if fcf_change else None,
+                },
+                "difficulty": "medium",
+                "timeframe": "1-2년",
+                "effect_score": abs(fcf_change) if fcf_change else 0,
+            }
+        )
 
     # 레버 2: 판관비 2%p 절감
     if opm is not None:
@@ -271,18 +273,20 @@ def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | N
         improved_ni2 = improved_op2 - interest_abs if interest_abs else improved_op2 * 0.75
         improved_roe2 = improved_ni2 / equity * 100 if equity and equity > 0 else None
         fcf_change2 = ((improved_op2 - op_income) / abs(fcf) * 100) if fcf and fcf != 0 else None
-        levers.append({
-            "name": "판관비 2%p 절감",
-            "driver": "sga_reduction_2pp",
-            "impact": {
-                "opm": round(improved_opm2, 1),
-                "roe": round(improved_roe2, 1) if improved_roe2 else None,
-                "fcf_change_pct": round(fcf_change2, 0) if fcf_change2 else None,
-            },
-            "difficulty": "easy",
-            "timeframe": "6개월-1년",
-            "effect_score": abs(fcf_change2) if fcf_change2 else 0,
-        })
+        levers.append(
+            {
+                "name": "판관비 2%p 절감",
+                "driver": "sga_reduction_2pp",
+                "impact": {
+                    "opm": round(improved_opm2, 1),
+                    "roe": round(improved_roe2, 1) if improved_roe2 else None,
+                    "fcf_change_pct": round(fcf_change2, 0) if fcf_change2 else None,
+                },
+                "difficulty": "easy",
+                "timeframe": "6개월-1년",
+                "effect_score": abs(fcf_change2) if fcf_change2 else 0,
+            }
+        )
 
     # 레버 3: 매출 10% 성장 (고정비 레버리지)
     if opm is not None and revenue:
@@ -293,34 +297,38 @@ def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | N
         grown_opm = grown_op / grown_rev * 100
         grown_ni = grown_op - interest_abs if interest_abs else grown_op * 0.75
         grown_roe = grown_ni / equity * 100 if equity and equity > 0 else None
-        levers.append({
-            "name": "매출 10% 성장",
-            "driver": "revenue_growth_10pct",
-            "impact": {
-                "opm": round(grown_opm, 1),
-                "roe": round(grown_roe, 1) if grown_roe else None,
-            },
-            "difficulty": "hard",
-            "timeframe": "2-3년",
-            "effect_score": abs(grown_opm - opm) if opm else 0,
-        })
+        levers.append(
+            {
+                "name": "매출 10% 성장",
+                "driver": "revenue_growth_10pct",
+                "impact": {
+                    "opm": round(grown_opm, 1),
+                    "roe": round(grown_roe, 1) if grown_roe else None,
+                },
+                "difficulty": "hard",
+                "timeframe": "2-3년",
+                "effect_score": abs(grown_opm - opm) if opm else 0,
+            }
+        )
 
     # 레버 4: 부채 30% 감축
     if interest_abs > 0 and op_income:
         reduced_interest = interest_abs * 0.70
         improved_ic = op_income / reduced_interest if reduced_interest > 0 else None
         saved = interest_abs - reduced_interest
-        levers.append({
-            "name": "부채 30% 감축",
-            "driver": "debt_reduction_30pct",
-            "impact": {
-                "interestCoverage": round(improved_ic, 1) if improved_ic else None,
-                "interestSaved": round(saved),
-            },
-            "difficulty": "medium",
-            "timeframe": "2-3년",
-            "effect_score": saved / revenue * 100 if revenue else 0,
-        })
+        levers.append(
+            {
+                "name": "부채 30% 감축",
+                "driver": "debt_reduction_30pct",
+                "impact": {
+                    "interestCoverage": round(improved_ic, 1) if improved_ic else None,
+                    "interestSaved": round(saved),
+                },
+                "difficulty": "medium",
+                "timeframe": "2-3년",
+                "effect_score": saved / revenue * 100 if revenue else 0,
+            }
+        )
 
     # ── 기업유형별 특수 레버 (storyTemplate 연동) ──
     situational = _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, interest_abs)
@@ -356,14 +364,21 @@ def _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, inte
     if opm is not None and opm < 0 and revenue:
         breakeven_rev = interest_abs / 0.05 if interest_abs > 0 else abs(op_income) / 0.10  # OPM 5% 가정
         growth_needed = (breakeven_rev - revenue) / revenue * 100 if revenue > 0 else None
-        levers.append({
-            "name": f"흑자 전환 — 매출 {growth_needed:+.0f}% 필요 (OPM 5% 가정)" if growth_needed else "흑자 전환 경로",
-            "driver": "breakeven_revenue",
-            "impact": {"breakeven_revenue": round(breakeven_rev), "required_growth": round(growth_needed, 1) if growth_needed else None},
-            "difficulty": "hard",
-            "timeframe": "2-3년",
-            "effect_score": 100,  # 적자 기업에게 최우선
-        })
+        levers.append(
+            {
+                "name": f"흑자 전환 — 매출 {growth_needed:+.0f}% 필요 (OPM 5% 가정)"
+                if growth_needed
+                else "흑자 전환 경로",
+                "driver": "breakeven_revenue",
+                "impact": {
+                    "breakeven_revenue": round(breakeven_rev),
+                    "required_growth": round(growth_needed, 1) if growth_needed else None,
+                },
+                "difficulty": "hard",
+                "timeframe": "2-3년",
+                "effect_score": 100,  # 적자 기업에게 최우선
+            }
+        )
 
     # ── 현금부자: 배당 확대 vs 재투자 ──
     debt_ratio = base.get("debtRatio")
@@ -376,14 +391,16 @@ def _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, inte
         ni = base.get("roe", 0) / 100 * equity if base.get("roe") else None
         new_roe = ni / reduced_equity * 100 if ni and reduced_equity > 0 else None
         if new_roe and base.get("roe"):
-            levers.append({
-                "name": f"배당 확대 (FCF의 20%) → ROE {base['roe']:.1f}% → {new_roe:.1f}%",
-                "driver": "dividend_expansion",
-                "impact": {"roe": round(new_roe, 1), "dividendIncrease": round(dividend_increase)},
-                "difficulty": "easy",
-                "timeframe": "즉시 가능",
-                "effect_score": abs(new_roe - base["roe"]),
-            })
+            levers.append(
+                {
+                    "name": f"배당 확대 (FCF의 20%) → ROE {base['roe']:.1f}% → {new_roe:.1f}%",
+                    "driver": "dividend_expansion",
+                    "impact": {"roe": round(new_roe, 1), "dividendIncrease": round(dividend_increase)},
+                    "difficulty": "easy",
+                    "timeframe": "즉시 가능",
+                    "effect_score": abs(new_roe - base["roe"]),
+                }
+            )
 
     # ── 턴어라운드: 생존 가능 기간 ──
     if opm is not None and opm > 0 and opm < 5 and fcf is not None:
@@ -404,28 +421,32 @@ def _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, inte
 
         if cash and cash > 0 and fcf < 0:
             months = round(cash / abs(fcf) * 12)
-            levers.append({
-                "name": f"현금 소진까지 약 {months}개월 — 구조조정 시급",
-                "driver": "cash_runway",
-                "impact": {"cashRunwayMonths": months, "currentCash": round(cash)},
-                "difficulty": "critical",
-                "timeframe": f"{months}개월",
-                "effect_score": 200,  # 생존 이슈는 최우선
-            })
+            levers.append(
+                {
+                    "name": f"현금 소진까지 약 {months}개월 — 구조조정 시급",
+                    "driver": "cash_runway",
+                    "impact": {"cashRunwayMonths": months, "currentCash": round(cash)},
+                    "difficulty": "critical",
+                    "timeframe": f"{months}개월",
+                    "effect_score": 200,  # 생존 이슈는 최우선
+                }
+            )
 
     # ── 사이클 기업: 다운턴 방어 OPM ──
     if opm is not None and opm > 10 and interest_abs > 0 and revenue:
         min_opm = interest_abs / revenue * 100  # 이자비용 감당 최소 OPM
         buffer = opm - min_opm
         if buffer < 10:
-            levers.append({
-                "name": f"다운턴 방어선 OPM {min_opm:.1f}% (현재 대비 -{buffer:.1f}%p 여유)",
-                "driver": "cycle_defense_opm",
-                "impact": {"minOPM": round(min_opm, 1), "bufferPP": round(buffer, 1)},
-                "difficulty": "awareness",
-                "timeframe": "사이클 하강 시",
-                "effect_score": 50,
-            })
+            levers.append(
+                {
+                    "name": f"다운턴 방어선 OPM {min_opm:.1f}% (현재 대비 -{buffer:.1f}%p 여유)",
+                    "driver": "cycle_defense_opm",
+                    "impact": {"minOPM": round(min_opm, 1), "bufferPP": round(buffer, 1)},
+                    "difficulty": "awareness",
+                    "timeframe": "사이클 하강 시",
+                    "effect_score": 50,
+                }
+            )
 
     # ── 고성장 기업: 재투자 ROI ─��
     if opm is not None and opm > 15 and revenue:
@@ -442,14 +463,19 @@ def _situationalLevers(company, base, revenue, op_income, opm, fcf, equity, inte
                     if capex > 0:
                         capex_to_rev = capex / revenue * 100
                         roic = opm * (revenue / equity) if equity and equity > 0 else None
-                        levers.append({
-                            "name": f"CAPEX/매출 {capex_to_rev:.1f}% — ROIC 대비 재투자 효율",
-                            "driver": "reinvestment_efficiency",
-                            "impact": {"capexToRevenue": round(capex_to_rev, 1), "estimatedROIC": round(roic, 1) if roic else None},
-                            "difficulty": "medium",
-                            "timeframe": "지속",
-                            "effect_score": 30,
-                        })
+                        levers.append(
+                            {
+                                "name": f"CAPEX/매출 {capex_to_rev:.1f}% — ROIC 대비 재투자 효율",
+                                "driver": "reinvestment_efficiency",
+                                "impact": {
+                                    "capexToRevenue": round(capex_to_rev, 1),
+                                    "estimatedROIC": round(roic, 1) if roic else None,
+                                },
+                                "difficulty": "medium",
+                                "timeframe": "지속",
+                                "effect_score": 30,
+                            }
+                        )
         except (AttributeError, ValueError, TypeError):
             pass
 

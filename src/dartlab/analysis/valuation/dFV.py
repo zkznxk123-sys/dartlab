@@ -160,12 +160,14 @@ def _triangulate(primary_key: str, primary_value: float, secondary_keys: list[st
             verdict = "부분 합의"
         else:
             verdict = "불일치"
-        checks.append({
-            "method": key,
-            "value": round(sec_value),
-            "divergence": round(divergence * 100, 1),
-            "verdict": verdict,
-        })
+        checks.append(
+            {
+                "method": key,
+                "value": round(sec_value),
+                "divergence": round(divergence * 100, 1),
+                "verdict": verdict,
+            }
+        )
 
     # 종합 신뢰도
     if not checks:

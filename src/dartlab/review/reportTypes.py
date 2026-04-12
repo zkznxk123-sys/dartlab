@@ -18,9 +18,9 @@ class ReportType:
     key: str
     label: str
     description: str
-    sectionOrder: tuple[str, ...]           # 렌더링할 섹션들 + 순서
+    sectionOrder: tuple[str, ...]  # 렌더링할 섹션들 + 순서
     emphasize: frozenset[str] = frozenset()  # ★ 강조 블록
-    focusQuestions: tuple[str, ...] = ()     # 보고서 상단에 표시
+    focusQuestions: tuple[str, ...] = ()  # 보고서 상단에 표시
     detail: bool = True
 
 
@@ -247,6 +247,4 @@ def resolveReportType(name: str | None) -> ReportType:
     low = s.lower()
     if low in _ALIASES:
         return REPORT_TYPES[_ALIASES[low]]
-    raise ValueError(
-        f"알 수 없는 보고서 타입: {name!r}. 사용 가능: {', '.join(REPORT_TYPES)}"
-    )
+    raise ValueError(f"알 수 없는 보고서 타입: {name!r}. 사용 가능: {', '.join(REPORT_TYPES)}")

@@ -2497,7 +2497,9 @@ def dFVBlock(data: dict | None) -> list:
     metrics.append(("Primary 모델", data.get("primaryModel", "").upper()))
     sc = data.get("scenarios", {})
     if sc:
-        metrics.append(("시나리오", f"Bull {sc.get('bull', 0):,} / Base {sc.get('base', 0):,} / Bear {sc.get('bear', 0):,}"))
+        metrics.append(
+            ("시나리오", f"Bull {sc.get('bull', 0):,} / Base {sc.get('base', 0):,} / Bear {sc.get('bear', 0):,}")
+        )
     if metrics:
         blocks.append(MetricBlock(metrics))
 
@@ -2522,12 +2524,14 @@ def methodFitnessBlock(data: dict | None) -> list:
     if checks:
         rows = []
         for c in checks:
-            rows.append({
-                "검증 모델": c["method"].upper(),
-                "적정가": f"{c['value']:,}원",
-                "괴리": f"{c['divergence']:.1f}%",
-                "판정": c["verdict"],
-            })
+            rows.append(
+                {
+                    "검증 모델": c["method"].upper(),
+                    "적정가": f"{c['value']:,}원",
+                    "괴리": f"{c['divergence']:.1f}%",
+                    "판정": c["verdict"],
+                }
+            )
         blocks.append(TableBlock("삼각검증", pl.DataFrame(rows)))
 
     # 전체 방법론 참고
@@ -2563,11 +2567,15 @@ def qualityFactorsBlock(data: dict | None) -> list:
         TableBlock("Quality WACC", pl.DataFrame(rows)),
     ]
     total = qw.get("totalSpread", 0)
-    blocks.append(MetricBlock([
-        ("기본 WACC", f"{qw.get('baseWACC', 0):.1f}%"),
-        ("질적 가감", f"{total:+.1f}%p"),
-        ("조정 WACC", f"{qw.get('adjustedWACC', 0):.1f}%"),
-    ]))
+    blocks.append(
+        MetricBlock(
+            [
+                ("기본 WACC", f"{qw.get('baseWACC', 0):.1f}%"),
+                ("질적 가감", f"{total:+.1f}%p"),
+                ("조정 WACC", f"{qw.get('adjustedWACC', 0):.1f}%"),
+            ]
+        )
+    )
     return blocks
 
 
@@ -2614,7 +2622,9 @@ def sensitivityBlock(data: dict) -> list:
         from dartlab.review.blocks import ChartBlock
         from dartlab.viz.generators import spec_sensitivity_heatmap
 
-        hm_grid = [{"wacc": g["wacc"], "g": g.get("terminalGrowth", 0), "fairValue": g.get("perShareValue")} for g in grid]
+        hm_grid = [
+            {"wacc": g["wacc"], "g": g.get("terminalGrowth", 0), "fairValue": g.get("perShareValue")} for g in grid
+        ]
         hm = spec_sensitivity_heatmap(hm_grid)
         if hm:
             blocks.append(ChartBlock(spec=hm))
@@ -2625,7 +2635,11 @@ def sensitivityBlock(data: dict) -> list:
             min_v, max_v = min(vals), max(vals)
             pct_range = (max_v - min_v) / baseVal * 100 if baseVal > 0 else 0
             label = "높음" if pct_range > 80 else "보통" if pct_range > 40 else "낮음"
-            blocks.append(TextBlock(f"가정 민감도: 적정가 편차 {pct_range:.0f}% ({label}) — 가정 변화에 가치가 크게 흔들리{'면 주의' if label == '높음' else '지 않음'}"))
+            blocks.append(
+                TextBlock(
+                    f"가정 민감도: 적정가 편차 {pct_range:.0f}% ({label}) — 가정 변화에 가치가 크게 흔들리{'면 주의' if label == '높음' else '지 않음'}"
+                )
+            )
     return blocks
 
 
@@ -2967,7 +2981,9 @@ def peerPositionBlock(data: dict | None) -> list:
     from dartlab.review.blocks import ChartBlock
     from dartlab.viz.generators import spec_peer_radar
 
-    blocks: list = [HeadingBlock(_meta("peerPosition").label, level=2, helper="전종목 횡단 비교 — 4축 백분위 + 교차 관점")]
+    blocks: list = [
+        HeadingBlock(_meta("peerPosition").label, level=2, helper="전종목 횡단 비교 — 4축 백분위 + 교차 관점")
+    ]
 
     total = data.get("total_stocks", 0)
     metrics: list[tuple[str, str]] = []
@@ -3163,7 +3179,11 @@ def revenueForecastBlock(data: dict) -> list:
 
         # historical: calc가 반환하는 과거 매출 시계열 (list[float])
         hist_vals = data.get("historical", []) or []
-        history_dicts = [{"period": f"Y-{len(hist_vals) - i}", "revenue": v} for i, v in enumerate(hist_vals) if v is not None] if hist_vals else []
+        history_dicts = (
+            [{"period": f"Y-{len(hist_vals) - i}", "revenue": v} for i, v in enumerate(hist_vals) if v is not None]
+            if hist_vals
+            else []
+        )
         forecasts = {}
         for key in ("base", "bull", "bear"):
             sc = scenarios.get(key, {})
@@ -4988,7 +5008,9 @@ def improvementLeversBlock(data: dict | None) -> list:
 
     from dartlab.review.narrate import narrateImprovementLevers
 
-    blocks: list = [HeadingBlock(_meta("improvementLevers").label, level=2, helper="영향도 순 개선 경로 — 가장 효과 큰 것부터")]
+    blocks: list = [
+        HeadingBlock(_meta("improvementLevers").label, level=2, helper="영향도 순 개선 경로 — 가장 효과 큰 것부터")
+    ]
 
     narration = narrateImprovementLevers(data)
     if narration:
@@ -5020,7 +5042,9 @@ def gradeUpgradePathBlock(data: dict | None) -> list:
 
     from dartlab.review.narrate import narrateGradeUpgrade
 
-    blocks: list = [HeadingBlock(_meta("gradeUpgradePath").label, level=2, helper="dCR 한 노치 상향에 필요한 구체적 변화")]
+    blocks: list = [
+        HeadingBlock(_meta("gradeUpgradePath").label, level=2, helper="dCR 한 노치 상향에 필요한 구체적 변화")
+    ]
 
     narration = narrateGradeUpgrade(data)
     if narration:
@@ -5033,7 +5057,16 @@ def gradeUpgradePathBlock(data: dict | None) -> list:
 
     improvements = data.get("improvements", [])
     if improvements:
-        rows = [{"축": imp["axis"], "지표": imp["metric"], "현재": f"{imp['current']:.1f}", "목표": f"{imp['target']:.1f}", "변화": imp["change"]} for imp in improvements]
+        rows = [
+            {
+                "축": imp["axis"],
+                "지표": imp["metric"],
+                "현재": f"{imp['current']:.1f}",
+                "목표": f"{imp['target']:.1f}",
+                "변화": imp["change"],
+            }
+            for imp in improvements
+        ]
         blocks.append(TableBlock("등급 상향 경로", pl.DataFrame(rows)))
     return blocks
 
@@ -5045,7 +5078,9 @@ def technicalActionTargetsBlock(data: dict | None) -> list:
 
     from dartlab.review.narrate import narrateTechnicalAction
 
-    blocks: list = [HeadingBlock(_meta("technicalActionTargets").label, level=2, helper="기술적 관점의 진입/청산 가격 목표")]
+    blocks: list = [
+        HeadingBlock(_meta("technicalActionTargets").label, level=2, helper="기술적 관점의 진입/청산 가격 목표")
+    ]
 
     narration = narrateTechnicalAction(data)
     if narration:
@@ -5060,7 +5095,15 @@ def technicalActionTargetsBlock(data: dict | None) -> list:
 
     targets = data.get("targets", [])
     if targets:
-        rows = [{"신호": t["signal"], "트리거 가격": f"{t['triggerPrice']:,}", "행동": t["action"], "신뢰도": t["confidence"]} for t in targets]
+        rows = [
+            {
+                "신호": t["signal"],
+                "트리거 가격": f"{t['triggerPrice']:,}",
+                "행동": t["action"],
+                "신뢰도": t["confidence"],
+            }
+            for t in targets
+        ]
         blocks.append(TableBlock("행동 목표", pl.DataFrame(rows)))
     return blocks
 
@@ -5072,7 +5115,9 @@ def cyclicalActionPlanBlock(data: dict | None) -> list:
 
     from dartlab.review.narrate import narrateCyclicalAction
 
-    blocks: list = [HeadingBlock(_meta("cyclicalActionPlan").label, level=2, helper="사이클 위치에 따른 지금 해야 할 것")]
+    blocks: list = [
+        HeadingBlock(_meta("cyclicalActionPlan").label, level=2, helper="사이클 위치에 따른 지금 해야 할 것")
+    ]
 
     narration = narrateCyclicalAction(data)
     if narration:
@@ -5082,7 +5127,10 @@ def cyclicalActionPlanBlock(data: dict | None) -> list:
 
     actions = data.get("actions", [])
     if actions:
-        rows = [{"우선순위": a["priority"], "행동": a["action"], "이유": a["reason"], "긴급도": a.get("urgency", "")} for a in actions]
+        rows = [
+            {"우선순위": a["priority"], "행동": a["action"], "이유": a["reason"], "긴급도": a.get("urgency", "")}
+            for a in actions
+        ]
         blocks.append(TableBlock("행동 계획", pl.DataFrame(rows)))
 
     precedent = data.get("historicalPrecedent")

@@ -501,11 +501,13 @@ def _edgarTreasuryStockFallback(company) -> dict | None:
         for col in yCols:
             v = tsRow.get(col)
             if v is not None:
-                rows.append({
-                    "method": f"Share Repurchase ({col})",
-                    "acquired": abs(float(v)),
-                    "endShares": None,
-                })
+                rows.append(
+                    {
+                        "method": f"Share Repurchase ({col})",
+                        "acquired": abs(float(v)),
+                        "endShares": None,
+                    }
+                )
 
         return {"rows": rows, "source": "XBRL"} if rows else None
     except (AttributeError, ValueError, TypeError, KeyError):
