@@ -113,56 +113,29 @@ def calcDFV(company: Any, *, basePeriod: str | None = None) -> dict | None:
 
 
 def _collectMethodValues(company: Any, basePeriod: str | None) -> dict:
-    """기존 4개 방법론의 적정가(주당) 수집."""
+    """기존 4개 방법론의 적정가(주당) 수집.
+
+    calcValuationSynthesis의 estimates 리스트에서 추출.
+    """
     values: dict = {}
 
-    # DCF
     try:
-        from dartlab.analysis.valuation.valuation import calcValuationSynthesis
+        from dartlab.analysis.financial.valuation import calcValuationSynthesis
 
         synth = calcValuationSynthesis(company, basePeriod=basePeriod)
-        if synth:
-            dcf = synth.get("dcf", {})
-            if dcf and dcf.get("perShareValue"):
-                values["dcf"] = float(dcf["perShareValue"])
-    except (ImportError, AttributeError, ValueError, TypeError):
-        pass
+        if not synth:
+            return values
 
-    # RIM
-    try:
-        from dartlab.analysis.valuation.residualIncome import calcRIM
+        estimates = synth.get("estimates", [])
+        method_map = {"DCF": "dcf", "DDM": "ddm", "상대가치": "relative", "RIM": "rim"}
 
-        rim = calcRIM(company, basePeriod=basePeriod)
-        if rim:
-            iv = getattr(rim, "intrinsicValue", None)
-            if iv is None and isinstance(rim, dict):
-                iv = rim.get("intrinsicValue")
-            if iv and iv > 0:
-                values["rim"] = float(iv)
-    except (ImportError, AttributeError, ValueError, TypeError):
-        pass
+        for est in estimates:
+            method = est.get("method", "")
+            value = est.get("value")
+            key = method_map.get(method)
+            if key and value and value > 0:
+                values[key] = float(value)
 
-    # DDM
-    try:
-        from dartlab.analysis.valuation.valuation import calcValuationSynthesis
-
-        synth = calcValuationSynthesis(company, basePeriod=basePeriod)
-        if synth:
-            ddm = synth.get("ddm", {})
-            if ddm and ddm.get("perShareValue"):
-                values["ddm"] = float(ddm["perShareValue"])
-    except (ImportError, AttributeError, ValueError, TypeError):
-        pass
-
-    # 상대가치
-    try:
-        from dartlab.analysis.valuation.valuation import calcValuationSynthesis
-
-        synth = calcValuationSynthesis(company, basePeriod=basePeriod)
-        if synth:
-            rel = synth.get("relative", {})
-            if rel and rel.get("fairValue"):
-                values["relative"] = float(rel["fairValue"])
     except (ImportError, AttributeError, ValueError, TypeError):
         pass
 
