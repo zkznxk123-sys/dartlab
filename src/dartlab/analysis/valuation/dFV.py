@@ -38,23 +38,46 @@ def calcDFV(company: Any, *, basePeriod: str | None = None) -> dict | None:
 
     fitness = calcMethodFitness(company, basePeriod=basePeriod)
 
-    # 3. 적합도 가중 합산
-    weighted_sum = 0.0
-    fitness_sum = 0.0
-    method_details = {}
+    # 3. 적합도 필터링 + 이상치 제거 + 가중 합산
+    MIN_FITNESS = 0.3  # 이 이하는 노이즈 — 제외
 
+    # 3a. 적합도 필터
+    qualified: dict[str, tuple[float, float]] = {}  # key → (value, fitness)
+    method_details = {}
     for key, value in methods.items():
-        if value is None:
+        if value is None or value <= 0:
             continue
         fit = fitness.get(key, {}).get("fitness", 0.5)
-        weighted_sum += value * fit
-        fitness_sum += fit
         method_details[key] = {
             "value": round(value),
             "fitness": fit,
             "fitnessReason": fitness.get(key, {}).get("reason", ""),
-            "weight": 0,  # 나중에 계산
+            "weight": 0,
+            "excluded": fit < MIN_FITNESS,
         }
+        if fit >= MIN_FITNESS:
+            qualified[key] = (value, fit)
+
+    if not qualified:
+        return None
+
+    # 3b. 이상치 제거: 중앙값 대비 ±100% 벗어나는 방법론 제거
+    vals = [v for v, _ in qualified.values()]
+    median = sorted(vals)[len(vals) // 2]
+    filtered = {}
+    for key, (value, fit) in qualified.items():
+        if median > 0 and abs(value - median) / median > 1.0:
+            method_details[key]["excluded"] = True
+            method_details[key]["excludeReason"] = f"중앙값({median:,.0f}) 대비 ±100% 이상 이탈"
+        else:
+            filtered[key] = (value, fit)
+
+    if not filtered:
+        filtered = qualified  # 이상치 제거로 전부 없어지면 복원
+
+    # 3c. 적합도 가중 합산
+    weighted_sum = sum(v * f for v, f in filtered.values())
+    fitness_sum = sum(f for _, f in filtered.values())
 
     if fitness_sum == 0:
         return None

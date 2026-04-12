@@ -124,42 +124,56 @@ def _rimFitness(company: Any, basePeriod: str | None) -> dict:
 
 
 def _ddmFitness(company: Any, basePeriod: str | None) -> dict:
-    """DDM 적합도: 연속배당 + 배당성향 안정성."""
+    """DDM 적합도: 연속배당 × 포괄성(배당성향).
+
+    핵심: DDM은 배당만으로 가치 산출 → 성향 <30%면 기업가치의 극히 일부.
+    성향이 낮은 기업에 DDM을 높은 가중치로 쓰면 적정가가 왜곡됨.
+    """
     try:
         from dartlab.analysis.financial.capitalAllocation import calcDividendPolicy
 
         data = calcDividendPolicy(company, basePeriod=basePeriod)
         if not data:
-            return {"fitness": 0.0, "reason": "배당 데이터 없음 (무배당 또는 데이터 부족)"}
+            return {"fitness": 0.0, "reason": "배당 데이터 없음"}
 
         consecutive = data.get("consecutiveYears", 0)
         history = data.get("history", [])
         payouts = [h.get("payoutRatio") for h in history if h.get("payoutRatio") is not None]
 
         if consecutive == 0 or not payouts:
-            return {"fitness": 0.0, "reason": "무배당 또는 배당 기록 없음"}
+            return {"fitness": 0.0, "reason": "무배당"}
 
         avg_payout = sum(payouts) / len(payouts)
+        reasons = [f"연속배당 {consecutive}년", f"평균성향 {avg_payout:.0f}%"]
 
-        fitness = 0.3
-        reasons = [f"연속배당 {consecutive}년"]
-
+        # 1. 연속배당 기본 점수
         if consecutive >= 10:
-            fitness = 0.9
+            base = 0.9
         elif consecutive >= 5:
-            fitness = 0.7
+            base = 0.7
         elif consecutive >= 3:
-            fitness = 0.5
-
-        if avg_payout > 100:
-            fitness = max(fitness - 0.3, 0.1)
-            reasons.append(f"성향 {avg_payout:.0f}% (이익 ��과 — 지속 불가)")
-        elif avg_payout > 80:
-            fitness = max(fitness - 0.1, 0.2)
-            reasons.append(f"성향 {avg_payout:.0f}% (높음)")
+            base = 0.5
         else:
-            reasons.append(f"성향 {avg_payout:.0f}%")
+            base = 0.3
 
+        # 2. 포괄성 상한 — DDM이 기업가치를 얼마나 반영하나
+        if avg_payout < 30:
+            cap = 0.25
+            reasons.append("저배당 → DDM은 부분가치만 반영")
+        elif avg_payout < 50:
+            cap = 0.45
+            reasons.append("중저배당 → DDM 제한적")
+        elif avg_payout < 70:
+            cap = 0.7
+        else:
+            cap = 1.0
+
+        # 3. 이익 초과 배당
+        if avg_payout > 100:
+            base = max(base - 0.3, 0.1)
+            reasons.append("이익 초과 배당 — 지속 불가")
+
+        fitness = min(base, cap)
         return {"fitness": round(fitness, 2), "reason": ", ".join(reasons)}
 
     except (AttributeError, ValueError, TypeError, KeyError, ImportError):
