@@ -1,0 +1,52 @@
+[
+  {
+    "question": "삼성전자 수익성 분석해줘",
+    "code": "r = c.analysis('수익성')\nprint('| 기간 | 매출(조) | 영업이익률 | 순이익률 |')\nprint('| --- | --- | --- | --- |')\nfor h in r['marginTrend']['history'][:8]:\n    rev = f'{h[\"revenue\"]/1e12:.1f}' if h.get('revenue') else '-'\n    om = f'{h[\"operatingMargin\"]:.1f}%' if h.get('operatingMargin') is not None else '-'\n    nm = f'{h[\"netMargin\"]:.1f}%' if h.get('netMargin') is not None else '-'\n    print(f'| {h[\"period\"]} | {rev} | {om} | {nm} |')",
+    "intent": "act2_profit"
+  },
+  {
+    "question": "삼성전자 현금흐름 분석해줘",
+    "code": "r = c.analysis('현금흐름')\nprint('| 기간 | OCF(조) | ICF(조) | CAPEX(조) | FCF(조) | 패턴 |')\nprint('| --- | --- | --- | --- | --- | --- |')\nfor h in r['cashFlowOverview']['history'][:8]:\n    ocf = f'{h[\"ocf\"]/1e12:.1f}' if h.get('ocf') else '-'\n    icf = f'{h[\"icf\"]/1e12:.1f}' if h.get('icf') else '-'\n    capex = f'{h[\"capex\"]/1e12:.1f}' if h.get('capex') else '-'\n    fcf = f'{h[\"fcf\"]/1e12:.1f}' if h.get('fcf') else '-'\n    pat = h.get('pattern', '-')\n    print(f'| {h[\"period\"]} | {ocf} | {icf} | {capex} | {fcf} | {pat} |')",
+    "intent": "act3_cash"
+  },
+  {
+    "question": "삼성전자 안정성 분석해줘",
+    "code": "r = c.analysis('안정성')\nprint('| 기간 | 부채비율 | 자기자본비율 | 순부채비율 | 차입금(조) |')\nprint('| --- | --- | --- | --- | --- |')\nfor h in r['leverageTrend']['history'][:8]:\n    dr = f'{h[\"debtRatio\"]:.1f}%' if h.get('debtRatio') is not None else '-'\n    er = f'{h[\"equityRatio\"]:.1f}%' if h.get('equityRatio') is not None else '-'\n    ndr = f'{h[\"netDebtRatio\"]:.1f}%' if h.get('netDebtRatio') is not None else '-'\n    tb = f'{h[\"totalBorrowing\"]/1e12:.1f}' if h.get('totalBorrowing') else '-'\n    print(f'| {h[\"period\"]} | {dr} | {er} | {ndr} | {tb} |')",
+    "intent": "act4_stability"
+  },
+  {
+    "question": "최근 매출이 증가한 회사는?",
+    "code": "df = dartlab.scan('growth')\nprint(df.sort('매출CAGR', descending=True).head(20))",
+    "intent": "compare"
+  },
+  {
+    "question": "현재 경기 사이클은?",
+    "code": "r = dartlab.macro('사이클')\nfor k, v in r.items():\n    if isinstance(v, dict):\n        for kk, vv in v.items():\n            print(f'{kk}: {vv}')\n    else:\n        print(f'{k}: {v}')",
+    "intent": "act6_outlook"
+  },
+  {
+    "question": "배당 많이 주는 안정적인 회사 추천해줘",
+    "code": "df = dartlab.scan('capital')\nbase = df.filter(pl.col('배당여부') == True).filter(pl.col('최근증자') == False).filter(pl.col('모순형') == False)\nif '분류' in base.columns:\n    base = base.filter(pl.col('분류').is_in(['적극환원', '환원형']))\nif '환원점수' in base.columns:\n    base = base.sort('환원점수', descending=True)\nprint(base.head(10))",
+    "intent": "compare"
+  },
+  {
+    "question": "ROE 상위 10개 회사 알려줘",
+    "code": "df = dartlab.scan('profitability')\nprint(df.filter(pl.col('ROE').is_not_null()).sort('ROE', descending=True).select(['종목코드', '종목명', 'ROE', '영업이익률', '순이익률']).head(10))",
+    "intent": "compare"
+  },
+  {
+    "question": "삼성전자 성장성 분석해줘",
+    "code": "r = c.analysis('성장성')\nprint('| 기간 | 매출YoY | 영업이익YoY | 순이익YoY |')\nprint('| --- | --- | --- | --- |')\nfor h in r['growthTrend']['history'][:8]:\n    ry = f'{h[\"revenueYoy\"]:.1f}%' if h.get('revenueYoy') is not None else '-'\n    oy = f'{h[\"operatingIncomeYoy\"]:.1f}%' if h.get('operatingIncomeYoy') is not None else '-'\n    ny = f'{h[\"netIncomeYoy\"]:.1f}%' if h.get('netIncomeYoy') is not None else '-'\n    print(f'| {h[\"period\"]} | {ry} | {oy} | {ny} |')",
+    "intent": "act1_business"
+  },
+  {
+    "question": "반도체 업종 수익성 비교해줘",
+    "code": "codes = dartlab.listing('반도체')\nif codes is not None and len(codes) > 0:\n    code_list = codes['종목코드'].to_list() if hasattr(codes, 'to_list') else list(codes['종목코드'])\n    df = dartlab.scan('profitability')\n    semi = df.filter(pl.col('종목코드').is_in(code_list))\n    print(semi.sort('영업이익률', descending=True).head(20))\nelse:\n    df = dartlab.scan('profitability')\n    print(df.head(10))",
+    "intent": "compare"
+  },
+  {
+    "question": "삼성전자 매출 추이 보여줘",
+    "code": "df = c.select('IS', ['매출액'])\nprint(df)",
+    "intent": "act1_business"
+  }
+]

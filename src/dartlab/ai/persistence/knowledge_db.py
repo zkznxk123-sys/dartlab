@@ -382,7 +382,8 @@ class KnowledgeDB:
         bullet = (bullet or "").strip()
         if not bullet or not intent:
             return
-        bullet = bullet[:200]
+        max_len = 600 if source == "recipe" else 200
+        bullet = bullet[:max_len]
         with self._write_lock:
             conn = self._ensure_db()
             now = time.time()

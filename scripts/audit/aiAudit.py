@@ -152,6 +152,11 @@ def runOne(
         }
 
     grade, issues = _grade(response)
+
+    # P등급이면 성공 패턴을 playbook recipe로 저장 → HF 공유 대상
+    if grade == "P":
+        _save_recipe(question, axis, response)
+
     return {
         "timestamp": datetime.now().isoformat(timespec="seconds"),
         "provider": provider,
@@ -171,6 +176,41 @@ def runOne(
         "duration_sec": duration,
         "response": response,
     }
+
+
+def _save_recipe(question: str, axis: str, response: str) -> None:
+    """P등급 응답에서 코드 패턴을 추출해 playbook recipe로 저장."""
+    try:
+        from dartlab.ai.context.intent import classifyIntent
+        from dartlab.ai.persistence.knowledge_db import KnowledgeDB
+
+        # intent 분류
+        intent_result = classifyIntent(question, hasCompany=True)
+        intent = intent_result.intent.value
+
+        # 응답에서 코드 블록 추출
+        code_blocks = re.findall(r"```python\n(.*?)```", response, re.DOTALL)
+        if not code_blocks:
+            return
+
+        # 마지막 성공 코드 (보통 최종 실행 코드)
+        code = code_blocks[-1].strip()
+        if len(code) < 20:
+            return
+
+        # recipe bullet 형식: "질문유형 → 코드패턴"
+        bullet = f"{question[:80]} → {code[:500]}"
+
+        db = KnowledgeDB.get()
+        db.upsert_bullet(
+            intent=intent,
+            sector="",
+            bullet=bullet,
+            outcome="success",
+            source="recipe",
+        )
+    except (ImportError, OSError, ValueError):
+        pass
 
 
 def writeReport(outDir: Path, results: list[dict]) -> None:

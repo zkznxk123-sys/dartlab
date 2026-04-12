@@ -148,6 +148,50 @@ class ExperienceIndex:
                 )
             )
 
+        # playbook recipe도 검색 (HF 공유 대상 — 검증된 코드 패턴)
+        try:
+            recipe_rows = conn.execute(
+                "SELECT intent, bullet, quality, created_at FROM playbook WHERE source = 'recipe' ORDER BY quality DESC LIMIT 100"
+            ).fetchall()
+            for row in recipe_rows:
+                row_intent = row[0] or ""
+                row_bullet = row[1] or ""
+                row_quality = row[2] or 0.5
+                row_created = row[3]
+
+                # bullet에서 질문 부분과 코드 부분 분리
+                parts = row_bullet.split(" → ", 1)
+                if len(parts) < 2:
+                    continue
+                row_question = parts[0]
+                row_code = parts[1]
+
+                q_tokens = self._tokenize(row_question)
+                if not q_tokens:
+                    continue
+
+                overlap = len(set(query_tokens) & set(q_tokens))
+                if overlap == 0:
+                    continue
+                jaccard = overlap / len(set(query_tokens) | set(q_tokens))
+
+                # recipe는 검증된 패턴이라 가점
+                score = jaccard * 12.0 + row_quality * 2.0
+
+                age_days = (now - row_created) / 86400
+                hits.append(
+                    ExperienceHit(
+                        question=row_question,
+                        code=row_code[:800],
+                        result_summary=f"[recipe:{row_intent}]",
+                        grade="P",
+                        age_days=age_days,
+                        score=score,
+                    )
+                )
+        except Exception:
+            pass
+
         hits.sort(key=lambda h: h.score, reverse=True)
         return hits[:k]
 
