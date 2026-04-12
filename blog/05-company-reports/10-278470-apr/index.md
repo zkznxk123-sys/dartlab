@@ -371,6 +371,12 @@ c.review()
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
+<script>
+import LineChart from '$lib/components/blog/LineChart.svelte';
+import BarChart from '$lib/components/blog/BarChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
 ## 공시 / Filings
 
 | 기간 | 보고서 | 링크 |
@@ -407,6 +413,8 @@ c.review()
 > c.show("ratios")          # 재무비율
 > ```
 
+<LineChart data={[{year:"2025",매출:15273,영업이익:3655},{year:"2024",매출:7228,영업이익:1227},{year:"2023",매출:5238,영업이익:1042},{year:"2022",매출:3977,영업이익:392},{year:"2021",매출:2591,영업이익:143}]} title="매출 vs 영업이익 추이" unit="억원" />
+
 ### 손익계산서 (IS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -420,6 +428,8 @@ c.review()
 | 금융비용 | — | — | — | — | — |
 | 당기순이익 | 2,897 | 1,076 | 815 | 300 | 114 |
 
+<StackBar data={[{year:"2025",segments:[{label:"부채",value:3259,color:"#ef4444"},{label:"자본",value:4458,color:"#22c55e"}]},{year:"2024",segments:[{label:"부채",value:2416,color:"#ef4444"},{label:"자본",value:3235,color:"#22c55e"}]},{year:"2023",segments:[{label:"부채",value:904,color:"#ef4444"},{label:"자본",value:1969,color:"#22c55e"}]},{year:"2022",segments:[{label:"부채",value:839,color:"#ef4444"},{label:"자본",value:1003,color:"#22c55e"}]},{year:"2021",segments:[{label:"부채",value:604,color:"#ef4444"},{label:"자본",value:660,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="억원" />
+
 ### 재무상태표 (BS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -431,6 +441,8 @@ c.review()
 | 유동부채 | 2,384 | 1,451 | 823 | 763 | 501 |
 | 비유동부채 | 876 | 965 | 81 | 76 | 104 |
 | 자본총계 | 4,458 | 3,235 | 1,969 | 1,003 | 660 |
+
+<BarChart data={[{label:"2025",value:3410},{label:"2024",value:791},{label:"2023",value:1078},{label:"2022",value:316},{label:"2021",value:46}]} title="영업활동 현금흐름" unit="억원" />
 
 ### 현금흐름표 (CF) — 단위 억원
 
@@ -460,6 +472,6 @@ c.review()
 | 주식보상 | — | — | — | — | — |
 | 주식선택권 | 0.8 | 48 | 72 | -12 | 23 |
 
-*최종 갱신: 2026-04-12 | dartlab 실측 (DART 공시 기준)*
+*최종 갱신: 2026-04-13 | dartlab 실측 (DART 공시 기준)*
 
 <!-- AUTO:END -->

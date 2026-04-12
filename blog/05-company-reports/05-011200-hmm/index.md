@@ -256,6 +256,12 @@ dartlab이 답할 수 없는 것: 글로벌 컨테이너 운임의 다음 분기
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
+<script>
+import LineChart from '$lib/components/blog/LineChart.svelte';
+import BarChart from '$lib/components/blog/BarChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
 ## 공시 / Filings
 
 | 기간 | 보고서 | 링크 |
@@ -292,6 +298,8 @@ dartlab이 답할 수 없는 것: 글로벌 컨테이너 운임의 다음 분기
 > c.show("ratios")          # 재무비율
 > ```
 
+<LineChart data={[{year:"2025",매출:108914,영업이익:14612},{year:"2024",매출:117002,영업이익:35128},{year:"2023",매출:84010,영업이익:5853},{year:"2022",매출:185828,영업이익:99516},{year:"2021",매출:137941,영업이익:73775}]} title="매출 vs 영업이익 추이" unit="억원" />
+
 ### 손익계산서 (IS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -305,6 +313,8 @@ dartlab이 답할 수 없는 것: 글로벌 컨테이너 운임의 다음 분기
 | 금융비용 | — | — | — | — | — |
 | 당기순이익 | 18,787 | 37,821 | 9,565 | 100,854 | 53,372 |
 
+<StackBar data={[{year:"2025",segments:[{label:"부채",value:69919,color:"#ef4444"},{label:"자본",value:265713,color:"#22c55e"}]},{year:"2024",segments:[{label:"부채",value:59930,color:"#ef4444"},{label:"자본",value:278555,color:"#22c55e"}]},{year:"2023",segments:[{label:"부채",value:42726,color:"#ef4444"},{label:"자본",value:214408,color:"#22c55e"}]},{year:"2022",segments:[{label:"부채",value:52855,color:"#ef4444"},{label:"자본",value:206879,color:"#22c55e"}]},{year:"2021",segments:[{label:"부채",value:75178,color:"#ef4444"},{label:"자본",value:103583,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="억원" />
+
 ### 재무상태표 (BS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -316,6 +326,8 @@ dartlab이 답할 수 없는 것: 글로벌 컨테이너 운임의 다음 분기
 | 유동부채 | 26,020 | 23,572 | 20,014 | 20,518 | 25,247 |
 | 비유동부채 | 43,899 | 36,358 | 22,712 | 32,338 | 49,931 |
 | 자본총계 | 265,713 | 278,555 | 214,408 | 206,879 | 103,583 |
+
+<BarChart data={[{label:"2025",value:33051},{label:"2024",value:48746},{label:"2023",value:19797},{label:"2022",value:113189},{label:"2021",value:75050}]} title="영업활동 현금흐름" unit="억원" />
 
 ### 현금흐름표 (CF) — 단위 억원
 
@@ -345,6 +357,6 @@ dartlab이 답할 수 없는 것: 글로벌 컨테이너 운임의 다음 분기
 | 신종자본증권발행 | 378 | -621 | 0.0 | 0.0 | 0.0 |
 | 연결범위내거래 | — | — | 0.0 | 5 | — |
 
-*최종 갱신: 2026-04-12 | dartlab 실측 (DART 공시 기준)*
+*최종 갱신: 2026-04-13 | dartlab 실측 (DART 공시 기준)*
 
 <!-- AUTO:END -->

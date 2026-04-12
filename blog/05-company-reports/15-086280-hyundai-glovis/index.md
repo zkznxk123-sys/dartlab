@@ -366,6 +366,12 @@ PCC선 128척과 LNG PCTC 22척이 계획대로 들어오면, 이 회사는 "현
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
+<script>
+import LineChart from '$lib/components/blog/LineChart.svelte';
+import BarChart from '$lib/components/blog/BarChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
 ## 공시 / Filings
 
 | 기간 | 보고서 | 링크 |
@@ -402,6 +408,8 @@ PCC선 128척과 LNG PCTC 22척이 계획대로 들어오면, 이 회사는 "현
 > c.show("ratios")          # 재무비율
 > ```
 
+<LineChart data={[{year:"2025",매출:295664,영업이익:20730},{year:"2024",매출:284074,영업이익:17529},{year:"2023",매출:256832,영업이익:15540},{year:"2022",매출:269819,영업이익:17985},{year:"2021",매출:217796,영업이익:11262}]} title="매출 vs 영업이익 추이" unit="억원" />
+
 ### 손익계산서 (IS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -415,6 +423,8 @@ PCC선 128척과 LNG PCTC 22척이 계획대로 들어오면, 이 회사는 "현
 | 금융비용 | — | — | — | — | — |
 | 당기순이익 | 17,347 | 10,995 | 10,701 | 11,928 | 7,832 |
 
+<StackBar data={[{year:"2025",segments:[{label:"부채",value:81988,color:"#ef4444"},{label:"자본",value:103885,color:"#22c55e"}]},{year:"2024",segments:[{label:"부채",value:80398,color:"#ef4444"},{label:"자본",value:88094,color:"#22c55e"}]},{year:"2023",segments:[{label:"부채",value:69411,color:"#ef4444"},{label:"자본",value:77839,color:"#22c55e"}]},{year:"2022",segments:[{label:"부채",value:69982,color:"#ef4444"},{label:"자본",value:68796,color:"#22c55e"}]},{year:"2021",segments:[{label:"부채",value:63585,color:"#ef4444"},{label:"자본",value:58124,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="억원" />
+
 ### 재무상태표 (BS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -426,6 +436,8 @@ PCC선 128척과 LNG PCTC 22척이 계획대로 들어오면, 이 회사는 "현
 | 유동부채 | 51,582 | 53,106 | 44,676 | 43,438 | 39,430 |
 | 비유동부채 | 30,405 | 27,292 | 24,735 | 26,544 | 24,156 |
 | 자본총계 | 103,885 | 88,094 | 77,839 | 68,796 | 58,124 |
+
+<BarChart data={[{label:"2025",value:25008},{label:"2024",value:21224},{label:"2023",value:22423},{label:"2022",value:11961},{label:"2021",value:29233}]} title="영업활동 현금흐름" unit="억원" />
 
 ### 현금흐름표 (CF) — 단위 억원
 
@@ -455,6 +467,6 @@ PCC선 128척과 LNG PCTC 22척이 계획대로 들어오면, 이 회사는 "현
 | 기타(합계) | 18,569 | 1,723 | 10,473 | 12,061 | 8,528 |
 | 확정급여재측정 | 91 | -75 | -116 | 105 | 15 |
 
-*최종 갱신: 2026-04-12 | dartlab 실측 (DART 공시 기준)*
+*최종 갱신: 2026-04-13 | dartlab 실측 (DART 공시 기준)*
 
 <!-- AUTO:END -->

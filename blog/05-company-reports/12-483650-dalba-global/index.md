@@ -375,6 +375,12 @@ c.analysis("financial", "종합평가")
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
+<script>
+import LineChart from '$lib/components/blog/LineChart.svelte';
+import BarChart from '$lib/components/blog/BarChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
 ## 공시 / Filings
 
 | 기간 | 보고서 | 링크 |
@@ -410,6 +416,8 @@ c.analysis("financial", "종합평가")
 > c.show("ratios")          # 재무비율
 > ```
 
+<LineChart data={[{year:"2025",매출:5197,영업이익:1015},{year:"2024",매출:1690,영업이익:275}]} title="매출 vs 영업이익 추이" unit="억원" />
+
 ### 손익계산서 (IS) — 단위 억원
 
 | 항목 | 2025 | 2024 |
@@ -423,6 +431,8 @@ c.analysis("financial", "종합평가")
 | 금융비용 | — | — |
 | 당기순이익 | 791 | 226 |
 
+<StackBar data={[{year:"2025",segments:[{label:"부채",value:568,color:"#ef4444"},{label:"자본",value:1986,color:"#22c55e"}]},{year:"2024",segments:[{label:"부채",value:340,color:"#ef4444"},{label:"자본",value:1021,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="억원" />
+
 ### 재무상태표 (BS) — 단위 억원
 
 | 항목 | 2025 | 2024 |
@@ -434,6 +444,8 @@ c.analysis("financial", "종합평가")
 | 유동부채 | 536 | 313 |
 | 비유동부채 | 32 | 27 |
 | 자본총계 | 1,986 | 1,021 |
+
+<BarChart data={[{label:"2025",value:685},{label:"2024",value:0.5}]} title="영업활동 현금흐름" unit="억원" />
 
 ### 현금흐름표 (CF) — 단위 억원
 
@@ -459,6 +471,6 @@ c.analysis("financial", "종합평가")
 | 주식보상 | 0.0 | 8 |
 | 주식선택권 | 25 | 0.0 |
 
-*최종 갱신: 2026-04-12 | dartlab 실측 (DART 공시 기준)*
+*최종 갱신: 2026-04-13 | dartlab 실측 (DART 공시 기준)*
 
 <!-- AUTO:END -->

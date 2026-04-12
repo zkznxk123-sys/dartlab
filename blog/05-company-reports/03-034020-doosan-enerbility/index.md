@@ -341,6 +341,12 @@ c.analysis("financial", "자금조달")["distressIndicators"]
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
+<script>
+import LineChart from '$lib/components/blog/LineChart.svelte';
+import BarChart from '$lib/components/blog/BarChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
 ## 공시 / Filings
 
 | 기간 | 보고서 | 링크 |
@@ -352,8 +358,8 @@ c.analysis("financial", "자금조달")["distressIndicators"]
 | 2024 | 사업보고서 (2024.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250320001103) |
 | 2024 | [기재정정]반기보고서 (2024.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241227000720) |
 | 2024 | 분기보고서 (2024.09) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241112000354) |
-| 2024 | 반기보고서 (2024.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240814004530) |
 | 2024 | [기재정정]반기보고서 (2024.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240814004587) |
+| 2024 | 반기보고서 (2024.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240814004530) |
 | 2024 | 분기보고서 (2024.03) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240516002258) |
 
 > 전체 공시 목록은 dartlab에서 확인:
@@ -377,6 +383,8 @@ c.analysis("financial", "자금조달")["distressIndicators"]
 > c.show("ratios")          # 재무비율
 > ```
 
+<LineChart data={[{year:"2025",매출:170579,영업이익:7627},{year:"2024",매출:162331,영업이익:10176},{year:"2023",매출:175899,영업이익:14673},{year:"2022",매출:154880,영업이익:11068},{year:"2021",매출:125368,영업이익:9968}]} title="매출 vs 영업이익 추이" unit="억원" />
+
 ### 손익계산서 (IS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -390,6 +398,8 @@ c.analysis("financial", "자금조달")["distressIndicators"]
 | 금융비용 | — | — | — | — | — |
 | 당기순이익 | 2,052 | 3,947 | 5,175 | -4,531 | 6,458 |
 
+<StackBar data={[{year:"2025",segments:[{label:"부채",value:155039,color:"#ef4444"},{label:"자본",value:120094,color:"#22c55e"}]},{year:"2024",segments:[{label:"부채",value:146537,color:"#ef4444"},{label:"자본",value:116611,color:"#22c55e"}]},{year:"2023",segments:[{label:"부채",value:137993,color:"#ef4444"},{label:"자본",value:108415,color:"#22c55e"}]},{year:"2022",segments:[{label:"부채",value:129695,color:"#ef4444"},{label:"자본",value:100803,color:"#22c55e"}]},{year:"2021",segments:[{label:"부채",value:149129,color:"#ef4444"},{label:"자본",value:88076,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="억원" />
+
 ### 재무상태표 (BS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -401,6 +411,8 @@ c.analysis("financial", "자금조달")["distressIndicators"]
 | 유동부채 | 101,071 | 89,458 | 95,967 | 80,595 | 101,258 |
 | 비유동부채 | 53,968 | 57,079 | 42,026 | 49,100 | 47,872 |
 | 자본총계 | 120,094 | 116,611 | 108,415 | 100,803 | 88,076 |
+
+<BarChart data={[{label:"2025",value:7518},{label:"2024",value:2422},{label:"2023",value:20706},{label:"2022",value:6251},{label:"2021",value:10277}]} title="영업활동 현금흐름" unit="억원" />
 
 ### 현금흐름표 (CF) — 단위 억원
 
@@ -430,6 +442,6 @@ c.analysis("financial", "자금조달")["distressIndicators"]
 | 합병 | — | — | — | — | 6 |
 | 비지배지분변동 | — | — | — | — | — |
 
-*최종 갱신: 2026-04-12 | dartlab 실측 (DART 공시 기준)*
+*최종 갱신: 2026-04-13 | dartlab 실측 (DART 공시 기준)*
 
 <!-- AUTO:END -->

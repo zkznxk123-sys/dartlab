@@ -276,6 +276,12 @@ c.credit("등급")
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
+<script>
+import LineChart from '$lib/components/blog/LineChart.svelte';
+import BarChart from '$lib/components/blog/BarChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
 ## 공시 / Filings
 
 | 기간 | 보고서 | 링크 |
@@ -312,6 +318,8 @@ c.credit("등급")
 > c.show("ratios")          # 재무비율
 > ```
 
+<LineChart data={[{year:"2025",매출:2159,영업이익:1069},{year:"2024",매출:1029,영업이익:254},{year:"2023",매출:965,영업이익:-97},{year:"2022",매출:288,영업이익:-294},{year:"2021",매출:411,영업이익:-128}]} title="매출 vs 영업이익 추이" unit="억원" />
+
 ### 손익계산서 (IS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -325,6 +333,8 @@ c.credit("등급")
 | 금융비용 | — | — | — | — | — |
 | 당기순이익 | 1,452 | 607 | -36 | -101 | -92 |
 
+<StackBar data={[{year:"2025",segments:[{label:"부채",value:2443,color:"#ef4444"},{label:"자본",value:4544,color:"#22c55e"}]},{year:"2024",segments:[{label:"부채",value:1349,color:"#ef4444"},{label:"자본",value:2741,color:"#22c55e"}]},{year:"2023",segments:[{label:"부채",value:1083,color:"#ef4444"},{label:"자본",value:1478,color:"#22c55e"}]},{year:"2022",segments:[{label:"부채",value:1001,color:"#ef4444"},{label:"자본",value:1454,color:"#22c55e"}]},{year:"2021",segments:[{label:"부채",value:1264,color:"#ef4444"},{label:"자본",value:1339,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="억원" />
+
 ### 재무상태표 (BS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -336,6 +346,8 @@ c.credit("등급")
 | 유동부채 | 2,397 | 1,292 | 1,004 | 943 | 1,232 |
 | 비유동부채 | 46 | 57 | 78 | 58 | 32 |
 | 자본총계 | 4,544 | 2,741 | 1,478 | 1,454 | 1,339 |
+
+<BarChart data={[{label:"2025",value:1241},{label:"2024",value:530},{label:"2023",value:-78},{label:"2022",value:-179},{label:"2021",value:-94}]} title="영업활동 현금흐름" unit="억원" />
 
 ### 현금흐름표 (CF) — 단위 억원
 
@@ -365,6 +377,6 @@ c.credit("등급")
 | 주식보상 | 49 | 0.0 | 0.0 | 0.0 | 14 |
 | 주식선택권 | 81 | — | — | — | — |
 
-*최종 갱신: 2026-04-12 | dartlab 실측 (DART 공시 기준)*
+*최종 갱신: 2026-04-13 | dartlab 실측 (DART 공시 기준)*
 
 <!-- AUTO:END -->

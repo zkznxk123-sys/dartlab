@@ -307,6 +307,12 @@ c.analysis("financial", "수익구조") # 해외/국내 매출 비중
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
+<script>
+import LineChart from '$lib/components/blog/LineChart.svelte';
+import BarChart from '$lib/components/blog/BarChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
 ## 공시 / Filings
 
 | 기간 | 보고서 | 링크 |
@@ -343,6 +349,8 @@ c.analysis("financial", "수익구조") # 해외/국내 매출 비중
 > c.show("ratios")          # 재무비율
 > ```
 
+<LineChart data={[{year:"2025",매출:65562,영업이익:1839},{year:"2024",매출:39379,영업이익:1631},{year:"2023",매출:63406,영업이익:2121},{year:"2022",매출:64100,영업이익:1122},{year:"2021",매출:51608,영업이익:1061}]} title="매출 vs 영업이익 추이" unit="억원" />
+
 ### 손익계산서 (IS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -356,6 +364,8 @@ c.analysis("financial", "수익구조") # 해외/국내 매출 비중
 | 금융비용 | — | — | — | — | — |
 | 당기순이익 | 1,701 | 1,576 | 1,715 | 1,160 | 996 |
 
+<StackBar data={[{year:"2025",segments:[{label:"부채",value:9909,color:"#ef4444"},{label:"자본",value:28312,color:"#22c55e"}]},{year:"2024",segments:[{label:"부채",value:9249,color:"#ef4444"},{label:"자본",value:26726,color:"#22c55e"}]},{year:"2023",segments:[{label:"부채",value:7939,color:"#ef4444"},{label:"자본",value:24408,color:"#22c55e"}]},{year:"2022",segments:[{label:"부채",value:7194,color:"#ef4444"},{label:"자본",value:23153,color:"#22c55e"}]},{year:"2021",segments:[{label:"부채",value:6991,color:"#ef4444"},{label:"자본",value:22008,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="억원" />
+
 ### 재무상태표 (BS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -367,6 +377,8 @@ c.analysis("financial", "수익구조") # 해외/국내 매출 비중
 | 유동부채 | 8,331 | 6,782 | 6,965 | 6,165 | 5,373 |
 | 비유동부채 | 1,579 | 2,467 | 975 | 1,029 | 1,618 |
 | 자본총계 | 28,312 | 26,726 | 24,408 | 23,153 | 22,008 |
+
+<BarChart data={[{label:"2025",value:2687},{label:"2024",value:2725},{label:"2023",value:3272},{label:"2022",value:1597},{label:"2021",value:1627}]} title="영업활동 현금흐름" unit="억원" />
 
 ### 현금흐름표 (CF) — 단위 억원
 
@@ -396,6 +408,6 @@ c.analysis("financial", "수익구조") # 해외/국내 매출 비중
 | 총포괄손익 | 0.0 | 1,121 | 72 | 1,375 | 1,737 |
 | 자기주식처분 | 69 | — | — | — | — |
 
-*최종 갱신: 2026-04-12 | dartlab 실측 (DART 공시 기준)*
+*최종 갱신: 2026-04-13 | dartlab 실측 (DART 공시 기준)*
 
 <!-- AUTO:END -->

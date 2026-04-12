@@ -195,10 +195,74 @@ def extract_data(stock_code: str) -> dict | None:
     return result
 
 
+def _build_chart_data_is(data: dict) -> str:
+    """IS 데이터로 LineChart data prop 문자열 생성."""
+    d = data.get("IS")
+    if not d:
+        return ""
+    years = d["years"]
+    # rows를 dict로 변환
+    row_map = {name: vals for name, vals in d["rows"]}
+    매출 = row_map.get("매출액", ["—"] * len(years))
+    영업이익 = row_map.get("영업이익", ["—"] * len(years))
+
+    items = []
+    for i, y in enumerate(years):
+        rev = 매출[i].replace(",", "").replace("—", "null")
+        op = 영업이익[i].replace(",", "").replace("—", "null")
+        items.append(f'{{year:"{y}",매출:{rev},영업이익:{op}}}')
+    return "[" + ",".join(items) + "]"
+
+
+def _build_chart_data_bs(data: dict) -> str:
+    """BS 데이터로 StackBar data prop 문자열 생성."""
+    d = data.get("BS")
+    if not d:
+        return ""
+    years = d["years"]
+    row_map = {name: vals for name, vals in d["rows"]}
+    부채 = row_map.get("부채총계", ["—"] * len(years))
+    자본 = row_map.get("자본총계", ["—"] * len(years))
+
+    items = []
+    for i, y in enumerate(years):
+        debt = 부채[i].replace(",", "").replace("—", "0")
+        eq = 자본[i].replace(",", "").replace("—", "0")
+        items.append(
+            f'{{year:"{y}",segments:[{{label:"부채",value:{debt},color:"#ef4444"}},'
+            f'{{label:"자본",value:{eq},color:"#22c55e"}}]}}'
+        )
+    return "[" + ",".join(items) + "]"
+
+
+def _build_chart_data_cf(data: dict) -> str:
+    """CF 데이터로 BarChart data prop 문자열 생성 (영업CF)."""
+    d = data.get("CF")
+    if not d:
+        return ""
+    years = d["years"]
+    row_map = {name: vals for name, vals in d["rows"]}
+    ocf = row_map.get("영업활동현금흐름", ["—"] * len(years))
+
+    items = []
+    for i, y in enumerate(years):
+        v = ocf[i].replace(",", "").replace("—", "0")
+        items.append(f'{{label:"{y}",value:{v}}}')
+    return "[" + ",".join(items) + "]"
+
+
 def build_auto_section(data: dict) -> str:
     """AUTO 영역 전체 마크다운 생성."""
     sc = data["stockCode"]
     parts = [AUTO_START, ""]
+
+    # --- Svelte 차트 import ---
+    parts.append("<script>")
+    parts.append("import LineChart from '$lib/components/blog/LineChart.svelte';")
+    parts.append("import BarChart from '$lib/components/blog/BarChart.svelte';")
+    parts.append("import StackBar from '$lib/components/blog/StackBar.svelte';")
+    parts.append("</script>")
+    parts.append("")
 
     # --- Filings ---
     if data.get("filings"):
@@ -232,19 +296,31 @@ def build_auto_section(data: dict) -> str:
     parts.append("> ```")
     parts.append("")
 
-    # IS
+    # IS + 차트
     if data.get("IS"):
         d = data["IS"]
+        chart_data = _build_chart_data_is(data)
+        if chart_data:
+            parts.append(f'<LineChart data={{{chart_data}}} title="매출 vs 영업이익 추이" unit="억원" />')
+            parts.append("")
         parts.append(build_table(d["rows"], d["years"], "손익계산서 (IS) — 단위 억원"))
 
-    # BS
+    # BS + 차트
     if data.get("BS"):
         d = data["BS"]
+        chart_data = _build_chart_data_bs(data)
+        if chart_data:
+            parts.append(f'<StackBar data={{{chart_data}}} title="부채 vs 자본 구조" unit="억원" />')
+            parts.append("")
         parts.append(build_table(d["rows"], d["years"], "재무상태표 (BS) — 단위 억원"))
 
-    # CF
+    # CF + 차트
     if data.get("CF"):
         d = data["CF"]
+        chart_data = _build_chart_data_cf(data)
+        if chart_data:
+            parts.append(f'<BarChart data={{{chart_data}}} title="영업활동 현금흐름" unit="억원" />')
+            parts.append("")
         parts.append(build_table(d["rows"], d["years"], "현금흐름표 (CF) — 단위 억원"))
 
     # SCE

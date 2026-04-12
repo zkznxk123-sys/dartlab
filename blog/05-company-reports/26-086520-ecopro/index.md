@@ -606,6 +606,12 @@ c.analysis("수익성")
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
+<script>
+import LineChart from '$lib/components/blog/LineChart.svelte';
+import BarChart from '$lib/components/blog/BarChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
 ## 공시 / Filings
 
 | 기간 | 보고서 | 링크 |
@@ -642,6 +648,8 @@ c.analysis("수익성")
 > c.show("ratios")          # 재무비율
 > ```
 
+<LineChart data={[{year:"2025",매출:34130,영업이익:2138},{year:"2024",매출:31279,영업이익:-2930},{year:"2023",매출:72602,영업이익:2982},{year:"2022",매출:56397,영업이익:6132},{year:"2021",매출:15041,영업이익:864}]} title="매출 vs 영업이익 추이" unit="억원" />
+
 ### 손익계산서 (IS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -655,6 +663,8 @@ c.analysis("수익성")
 | 금융비용 | — | — | — | — | — |
 | 당기순이익 | -1,055 | -2,954 | 1,353 | 2,206 | 2,789 |
 
+<StackBar data={[{year:"2025",segments:[{label:"부채",value:52914,color:"#ef4444"},{label:"자본",value:44873,color:"#22c55e"}]},{year:"2024",segments:[{label:"부채",value:42998,color:"#ef4444"},{label:"자본",value:38385,color:"#22c55e"}]},{year:"2023",segments:[{label:"부채",value:40708,color:"#ef4444"},{label:"자본",value:34861,color:"#22c55e"}]},{year:"2022",segments:[{label:"부채",value:28240,color:"#ef4444"},{label:"자본",value:25218,color:"#22c55e"}]},{year:"2021",segments:[{label:"부채",value:17037,color:"#ef4444"},{label:"자본",value:0,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="억원" />
+
 ### 재무상태표 (BS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -666,6 +676,8 @@ c.analysis("수익성")
 | 유동부채 | 30,560 | 21,845 | 27,436 | 20,827 | 9,674 |
 | 비유동부채 | 22,354 | 21,153 | 13,273 | 7,413 | 7,363 |
 | 자본총계 | 44,873 | 38,385 | 34,861 | 25,218 | — |
+
+<BarChart data={[{label:"2025",value:3391},{label:"2024",value:4888},{label:"2023",value:809},{label:"2022",value:-5186},{label:"2021",value:-1406}]} title="영업활동 현금흐름" unit="억원" />
 
 ### 현금흐름표 (CF) — 단위 억원
 
@@ -695,6 +707,6 @@ c.analysis("수익성")
 | 신종자본증권발행 | 214 | 1,048 | — | — | — |
 | 연결범위내거래 | 0.2 | — | 2,063 | 12 | 5,019 |
 
-*최종 갱신: 2026-04-12 | dartlab 실측 (DART 공시 기준)*
+*최종 갱신: 2026-04-13 | dartlab 실측 (DART 공시 기준)*
 
 <!-- AUTO:END -->

@@ -427,6 +427,12 @@ c.analysis("financial", "종합평가")
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
+<script>
+import LineChart from '$lib/components/blog/LineChart.svelte';
+import BarChart from '$lib/components/blog/BarChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
 ## 공시 / Filings
 
 | 기간 | 보고서 | 링크 |
@@ -463,6 +469,8 @@ c.analysis("financial", "종합평가")
 > c.show("ratios")          # 재무비율
 > ```
 
+<LineChart data={[{year:"2025",매출:41470,영업이익:2486},{year:"2024",매출:42562,영업이익:1846},{year:"2023",매출:41908,영업이익:1953},{year:"2022",매출:32983,영업이익:1164},{year:"2021",매출:33639,영업이익:2734}]} title="매출 vs 영업이익 추이" unit="억원" />
+
 ### 손익계산서 (IS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -476,6 +484,8 @@ c.analysis("financial", "종합평가")
 | 금융비용 | — | — | — | — | — |
 | 당기순이익 | 1,581 | 1,557 | 1,729 | 502 | 1,763 |
 
+<StackBar data={[{year:"2025",segments:[{label:"부채",value:43863,color:"#ef4444"},{label:"자본",value:32128,color:"#22c55e"}]},{year:"2024",segments:[{label:"부채",value:43473,color:"#ef4444"},{label:"자본",value:31146,color:"#22c55e"}]},{year:"2023",segments:[{label:"부채",value:40083,color:"#ef4444"},{label:"자본",value:30080,color:"#22c55e"}]},{year:"2022",segments:[{label:"부채",value:44345,color:"#ef4444"},{label:"자본",value:29019,color:"#22c55e"}]},{year:"2021",segments:[{label:"부채",value:36811,color:"#ef4444"},{label:"자본",value:28853,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="억원" />
+
 ### 재무상태표 (BS) — 단위 억원
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
@@ -487,6 +497,8 @@ c.analysis("financial", "종합평가")
 | 유동부채 | 32,916 | 35,100 | 31,476 | 34,591 | 28,470 |
 | 비유동부채 | 10,947 | 8,373 | 8,607 | 9,753 | 8,341 |
 | 자본총계 | 32,128 | 31,146 | 30,080 | 29,019 | 28,853 |
+
+<BarChart data={[{label:"2025",value:28},{label:"2024",value:3144},{label:"2023",value:6402},{label:"2022",value:-17351},{label:"2021",value:304}]} title="영업활동 현금흐름" unit="억원" />
 
 ### 현금흐름표 (CF) — 단위 억원
 
@@ -516,6 +528,6 @@ c.analysis("financial", "종합평가")
 | 자기주식취득 | 0.0 | — | — | — | — |
 | 자기주식변동 | — | 0.0 | -200 | — | — |
 
-*최종 갱신: 2026-04-12 | dartlab 실측 (DART 공시 기준)*
+*최종 갱신: 2026-04-13 | dartlab 실측 (DART 공시 기준)*
 
 <!-- AUTO:END -->
