@@ -18,7 +18,6 @@ _PROVIDER_BUDGETS: dict[str, int] = {
     "mistral": 8000,
     "ollama": 4000,
     "claude": 30000,
-    "claude_code": 30000,
     "codex": 12000,
     "oauth_codex": 12000,
 }

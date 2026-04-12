@@ -10,7 +10,7 @@
 | `chatgpt` | providers/__init__.py alias | `codex`로 정규화 | codex mirror | **호환용 alias** — 공개 surface 비노출 |
 | `codex` | codex.py | CLI 세션 | CLI config 또는 gpt-4.1 | **공식 경로 우선** — Codex CLI 의존 |
 | `oauth-codex` | oauthCodex.py | ChatGPT OAuth | gpt-5.4 | **공개 경로** — 비공식 backend API 의존 |
-| `claude-code` | claude_code.py | CLI 세션 | sonnet | **보류중** — OAuth 지원 전 비공개 |
+| ~~`claude-code`~~ | ~~claude_code.py~~ | — | — | **제거됨 (2026-04)** — Anthropic ToS 위반 (OAuth 토큰 추출 금지, 2026-01 차단). Claude Pro 구독자는 API 키 발급 후 ANTHROPIC_API_KEY 사용 |
 
 ---
 
@@ -160,19 +160,13 @@ CLI의 JSONL 출력 포맷이 변경되면 파싱 실패.
 
 ---
 
-## Claude Code CLI Provider — 보류중
+## Claude Code CLI Provider — 제거됨 (2026-04)
 
-### 현재 상태
+Anthropic이 2026년 1월부터 Claude Code OAuth 토큰을 제3자 API 클라이언트에서 사용하는 것을 ToS 위반으로 차단.
+OpenClaw, OpenCode, Roo Code, Goose 등 유사 도구와 함께 차단 대상.
 
-VSCode 환경에서 `CLAUDECODE` 환경변수가 설정되어 SDK fallback 모드로 진입하지만,
-SDK fallback에서 API key 추출(`claude auth status --json`)이 또 subprocess를 호출하는 순환 문제.
-
-### 알려진 이슈
-
-- 테스트 31/32 pass, `test_complete_timeout` 1개 fail
-- VSCode 내에서 CLI 호출이 hang되는 케이스 (중첩 세션)
-- `_probe_cli()` 8초 타임아웃으로 hang 감지 후 SDK 전환
-- 파일: [claude_code.py](providers/claude_code.py)
+**Claude Pro/Max 구독자는**: Anthropic Console에서 API 키를 발급받아 `ANTHROPIC_API_KEY` 환경변수로 사용.
+Claude Code CLI subprocess 호출 자체(`claude -p`)는 허용되지만, 토큰 추출은 금지.
 
 ---
 
