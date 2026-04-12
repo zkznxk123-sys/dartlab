@@ -4756,6 +4756,66 @@ def macroFlagsBlock(summary: dict) -> list:
     return blocks
 
 
+def sectorKpiBlock(data: dict | None) -> list:
+    """sectorKpi 결과 → 업종별 KPI 블록. 업종에 따라 다른 내용."""
+    if not data:
+        return []
+    sector = data.get("sector", "")
+    kpis = data.get("kpis", {})
+    if not kpis:
+        return []
+
+    sector_labels = {"construction": "건설", "semiconductor": "반도체", "gaming": "게임·엔터", "pharma": "제약·바이오"}
+
+    blocks: list = [
+        HeadingBlock(
+            f"업종 특수 KPI ({sector_labels.get(sector, sector)})",
+            level=2,
+            helper="범용 14축에 없는 이 업종만의 핵심 지표",
+        ),
+    ]
+
+    for key, val in kpis.items():
+        if not val or not isinstance(val, dict):
+            continue
+
+        # 공통 패턴: history가 있으면 표, 아니면 metric
+        history = val.get("history", [])
+        if history and isinstance(history, list) and len(history) > 0 and isinstance(history[0], dict):
+            cols_dict: dict[str, list] = {}
+            for h in history:
+                for k, v in h.items():
+                    if k == "period":
+                        continue
+                    if k not in cols_dict:
+                        cols_dict[k] = []
+                    cols_dict[k].append(str(v) if v is not None else "-")
+            if cols_dict:
+                periods_list = [str(h.get("period", "")) for h in history]
+                rows = [{"": k, **dict(zip(periods_list, vals))} for k, vals in cols_dict.items()]
+                if rows:
+                    blocks.append(TableBlock(key, pl.DataFrame(rows)))
+
+        # simple metrics
+        metrics = []
+        for k, v in val.items():
+            if k in ("history", "note", "products"):
+                continue
+            if isinstance(v, (int, float)):
+                metrics.append((k, f"{v:.1f}" if isinstance(v, float) else str(v)))
+            elif isinstance(v, str) and v:
+                metrics.append((k, v))
+        if metrics:
+            blocks.append(MetricBlock(metrics[:8]))
+
+        # note
+        note = val.get("note")
+        if note:
+            blocks.append(TextBlock(f"_{note}_"))
+
+    return blocks
+
+
 def damodaran3testBlock(company) -> list:
     """Damodaran 3-test 결과 → 스토리 검증 블록."""
     try:

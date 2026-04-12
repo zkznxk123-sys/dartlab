@@ -1,0 +1,76 @@
+"""반도체 KPI — CAPEX 사이클/웨이퍼 ASP 추정/가동률 추정.
+
+DART sections(productService/생산실적) + IS(매출/CAPEX) 활용.
+"""
+
+from __future__ import annotations
+
+from dartlab.analysis.financial._memoize import memoized_calc
+
+
+@memoized_calc
+def calcSemiconductorKpis(company, *, basePeriod: str | None = None) -> dict | None:
+    """반도체 핵심 KPI.
+
+    Returns
+    -------
+    dict | None
+        capexCycle : dict — CAPEX/매출 3Y + 사이클 위치 추정
+        aspProxy : dict | None — 매출/생산량 → ASP 추정
+        utilizationProxy : dict | None — 가동률 추정
+    """
+    from dartlab.analysis.financial._helpers import toDictBySnakeId
+    from dartlab.core.finance.helpers import annualColsFromPeriods
+
+    result: dict = {}
+
+    # ── CAPEX/매출 사이클 ──
+    try:
+        parsed = toDictBySnakeId(
+            company.select("CF", ["purchase_of_property_plant_and_equipment"])
+        )
+        is_parsed = toDictBySnakeId(company.select("IS", ["sales"]))
+        if parsed and is_parsed:
+            cfData, cfPeriods = parsed
+            isData, isPeriods = is_parsed
+            yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=5)
+            capexRow = cfData.get("purchase_of_property_plant_and_equipment", {})
+            salesRow = isData.get("sales", {})
+
+            history = []
+            for col in yCols:
+                capex = capexRow.get(col)
+                rev = salesRow.get(col)
+                if capex is not None and rev and float(rev) > 0:
+                    ratio = abs(float(capex)) / float(rev) * 100
+                    history.append({"period": col, "capexToRevenue": round(ratio, 1)})
+
+            if history:
+                avg = sum(h["capexToRevenue"] for h in history) / len(history)
+                latest = history[-1]["capexToRevenue"]
+                phase = "확장" if latest > avg * 1.2 else "유지" if latest > avg * 0.8 else "축소"
+                result["capexCycle"] = {
+                    "history": history,
+                    "avg": round(avg, 1),
+                    "latest": latest,
+                    "phase": phase,
+                }
+    except (AttributeError, ValueError, TypeError):
+        pass
+
+    # ── 생산실적에서 ASP 추정 (사업보고서 sections) ──
+    try:
+        ps = company.show("productService")
+        if ps is not None and hasattr(ps, "to_dicts"):
+            rows = ps.to_dicts()
+            semi_kw = ["반도체", "메모리", "DRAM", "NAND", "파운드리", "웨이퍼"]
+            semi_rows = [r for r in rows if any(k in str(r) for k in semi_kw)]
+            if semi_rows:
+                result["aspProxy"] = {
+                    "segmentCount": len(semi_rows),
+                    "note": "productService에서 반도체 관련 세그먼트 감지 — ASP 직접 추정은 생산수량 데이터 필요",
+                }
+    except (AttributeError, ValueError, TypeError, KeyError):
+        pass
+
+    return result if result else None

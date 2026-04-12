@@ -389,6 +389,11 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
             b["piotroski"] = _safe(lambda: piotroskiBlock(calcPiotroskiDetail(company, basePeriod=basePeriod)))
         if _need("summaryFlags"):
             b["summaryFlags"] = _safe(lambda: summaryFlagsBlock(calcSummaryFlags(company, basePeriod=basePeriod)))
+        if _need("sectorKpi"):
+            from dartlab.analysis.financial.sectorKpi import sectorKpi as _sectorKpi
+            from dartlab.review.builders import sectorKpiBlock
+
+            b["sectorKpi"] = _safe(lambda: sectorKpiBlock(_sectorKpi(company)))
 
     # ── 3부: 심화 분석 ──
     if keys is None or keys & {
