@@ -344,6 +344,19 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
                 b["scenarioSensitivity"] = _safe(lambda: scenarioSensitivityBlock(_ss))
             if _need("criticalAssumptions"):
                 b["criticalAssumptions"] = _safe(lambda: criticalAssumptionsBlock(_ss))
+            # improvementLevers를 여기서 즉시 계산 (같은 SS 캐시 시점, 메모리 압박 전)
+            if _need("improvementLevers") and _ss:
+                from dartlab.analysis.financial.scenarioSensitivity import calcImprovementLevers
+                from dartlab.review.builders import improvementLeversBlock
+
+                try:
+                    _il_data = calcImprovementLevers(company, basePeriod=basePeriod)
+                    b["improvementLevers"] = improvementLeversBlock(_il_data) if _il_data else []
+                except Exception as _e:
+                    import logging
+
+                    logging.getLogger("dartlab.review").debug("improvementLevers: %s", _e)
+                    b["improvementLevers"] = []
         if _need("marketRisk"):
             from dartlab.quant.extended import calcMarketRisk
             from dartlab.review.builders import marketRiskBlock
@@ -1083,26 +1096,14 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
 
     from dartlab.review.blockMap import BlockMap
 
-    # ── 개선 시나리오 (How축) ──
-    if keys is None or keys & {"improvementLevers", "gradeUpgradePath", "technicalActionTargets", "cyclicalActionPlan"}:
+    # ── 개선 시나리오 (How축) — improvementLevers는 안정성 그룹에서 미리 계산됨 ──
+    if keys is None or keys & {"gradeUpgradePath", "technicalActionTargets", "cyclicalActionPlan"}:
         from dartlab.review.builders import (
             cyclicalActionPlanBlock,
             gradeUpgradePathBlock,
-            improvementLeversBlock,
             technicalActionTargetsBlock,
         )
 
-        if _need("improvementLevers"):
-            from dartlab.analysis.financial.scenarioSensitivity import calcImprovementLevers
-
-            try:
-                _il_data = calcImprovementLevers(company, basePeriod=basePeriod)
-                b["improvementLevers"] = improvementLeversBlock(_il_data) if _il_data else []
-            except Exception as _e:
-                import logging, traceback
-
-                logging.getLogger("dartlab.review").warning("improvementLevers 실패: %s\n%s", _e, traceback.format_exc())
-                b["improvementLevers"] = []
         if _need("gradeUpgradePath"):
             from dartlab.credit.calcs import calcGradeImprovement
 
