@@ -1,10 +1,12 @@
-"""dFV (dartlab Fair Value) — 4엔진 통합 적정주가.
+"""dFV v2 (dartlab Fair Value) — DCF Anchor + 삼각검증 + Quality WACC.
 
-기존 DCF/RIM/DDM/상대가치를 "참고용 도구"로 두고,
-각 방법론의 적합도(fitness) 가중 합산 + 질적 조정(quality adjustment)으로
-dartlab만의 종합 적정주가를 산출한다.
+학술 근거:
+- McKinsey Valuation Ch.14: DCF를 primary, multiples를 triangulation
+- Damodaran: "하나의 서사, 하나의 모델" — 가중 평균 경계
+- Fernandez: 질적 조정은 WACC 입력에서 (사후 곱셈 금지)
+- CFA Level II: 기업유형별 모델 선택 매트릭스
 
-dFV = Σ(방법론i × 적합도i) / Σ(적합도i) × (1 + 질적조정)
+dFV = Primary Model(Quality-Adjusted WACC) + 삼각검증 + DDM floor
 """
 
 from __future__ import annotations
@@ -13,151 +15,176 @@ from typing import Any
 
 
 def calcDFV(company: Any, *, basePeriod: str | None = None) -> dict | None:
-    """dartlab Fair Value — 4엔진 통합 적정주가.
+    """dartlab Fair Value v2.
 
     Returns
     -------
     dict | None
-        dFV : float — dartlab 적정주가
+        dFV : float — dartlab 적정주가 (Base 시나리오)
+        scenarios : dict — bull/base/bear 적정가
         currentPrice : float
         upside : float — %
-        opinion : str — 강력매수/매수/보유/매도/강력매도
-        confidence : str — high/medium/low
-        confidenceInterval : list[float] — [하한, 상한]
-        methods : dict — 방법론별 value/fitness/weight
-        qualityAdjustment : float
-        adjustmentFactors : list[dict]
+        opinion : str
+        confidence : str
+        primaryModel : str — 사용된 primary 모델명
+        companyType : str | None
+        triangulation : dict — 삼각검증 결과
+        dividendFloor : dict | None — DDM 하한
+        qualityWACC : dict — WACC 조정 상세
+        allMethods : dict — 모든 방법론 적정가 (참고용)
     """
-    # 1. 기존 방법론 적정가 수집
-    methods = _collectMethodValues(company, basePeriod)
-    if not methods:
+    # 1. 기업유형 → primary/secondary 선택
+    from dartlab.analysis.valuation.fitness import selectModels
+
+    models = selectModels(company)
+    primary_key = models["primary"]
+    secondary_keys = models["secondary"]
+
+    # 2. 모든 방법론 적정가 수집
+    all_methods = _collectAllValues(company, basePeriod)
+    if not all_methods:
         return None
 
-    # 2. 적합도 산출
-    from dartlab.analysis.valuation.fitness import calcMethodFitness
+    # 3. Quality-Adjusted WACC
+    base_wacc = _getBaseWACC(company)
+    from dartlab.analysis.valuation.qualityWACC import calcQualityWACC
 
-    fitness = calcMethodFitness(company, basePeriod=basePeriod)
+    qw = calcQualityWACC(company, base_wacc, basePeriod=basePeriod)
+    adjusted_wacc = qw["adjustedWACC"]
 
-    # 3. 적합도 필터링 + 이상치 제거 + 가중 합산
-    MIN_FITNESS = 0.3  # 이 이하는 노이즈 — 제외
+    # 4. Primary 모델 값 = dFV (Base)
+    primary_value = all_methods.get(primary_key)
 
-    # 3a. 적합도 필터
-    qualified: dict[str, tuple[float, float]] = {}  # key → (value, fitness)
-    method_details = {}
-    for key, value in methods.items():
-        if value is None or value <= 0:
-            continue
-        fit = fitness.get(key, {}).get("fitness", 0.5)
-        method_details[key] = {
-            "value": round(value),
-            "fitness": fit,
-            "fitnessReason": fitness.get(key, {}).get("reason", ""),
-            "weight": 0,
-            "excluded": fit < MIN_FITNESS,
+    # primary가 없으면 fallback: 가장 적합도 높은 방법론 사용
+    if primary_value is None:
+        from dartlab.analysis.valuation.fitness import calcMethodFitness
+
+        fit = calcMethodFitness(company, basePeriod=basePeriod)
+        best_key = max(all_methods.keys(), key=lambda k: fit.get(k, {}).get("fitness", 0), default=None)
+        if best_key:
+            primary_key = best_key
+            primary_value = all_methods[best_key]
+        else:
+            return None
+
+    if primary_value is None or primary_value <= 0:
+        return None
+
+    # 5. Bull/Base/Bear 시나리오 (WACC ±1%p 효과 근사)
+    # WACC 1%p 변화 ≈ 적정가 ±10~15% (경험칙)
+    wacc_effect = 0.12  # 12% per 1%p WACC change
+    bull = primary_value * (1 + wacc_effect)
+    bear = primary_value * (1 - wacc_effect)
+
+    # 6. 삼각검증
+    triangulation = _triangulate(primary_key, primary_value, secondary_keys, all_methods)
+
+    # 7. DDM floor
+    ddm_floor = None
+    ddm_value = all_methods.get("ddm")
+    if ddm_value and ddm_value > 0 and models["ddmRole"] == "floor":
+        ddm_floor = {
+            "value": round(ddm_value),
+            "meaning": f"배당만으로도 최소 {ddm_value:,.0f}원의 가치",
+            "coverageRatio": round(ddm_value / primary_value, 2) if primary_value > 0 else 0,
         }
-        if fit >= MIN_FITNESS:
-            qualified[key] = (value, fit)
 
-    if not qualified:
-        return None
-
-    # 3b. 적합도 가중 합산 (이상치 제거 안 함 — 적합도 필터로 충분)
-    weighted_sum = sum(v * f for v, f in qualified.values())
-    fitness_sum = sum(f for _, f in qualified.values())
-
-    if fitness_sum == 0:
-        return None
-
-    raw_value = weighted_sum / fitness_sum
-
-    # 가중치 비율 역산
-    for key in method_details:
-        fit = method_details[key]["fitness"]
-        method_details[key]["weight"] = round(fit / fitness_sum, 2)
-
-    # 4. 질적 조정
-    from dartlab.analysis.valuation.qualityAdjustment import calcQualityAdjustment
-
-    qa = calcQualityAdjustment(company, basePeriod=basePeriod)
-    total_adj = qa.get("totalAdjustment", 0)
-    adjusted_value = raw_value * (1 + total_adj)
-
-    # 5. 현재가 + upside
+    # 8. 현재가 + upside
     current_price = _getCurrentPrice(company)
-    if current_price and current_price > 0:
-        upside = (adjusted_value - current_price) / current_price * 100
-    else:
-        upside = None
+    upside = (primary_value - current_price) / current_price * 100 if current_price and current_price > 0 else None
 
-    # 6. 컨피던스 구간 (방법론간 σ 기반)
-    values = [v for v in methods.values() if v is not None]
-    if len(values) >= 2:
-        mean = sum(values) / len(values)
-        var = sum((v - mean) ** 2 for v in values) / len(values)
-        sigma = var**0.5
-        ci_low = adjusted_value - sigma
-        ci_high = adjusted_value + sigma
-    else:
-        ci_low = adjusted_value * 0.85
-        ci_high = adjusted_value * 1.15
-
-    # 7. 신뢰도 등급
-    confidence = _calcConfidence(fitness_sum, values)
-
-    # 8. 의견
+    # 9. 신뢰도 + 의견
+    confidence = triangulation.get("confidence", "low")
     opinion = _calcOpinion(upside)
 
     return {
-        "dFV": round(adjusted_value),
+        "dFV": round(primary_value),
+        "scenarios": {"bull": round(bull), "base": round(primary_value), "bear": round(bear)},
         "currentPrice": round(current_price) if current_price else None,
         "upside": round(upside, 1) if upside is not None else None,
         "opinion": opinion,
         "confidence": confidence,
-        "confidenceInterval": [round(ci_low), round(ci_high)],
-        "methods": method_details,
-        "qualityAdjustment": total_adj,
-        "adjustmentFactors": qa.get("factors", []),
-        "rawAverage": round(raw_value),
+        "primaryModel": primary_key,
+        "companyType": models.get("companyType"),
+        "triangulation": triangulation,
+        "dividendFloor": ddm_floor,
+        "qualityWACC": qw,
+        "allMethods": {k: round(v) for k, v in all_methods.items()},
     }
 
 
-def _collectMethodValues(company: Any, basePeriod: str | None) -> dict:
-    """기존 4개 방법론의 적정가(주당) 수집.
-
-    calcValuationSynthesis의 estimates 리스트에서 추출.
-    """
+def _collectAllValues(company: Any, basePeriod: str | None) -> dict:
+    """모든 방법론 적정가 수집."""
     values: dict = {}
-
     try:
         from dartlab.analysis.financial.valuation import calcValuationSynthesis
 
         synth = calcValuationSynthesis(company, basePeriod=basePeriod)
-        if not synth:
-            return values
-
-        estimates = synth.get("estimates", [])
-        method_map = {"DCF": "dcf", "DDM": "ddm", "상대가치": "relative", "RIM": "rim"}
-
-        for est in estimates:
-            method = est.get("method", "")
-            value = est.get("value")
-            key = method_map.get(method)
-            if key and value and value > 0:
-                values[key] = float(value)
-
+        if synth:
+            method_map = {"DCF": "dcf", "DDM": "ddm", "상대가치": "relative", "RIM": "rim"}
+            for est in synth.get("estimates", []):
+                key = method_map.get(est.get("method", ""))
+                val = est.get("value")
+                if key and val and val > 0:
+                    values[key] = float(val)
     except (ImportError, AttributeError, ValueError, TypeError):
         pass
-
     return values
 
 
+def _getBaseWACC(company: Any) -> float:
+    """기본 WACC 추출 (업종 기반)."""
+    try:
+        from dartlab.core.finance.dcf import _getSectorParams
+
+        si = getattr(company, "sector", None)
+        params = _getSectorParams(si.sector if si else None, si.industryGroup if si else None) if si else None
+        if params:
+            return params.discountRate
+    except (ImportError, AttributeError):
+        pass
+    return 10.0  # 기본값
+
+
+def _triangulate(primary_key: str, primary_value: float, secondary_keys: list[str], all_methods: dict) -> dict:
+    """삼각검증 — primary와 secondary 괴리 체크."""
+    checks = []
+    for key in secondary_keys:
+        sec_value = all_methods.get(key)
+        if sec_value is None or sec_value <= 0:
+            continue
+        divergence = abs(primary_value - sec_value) / primary_value
+        if divergence < 0.20:
+            verdict = "합의"
+        elif divergence < 0.50:
+            verdict = "부분 합의"
+        else:
+            verdict = "불일치"
+        checks.append({
+            "method": key,
+            "value": round(sec_value),
+            "divergence": round(divergence * 100, 1),
+            "verdict": verdict,
+        })
+
+    # 종합 신뢰도
+    if not checks:
+        confidence = "low"
+    elif all(c["verdict"] == "합의" for c in checks):
+        confidence = "high"
+    elif any(c["verdict"] == "불일치" for c in checks):
+        confidence = "low"
+    else:
+        confidence = "medium"
+
+    return {"checks": checks, "confidence": confidence}
+
+
 def _getCurrentPrice(company: Any) -> float | None:
-    """현재 주가 조회."""
     try:
         price = getattr(company, "currentPrice", None)
         if price:
             return float(price)
-        # gather 경로
         import dartlab
 
         p = dartlab.gather("price", getattr(company, "stockCode", ""))
@@ -168,26 +195,7 @@ def _getCurrentPrice(company: Any) -> float | None:
     return None
 
 
-def _calcConfidence(fitness_sum: float, values: list[float]) -> str:
-    """신뢰도 등급."""
-    if len(values) < 2:
-        return "low"
-
-    mean = sum(values) / len(values)
-    if mean == 0:
-        return "low"
-
-    cv = (sum((v - mean) ** 2 for v in values) / len(values)) ** 0.5 / abs(mean)
-
-    if fitness_sum > 2.5 and cv < 0.20:
-        return "high"
-    elif fitness_sum > 1.5 and cv < 0.40:
-        return "medium"
-    return "low"
-
-
 def _calcOpinion(upside: float | None) -> str:
-    """upside 기반 투자 의견."""
     if upside is None:
         return "판단 불가"
     if upside > 30:

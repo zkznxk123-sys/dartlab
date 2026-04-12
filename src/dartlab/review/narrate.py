@@ -865,35 +865,44 @@ def narrateCyclicalAction(data: dict) -> str | None:
 
 
 def narrateDFV(data: dict) -> str | None:
-    """dFV 종합 판정 → 자연어."""
+    """dFV v2 → 자연어 (anchor + 삼각검증)."""
     dfv = data.get("dFV")
     current = data.get("currentPrice")
     upside = data.get("upside")
     opinion = data.get("opinion", "")
     confidence = data.get("confidence", "")
-    methods = data.get("methods", {})
+    primary = data.get("primaryModel", "")
 
     if not dfv:
         return None
 
     parts = [f"**dartlab 적정주가 {dfv:,}원**"]
-    if current:
-        parts.append(f"(현재 {current:,}원 대비 {upside:+.1f}%)." if upside is not None else ".")
-    if opinion:
-        parts.append(f"투자 의견: **{opinion}**.")
-    if confidence:
-        parts.append(f"신뢰도 **{confidence}**.")
+    if current and upside is not None:
+        parts.append(f"(현재 {current:,}원 대비 {upside:+.1f}%).")
+    parts.append(f"투자 의견 **{opinion}**, 신뢰도 **{confidence}**.")
+    parts.append(f"Primary 모델: **{primary.upper()}**.")
 
-    # 적합도 높은 방법론 언급
-    high_fit = [(k, m) for k, m in methods.items() if m.get("fitness", 0) >= 0.7]
-    if high_fit:
-        names = [f"{k.upper()}({m['fitness']:.2f})" for k, m in high_fit]
-        parts.append(f"적합도 높은 방법론: {', '.join(names)}.")
+    # 삼각검증 결과
+    tri = data.get("triangulation", {})
+    checks = tri.get("checks", [])
+    if checks:
+        verdicts = [f"{c['method'].upper()}: {c['verdict']}({c['divergence']:.0f}%)" for c in checks]
+        parts.append(f"삼각검증: {', '.join(verdicts)}.")
 
-    # 질적 조정
-    qa = data.get("qualityAdjustment", 0)
-    if qa != 0:
-        direction = "프리미엄" if qa > 0 else "할인"
-        parts.append(f"질적 {direction} {abs(qa):.1%} 반영.")
+    # Quality WACC
+    qw = data.get("qualityWACC", {})
+    spread = qw.get("totalSpread", 0)
+    if spread != 0:
+        parts.append(f"Quality WACC 가감 {spread:+.1f}%p ({qw.get('adjustedWACC', 0):.1f}%).")
+
+    # 시나리오
+    sc = data.get("scenarios", {})
+    if sc:
+        parts.append(f"시나리오: Bull {sc.get('bull', 0):,} / Bear {sc.get('bear', 0):,}.")
+
+    # DDM floor
+    floor = data.get("dividendFloor")
+    if floor:
+        parts.append(f"배당 하한 {floor['value']:,}원.")
 
     return " ".join(parts)

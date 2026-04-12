@@ -2473,13 +2473,13 @@ def reverseImpliedBlock(data: dict) -> list:
 
 
 def dFVBlock(data: dict | None) -> list:
-    """calcDFV 결과 → dartlab 적정주가 블록."""
+    """calcDFV v2 → dartlab 적정주가 블록 (anchor + 삼각검증)."""
     if not data:
         return []
 
     from dartlab.review.narrate import narrateDFV
 
-    blocks: list = [HeadingBlock(_meta("dFV").label, level=2, helper="dartlab 적정주가 — 적합도 가중 + 질적 조정")]
+    blocks: list = [HeadingBlock(_meta("dFV").label, level=2, helper="dartlab 적정주가 — DCF Anchor + 삼각검증")]
 
     narration = narrateDFV(data)
     if narration:
@@ -2492,75 +2492,82 @@ def dFVBlock(data: dict | None) -> list:
         metrics.append(("현재가", f"{data['currentPrice']:,}원"))
     if data.get("upside") is not None:
         metrics.append(("업사이드", f"{data['upside']:+.1f}%"))
-    if data.get("opinion"):
-        metrics.append(("투자 의견", data["opinion"]))
-    if data.get("confidence"):
-        metrics.append(("신뢰도", data["confidence"]))
-    ci = data.get("confidenceInterval")
-    if ci:
-        metrics.append(("68% 구간", f"{ci[0]:,} ~ {ci[1]:,}원"))
+    metrics.append(("투자 의견", data.get("opinion", "")))
+    metrics.append(("신뢰도", data.get("confidence", "")))
+    metrics.append(("Primary 모델", data.get("primaryModel", "").upper()))
+    sc = data.get("scenarios", {})
+    if sc:
+        metrics.append(("시나리오", f"Bull {sc.get('bull', 0):,} / Base {sc.get('base', 0):,} / Bear {sc.get('bear', 0):,}"))
     if metrics:
         blocks.append(MetricBlock(metrics))
+
+    # DDM floor
+    floor = data.get("dividendFloor")
+    if floor:
+        blocks.append(TextBlock(f"**배당 하한**: {floor['value']:,}원 — {floor['meaning']}"))
 
     return blocks
 
 
 def methodFitnessBlock(data: dict | None) -> list:
-    """calcDFV의 methods → 방법론별 적합도 비교 테이블."""
+    """삼각검증 + 모든 방법론 참고용 테이블."""
     if not data:
         return []
-    methods = data.get("methods", {})
-    if not methods:
-        return []
 
-    rows = []
-    for key, m in methods.items():
-        rows.append({
-            "방법론": key.upper(),
-            "적정가": f"{m['value']:,}원" if m.get("value") else "-",
-            "적합도": f"{m['fitness']:.2f}",
-            "가중치": f"{m['weight']:.0%}",
-            "판정 근거": m.get("fitnessReason", ""),
-        })
+    blocks: list = [HeadingBlock(_meta("methodFitness").label, level=2, helper="Primary 모델 + 삼각검증 결과")]
 
-    return [
-        HeadingBlock(_meta("methodFitness").label, level=2, helper="각 방법론이 이 기업에 얼마나 적합한가"),
-        TableBlock("방법론 적합도 비교", pl.DataFrame(rows)),
-    ]
+    # 삼각검증
+    tri = data.get("triangulation", {})
+    checks = tri.get("checks", [])
+    if checks:
+        rows = []
+        for c in checks:
+            rows.append({
+                "검증 모델": c["method"].upper(),
+                "적정가": f"{c['value']:,}원",
+                "괴리": f"{c['divergence']:.1f}%",
+                "판정": c["verdict"],
+            })
+        blocks.append(TableBlock("삼각검증", pl.DataFrame(rows)))
+
+    # 전체 방법론 참고
+    all_m = data.get("allMethods", {})
+    if all_m:
+        primary = data.get("primaryModel", "")
+        ref_rows = []
+        for k, v in all_m.items():
+            role = "**Primary**" if k == primary else "참고"
+            ref_rows.append({"방법론": k.upper(), "적정가": f"{v:,}원", "역할": role})
+        blocks.append(TableBlock("전체 방법론 (참고용)", pl.DataFrame(ref_rows)))
+
+    return blocks
 
 
 def qualityFactorsBlock(data: dict | None) -> list:
-    """calcDFV의 adjustmentFactors → 질적 조정 요인 분해."""
+    """Quality-Adjusted WACC 요인 분해."""
     if not data:
         return []
-    factors = data.get("adjustmentFactors", [])
-    total = data.get("qualityAdjustment", 0)
-
+    qw = data.get("qualityWACC", {})
+    factors = qw.get("factors", [])
     if not factors:
         return []
 
     rows = []
     for f in factors:
-        adj = f.get("adjustment", 0)
-        if adj == 0:
-            label = "—"
-        elif adj > 0:
-            label = f"+{adj:.0%}"
-        else:
-            label = f"{adj:.0%}"
-        rows.append({
-            "요인": f.get("name", ""),
-            "엔진": f.get("source", ""),
-            "조정": label,
-            "근거": f.get("reason", ""),
-        })
+        sp = f.get("spread", 0)
+        label = f"{sp:+.1f}%p" if sp != 0 else "—"
+        rows.append({"요인": f.get("name", ""), "WACC 가감": label, "근거": f.get("reason", "")})
 
     blocks: list = [
-        HeadingBlock(_meta("qualityFactors").label, level=2, helper="4엔진 데이터 기반 질적 할인/프리미엄"),
-        TableBlock("질적 조정 요인", pl.DataFrame(rows)),
+        HeadingBlock(_meta("qualityFactors").label, level=2, helper="4엔진 데이터 → WACC 가감 (Fernandez 방식)"),
+        TableBlock("Quality WACC", pl.DataFrame(rows)),
     ]
-    if total != 0:
-        blocks.append(MetricBlock([("합산 조정", f"{total:+.1%}")]))
+    total = qw.get("totalSpread", 0)
+    blocks.append(MetricBlock([
+        ("기본 WACC", f"{qw.get('baseWACC', 0):.1f}%"),
+        ("질적 가감", f"{total:+.1f}%p"),
+        ("조정 WACC", f"{qw.get('adjustedWACC', 0):.1f}%"),
+    ]))
     return blocks
 
 
