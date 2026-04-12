@@ -201,7 +201,6 @@ def calcScenarioSensitivity(company, *, basePeriod: str | None = None) -> dict |
     }
 
 
-@memoized_calc
 def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | None:
     """개선 레버 시뮬레이션 — 각 레버별 영향도 계산 + 우선순위.
 
