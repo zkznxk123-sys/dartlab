@@ -48,8 +48,15 @@ def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
 
     try:
         lf = pl.scan_parquet(str(path))
+        # 필요한 컬럼만 선택 → 메모리 절약 (전종목이지만 계정+금액만)
+        needed_cols = ["stockCode", "bsns_year", "sj_div", "account_nm", "thstrm_amount", "fs_nm", "reprt_nm"]
+        available = lf.collect_schema().names()
+        select_cols = [c for c in needed_cols if c in available]
         snap = (
-            lf.filter(pl.col("fs_nm").str.contains("연결")).filter(pl.col("reprt_nm").str.contains("4분기")).collect()
+            lf.select(select_cols)
+            .filter(pl.col("fs_nm").str.contains("연결"))
+            .filter(pl.col("reprt_nm").str.contains("4분기"))
+            .collect()
         )
     except (pl.exceptions.PolarsError, OSError) as e:
         log.warning("finance.parquet 스캔 실패: %s", e)

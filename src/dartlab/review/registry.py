@@ -1037,13 +1037,19 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
 
         # macro("종합") 1회 호출 + 캐시 — 11축 전부 포함
         _macro_summary: list = [None]
+        _macro_market = getattr(company, "market", "KR")
 
         def _ensure_summary():
             if _macro_summary[0] is None:
                 import dartlab as _dl
 
-                market = getattr(company, "market", "KR")
-                _macro_summary[0] = _dl.macro("종합", market=market)
+                try:
+                    _macro_summary[0] = _dl.macro("종합", market=_macro_market)
+                except (ValueError, TypeError, KeyError, OSError) as e:
+                    import logging
+
+                    logging.getLogger(__name__).debug("macro 종합 실패 (market=%s): %s", _macro_market, e)
+                    _macro_summary[0] = {}
             return _macro_summary[0]
 
         if _need("macroEnvironment"):
@@ -1111,6 +1117,11 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         if _need("damodaran3test"):
             b["damodaran3test"] = _safe(lambda: damodaran3testBlock(company))
 
+    # ── 메모리 해제 힌트 ──
+    import gc
+
+    gc.collect()
+
     return BlockMap(b)
 
 
@@ -1145,6 +1156,7 @@ def buildReview(
 
     from dartlab.review import Review
     from dartlab.review.reportTypes import resolveReportType
+    from dartlab.review.section import Section
 
     ly = layout or ReviewLayout()
 
