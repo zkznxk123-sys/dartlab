@@ -195,6 +195,159 @@ def calcScenarioSensitivity(company, *, basePeriod: str | None = None) -> dict |
     }
 
 
+@memoized_calc
+def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | None:
+    """개선 레버 시뮬레이션 — 각 레버별 영향도 계산 + 우선순위.
+
+    "진단"이 아니라 "처방" — 이 회사가 어떻게 하면 좋아지는가.
+    scenarioSensitivity의 baseCase 재사용 + 상방 시나리오 5종 계산.
+
+    Returns
+    -------
+    dict | None
+        baseCase : dict — 현재 핵심 지표
+        levers : list[dict] — 개선 레버 (영향도 순 정렬)
+            name : str — 레버 이름
+            driver : str — 레버 키
+            impact : dict — 개선 후 지표
+            difficulty : str — easy/medium/hard
+            timeframe : str
+        topLever : str — 가장 효과 큰 레버 driver
+    """
+    ss = calcScenarioSensitivity(company, basePeriod=basePeriod)
+    if not ss:
+        return None
+
+    base = ss.get("baseCase", {})
+    if not base:
+        return None
+
+    revenue = base.get("_revenue")
+    op_income = base.get("_op_income")
+    equity = base.get("_equity")
+    interest_abs = base.get("_interest_abs", 0)
+    fcf = base.get("fcf")
+    opm = base.get("opm")
+    roe = base.get("roe")
+
+    # baseCase에 내부 값이 없으면 재계산 시도
+    if revenue is None:
+        from dartlab.analysis.financial._helpers import toDictBySnakeId
+        from dartlab.core.finance.helpers import annualColsFromPeriods
+
+        parsed = toDictBySnakeId(company.select("IS", ["sales", "operating_income", "net_profit"]))
+        if not parsed:
+            return None
+        isData, periods = parsed
+        yCols = annualColsFromPeriods(periods, basePeriod=basePeriod, maxYears=1)
+        if not yCols:
+            return None
+        col = yCols[0]
+        revenue = float(isData.get("sales", {}).get(col) or 0)
+        op_income = float(isData.get("operating_income", {}).get(col) or 0)
+
+        bs_parsed = toDictBySnakeId(company.select("BS", ["total_equity", "total_liabilities"]))
+        if bs_parsed:
+            bsData, bsPeriods = bs_parsed
+            bsCols = annualColsFromPeriods(bsPeriods, basePeriod=basePeriod, maxYears=1)
+            if bsCols:
+                equity = float(bsData.get("total_equity", {}).get(bsCols[0]) or 0)
+
+    if not revenue or revenue <= 0:
+        return None
+
+    levers = []
+
+    # 레버 1: 매출원가 3%p 절감
+    if opm is not None:
+        improved_opm = opm + 3
+        improved_op = revenue * improved_opm / 100
+        improved_ni = improved_op - interest_abs if interest_abs else improved_op * 0.75
+        improved_roe = improved_ni / equity * 100 if equity and equity > 0 else None
+        fcf_change = ((improved_op - op_income) / abs(fcf) * 100) if fcf and fcf != 0 else None
+        levers.append({
+            "name": "매출원가 3%p 절감",
+            "driver": "cogs_reduction_3pp",
+            "impact": {
+                "opm": round(improved_opm, 1),
+                "roe": round(improved_roe, 1) if improved_roe else None,
+                "fcf_change_pct": round(fcf_change, 0) if fcf_change else None,
+            },
+            "difficulty": "medium",
+            "timeframe": "1-2년",
+            "effect_score": abs(fcf_change) if fcf_change else 0,
+        })
+
+    # 레버 2: 판관비 2%p 절감
+    if opm is not None:
+        improved_opm2 = opm + 2
+        improved_op2 = revenue * improved_opm2 / 100
+        improved_ni2 = improved_op2 - interest_abs if interest_abs else improved_op2 * 0.75
+        improved_roe2 = improved_ni2 / equity * 100 if equity and equity > 0 else None
+        fcf_change2 = ((improved_op2 - op_income) / abs(fcf) * 100) if fcf and fcf != 0 else None
+        levers.append({
+            "name": "판관비 2%p 절감",
+            "driver": "sga_reduction_2pp",
+            "impact": {
+                "opm": round(improved_opm2, 1),
+                "roe": round(improved_roe2, 1) if improved_roe2 else None,
+                "fcf_change_pct": round(fcf_change2, 0) if fcf_change2 else None,
+            },
+            "difficulty": "easy",
+            "timeframe": "6개월-1년",
+            "effect_score": abs(fcf_change2) if fcf_change2 else 0,
+        })
+
+    # 레버 3: 매출 10% 성장 (고정비 레버리지)
+    if opm is not None and revenue:
+        grown_rev = revenue * 1.10
+        # 고정비 부분은 불변 → 변동비만 증가
+        variable_cost = revenue * (1 - opm / 100)
+        grown_op = grown_rev - variable_cost * 1.10  # 변동비 비례 증가
+        grown_opm = grown_op / grown_rev * 100
+        grown_ni = grown_op - interest_abs if interest_abs else grown_op * 0.75
+        grown_roe = grown_ni / equity * 100 if equity and equity > 0 else None
+        levers.append({
+            "name": "매출 10% 성장",
+            "driver": "revenue_growth_10pct",
+            "impact": {
+                "opm": round(grown_opm, 1),
+                "roe": round(grown_roe, 1) if grown_roe else None,
+            },
+            "difficulty": "hard",
+            "timeframe": "2-3년",
+            "effect_score": abs(grown_opm - opm) if opm else 0,
+        })
+
+    # 레버 4: 부채 30% 감축
+    if interest_abs > 0 and op_income:
+        reduced_interest = interest_abs * 0.70
+        improved_ic = op_income / reduced_interest if reduced_interest > 0 else None
+        saved = interest_abs - reduced_interest
+        levers.append({
+            "name": "부채 30% 감축",
+            "driver": "debt_reduction_30pct",
+            "impact": {
+                "interestCoverage": round(improved_ic, 1) if improved_ic else None,
+                "interestSaved": round(saved),
+            },
+            "difficulty": "medium",
+            "timeframe": "2-3년",
+            "effect_score": saved / revenue * 100 if revenue else 0,
+        })
+
+    # 영향도 순 정렬
+    levers.sort(key=lambda x: x.get("effect_score", 0), reverse=True)
+    for lv in levers:
+        lv.pop("effect_score", None)
+
+    return {
+        "baseCase": base,
+        "levers": levers,
+        "topLever": levers[0]["driver"] if levers else None,
+    }
+
+
 def _verdict_opm(opm: float, ic: float | None) -> str:
     if opm < 0:
         return "영업적자 전환"

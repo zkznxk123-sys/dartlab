@@ -64,6 +64,8 @@ SECTIONS: list[SectionMeta] = [
     SectionMeta("매출전망", "6-5", "매출 전망 -- 이 회사의 매출은 어디로 가는가"),
     SectionMeta("시장분석", "6-6", "시장 분석 -- 시장은 이 회사를 어떻게 보는가"),
     SectionMeta("매크로", "6-7", "매크로 환경 -- 경제 사이클이 이 회사에 어떤 의미인가"),
+    # ── 개선 시나리오 (How축 — 진단 → 처방) ──
+    SectionMeta("improvementPlan", "IP", "개선 시나리오 -- 이 회사가 더 좋아지려면 무엇을 해야 하는가"),
     # ── 스토리 검증 (Damodaran 3-test) ──
     SectionMeta("storyValidation", "SV", "스토리 검증 -- 이 서사는 신뢰할 수 있는가"),
     # ── AI 주도 서사 보고서 (thesis) ──
@@ -256,6 +258,11 @@ _BLOCKS: list[BlockMeta] = [
     ),
     # ── 업종별 KPI (조건부 inject) ─��
     BlockMeta("sectorKpi", "업종 특수 KPI", "종합평가", "업종별 핵심 지표 — 건설/반도체/게임/제약 자동 감지"),
+    # ── 개선 시나리오 (How축) ──
+    BlockMeta("improvementLevers", "개선 레버 순위", "improvementPlan", "영향도 × 난이도별 개선 경로"),
+    BlockMeta("gradeUpgradePath", "신용등급 상향 경로", "improvementPlan", "dCR 한 노치 상향에 필요한 것"),
+    BlockMeta("technicalActionTargets", "기술적 행동 목표", "improvementPlan", "지지/저항 + 진입 트리거"),
+    BlockMeta("cyclicalActionPlan", "사이클 대응", "improvementPlan", "사이클 위치 기반 행동 제안"),
     # ── storyValidation (Damodaran 3-test) ──
     BlockMeta("damodaran3test", "스토리 3-test", "storyValidation", "History/Experience/CommonSense 3단 ��증 결과"),
     # ── thesisReport (AI 서사) ──

@@ -1077,6 +1077,33 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
 
     from dartlab.review.blockMap import BlockMap
 
+    # ── 개선 시나리오 (How축) ──
+    if keys is None or keys & {"improvementLevers", "gradeUpgradePath", "technicalActionTargets", "cyclicalActionPlan"}:
+        from dartlab.review.builders import (
+            cyclicalActionPlanBlock,
+            gradeUpgradePathBlock,
+            improvementLeversBlock,
+            technicalActionTargetsBlock,
+        )
+
+        if _need("improvementLevers"):
+            from dartlab.analysis.financial.scenarioSensitivity import calcImprovementLevers
+
+            b["improvementLevers"] = _safe(lambda: improvementLeversBlock(calcImprovementLevers(company, basePeriod=basePeriod)))
+        if _need("gradeUpgradePath"):
+            from dartlab.credit.calcs import calcGradeImprovement
+
+            b["gradeUpgradePath"] = _safe(lambda: gradeUpgradePathBlock(calcGradeImprovement(company, basePeriod=basePeriod)))
+        if _need("technicalActionTargets"):
+            from dartlab.quant.extended import calcActionableTargets
+
+            b["technicalActionTargets"] = _safe(lambda: technicalActionTargetsBlock(calcActionableTargets(company)))
+        if _need("cyclicalActionPlan"):
+            from dartlab.macro.crisis import calcCyclicalAction
+
+            _market = getattr(company, "market", "KR")
+            b["cyclicalActionPlan"] = _safe(lambda: cyclicalActionPlanBlock(calcCyclicalAction(market=_market)))
+
     # ── Damodaran 3-test (스토리 검증) ──
     if keys is None or keys & {"damodaran3test"}:
         from dartlab.review.builders import damodaran3testBlock

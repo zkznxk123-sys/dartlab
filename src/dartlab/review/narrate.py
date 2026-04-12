@@ -778,3 +778,84 @@ def narrateSectorContext(sector: str, kpis: dict | None) -> str | None:
                 parts.append(f"R&D 집중도: {rd['latest']:.1f}% ({rd.get('verdict', '')})")
 
     return " ".join(parts)
+
+
+# ── How축 narrate (진단 → 처방) ──
+
+
+def narrateImprovementLevers(data: dict) -> str | None:
+    """개선 레버 시뮬레이션 → 자연어 처방."""
+    levers = data.get("levers", [])
+    if not levers:
+        return None
+    top = levers[0]
+    base = data.get("baseCase", {})
+    impact = top.get("impact", {})
+
+    parts = [f"가장 효과적인 개선 레버는 **{top['name']}**이다."]
+    if impact.get("opm") is not None and base.get("opm") is not None:
+        parts.append(f"이를 달성하면 OPM이 {base['opm']:.1f}% → {impact['opm']:.1f}%로 개선된다.")
+    if impact.get("fcf_change_pct") is not None:
+        parts.append(f"FCF는 {impact['fcf_change_pct']:+.0f}% 변화한다.")
+    if top.get("difficulty") and top.get("timeframe"):
+        parts.append(f"난이도는 {top['difficulty']}, 예상 소요 기간은 {top['timeframe']}.")
+    if len(levers) > 1:
+        parts.append(f"차순위 레버는 {levers[1]['name']}.")
+    return " ".join(parts)
+
+
+def narrateGradeUpgrade(data: dict) -> str | None:
+    """신용등급 상향 경로 → 자연어."""
+    grade = data.get("currentGrade", "")
+    target = data.get("targetGrade", "")
+    weakest = data.get("weakestAxis", "")
+    improvements = data.get("improvements", [])
+
+    if not grade or not target:
+        return None
+
+    parts = [f"현재 {grade}에서 {target}로 상향하려면"]
+    if weakest:
+        parts.append(f"가장 약한 축인 **{weakest}**를 우선 개선해야 한다.")
+    if improvements:
+        imp = improvements[0]
+        parts.append(f"구체적으로 {imp['change']}이 필요하다.")
+    return " ".join(parts)
+
+
+def narrateTechnicalAction(data: dict) -> str | None:
+    """기술적 행동 목표 → 자연어."""
+    verdict = data.get("technicalVerdict", "")
+    current = data.get("currentPrice", 0)
+    targets = data.get("targets", [])
+
+    if not current:
+        return None
+
+    parts = [f"현재가 {current:,}원, 기술적 판정 **{verdict}**."]
+    if data.get("support"):
+        parts.append(f"지지선 {data['support']:,}원, 저항선 {data.get('resistance', 0):,}원.")
+    if targets:
+        t = targets[0]
+        parts.append(f"{t['signal']} 시 {t['triggerPrice']:,}원에서 {t['action']} ({t['confidence']}).")
+    return " ".join(parts)
+
+
+def narrateCyclicalAction(data: dict) -> str | None:
+    """사이클 대응 → 자연어."""
+    phase = data.get("phaseLabel", "")
+    actions = data.get("actions", [])
+
+    if not phase:
+        return None
+
+    parts = [f"현재 사이클 국면: **{phase}**."]
+    if actions:
+        top = actions[0]
+        parts.append(f"최우선 행동: {top['action']} — {top['reason']}.")
+        if top.get("urgency") == "critical":
+            parts.append("긴급도 최상.")
+    precedent = data.get("historicalPrecedent")
+    if precedent:
+        parts.append(f"역사적 선례: {precedent}.")
+    return " ".join(parts)

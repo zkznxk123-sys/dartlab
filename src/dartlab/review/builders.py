@@ -4873,6 +4873,122 @@ def sectorKpiBlock(data: dict | None) -> list:
     return blocks
 
 
+# ── 개선 시나리오 (How축) ──
+
+
+def improvementLeversBlock(data: dict | None) -> list:
+    """calcImprovementLevers 결과 → 개선 레버 순위 + narrate."""
+    if not data:
+        return []
+    levers = data.get("levers", [])
+    if not levers:
+        return []
+
+    from dartlab.review.narrate import narrateImprovementLevers
+
+    blocks: list = [HeadingBlock(_meta("improvementLevers").label, level=2, helper="영향도 순 개선 경로 — 가장 효과 큰 것부터")]
+
+    narration = narrateImprovementLevers(data)
+    if narration:
+        blocks.append(TextBlock(narration))
+
+    rows = []
+    for lv in levers[:5]:
+        row: dict = {"레버": lv["name"], "난이도": lv.get("difficulty", ""), "기간": lv.get("timeframe", "")}
+        impact = lv.get("impact", {})
+        if impact.get("opm") is not None:
+            row["OPM"] = f"{impact['opm']:.1f}%"
+        if impact.get("roe") is not None:
+            row["ROE"] = f"{impact['roe']:.1f}%"
+        if impact.get("fcf_change_pct") is not None:
+            row["FCF 변화"] = f"{impact['fcf_change_pct']:+.0f}%"
+        if impact.get("interestCoverage") is not None:
+            row["이자보상"] = f"{impact['interestCoverage']:.1f}x"
+        rows.append(row)
+
+    if rows:
+        blocks.append(TableBlock("개선 레버 영향도", pl.DataFrame(rows)))
+    return blocks
+
+
+def gradeUpgradePathBlock(data: dict | None) -> list:
+    """calcGradeImprovement 결과 → 신용등급 상향 경로."""
+    if not data:
+        return []
+
+    from dartlab.review.narrate import narrateGradeUpgrade
+
+    blocks: list = [HeadingBlock(_meta("gradeUpgradePath").label, level=2, helper="dCR 한 노치 상향에 필요한 구체적 변화")]
+
+    narration = narrateGradeUpgrade(data)
+    if narration:
+        blocks.append(TextBlock(narration))
+
+    metrics = [("현재 등급", data.get("currentGrade", "")), ("목표 등급", data.get("targetGrade", ""))]
+    if data.get("weakestAxis"):
+        metrics.append(("가장 약한 축", data["weakestAxis"]))
+    blocks.append(MetricBlock(metrics))
+
+    improvements = data.get("improvements", [])
+    if improvements:
+        rows = [{"축": imp["axis"], "지표": imp["metric"], "현재": f"{imp['current']:.1f}", "목표": f"{imp['target']:.1f}", "변화": imp["change"]} for imp in improvements]
+        blocks.append(TableBlock("등급 상향 경로", pl.DataFrame(rows)))
+    return blocks
+
+
+def technicalActionTargetsBlock(data: dict | None) -> list:
+    """calcActionableTargets 결과 → 기술적 행동 목표."""
+    if not data:
+        return []
+
+    from dartlab.review.narrate import narrateTechnicalAction
+
+    blocks: list = [HeadingBlock(_meta("technicalActionTargets").label, level=2, helper="기술적 관점의 진입/청산 가격 목표")]
+
+    narration = narrateTechnicalAction(data)
+    if narration:
+        blocks.append(TextBlock(narration))
+
+    metrics = [("현재가", f"{data['currentPrice']:,}"), ("기술적 판정", data.get("technicalVerdict", ""))]
+    if data.get("support"):
+        metrics.append(("지지선", f"{data['support']:,}"))
+    if data.get("resistance"):
+        metrics.append(("저항선", f"{data['resistance']:,}"))
+    blocks.append(MetricBlock(metrics))
+
+    targets = data.get("targets", [])
+    if targets:
+        rows = [{"신호": t["signal"], "트리거 가격": f"{t['triggerPrice']:,}", "행동": t["action"], "신뢰도": t["confidence"]} for t in targets]
+        blocks.append(TableBlock("행동 목표", pl.DataFrame(rows)))
+    return blocks
+
+
+def cyclicalActionPlanBlock(data: dict | None) -> list:
+    """calcCyclicalAction 결과 → 사이클 대응 행동 계획."""
+    if not data:
+        return []
+
+    from dartlab.review.narrate import narrateCyclicalAction
+
+    blocks: list = [HeadingBlock(_meta("cyclicalActionPlan").label, level=2, helper="사이클 위치에 따른 지금 해야 할 것")]
+
+    narration = narrateCyclicalAction(data)
+    if narration:
+        blocks.append(TextBlock(narration))
+
+    blocks.append(MetricBlock([("사이클 국면", data.get("phaseLabel", ""))]))
+
+    actions = data.get("actions", [])
+    if actions:
+        rows = [{"우선순위": a["priority"], "행동": a["action"], "이유": a["reason"], "긴급도": a.get("urgency", "")} for a in actions]
+        blocks.append(TableBlock("행동 계획", pl.DataFrame(rows)))
+
+    precedent = data.get("historicalPrecedent")
+    if precedent:
+        blocks.append(TextBlock(f"**역사적 선례**: {precedent}"))
+    return blocks
+
+
 def damodaran3testBlock(company) -> list:
     """Damodaran 3-test 결과 → 스토리 검증 블록."""
     try:

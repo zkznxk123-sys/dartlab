@@ -339,3 +339,106 @@ def calcCreditAudit(company, *, basePeriod: str | None = None) -> dict | None:
         "agreements": list(audit.agreements),
         "disagreements": list(audit.disagreements),
     }
+
+
+@_memoized_calc
+def calcGradeImprovement(company, *, basePeriod: str | None = None) -> dict | None:
+    """신용등급 한 노치 상향에 필요한 구체적 개선사항.
+
+    가장 약한 축을 찾고, 그 축의 metric을 다음 등급 구간까지
+    올리는 데 필요한 변화량을 역계산한다.
+
+    Returns
+    -------
+    dict | None
+        currentGrade : str
+        currentScore : float
+        targetGrade : str
+        weakestAxis : str
+        improvements : list[dict]
+            axis : str — 축 이름
+            metric : str — 지표명
+            current : float — 현재값
+            target : float — 목표값
+            change : str — 자연어 설명
+    """
+    result = _evaluate(company, basePeriod)
+    if not result:
+        return None
+
+    grade = result.get("grade", "")
+    score = result.get("score", 0)
+    metrics = result.get("metrics", {})
+
+    if not grade or not metrics:
+        return None
+
+    from dartlab.credit.scorecard import mapTo20Grade, scoreMetric
+    from dartlab.credit.thresholds import getThresholds
+
+    sector, ig = None, None
+    try:
+        si = getattr(company, "sector", None)
+        if si:
+            sector, ig = si.sector, si.industryGroup
+    except (AttributeError, ImportError):
+        pass
+
+    thresholds = getThresholds(sector, ig)
+
+    # 각 축별 현재 스코어 산출 + 가장 약한 축 찾기
+    axis_scores: list[tuple[str, str, float, float]] = []
+    metric_map = [
+        ("leverage", "debt_to_ebitda", "debtToEbitda"),
+        ("coverage", "ebitda_interest_coverage", "ebitdaInterestCoverage"),
+        ("liquidity", "current_ratio", "currentRatio"),
+        ("cashflow", "ffo_to_debt", "ffoToDebt"),
+        ("stability", "debt_ratio", "debtRatio"),
+    ]
+    for axis_name, t_key, m_key in metric_map:
+        val = metrics.get(m_key)
+        if val is None:
+            continue
+        s = scoreMetric(val, thresholds[t_key])
+        if s is not None:
+            axis_scores.append((axis_name, t_key, val, s))
+
+    if not axis_scores:
+        return None
+
+    axis_scores.sort(key=lambda x: x[3], reverse=True)  # 높은 스코어 = 약한 축
+    weakest = axis_scores[0]
+
+    # 목표: 스코어를 5점 낮추면 대략 한 노치 상향
+    target_score = max(0, score - 5)
+    tg, _, _ = mapTo20Grade(target_score)
+
+    # 각 약한 축에서 필요한 metric 개선 역계산
+    improvements = []
+    for axis_name, t_key, current_val, current_score in axis_scores[:3]:
+        bp = thresholds[t_key]
+        # breakpoints에서 한 단계 나은 구간 찾기
+        target_val = current_val
+        for threshold_val, threshold_score in bp:
+            if threshold_score < current_score:
+                target_val = threshold_val
+                break
+
+        if target_val != current_val:
+            direction = "감소" if target_val < current_val else "증가"
+            pct_change = abs(target_val - current_val) / abs(current_val) * 100 if current_val != 0 else 0
+            improvements.append({
+                "axis": axis_name,
+                "metric": t_key,
+                "current": round(current_val, 2),
+                "target": round(target_val, 2),
+                "change": f"{t_key} {current_val:.1f} → {target_val:.1f} ({pct_change:.0f}% {direction})",
+            })
+
+    return {
+        "currentGrade": grade,
+        "currentScore": round(score, 1),
+        "targetGrade": tg,
+        "weakestAxis": weakest[0],
+        "improvements": improvements,
+    }

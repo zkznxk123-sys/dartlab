@@ -563,3 +563,93 @@ def calcStrategySnapshot(company) -> dict | None:
             "reason": bt.reason,
         }
     return snap
+
+
+def calcActionableTargets(company) -> dict | None:
+    """기술적 관점의 구체적 행동 목표 — 진입/청산 가격.
+
+    현재 가격, 기술적 판정, 지지/저항선, 신호별 트리거 가격을 반환.
+
+    Returns
+    -------
+    dict | None
+        currentPrice : float
+        technicalVerdict : str
+        support : float | None — 지지선
+        resistance : float | None — 저항선
+        targets : list[dict]
+            signal : str — 신호 이름
+            triggerPrice : float — 트리거 가격
+            action : str — 행동 제안
+            confidence : str — low/medium/high
+    """
+    try:
+        ohlcv = _fetchOHLCV(company)
+    except (AttributeError, ValueError, TypeError):
+        return None
+
+    if ohlcv is None or ohlcv.is_empty():
+        return None
+
+    import polars as pl
+
+    closes = ohlcv["close"].to_list()
+    if not closes or len(closes) < 20:
+        return None
+
+    current = closes[-1]
+
+    # 지지/저항: 20일 최저/최고
+    low20 = min(closes[-20:])
+    high20 = max(closes[-20:])
+
+    # 볼린저 밴드 (20일)
+    import numpy as np
+
+    arr = np.array(closes[-20:], dtype=float)
+    ma20 = float(np.mean(arr))
+    std20 = float(np.std(arr))
+    bb_lower = ma20 - 2 * std20
+    bb_upper = ma20 + 2 * std20
+
+    targets = []
+
+    # 볼린저 하단 접근
+    if current > bb_lower:
+        targets.append({
+            "signal": "볼린저 하단 접근",
+            "triggerPrice": round(bb_lower),
+            "action": "분할 매수 검토",
+            "confidence": "medium",
+        })
+
+    # RSI 과매도 (간략 계산)
+    if len(closes) >= 14:
+        gains = [max(0, closes[i] - closes[i - 1]) for i in range(-14, 0)]
+        losses = [max(0, closes[i - 1] - closes[i]) for i in range(-14, 0)]
+        avg_gain = sum(gains) / 14
+        avg_loss = sum(losses) / 14
+        rsi = 100 - 100 / (1 + avg_gain / avg_loss) if avg_loss > 0 else 100
+
+        if rsi > 30:
+            # RSI가 30 이하가 될 가격 역산 (근사)
+            rsi_target = round(current * 0.90)  # 약 10% 하락 시 과매도 근접
+            targets.append({
+                "signal": "RSI 과매도 접근",
+                "triggerPrice": rsi_target,
+                "action": "적극 매수 검토",
+                "confidence": "high" if rsi < 40 else "medium",
+            })
+
+    verdict = calcTechnicalVerdict(company)
+    tech_label = verdict.get("verdict", "중립") if verdict else "중립"
+
+    return {
+        "currentPrice": round(current),
+        "technicalVerdict": tech_label,
+        "support": round(low20),
+        "resistance": round(high20),
+        "bollingerLower": round(bb_lower),
+        "bollingerUpper": round(bb_upper),
+        "targets": targets,
+    }

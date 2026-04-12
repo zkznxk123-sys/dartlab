@@ -429,3 +429,85 @@ def analyze_crisis(*, market: str = "US", as_of: str | None = None, overrides: d
     result["timeseries"] = collect_timeseries(g_ts, {"hy_spread": "BAMLH0A0HYM2", "vix": "VIXCLS", "dxy": "DTWEXBGS"})
 
     return result
+
+
+# ── 사이클 위치 기반 행동 추천 ──
+
+_CYCLE_ACTIONS: dict[str, list[dict]] = {
+    "recovery": [
+        {"priority": 1, "action": "성장 투자 확대", "reason": "경기 회복기 — 수요 증가 시 시장 선점 기회", "urgency": "high"},
+        {"priority": 2, "action": "레버리지 활용 검토", "reason": "저금리 + 경기 호전 → 차입 비용 대비 투자 수익률 우위", "urgency": "medium"},
+    ],
+    "expansion": [
+        {"priority": 1, "action": "수익성 극대화", "reason": "수요 호조 → 가격 인상 여력, 판관비 효율화 적기", "urgency": "medium"},
+        {"priority": 2, "action": "현금 축적 시작", "reason": "사이클 정점 접근 → 하강기 대비 유보금 확보", "urgency": "medium"},
+    ],
+    "late_expansion": [
+        {"priority": 1, "action": "부채 감축 가속화", "reason": "금리 상승 + 경기 둔화 시 이자부담 급증", "urgency": "high"},
+        {"priority": 2, "action": "현금 보유 확대", "reason": "경기 하강기 인수 기회 또는 방어 자금", "urgency": "high"},
+        {"priority": 3, "action": "CAPEX 집행 속도 조절", "reason": "투자 수익률 하락 구간 진입", "urgency": "medium"},
+    ],
+    "slowdown": [
+        {"priority": 1, "action": "비용 구조 긴축", "reason": "매출 둔화 시 고정비 부담 급등 → 선제적 구조조정", "urgency": "high"},
+        {"priority": 2, "action": "운전자본 최적화", "reason": "재고 축소, 매출채권 회수 가속화 → 현금 방어", "urgency": "high"},
+    ],
+    "contraction": [
+        {"priority": 1, "action": "생존 모드 — 현금 보전", "reason": "경기 침체 → 매출 급감, 유동성이 생존 결정", "urgency": "critical"},
+        {"priority": 2, "action": "저점 인수 기회 탐색", "reason": "경쟁사 부실 → 저가 인수 가능, 현금 여력이 전제", "urgency": "medium"},
+    ],
+}
+
+
+def calcCyclicalAction(*, market: str = "KR", as_of: str | None = None) -> dict | None:
+    """사이클 위치 기반 행동 추천.
+
+    Returns
+    -------
+    dict | None
+        cyclePhase : str
+        phaseLabel : str
+        actions : list[dict]
+        historicalPrecedent : str | None
+    """
+    try:
+        crisis = analyze_crisis(market=market, as_of=as_of)
+    except (ValueError, TypeError, KeyError):
+        return None
+
+    cycle = crisis.get("cycle", {})
+    if not cycle:
+        return None
+
+    phase = cycle.get("phase", "")
+    label = cycle.get("label", "")
+
+    # phase 매핑
+    phase_key = "expansion"
+    if "회복" in label or "recovery" in phase.lower():
+        phase_key = "recovery"
+    elif "확장" in label or "expansion" in phase.lower():
+        if "후반" in label or "late" in phase.lower():
+            phase_key = "late_expansion"
+        else:
+            phase_key = "expansion"
+    elif "둔화" in label or "slowdown" in phase.lower():
+        phase_key = "slowdown"
+    elif "침체" in label or "contraction" in phase.lower():
+        phase_key = "contraction"
+
+    actions = _CYCLE_ACTIONS.get(phase_key, _CYCLE_ACTIONS["expansion"])
+
+    # 역사적 선례 (historicalContext 활용)
+    hc = crisis.get("historicalContext", {})
+    events = hc.get("historicalEvents", []) if hc else []
+    precedent = None
+    if events and isinstance(events[0], dict):
+        e = events[0]
+        precedent = f"{e.get('eventName', '')} ({e.get('eventDate', '')}) — {e.get('outcome', '')}"
+
+    return {
+        "cyclePhase": phase_key,
+        "phaseLabel": label or phase_key,
+        "actions": actions,
+        "historicalPrecedent": precedent,
+    }
