@@ -37,5 +37,7 @@ def test_review_unknown_preset_raises():
 
     from dartlab.review.registry import buildReview
 
-    src = inspect.getsource(buildReview)
-    assert "알 수 없는 프리셋" in src
+    from dartlab.review.reportTypes import resolveReportType
+
+    src = inspect.getsource(resolveReportType)
+    assert "알 수 ���는 보고서 타입" in src

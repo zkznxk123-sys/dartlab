@@ -120,6 +120,7 @@ def test_buildBlocks_with_basePeriod(mock_company):
 def test_block_items_are_valid_types(mock_company):
     """생성된 블록 내 아이템이 올바른 Block 타입인지 검증."""
     from dartlab.review.blocks import (
+        ChartBlock,
         FlagBlock,
         HeadingBlock,
         MetricBlock,
@@ -128,7 +129,7 @@ def test_block_items_are_valid_types(mock_company):
     )
     from dartlab.review.registry import buildBlocks
 
-    valid_types = (HeadingBlock, TextBlock, TableBlock, FlagBlock, MetricBlock)
+    valid_types = (HeadingBlock, TextBlock, TableBlock, FlagBlock, MetricBlock, ChartBlock)
 
     mock_company._cache.clear()
     blocks = buildBlocks(mock_company)
