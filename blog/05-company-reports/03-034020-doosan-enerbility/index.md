@@ -22,6 +22,11 @@ ogImage: /thumbnails/034020-doosan-enerbility.webp
 youtubeId: ""
 ---
 
+<script>
+import ComboChart from '$lib/components/blog/ComboChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
 > **위기 탈출 + 장기 사이클** | 산업재 > 발전·에너지 | 2026-04-08 dartlab 실측
 > 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: review + analysis + credit + report.dividend
 > 같은 시리즈: [SK하이닉스](/blog/000660-skhynix) · [삼양식품](/blog/003230-samyang-foods) · [두산에너빌리티](/blog/034020-doosan-enerbility) · [알테오젠](/blog/196170-alteogen) · [HMM](/blog/011200-hmm) · [셀트리온](/blog/068270-celltrion) · [한화에어로스페이스](/blog/012450-hanwha-aerospace) · [HD현대일렉트릭](/blog/267260-hd-hyundai-electric) · [고려아연](/blog/010130-korea-zinc) · [에이피알](/blog/278470-apr) · [기업이야기 시리즈 전체](/blog/series/company-reports)
@@ -341,10 +346,6 @@ c.analysis("financial", "자금조달")["distressIndicators"]
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
-<script>
-import ComboChart from '$lib/components/blog/ComboChart.svelte';
-import StackBar from '$lib/components/blog/StackBar.svelte';
-</script>
 
 ## 공시 / Filings
 
@@ -357,8 +358,8 @@ import StackBar from '$lib/components/blog/StackBar.svelte';
 | 2024 | 사업보고서 (2024.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250320001103) |
 | 2024 | [기재정정]반기보고서 (2024.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241227000720) |
 | 2024 | 분기보고서 (2024.09) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241112000354) |
-| 2024 | 반기보고서 (2024.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240814004530) |
 | 2024 | [기재정정]반기보고서 (2024.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240814004587) |
+| 2024 | 반기보고서 (2024.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240814004530) |
 | 2024 | 분기보고서 (2024.03) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240516002258) |
 
 > 전체 공시 목록은 dartlab에서 확인:

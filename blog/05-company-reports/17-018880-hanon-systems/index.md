@@ -23,6 +23,11 @@ ogImage: /thumbnails/018880-hanon-systems.webp
 youtubeId: ""
 ---
 
+<script>
+import ComboChart from '$lib/components/blog/ComboChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
 > **턴어라운드** | 제조 > 자동차부품 | 2026-04-11 dartlab 실측
 > 같은 시리즈: [SK하이닉스](/blog/000660-skhynix) · [삼양식품](/blog/003230-samyang-foods) · [두산에너빌리티](/blog/034020-doosan-enerbility) · [알테오젠](/blog/196170-alteogen) · [HMM](/blog/011200-hmm) · [셀트리온](/blog/068270-celltrion) · [한화에어로스페이스](/blog/012450-hanwha-aerospace) · [HD현대일렉트릭](/blog/267260-hd-hyundai-electric) · [고려아연](/blog/010130-korea-zinc) · [에이피알](/blog/278470-apr) · [크래프톤](/blog/259960-krafton) · [달바글로벌](/blog/483650-dalba-global) · [경동나비엔](/blog/009450-kyungdong-navien) · [대한조선](/blog/439260-daehan-shipbuilding) · [현대글로비스](/blog/086280-hyundai-glovis) · [농심](/blog/004370-nongshim) · [기업이야기 시리즈 전체](/blog/series/company-reports)
 
@@ -387,10 +392,6 @@ dartlab.scan("debt")
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
-<script>
-import ComboChart from '$lib/components/blog/ComboChart.svelte';
-import StackBar from '$lib/components/blog/StackBar.svelte';
-</script>
 
 ## 공시 / Filings
 
@@ -403,8 +404,8 @@ import StackBar from '$lib/components/blog/StackBar.svelte';
 | 2024 | [기재정정]사업보고서 (2024.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260318000466) |
 | 2024 | 사업보고서 (2024.12) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250321001829) |
 | 2024 | 분기보고서 (2024.09) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20241114001534) |
-| 2024 | [기재정정]반기보고서 (2024.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240814003992) |
 | 2024 | 반기보고서 (2024.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240814002300) |
+| 2024 | [기재정정]반기보고서 (2024.06) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240814003992) |
 | 2024 | 분기보고서 (2024.03) | [DART에서 보기](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240516000554) |
 
 > 전체 공시 목록은 dartlab에서 확인:

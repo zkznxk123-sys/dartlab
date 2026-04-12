@@ -23,6 +23,11 @@ ogImage: /thumbnails/483650-dalba-global.webp
 youtubeId: ""
 ---
 
+<script>
+import ComboChart from '$lib/components/blog/ComboChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
 > **성장** | 소비재 > 화장품 | 2026-04-09 dartlab 실측
 > 같은 시리즈: [SK하이닉스](/blog/000660-skhynix) · [삼양식품](/blog/003230-samyang-foods) · [두산에너빌리티](/blog/034020-doosan-enerbility) · [알테오젠](/blog/196170-alteogen) · [HMM](/blog/011200-hmm) · [셀트리온](/blog/068270-celltrion) · [한화에어로스페이스](/blog/012450-hanwha-aerospace) · [HD현대일렉트릭](/blog/267260-hd-hyundai-electric) · [고려아연](/blog/010130-korea-zinc) · [에이피알](/blog/278470-apr) · [크래프톤](/blog/259960-krafton) · [기업이야기 시리즈 전체](/blog/series/company-reports)
 
@@ -375,10 +380,6 @@ c.analysis("financial", "종합평가")
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
-<script>
-import ComboChart from '$lib/components/blog/ComboChart.svelte';
-import StackBar from '$lib/components/blog/StackBar.svelte';
-</script>
 
 ## 공시 / Filings
 

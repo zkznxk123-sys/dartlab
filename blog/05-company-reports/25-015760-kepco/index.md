@@ -22,6 +22,11 @@ tags:
   - 재무분석
 ---
 
+<script>
+import ComboChart from '$lib/components/blog/ComboChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
 
 > **전기요금 1원이 5,600억을 만든다 — 정부가 재무제표를 쓰는 회사.**
 
@@ -676,10 +681,6 @@ c.analysis("financial", "종합평가")
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
-<script>
-import ComboChart from '$lib/components/blog/ComboChart.svelte';
-import StackBar from '$lib/components/blog/StackBar.svelte';
-</script>
 
 ## 공시 / Filings
 

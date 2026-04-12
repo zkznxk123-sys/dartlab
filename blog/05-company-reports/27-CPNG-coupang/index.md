@@ -22,6 +22,11 @@ tags:
   - 재무분석
 ---
 
+<script>
+import ComboChart from '$lib/components/blog/ComboChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
 
 > **매출 49조인데 이익 $208M — 마진 0.6%의 회사가 3,370만명 유출 후에도 살아남은 이유.**
 
@@ -681,10 +686,6 @@ c.analysis("효율성")  # CCC 상세 분해
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
-<script>
-import ComboChart from '$lib/components/blog/ComboChart.svelte';
-import StackBar from '$lib/components/blog/StackBar.svelte';
-</script>
 
 ## 공시 / Filings
 
@@ -724,7 +725,7 @@ import StackBar from '$lib/components/blog/StackBar.svelte';
 
 ### 손익계산서 (IS) — 단위 $M
 
-<ComboChart data={[{year:"2025",매출액:null,영업이익:null,당기순이익:null},{year:"2024",매출액:30268,영업이익:436,당기순이익:143},{year:"2023",매출액:24383,영업이익:473,당기순이익:1360},{year:"2022",매출액:20583,영업이익:-112,당기순이익:-92},{year:"2021",매출액:18406,영업이익:-1494,당기순이익:-1543}]} lineKeys={["매출액"]} barKeys={["영업이익","당기순이익"]} lineColors={["#22c55e"]} barColors={["#3b82f6","#f59e0b"]} title="매출(라인) vs 영업이익·당기순이익(막대)" unit="$M" />
+<ComboChart data={[{year:"2025",매출액:null,영업이익:null,당기순이익:null},{year:"2024",매출액:30268,영업이익:436,당기순이익:154},{year:"2023",매출액:24383,영업이익:473,당기순이익:1360},{year:"2022",매출액:20583,영업이익:-112,당기순이익:-92},{year:"2021",매출액:18406,영업이익:-1494,당기순이익:-1543}]} lineKeys={["매출액"]} barKeys={["영업이익","당기순이익"]} lineColors={["#22c55e"]} barColors={["#3b82f6","#f59e0b"]} title="매출(라인) vs 영업이익·당기순이익(막대)" unit="$M" />
 
 | 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
 |---|---:|---:|---:|---:|---:|
@@ -735,7 +736,7 @@ import StackBar from '$lib/components/blog/StackBar.svelte';
 | 영업이익 | — | 436 | 473 | -112 | -1,494 |
 | 금융수익 | — | — | — | — | — |
 | 금융비용 | — | — | — | — | — |
-| 당기순이익 | — | 143 | 1,360 | -92 | -1,543 |
+| 당기순이익 | — | 154 | 1,360 | -92 | -1,543 |
 
 ### 재무상태표 (BS) — 단위 $M
 

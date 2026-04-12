@@ -19,8 +19,16 @@ tags:
   - 전자공시
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/000660-skhynix.webp
-youtubeId: ""
+youtubeId: "x9z7646-QbY"
 ---
+
+<script>
+import YouTube from '$lib/components/YouTube.svelte';
+import ComboChart from '$lib/components/blog/ComboChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
+<YouTube id="x9z7646-QbY" title="SK하이닉스 — 한국 반도체 30년의 미스터리" />
 
 > **장기 사이클 + 위기 탈출** | IT > 메모리반도체 | 2026-04-08 dartlab 실측
 > 데이터: dartlab Q1 2016 ~ Q4 2025 | 엔진: review + analysis + credit + report
@@ -427,10 +435,6 @@ dartlab 의 forecast 모델은 base 시나리오로 1년 후 매출 둔화를 50
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
-<script>
-import ComboChart from '$lib/components/blog/ComboChart.svelte';
-import StackBar from '$lib/components/blog/StackBar.svelte';
-</script>
 
 ## 공시 / Filings
 

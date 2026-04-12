@@ -289,11 +289,8 @@ def build_auto_section(data: dict) -> str:
     unit_label = "$M" if is_edgar else "억원"
     parts = [AUTO_START, ""]
 
-    # --- Svelte 차트 import ---
-    parts.append("<script>")
-    parts.append("import ComboChart from '$lib/components/blog/ComboChart.svelte';")
-    parts.append("import StackBar from '$lib/components/blog/StackBar.svelte';")
-    parts.append("</script>")
+    # 차트 import는 AUTO 밖 본문 <script>에서 처리
+    # (AUTO 안에 <script> 넣으면 mdsvex 충돌)
     parts.append("")
 
     # --- Filings ---
@@ -441,6 +438,19 @@ def sync_post(index_path: Path, target_code: str | None, dry_run: bool) -> bool:
             else:
                 new_text = text.rstrip() + "\n\n---\n\n" + auto_section + "\n"
             print(f"  AUTO 신규 삽입")
+
+    # 본문 <script>에 차트 import 보장 (AUTO 안에 넣으면 mdsvex 충돌)
+    chart_imports = [
+        "import ComboChart from '$lib/components/blog/ComboChart.svelte';",
+        "import StackBar from '$lib/components/blog/StackBar.svelte';",
+    ]
+    if "<script>" in new_text:
+        for imp in chart_imports:
+            if imp not in new_text:
+                new_text = new_text.replace("</script>", imp + "\n</script>", 1)
+    else:
+        # <script> 블록 자체가 없으면 frontmatter 뒤에 삽입
+        new_text = new_text.replace("---\n\n", "---\n\n<script>\n" + "\n".join(chart_imports) + "\n</script>\n\n", 1)
 
     index_path.write_text(new_text, encoding="utf-8")
     auto_lines = auto_section.count("\n")

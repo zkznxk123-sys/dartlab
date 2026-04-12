@@ -22,6 +22,11 @@ tags:
   - 재무분석
 ---
 
+<script>
+import ComboChart from '$lib/components/blog/ComboChart.svelte';
+import StackBar from '$lib/components/blog/StackBar.svelte';
+</script>
+
 
 > **시총 78조를 찍은 회사의 영업이익은 864억이었다 — 숫자가 아니라 서사를 산 시장.**
 
@@ -748,10 +753,6 @@ c.analysis("financial", "종합평가")
 
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
-<script>
-import ComboChart from '$lib/components/blog/ComboChart.svelte';
-import StackBar from '$lib/components/blog/StackBar.svelte';
-</script>
 
 ## 공시 / Filings
 
