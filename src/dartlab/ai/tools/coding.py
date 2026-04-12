@@ -361,6 +361,13 @@ class DartlabCodeExecutor(LocalPythonBackend):
         preamble += (
             "from dartlab.viz import revenue, cashflow, profitability_chart, dividend_chart, balance_sheet_chart\n"
         )
+        # AI Override: 분석 가정 조율 도구
+        preamble += (
+            "try:\n"
+            "    from dartlab.core.overrides import validateOverrides\n"
+            "except ImportError:\n"
+            "    pass\n"
+        )
         if stockCode:
             preamble += f'c = Company("{stockCode}")\n'
             preamble += "company = c\n"

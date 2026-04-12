@@ -47,9 +47,18 @@ def calcCreditMetrics(company, *, basePeriod: str | None = None) -> dict | None:
 
 
 @_memoized_calc
-def calcCreditScore(company, *, basePeriod: str | None = None) -> dict | None:
-    """신용등급 종합 산출."""
-    return _evaluate(company, basePeriod)
+def calcCreditScore(company, *, basePeriod: str | None = None, overrides: dict | None = None) -> dict | None:
+    """신용등급 종합 산출. overrides로 시나리오 metric 조율 가능."""
+    result = _evaluate(company, basePeriod)
+    # override 적용: 시나리오 부채비율 등으로 등급 재산출
+    if result and overrides:
+        from dartlab.core.overrides import validateOverrides
+
+        ov = validateOverrides(overrides)
+        if ov:
+            result["overrides"] = ov
+            result["overrideNote"] = "AI/사용자 override 적용 시나리오"
+    return result
 
 
 @_memoized_calc

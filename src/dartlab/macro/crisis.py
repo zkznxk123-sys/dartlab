@@ -458,8 +458,8 @@ _CYCLE_ACTIONS: dict[str, list[dict]] = {
 }
 
 
-def calcCyclicalAction(*, market: str = "KR", as_of: str | None = None) -> dict | None:
-    """사이클 위치 기반 행동 추천.
+def calcCyclicalAction(*, market: str = "KR", as_of: str | None = None, overrides: dict | None = None) -> dict | None:
+    """사이클 위치 기반 행동 추천. overrides로 AI 사이클 국면 조율.
 
     Returns
     -------
@@ -469,6 +469,17 @@ def calcCyclicalAction(*, market: str = "KR", as_of: str | None = None) -> dict 
         actions : list[dict]
         historicalPrecedent : str | None
     """
+    # override: cyclePhase 직접 지정
+    if overrides and overrides.get("cyclePhase"):
+        phase_key = overrides["cyclePhase"]
+        actions = _CYCLE_ACTIONS.get(phase_key, _CYCLE_ACTIONS["expansion"])
+        return {
+            "cyclePhase": phase_key,
+            "phaseLabel": f"{phase_key} (AI override)",
+            "actions": actions,
+            "historicalPrecedent": None,
+        }
+
     try:
         crisis = analyze_crisis(market=market, as_of=as_of)
     except (ValueError, TypeError, KeyError):

@@ -565,8 +565,8 @@ def calcStrategySnapshot(company) -> dict | None:
     return snap
 
 
-def calcActionableTargets(company) -> dict | None:
-    """기술적 관점의 구체적 행동 목표 — 진입/청산 가격.
+def calcActionableTargets(company, *, overrides: dict | None = None) -> dict | None:
+    """기술적 관점의 구체적 행동 목표 — 진입/청산 가격. overrides로 AI 조율 가능.
 
     현재 가격, 기술적 판정, 지지/저항선, 신호별 트리거 가격을 반환.
 
