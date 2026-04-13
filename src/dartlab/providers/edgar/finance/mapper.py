@@ -143,6 +143,19 @@ class EdgarMapper:
         return result
 
     @classmethod
+    def getLineOrder(cls) -> dict[str, int]:
+        """snakeId → line 번호 (재무제표 표준 순서). SNAKEID_ALIASES 변환 후 snakeId도 포함."""
+        cls._ensureLoaded()
+        result = {a["snakeId"]: a.get("line", 9999) for a in cls._accounts}
+        # SNAKEID_ALIASES로 변환된 snakeId에도 원본 line 적용
+        for src, tgt in EDGAR_TO_DART_ALIASES.items():
+            if src in result and tgt not in result:
+                result[tgt] = result[src]
+            if tgt in result and src not in result:
+                result[src] = result[tgt]
+        return result
+
+    @classmethod
     def getAccountStmt(cls, snakeId: str) -> str | None:
         """snakeId의 정식 재무제표 유형 (BS/IS/CF/CI/NT/EQ). 없으면 None."""
         cls._ensureLoaded()

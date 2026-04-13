@@ -34,10 +34,15 @@ class _FinanceAccessor:
             return None
 
         from dartlab.core.finance.labels import get_korean_labels
+        from dartlab.providers.edgar.finance.mapper import EdgarMapper
 
         krLabels = get_korean_labels()
+        lineOrder = EdgarMapper.getLineOrder()  # snakeId → line 번호
+
+        # standardAccounts line 순서로 정렬 (매핑 없으면 맨 뒤)
+        sortedItems = sorted(stmtData.items(), key=lambda kv: lineOrder.get(kv[0], 9999))
         rows = []
-        for snakeId, values in stmtData.items():
+        for snakeId, values in sortedItems:
             label = krLabels.get(snakeId, snakeId)  # 한국어 매핑 없으면 snakeId 그대로
             # 컬럼명 표준: "항목" (sections 사상)
             row: dict[str, Any] = {

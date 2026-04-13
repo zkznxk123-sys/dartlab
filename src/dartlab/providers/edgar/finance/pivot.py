@@ -181,6 +181,11 @@ def buildAnnual(
             # _detail/_note는 IS/BS/CF 본문에서 제외
             if snakeId.endswith("_detail") or snakeId.endswith("_note"):
                 continue
+            # canonStmt 검증 — BS 항목이 IS에 섞이는 것 방지
+            if not snakeId.endswith("_change"):
+                canonStmt = EdgarMapper.getAccountStmt(snakeId)
+                if canonStmt and canonStmt in ("BS", "IS", "CF", "CI") and canonStmt != sjDiv:
+                    continue
             vals = qSeries.get(sjDiv, {}).get(snakeId, [])
             annual: list[Optional[float]] = [None] * nYears
 
@@ -388,10 +393,11 @@ def _guessStmt(tag: str) -> str | None:
 
 
 def _selectStandalone(df: pl.DataFrame, stmtType: str) -> pl.DataFrame:
-    if stmtType == "BS":
-        tagDf = df.filter(pl.col("fp").is_in(["Q1", "Q2", "Q3", "FY"]))
-    else:
-        tagDf = df.filter(pl.col("frame").is_null() & pl.col("fp").is_in(["Q1", "Q2", "Q3", "FY"]))
+    # frame.is_null() 필터 제거 — downstream(_selectFlowDirect 등)이
+    # duration_days 기반으로 standalone/YTD를 정확히 구분한다.
+    # frame이 있는 행(CY2025, CY2025Q2 등)도 standalone일 수 있으므로
+    # 여기서 미리 제거하면 Q2/Q3/FY 데이터가 누락된다.
+    tagDf = df.filter(pl.col("fp").is_in(["Q1", "Q2", "Q3", "FY"]))
 
     if tagDf.height == 0:
         return pl.DataFrame()
