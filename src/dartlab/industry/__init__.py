@@ -35,6 +35,10 @@ class Industry:
         self,
         industryId: str | None = None,
         stage: str | None = None,
+        *,
+        summary: bool = False,
+        timeline: bool = False,
+        year: str = "2024",
     ) -> pl.DataFrame:
         """산업지도를 조회한다.
 
@@ -44,6 +48,12 @@ class Industry:
             산업 ID. None이면 가이드 반환.
         stage : str | None
             특정 공정만 필터.
+        summary : bool
+            True이면 공정별 매출/이익 집계.
+        timeline : bool
+            True이면 연도별 공정 매출 추이.
+        year : str
+            재무 데이터 기준 연도 (summary 시 사용).
 
         Returns
         -------
@@ -51,6 +61,10 @@ class Industry:
         """
         if industryId is None:
             return self._guide()
+        if summary:
+            return self._summary(industryId, year=year)
+        if timeline:
+            return self._timeline(industryId)
         return self._query(industryId, stage)
 
     def _guide(self) -> pl.DataFrame:
@@ -107,6 +121,20 @@ class Industry:
                 "소스": [n.source for n in filtered],
             }
         ).sort("신뢰도", descending=True)
+
+    def _summary(self, industryId: str, *, year: str = "2024") -> pl.DataFrame:
+        """공정별 매출/이익 집계."""
+        from dartlab.industry.build.financials import buildIndustrySummary
+        from dartlab.industry.build.pipeline import loadNodes
+
+        return buildIndustrySummary(loadNodes(), industryId, year=year)
+
+    def _timeline(self, industryId: str) -> pl.DataFrame:
+        """연도별 공정 매출 추이."""
+        from dartlab.industry.build.financials import buildTimelineSummary
+        from dartlab.industry.build.pipeline import loadNodes
+
+        return buildTimelineSummary(loadNodes(), industryId)
 
     def build(self, *, skipDocs: bool = False) -> None:
         """산업지도를 빌드한다 (4단계 파이프라인)."""

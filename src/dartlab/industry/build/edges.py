@@ -126,21 +126,37 @@ def extractNetworkEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
 
 # ── 2. docs에서 거래처 관계 (rawMaterial/relatedPartyTx) ──
 
-# 상장사명 매칭 패턴 — 회사명이 텍스트에 나오면 거래 관계로 추정
-_SUPPLIER_TITLE = re.compile(r"원재료|원자재|부자재|매입처|공급처|거래처")
+# section_title → 공급/수요 분류 패턴
+_SUPPLIER_TITLE = re.compile(r"원재료|원자재|부자재|매입처|공급처|거래처|생산설비")
 _CUSTOMER_TITLE = re.compile(r"매출처|판매처|수주처|주요.*고객")
+_RELATED_PARTY = re.compile(r"대주주.*거래|특수관계자|계열회사")
+
+# 법인명 추출 패턴 — ㈜, (주), 주식회사 앞뒤로 회사명
+_CORP_PATTERN = re.compile(r"㈜\s*([가-힣A-Za-z0-9]+)|([가-힣A-Za-z0-9]+)\s*㈜|\(주\)\s*([가-힣A-Za-z0-9]+)|주식회사\s+([가-힣A-Za-z0-9]+)")
+
+
+def _extractCorpNames(content: str) -> list[str]:
+    """본문에서 법인명 패턴(㈜, (주), 주식회사)을 추출."""
+    names: list[str] = []
+    for m in _CORP_PATTERN.finditer(content):
+        name = m.group(1) or m.group(2) or m.group(3) or m.group(4)
+        if name and len(name) >= 2:
+            names.append(name)
+    return names
 
 
 def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     """docs parquet에서 거래처 관계를 추출.
 
-    rawMaterial/거래처 섹션 텍스트에서 상장사명이 언급되면 supplier/customer 엣지로 생성.
+    2가지 방법으로 상장사를 찾는다:
+    1. 본문에서 ㈜/주식회사 패턴으로 법인명 추출 → KindList 매칭
+    2. KindList 상장사명이 본문에 직접 나오는 경우 (3글자 이상)
     """
     edges: list[IndustryEdge] = []
     nodeIdx = _buildNodeIndex(nodes)
     c2n, n2c = _listingLookup()
 
-    # 매칭할 상장사명 집합 (3글자 이상만 — 노이즈 방지)
+    # 매칭할 상장사명 집합 (3글자 이상 — 노이즈 방지)
     targetNames = {name: code for name, code in n2c.items() if len(name) >= 3}
 
     try:
@@ -175,42 +191,62 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
 
             isSupplier = bool(_SUPPLIER_TITLE.search(title))
             isCustomer = bool(_CUSTOMER_TITLE.search(title))
-            if not isSupplier and not isCustomer:
+            isRelated = bool(_RELATED_PARTY.search(title))
+            if not isSupplier and not isCustomer and not isRelated:
                 continue
 
-            # 텍스트에서 상장사명 검색
+            # 방법 1: ㈜ 패턴으로 법인명 추출
+            corpNames = _extractCorpNames(content)
+
+            # 방법 2: 상장사명 직접 매칭
+            foundCodes: set[str] = set()
+            for corpName in corpNames:
+                targetCode = n2c.get(corpName)
+                if targetCode and targetCode != code:
+                    foundCodes.add(targetCode)
+
             for targetName, targetCode in targetNames.items():
-                if targetCode == code:
-                    continue  # 자기 자신 제외
+                if targetCode == code or targetCode in foundCodes:
+                    continue
                 if targetName in content:
-                    if isSupplier:
-                        edges.append(
-                            IndustryEdge(
-                                fromCode=targetCode,
-                                fromName=targetName,
-                                toCode=code,
-                                toName=c2n.get(code, ""),
-                                edgeType="supplier",
-                                industry=node.industry,
-                                confidence=0.6,
-                                source="docs",
-                                evidence=f"{title} 섹션에서 '{targetName}' 언급",
-                            )
+                    foundCodes.add(targetCode)
+
+            # 엣지 생성
+            for targetCode in foundCodes:
+                targetName = c2n.get(targetCode, "")
+                edgeType = "supplier" if isSupplier else "customer" if isCustomer else "affiliate"
+                confidence = 0.7 if isSupplier else 0.6
+
+                if isSupplier:
+                    edges.append(
+                        IndustryEdge(
+                            fromCode=targetCode, fromName=targetName,
+                            toCode=code, toName=c2n.get(code, ""),
+                            edgeType="supplier", industry=node.industry,
+                            confidence=confidence, source="docs",
+                            evidence=f"{title}",
                         )
-                    elif isCustomer:
-                        edges.append(
-                            IndustryEdge(
-                                fromCode=code,
-                                fromName=c2n.get(code, ""),
-                                toCode=targetCode,
-                                toName=targetName,
-                                edgeType="customer",
-                                industry=node.industry,
-                                confidence=0.6,
-                                source="docs",
-                                evidence=f"{title} 섹션에서 '{targetName}' 언급",
-                            )
+                    )
+                elif isCustomer:
+                    edges.append(
+                        IndustryEdge(
+                            fromCode=code, fromName=c2n.get(code, ""),
+                            toCode=targetCode, toName=targetName,
+                            edgeType="customer", industry=node.industry,
+                            confidence=confidence, source="docs",
+                            evidence=f"{title}",
                         )
+                    )
+                elif isRelated:
+                    edges.append(
+                        IndustryEdge(
+                            fromCode=code, fromName=c2n.get(code, ""),
+                            toCode=targetCode, toName=targetName,
+                            edgeType="affiliate", industry=node.industry,
+                            confidence=0.5, source="docs",
+                            evidence=f"{title}",
+                        )
+                    )
 
         processed += 1
 
