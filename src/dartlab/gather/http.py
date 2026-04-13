@@ -29,7 +29,9 @@ DOMAIN_POLICY: dict[str, DomainConfig] = {
     "finance.naver.com": DomainConfig(rpm=30, concurrency=2, jitter_min=0.5, jitter_max=2.0),
     "data-api.krx.co.kr": DomainConfig(rpm=30, concurrency=2, jitter_min=0.3, jitter_max=1.5),
     "ecos.bok.or.kr": DomainConfig(rpm=30, concurrency=2, jitter_min=0.3, jitter_max=1.5),
-    # 해외 — 상대적 관대
+    # 해외 — 네이버 글로벌
+    "api.stock.naver.com": DomainConfig(rpm=30, concurrency=2, jitter_min=0.5, jitter_max=2.0),
+    # 해외 — Yahoo (fallback)
     "query1.finance.yahoo.com": DomainConfig(rpm=6, concurrency=1, jitter_min=1.0, jitter_max=3.0, min_interval=10.0),
     "query2.finance.yahoo.com": DomainConfig(rpm=6, concurrency=1, jitter_min=1.0, jitter_max=3.0, min_interval=10.0),
     "financialmodelingprep.com": DomainConfig(rpm=4, concurrency=1, timeout=15.0, jitter_min=1.0, jitter_max=3.0),

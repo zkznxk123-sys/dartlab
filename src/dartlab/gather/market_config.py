@@ -38,7 +38,7 @@ MARKETS: dict[str, MarketConfig] = {
         currency="USD",
         exchange_suffix="",
         benchmark_ticker="^GSPC",
-        fallback_chain=("yahoo_direct", "fmp"),
+        fallback_chain=("naver_global", "fmp"),
         trading_hours_utc=(14, 21),
     ),
     "JP": MarketConfig(
