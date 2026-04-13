@@ -81,10 +81,14 @@ class Industry:
         if not filtered:
             return pl.DataFrame(
                 schema={
-                    "종목코드": pl.Utf8, "종목명": pl.Utf8,
-                    "공정": pl.Utf8, "공정명": pl.Utf8,
-                    "역할": pl.Utf8, "위치": pl.Utf8,
-                    "신뢰도": pl.Float64, "소스": pl.Utf8,
+                    "종목코드": pl.Utf8,
+                    "종목명": pl.Utf8,
+                    "공정": pl.Utf8,
+                    "공정명": pl.Utf8,
+                    "역할": pl.Utf8,
+                    "위치": pl.Utf8,
+                    "신뢰도": pl.Float64,
+                    "소스": pl.Utf8,
                 }
             )
 

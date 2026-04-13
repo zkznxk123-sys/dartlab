@@ -127,7 +127,9 @@ def buildIndustryMap(
     if verbose:
         total = len(nodes)
         withStage = sum(1 for n in nodes if n.stage)
-        print(f"[industry] 완료: {total}사, {withStage}사 공정 매칭 ({withStage / total * 100:.0f}%), {len(edges)} 엣지")
+        print(
+            f"[industry] 완료: {total}사, {withStage}사 공정 매칭 ({withStage / total * 100:.0f}%), {len(edges)} 엣지"
+        )
 
     return nodes
 

@@ -25,6 +25,7 @@ if not _IS_PYODIDE:
     # .env 자동 로드 — API 키 등 환경변수
     _loadEnv()
 
+
 async def prefetch(*stockCodes: str, categories: list[str] | None = None) -> None:
     """HF에서 종목 데이터를 미리 다운로드 (Pyodide/브라우저 전용).
 
@@ -41,6 +42,7 @@ async def prefetch(*stockCodes: str, categories: list[str] | None = None) -> Non
 
     # pyodide 빌트인 패키지 로드 (C 확장 — micropip으로 설치 불가)
     import pyodide_js  # type: ignore[import-not-found]
+
     await pyodide_js.loadPackage(["pyarrow", "lxml", "polars", "numpy", "pydantic"])
 
     from pyodide.http import pyfetch  # type: ignore[import-not-found]
@@ -55,6 +57,7 @@ async def prefetch(*stockCodes: str, categories: list[str] | None = None) -> Non
             path = f"/data/{dirPath}/{code}.parquet"
 
             import os
+
             if os.path.exists(path):
                 continue
 
@@ -71,6 +74,7 @@ async def prefetch(*stockCodes: str, categories: list[str] | None = None) -> Non
                 print(f"  {cat}/{code}: {len(buf) // 1024} KB")
             except Exception as e:
                 print(f"  ⚠ {cat}/{code} 실패: {e}")
+
 
 try:
     __version__ = _pkg_version("dartlab")

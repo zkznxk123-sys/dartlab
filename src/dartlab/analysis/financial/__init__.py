@@ -1024,7 +1024,16 @@ class Analysis:
                 if overrides and _acceptsOverrides(fn):
                     kw["overrides"] = overrides
                 results[calc.blockKey] = fn(company, **kw)
-            except (KeyError, ValueError, TypeError, AttributeError, ArithmeticError, ImportError, RuntimeError, OSError):
+            except (
+                KeyError,
+                ValueError,
+                TypeError,
+                AttributeError,
+                ArithmeticError,
+                ImportError,
+                RuntimeError,
+                OSError,
+            ):
                 results[calc.blockKey] = None
         return results
 
