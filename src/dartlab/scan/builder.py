@@ -315,6 +315,20 @@ def buildChanges(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
 # ── finance ──────────────────────────────────────────────────────────
 
 
+def _loadAccountMap() -> dict[str, str]:
+    """accountMappings.json → {원본계정명: snakeId} 매핑 로드."""
+    import json
+
+    mapPath = Path(__file__).resolve().parents[1] / "core" / "data" / "accountMappings.json"
+    if not mapPath.exists():
+        return {}
+    try:
+        data = json.loads(mapPath.read_text(encoding="utf-8"))
+        return data.get("mappings", {})
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
 def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
     """finance 전종목 합산. 반환: 출력 parquet 경로."""
     finDir = _financeDir()
@@ -329,6 +343,11 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
         if verbose:
             _log("finance parquet 없음 — 빌드 건너뜀")
         return None
+
+    # 계정명 정규화 매핑 로드
+    acctMap = _loadAccountMap()
+    if verbose and acctMap:
+        _log(f"[finance] accountMappings: {len(acctMap)}개 매핑 로드")
 
     # 비12월 결산 종목 → 달력 분기 변환 준비
     fmMap = _fiscalMonthMap()
@@ -381,6 +400,14 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
                 else:
                     rows.append(row)
             df = pl.DataFrame(rows, schema=df.schema)
+
+        # 계정명 정규화: account_nm → snakeId 컬럼 추가
+        if acctMap and "account_nm" in df.columns:
+            df = df.with_columns(
+                pl.col("account_nm")
+                .replace_strict(acctMap, default=None, return_dtype=pl.Utf8)
+                .alias("account_id_std")
+            )
 
         batchChunks.append(df)
         totalRows += df.height
