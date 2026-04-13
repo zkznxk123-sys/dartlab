@@ -5,7 +5,7 @@
 import { loadPyodide } from "pyodide";
 
 const HF = "https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main";
-const WHEEL_URL = `${HF}/pyodide/dartlab-0.9.10-py3-none-any.whl`;
+const WHEEL_URL = `${HF}/pyodide/dartlab-0.9.10-py3-none-any.whl?v=6`;
 const STOCK = "005930";
 
 const log = (msg) => console.log(msg);
