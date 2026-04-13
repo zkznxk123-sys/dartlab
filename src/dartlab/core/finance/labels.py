@@ -14,7 +14,7 @@ from pathlib import Path
 @lru_cache(maxsize=1)
 def _load_account_mappings() -> dict:
     """K-IFRS account mappings — core SSOT (`core/data/accountMappings.json`)."""
-    mapper_path = Path(__file__).resolve().parents[1] / "data" / "accountMappings.json"
+    mapper_path = Path(__file__).parent.parent / "data" / "accountMappings.json"
     if not mapper_path.exists():
         return {}
     return json.loads(mapper_path.read_text(encoding="utf-8"))
@@ -28,7 +28,7 @@ def _load_standard_accounts() -> dict[str, dict]:
 @lru_cache(maxsize=1)
 def _load_label_supplements() -> dict[str, str]:
     """labelSupplements.json — standardAccounts 외 보충 라벨 SSOT."""
-    p = Path(__file__).resolve().parents[1] / "data" / "labelSupplements.json"
+    p = Path(__file__).parent.parent / "data" / "labelSupplements.json"
     if not p.exists():
         return {}
     return json.loads(p.read_text(encoding="utf-8")).get("supplements", {})
@@ -80,6 +80,13 @@ def get_korean_labels() -> dict[str, str]:
     for sid, name in _load_label_supplements().items():
         if sid not in result:
             result[sid] = name
+
+    # 4. SNAKEID_ALIASES 역참조 — alias 양방향으로 한국어 전파
+    for src, tgt in SNAKEID_ALIASES.items():
+        if tgt not in result and src in result:
+            result[tgt] = result[src]
+        if src not in result and tgt in result:
+            result[src] = result[tgt]
 
     return result
 
