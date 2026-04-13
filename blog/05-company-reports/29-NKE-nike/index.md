@@ -10,7 +10,7 @@ exchange: "NYSE"
 storyTemplate: "턴어라운드"
 thumbnail: /avatar-chart.png
 ogImage: "/thumbnails/NKE-nike.webp"
-description: "매출 $51B→$46B. 주가 $170→$44. 자사주 $11.8B 태웠는데 반토막. DTC 올인으로 도매 파트너 50%를 잘랐더니 빈 선반을 On/Hoka/NB가 차지했다. 32년 Nike맨 Elliott Hill이 돌아왔다."
+description: "매출 $51B→$46B. 주가 $170→$44. 자사주 $11.8B 태웠는데 반토막. 직접판매 올인으로 도매 파트너 50%를 잘랐더니 빈 선반을 On/Hoka/NB가 차지했다. 32년 Nike맨이 돌아왔다."
 tags:
   - Nike
   - NKE
@@ -92,7 +92,7 @@ FY2020 매출 $37.4B(-4.4%). 코로나로 매장이 닫힌 결과다. 외부 충
 
 ---
 
-# 제2막: "DTC 올인의 대가" — CEO가 버린 선반
+# 제2막: "직접판매 올인의 대가" — CEO가 버린 선반
 
 ![DTC vs Wholesale 변화](./assets/29-dtc-wholesale-shift.svg)
 
