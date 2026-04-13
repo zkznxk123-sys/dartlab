@@ -303,7 +303,7 @@ def calcDdm(company: Any, *, basePeriod: str | None = None) -> dict | None:
             validDps = [d for d in divResult.dps if d is not None and d > 0]
             if validDps and shares and shares > 0:
                 annualDivs = [dps * shares for dps in validDps]
-    except (ImportError, ValueError, KeyError, AttributeError):
+    except (ImportError, ValueError, KeyError, AttributeError, RuntimeError, OSError):
         pass
 
     # 2순위: calcDividendPolicy CF 기반 (Report 없을 때 fallback)

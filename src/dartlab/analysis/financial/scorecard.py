@@ -75,7 +75,7 @@ def calcScorecard(company, *, basePeriod: str | None = None) -> dict | None:
             insights = analyze(company.stockCode, company=company)
             if hasattr(company, "_cache"):
                 company._cache[cacheKey] = insights
-        except (ImportError, ValueError, KeyError, AttributeError, TypeError):
+        except (ImportError, ValueError, KeyError, AttributeError, TypeError, RuntimeError, OSError):
             insights = None
 
     # 금융업 판별
