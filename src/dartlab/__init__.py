@@ -25,6 +25,53 @@ if not _IS_PYODIDE:
     # .env 자동 로드 — API 키 등 환경변수
     _loadEnv()
 
+async def prefetch(*stockCodes: str, categories: list[str] | None = None) -> None:
+    """HF에서 종목 데이터를 미리 다운로드 (Pyodide/브라우저 전용).
+
+    Company 생성 전에 await로 호출한다.
+
+    Example::
+
+        import dartlab
+        await dartlab.prefetch("005930")
+        c = dartlab.Company("005930")
+    """
+    if not _IS_PYODIDE:
+        return  # 일반 환경에서는 no-op
+
+    # pyodide 빌트인 패키지 로드 (C 확장 — micropip으로 설치 불가)
+    import pyodide_js  # type: ignore[import-not-found]
+    await pyodide_js.loadPackage(["pyarrow", "lxml", "polars", "numpy", "pydantic"])
+
+    from pyodide.http import pyfetch  # type: ignore[import-not-found]
+
+    from dartlab.core.dataConfig import DATA_RELEASES, hfBaseUrl
+
+    cats = categories or ["docs", "finance", "report"]
+    for code in stockCodes:
+        code = code.strip()
+        for cat in cats:
+            dirPath = DATA_RELEASES[cat]["dir"]
+            path = f"/data/{dirPath}/{code}.parquet"
+
+            import os
+            if os.path.exists(path):
+                continue
+
+            url = f"{hfBaseUrl(cat)}/{code}.parquet"
+            try:
+                resp = await pyfetch(url)
+                if resp.status != 200:
+                    print(f"  ⚠ {cat}/{code} 실패 (HTTP {resp.status})")
+                    continue
+                buf = await resp.bytes()
+                os.makedirs(f"/data/{dirPath}", exist_ok=True)
+                with open(path, "wb") as f:
+                    f.write(buf)
+                print(f"  {cat}/{code}: {len(buf) // 1024} KB")
+            except Exception as e:
+                print(f"  ⚠ {cat}/{code} 실패: {e}")
+
 try:
     __version__ = _pkg_version("dartlab")
 except PackageNotFoundError:
@@ -831,6 +878,12 @@ class _Module(sys.modules[__name__].__class__):
             instance = Macro()
             setattr(self, name, instance)
             return instance
+        if name == "industry":
+            from dartlab.industry import Industry
+
+            instance = Industry()
+            setattr(self, name, instance)
+            return instance
         if name == "topdown":
             from dartlab.topdown import _TopdownEntry
 
@@ -961,6 +1014,7 @@ __all__ = [
     "quant",
     "credit",
     "macro",
+    "industry",
     "topdown",
     "verbose",
     "dataDir",

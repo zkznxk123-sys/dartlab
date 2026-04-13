@@ -3870,7 +3870,7 @@ class Company:
         cacheKey = "_sector"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        from dartlab.core.sector import classify
+        from dartlab.industry.compat import classify
 
         kindDf = getKindList()
         row = kindDf.filter(pl.col("종목코드") == self.stockCode)
@@ -3915,7 +3915,7 @@ class Company:
         cacheKey = "_sectorParams"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        from dartlab.core.sector import getParams
+        from dartlab.industry.compat import getParams
 
         result = getParams(self.sector)
         self._cache[cacheKey] = result
@@ -4554,6 +4554,24 @@ class Company:
         if metric is None:
             return q()  # 가이드 DataFrame
         return q(metric, self.stockCode, **kwargs)
+
+    def industry(self) -> dict | None:
+        """이 회사의 밸류체인 산업 내 위치를 분석한다.
+
+        Returns:
+            dict | None: 산업 내 위치 정보.
+                chainId, chainName, stage, stageLabel, confidence, matches, products, peers.
+                매칭 실패 시 None.
+
+        Example::
+
+            c = Company("005930")
+            pos = c.industry()
+            # {'chainId': 'semiconductor', 'stage': 'fab', 'stageLabel': '전공정(FAB)', ...}
+        """
+        from dartlab.industry.calcs import calcChainPosition
+
+        return calcChainPosition(self)
 
     def view(self, *, port: int = 8400) -> None:
         """브라우저에서 공시 뷰어를 엽니다.

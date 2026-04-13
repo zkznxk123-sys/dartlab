@@ -168,7 +168,7 @@ def generateResearch(
         try:
             from dartlab.analysis.financial.insight.benchmark import getBenchmark
             from dartlab.analysis.financial.research.narrative import buildNarrative
-            from dartlab.core.sector.params import getParams
+            from dartlab.industry.compat import getParams
 
             sectorInfo = _safeGet(company, "sector")
             sectorEnum = getattr(sectorInfo, "sector", sectorInfo)
@@ -908,7 +908,7 @@ def _buildPeerAnalysis(
         # 섹터 파라미터에서 배수 가져오기
         sectorMultiples: dict[str, float] = {}
         try:
-            from dartlab.core.sector.params import SECTOR_PARAMS
+            from dartlab.industry.compat import SECTOR_PARAMS
 
             sp = SECTOR_PARAMS.get(sectorEnum)
             if sp:

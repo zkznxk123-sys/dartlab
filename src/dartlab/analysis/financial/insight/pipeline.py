@@ -23,7 +23,7 @@ from dartlab.analysis.financial.insight.grading import (
 from dartlab.analysis.financial.insight.summary import classifyProfile, generateSummary
 from dartlab.analysis.financial.insight.types import AnalysisResult, Anomaly, AuditDataForAnomaly, MarketDataForDistress
 from dartlab.core.finance.ratios import calcRatios
-from dartlab.core.sector.types import Sector
+from dartlab.industry.compat import Sector
 
 if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company
@@ -136,7 +136,7 @@ def _ratio_archetype_override(company: Company | None) -> str | None:
         return None
 
     try:
-        from dartlab.core.sector.types import IndustryGroup
+        from dartlab.industry.compat import IndustryGroup
     except ImportError:
         return None
 

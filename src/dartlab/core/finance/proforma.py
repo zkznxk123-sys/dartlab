@@ -610,7 +610,7 @@ def compute_company_wacc(
     Ke = Rf + beta * (ERP + CRP)
     WACC = E/(D+E) * Ke + D/(D+E) * Kd * (1-t)
     """
-    from dartlab.core.sector.types import getMarketParams
+    from dartlab.industry.compat import getMarketParams
 
     mkt = getMarketParams(currency)
     rf = risk_free_rate if risk_free_rate is not None else mkt.riskFreeRate

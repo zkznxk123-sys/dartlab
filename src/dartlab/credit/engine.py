@@ -97,7 +97,7 @@ def _isFinancial(company) -> bool:
     try:
         sector, _ = _getSectorInfo(company)
         if sector is not None:
-            from dartlab.core.sector.types import Sector
+            from dartlab.industry.compat import Sector
 
             return sector == Sector.FINANCIALS
     except (AttributeError, ImportError):
@@ -143,7 +143,7 @@ def _isCyclical(sector) -> bool:
     if sector is None:
         return False
     try:
-        from dartlab.core.sector.types import Sector
+        from dartlab.industry.compat import Sector
 
         return sector in (Sector.ENERGY, Sector.MATERIALS)
     except ImportError:

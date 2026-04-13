@@ -12,7 +12,7 @@ from dartlab.core.finance.ols import (
     _detectStructuralBreak,
     _ols,
 )
-from dartlab.core.sector.types import SectorParams
+from dartlab.industry.compat import SectorParams
 
 # ── 결과 타입 ──────────────────────────────────────────────
 
