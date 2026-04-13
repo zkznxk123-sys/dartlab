@@ -18,6 +18,27 @@ from dartlab.core.dataConfig import (
 
 _IS_PYODIDE = sys.platform == "emscripten"
 
+
+def readParquetSafe(path) -> pl.DataFrame:
+    """polars read_parquet with pyarrow fallback (pyodide WASM 호환).
+
+    polars WASM wheel은 read_parquet이 비활성이므로
+    pyarrow.parquet.read_table → pl.from_arrow 로 우회한다.
+    일반 환경에서는 pl.read_parquet 그대로 사용.
+    """
+    if not _IS_PYODIDE:
+        return pl.read_parquet(path)
+    import io
+    import pyarrow.parquet as pq
+
+    data = Path(path).read_bytes() if not isinstance(path, bytes) else path
+    arrow_table = pq.read_table(io.BytesIO(data))
+    try:
+        return pl.from_arrow(arrow_table)
+    except (ModuleNotFoundError, ImportError):
+        return pl.DataFrame(arrow_table.to_pydict())
+
+
 if not _IS_PYODIDE:
     import socket
     from urllib.error import URLError
@@ -1077,12 +1098,28 @@ def _loadDataPyodide(
     path = Path(f"/data/{dirPath}/{stockCode}.parquet")
 
     if not path.exists():
-        raise FileNotFoundError(
-            f"Pyodide FS에 {path} 없음. JS에서 prefetchParquet(py, '{stockCode}')를 먼저 호출하세요."
-        )
+        _pyodideFetchToFS(stockCode, category, dirPath, path)
 
     arrow_table = pq.read_table(io.BytesIO(path.read_bytes()))
-    df = pl.from_arrow(arrow_table)
+    # polars WASM에서 from_arrow 시 pyarrow 미인식 문제 우회:
+    # polars.dependencies의 lazy import 캐시를 강제 갱신
+    try:
+        df = pl.from_arrow(arrow_table)
+    except (ModuleNotFoundError, ImportError):
+        import pyarrow as _pa  # noqa: F811 — 이미 import됐지만 polars에 인식시키기 위해
+
+        try:
+            import polars.dependencies as _pdeps
+
+            _pdeps._lazy_import.cache_clear() if hasattr(_pdeps._lazy_import, "cache_clear") else None
+            _pdeps.pyarrow = _pa  # type: ignore[attr-defined]
+        except (AttributeError, TypeError):
+            pass
+        try:
+            df = pl.from_arrow(arrow_table)
+        except (ModuleNotFoundError, ImportError):
+            # 최종 fallback: pydict 경유 (데이터 타입 손실 가능)
+            df = pl.DataFrame(arrow_table.to_pydict())
 
     # sinceYear 필터
     if sinceYear is not None:
@@ -1101,3 +1138,74 @@ def _loadDataPyodide(
             df = df.select(available)
 
     return _normalizeLoadedFrame(df, category)
+
+
+def _pyodideFetchToFS(stockCode: str, category: str, dirPath: str, path: Path) -> None:
+    """Pyodide: HF에서 parquet을 fetch하여 FS에 저장.
+
+    여러 pyodide 환경(브라우저/xlwings lite/JupyterLite/Node)을 지원하기 위해
+    3가지 방법을 순차 시도한다.
+    """
+    url = f"{hfBaseUrl(category)}/{stockCode}.parquet"
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    buf = None
+
+    # 방법 1: pyodide.http.pyfetch (async → run_sync)
+    try:
+        from pyodide.http import pyfetch  # type: ignore[import-not-found]
+
+        import asyncio
+
+        async def _fetch():
+            resp = await pyfetch(url)
+            if resp.status != 200:
+                raise RuntimeError(f"HTTP {resp.status}")
+            return await resp.bytes()
+
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            # 이미 async context — coroutine을 직접 await할 수 없으므로 방법 2로
+            raise RuntimeError("event loop running")
+        buf = loop.run_until_complete(_fetch())
+    except Exception:
+        pass
+
+    # 방법 2: JS XMLHttpRequest sync + overrideMimeType
+    if buf is None:
+        try:
+            from js import XMLHttpRequest  # type: ignore[import-not-found]
+
+            xhr = XMLHttpRequest.new()
+            xhr.open("GET", url, False)
+            xhr.overrideMimeType("text/plain; charset=x-user-defined")
+            xhr.send()
+            if xhr.status == 200:
+                raw = xhr.responseText
+                buf = bytes(ord(c) & 0xFF for c in raw)
+        except Exception:
+            pass
+
+    # 방법 3: pyodide.http.open_url (텍스트 전용이지만 최후 수단)
+    if buf is None:
+        try:
+            from pyodide.http import open_url  # type: ignore[import-not-found]
+
+            resp = open_url(url)
+            raw = resp.read()
+            buf = raw.encode("latin-1") if isinstance(raw, str) else raw
+        except Exception:
+            pass
+
+    if buf is None:
+        raise RuntimeError(
+            f"Pyodide fetch 실패: {url}\n"
+            "데이터를 수동으로 로드하세요:\n"
+            "  from pyodide.http import pyfetch\n"
+            f"  resp = await pyfetch('{url}')\n"
+            f"  buf = await resp.bytes()\n"
+            "  import os; os.makedirs('/data/{dirPath}', exist_ok=True)\n"
+            f"  open('/data/{dirPath}/{stockCode}.parquet', 'wb').write(buf)"
+        )
+
+    path.write_bytes(buf)

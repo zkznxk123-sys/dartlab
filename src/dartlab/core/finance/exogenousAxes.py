@@ -405,7 +405,9 @@ def _lookupFromProductIndex(stockCode: str) -> str | None:
             if not path.exists():
                 _PRODUCT_INDEX_CACHE = {}
                 return None
-            df = pl.read_parquet(path)
+            from dartlab.core.dataLoader import readParquetSafe
+
+            df = readParquetSafe(path)
             _PRODUCT_INDEX_CACHE = {row["stockCode"]: row["product"] for row in df.iter_rows(named=True)}
         except (ImportError, KeyError):
             _PRODUCT_INDEX_CACHE = {}

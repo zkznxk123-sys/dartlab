@@ -37,6 +37,8 @@ def loadSectionProfileTable() -> pl.DataFrame | None:
     """패키지에 포함된 sectionProfileTable parquet을 DataFrame으로 로드한다."""
     try:
         with packagedArtifactPath("sectionProfileTable.parquet") as path:
-            return pl.read_parquet(path)
+            from dartlab.core.dataLoader import readParquetSafe
+
+            return readParquetSafe(path)
     except FileNotFoundError:
         return None

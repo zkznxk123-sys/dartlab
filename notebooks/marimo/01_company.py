@@ -5,23 +5,16 @@
 
 import marimo
 
-__generated_with = "0.22.0"
+__generated_with = "0.23.1"
 app = marimo.App(width="medium")
 
 
 @app.cell
 def _():
     import dartlab
-    c = dartlab.Company("005930")
+    c = dartlab.Company("TSLA")
     c.corpName
     return (c,)
-
-
-@app.cell
-def _(c):
-    # 사용 가능한 topic 목록
-    c.topics
-    return
 
 
 @app.cell
@@ -54,32 +47,13 @@ def _(c):
 
 @app.cell
 def _(c):
-    # 정형 공시 — 배당
-    c.show("dividend")
-    return
-
-
-@app.cell
-def _(c):
     c.sections.head(20)
     return
 
 
 @app.cell
 def _(c):
-    c.trace("BS")
-    return
-
-
-@app.cell
-def _(c):
     c.filings().head(10)
-    return
-
-
-@app.cell
-def _(c):
-    c.diff()
     return
 
 

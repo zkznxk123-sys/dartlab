@@ -152,6 +152,14 @@ def getKindList(*, forceRefresh: bool = False) -> pl.DataFrame:
     """
     global _memory, _memoryTs, _searchCache
 
+    import sys
+
+    if sys.platform == "emscripten":
+        # Pyodide: KRX API CORS 차단 → 빈 DataFrame (corpName은 docs에서 추출)
+        if _memory is None:
+            _memory = pl.DataFrame({"회사명": [], "종목코드": []})
+        return _memory
+
     if not forceRefresh and _memory is not None:
         if (time.time() - _memoryTs) < CACHE_TTL:
             return _memory

@@ -50,22 +50,30 @@ classifiers = [
 ]
 dependencies = [
     # core (pyodide 호환 — polars, numpy, bs4, lxml은 pyodide 빌트인)
+    # core
     "beautifulsoup4>=4.14.3,<5",
-    "polars>=1.0.0,<2",
-    "numpy>=1.26.0,<3",
     "diff-match-patch>=20230430",
     "openpyxl>=3.1.5,<4",
-    # native extensions — pyodide에서는 빌트인이므로 제외
+    # C 확장 — 일반: PyPI, pyodide: 빌트인 (버전 무관)
     "lxml>=6.0.2,<7; sys_platform != 'emscripten'",
+    "lxml; sys_platform == 'emscripten'",
+    "polars>=1.0.0,<2; sys_platform != 'emscripten'",
+    "polars; sys_platform == 'emscripten'",
+    "numpy>=1.26.0,<3; sys_platform != 'emscripten'",
+    "numpy; sys_platform == 'emscripten'",
+    "pyarrow; sys_platform == 'emscripten'",
+    # network
     "httpx>=0.28.1,<1; sys_platform != 'emscripten'",
+    "httpx; sys_platform == 'emscripten'",
     "huggingface-hub>=0.20.0,<1; sys_platform != 'emscripten'",
     "rich>=14.3.3,<15; sys_platform != 'emscripten'",
-    # ai providers
+    "rich; sys_platform == 'emscripten'",
+    # ai providers (pyodide 불필요)
     "openai>=1.0.0,<3; sys_platform != 'emscripten'",
     "google-genai>=1.0.0,<2; sys_platform != 'emscripten'",
     "anthropic>=0.30.0,<2; sys_platform != 'emscripten'",
     # server (pyodide 불필요)
-    "marimo>=0.22.0; sys_platform != 'emscripten'",
+    "marimo>=0.23.1; sys_platform != 'emscripten'",
     "fastapi>=0.135.1,<1; sys_platform != 'emscripten'",
     "uvicorn[standard]>=0.30.0,<1; sys_platform != 'emscripten'",
     "sse-starlette>=2.0.0,<3; sys_platform != 'emscripten'",
@@ -96,6 +104,8 @@ build-backend = "hatchling.build"
 packages = ["src/dartlab"]
 artifacts = [
     "src/dartlab/ui/build/**",
+    "src/dartlab/**/*.json",
+    "src/dartlab/**/*.parquet",
 ]
 exclude = [
     "**/_reference/**",
