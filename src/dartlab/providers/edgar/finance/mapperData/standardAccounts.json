@@ -3,7 +3,7 @@
     "source": "US-GAAP Taxonomy + Custom Design",
     "description": "EDGAR 표준계정 코드 - US-GAAP 기반 (핵심 재무제표 본문 항목)",
     "version": "3.0.0",
-    "totalAccounts": 204,
+    "totalAccounts": 206,
     "boundary": "재무제표 본문(BS/IS/CF) + 자본변동표(EQ) + 포괄손익(CI) + 주석공시(NT) 전체 항목",
     "statementMapping": {
       "BS": "Balance Sheet",
@@ -2799,6 +2799,26 @@
       "commonTags": [],
       "code": "IS073",
       "line": 730
+    },
+    {
+      "code": "CF061",
+      "snakeId": "stock_compensation_cf",
+      "korName": "주식보상비용(현금흐름)",
+      "engName": "Stock Compensation (CF)",
+      "stmt": "CF",
+      "level": 3,
+      "line": 610,
+      "commonTags": []
+    },
+    {
+      "code": "CF063",
+      "snakeId": "income_tax_cf",
+      "korName": "법인세(현금흐름)",
+      "engName": "Income Tax (CF)",
+      "stmt": "CF",
+      "level": 3,
+      "line": 630,
+      "commonTags": []
     }
   ]
 }
