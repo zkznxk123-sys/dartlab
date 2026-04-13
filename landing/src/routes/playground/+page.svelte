@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	const HF = 'https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main';
 	const WHEEL_URL = `${HF}/pyodide/dartlab-0.9.9-py3-none-any.whl`;
 	const PYODIDE_CDN = 'https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js';
@@ -44,7 +45,6 @@
 		if (loading || ready) return;
 		loading = true;
 		logs = [];
-		resultHtml = '';
 
 		try {
 			// 1. Pyodide
@@ -182,7 +182,7 @@ except Exception:
 	<div class="mx-auto max-w-4xl px-6 pt-20 pb-16">
 		<!-- Header -->
 		<div class="mb-10">
-			<a href="/" class="text-dl-text-muted text-sm hover:text-dl-text transition-colors">← dartlab</a>
+			<a href="{base}/" class="text-dl-text-muted text-sm hover:text-dl-text transition-colors">← dartlab</a>
 			<h1 class="text-3xl font-bold mt-3 mb-2">Playground</h1>
 			<p class="text-dl-text-muted">브라우저에서 바로 실행. 설치 없음.</p>
 		</div>
