@@ -50,7 +50,7 @@ def _extractYearly(year: str) -> pl.DataFrame:
         .filter(pl.col("account_id_std").is_in(snakeIds))
         .filter(pl.col("bsns_year") == year)
         .filter(pl.col("reprt_nm") == "4분기")  # 연간 누적만
-        .filter(pl.col("sj_div").is_in(["IS", "BS"]))
+        .filter(pl.col("sj_div").is_in(["IS", "CIS", "BS"]))
         .select(["stockCode", "fs_div", "account_id_std", "thstrm_amount"])
         .collect()
     )
@@ -66,21 +66,16 @@ def _extractYearly(year: str) -> pl.DataFrame:
         .alias("amount")
     )
 
-    # CFS 우선, OFS fallback
-    cfsCodes = df.filter(pl.col("fs_div") == "CFS").select("stockCode").unique()
-    cfs = df.filter(pl.col("fs_div") == "CFS")
-    ofs = df.filter(pl.col("fs_div") == "OFS").join(cfsCodes, on="stockCode", how="anti")
-    merged = pl.concat([cfs, ofs])
-
-    # pivot: stockCode × account
-    result = pl.DataFrame({"stockCode": merged["stockCode"].unique().sort()})
+    # 계정별로 CFS 우선, OFS fallback
+    allCodes = df["stockCode"].unique().sort()
+    result = pl.DataFrame({"stockCode": allCodes})
 
     for snakeId, alias in _ACCOUNTS.items():
-        acct = (
-            merged.filter(pl.col("account_id_std") == snakeId)
-            .group_by("stockCode")
-            .agg(pl.col("amount").first().alias(alias))
-        )
+        subset = df.filter(pl.col("account_id_std") == snakeId)
+        cfs = subset.filter(pl.col("fs_div") == "CFS").group_by("stockCode").agg(pl.col("amount").first().alias(alias))
+        ofsCodes = cfs.select("stockCode")
+        ofs = subset.filter(pl.col("fs_div") == "OFS").join(ofsCodes, on="stockCode", how="anti").group_by("stockCode").agg(pl.col("amount").first().alias(alias))
+        acct = pl.concat([cfs, ofs])
         result = result.join(acct, on="stockCode", how="left")
 
     return result
@@ -89,29 +84,44 @@ def _extractYearly(year: str) -> pl.DataFrame:
 def attachFinancials(
     nodes: list[IndustryNode],
     *,
-    year: str = "2024",
+    years: list[str] | None = None,
 ) -> list[IndustryNode]:
     """nodes에 재무 데이터를 붙인다.
+
+    최신 연도부터 시도하여 데이터가 있는 연도를 사용한다.
 
     Parameters
     ----------
     nodes : list[IndustryNode]
         기존 노드 리스트.
-    year : str
-        재무 데이터 연도.
+    years : list[str] | None
+        시도할 연도 목록 (내림차순). None이면 2025→2024→2023.
 
     Returns
     -------
     list[IndustryNode]
         revenue 필드가 채워진 노드 리스트.
     """
-    fin = _extractYearly(year)
-    if fin.height == 0:
+    if years is None:
+        years = ["2025", "2024", "2023"]
+
+    # 최신 연도부터 merge
+    import polars as pl
+
+    allFin: dict[str, dict] = {}
+    for year in years:
+        fin = _extractYearly(year)
+        if fin.height == 0:
+            continue
+        for row in fin.iter_rows(named=True):
+            code = row["stockCode"]
+            if code not in allFin:  # 최신 연도 우선
+                allFin[code] = row
+
+    if not allFin:
         return nodes
 
-    finMap: dict[str, dict] = {}
-    for row in fin.iter_rows(named=True):
-        finMap[row["stockCode"]] = row
+    finMap = allFin
 
     for node in nodes:
         data = finMap.get(node.stockCode)

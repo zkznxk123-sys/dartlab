@@ -109,7 +109,7 @@ class Industry:
         ind = getIndustry(industryId)
         stageLabels = {s.key: s.name for s in ind.stages} if ind else {}
 
-        return pl.DataFrame(
+        df = pl.DataFrame(
             {
                 "종목코드": [n.stockCode for n in filtered],
                 "종목명": [n.corpName for n in filtered],
@@ -117,10 +117,12 @@ class Industry:
                 "공정명": [stageLabels.get(n.stage, n.stage) for n in filtered],
                 "역할": [n.role for n in filtered],
                 "위치": [n.stream for n in filtered],
+                "매출(억)": [round(n.revenue / 1e8, 0) if n.revenue else None for n in filtered],
                 "신뢰도": [n.confidence for n in filtered],
                 "소스": [n.source for n in filtered],
             }
-        ).sort("신뢰도", descending=True)
+        )
+        return df.sort("매출(억)", descending=True, nulls_last=True)
 
     def _summary(self, industryId: str, *, year: str = "2024") -> pl.DataFrame:
         """공정별 매출/이익 집계."""
@@ -141,6 +143,55 @@ class Industry:
         from dartlab.industry.build.pipeline import buildIndustryMap
 
         buildIndustryMap(skipDocs=skipDocs)
+
+    def edges(self, industryId: str | None = None, stockCode: str | None = None) -> pl.DataFrame:
+        """공급-수요·계열 관계 조회.
+
+        Parameters
+        ----------
+        industryId : str | None
+            산업 ID로 필터.
+        stockCode : str | None
+            특정 종목의 관계만.
+
+        Returns
+        -------
+        pl.DataFrame
+            columns: from코드, from이름, to코드, to이름, 관계, 산업, 신뢰도, 소스, 근거
+        """
+        from dartlab.industry.build.pipeline import loadEdges
+
+        allEdges = loadEdges()
+        filtered = allEdges
+
+        if industryId:
+            filtered = [e for e in filtered if e.industry == industryId]
+        if stockCode:
+            filtered = [e for e in filtered if e.fromCode == stockCode or e.toCode == stockCode]
+
+        if not filtered:
+            return pl.DataFrame(
+                schema={
+                    "from코드": pl.Utf8, "from이름": pl.Utf8,
+                    "to코드": pl.Utf8, "to이름": pl.Utf8,
+                    "관계": pl.Utf8, "산업": pl.Utf8,
+                    "신뢰도": pl.Float64, "소스": pl.Utf8, "근거": pl.Utf8,
+                }
+            )
+
+        return pl.DataFrame(
+            {
+                "from코드": [e.fromCode for e in filtered],
+                "from이름": [e.fromName for e in filtered],
+                "to코드": [e.toCode for e in filtered],
+                "to이름": [e.toName for e in filtered],
+                "관계": [e.edgeType for e in filtered],
+                "산업": [e.industry for e in filtered],
+                "신뢰도": [e.confidence for e in filtered],
+                "소스": [e.source for e in filtered],
+                "근거": [e.evidence for e in filtered],
+            }
+        )
 
     def map(self, industryId: str) -> Any:
         """IndustryDef 객체를 반환 (taxonomy 조회)."""

@@ -53,6 +53,7 @@ class IndustryNode:
     source: str = ""  # kindlist / product / docs / ai / manual
     primary: bool = True
     updatedAt: str = ""
+    revenue: float | None = None  # 매출액 (원)
 
     def toDict(self) -> dict:
         return {
@@ -66,6 +67,7 @@ class IndustryNode:
             "source": self.source,
             "primary": self.primary,
             "updatedAt": self.updatedAt,
+            "revenue": self.revenue,
         }
 
     @staticmethod
@@ -81,6 +83,7 @@ class IndustryNode:
             source=d.get("source", ""),
             primary=d.get("primary", True),
             updatedAt=d.get("updatedAt", ""),
+            revenue=d.get("revenue"),
         )
 
 

@@ -113,6 +113,14 @@ def buildIndustryMap(
     for n in nodes:
         n.updatedAt = today
 
+    # 재무 데이터 join (revenue → nodes)
+    from dartlab.industry.build.financials import attachFinancials
+
+    nodes = attachFinancials(nodes)
+    revCount = sum(1 for n in nodes if n.revenue)
+    if verbose:
+        print(f"[industry] 재무: {revCount}사 매출 데이터 join")
+
     # 엣지 빌드
     from dartlab.industry.build.edges import buildAllEdges
 
