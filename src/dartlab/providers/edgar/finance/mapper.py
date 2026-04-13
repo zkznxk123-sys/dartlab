@@ -26,6 +26,12 @@ EDGAR_TO_DART_ALIASES = SNAKEID_ALIASES
 STMT_OVERRIDES: dict[tuple[str, str], str] = {
     ("NetIncomeLoss", "IS"): "net_profit",
     ("NetIncomeLoss", "CF"): "net_income_cf",
+    ("DepreciationDepletionAndAmortization", "IS"): "depreciation_amortization",
+    ("DepreciationDepletionAndAmortization", "CF"): "depreciation_cf",
+    ("IncomeTaxExpenseBenefit", "IS"): "income_tax_expense",
+    ("IncomeTaxExpenseBenefit", "CF"): "income_tax_cf",
+    ("ShareBasedCompensation", "IS"): "stock_compensation_expense",
+    ("ShareBasedCompensation", "CF"): "stock_compensation_cf",
 }
 
 
@@ -121,6 +127,20 @@ class EdgarMapper:
                 for tag in acct.get("commonTags", []):
                     stmtTags[stmt].add(tag)
         return stmtTags
+
+    @classmethod
+    def getPrimaryStmtMap(cls) -> dict[str, str]:
+        """commonTag → 해당 계정의 primary stmt (1:1). 충돌 태그는 계정의 stmt 우선."""
+        cls._ensureLoaded()
+        result: dict[str, str] = {}
+        for acct in cls._accounts:
+            stmt = acct["stmt"]
+            if stmt in ("NT", "EQ"):
+                continue  # notes/equity는 IS/BS/CF에 넣지 않음
+            for tag in acct.get("commonTags", []):
+                if tag not in result:
+                    result[tag] = stmt
+        return result
 
     @classmethod
     def getTagsForSnakeIds(cls, snakeIds: list[str]) -> set[str]:

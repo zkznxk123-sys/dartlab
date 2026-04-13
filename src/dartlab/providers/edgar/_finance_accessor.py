@@ -16,17 +16,18 @@ class _FinanceAccessor:
     def __init__(self, company: Company):
         self._company = company
 
-    def _stmtDf(self, stmtKey: str) -> pl.DataFrame | None:
-        cacheKey = f"_finance_{stmtKey}"
+    def _stmtDf(self, stmtKey: str, *, freq: str = "Q") -> pl.DataFrame | None:
+        """재무제표 DataFrame. freq="Q"(분기, 기본) 또는 "Y"(연간)."""
+        cacheKey = f"_finance_{stmtKey}_{freq}"
         if cacheKey in self._company._cache:
             return self._company._cache[cacheKey]
 
-        annual = self._company._buildFinanceSeries(freq="Y")
-        if annual is None:
+        result = self._company._buildFinanceSeries(freq=freq)
+        if result is None:
             self._company._cache[cacheKey] = None
             return None
 
-        series, years = annual
+        series, years = result
         stmtData = series.get(stmtKey)
         if not stmtData:
             self._company._cache[cacheKey] = None

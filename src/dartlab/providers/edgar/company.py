@@ -1547,13 +1547,14 @@ class Company:
                 source = srcRows["source"][0]
 
         if source == "finance":
+            freq = _kw.get("freq", "Q")
             if topic == "ratios":
                 df = self._buildRatios()
                 return self._applyPeriodFilter(df, period) if df is not None else None
             if topic == "SCE":
                 df = self._finance.SCE
                 return self._applyPeriodFilter(df, period) if df is not None else None
-            df = getattr(self._finance, topic, None)
+            df = self._finance._stmtDf(topic, freq=freq)
             return self._applyPeriodFilter(df, period) if df is not None else None
 
         # docs — blockType에 따라 text/table 반환
