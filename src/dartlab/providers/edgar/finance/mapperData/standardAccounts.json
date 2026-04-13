@@ -1532,7 +1532,7 @@
     },
     {
       "code": "IS071",
-      "stmt": "IS",
+      "stmt": "EQ",
       "snakeId": "dividends_common_stock",
       "korName": "보통주배당금총액",
       "engName": "Common Stock Dividends",

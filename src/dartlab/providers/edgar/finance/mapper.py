@@ -157,11 +157,18 @@ class EdgarMapper:
 
     @classmethod
     def getAccountStmt(cls, snakeId: str) -> str | None:
-        """snakeId의 정식 재무제표 유형 (BS/IS/CF/CI/NT/EQ). 없으면 None."""
+        """snakeId의 정식 재무제표 유형 (BS/IS/CF/CI/NT/EQ). SNAKEID_ALIASES 역참조 포함."""
         cls._ensureLoaded()
         for acct in cls._accounts:
             if acct["snakeId"] == snakeId:
                 return acct.get("stmt")
+        # alias 원본에서 찾기
+        for src, tgt in EDGAR_TO_DART_ALIASES.items():
+            if tgt == snakeId or src == snakeId:
+                other = src if tgt == snakeId else tgt
+                for acct in cls._accounts:
+                    if acct["snakeId"] == other:
+                        return acct.get("stmt")
         return None
 
     @classmethod

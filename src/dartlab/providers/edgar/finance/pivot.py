@@ -94,7 +94,7 @@ def _buildTimeseriesFromFacts(
             # 단, _change 접미사(운전자본 변동)는 CF에서 정당하므로 예외
             if not dartSid.endswith("_change"):
                 canonStmt = EdgarMapper.getAccountStmt(dartSid)
-                if canonStmt and canonStmt in ("BS", "IS", "CF", "CI") and canonStmt != stmt:
+                if canonStmt and canonStmt in ("BS", "IS", "CF", "CI", "EQ", "NT") and canonStmt != stmt:
                     continue
 
             isCommon = EdgarMapper.isCommonTag(tag)
@@ -184,7 +184,7 @@ def buildAnnual(
             # canonStmt 검증 — BS 항목이 IS에 섞이는 것 방지
             if not snakeId.endswith("_change"):
                 canonStmt = EdgarMapper.getAccountStmt(snakeId)
-                if canonStmt and canonStmt in ("BS", "IS", "CF", "CI") and canonStmt != sjDiv:
+                if canonStmt and canonStmt in ("BS", "IS", "CF", "CI", "EQ", "NT") and canonStmt != sjDiv:
                     continue
             vals = qSeries.get(sjDiv, {}).get(snakeId, [])
             annual: list[Optional[float]] = [None] * nYears
