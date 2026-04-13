@@ -1,29 +1,17 @@
-"""WICS 섹터 분류 엔진.
+"""WICS 섹터 분류 — industry/compat.py에 위임.
 
-KIND 업종명 + 주요제품 키워드로 투자 관점 섹터 분류.
-
-사용법::
-
-    from dartlab.core.sector import classify, getParams
-
-    info = classify("삼성전자", kindIndustry="통신 및 방송 장비 제조업")
-    info.sector       # Sector.IT
-    info.industryGroup  # IndustryGroup.SEMICONDUCTOR
-
-    params = getParams(info)
-    params.perMultiple  # 15
-    params.discountRate  # 13.0
+하위 호환용 shim. 모든 실제 구현은 dartlab.industry.compat.
 """
 
-from dartlab.core.sector.classifier import classify
-from dartlab.core.sector.params import getParams
-from dartlab.core.sector.types import (
+from dartlab.industry.compat import (
     IndustryGroup,
     MarketParams,
     Sector,
     SectorInfo,
     SectorParams,
+    classify,
     getMarketParams,
+    getParams,
 )
 
 __all__ = [

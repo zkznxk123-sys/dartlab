@@ -156,6 +156,8 @@ _DART_ONLY_EXEMPT: set[str] = {
     "sectorParams",  # KRX 섹터 파라미터
     # ── 데이터 구조 차이 (DART XBRL vs EDGAR XBRL 형태 상이) ──
     "sceMatrix",  # DART SCE matrix (EDGAR SCE 구조 다름)
+    # ── 산업엔진 (DART docs 공정/거래처 텍스트 기반, SEC에 동등 구조 없음) ──
+    "industry",  # DART docs 밸류체인 분석 (SEC 공정 구조화 데이터 없음)
 }
 
 

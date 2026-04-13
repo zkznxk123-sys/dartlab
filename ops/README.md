@@ -14,10 +14,12 @@
 | [search.md](search.md) | L0 | core/search/ | 공시 시맨틱 검색 *(alpha)* |
 | [mappers.md](mappers.md) | L0 | core/mappers/ | 매퍼 통합 엔진 — 계정/topic/alias/flow/notes, 학습 메커니즘 |
 | [listing.md](listing.md) | facade | listing.py | 목록 조회 단일 진입점 — `dartlab.listing(kind, ...)` |
+| [pyodide.md](pyodide.md) | 교차 | pyodide/ | 브라우저/Excel 실행 — Pyodide WASM *(alpha)* |
 | [analysis.md](analysis.md) | L2 | analysis/ | 재무 심층분석 + 전망 + 가치평가, 6막 인과 구조 |
 | [macro.md](macro.md) | L2 | macro/ | 시장 레벨 매크로 분석 — Company 불필요 |
 | [review.md](review.md) | L3 | review/ | 이야기꾼 — L2 엔진 4개 + scan 소비, 보고서 조립 + 4 출력 형식 |
 | [credit.md](credit.md) | L2 | credit/ | 독립 신용평가 (dCR 20단계, 7축, 투명 공개) |
+| [industry.md](industry.md) | L2 | industry/ | 산업 매퍼엔진 — 데이터 주도 산업지도, 노드-엣지, 지속 학습 |
 | [ai.md](ai.md) | L4 | ai/ | 적극적 분석가, 5 provider (AI + 사람 둘 다 L4 소비자) |
 | [guide.md](guide.md) | 교차 | guide/ | 안내 데스크 + 교육 안내자, 4층위 |
 | [channel.md](channel.md) | L4 | channel/ | 외부 공유 — Microsoft DevTunnels 자동 셋업, `dartlab channel` |

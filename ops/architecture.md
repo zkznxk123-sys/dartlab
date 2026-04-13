@@ -13,7 +13,8 @@ L1 (데이터)     providers/     DART, EDGAR, EDINET
 L2 (분석)       analysis/      재무 + 전망 + 가치평가
                 macro/         시장 레벨 매크로 분석 (Company 불필요)
                 credit/        독립 신용평가
-                review/        블록식 조합 보고서 (analysis + credit)
+                industry/      산업지도 + 밸류체인 분석
+                review/        블록식 조합 보고서 (analysis + credit + industry)
 L3 (AI)         ai/            적극적 분석가
 L4 (표현)       vscode/        VSCode 확장
 
@@ -21,9 +22,9 @@ L4 (표현)       vscode/        VSCode 확장
                 viz/           시각화 (차트 + 다이어그램)
 ```
 
-### 5 분석 엔진 — 두 소비자를 최고로 지원
+### 6 분석 엔진 — 두 소비자를 최고로 지원
 
-analysis, scan, macro, credit, quant 는 **두 소비자(review, AI)**를 모두 최고로 지원한다:
+analysis, scan, macro, credit, quant, industry 는 **두 소비자(review, AI)**를 모두 최고로 지원한다:
 
 1. **데이터 소비** — 각자의 데이터 소스에서 원본 수집
 2. **분석기준 생성** — 학술/실무 검증된 기준으로 평가
@@ -39,6 +40,7 @@ analysis, scan, macro, credit, quant 는 **두 소비자(review, AI)**를 모두
 | macro | 거시지표 (FRED/ECOS) | 사이클/금리/자산/심리/유동성 | review 매크로 + AI 환경 판단 |
 | credit | 신용등급/재무비율 | 등급/이력/플래그 | review 안정성 + AI 신용 검증 |
 | quant | 주가 OHLCV + 수급 | 추세/리스크/수급/전략검증/재무교차 | review 시장분석 + AI 기술 판단 |
+| industry | docs 텍스트 (사업개요/제품/원재료) | 밸류체인 위치/공급망/산업지도 | review 산업블록 + AI 산업 분석 |
 
 **소비자별 차이:**
 - **review가 쓸 때**: 엔진의 calc 결과를 블록으로 변환하여 보고서에 배치. 해석 제공 안 함.
@@ -89,6 +91,7 @@ review/
 | analysis | L2 | `c.analysis("그룹", "축")` | 재무 심층분석 |
 | macro | L2 | `dartlab.macro("축")` | 시장 레벨 매크로 분석 |
 | credit | L2 | `c.credit()` | 독립 신용평가 |
+| industry | L2 | `dartlab.industry("semiconductor")`, `c.industry()` | 산업지도 + 밸류체인 |
 | review | L2 | `c.review()` | 블록식 조합 보고서 |
 | search | L0 | `dartlab.search("키워드")` | 공시 원문 검색 |
 | ai | L3 | `dartlab.ask("질문")` | AI 분석가 |
