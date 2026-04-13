@@ -53,9 +53,15 @@ class _FinanceAccessor:
             return None
 
         result = pl.DataFrame(rows)
-        # 기간 컬럼 역순 정렬
+        # 기간 컬럼: "2025-Q4" → "2025Q4" (DART 형식 통일) + 역순 정렬
         periodCols = [c for c in result.columns if c not in ("snakeId", "항목")]
-        result = result.select(["snakeId", "항목"] + periodCols[::-1])
+        renameMap = {c: c.replace("-", "") for c in periodCols if "-" in c}
+        if renameMap:
+            result = result.rename(renameMap)
+            periodCols = [renameMap.get(c, c) for c in periodCols]
+        # 전부 null인 빈 컬럼 제거
+        nonEmpty = [c for c in periodCols if result[c].null_count() < result.height]
+        result = result.select(["snakeId", "항목"] + nonEmpty[::-1])
         self._company._cache[cacheKey] = result
         return result
 

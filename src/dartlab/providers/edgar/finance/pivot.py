@@ -178,6 +178,9 @@ def buildAnnual(
         snakeIds.update(fyMap.get(sjDiv, {}).keys())
 
         for snakeId in snakeIds:
+            # _detail/_note는 IS/BS/CF 본문에서 제외
+            if snakeId.endswith("_detail") or snakeId.endswith("_note"):
+                continue
             vals = qSeries.get(sjDiv, {}).get(snakeId, [])
             annual: list[Optional[float]] = [None] * nYears
 

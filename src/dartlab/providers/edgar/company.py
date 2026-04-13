@@ -1502,6 +1502,18 @@ class Company:
                 return None
             return self._transposeToVertical(wide, period)
 
+        # Finance topic(IS/BS/CF/CIS/SCE/ratios) — sections 거치지 않고 직접
+        _FINANCE_TOPICS = {"IS", "BS", "CF", "CIS", "SCE", "ratios"}
+        if topic in _FINANCE_TOPICS:
+            freq = _kw.get("freq", "Q")
+            if topic == "ratios":
+                df = self._buildRatios()
+            elif topic == "SCE":
+                df = self._finance.SCE
+            else:
+                df = self._finance._stmtDf(topic, freq=freq)
+            return self._applyPeriodFilter(df, period) if df is not None else None
+
         # Notes 12 항목 — DART show("inventory") 와 동일 패턴 (XBRL 수치 태그 기반)
         try:
             from dartlab.providers.edgar.docs.notesParsers import availableCategories

@@ -111,6 +111,17 @@ def get_korean_labels() -> dict[str, str]:
         if src not in result and tgt in result:
             result[src] = result[tgt]
 
+    # 6. 선행 번호 제거 — "4.금융비용" → "금융비용"
+    import re as _re
+
+    _NUM_PREFIX = _re.compile(r"^\d+[.\s·]+")
+    for sid in result:
+        val = result[sid]
+        if val and val[0].isdigit():
+            cleaned = _NUM_PREFIX.sub("", val)
+            if cleaned:
+                result[sid] = cleaned
+
     return result
 
 
