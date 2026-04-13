@@ -86,6 +86,17 @@ def _buildTimeseriesFromFacts(
             if dartSid is None:
                 continue
 
+            # NT(주석) 상세 항목은 IS/BS/CF 본문에서 제외
+            if dartSid.endswith("_detail") or dartSid.endswith("_note"):
+                continue
+
+            # snakeId의 정식 stmt와 현재 stmt가 다르면 제외 (BS 항목이 IS에 섞이는 것 방지)
+            # 단, _change 접미사(운전자본 변동)는 CF에서 정당하므로 예외
+            if not dartSid.endswith("_change"):
+                canonStmt = EdgarMapper.getAccountStmt(dartSid)
+                if canonStmt and canonStmt in ("BS", "IS", "CF", "CI") and canonStmt != stmt:
+                    continue
+
             isCommon = EdgarMapper.isCommonTag(tag)
 
             for p in periodCols:

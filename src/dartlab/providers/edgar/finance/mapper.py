@@ -143,6 +143,15 @@ class EdgarMapper:
         return result
 
     @classmethod
+    def getAccountStmt(cls, snakeId: str) -> str | None:
+        """snakeId의 정식 재무제표 유형 (BS/IS/CF/CI/NT/EQ). 없으면 None."""
+        cls._ensureLoaded()
+        for acct in cls._accounts:
+            if acct["snakeId"] == snakeId:
+                return acct.get("stmt")
+        return None
+
+    @classmethod
     def getTagsForSnakeIds(cls, snakeIds: list[str]) -> set[str]:
         """지정한 snakeId에 매핑된 모든 원본 태그를 반환."""
         cls._ensureLoaded()
