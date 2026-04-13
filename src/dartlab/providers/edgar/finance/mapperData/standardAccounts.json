@@ -1076,7 +1076,7 @@
     },
     {
       "code": "IS080",
-      "stmt": "IS",
+      "stmt": "CI",
       "snakeId": "other_comprehensive_income",
       "korName": "기타포괄손익",
       "engName": "Other Comprehensive Income",
@@ -1090,7 +1090,7 @@
     },
     {
       "code": "IS081",
-      "stmt": "IS",
+      "stmt": "CI",
       "snakeId": "comprehensive_income",
       "korName": "포괄손익",
       "engName": "Comprehensive Income",
@@ -1104,7 +1104,7 @@
     },
     {
       "code": "IS082",
-      "stmt": "IS",
+      "stmt": "CI",
       "snakeId": "foreign_currency_translation",
       "korName": "외화환산손익",
       "engName": "Foreign Currency Translation Adjustment",
@@ -1187,7 +1187,7 @@
     },
     {
       "code": "IS083",
-      "stmt": "IS",
+      "stmt": "CI",
       "snakeId": "securities_valuation_oci",
       "korName": "매도가능증권평가손익",
       "engName": "Unrealized Gain/Loss on Securities",
@@ -1229,7 +1229,7 @@
     },
     {
       "code": "IS084",
-      "stmt": "IS",
+      "stmt": "CI",
       "snakeId": "unrealized_holding_gain_loss",
       "korName": "미실현보유손익",
       "engName": "Unrealized Holding Gain/Loss on Securities",
@@ -1326,7 +1326,7 @@
     },
     {
       "code": "IS086",
-      "stmt": "IS",
+      "stmt": "CI",
       "snakeId": "derivative_hedge_oci",
       "korName": "파생상품헤지손익",
       "engName": "Derivatives Hedging OCI",
@@ -1767,7 +1767,7 @@
     },
     {
       "code": "IS100",
-      "stmt": "IS",
+      "stmt": "CI",
       "snakeId": "comprehensive_income_nci",
       "korName": "포괄손익(비지배지분)",
       "engName": "Comprehensive Income (Non-controlling)",
