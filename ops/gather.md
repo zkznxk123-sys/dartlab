@@ -23,7 +23,7 @@ dartlab.gather("price", "005930")      # 주가 시계열
 |------|------|
 | 레이어 | L1 |
 | 진입점 | `dartlab.gather()`, `c.gather()` |
-| 소비 | 외부 API (Naver, Yahoo, FRED, ECOS, Google News) |
+| 소비 | 외부 소스 (Naver 차트, Naver Global, FMP, FRED, ECOS, Google News) |
 | 생산 | analysis, macro가 gather 데이터를 소비 (주가, 매크로) |
 | 축 | 4축: price, flow, macro, news |
 
@@ -39,7 +39,7 @@ dartlab.gather("news", "삼성전자")              # 뉴스
 
 # EDGAR (미국) — Company-bound 시 market="US" 자동 전달
 c = Company("AAPL")
-c.gather("price")                             # Yahoo/FMP
+c.gather("price")                             # Naver Global → FMP
 c.gather("macro")                             # FRED
 c.gather("news")                              # Google News RSS
 ```
@@ -58,7 +58,7 @@ Company-bound: `c.gather("price")` — 종목코드/market 재전달 불필요. 
 
 | 축 | KR 소스 | US 소스 | 캐시 |
 |------|---------|---------|------|
-| price | Naver → Yahoo fallback | Yahoo → FMP fallback | 메모리 TTL |
+| price | Naver 차트 → Naver Global | Naver Global → FMP | 메모리 TTL |
 | flow | Naver/KRX | — (KR 전용) | 메모리 TTL |
 | macro | ECOS + FRED | FRED | Parquet + 30분 TTL |
 | news | Google News RSS | Google News RSS | GatherCache |
