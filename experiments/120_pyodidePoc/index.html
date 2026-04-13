@@ -89,7 +89,7 @@ print(f"shape: {df.shape}")
       try {
         const py = await ensurePyodide();
         log("[3] dartlab wheel 설치...");
-        const wheelResp = await fetch("/dartlab-0.9.8-py3-none-any.whl?v=" + Date.now());
+        const wheelResp = await fetch("/dartlab-0.9.10-py3-none-any.whl?v=" + Date.now());
         const wheelBuf = new Uint8Array(await wheelResp.arrayBuffer());
         py.FS.writeFile("/tmp/dartlab.whl", wheelBuf);
         log(`    ${(wheelBuf.length / 1024).toFixed(0)} KB`);

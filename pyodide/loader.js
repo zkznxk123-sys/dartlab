@@ -38,7 +38,7 @@ const DATA_CATEGORIES = [
 export async function initDartlab(options = {}) {
   const {
     stockCode = "005930",
-    version = "0.9.8",
+    version = "0.9.10",
     wheelUrl = null,
     onLog = () => {},
     onProgress = () => {},

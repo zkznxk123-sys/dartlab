@@ -26,7 +26,7 @@ dartlab을 브라우저에서 실행. 설치 없이 재무분석.
 import micropip
 await micropip.install(["diff-match-patch", "openpyxl"])
 # dartlab wheel — deps=False (빌트인 패키지는 pyodide가 제공)
-await micropip.install("https://huggingface.co/.../pyodide/dartlab-0.9.8-py3-none-any.whl", deps=False)
+await micropip.install("https://huggingface.co/.../pyodide/dartlab-0.9.10-py3-none-any.whl", deps=False)
 
 import dartlab
 c = dartlab.Company("005930")

@@ -324,11 +324,14 @@ class KnowledgeDB:
             ).fetchone()
             if row:
                 return InsightRecord(
-                    stock_code=row[0], narrative=row[1],
+                    stock_code=row[0],
+                    narrative=row[1],
                     strengths=json.loads(row[2]) if row[2] else [],
                     weaknesses=json.loads(row[3]) if row[3] else [],
-                    sector=row[4] or "", source=row[5] or source,
-                    created_at=row[6], expires_at=row[7],
+                    sector=row[4] or "",
+                    source=row[5] or source,
+                    created_at=row[6],
+                    expires_at=row[7],
                 )
         row = conn.execute(
             "SELECT stock_code, narrative, strengths, weaknesses, sector, source, "
