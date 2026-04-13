@@ -1,0 +1,1653 @@
+{
+  "market": {
+    "riskFreeRate": 3.5,
+    "equityRiskPremium": 5.5,
+    "countryRiskPremium": 0.9,
+    "defaultTaxRate": 22.0,
+    "gdpGrowth": 4.0
+  },
+  "sectorParams": {
+    "IT": {
+      "discountRate": 12.0,
+      "growthRate": 5.0,
+      "perMultiple": 18,
+      "pbrMultiple": 2.0,
+      "evEbitdaMultiple": 10,
+      "beta": 1.2,
+      "exitMultiple": 10.0,
+      "label": "IT"
+    },
+    "건강관리": {
+      "discountRate": 15.0,
+      "growthRate": 10.0,
+      "perMultiple": 30,
+      "pbrMultiple": 3.0,
+      "evEbitdaMultiple": 15,
+      "beta": 1.4,
+      "exitMultiple": 15.0,
+      "label": "건강관리"
+    },
+    "금융": {
+      "discountRate": 9.0,
+      "growthRate": 3.0,
+      "perMultiple": 8,
+      "pbrMultiple": 0.6,
+      "evEbitdaMultiple": 8,
+      "beta": 0.8,
+      "exitMultiple": 8.0,
+      "label": "금융"
+    },
+    "경기관련소비재": {
+      "discountRate": 10.0,
+      "growthRate": 3.0,
+      "perMultiple": 12,
+      "pbrMultiple": 1.0,
+      "evEbitdaMultiple": 8,
+      "beta": 1.1,
+      "exitMultiple": 8.0,
+      "label": "경기관련소비재"
+    },
+    "필수소비재": {
+      "discountRate": 9.0,
+      "growthRate": 2.0,
+      "perMultiple": 15,
+      "pbrMultiple": 1.5,
+      "evEbitdaMultiple": 10,
+      "beta": 0.7,
+      "exitMultiple": 10.0,
+      "label": "필수소비재"
+    },
+    "산업재": {
+      "discountRate": 10.0,
+      "growthRate": 3.0,
+      "perMultiple": 12,
+      "pbrMultiple": 1.0,
+      "evEbitdaMultiple": 7,
+      "beta": 1.05,
+      "exitMultiple": 7.0,
+      "label": "산업재"
+    },
+    "소재": {
+      "discountRate": 11.0,
+      "growthRate": 3.0,
+      "perMultiple": 10,
+      "pbrMultiple": 1.0,
+      "evEbitdaMultiple": 6,
+      "beta": 1.15,
+      "exitMultiple": 6.0,
+      "label": "소재"
+    },
+    "에너지": {
+      "discountRate": 10.0,
+      "growthRate": 2.0,
+      "perMultiple": 8,
+      "pbrMultiple": 0.8,
+      "evEbitdaMultiple": 5,
+      "beta": 1.1,
+      "exitMultiple": 5.0,
+      "label": "에너지"
+    },
+    "유틸리티": {
+      "discountRate": 8.0,
+      "growthRate": 2.0,
+      "perMultiple": 12,
+      "pbrMultiple": 0.8,
+      "evEbitdaMultiple": 7,
+      "beta": 0.55,
+      "exitMultiple": 7.0,
+      "label": "유틸리티"
+    },
+    "부동산": {
+      "discountRate": 9.0,
+      "growthRate": 2.0,
+      "perMultiple": 15,
+      "pbrMultiple": 1.0,
+      "evEbitdaMultiple": 12,
+      "beta": 0.75,
+      "exitMultiple": 12.0,
+      "label": "부동산"
+    },
+    "커뮤니케이션서비스": {
+      "discountRate": 11.0,
+      "growthRate": 5.0,
+      "perMultiple": 18,
+      "pbrMultiple": 2.0,
+      "evEbitdaMultiple": 10,
+      "beta": 1.1,
+      "exitMultiple": 10.0,
+      "label": "커뮤니케이션서비스"
+    },
+    "기타": {
+      "discountRate": 10.0,
+      "growthRate": 3.0,
+      "perMultiple": 15,
+      "pbrMultiple": 1.2,
+      "evEbitdaMultiple": 8,
+      "beta": 1.0,
+      "exitMultiple": 8.0,
+      "label": "기타"
+    }
+  },
+  "industryGroupParams": {
+    "반도체와반도체장비": {
+      "discountRate": 13.0,
+      "growthRate": 7.0,
+      "perMultiple": 15,
+      "pbrMultiple": 2.5,
+      "evEbitdaMultiple": 8,
+      "beta": 1.35,
+      "exitMultiple": 8.0,
+      "label": "반도체"
+    },
+    "디스플레이": {
+      "discountRate": 12.0,
+      "growthRate": 4.0,
+      "perMultiple": 12,
+      "pbrMultiple": 1.5,
+      "evEbitdaMultiple": 6,
+      "beta": 1.25,
+      "exitMultiple": 6.0,
+      "label": "디스플레이"
+    },
+    "소프트웨어와서비스": {
+      "discountRate": 12.0,
+      "growthRate": 8.0,
+      "perMultiple": 25,
+      "pbrMultiple": 4.0,
+      "evEbitdaMultiple": 15,
+      "beta": 1.25,
+      "exitMultiple": 15.0,
+      "label": "소프트웨어"
+    },
+    "제약과바이오": {
+      "discountRate": 16.0,
+      "growthRate": 12.0,
+      "perMultiple": 35,
+      "pbrMultiple": 4.0,
+      "evEbitdaMultiple": 18,
+      "beta": 1.5,
+      "exitMultiple": 18.0,
+      "label": "제약/바이오"
+    },
+    "은행": {
+      "discountRate": 8.0,
+      "growthRate": 2.0,
+      "perMultiple": 6,
+      "pbrMultiple": 0.5,
+      "evEbitdaMultiple": 6,
+      "beta": 0.7,
+      "exitMultiple": 6.0,
+      "label": "은행"
+    },
+    "보험": {
+      "discountRate": 9.0,
+      "growthRate": 3.0,
+      "perMultiple": 8,
+      "pbrMultiple": 0.7,
+      "evEbitdaMultiple": 7,
+      "beta": 0.8,
+      "exitMultiple": 7.0,
+      "label": "보험"
+    },
+    "다각화된금융": {
+      "discountRate": 10.0,
+      "growthRate": 4.0,
+      "perMultiple": 10,
+      "pbrMultiple": 1.0,
+      "evEbitdaMultiple": 8,
+      "beta": 1.1,
+      "exitMultiple": 8.0,
+      "label": "증권/기타금융"
+    },
+    "자동차와부품": {
+      "discountRate": 10.0,
+      "growthRate": 3.0,
+      "perMultiple": 8,
+      "pbrMultiple": 0.8,
+      "evEbitdaMultiple": 5,
+      "beta": 1.1,
+      "exitMultiple": 5.0,
+      "label": "자동차"
+    },
+    "조선": {
+      "discountRate": 11.0,
+      "growthRate": 4.0,
+      "perMultiple": 10,
+      "pbrMultiple": 0.9,
+      "evEbitdaMultiple": 6,
+      "beta": 1.2,
+      "exitMultiple": 6.0,
+      "label": "조선"
+    },
+    "건설": {
+      "discountRate": 10.0,
+      "growthRate": 2.0,
+      "perMultiple": 8,
+      "pbrMultiple": 0.6,
+      "evEbitdaMultiple": 5,
+      "beta": 1.05,
+      "exitMultiple": 5.0,
+      "label": "건설"
+    },
+    "항공우주와국방": {
+      "discountRate": 11.0,
+      "growthRate": 6.0,
+      "perMultiple": 18,
+      "pbrMultiple": 2.0,
+      "evEbitdaMultiple": 12,
+      "beta": 1.15,
+      "exitMultiple": 12.0,
+      "label": "항공우주/방산"
+    },
+    "화학": {
+      "discountRate": 11.0,
+      "growthRate": 3.0,
+      "perMultiple": 10,
+      "pbrMultiple": 1.0,
+      "evEbitdaMultiple": 6,
+      "beta": 1.15,
+      "exitMultiple": 6.0,
+      "label": "화학"
+    },
+    "금속과광물": {
+      "discountRate": 10.0,
+      "growthRate": 2.0,
+      "perMultiple": 8,
+      "pbrMultiple": 0.6,
+      "evEbitdaMultiple": 5,
+      "beta": 1.1,
+      "exitMultiple": 5.0,
+      "label": "철강/비철"
+    },
+    "게임엔터테인먼트": {
+      "discountRate": 13.0,
+      "growthRate": 8.0,
+      "perMultiple": 20,
+      "pbrMultiple": 3.0,
+      "evEbitdaMultiple": 12,
+      "beta": 1.3,
+      "exitMultiple": 12.0,
+      "label": "게임"
+    },
+    "인터넷과카탈로그소매": {
+      "discountRate": 12.0,
+      "growthRate": 7.0,
+      "perMultiple": 25,
+      "pbrMultiple": 3.5,
+      "evEbitdaMultiple": 15,
+      "beta": 1.25,
+      "exitMultiple": 15.0,
+      "label": "인터넷"
+    },
+    "미디어": {
+      "discountRate": 11.0,
+      "growthRate": 5.0,
+      "perMultiple": 15,
+      "pbrMultiple": 2.0,
+      "evEbitdaMultiple": 10,
+      "beta": 1.15,
+      "exitMultiple": 10.0,
+      "label": "미디어/엔터"
+    },
+    "전기통신서비스": {
+      "discountRate": 9.0,
+      "growthRate": 2.0,
+      "perMultiple": 10,
+      "pbrMultiple": 1.0,
+      "evEbitdaMultiple": 6,
+      "beta": 0.65,
+      "exitMultiple": 6.0,
+      "label": "통신"
+    },
+    "소매(유통)": {
+      "discountRate": 10.0,
+      "growthRate": 3.0,
+      "perMultiple": 12,
+      "pbrMultiple": 1.2,
+      "evEbitdaMultiple": 8,
+      "beta": 0.95,
+      "exitMultiple": 8.0,
+      "label": "유통"
+    },
+    "식품,음료,담배": {
+      "discountRate": 9.0,
+      "growthRate": 2.0,
+      "perMultiple": 15,
+      "pbrMultiple": 1.5,
+      "evEbitdaMultiple": 10,
+      "beta": 0.65,
+      "exitMultiple": 10.0,
+      "label": "음식료"
+    },
+    "석유와가스": {
+      "discountRate": 10.0,
+      "growthRate": 2.0,
+      "perMultiple": 8,
+      "pbrMultiple": 0.7,
+      "evEbitdaMultiple": 5,
+      "beta": 1.1,
+      "exitMultiple": 5.0,
+      "label": "정유/가스"
+    },
+    "전력": {
+      "discountRate": 8.0,
+      "growthRate": 2.0,
+      "perMultiple": 12,
+      "pbrMultiple": 0.8,
+      "evEbitdaMultiple": 7,
+      "beta": 0.55,
+      "exitMultiple": 7.0,
+      "label": "전력"
+    }
+  },
+  "industryGroupToSector": {
+    "반도체와반도체장비": "IT",
+    "기술하드웨어와장비": "IT",
+    "소프트웨어와서비스": "IT",
+    "IT서비스": "IT",
+    "인터넷과카탈로그소매": "커뮤니케이션서비스",
+    "제약과바이오": "건강관리",
+    "건강관리장비와서비스": "건강관리",
+    "은행": "금융",
+    "다각화된금융": "금융",
+    "보험": "금융",
+    "자동차와부품": "경기관련소비재",
+    "소매(유통)": "경기관련소비재",
+    "금속과광물": "소재",
+    "화학": "소재",
+    "석유와가스": "에너지",
+    "가스": "유틸리티",
+    "전력": "유틸리티",
+    "건설": "산업재",
+    "기계": "산업재",
+    "조선": "산업재",
+    "운송": "산업재",
+    "항공우주와국방": "산업재",
+    "전기통신서비스": "커뮤니케이션서비스",
+    "미디어": "커뮤니케이션서비스",
+    "식품,음료,담배": "필수소비재",
+    "호텔,레스토랑,레저": "경기관련소비재",
+    "내구소비재와의류": "경기관련소비재",
+    "가정용품과개인용품": "필수소비재",
+    "부동산": "부동산",
+    "소비자서비스": "경기관련소비재",
+    "상업서비스와공급품": "산업재",
+    "종이와목재": "소재",
+    "용기와포장": "소재",
+    "건설자재": "소재",
+    "유틸리티": "유틸리티",
+    "식품과기본식료품소매": "필수소비재",
+    "자본재": "산업재",
+    "디스플레이": "IT",
+    "게임엔터테인먼트": "커뮤니케이션서비스"
+  },
+  "manualOverrides": {
+    "SK하이닉스": {
+      "sector": "IT",
+      "industryGroup": "반도체와반도체장비"
+    },
+    "삼성전자": {
+      "sector": "IT",
+      "industryGroup": "반도체와반도체장비"
+    },
+    "DB하이텍": {
+      "sector": "IT",
+      "industryGroup": "반도체와반도체장비"
+    },
+    "리노공업": {
+      "sector": "IT",
+      "industryGroup": "반도체와반도체장비"
+    },
+    "한미반도체": {
+      "sector": "IT",
+      "industryGroup": "반도체와반도체장비"
+    },
+    "HPSP": {
+      "sector": "IT",
+      "industryGroup": "반도체와반도체장비"
+    },
+    "주성엔지니어링": {
+      "sector": "IT",
+      "industryGroup": "반도체와반도체장비"
+    },
+    "원익IPS": {
+      "sector": "IT",
+      "industryGroup": "반도체와반도체장비"
+    },
+    "피에스케이": {
+      "sector": "IT",
+      "industryGroup": "반도체와반도체장비"
+    },
+    "테스": {
+      "sector": "IT",
+      "industryGroup": "반도체와반도체장비"
+    },
+    "유진테크": {
+      "sector": "IT",
+      "industryGroup": "반도체와반도체장비"
+    },
+    "이오테크닉스": {
+      "sector": "IT",
+      "industryGroup": "반도체와반도체장비"
+    },
+    "LG디스플레이": {
+      "sector": "IT",
+      "industryGroup": "디스플레이"
+    },
+    "삼성SDI": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "LG에너지솔루션": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "카카오": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "인터넷과카탈로그소매"
+    },
+    "네이버": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "인터넷과카탈로그소매"
+    },
+    "NAVER": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "인터넷과카탈로그소매"
+    },
+    "카카오페이": {
+      "sector": "금융",
+      "industryGroup": "다각화된금융"
+    },
+    "카카오뱅크": {
+      "sector": "금융",
+      "industryGroup": "은행"
+    },
+    "토스": {
+      "sector": "금융",
+      "industryGroup": "다각화된금융"
+    },
+    "크래프톤": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "게임엔터테인먼트"
+    },
+    "넷마블": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "게임엔터테인먼트"
+    },
+    "엔씨소프트": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "게임엔터테인먼트"
+    },
+    "펄어비스": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "게임엔터테인먼트"
+    },
+    "카카오게임즈": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "게임엔터테인먼트"
+    },
+    "컴투스": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "게임엔터테인먼트"
+    },
+    "위메이드": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "게임엔터테인먼트"
+    },
+    "데브시스터즈": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "게임엔터테인먼트"
+    },
+    "하이브": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "미디어"
+    },
+    "SM": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "미디어"
+    },
+    "JYP Ent.": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "미디어"
+    },
+    "YG엔터테인먼트": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "미디어"
+    },
+    "CJ ENM": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "미디어"
+    },
+    "스튜디오드래곤": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "미디어"
+    },
+    "삼성바이오로직스": {
+      "sector": "건강관리",
+      "industryGroup": "제약과바이오"
+    },
+    "셀트리온": {
+      "sector": "건강관리",
+      "industryGroup": "제약과바이오"
+    },
+    "셀트리온헬스케어": {
+      "sector": "건강관리",
+      "industryGroup": "건강관리장비와서비스"
+    },
+    "SK바이오팜": {
+      "sector": "건강관리",
+      "industryGroup": "제약과바이오"
+    },
+    "SK바이오사이언스": {
+      "sector": "건강관리",
+      "industryGroup": "제약과바이오"
+    },
+    "유한양행": {
+      "sector": "건강관리",
+      "industryGroup": "제약과바이오"
+    },
+    "한미약품": {
+      "sector": "건강관리",
+      "industryGroup": "제약과바이오"
+    },
+    "녹십자": {
+      "sector": "건강관리",
+      "industryGroup": "제약과바이오"
+    },
+    "대웅제약": {
+      "sector": "건강관리",
+      "industryGroup": "제약과바이오"
+    },
+    "종근당": {
+      "sector": "건강관리",
+      "industryGroup": "제약과바이오"
+    },
+    "현대자동차": {
+      "sector": "경기관련소비재",
+      "industryGroup": "자동차와부품"
+    },
+    "기아": {
+      "sector": "경기관련소비재",
+      "industryGroup": "자동차와부품"
+    },
+    "현대모비스": {
+      "sector": "경기관련소비재",
+      "industryGroup": "자동차와부품"
+    },
+    "현대위아": {
+      "sector": "경기관련소비재",
+      "industryGroup": "자동차와부품"
+    },
+    "만도": {
+      "sector": "경기관련소비재",
+      "industryGroup": "자동차와부품"
+    },
+    "한온시스템": {
+      "sector": "경기관련소비재",
+      "industryGroup": "자동차와부품"
+    },
+    "HL만도": {
+      "sector": "경기관련소비재",
+      "industryGroup": "자동차와부품"
+    },
+    "POSCO홀딩스": {
+      "sector": "소재",
+      "industryGroup": "금속과광물"
+    },
+    "포스코": {
+      "sector": "소재",
+      "industryGroup": "금속과광물"
+    },
+    "현대제철": {
+      "sector": "소재",
+      "industryGroup": "금속과광물"
+    },
+    "동국제강": {
+      "sector": "소재",
+      "industryGroup": "금속과광물"
+    },
+    "LG화학": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "롯데케미칼": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "금호석유화학": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "한화솔루션": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "SK이노베이션": {
+      "sector": "에너지",
+      "industryGroup": "석유와가스"
+    },
+    "S-Oil": {
+      "sector": "에너지",
+      "industryGroup": "석유와가스"
+    },
+    "에쓰오일": {
+      "sector": "에너지",
+      "industryGroup": "석유와가스"
+    },
+    "HD현대오일뱅크": {
+      "sector": "에너지",
+      "industryGroup": "석유와가스"
+    },
+    "HD한국조선해양": {
+      "sector": "산업재",
+      "industryGroup": "조선"
+    },
+    "삼성중공업": {
+      "sector": "산업재",
+      "industryGroup": "조선"
+    },
+    "한화오션": {
+      "sector": "산업재",
+      "industryGroup": "조선"
+    },
+    "HD현대중공업": {
+      "sector": "산업재",
+      "industryGroup": "조선"
+    },
+    "삼성물산": {
+      "sector": "산업재",
+      "industryGroup": "건설"
+    },
+    "현대건설": {
+      "sector": "산업재",
+      "industryGroup": "건설"
+    },
+    "GS건설": {
+      "sector": "산업재",
+      "industryGroup": "건설"
+    },
+    "DL이앤씨": {
+      "sector": "산업재",
+      "industryGroup": "건설"
+    },
+    "KB금융": {
+      "sector": "금융",
+      "industryGroup": "은행"
+    },
+    "신한지주": {
+      "sector": "금융",
+      "industryGroup": "은행"
+    },
+    "하나금융지주": {
+      "sector": "금융",
+      "industryGroup": "은행"
+    },
+    "우리금융지주": {
+      "sector": "금융",
+      "industryGroup": "은행"
+    },
+    "기업은행": {
+      "sector": "금융",
+      "industryGroup": "은행"
+    },
+    "삼성증권": {
+      "sector": "금융",
+      "industryGroup": "다각화된금융"
+    },
+    "미래에셋증권": {
+      "sector": "금융",
+      "industryGroup": "다각화된금융"
+    },
+    "NH투자증권": {
+      "sector": "금융",
+      "industryGroup": "다각화된금융"
+    },
+    "키움증권": {
+      "sector": "금융",
+      "industryGroup": "다각화된금융"
+    },
+    "삼성화재": {
+      "sector": "금융",
+      "industryGroup": "보험"
+    },
+    "삼성생명": {
+      "sector": "금융",
+      "industryGroup": "보험"
+    },
+    "DB손해보험": {
+      "sector": "금융",
+      "industryGroup": "보험"
+    },
+    "현대해상": {
+      "sector": "금융",
+      "industryGroup": "보험"
+    },
+    "신세계": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소매(유통)"
+    },
+    "이마트": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소매(유통)"
+    },
+    "BGF리테일": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소매(유통)"
+    },
+    "GS리테일": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소매(유통)"
+    },
+    "CJ제일제당": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "오리온": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "농심": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "삼양식품": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "하이트진로": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "오뚜기": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "SK텔레콤": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "전기통신서비스"
+    },
+    "KT": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "전기통신서비스"
+    },
+    "LG유플러스": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "전기통신서비스"
+    },
+    "한국전력": {
+      "sector": "유틸리티",
+      "industryGroup": "전력"
+    },
+    "한국가스공사": {
+      "sector": "유틸리티",
+      "industryGroup": "가스"
+    },
+    "한국지역난방공사": {
+      "sector": "유틸리티",
+      "industryGroup": "가스"
+    },
+    "한화에어로스페이스": {
+      "sector": "산업재",
+      "industryGroup": "항공우주와국방"
+    },
+    "LIG넥스원": {
+      "sector": "산업재",
+      "industryGroup": "항공우주와국방"
+    },
+    "한국항공우주": {
+      "sector": "산업재",
+      "industryGroup": "항공우주와국방"
+    },
+    "대한항공": {
+      "sector": "산업재",
+      "industryGroup": "운송"
+    },
+    "SK": {
+      "sector": "IT",
+      "industryGroup": "IT서비스"
+    },
+    "LG": {
+      "sector": "IT",
+      "industryGroup": "기술하드웨어와장비"
+    },
+    "CJ": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "GS": {
+      "sector": "에너지",
+      "industryGroup": "석유와가스"
+    },
+    "HD현대": {
+      "sector": "산업재",
+      "industryGroup": "조선"
+    },
+    "LS": {
+      "sector": "산업재",
+      "industryGroup": "기계"
+    },
+    "한화": {
+      "sector": "산업재",
+      "industryGroup": "항공우주와국방"
+    },
+    "두산": {
+      "sector": "산업재",
+      "industryGroup": "기계"
+    },
+    "효성": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "에코프로": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "LG전자": {
+      "sector": "IT",
+      "industryGroup": "기술하드웨어와장비"
+    }
+  },
+  "ksicMapping": {
+    "반도체 제조업": {
+      "sector": "IT",
+      "industryGroup": "반도체와반도체장비"
+    },
+    "전자부품 제조업": {
+      "sector": "IT",
+      "industryGroup": "반도체와반도체장비"
+    },
+    "마그네틱 및 광학 매체 제조업": {
+      "sector": "IT",
+      "industryGroup": "기술하드웨어와장비"
+    },
+    "컴퓨터 및 주변장치 제조업": {
+      "sector": "IT",
+      "industryGroup": "기술하드웨어와장비"
+    },
+    "영상 및 음향기기 제조업": {
+      "sector": "IT",
+      "industryGroup": "기술하드웨어와장비"
+    },
+    "통신 및 방송 장비 제조업": {
+      "sector": "IT",
+      "industryGroup": "기술하드웨어와장비"
+    },
+    "소프트웨어 개발 및 공급업": {
+      "sector": "IT",
+      "industryGroup": "소프트웨어와서비스"
+    },
+    "컴퓨터 프로그래밍, 시스템 통합 및 관리업": {
+      "sector": "IT",
+      "industryGroup": "IT서비스"
+    },
+    "자료처리, 호스팅, 포털 및 기타 인터넷 정보매개 서비스업": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "인터넷과카탈로그소매"
+    },
+    "기타 정보 서비스업": {
+      "sector": "IT",
+      "industryGroup": "IT서비스"
+    },
+    "의약품 제조업": {
+      "sector": "건강관리",
+      "industryGroup": "제약과바이오"
+    },
+    "기초 의약물질 제조업": {
+      "sector": "건강관리",
+      "industryGroup": "제약과바이오"
+    },
+    "의료용 기기 제조업": {
+      "sector": "건강관리",
+      "industryGroup": "건강관리장비와서비스"
+    },
+    "의료용품 및 기타 의약 관련제품 제조업": {
+      "sector": "건강관리",
+      "industryGroup": "건강관리장비와서비스"
+    },
+    "자연과학 및 공학 연구개발업": {
+      "sector": "건강관리",
+      "industryGroup": "제약과바이오"
+    },
+    "은행 및 저축기관": {
+      "sector": "금융",
+      "industryGroup": "은행"
+    },
+    "신탁업 및 집합투자업": {
+      "sector": "금융",
+      "industryGroup": "다각화된금융"
+    },
+    "금융 지원 서비스업": {
+      "sector": "금융",
+      "industryGroup": "다각화된금융"
+    },
+    "기타 금융업": {
+      "sector": "금융",
+      "industryGroup": "다각화된금융"
+    },
+    "보험업": {
+      "sector": "금융",
+      "industryGroup": "보험"
+    },
+    "보험 및 연금관련 서비스업": {
+      "sector": "금융",
+      "industryGroup": "보험"
+    },
+    "재 보험업": {
+      "sector": "금융",
+      "industryGroup": "보험"
+    },
+    "자동차용 엔진 및 자동차 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "자동차와부품"
+    },
+    "자동차 신품 부품 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "자동차와부품"
+    },
+    "자동차 재제조 부품 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "자동차와부품"
+    },
+    "자동차 차체나 트레일러 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "자동차와부품"
+    },
+    "자동차 판매업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소매(유통)"
+    },
+    "자동차 부품 및 내장품 판매업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소매(유통)"
+    },
+    "1차 철강 제조업": {
+      "sector": "소재",
+      "industryGroup": "금속과광물"
+    },
+    "1차 비철금속 제조업": {
+      "sector": "소재",
+      "industryGroup": "금속과광물"
+    },
+    "금속 주조업": {
+      "sector": "소재",
+      "industryGroup": "금속과광물"
+    },
+    "구조용 금속제품, 탱크 및 증기발생기 제조업": {
+      "sector": "소재",
+      "industryGroup": "금속과광물"
+    },
+    "기타 금속 가공제품 제조업": {
+      "sector": "소재",
+      "industryGroup": "금속과광물"
+    },
+    "기초 화학물질 제조업": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "합성고무 및 플라스틱 물질 제조업": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "비료, 농약 및 살균, 살충제 제조업": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "기타 화학제품 제조업": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "화학섬유 제조업": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "플라스틱제품 제조업": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "고무제품 제조업": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "석유 정제품 제조업": {
+      "sector": "에너지",
+      "industryGroup": "석유와가스"
+    },
+    "연료용 가스 제조 및 배관공급업": {
+      "sector": "유틸리티",
+      "industryGroup": "가스"
+    },
+    "전기업": {
+      "sector": "유틸리티",
+      "industryGroup": "전력"
+    },
+    "증기, 냉·온수 및 공기조절 공급업": {
+      "sector": "유틸리티",
+      "industryGroup": "가스"
+    },
+    "건물 건설업": {
+      "sector": "산업재",
+      "industryGroup": "건설"
+    },
+    "토목 건설업": {
+      "sector": "산업재",
+      "industryGroup": "건설"
+    },
+    "기반조성 및 시설물 축조관련 전문공사업": {
+      "sector": "산업재",
+      "industryGroup": "건설"
+    },
+    "건물설비 설치 공사업": {
+      "sector": "산업재",
+      "industryGroup": "건설"
+    },
+    "전기 및 통신 공사업": {
+      "sector": "산업재",
+      "industryGroup": "건설"
+    },
+    "실내건축 및 건축마무리 공사업": {
+      "sector": "산업재",
+      "industryGroup": "건설"
+    },
+    "일반 목적용 기계 제조업": {
+      "sector": "산업재",
+      "industryGroup": "기계"
+    },
+    "특수 목적용 기계 제조업": {
+      "sector": "산업재",
+      "industryGroup": "기계"
+    },
+    "전동기, 발전기 및 전기 변환 · 공급 · 제어 장치 제조업": {
+      "sector": "산업재",
+      "industryGroup": "기계"
+    },
+    "기타 전기장비 제조업": {
+      "sector": "산업재",
+      "industryGroup": "기계"
+    },
+    "전구 및 조명장치 제조업": {
+      "sector": "산업재",
+      "industryGroup": "기계"
+    },
+    "일차전지 및 이차전지 제조업": {
+      "sector": "소재",
+      "industryGroup": "화학"
+    },
+    "절연선 및 케이블 제조업": {
+      "sector": "산업재",
+      "industryGroup": "기계"
+    },
+    "선박 및 보트 건조업": {
+      "sector": "산업재",
+      "industryGroup": "조선"
+    },
+    "철도장비 제조업": {
+      "sector": "산업재",
+      "industryGroup": "운송"
+    },
+    "항공기,우주선 및 부품 제조업": {
+      "sector": "산업재",
+      "industryGroup": "항공우주와국방"
+    },
+    "무기 및 총포탄 제조업": {
+      "sector": "산업재",
+      "industryGroup": "항공우주와국방"
+    },
+    "해상 운송업": {
+      "sector": "산업재",
+      "industryGroup": "운송"
+    },
+    "항공 여객 운송업": {
+      "sector": "산업재",
+      "industryGroup": "운송"
+    },
+    "육상 여객 운송업": {
+      "sector": "산업재",
+      "industryGroup": "운송"
+    },
+    "도로 화물 운송업": {
+      "sector": "산업재",
+      "industryGroup": "운송"
+    },
+    "기타 운송관련 서비스업": {
+      "sector": "산업재",
+      "industryGroup": "운송"
+    },
+    "전기 통신업": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "전기통신서비스"
+    },
+    "텔레비전 방송업": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "미디어"
+    },
+    "영화, 비디오물, 방송프로그램 제작 및 배급업": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "미디어"
+    },
+    "영상·오디오물 제공 서비스업": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "미디어"
+    },
+    "오디오물 출판 및 원판 녹음업": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "미디어"
+    },
+    "광고업": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "미디어"
+    },
+    "창작 및 예술관련 서비스업": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "미디어"
+    },
+    "종합 소매업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소매(유통)"
+    },
+    "무점포 소매업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소매(유통)"
+    },
+    "상품 종합 도매업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소매(유통)"
+    },
+    "기타 상품 전문 소매업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소매(유통)"
+    },
+    "섬유, 의복, 신발 및 가죽제품 소매업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소매(유통)"
+    },
+    "가전제품 및 정보통신장비 소매업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소매(유통)"
+    },
+    "연료 소매업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소매(유통)"
+    },
+    "기타 식품 제조업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "과실, 채소 가공 및 저장 처리업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "도축, 육류 가공 및 저장 처리업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "수산물 가공 및 저장 처리업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "동·식물성 유지 및 낙농제품 제조업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "곡물가공품, 전분 및 전분제품 제조업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "떡, 빵 및 과자류 제조업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "알코올음료 제조업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "비알코올음료 및 얼음 제조업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "동물용 사료 및 조제식품 제조업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "도시락 및 식사용 조리식품 제조업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "담배 제조업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "음·식료품 및 담배 도매업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "음·식료품 및 담배 소매업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "음식점업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "호텔,레스토랑,레저"
+    },
+    "봉제의복 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "내구소비재와의류"
+    },
+    "편조의복 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "내구소비재와의류"
+    },
+    "의복 액세서리 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "내구소비재와의류"
+    },
+    "신발 및 신발 부분품 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "내구소비재와의류"
+    },
+    "가죽, 가방 및 유사제품 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "내구소비재와의류"
+    },
+    "귀금속 및 장신용품 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "내구소비재와의류"
+    },
+    "가정용 기기 제조업": {
+      "sector": "필수소비재",
+      "industryGroup": "가정용품과개인용품"
+    },
+    "생활용품 도매업": {
+      "sector": "필수소비재",
+      "industryGroup": "가정용품과개인용품"
+    },
+    "기타 생활용품 소매업": {
+      "sector": "필수소비재",
+      "industryGroup": "가정용품과개인용품"
+    },
+    "부동산 임대 및 공급업": {
+      "sector": "부동산",
+      "industryGroup": "부동산"
+    },
+    "부동산 관련 서비스업": {
+      "sector": "부동산",
+      "industryGroup": "부동산"
+    },
+    "일반 및 생활 숙박시설 운영업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "호텔,레스토랑,레저"
+    },
+    "유원지 및 기타 오락관련 서비스업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "호텔,레스토랑,레저"
+    },
+    "스포츠 서비스업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "호텔,레스토랑,레저"
+    },
+    "여행사 및 기타 여행보조 서비스업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "호텔,레스토랑,레저"
+    },
+    "일반 교습 학원": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소비자서비스"
+    },
+    "기타 교육기관": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소비자서비스"
+    },
+    "교육지원 서비스업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소비자서비스"
+    },
+    "초등 교육기관": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소비자서비스"
+    },
+    "건축기술, 엔지니어링 및 관련 기술 서비스업": {
+      "sector": "산업재",
+      "industryGroup": "상업서비스와공급품"
+    },
+    "기타 과학기술 서비스업": {
+      "sector": "산업재",
+      "industryGroup": "상업서비스와공급품"
+    },
+    "회사 본부 및 경영 컨설팅 서비스업": {
+      "sector": "산업재",
+      "industryGroup": "상업서비스와공급품"
+    },
+    "기타 전문 서비스업": {
+      "sector": "산업재",
+      "industryGroup": "상업서비스와공급품"
+    },
+    "전문디자인업": {
+      "sector": "산업재",
+      "industryGroup": "상업서비스와공급품"
+    },
+    "시장조사 및 여론조사업": {
+      "sector": "산업재",
+      "industryGroup": "상업서비스와공급품"
+    },
+    "측정, 시험, 항해, 제어 및 기타 정밀기기 제조업; 광학기기 제외": {
+      "sector": "산업재",
+      "industryGroup": "기계"
+    },
+    "사진장비 및 광학기기 제조업": {
+      "sector": "산업재",
+      "industryGroup": "기계"
+    },
+    "가구 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "내구소비재와의류"
+    },
+    "악기 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "내구소비재와의류"
+    },
+    "운동 및 경기용구 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "내구소비재와의류"
+    },
+    "그외 기타 제품 제조업": {
+      "sector": "산업재",
+      "industryGroup": "기계"
+    },
+    "펄프, 종이 및 판지 제조업": {
+      "sector": "소재",
+      "industryGroup": "종이와목재"
+    },
+    "골판지, 종이 상자 및 종이용기 제조업": {
+      "sector": "소재",
+      "industryGroup": "용기와포장"
+    },
+    "기타 종이 및 판지 제품 제조업": {
+      "sector": "소재",
+      "industryGroup": "종이와목재"
+    },
+    "인쇄 및 인쇄관련 산업": {
+      "sector": "산업재",
+      "industryGroup": "상업서비스와공급품"
+    },
+    "서적, 잡지 및 기타 인쇄물 출판업": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "미디어"
+    },
+    "기록매체 복제업": {
+      "sector": "커뮤니케이션서비스",
+      "industryGroup": "미디어"
+    },
+    "방적 및 가공사 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "내구소비재와의류"
+    },
+    "직물직조 및 직물제품 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "내구소비재와의류"
+    },
+    "편조원단 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "내구소비재와의류"
+    },
+    "섬유제품 염색, 정리 및 마무리 가공업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "내구소비재와의류"
+    },
+    "기타 섬유제품 제조업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "내구소비재와의류"
+    },
+    "유리 및 유리제품 제조업": {
+      "sector": "소재",
+      "industryGroup": "건설자재"
+    },
+    "시멘트, 석회, 플라스터 및 그 제품 제조업": {
+      "sector": "소재",
+      "industryGroup": "건설자재"
+    },
+    "내화, 비내화 요업제품 제조업": {
+      "sector": "소재",
+      "industryGroup": "건설자재"
+    },
+    "기타 비금속 광물제품 제조업": {
+      "sector": "소재",
+      "industryGroup": "건설자재"
+    },
+    "제재 및 목재 가공업": {
+      "sector": "소재",
+      "industryGroup": "종이와목재"
+    },
+    "나무제품 제조업": {
+      "sector": "소재",
+      "industryGroup": "종이와목재"
+    },
+    "폐기물 처리업": {
+      "sector": "유틸리티",
+      "industryGroup": "유틸리티"
+    },
+    "해체, 선별 및 원료 재생업": {
+      "sector": "유틸리티",
+      "industryGroup": "유틸리티"
+    },
+    "작물 재배업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "어로 어업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품,음료,담배"
+    },
+    "사업시설 유지·관리 서비스업": {
+      "sector": "산업재",
+      "industryGroup": "상업서비스와공급품"
+    },
+    "기타 사업지원 서비스업": {
+      "sector": "산업재",
+      "industryGroup": "상업서비스와공급품"
+    },
+    "경비, 경호 및 탐정업": {
+      "sector": "산업재",
+      "industryGroup": "상업서비스와공급품"
+    },
+    "개인 및 가정용품 수리업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소비자서비스"
+    },
+    "개인 및 가정용품 임대업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소비자서비스"
+    },
+    "산업용 기계 및 장비 임대업": {
+      "sector": "산업재",
+      "industryGroup": "기계"
+    },
+    "운송장비 임대업": {
+      "sector": "산업재",
+      "industryGroup": "운송"
+    },
+    "그외 기타 개인 서비스업": {
+      "sector": "경기관련소비재",
+      "industryGroup": "소비자서비스"
+    },
+    "그외 기타 운송장비 제조업": {
+      "sector": "산업재",
+      "industryGroup": "운송"
+    },
+    "그외 기타 전문, 과학 및 기술 서비스업": {
+      "sector": "산업재",
+      "industryGroup": "상업서비스와공급품"
+    },
+    "산업용 농·축산물 및 동·식물 도매업": {
+      "sector": "필수소비재",
+      "industryGroup": "식품과기본식료품소매"
+    },
+    "건축자재, 철물 및 난방장치 도매업": {
+      "sector": "산업재",
+      "industryGroup": "자본재"
+    },
+    "기계장비 및 관련 물품 도매업": {
+      "sector": "산업재",
+      "industryGroup": "자본재"
+    },
+    "기타 전문 도매업": {
+      "sector": "산업재",
+      "industryGroup": "자본재"
+    },
+    "상품 중개업": {
+      "sector": "산업재",
+      "industryGroup": "상업서비스와공급품"
+    }
+  },
+  "productKeywords": {
+    "IT|반도체와반도체장비": [
+      "DRAM",
+      "NAND",
+      "메모리반도체",
+      "파운드리",
+      "SoC",
+      "DDR",
+      "웨이퍼",
+      "CPU",
+      "GPU",
+      "NPU",
+      "HBM",
+      "시스템반도체",
+      "반도체설계",
+      "반도체제조",
+      "반도체장비",
+      "반도체 장비",
+      "CVD",
+      "식각장비",
+      "에칭",
+      "증착장비",
+      "세정장비",
+      "반도체검사",
+      "반도체테스트",
+      "반도체패키징",
+      "프로브카드",
+      "본더"
+    ],
+    "IT|디스플레이": [
+      "디스플레이패널",
+      "OLED패널",
+      "LCD패널",
+      "터치스크린",
+      "LED디스플레이"
+    ],
+    "커뮤니케이션서비스|게임엔터테인먼트": [
+      "게임",
+      "모바일게임",
+      "온라인게임",
+      "MMORPG",
+      "RPG",
+      "퍼블리싱",
+      "리니지",
+      "배틀그라운드",
+      "메이플",
+      "던전",
+      "로스트아크"
+    ],
+    "건강관리|제약과바이오": [
+      "바이오",
+      "항체",
+      "세포치료",
+      "유전자",
+      "CMO",
+      "CDMO",
+      "바이오시밀러",
+      "항암제",
+      "면역",
+      "백신",
+      "mRNA",
+      "ADC",
+      "CAR-T",
+      "의약품",
+      "제약",
+      "신약",
+      "복제약"
+    ],
+    "소재|화학": [
+      "2차전지",
+      "이차전지",
+      "배터리",
+      "리튬",
+      "양극재",
+      "음극재",
+      "분리막",
+      "전해질",
+      "ESS",
+      "전기차배터리"
+    ],
+    "커뮤니케이션서비스|인터넷과카탈로그소매": [
+      "인터넷플랫폼",
+      "포털사이트",
+      "검색엔진",
+      "온라인광고",
+      "이커머스",
+      "온라인쇼핑",
+      "SNS",
+      "메신저",
+      "OTT",
+      "스트리밍서비스"
+    ],
+    "금융|다각화된금융": [
+      "핀테크",
+      "간편결제",
+      "페이",
+      "송금",
+      "대출플랫폼",
+      "P2P",
+      "크라우드펀딩",
+      "로보어드바이저"
+    ],
+    "커뮤니케이션서비스|미디어": [
+      "엔터테인먼트",
+      "K-POP",
+      "아이돌",
+      "연예",
+      "매니지먼트",
+      "기획사",
+      "음반",
+      "공연",
+      "콘서트",
+      "팬덤",
+      "스트리밍",
+      "방송"
+    ],
+    "IT|소프트웨어와서비스": [
+      "AI",
+      "인공지능",
+      "머신러닝",
+      "딥러닝",
+      "SaaS",
+      "클라우드",
+      "빅데이터",
+      "데이터분석",
+      "RPA",
+      "자동화"
+    ],
+    "산업재|항공우주와국방": [
+      "방산",
+      "국방",
+      "미사일",
+      "레이더",
+      "전투기",
+      "무기체계",
+      "K방산",
+      "K9",
+      "K2",
+      "FA-50",
+      "항공우주"
+    ],
+    "에너지|에너지장비및서비스": [
+      "태양광",
+      "풍력",
+      "수소",
+      "연료전지",
+      "신재생",
+      "ESS",
+      "태양전지",
+      "태양열",
+      "그린에너지"
+    ]
+  }
+}

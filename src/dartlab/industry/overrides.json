@@ -1,0 +1,18 @@
+{
+  "semiconductor": [
+    {
+      "stockCode": "403870",
+      "corpName": "HPSP",
+      "stage": "equipment",
+      "confidence": 1.0,
+      "note": "고압 수소 어닐링 장비 — 전공정 장비 회사"
+    },
+    {
+      "stockCode": "058470",
+      "corpName": "리노공업",
+      "stage": "test",
+      "confidence": 1.0,
+      "note": "프로브카드 전문 — 테스트 공정"
+    }
+  ]
+}

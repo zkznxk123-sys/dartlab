@@ -1,0 +1,297 @@
+{
+  "version": "2026-04-13",
+  "industries": {
+    "semiconductor": {
+      "name": "반도체",
+      "ksicCodes": ["반도체 제조업"],
+      "stages": {
+        "design": {"name": "설계", "role": "제조", "stream": "upstream", "keywords": ["팹리스", "fabless", "반도체 설계", "반도체설계", "SoC", "시스템반도체", "IP설계", "EDA", "ASIC", "NPU", "GPU 설계", "집적회로 설계"]},
+        "fab": {"name": "전공정(FAB)", "role": "제조", "stream": "midstream", "keywords": ["파운드리", "foundry", "FAB", "전공정", "DRAM", "NAND", "메모리반도체", "웨이퍼가공", "3D NAND", "HBM", "DDR5", "Flash", "V-NAND"]},
+        "packaging": {"name": "후공정(패키징)", "role": "제조", "stream": "midstream", "keywords": ["패키징", "후공정", "본딩", "범핑", "OSAT", "플립칩", "와이어본딩", "몰딩", "TSV", "CoWoS", "TC본더", "리드프레임"]},
+        "test": {"name": "테스트", "role": "제조", "stream": "midstream", "keywords": ["프로브카드", "테스트 소켓", "반도체 테스트", "반도체 검사", "테스터", "ATE", "번인", "burn-in"]},
+        "equipment": {"name": "장비", "role": "제조", "stream": "upstream", "keywords": ["반도체장비", "반도체 장비", "CVD", "ALD", "식각장비", "세정장비", "증착장비", "노광장비", "노광", "리소그래피", "CMP 장비", "이온주입", "스퍼터", "진공장비"]},
+        "materials": {"name": "소재", "role": "제조", "stream": "upstream", "keywords": ["실리콘웨이퍼", "포토레지스트", "특수가스", "CMP슬러리", "타겟소재", "전구체", "프리커서", "블랭크마스크", "포토마스크", "반도체 소재", "케미컬"]}
+      }
+    },
+    "electronics": {
+      "name": "전자부품",
+      "ksicCodes": ["전자부품 제조업", "영상 및 음향기기 제조업", "컴퓨터 및 주변장치 제조업", "마그네틱 및 광학 매체 제조업", "가정용 기기 제조업"],
+      "stages": {
+        "component": {"name": "부품", "role": "제조", "stream": "upstream", "keywords": ["PCB", "MLCC", "커넥터", "콘덴서", "저항", "인덕터", "수정진동자", "필터", "부품"]},
+        "module": {"name": "모듈", "role": "제조", "stream": "midstream", "keywords": ["모듈", "카메라모듈", "센서모듈", "디스플레이모듈", "터치패널"]},
+        "display": {"name": "디스플레이", "role": "제조", "stream": "midstream", "keywords": ["OLED", "LCD", "디스플레이", "패널", "백라이트", "편광필름"]},
+        "set": {"name": "완제품", "role": "제조", "stream": "downstream", "keywords": ["TV", "모니터", "스마트폰", "노트북", "태블릿", "가전", "세탁기", "냉장고", "에어컨"]}
+      }
+    },
+    "telecom": {
+      "name": "통신장비",
+      "ksicCodes": ["통신 및 방송 장비 제조업", "전기 통신업", "텔레비전 방송업"],
+      "stages": {
+        "infra": {"name": "인프라", "role": "제조", "stream": "upstream", "keywords": ["기지국", "안테나", "중계기", "광케이블", "5G 장비", "통신장비"]},
+        "device": {"name": "단말", "role": "제조", "stream": "downstream", "keywords": ["단말기", "핸드셋", "라우터", "스위치"]},
+        "service": {"name": "서비스", "role": "서비스", "stream": "downstream", "keywords": ["통신서비스", "이동통신", "IPTV", "인터넷", "방송"]}
+      }
+    },
+    "software": {
+      "name": "소프트웨어·IT서비스",
+      "ksicCodes": ["소프트웨어 개발 및 공급업", "컴퓨터 프로그래밍, 시스템 통합 및 관리업", "자료처리, 호스팅, 포털 및 기타 인터넷 정보매개 서비스업", "기타 정보 서비스업"],
+      "stages": {
+        "platform": {"name": "플랫폼", "role": "서비스", "stream": "downstream", "keywords": ["플랫폼", "포털", "클라우드", "SaaS", "PaaS"]},
+        "solution": {"name": "솔루션", "role": "서비스", "stream": "midstream", "keywords": ["ERP", "MES", "보안솔루션", "SI", "시스템통합"]},
+        "game": {"name": "게임", "role": "서비스", "stream": "downstream", "keywords": ["게임", "모바일게임", "온라인게임", "MMORPG"]},
+        "ai": {"name": "AI·데이터", "role": "서비스", "stream": "midstream", "keywords": ["인공지능", "AI", "빅데이터", "머신러닝", "딥러닝"]}
+      }
+    },
+    "pharma": {
+      "name": "제약·바이오",
+      "ksicCodes": ["의약품 제조업", "기초 의약물질 제조업", "의료용품 및 기타 의약 관련제품 제조업", "자연과학 및 공학 연구개발업"],
+      "stages": {
+        "research": {"name": "연구·신약개발", "role": "연구", "stream": "upstream", "keywords": ["신약", "임상", "바이오시밀러", "항체", "세포치료", "유전자치료", "CAR-T", "mRNA", "CDMO"]},
+        "api": {"name": "원료의약품", "role": "제조", "stream": "upstream", "keywords": ["원료의약품", "API", "합성의약", "발효"]},
+        "formulation": {"name": "완제의약품", "role": "제조", "stream": "midstream", "keywords": ["완제의약품", "제네릭", "OTC", "전문의약품", "건강기능식품"]},
+        "device": {"name": "의료기기", "role": "제조", "stream": "midstream", "keywords": ["의료기기", "진단키트", "체외진단", "의료영상", "초음파", "MRI", "내시경", "치과"]},
+        "distribution": {"name": "유통", "role": "도매", "stream": "downstream", "keywords": ["의약품 도매", "의약품 유통", "약국"]}
+      }
+    },
+    "medicalDevice": {
+      "name": "의료기기",
+      "ksicCodes": ["의료용 기기 제조업"],
+      "stages": {
+        "diagnostic": {"name": "진단", "role": "제조", "stream": "midstream", "keywords": ["진단키트", "체외진단", "IVD", "PCR", "면역진단", "혈당측정"]},
+        "therapeutic": {"name": "치료", "role": "제조", "stream": "midstream", "keywords": ["임플란트", "스텐트", "인공관절", "수술로봇", "레이저"]},
+        "imaging": {"name": "영상", "role": "제조", "stream": "midstream", "keywords": ["초음파", "MRI", "CT", "X-ray", "내시경"]}
+      }
+    },
+    "auto": {
+      "name": "자동차",
+      "ksicCodes": ["자동차 신품 부품 제조업", "자동차용 엔진 및 자동차 제조업", "자동차 재제조 부품 제조업", "자동차 차체나 트레일러 제조업"],
+      "stages": {
+        "oem": {"name": "완성차", "role": "제조", "stream": "downstream", "keywords": ["완성차", "승용차", "상용차", "전기차", "하이브리드"]},
+        "powertrain": {"name": "파워트레인", "role": "제조", "stream": "midstream", "keywords": ["엔진", "변속기", "모터", "구동모터", "감속기", "인버터"]},
+        "body": {"name": "차체·내장", "role": "제조", "stream": "midstream", "keywords": ["프레스", "차체", "시트", "내장재", "에어백", "범퍼"]},
+        "chassis": {"name": "샤시·제동", "role": "제조", "stream": "midstream", "keywords": ["서스펜션", "브레이크", "조향", "휠", "타이어"]},
+        "electronics": {"name": "전장", "role": "제조", "stream": "midstream", "keywords": ["ADAS", "자율주행", "ECU", "헤드램프", "전장부품", "와이어하네스"]}
+      }
+    },
+    "battery": {
+      "name": "2차전지",
+      "ksicCodes": ["일차전지 및 이차전지 제조업"],
+      "stages": {
+        "cathode": {"name": "양극재", "role": "제조", "stream": "upstream", "keywords": ["양극재", "양극활물질", "NCM", "NCA", "LFP", "하이니켈"]},
+        "anode": {"name": "음극재", "role": "제조", "stream": "upstream", "keywords": ["음극재", "흑연", "실리콘음극", "인조흑연", "천연흑연"]},
+        "separator": {"name": "분리막", "role": "제조", "stream": "upstream", "keywords": ["분리막", "세퍼레이터", "습식분리막", "건식분리막"]},
+        "electrolyte": {"name": "전해질", "role": "제조", "stream": "upstream", "keywords": ["전해질", "전해액", "고체전해질", "리튬염"]},
+        "cell": {"name": "셀", "role": "제조", "stream": "midstream", "keywords": ["배터리셀", "파우치", "각형", "원통형", "ESS"]},
+        "pack": {"name": "팩·BMS", "role": "제조", "stream": "downstream", "keywords": ["배터리팩", "BMS", "배터리관리"]}
+      }
+    },
+    "chemical": {
+      "name": "화학",
+      "ksicCodes": ["기초 화학물질 제조업", "기타 화학제품 제조업", "합성고무 및 플라스틱 물질 제조업", "비료, 농약 및 살균, 살충제 제조업", "화학섬유 제조업", "석유 정제품 제조업"],
+      "stages": {
+        "basic": {"name": "기초화학", "role": "제조", "stream": "upstream", "keywords": ["에틸렌", "프로필렌", "NCC", "나프타", "석유화학", "정유"]},
+        "specialty": {"name": "정밀화학", "role": "제조", "stream": "midstream", "keywords": ["정밀화학", "촉매", "첨가제", "코팅", "접착제", "실리콘"]},
+        "polymer": {"name": "고분자·플라스틱", "role": "제조", "stream": "midstream", "keywords": ["PE", "PP", "PVC", "PET", "엔지니어링플라스틱", "합성수지"]}
+      }
+    },
+    "steel": {
+      "name": "철강·금속",
+      "ksicCodes": ["1차 철강 제조업", "1차 비철금속 제조업", "기타 금속 가공제품 제조업", "구조용 금속제품, 탱크 및 증기발생기 제조업", "금속 주조업"],
+      "stages": {
+        "raw": {"name": "원료·제련", "role": "제조", "stream": "upstream", "keywords": ["제철", "제련", "고로", "전기로", "광석"]},
+        "product": {"name": "철강제품", "role": "제조", "stream": "midstream", "keywords": ["열연", "냉연", "스테인리스", "특수강", "선재", "후판"]},
+        "processing": {"name": "가공", "role": "제조", "stream": "downstream", "keywords": ["금속가공", "프레스", "단조", "주조", "절삭"]}
+      }
+    },
+    "machinery": {
+      "name": "기계·장비",
+      "ksicCodes": ["특수 목적용 기계 제조업", "일반 목적용 기계 제조업", "측정, 시험, 항해, 제어 및 기타 정밀기기 제조업; 광학기기 제외", "사진장비 및 광학기기 제조업"],
+      "stages": {
+        "general": {"name": "범용기계", "role": "제조", "stream": "midstream", "keywords": ["펌프", "밸브", "컴프레서", "감속기", "베어링", "유압", "공압"]},
+        "special": {"name": "전용기계", "role": "제조", "stream": "midstream", "keywords": ["공작기계", "CNC", "사출", "프레스기", "레이저장비", "로봇", "자동화"]},
+        "precision": {"name": "정밀기기", "role": "제조", "stream": "midstream", "keywords": ["계측", "센서", "광학", "렌즈", "카메라", "측정장비"]}
+      }
+    },
+    "electrical": {
+      "name": "전기장비",
+      "ksicCodes": ["전동기, 발전기 및 전기 변환 · 공급 · 제어 장치 제조업", "기타 전기장비 제조업", "절연선 및 케이블 제조업", "전구 및 조명장치 제조업"],
+      "stages": {
+        "power": {"name": "전력기기", "role": "제조", "stream": "midstream", "keywords": ["변압기", "차단기", "배전반", "전력변환", "인버터", "UPS"]},
+        "motor": {"name": "모터·발전기", "role": "제조", "stream": "midstream", "keywords": ["전동기", "모터", "발전기", "서보모터"]},
+        "cable": {"name": "전선·케이블", "role": "제조", "stream": "midstream", "keywords": ["전선", "케이블", "광케이블", "동축케이블"]}
+      }
+    },
+    "shipbuilding": {
+      "name": "조선·해운",
+      "ksicCodes": ["선박 및 보트 건조업", "해상 운송업"],
+      "stages": {
+        "build": {"name": "건조", "role": "제조", "stream": "midstream", "keywords": ["조선", "선박건조", "LNG선", "컨테이너선", "벌크선", "해양플랜트"]},
+        "equipment": {"name": "기자재", "role": "제조", "stream": "upstream", "keywords": ["선박엔진", "프로펠러", "선박도장", "밸러스트", "해양장비"]},
+        "shipping": {"name": "해운", "role": "서비스", "stream": "downstream", "keywords": ["해운", "컨테이너", "벌크", "탱커", "물류"]}
+      }
+    },
+    "aerospace": {
+      "name": "항공·방산",
+      "ksicCodes": ["항공기,우주선 및 부품 제조업", "무기 및 총포탄 제조업", "항공 여객 운송업"],
+      "stages": {
+        "airframe": {"name": "기체·부품", "role": "제조", "stream": "midstream", "keywords": ["항공기", "기체", "날개", "동체", "랜딩기어", "항공부품"]},
+        "defense": {"name": "방산", "role": "제조", "stream": "midstream", "keywords": ["미사일", "레이더", "전투기", "장갑차", "무인기", "드론", "방산"]},
+        "airline": {"name": "항공사", "role": "서비스", "stream": "downstream", "keywords": ["항공운송", "여객", "화물항공"]}
+      }
+    },
+    "construction": {
+      "name": "건설",
+      "ksicCodes": ["건물 건설업", "토목 건설업", "실내건축 및 건축마무리 공사업", "기반조성 및 시설물 축조관련 전문공사업", "건물설비 설치 공사업", "전기 및 통신 공사업"],
+      "stages": {
+        "general": {"name": "종합건설", "role": "서비스", "stream": "midstream", "keywords": ["건설", "시공", "아파트", "주택", "플랜트", "토목"]},
+        "material": {"name": "건자재", "role": "제조", "stream": "upstream", "keywords": ["시멘트", "레미콘", "골재", "철근", "유리", "단열재"]},
+        "engineering": {"name": "엔지니어링", "role": "서비스", "stream": "upstream", "keywords": ["설계", "감리", "CM", "엔지니어링"]}
+      }
+    },
+    "food": {
+      "name": "식품·음료",
+      "ksicCodes": ["기타 식품 제조업", "곡물가공품, 전분 및 전분제품 제조업", "도축, 육류 가공 및 저장 처리업", "수산물 가공 및 저장 처리업", "동·식물성 유지 및 낙농제품 제조업", "과실, 채소 가공 및 저장 처리업", "알코올음료 제조업", "비알코올음료 및 얼음 제조업", "담배 제조업", "동물용 사료 및 조제식품 제조업", "떡, 빵 및 과자류 제조업", "도시락 및 식사용 조리식품 제조업"],
+      "stages": {
+        "raw": {"name": "원료·소재", "role": "제조", "stream": "upstream", "keywords": ["원료", "전분", "유지", "밀가루", "설탕", "사료"]},
+        "processing": {"name": "가공·제조", "role": "제조", "stream": "midstream", "keywords": ["식품가공", "음료", "유제품", "라면", "스낵", "냉동식품", "HMR"]},
+        "distribution": {"name": "유통", "role": "도매", "stream": "downstream", "keywords": ["식품유통", "도매", "프랜차이즈"]}
+      }
+    },
+    "textile": {
+      "name": "섬유·의류",
+      "ksicCodes": ["봉제의복 제조업", "화학섬유 제조업", "직물직조 및 직물제품 제조업", "방적 및 가공사 제조업", "가죽, 가방 및 유사제품 제조업", "기타 섬유제품 제조업", "의복 액세서리 제조업", "편조원단 제조업", "편조의복 제조업", "섬유제품 염색, 정리 및 마무리 가공업", "신발 및 신발 부분품 제조업"],
+      "stages": {
+        "fiber": {"name": "섬유·원단", "role": "제조", "stream": "upstream", "keywords": ["원사", "섬유", "원단", "직물", "부직포", "나일론", "폴리에스터"]},
+        "apparel": {"name": "의류·패션", "role": "제조", "stream": "downstream", "keywords": ["의류", "패션", "브랜드", "OEM", "ODM", "스포츠웨어"]}
+      }
+    },
+    "plastic": {
+      "name": "플라스틱·고무",
+      "ksicCodes": ["플라스틱제품 제조업", "고무제품 제조업"],
+      "stages": {
+        "general": {"name": "제조", "role": "제조", "stream": "midstream", "keywords": ["사출", "압출", "블로우몰딩", "필름", "시트", "파이프", "타이어", "고무"]}
+      }
+    },
+    "buildingMaterials": {
+      "name": "시멘트·요업",
+      "ksicCodes": ["시멘트, 석회, 플라스터 및 그 제품 제조업", "내화, 비내화 요업제품 제조업", "유리 및 유리제품 제조업", "기타 비금속 광물제품 제조업"],
+      "stages": {
+        "general": {"name": "제조", "role": "제조", "stream": "midstream", "keywords": ["시멘트", "레미콘", "요업", "세라믹", "유리", "타일", "내화물"]}
+      }
+    },
+    "paper": {
+      "name": "제지·목재",
+      "ksicCodes": ["펄프, 종이 및 판지 제조업", "골판지, 종이 상자 및 종이용기 제조업", "기타 종이 및 판지 제품 제조업", "제재 및 목재 가공업", "나무제품 제조업", "가구 제조업"],
+      "stages": {
+        "general": {"name": "제조", "role": "제조", "stream": "midstream", "keywords": ["펄프", "종이", "판지", "골판지", "포장재", "가구", "목재"]}
+      }
+    },
+    "finance": {
+      "name": "금융",
+      "ksicCodes": ["기타 금융업", "금융 지원 서비스업", "신탁업 및 집합투자업", "보험업", "은행 및 저축기관", "보험 및 연금관련 서비스업", "재 보험업"],
+      "stages": {
+        "bank": {"name": "은행", "role": "서비스", "stream": "midstream", "keywords": ["은행", "예금", "대출", "저축은행"]},
+        "securities": {"name": "증권", "role": "서비스", "stream": "midstream", "keywords": ["증권", "투자", "자산운용", "펀드", "IB"]},
+        "insurance": {"name": "보험", "role": "서비스", "stream": "midstream", "keywords": ["보험", "생명보험", "손해보험", "재보험"]},
+        "fintech": {"name": "핀테크", "role": "서비스", "stream": "downstream", "keywords": ["결제", "핀테크", "간편결제", "PG"]}
+      }
+    },
+    "media": {
+      "name": "미디어·엔터",
+      "ksicCodes": ["영화, 비디오물, 방송프로그램 제작 및 배급업", "오디오물 출판 및 원판 녹음업", "서적, 잡지 및 기타 인쇄물 출판업", "광고업", "영상·오디오물 제공 서비스업", "창작 및 예술관련 서비스업", "기록매체 복제업", "인쇄 및 인쇄관련 산업"],
+      "stages": {
+        "content": {"name": "콘텐츠 제작", "role": "서비스", "stream": "upstream", "keywords": ["영화", "드라마", "예능", "음악", "웹툰", "출판"]},
+        "platform": {"name": "플랫폼·유통", "role": "서비스", "stream": "downstream", "keywords": ["OTT", "스트리밍", "광고", "미디어렙"]},
+        "agency": {"name": "기획사·엔터", "role": "서비스", "stream": "midstream", "keywords": ["기획사", "매니지먼트", "아이돌", "엔터테인먼트"]}
+      }
+    },
+    "retail": {
+      "name": "유통·소매",
+      "ksicCodes": ["종합 소매업", "기타 전문 도매업", "상품 종합 도매업", "기계장비 및 관련 물품 도매업", "생활용품 도매업", "음·식료품 및 담배 도매업", "상품 중개업", "섬유, 의복, 신발 및 가죽제품 소매업", "무점포 소매업", "자동차 부품 및 내장품 판매업", "자동차 판매업", "기타 상품 전문 소매업", "연료 소매업", "기타 생활용품 소매업", "가전제품 및 정보통신장비 소매업", "음·식료품 및 담배 소매업", "산업용 농·축산물 및 동·식물 도매업", "건축자재, 철물 및 난방장치 도매업"],
+      "stages": {
+        "wholesale": {"name": "도매", "role": "도매", "stream": "midstream", "keywords": ["도매", "상사", "무역", "수출입"]},
+        "retail": {"name": "소매", "role": "소매", "stream": "downstream", "keywords": ["백화점", "마트", "편의점", "이커머스", "온라인쇼핑", "홈쇼핑"]}
+      }
+    },
+    "logistics": {
+      "name": "물류·운송",
+      "ksicCodes": ["도로 화물 운송업", "기타 운송관련 서비스업", "육상 여객 운송업", "여행사 및 기타 여행보조 서비스업", "운송장비 임대업"],
+      "stages": {
+        "general": {"name": "물류", "role": "서비스", "stream": "midstream", "keywords": ["물류", "택배", "창고", "포워딩", "3PL", "운송"]}
+      }
+    },
+    "energy": {
+      "name": "에너지·유틸리티",
+      "ksicCodes": ["전기업", "연료용 가스 제조 및 배관공급업", "증기, 냉·온수 및 공기조절 공급업"],
+      "stages": {
+        "generation": {"name": "발전", "role": "서비스", "stream": "upstream", "keywords": ["발전", "태양광", "풍력", "원전", "수력", "연료전지"]},
+        "distribution": {"name": "공급", "role": "서비스", "stream": "downstream", "keywords": ["전력", "가스", "LNG", "도시가스", "열공급"]}
+      }
+    },
+    "realestate": {
+      "name": "부동산",
+      "ksicCodes": ["부동산 임대 및 공급업", "부동산 관련 서비스업"],
+      "stages": {
+        "general": {"name": "부동산", "role": "서비스", "stream": "midstream", "keywords": ["부동산", "임대", "리츠", "개발", "분양"]}
+      }
+    },
+    "education": {
+      "name": "교육",
+      "ksicCodes": ["일반 교습 학원", "초등 교육기관", "교육지원 서비스업", "기타 교육기관"],
+      "stages": {
+        "general": {"name": "교육", "role": "서비스", "stream": "downstream", "keywords": ["학원", "교육", "온라인교육", "에듀테크", "출판"]}
+      }
+    },
+    "leisure": {
+      "name": "레저·서비스",
+      "ksicCodes": ["음식점업", "일반 및 생활 숙박시설 운영업", "유원지 및 기타 오락관련 서비스업", "스포츠 서비스업"],
+      "stages": {
+        "general": {"name": "레저", "role": "서비스", "stream": "downstream", "keywords": ["호텔", "카지노", "골프", "리조트", "외식", "프랜차이즈"]}
+      }
+    },
+    "environment": {
+      "name": "환경",
+      "ksicCodes": ["폐기물 처리업", "해체, 선별 및 원료 재생업"],
+      "stages": {
+        "general": {"name": "환경", "role": "서비스", "stream": "midstream", "keywords": ["폐기물", "재활용", "수처리", "대기", "환경설비"]}
+      }
+    },
+    "consulting": {
+      "name": "전문서비스",
+      "ksicCodes": ["회사 본부 및 경영 컨설팅 서비스업", "건축기술, 엔지니어링 및 관련 기술 서비스업", "그외 기타 전문, 과학 및 기술 서비스업", "기타 과학기술 서비스업", "기타 사업지원 서비스업", "전문디자인업", "시장조사 및 여론조사업", "경비, 경호 및 탐정업", "사업시설 유지·관리 서비스업"],
+      "stages": {
+        "general": {"name": "전문서비스", "role": "서비스", "stream": "midstream", "keywords": ["컨설팅", "설계", "엔지니어링", "인력", "아웃소싱"]}
+      }
+    },
+    "agriculture": {
+      "name": "농축수산",
+      "ksicCodes": ["작물 재배업", "어로 어업"],
+      "stages": {
+        "general": {"name": "농축수산", "role": "제조", "stream": "upstream", "keywords": ["농업", "축산", "수산", "양식", "재배"]}
+      }
+    },
+    "railroad": {
+      "name": "철도",
+      "ksicCodes": ["철도장비 제조업", "그외 기타 운송장비 제조업"],
+      "stages": {
+        "general": {"name": "철도장비", "role": "제조", "stream": "midstream", "keywords": ["철도", "전동차", "객차", "신호", "궤도"]}
+      }
+    },
+    "cosmetics": {
+      "name": "화장품·생활용품",
+      "ksicCodes": [],
+      "stages": {
+        "raw": {"name": "원료", "role": "제조", "stream": "upstream", "keywords": ["원료", "계면활성제", "향료", "색소"]},
+        "manufacturing": {"name": "제조·ODM", "role": "제조", "stream": "midstream", "keywords": ["화장품", "ODM", "OEM", "스킨케어", "색조"]},
+        "brand": {"name": "브랜드", "role": "소매", "stream": "downstream", "keywords": ["브랜드", "뷰티", "더마", "이너뷰티"]}
+      }
+    },
+    "misc": {
+      "name": "기타",
+      "ksicCodes": ["그외 기타 제품 제조업", "귀금속 및 장신용품 제조업", "운동 및 경기용구 제조업", "악기 제조업", "그외 기타 개인 서비스업", "개인 및 가정용품 수리업", "산업용 기계 및 장비 임대업", "개인 및 가정용품 임대업"],
+      "stages": {
+        "general": {"name": "기타", "role": "제조", "stream": "midstream", "keywords": []}
+      }
+    }
+  }
+}
