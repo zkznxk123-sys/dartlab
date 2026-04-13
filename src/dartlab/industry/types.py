@@ -100,6 +100,9 @@ class IndustryEdge:
     confidence: float = 0.0
     source: str = ""  # docs / network / ai / manual
     evidence: str = ""
+    product: str = ""  # 거래 품목 (supplier/customer)
+    amount: float | None = None  # 거래 금액 (억원)
+    ratio: float | None = None  # 매입비중 (%)
 
     def toDict(self) -> dict:
         return {
@@ -112,6 +115,9 @@ class IndustryEdge:
             "confidence": self.confidence,
             "source": self.source,
             "evidence": self.evidence,
+            "product": self.product,
+            "amount": self.amount,
+            "ratio": self.ratio,
         }
 
     @staticmethod
@@ -126,4 +132,7 @@ class IndustryEdge:
             confidence=d.get("confidence", 0.0),
             source=d.get("source", ""),
             evidence=d.get("evidence", ""),
+            product=d.get("product", ""),
+            amount=d.get("amount"),
+            ratio=d.get("ratio"),
         )

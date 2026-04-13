@@ -264,6 +264,126 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     return unique
 
 
+# ── 3. docs 원재료 테이블 파싱 (강력한 한방) ──
+
+
+def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
+    """docs "원재료 및 생산설비" 섹션의 마크다운 테이블에서 supplier 엣지 추출.
+
+    구조화된 데이터: 부문 / 품목 / 매입액 / 비중 / 매입처
+    → 공급사 실명 + 제품 + 거래 비중이 포함된 정밀 엣지.
+    """
+    from dartlab.industry.build.table_parser import (
+        extractCorpNames,
+        extractTables,
+        findTableByHeaders,
+        normalizeCorpName,
+        parseAmount,
+        parsePercent,
+        tableToRowDictsWithHeaderRow,
+    )
+    from dartlab.industry.build.stage3_docs import _docsDir
+
+    edges: list[IndustryEdge] = []
+    nodeIdx = _buildNodeIndex(nodes)
+    c2n, n2c = _listingLookup()
+
+    # 정규화된 회사명 → 종목코드 매핑 (㈜ 등 제거)
+    n2cNorm = {normalizeCorpName(name): code for name, code in n2c.items() if len(name) >= 2}
+
+    docsDir = _docsDir()
+    if not docsDir.exists():
+        return edges
+
+    processed = 0
+    matched = 0
+
+    for code, node in nodeIdx.items():
+        pqPath = docsDir / f"{code}.parquet"
+        if not pqPath.exists():
+            continue
+
+        try:
+            # 원재료 섹션만 — 최신 사업보고서(사업 or 12월)
+            df = (
+                pl.scan_parquet(str(pqPath))
+                .filter(pl.col("section_title").str.contains("원재료"))
+                .filter(pl.col("section_content").is_not_null())
+                .select(["section_title", "section_content", "report_type"])
+                .collect()
+            )
+        except (pl.exceptions.PolarsError, OSError):
+            continue
+
+        if df.height == 0:
+            continue
+
+        # 최신 사업보고서 우선
+        latest = df.filter(pl.col("report_type").str.contains("사업보고서|12")).sort("report_type", descending=True)
+        if latest.height == 0:
+            latest = df
+
+        processed += 1
+        row = latest.row(0, named=True)
+        content = row.get("section_content") or ""
+
+        tables = extractTables(content)
+        found = findTableByHeaders(tables, ["매입처"])
+        if not found:
+            continue
+
+        table, hi = found
+        rows = tableToRowDictsWithHeaderRow(table, hi, inheritColumns=["부문", "부 문"])
+
+        for r in rows:
+            supplierCol = next((k for k in r.keys() if "매입처" in k), None)
+            if not supplierCol:
+                continue
+            supplierText = r[supplierCol]
+            if not supplierText:
+                continue
+            supNames = extractCorpNames(supplierText)
+            if not supNames:
+                continue
+
+            bumun = r.get("부 문", "").strip()
+            # 소계/총계/※ 행 제외
+            if any(skip in bumun for skip in ["소 계", "소계", "총 계", "총계", "※"]):
+                continue
+
+            product = r.get("품 목", "").strip()
+            amount = parseAmount(r.get("매입액", ""))
+            ratio = parsePercent(r.get("비중", ""))
+
+            for supName in supNames:
+                # 정규화 매칭
+                normName = normalizeCorpName(supName)
+                supCode = n2c.get(supName) or n2cNorm.get(normName)
+                if not supCode or supCode == code:
+                    continue
+
+                matched += 1
+                edges.append(
+                    IndustryEdge(
+                        fromCode=supCode,
+                        fromName=c2n.get(supCode, supName),
+                        toCode=code,
+                        toName=c2n.get(code, ""),
+                        edgeType="supplier",
+                        industry=node.industry,
+                        confidence=0.9,  # 테이블 직접 매칭 — 높은 신뢰도
+                        source="docs_table",
+                        evidence=f"{bumun} {product}".strip(),
+                        product=product,
+                        amount=amount,
+                        ratio=ratio,
+                    )
+                )
+
+    logger.info("원재료 테이블 엣지: %d사 스캔, %d건 매칭", processed, matched)
+    return edges
+
+
 # ── 통합 ──
 
 
@@ -279,7 +399,7 @@ def buildAllEdges(nodes: list[IndustryNode], *, skipDocs: bool = False) -> list[
     except Exception as e:
         logger.warning("network 엣지 실패: %s", e)
 
-    # 2. docs
+    # 2. docs (텍스트 기반)
     if not skipDocs:
         try:
             docsEdges = extractDocsEdges(nodes)
@@ -288,4 +408,24 @@ def buildAllEdges(nodes: list[IndustryNode], *, skipDocs: bool = False) -> list[
         except Exception as e:
             logger.warning("docs 엣지 실패: %s", e)
 
-    return edges
+        # 3. docs 원재료 테이블 (구조화 파싱)
+        try:
+            tableEdges = extractRawMaterialEdges(nodes)
+            edges.extend(tableEdges)
+            logger.info("원재료 테이블 엣지: %d건", len(tableEdges))
+        except Exception as e:
+            logger.warning("원재료 테이블 엣지 실패: %s", e)
+
+    # 중복 제거 (from+to+type 기준, 테이블 우선)
+    seen: set[tuple[str, str, str]] = set()
+    unique: list[IndustryEdge] = []
+    # source 우선순위: docs_table > docs > network
+    priority = {"docs_table": 0, "docs": 1, "network": 2}
+    edges.sort(key=lambda e: priority.get(e.source, 3))
+    for e in edges:
+        key = (e.fromCode, e.toCode, e.edgeType)
+        if key not in seen:
+            seen.add(key)
+            unique.append(e)
+
+    return unique
