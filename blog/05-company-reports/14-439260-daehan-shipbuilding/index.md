@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/439260-daehan-shipbuilding.webp
 youtubeId: ""
+ai:
+  verdict: "3번 죽은 조선소가 수에즈막스 올인 OPM 24%. 조선업 최고 이익률."
+  direction: 개선
+  confidence: 높음
+  archetype: 턴어라운드
+  strengths:
+    - "OPM 0.48%→24%"
+    - "Big3도 못한 24% 방산 0%로"
+  weaknesses:
+    - "3번 법정관리"
+    - "수에즈막스 편중"
+  keyMetrics: {revenue: 1.23, opm: 23.95, roe: 30.0, fcf: 0.3}
+  dataAsOf: "2026-04-08"
 ---
 
 <script>

@@ -201,6 +201,19 @@ audit 파일 구조도 확장:
 - analysis()가 가이드하고 라우팅 — 개별 calc 함수는 내부 구현
 - insight는 등급 카드(보조 요약) — analysis와 역할이 다르다
 
+## 두 소비자 — review와 AI
+
+analysis는 두 소비자를 모두 최고로 지원한다:
+
+| 소비자 | 사용 방식 | 기대 |
+|---|---|---|
+| review(L3) | buildBlocks()에서 calc 호출 → Block 변환 | 블록화 가능한 dict. 보고서 배치용 |
+| AI(L4) | `c.analysis("수익성")` 직접 호출 | AI가 주체자. 결과를 의심하고 원본으로 검증. override 재계산 |
+
+- review는 calc 결과를 블록으로 배치한다 (해석 안 함)
+- AI는 calc 결과를 의심하고, 원본(`c.show`)으로 검증하고, `overrides`로 재계산한다
+- 엔진은 양쪽 모두에게 최고의 재료를 제공한다 — 투명한 dict 반환
+
 ## 축 체계
 
 > 신용평가는 독립 엔진 `c.credit()` — analysis 축이 아님. 상세: `ops/credit.md`

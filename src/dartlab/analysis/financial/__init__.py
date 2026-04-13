@@ -765,6 +765,7 @@ def _resolveAxis(axis: str) -> str:
 # ── basePeriod 지원 여부 검사 (캐싱) ──
 
 _BP_CACHE: dict[str, bool] = {}
+_OV_CACHE: dict[str, bool] = {}
 
 
 def _acceptsBasePeriod(fn) -> bool:
@@ -782,6 +783,21 @@ def _acceptsBasePeriod(fn) -> bool:
     return result
 
 
+def _acceptsOverrides(fn) -> bool:
+    """calc 함수가 overrides 파라미터를 받는지 확인 (결과 캐싱)."""
+    key = f"{fn.__module__}.{fn.__qualname__}"
+    cached = _OV_CACHE.get(key)
+    if cached is not None:
+        return cached
+    try:
+        sig = inspect.signature(fn)
+        result = "overrides" in sig.parameters
+    except (ValueError, TypeError):
+        result = False
+    _OV_CACHE[key] = result
+    return result
+
+
 # ── Group Accessor ──
 
 
@@ -792,9 +808,9 @@ class _GroupAccessor:
         self._analysis = analysis_instance
         self._group = group
 
-    def __call__(self, company=None, *, basePeriod=None):
+    def __call__(self, company=None, *, basePeriod=None, overrides=None):
         """그룹 가이드 또는 그룹 전체 실행."""
-        return self._analysis(self._group, company=company, basePeriod=basePeriod)
+        return self._analysis(self._group, company=company, basePeriod=basePeriod, overrides=overrides)
 
     def __getattr__(self, name):
         """analysis.financial.profitability() 패턴."""
@@ -806,8 +822,8 @@ class _GroupAccessor:
         if resolved not in _GROUPS.get(self._group, []):
             raise AttributeError(f"'{name}' 축은 '{self._group}' 그룹에 속하지 않습니다")
 
-        def _bound_axis(company=None, *, basePeriod=None):
-            return self._analysis(self._group, resolved, company=company, basePeriod=basePeriod)
+        def _bound_axis(company=None, *, basePeriod=None, overrides=None):
+            return self._analysis(self._group, resolved, company=company, basePeriod=basePeriod, overrides=overrides)
 
         _bound_axis.__name__ = name
         _bound_axis.__doc__ = f'analysis("{self._group}", "{resolved}")'
@@ -887,6 +903,7 @@ class Analysis:
         *,
         company: Any | None = None,
         basePeriod: str | None = None,
+        overrides: dict | None = None,
         **kwargs: Any,
     ) -> pl.DataFrame | dict:
         """엔진("그룹", "하위") 2단계 호출 패턴.
@@ -928,7 +945,7 @@ class Analysis:
             entry = _AXIS_REGISTRY[resolved]
             if company is None:
                 return self._listCalcs(resolved, entry)
-            return self._run(company, entry, basePeriod=basePeriod)
+            return self._run(company, entry, basePeriod=basePeriod, overrides=overrides)
 
         # 그룹 없이 축만 전달된 경우 → 자동 추론
         resolved = _resolveAxis(axis)
@@ -937,7 +954,7 @@ class Analysis:
         if company is None:
             return self._listCalcs(resolved, entry)
 
-        return self._run(company, entry, basePeriod=basePeriod)
+        return self._run(company, entry, basePeriod=basePeriod, overrides=overrides)
 
     def _groupGuide(self, group: str) -> pl.DataFrame:
         """그룹 내 축 목록."""
@@ -980,17 +997,33 @@ class Analysis:
             )
         return pl.DataFrame(rows)
 
-    def _run(self, company: Any, entry: _AxisEntry, *, basePeriod: str | None = None) -> dict:
-        """해당 축의 calc* 함수 전부 실행."""
+    def _run(
+        self,
+        company: Any,
+        entry: _AxisEntry,
+        *,
+        basePeriod: str | None = None,
+        overrides: dict | None = None,
+    ) -> dict:
+        """해당 축의 calc* 함수 전부 실행.
+
+        Parameters
+        ----------
+        overrides : dict | None
+            AI/사용자가 지정한 가정 override. overrides 파라미터를
+            받는 calc 함수에만 전달된다.
+        """
         results: dict[str, Any] = {}
         for calc in entry.calcs:
             try:
                 mod = importlib.import_module(calc.module)
                 fn = getattr(mod, calc.fn)
+                kw: dict[str, Any] = {}
                 if _acceptsBasePeriod(fn):
-                    results[calc.blockKey] = fn(company, basePeriod=basePeriod)
-                else:
-                    results[calc.blockKey] = fn(company)
+                    kw["basePeriod"] = basePeriod
+                if overrides and _acceptsOverrides(fn):
+                    kw["overrides"] = overrides
+                results[calc.blockKey] = fn(company, **kw)
             except (KeyError, ValueError, TypeError, AttributeError, ArithmeticError, ImportError):
                 results[calc.blockKey] = None
         return results

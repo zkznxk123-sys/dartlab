@@ -118,6 +118,14 @@ dartlab.ask("삼성전자 재무건전성 분석해줘")
 
 API 키 불필요. [HuggingFace](https://huggingface.co/datasets/eddmpython/dartlab-data)에서 자동 다운로드, 로컬 캐시로 즉시 로드.
 
+## 세 겹의 분석
+
+Company가 종목코드 하나로 데이터를 준비하면, 세 겹이 분석한다.
+
+1. **분석 엔진** — 숫자를 만든다. 마진 추이, 현금흐름 패턴, 부도 확률, 업종 비교, 매크로 사이클. 해석하지 않는다. 숫자와 근거만 제공한다.
+2. **review** — 엔진 데이터를 블록 단위로 조합하여 보고서를 만든다. 11가지 보고서 타입 × 7가지 기업유형 템플릿. 해석은 제공하지 않는다. 다양한 관점의 근거를 체계적으로 배치한다.
+3. **AI** — 엔진을 직접 쓰고 판단한다. 결과를 의심하고, 원본으로 검증하고, 이상하면 가정을 바꿔서 재계산한다. dartlab을 대표하는 적극적 분석가.
+
 ## DartLab은 무엇인가
 
 하나의 호출 계약. `dartlab.엔진()` 으로 가이드 보고 `dartlab.엔진("축")` 으로 실행.
@@ -134,8 +142,8 @@ API 키 불필요. [HuggingFace](https://huggingface.co/datasets/eddmpython/dart
 | L2 | [Quant](ops/quant.md) | 가격 기반 정량 신호 (기술/리스크/팩터/백테스트) | `c.quant()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/04_quant.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/04_quant.py) |
 | L2 | [Credit](ops/credit.md) | 독립 신용평가 (dCR 등급, 부도확률, 건전도) | `c.credit("등급")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/07_credit.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/07_credit.py) |
 | L2 | [Macro](ops/macro.md) | 시장 레벨 매크로 (사이클/금리/유동성/심리/자산 + 시나리오 110) | `dartlab.macro("사이클")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/06_macro.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/06_macro.py) |
-| L3 | [Review](ops/review.md) | 이야기꾼 — L2 4엔진 + scan 소비, 보고서 조립 (rich/html/markdown/json) | `c.review("수익성")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/08_review.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/08_review.py) |
-| L4 | [AI](ops/ai.md) | 적극적 분석가 — 코드 실행 + 해석 (사람도 L4 소비자) | `dartlab.ask()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/09_ai.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/09_ai.py) |
+| L3 | [Review](ops/review.md) | 보고서 빌더 — 5엔진 블록 조합, 11 타입 × 7 템플릿 (해석 안 함) | `c.review("수익성")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/08_review.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/08_review.py) |
+| L4 | [AI](ops/ai.md) | 적극적 분석가 — 엔진 직접 호출 + 주관적 판단 + 원본 검증 (사람도 L4) | `dartlab.ask()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/09_ai.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/09_ai.py) |
 | L4 | [Channel](ops/channel.md) | 외부 공유 — `dartlab channel` 한 줄로 폰에서 PC dartlab 사용 | `dartlab channel` | — |
 | core | [Search](ops/search.md) | 공시 시맨틱 검색 *(alpha)* | `dartlab.search()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/10_search.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/10_search.py) |
 | facade | [Listing](ops/listing.md) | 종목/공시/topic 카탈로그 API | `dartlab.listing()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/11_listing.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/11_listing.py) |

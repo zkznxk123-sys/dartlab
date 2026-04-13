@@ -20,6 +20,26 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/000660-skhynix.webp
 youtubeId: "x9z7646-QbY"
+ai:
+  verdict: "5번 죽을 뻔한 회사가 HBM ��점으로 메모리 30년 최강 사이클 진입. OPM 58%는 구조적 가격결정력."
+  direction: 개선
+  confidence: 높음
+  archetype: 사이클
+  strengths:
+    - "HBM3E 양산 수율 1위 → NVIDIA 점유율 61%"
+    - "순현금 7.4조 (차입금 22조 < 현금 30조)"
+    - "ROIC 35% vs WACC 11% → spread +24pp"
+    - "OPM 58.4% — 삼성전자 추월"
+  weaknesses:
+    - "배당성향 1.1% (영업이익 47조 대비 5,221억)"
+    - "CAPEX 27.5조 베팅 — 2027년 수요 미달 시 감가상각 리스크"
+    - "NVIDIA 매출 비중 27% — 단일 고객 집중"
+  keyMetrics:
+    revenue: 97.15
+    opm: 48.59
+    roe: 35.27
+    fcf: 21.3
+  dataAsOf: "2026-04-01"
 ---
 
 <script>

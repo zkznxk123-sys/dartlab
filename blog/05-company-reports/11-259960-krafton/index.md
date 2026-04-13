@@ -21,6 +21,20 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/259960-krafton.webp
 youtubeId: ""
+ai:
+  verdict: "PUBG 5년 FCF 2.9조인데 현금 3조→6천억. 배당 0원. 금융자산에 분산."
+  direction: 악화
+  confidence: 보통
+  archetype: 현금부자
+  strengths:
+    - "PUBG 누적 12.6조"
+    - "모바일 텐센트 고마진"
+  weaknesses:
+    - "현금 3조→6천억"
+    - "배당 0원"
+    - "무형자산 1.8조 리스크"
+  keyMetrics: {revenue: 3.33, opm: 35.0, roe: 20.0, fcf: 0.6}
+  dataAsOf: "2026-04-07"
 ---
 
 <script>

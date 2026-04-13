@@ -20,6 +20,19 @@ tags:
   - 한전채
   - 유틸리티
   - 재무분석
+ai:
+  verdict: "전기요금 1원=5,600억. 11분기 동결로 적자 32조. 원가 통제 불가."
+  direction: 개선
+  confidence: 보통
+  archetype: 자본집약
+  strengths:
+    - "AA+ 신용등급"
+    - "매출원가율 141.6%→84%"
+  weaknesses:
+    - "적자 32.7조(2022)"
+    - "LNG+석탄 가격 변동"
+  keyMetrics: {revenue: 97.4, opm: 13.8, roe: 10.0, fcf: 5.0}
+  dataAsOf: "2026-04-12"
 ---
 
 <script>

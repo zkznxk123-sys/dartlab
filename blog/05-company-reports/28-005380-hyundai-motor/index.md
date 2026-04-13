@@ -20,6 +20,19 @@ tags:
   - 제네시스
   - 보스턴다이내믹스
   - 재무분석
+ai:
+  verdict: "매출 186조 최대이나 OPM 9.3%→6.2%. 관세+원가+판관비 3중고."
+  direction: 악화
+  confidence: 높음
+  archetype: 사이클
+  strengths:
+    - "매출 186조 최대"
+    - "하이브리드 +61%"
+  weaknesses:
+    - "영업이익 -19.5%"
+    - "관세 25%+원가+판관비"
+  keyMetrics: {revenue: 186.3, opm: 6.2, roe: 8.0, fcf: 5.0}
+  dataAsOf: "2026-04-13"
 ---
 
 <script>

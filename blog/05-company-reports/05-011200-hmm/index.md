@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/011200-hmm.webp
 youtubeId: ""
+ai:
+  verdict: "운임 사이클이 주가 90% 결정. 베타 0.37 R² 10%. OPM -18%~53%."
+  direction: 유지
+  confidence: 높음
+  archetype: 사이클
+  strengths:
+    - "호황기 OPM 53%"
+    - "2년 9.95조 영업이익"
+  weaknesses:
+    - "영업이익 -8,300억~+9,950억"
+    - "베타 0.37 시장 무상관"
+  keyMetrics: {revenue: 10.89, opm: 15.0, roe: 10.0, fcf: 2.0}
+  dataAsOf: "2026-04-04"
 ---
 
 <script>

@@ -312,8 +312,24 @@ class KnowledgeDB:
             )
         conn.commit()
 
-    def get_insight(self, stock_code: str) -> InsightRecord | None:
+    def get_insight(self, stock_code: str, *, source: str | None = None) -> InsightRecord | None:
+        """기업별 인사이트 조회. source 지정 시 해당 소스 우선."""
         conn = self._ensure_db()
+        if source:
+            row = conn.execute(
+                "SELECT stock_code, narrative, strengths, weaknesses, sector, source, "
+                "created_at, expires_at FROM insights "
+                "WHERE stock_code = ? AND source = ? ORDER BY created_at DESC LIMIT 1",
+                (stock_code, source),
+            ).fetchone()
+            if row:
+                return InsightRecord(
+                    stock_code=row[0], narrative=row[1],
+                    strengths=json.loads(row[2]) if row[2] else [],
+                    weaknesses=json.loads(row[3]) if row[3] else [],
+                    sector=row[4] or "", source=row[5] or source,
+                    created_at=row[6], expires_at=row[7],
+                )
         row = conn.execute(
             "SELECT stock_code, narrative, strengths, weaknesses, sector, source, "
             "created_at, expires_at FROM insights "

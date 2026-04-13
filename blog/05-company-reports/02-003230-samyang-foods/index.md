@@ -20,6 +20,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/003230-samyang-foods.webp
 youtubeId: ""
+ai:
+  verdict: "라면 꼴등이 불닭 베팅으로 OPM 21.8% 달성. FCF -1,397억 공격투자 사이클."
+  direction: 개선
+  confidence: 높음
+  archetype: 성장
+  strengths:
+    - "불닭 K-콘텐츠화로 수출 6배"
+    - "OPM 5%→22%"
+  weaknesses:
+    - "FCF -1,397억"
+    - "원재료비 리스크"
+  keyMetrics: {revenue: 2.3, opm: 21.83, roe: 30.0, fcf: -0.14}
+  dataAsOf: "2026-04-03"
 ---
 
 <script>

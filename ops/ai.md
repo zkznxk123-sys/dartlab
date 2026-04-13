@@ -1,10 +1,29 @@
 # AI
 
-LLM 기반 적극적 분석가.
-dartlab 엔진(analysis, scan, gather 등)은 AI가 호출하는 **도구**다.
-AI는 이 도구를 조합해 질문에 최적화된 분석 흐름을 스스로 설계하고,
-실행 과정(코드 + 결과)을 사용자에게 투명하게 보여줘서
-사용자가 분석 방법 자체를 학습할 수 있게 돕는다.
+**dartlab을 대표하는 적극적 분석가. 엔진은 도구, AI가 주체자.**
+
+엔진 결과를 읽어주는 낭독기가 아니다. **모든 분석에 개입한다.**
+- 분석 엔진을 직접 호출하고, 결과를 의심하고, 원본 재무제표(`c.show`)로 직접 계산하여 검증한다.
+- 엔진이 문제가 있으면 원본을 보고 직접 비율을 계산한다.
+- 가정이 비현실적이면 override로 재계산하여 비교한다.
+- audit 시에는 엔진/데이터 개선을 제안한다.
+- 실행 과정(코드 + 결과)을 사용자에게 투명하게 보여줘서 사용자가 분석 방법을 배운다.
+
+### review와의 관계
+
+**AI는 `c.review()`를 직접 호출하지 않는다.** 83초 타임아웃 + AI가 review의 낭독기가 되면 안 된다.
+
+대신 **review의 보고서 타입(11종)을 참고**하여 분석 관점을 잡는다:
+- "신용 관점에서 봐줘" → review credit 타입의 블록 조합(안정성/현금/자금/등급) 참고
+- "성장주로 봐줘" → review growth 타입(CAGR/마진확장/투자효율) 참고
+- "위기 진단해줘" → review crisis 타입(부실/레버리지/유동성) 참고
+- 참고하되 **AI 자신의 주관으로 판단**한다. review 결과를 그대로 읽지 않는다.
+
+AI가 엔진을 쓸 때는 AI가 주체자:
+- `c.analysis("수익성")` → AI가 직접 판단하고 해석
+- `c.show("IS", freq="Y")` → AI가 직접 원본 계산하여 검증
+- `dartlab.scan("profitability")` → AI가 직접 업종 위치 확인
+- `c.analysis("가치평가", overrides={"wacc": 9.0})` → AI가 가정 조정 후 재계산
 
 ## 호출 계약
 
@@ -31,11 +50,13 @@ dartlab.chat("005930", "배당 추세는?")     # Company-bound
 
 ## 설계 원칙
 
-- **AI가 분석의 전 과정을 주도** — 데이터 수집, 계산, 판단, 해석, 보고서까지 AI가 수행
-- dartlab 엔진은 AI가 호출하는 도구 — AI가 도구를 조합해서 질문에 최적화된 흐름을 스스로 설계
+- **AI는 dartlab을 대표하는 적극적 분석가** — 엔진 결과를 읽어주는 게 아니라, 직접 판단하고 검증하고 개입한다.
+- **모든 분석에 개입** — 엔진이 계산한 결과를 맹신하지 않는다. 원본 재무제표로 직접 비율을 계산하여 교차 검증한다.
+- **이상 시 직접 행동** — 가정이 비현실적이면 override로 재계산. 데이터가 이상하면 원본(`c.show`)을 파고든다.
+- **audit 시 개선 제안** — 엔진/데이터의 문제를 발견하면 구체적 개선안을 제시한다.
+- dartlab 엔진(analysis, scan, gather, macro, credit, quant)은 AI의 **도구** — AI가 조합해서 질문에 최적화된 흐름을 설계.
 - **CAPABILITIES-Driven**: 코드블록 자동실행. 데이터는 코드가 가져온다.
-- **사용자 학습 지원** — AI가 실행하는 코드와 결과를 투명하게 보여준다. 사용자는 답만 얻는 게 아니라 분석 방법을 배운다.
-- **함수 제공** — 사용자가 직접 실행할 수 있는 코드를 적극 제공한다. "이렇게 하면 됩니다"가 아니라 "이 코드를 실행하세요"다.
+- **사용자 학습 지원** — AI가 실행하는 코드와 결과를 투명하게 보여준다.
 - **모든 provider에서 기본 기능 동작** — 도구 호출 불가 시 코드 실행으로 보충
 - defaultProvider 기본 = 없음
 
@@ -496,10 +517,103 @@ dict
 엔진이 새 축을 추가해도 `history + period + 숫자` 패턴만 유지하면 autoEnrich가 자동 적용.
 scan 업종 백분위 조회도 company가 있으면 자동.
 
+## AI 개입 레이어 — 도구 조율자 (2026-04-13 도입)
+
+AI가 분석 엔진의 "소비자"에서 "조율자"로 진화하는 레이어.
+Kim et al. (2024, 시카고대) 참고: 표준화 재무제표 + CoT → 인간 초과 60% 정확도.
+
+### 3 Phase 구조
+
+**Phase 1: CoT 강제 + 구조화 출력** (시스템 프롬프트)
+
+시스템 프롬프트에 4단계 사고 구조를 강제:
+1. **추세(Trend)**: 3~5기 시계열 방향/변곡점
+2. **��율(Ratio)**: 핵심 비율 + 업종 대비 + 5년 평균 대비
+3. **근거(Rationale)**: 6막 인과 추적 + 외부 요인
+4. **판단(Prediction)**: Direction(개선/악화/유지) + Magnitude(대폭/소폭/미미) + Confidence(높음/보통/낮음)
+
+**Phase 1.5: 표준화 재무제표 직접 주입** (Kim et al. 핵심)
+
+`ai/context/selectors/financials.py` — BS/IS/CF 핵심 항목을 AI context에 원본 주입.
+AI가 엔진 calc 결과만 해석하지 않고, 원본 숫자로 직접 비율 계산 → calc 결과와 교차 검증.
+5%p 이상 불일치 시 AI가 원인을 밝히고 자체 판단 사용.
+
+| 주입 항목 | 소스 |
+|---|---|
+| IS 7행 | 매출액, 매출원가, 매출총이익, 판관비, 영업이익, 세전이익, 순이익 |
+| BS 8행 | 자산총계, 유동자산, 현금, 비유동자산, 부채총계, 유동부채, 비유동부채, 자본총계 |
+| CF 3행 | 영업CF, 투자CF, 재무CF |
+
+**Phase 2: Assumption Review** (결정론 검증기)
+
+`ai/context/selectors/assumptions.py` — LLM 호출 없이 임계값 기반 가정 경고.
+ACT6_OUTLOOK/ACT_ALL intent에서 ContextBuilder가 자동 주입.
+
+| 검증 | 임계값 | 경고 |
+|---|---|---|
+| WACC 범위 | <3% 또는 >20% | 리스크 ��리미엄 누락/과대 |
+| FCF 부호 | 최근 2기 음수 | DCF 부적합 |
+| 매출 성장률 | |g| > 30% | 극단적 전망 |
+| 적정주가 괴리 | |gap| > 50% | 가정 과대/과소 |
+
+**Phase 3: Override 재실행 경로**
+
+AI가 비현실적 가정 발견 시 코드블록으로 직접 override:
+```python
+r = c.analysis("가치평가", overrides={"wacc": 9.0})
+```
+
+override 흐름: `Analysis.__call__(overrides=)` → `_run(overrides=)` → `_acceptsOverrides(fn)` 체크 → calc에 전달.
+
+override 키 정의: `core/overrides.py` — FORECAST/VALUATION/CREDIT/MACRO 4그룹.
+
+### 설계 원칙
+
+- 기존 코드 실행 루프(`_streamWithCodeExecution` 3라운드) 활용 — 새 agent 루프 불필요
+- 결정론 먼저, LLM ��중 — 가정 검증은 임계값 기반 (환각 방지)
+- override는 AI가 명시적으로 판단하고 코드로 적용 — 자동 적용 금지
+
+### 학술 근거
+
+- Kim et al. (2024): GPT + 표준화 BS/IS + CoT → 60% (인간 53-57% 초과)
+- ACE (ICLR 2026): Generator/Reflector/Curator 폐쇄 루프
+- Fernandez: WACC 입력에서 질적 조정 (사후 곱셈 금지)
+- Damodaran: "하나의 서사, 하나의 모델" + Triangulation
+
+## AI 경험 생태계
+
+AI의 경험은 세 층으로 쌓인다:
+
+- **KnowledgeDB = 메인.** 모든 `dartlab.ask()` 호출에서 자동 축적. 2,700+ 기업.
+  - executions: 질문/등급 기록. insights: 기업별 서사. playbook: intent별 분석 지침.
+  - HuggingFace push/pull로 모든 사용자에게 공유.
+
+- **블로그 = 프리미엄 층.** 5에이전트 + 95점 게이트 + 신뢰성 검증.
+  - 블로그 마크다운이 source of truth. frontmatter `ai:` 블록에 verdict/strengths/weaknesses/keyMetrics.
+  - 자동 파생: ai: 블록 → KnowledgeDB `insights(source="blog")`. 관리 포인트는 블로그 하나.
+
+- **HuggingFace = 공유.** KnowledgeDB push/pull. 다른 사용자가 pull하면 경험 전파.
+
+AI가 기업 분석 시: insights에서 과거 경험 확인 → 참고하되 최신 데이터로 자기 판단. 맹신 금지.
+
+### 블로그 frontmatter ai: 블록
+
+```yaml
+ai:
+  verdict: "관통선의 결론 한 문장"
+  direction: 개선
+  confidence: 높음
+  archetype: 사이클
+  strengths: ["강점1", "강점2"]
+  weaknesses: ["약점1", "약점2"]
+  keyMetrics: {revenue: 97.15, opm: 48.59, roe: 35.27, fcf: 21.3}
+  dataAsOf: "2026-04-08"
+```
+
 ## 관련 코드
 
 - `src/dartlab/ai/context/aiview.py` — autoEnrich 공통 변환 레이어
-- `src/dartlab/ai/context/` — Phase 1: ContextBuilder + ACE 폐쇄 루프 (intent/encoder/budget/builder/playbook/selectors)
+- `src/dartlab/ai/context/` — ContextBuilder + ACE 폐쇄 루프 (intent/encoder/budget/builder/playbook/selectors)
 - `src/dartlab/ai/` — providers, tools, runtime, memory, persistence, conversation
 - `src/dartlab/ai/runtime/core.py` — 시스템 프롬프트, 코드 실행, 마크다운 변환, 인사이트 주입, preGround 백그라운드 thread
 - `src/dartlab/ai/persistence/knowledge_db.py` — 단일 영속 DB (CRUD + 마이그레이션 + HF push/pull). selfai 폐기 후 영속성만 분리 보존

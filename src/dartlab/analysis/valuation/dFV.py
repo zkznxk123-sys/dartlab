@@ -14,8 +14,18 @@ from __future__ import annotations
 from typing import Any
 
 
-def calcDFV(company: Any, *, basePeriod: str | None = None) -> dict | None:
+def calcDFV(
+    company: Any,
+    *,
+    basePeriod: str | None = None,
+    overrides: dict | None = None,
+) -> dict | None:
     """dartlab Fair Value v2.
+
+    Parameters
+    ----------
+    overrides : dict | None
+        AI/사용자 가정 override. wacc, terminalGrowth, primaryModel 키 지원.
 
     Returns
     -------
@@ -32,12 +42,17 @@ def calcDFV(company: Any, *, basePeriod: str | None = None) -> dict | None:
         dividendFloor : dict | None — DDM 하한
         qualityWACC : dict — WACC 조정 상세
         allMethods : dict — 모든 방법론 적정가 (참고용)
+        overrideApplied : dict | None — 적용된 override (있으면)
     """
+    from dartlab.core.overrides import applyOverride
+
+    ov = overrides or {}
+
     # 1. 기업유형 → primary/secondary 선택
     from dartlab.analysis.valuation.fitness import selectModels
 
     models = selectModels(company)
-    primary_key = models["primary"]
+    primary_key = applyOverride(models["primary"], "primaryModel", ov)
     secondary_keys = models["secondary"]
 
     # 2. 모든 방법론 적정가 수집
@@ -47,6 +62,7 @@ def calcDFV(company: Any, *, basePeriod: str | None = None) -> dict | None:
 
     # 3. Quality-Adjusted WACC
     base_wacc = _getBaseWACC(company)
+    base_wacc = applyOverride(base_wacc, "wacc", ov)
     from dartlab.analysis.valuation.qualityWACC import calcQualityWACC
 
     qw = calcQualityWACC(company, base_wacc, basePeriod=basePeriod)
@@ -97,7 +113,7 @@ def calcDFV(company: Any, *, basePeriod: str | None = None) -> dict | None:
     confidence = triangulation.get("confidence", "low")
     opinion = _calcOpinion(upside)
 
-    return {
+    out = {
         "dFV": round(primary_value),
         "scenarios": {"bull": round(bull), "base": round(primary_value), "bear": round(bear)},
         "currentPrice": round(current_price) if current_price else None,
@@ -111,6 +127,9 @@ def calcDFV(company: Any, *, basePeriod: str | None = None) -> dict | None:
         "qualityWACC": qw,
         "allMethods": {k: round(v) for k, v in all_methods.items()},
     }
+    if ov:
+        out["overrideApplied"] = {k: v for k, v in ov.items() if k in ("wacc", "terminalGrowth", "primaryModel")}
+    return out
 
 
 def _collectAllValues(company: Any, basePeriod: str | None) -> dict:

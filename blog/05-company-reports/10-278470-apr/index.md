@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/278470-apr.webp
 youtubeId: ""
+ai:
+  verdict: "화장품+디바이스 OPM 24%. 매출 7배. 해외 80% 환율 리스크."
+  direction: 개선
+  confidence: 보통
+  archetype: 성장
+  strengths:
+    - "디바이스+세럼 객단가 15배"
+    - "OPM 24%"
+  weaknesses:
+    - "해외 80% 환율 리스크"
+    - "디바이스 진입장벽 낮음"
+  keyMetrics: {revenue: 1.53, opm: 23.9, roe: 40.0, fcf: 0.1}
+  dataAsOf: "2026-04-06"
 ---
 
 <script>

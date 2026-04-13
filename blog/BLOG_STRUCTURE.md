@@ -43,7 +43,27 @@ category: reading-disclosures | dartlab-news | corporate-analysis | credit-repor
 series: 시리즈 id
 seriesOrder: 숫자
 thumbnail: /avatar-*.png
+
+# AI 경험 블록 (company-reports 필수, 기타 카테고리 선택)
+# mdsvex가 미사용 필드를 무시하므로 렌더링 영향 없음
+ai:
+  verdict: "관통선의 결론 — 핵심 판단 한 문장"
+  direction: 개선 | 악화 | 유지
+  confidence: 높음 | 보통 | 낮음
+  archetype: 사이클 | 프랜차이즈 | 턴어라운드 | 성장 | 자본집약 | 지주 | 현금부자
+  strengths: ["강점1", "강점2"]
+  weaknesses: ["약점1", "약점2"]
+  keyMetrics: {revenue: 조원, opm: %, roe: %, fcf: 조원}
+  dataAsOf: "YYYY-MM-DD"
 ```
+
+### ai: 블록 규칙
+- **company-reports 카테고리는 필���.** 발간 게이트에 ai: 블록 존재 여부 체크.
+- verdict = ��통선 질문의 답. 기획자가 확정한 관통선에서 도출.
+- strengths/weaknesses = 재무분석가가 발견한 핵심.
+- keyMetrics = dartlab 실측 수치. sync_financials.py가 자동 갱신.
+- 포스트 업데이트 시 ai: 블록도 같이 갱신.
+- KnowledgeDB에 자동 파생 → HuggingFace로 공유 → 다른 사용자/AI 재사용.
 
 ## 시리즈
 

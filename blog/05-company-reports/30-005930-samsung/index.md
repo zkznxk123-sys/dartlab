@@ -20,6 +20,19 @@ tags:
   - 이재용
   - 재무분석
   - 사이클
+ai:
+  verdict: "매출 334조이나 반도체 빼면 OPM 7%. 파운드리 적자 7조. 현금 110조 해외 고착."
+  direction: 유지
+  confidence: 높음
+  archetype: 사이클
+  strengths:
+    - "분기 이익 57.2조 역대 최대"
+    - "OPM 2.5%→13.1% 회복"
+  weaknesses:
+    - "파운드리 적자 7조"
+    - "현금 110조 해외 고착"
+  keyMetrics: {revenue: 334.0, opm: 13.1, roe: 10.4, fcf: 33.2}
+  dataAsOf: "2026-04-13"
 ---
 
 <script>

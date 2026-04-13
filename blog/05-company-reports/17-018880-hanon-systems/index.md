@@ -20,7 +20,20 @@ tags:
   - 전자공시
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/018880-hanon-systems.webp
-youtubeId: ""
+youtubeId: "_rnjdNcCZgw"
+ai:
+  verdict: "사모펀드가 순이익 7배 배당. 차입금 11배. 이자가 이익을 먹는 구조."
+  direction: 악화
+  confidence: 높음
+  archetype: 턴어라운드
+  strengths:
+    - "자동차 공조 세계 2위"
+    - "EV 열관리 성장"
+  weaknesses:
+    - "순이익 267억에 배당 1,850억"
+    - "차입금 4천억→4.5조"
+  keyMetrics: {revenue: 10.0, opm: 2.5, roe: -5.0, fcf: -0.3}
+  dataAsOf: "2026-04-10"
 ---
 
 <script>

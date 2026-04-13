@@ -20,6 +20,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/034020-doosan-enerbility.webp
 youtubeId: ""
+ai:
+  verdict: "부채비율 305%→129%. 체코 5.6조 수주 전환점이나 이자가 이익을 먹는 구조."
+  direction: 개선
+  confidence: 높음
+  archetype: 턴어라운드
+  strengths:
+    - "9년 연속 영업흑자"
+    - "체코 5.6조 수주"
+  weaknesses:
+    - "이자비용이 영업이익 대부분 흡수"
+    - "부채비율 129%"
+  keyMetrics: {revenue: 17.4, opm: 8.4, roe: 5.0, fcf: 0.3}
+  dataAsOf: "2026-04-03"
 ---
 
 <script>

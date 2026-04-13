@@ -20,6 +20,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/267260-hd-hyundai-electric.webp
 youtubeId: ""
+ai:
+  verdict: "765kV 변압기 독점. 적자 1,006억→이익 9,953억. OPM 24.4%."
+  direction: 개선
+  confidence: 높음
+  archetype: 턴어라운드
+  strengths:
+    - "765kV 세계 5~6곳 독점"
+    - "ROE -21%→36%"
+  weaknesses:
+    - "숙련공 20년 경력 필수"
+    - "대당 3~4년 생산"
+  keyMetrics: {revenue: 4.08, opm: 24.4, roe: 36.0, fcf: 0.8}
+  dataAsOf: "2026-04-05"
 ---
 
 <script>

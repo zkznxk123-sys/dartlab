@@ -159,8 +159,18 @@ def _getSectorParams(company: Any):
 
 
 @memoized_calc
-def calcDcf(company: Any, *, basePeriod: str | None = None) -> dict | None:
+def calcDcf(
+    company: Any,
+    *,
+    basePeriod: str | None = None,
+    overrides: dict | None = None,
+) -> dict | None:
     """DCF (현금흐름 할인) 밸류에이션.
+
+    Parameters
+    ----------
+    overrides : dict | None
+        AI/사용자 가정 override. wacc, terminalGrowth 키 지원.
 
     Returns
     -------
@@ -181,8 +191,12 @@ def calcDcf(company: Any, *, basePeriod: str | None = None) -> dict | None:
         warnings : list[str] — 경고 메시지
         currentPrice : float | None — 현재 주가 (원)
         currency : str — 통화 (KRW | USD)
+        overrideApplied : dict | None — 적용된 override (있으면)
     """
     from dartlab.core.finance.dcf import dcfValuation
+    from dartlab.core.overrides import applyOverride
+
+    ov = overrides or {}
 
     series, shares, currency = _getSeriesAndShares(company)
     sp = _getSectorParams(company)
@@ -198,6 +212,7 @@ def calcDcf(company: Any, *, basePeriod: str | None = None) -> dict | None:
         market_cap=marketCap,
         currency=currency,
     )
+    wacc = applyOverride(wacc, "wacc", ov)
 
     # 추정재무제표(Pro Forma) FCF → DCF 입력 (있으면 우선 사용)
     pfFCF = None
@@ -212,16 +227,20 @@ def calcDcf(company: Any, *, basePeriod: str | None = None) -> dict | None:
     except (ImportError, AttributeError, ValueError, TypeError, KeyError):
         pfFCF = None
 
-    result = dcfValuation(
-        series,
-        shares=shares,
-        sectorParams=sp,
-        currentPrice=currentPrice,
-        currency=currency,
-        discountRate=wacc,
-        proformaFCF=pfFCF,
-    )
-    return {
+    tg_override = ov.get("terminalGrowth")
+    dcf_kwargs: dict[str, Any] = {
+        "shares": shares,
+        "sectorParams": sp,
+        "currentPrice": currentPrice,
+        "currency": currency,
+        "discountRate": wacc,
+        "proformaFCF": pfFCF,
+    }
+    if tg_override is not None:
+        dcf_kwargs["terminalGrowthRate"] = tg_override / 100 if tg_override > 1 else tg_override
+
+    result = dcfValuation(series, **dcf_kwargs)
+    out: dict[str, Any] = {
         "perShareValue": result.perShareValue,
         "enterpriseValue": result.enterpriseValue,
         "equityValue": result.equityValue,
@@ -239,6 +258,9 @@ def calcDcf(company: Any, *, basePeriod: str | None = None) -> dict | None:
         "currentPrice": currentPrice,
         "currency": currency,
     }
+    if ov:
+        out["overrideApplied"] = {k: v for k, v in ov.items() if k in ("wacc", "terminalGrowth")}
+    return out
 
 
 @memoized_calc
