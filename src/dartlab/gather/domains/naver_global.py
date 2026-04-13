@@ -1,12 +1,16 @@
-"""네이버 글로벌 주식 API — US/글로벌 주가 (Yahoo 대체).
+"""네이버 글로벌 주식 — US/글로벌 주가 (Yahoo 대체).
 
-API 키 불필요. rate limit 느슨.
-네이버 Reuters Code 체계: NASDAQ → .O, NYSE → 접미사 없음.
+네이버 웹 스크래핑. 공식 API 아님.
+Reuters Code 체계: NASDAQ → .O, NYSE → 접미사 없음.
+**호출 간 3~6초 강제 딜레이** — 서버 보호.
 """
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import random
+import time
 from datetime import datetime, timezone
 
 from ..types import PriceSnapshot, SourceUnavailableError
@@ -17,6 +21,23 @@ _API_BASE = "https://api.stock.naver.com"
 
 # Reuters Code 접미사 후보 (순서대로 시도)
 _SUFFIXES = ["", ".O", ".N", ".K", ".A"]
+
+# 서버 보호: 호출 간 3~6초 강제 딜레이 (모듈 전역)
+_MIN_DELAY = 2.0
+_MAX_DELAY = 4.0
+_last_call_time: float = 0.0
+
+
+async def _throttle() -> None:
+    """마지막 호출 이후 3~6초 대기. 별도 호출이어도 무조건."""
+    global _last_call_time
+    now = time.monotonic()
+    elapsed = now - _last_call_time
+    delay = random.uniform(_MIN_DELAY, _MAX_DELAY)
+    if elapsed < delay:
+        wait = delay - elapsed
+        await asyncio.sleep(wait)
+    _last_call_time = time.monotonic()
 
 
 def _clean_number(val) -> float | None:
@@ -35,6 +56,7 @@ def _clean_number(val) -> float | None:
 async def _resolve_reuters_code(ticker: str, client) -> str | None:
     """ticker → 네이버 Reuters Code. 접미사를 순서대로 시도."""
     for suffix in _SUFFIXES:
+        await _throttle()
         code = f"{ticker}{suffix}"
         url = f"{_API_BASE}/stock/{code}/basic"
         try:
@@ -54,6 +76,7 @@ async def fetch_price(stock_code: str, client, *, market: str = "US") -> PriceSn
         log.warning("naver_global: %s 매핑 실패", stock_code)
         return None
 
+    await _throttle()
     url = f"{_API_BASE}/stock/{code}/basic"
     try:
         resp = await client.get(url, headers={"Accept": "application/json"})
@@ -117,6 +140,7 @@ async def fetch_history(
     if not code:
         return []
 
+    await _throttle()
     # dayCandle로 최대 데이터 요청
     count = 6000
     url = f"{_API_BASE}/chart/foreign/item/{code}?periodType=dayCandle&count={count}"
