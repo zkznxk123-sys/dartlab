@@ -2646,7 +2646,9 @@
       "engName": "Income Tax Detail",
       "stmt": "NT",
       "level": 3,
-      "commonTags": []
+      "commonTags": [],
+      "code": "NT091",
+      "line": 1000
     },
     {
       "snakeId": "pension_detail",
@@ -2654,7 +2656,9 @@
       "engName": "Pension Detail",
       "stmt": "NT",
       "level": 3,
-      "commonTags": []
+      "commonTags": [],
+      "code": "NT092",
+      "line": 1010
     },
     {
       "snakeId": "goodwill_detail",
@@ -2662,7 +2666,9 @@
       "engName": "Goodwill Detail",
       "stmt": "NT",
       "level": 3,
-      "commonTags": []
+      "commonTags": [],
+      "code": "NT093",
+      "line": 1020
     },
     {
       "snakeId": "operating_lease_detail",
@@ -2670,7 +2676,9 @@
       "engName": "Operating Lease Detail",
       "stmt": "NT",
       "level": 3,
-      "commonTags": []
+      "commonTags": [],
+      "code": "NT094",
+      "line": 1030
     },
     {
       "snakeId": "intangible_assets_detail",
@@ -2678,7 +2686,9 @@
       "engName": "Intangible Assets Detail",
       "stmt": "NT",
       "level": 3,
-      "commonTags": []
+      "commonTags": [],
+      "code": "NT095",
+      "line": 1040
     },
     {
       "snakeId": "debt_maturity_schedule",
@@ -2686,7 +2696,9 @@
       "engName": "Debt Maturity Schedule",
       "stmt": "NT",
       "level": 3,
-      "commonTags": []
+      "commonTags": [],
+      "code": "NT096",
+      "line": 1050
     },
     {
       "snakeId": "stock_compensation_detail",
@@ -2694,7 +2706,9 @@
       "engName": "Stock Compensation Detail",
       "stmt": "NT",
       "level": 3,
-      "commonTags": []
+      "commonTags": [],
+      "code": "NT097",
+      "line": 1060
     },
     {
       "snakeId": "fair_value_detail",
@@ -2702,7 +2716,9 @@
       "engName": "Fair Value Detail",
       "stmt": "NT",
       "level": 3,
-      "commonTags": []
+      "commonTags": [],
+      "code": "NT098",
+      "line": 1070
     },
     {
       "snakeId": "finance_lease_detail",
@@ -2710,7 +2726,9 @@
       "engName": "Finance Lease Detail",
       "stmt": "NT",
       "level": 3,
-      "commonTags": []
+      "commonTags": [],
+      "code": "NT099",
+      "line": 1080
     },
     {
       "snakeId": "gains_losses_detail",
@@ -2718,7 +2736,9 @@
       "engName": "Gains Losses Detail",
       "stmt": "NT",
       "level": 3,
-      "commonTags": []
+      "commonTags": [],
+      "code": "NT100",
+      "line": 1090
     },
     {
       "snakeId": "insurance_detail",
@@ -2726,7 +2746,9 @@
       "engName": "Insurance Detail",
       "stmt": "NT",
       "level": 3,
-      "commonTags": []
+      "commonTags": [],
+      "code": "NT101",
+      "line": 1100
     },
     {
       "snakeId": "payments_detail",
@@ -2734,7 +2756,9 @@
       "engName": "Payments Detail",
       "stmt": "NT",
       "level": 3,
-      "commonTags": []
+      "commonTags": [],
+      "code": "NT102",
+      "line": 1110
     },
     {
       "snakeId": "accrued_liabilities",
@@ -2742,7 +2766,9 @@
       "engName": "Accrued Liabilities",
       "stmt": "BS",
       "level": 3,
-      "commonTags": []
+      "commonTags": [],
+      "code": "BS059",
+      "line": 330
     },
     {
       "snakeId": "non_current_assets",
@@ -2750,7 +2776,9 @@
       "engName": "Non-Current Assets",
       "stmt": "BS",
       "level": 2,
-      "commonTags": []
+      "commonTags": [],
+      "code": "BS060",
+      "line": 340
     },
     {
       "snakeId": "other_expense",
@@ -2758,7 +2786,9 @@
       "engName": "Other Expense",
       "stmt": "IS",
       "level": 3,
-      "commonTags": []
+      "commonTags": [],
+      "code": "IS072",
+      "line": 720
     },
     {
       "snakeId": "other_income",
@@ -2766,7 +2796,9 @@
       "engName": "Other Income",
       "stmt": "IS",
       "level": 3,
-      "commonTags": []
+      "commonTags": [],
+      "code": "IS073",
+      "line": 730
     }
   ]
 }
