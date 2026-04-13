@@ -102,6 +102,9 @@ class SectorInfo:
     confidence: float
     source: str
 
+    def __repr__(self):
+        return f"SectorInfo({self.sector.value}/{self.industryGroup.value}, conf={self.confidence:.2f}, src={self.source})"
+
 
 @dataclass
 class SectorParams:
@@ -164,11 +167,15 @@ def classify(
                 sector=_byValue(Sector, ov["sector"], Sector.UNKNOWN),
                 industryGroup=_byValue(IndustryGroup, ov["industryGroup"], IndustryGroup.UNKNOWN),
                 confidence=0.95,
-                source="override",
+                source="override_partial",
             )
 
     # 2. 주요제품 키워드 매칭 (KSIC보다 우선 — 더 구체적)
-    if mainProducts:
+    # 지주사("홀딩스", "지주")는 키워드 매칭 건너뛰기 — KSIC가 더 정확
+    _HOLDING_KEYWORDS = ("홀딩스", "지주", "Holdings")
+    isHolding = any(h in companyName for h in _HOLDING_KEYWORDS)
+
+    if mainProducts and not isHolding:
         result = _matchProductKeywords(mainProducts, data.get("productKeywords", {}))
         if result:
             sector, ig, score = result
