@@ -3,7 +3,7 @@
     "source": "US-GAAP Taxonomy + Custom Design",
     "description": "EDGAR 표준계정 코드 - US-GAAP 기반 (핵심 재무제표 본문 항목)",
     "version": "3.0.0",
-    "totalAccounts": 188,
+    "totalAccounts": 204,
     "boundary": "재무제표 본문(BS/IS/CF) + 자본변동표(EQ) + 포괄손익(CI) + 주석공시(NT) 전체 항목",
     "statementMapping": {
       "BS": "Balance Sheet",
@@ -2639,6 +2639,134 @@
       "commonTags": [
         "OtherComprehensiveIncomeLossTax"
       ]
+    },
+    {
+      "snakeId": "income_tax_detail",
+      "korName": "법인세상세",
+      "engName": "Income Tax Detail",
+      "stmt": "NT",
+      "level": 3,
+      "commonTags": []
+    },
+    {
+      "snakeId": "pension_detail",
+      "korName": "퇴직급여상세",
+      "engName": "Pension Detail",
+      "stmt": "NT",
+      "level": 3,
+      "commonTags": []
+    },
+    {
+      "snakeId": "goodwill_detail",
+      "korName": "영업권상세",
+      "engName": "Goodwill Detail",
+      "stmt": "NT",
+      "level": 3,
+      "commonTags": []
+    },
+    {
+      "snakeId": "operating_lease_detail",
+      "korName": "운용리스상세",
+      "engName": "Operating Lease Detail",
+      "stmt": "NT",
+      "level": 3,
+      "commonTags": []
+    },
+    {
+      "snakeId": "intangible_assets_detail",
+      "korName": "무형자산상세",
+      "engName": "Intangible Assets Detail",
+      "stmt": "NT",
+      "level": 3,
+      "commonTags": []
+    },
+    {
+      "snakeId": "debt_maturity_schedule",
+      "korName": "부채만기일정",
+      "engName": "Debt Maturity Schedule",
+      "stmt": "NT",
+      "level": 3,
+      "commonTags": []
+    },
+    {
+      "snakeId": "stock_compensation_detail",
+      "korName": "주식보상상세",
+      "engName": "Stock Compensation Detail",
+      "stmt": "NT",
+      "level": 3,
+      "commonTags": []
+    },
+    {
+      "snakeId": "fair_value_detail",
+      "korName": "공정가치상세",
+      "engName": "Fair Value Detail",
+      "stmt": "NT",
+      "level": 3,
+      "commonTags": []
+    },
+    {
+      "snakeId": "finance_lease_detail",
+      "korName": "금융리스상세",
+      "engName": "Finance Lease Detail",
+      "stmt": "NT",
+      "level": 3,
+      "commonTags": []
+    },
+    {
+      "snakeId": "gains_losses_detail",
+      "korName": "손익상세",
+      "engName": "Gains Losses Detail",
+      "stmt": "NT",
+      "level": 3,
+      "commonTags": []
+    },
+    {
+      "snakeId": "insurance_detail",
+      "korName": "보험상세",
+      "engName": "Insurance Detail",
+      "stmt": "NT",
+      "level": 3,
+      "commonTags": []
+    },
+    {
+      "snakeId": "payments_detail",
+      "korName": "지급상세",
+      "engName": "Payments Detail",
+      "stmt": "NT",
+      "level": 3,
+      "commonTags": []
+    },
+    {
+      "snakeId": "accrued_liabilities",
+      "korName": "미지급비용",
+      "engName": "Accrued Liabilities",
+      "stmt": "BS",
+      "level": 3,
+      "commonTags": []
+    },
+    {
+      "snakeId": "non_current_assets",
+      "korName": "비유동자산",
+      "engName": "Non-Current Assets",
+      "stmt": "BS",
+      "level": 2,
+      "commonTags": []
+    },
+    {
+      "snakeId": "other_expense",
+      "korName": "기타비용",
+      "engName": "Other Expense",
+      "stmt": "IS",
+      "level": 3,
+      "commonTags": []
+    },
+    {
+      "snakeId": "other_income",
+      "korName": "기타수익",
+      "engName": "Other Income",
+      "stmt": "IS",
+      "level": 3,
+      "commonTags": []
     }
   ]
 }

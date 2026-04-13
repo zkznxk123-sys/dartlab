@@ -87,10 +87,14 @@ def get_korean_labels() -> dict[str, str]:
             used.add(result[snakeId])
 
     # 3. EDGAR standardAccounts korName (DART에 없는 US-GAAP 계정)
+    # 2단계에서 충돌로 snakeId 그대로 들어간 경우도 EDGAR korName으로 덮어씀
     try:
         _edgar_labels = _load_edgar_standard_accounts()
         for snakeId, korName in _edgar_labels.items():
-            if snakeId not in result and korName:
+            if not korName:
+                continue
+            current = result.get(snakeId)
+            if current is None or current == snakeId:
                 result[snakeId] = korName
     except (FileNotFoundError, KeyError):
         pass
