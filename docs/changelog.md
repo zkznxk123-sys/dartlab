@@ -11,6 +11,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.10] - 2026-04-13
+
+### Added
+
+- **AI 적극 개입 레이어**: CoT 4단계 + 구조화 판단 + 원본 검증 + override 재계산
+- **analysis() overrides 전파**: calcDcf/dFV에 wacc/terminalGrowth override 지원
+- **블로그 경험 생태계**: frontmatter ai: 블록 → KnowledgeDB(source="blog") 자동 파생
+- **KnowledgeDB get_insight(source=)**: blog source 우선 조회
+
+### Changed
+
+- 시스템 프롬프트 클린코드 (중복 50줄 제거)
+- 엔진/review/AI 역할론 확립 (ops 문서 + README)
+
+### Removed
+
+- financials.py, assumptions.py (AI가 직접 하면 되는 보조 레이어)
+
 ## [0.9.7] - 2026-04-11
 
 ### Added

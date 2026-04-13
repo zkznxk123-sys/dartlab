@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.10] - 2026-04-13
+
+### Added
+
+- **AI 적극 개입 레이어**: CoT 4단계(추세→비율→근거→판단) + Direction/Magnitude/Confidence 구조화 판단. AI가 엔진 결과를 원본 재무제표로 직접 검증하고, 이상 시 override로 재계산
+- **analysis() overrides 전파**: `c.analysis("가치평가", overrides={"wacc": 9.0})` — calcDcf/dFV에 wacc/terminalGrowth/primaryModel override 지원
+- **블로그 경험 생태계**: frontmatter `ai:` 블록(verdict/strengths/weaknesses/keyMetrics)으로 블로그가 AI 경험 저장소. sync_blog_insights.py로 KnowledgeDB(source="blog") 자동 파생. blog insight 우선 조회
+- **KnowledgeDB get_insight(source=)**: blog source 우선 조회 파라미터 추가
+
+### Changed
+
+- **시스템 프롬프트 클린코드**: 191줄→172줄, 중복 가이드 50줄 제거. "너는 분석가다" 핵심에 집중
+- **분석 깊이 강제**: 한 축만 보고 끝내지 말고 원인 축(비용구조/수익구조) + 원본 검증 필수
+- **notes 적극 활용**: borrowings/inventory 등 BS/IS 이면의 항목별 분해 가이드
+- **엔진/review/AI 역할론 확립**: ops 문서(architecture/ai/review/analysis) + README 전체 반영
+
+### Removed
+
+- **financials.py**: AI가 `c.select()`로 직접 하면 되므로 보조 레이어 삭제
+- **assumptions.py**: AI가 스스로 판단해야 하므로 시스템 대행 삭제
+
+## [0.9.9] - 2026-04-12
+
+### Added
+
+- **Pyodide 브라우저 실행**: `micropip.install("dartlab")` 한 줄로 브라우저/xlwings lite/JupyterLite에서 dartlab 사용. `sys_platform != 'emscripten'` 환경 마커로 native deps 자동 제외. Company → show → analysis → review 전체 경로 동작 확인
+- **dFV (dartlab Fair Value)**: 4엔진 통합 적정주가 — DCF Anchor + 삼각검증(DDM/상대가치/Residual Income) + Quality WACC. `c.analysis("valuation", "가치평가")` 진입
+- **AI Override 매커니즘**: analysis calc 결과를 AI가 자체 판단으로 보정 — mid-cycle 정규화, 성장률 상한, 할인율 조정 등 4엔진(analysis/macro/quant/credit) 확산
+- **How축 상황별 개선 레버**: 적자/턴어라운드/현금부자/사이클/고성장 5종 분기, 기업 상황에 맞는 재무 개선안 자동 제시
+- **추정재무제표 → DCF 연결**: proforma FCF 우선 사용, 3년이라도 터미널 성장률로 연장
+- **블로그 인터랙티브 차트**: Svelte ComboChart(매출 라인+영업이익 막대) + sync_financials.py 자동 데이터 동기화
+- **블로그 8편 발간**: #21 현대모비스, #22 SK텔레콤, #23 GS건설, #24 현대코퍼레이션, #25 한국전력, #26 에코프로, #27 쿠팡(EDGAR 첫 미국 주식), #28 현대자동차
+- **검색 scope 분리**: `scope="title"` (ngram, 제목형) + `scope="content"` (BM25, 본문형) 독립 엔진. main/delta 세그먼트 증분 전략
+- **EDGAR Phase 4**: treasuryStockStatus XBRL fallback, 매일 2회 수집, sectorKpi EDGAR fallback
+- **업종별 KPI 4모듈**: sectorKpi — 업종 특성에 맞는 핵심 지표 자동 선택
+
+### Changed
+
+- **review reportType 단일축 통합**: perspective/preset/template 3단계 → reportType 1축으로 통합. 11종 보고서 타입 (full/executive/credit/valuation/growth/crisis/audit/dividend/governance/macro/thesis)
+- **review 4종 신규 타입**: dividend(배당 지속성), governance(임원보수 괴리), macro(사이클+역사적 팩트), thesis(가설→증거→판정)
+- **pyproject.toml 환경 마커**: server/AI/viz deps에 `sys_platform != 'emscripten'` — pyodide에서 자동 제외, 일반 환경 영향 없음
+
+### Fixed
+
+- **review Section UnboundLocalError**: pyodide 환경에서 순환 참조로 인한 import 실패 수정
+- **메모리 최적화**: scan lazy 컬럼 선택, macro 실패 방어, improvementLevers BoundedCache 압박 회피
+- **블로그 실측 수치 재검증**: #15/#17/#19/#20/#22/#23 오류 5건 수정, 전 26편 H3 소제목 추가
+
 ## [0.9.8] - 2026-04-12
 
 ### Added
