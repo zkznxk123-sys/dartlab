@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/017670-skt.webp
 youtubeId: ""
+ai:
+  verdict: "OPM 10% 공식 8년 유지→6.3% 붕괴. 유심 해킹 2500만명."
+  direction: 악화
+  confidence: 높음
+  archetype: 프랜차이즈
+  strengths:
+    - "통신 기본 현금흐름"
+    - "ROCE 10.2%→4.3%"
+  weaknesses:
+    - "유심 해킹 후유증"
+    - "배당성향 143%→0%"
+  keyMetrics: {revenue: 0.0, opm: 6.3, roe: 4.3, fcf: 0.0}
+  dataAsOf: "2026-04-12"
 ---
 
 <script>

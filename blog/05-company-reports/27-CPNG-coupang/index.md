@@ -20,6 +20,19 @@ tags:
   - 이커머스
   - 개인정보유출
   - 재무분석
+ai:
+  verdict: "매출 49조 한국 1위. 마진 0.6%. 판관비가 95% 먹음."
+  direction: 유지
+  confidence: 보통
+  archetype: 성장
+  strengths:
+    - "MAU 2100만"
+    - "와우멤버십 1400만"
+  weaknesses:
+    - "마진 0.6%"
+    - "개인정보 유출"
+  keyMetrics: {revenue: 30.27, opm: 1.4, roe: 0.0, fcf: 0.0}
+  dataAsOf: "2026-04-13"
 ---
 
 <script>

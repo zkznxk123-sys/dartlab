@@ -20,6 +20,19 @@ tags:
   - Elliott Hill
   - EDGAR
   - 재무분석
+ai:
+  verdict: "세계 1위(27%) 매출 -10% 순이익 -44%. CEO DTC 올인 실패."
+  direction: 악화
+  confidence: 높음
+  archetype: 턴어라운드
+  strengths:
+    - "글로벌 브랜드"
+    - "OPM 12.3% 여전히 높음"
+  weaknesses:
+    - "매출 역성장"
+    - "도매처 손실"
+  keyMetrics: {revenue: 46.3, opm: 7.0, roe: 0.0, fcf: 0.0}
+  dataAsOf: "2026-04-13"
 ---
 
 <script>

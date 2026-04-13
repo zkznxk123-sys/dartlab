@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/086280-hyundai-glovis.webp
 youtubeId: ""
+ai:
+  verdict: "물류가 아니라 배 회사. PCC선 98척. 해운이 영업이익 36%."
+  direction: 개선
+  confidence: 높음
+  archetype: 성장
+  strengths:
+    - "PCC선 98척 글로벌 1위"
+    - "영업이익 2조"
+  weaknesses:
+    - "현대차 의존"
+    - "해운 사이클"
+  keyMetrics: {revenue: 2.96, opm: 7.0, roe: 0.0, fcf: 0.4}
+  dataAsOf: "2026-04-11"
 ---
 
 <script>

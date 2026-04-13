@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/009450-kyungdong-navien.webp
 youtubeId: ""
+ai:
+  verdict: "연탄회사→미국 온수기 1위. 매총이익률 42%인데 CAPEX 2.5배로 현금 없다."
+  direction: 유지
+  confidence: 보통
+  archetype: 성장
+  strengths:
+    - "매총이익률 42.5%"
+    - "북미 점유율 1위"
+  weaknesses:
+    - "CAPEX 2.5배 3년"
+    - "FCF 음수 2년"
+  keyMetrics: {revenue: 1.5, opm: 9.54, roe: 0.0, fcf: -0.06}
+  dataAsOf: "2026-04-10"
 ---
 
 <script>

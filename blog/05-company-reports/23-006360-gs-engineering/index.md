@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/006360-gs-engineering.webp
 youtubeId: ""
+ai:
+  verdict: "검단 붕괴 5524억을 Q4에 한꺼번에(빅배스). 2025년 1600억 흑자 회복."
+  direction: 개선
+  confidence: 보통
+  archetype: 턴어라운드
+  strengths:
+    - "빅배스 전략 성공"
+    - "위기 극복 속도"
+  weaknesses:
+    - "건설사이클 악화"
+    - "대형 손실 이력"
+  keyMetrics: {revenue: 0.0, opm: 0.0, roe: 0.0, fcf: 0.0}
+  dataAsOf: "2026-04-12"
 ---
 
 <script>

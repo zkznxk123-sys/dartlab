@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/483650-dalba-global.webp
 youtubeId: ""
+ai:
+  verdict: "화장품 경험 0에서 공장 없이 미스트 5000만병. OPM 26%. 차입금 0."
+  direction: 개선
+  confidence: 높음
+  archetype: 성장
+  strengths:
+    - "OPM 26% + 매총이익률 76%"
+    - "금융차입 0% 현금부자"
+  weaknesses:
+    - "해외 의존도"
+    - "브랜드 단순성"
+  keyMetrics: {revenue: 0.52, opm: 26.0, roe: 19.9, fcf: 0.07}
+  dataAsOf: "2026-04-09"
 ---
 
 <script>

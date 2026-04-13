@@ -20,6 +20,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/011760-hyundai-corp.webp
 youtubeId: ""
+ai:
+  verdict: "상사 매출 7.5조 OPM 1.85%. 순이익 868억인데 영업CF -2947억."
+  direction: 악화
+  confidence: 높음
+  archetype: 성장
+  strengths:
+    - "종합상사 전환 시도"
+    - "자원개발 포트폴리오"
+  weaknesses:
+    - "상사 마진 최악"
+    - "현금흐름 음수"
+  keyMetrics: {revenue: 7.55, opm: 1.85, roe: 0.0, fcf: -0.29}
+  dataAsOf: "2026-04-12"
 ---
 
 <script>

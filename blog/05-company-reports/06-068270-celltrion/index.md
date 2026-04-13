@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/068270-celltrion.webp
 youtubeId: "d7RUQIlimVM"
+ai:
+  verdict: "IMF 5천만원 → 시총 수십조. 바이오시밀러 글로벌 리더. 무형자산 13.78조."
+  direction: 개선
+  confidence: 높음
+  archetype: 성장
+  strengths:
+    - "바이오시밀러 글로벌 진출"
+    - "매출 4조 영업이익 1조"
+  weaknesses:
+    - "특허 만료 리스크"
+    - "제네릭 경쟁"
+  keyMetrics: {revenue: 4.16, opm: 28.1, roe: 0.0, fcf: 0.65}
+  dataAsOf: "2026-04-08"
 ---
 
 <script>

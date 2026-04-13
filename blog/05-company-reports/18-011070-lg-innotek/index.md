@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/011070-lg-innotek.webp
 youtubeId: ""
+ai:
+  verdict: "애플 카메라 독점(70%)인데 마진 3%. 독점의 역설."
+  direction: 악화
+  confidence: 높음
+  archetype: 성장
+  strengths:
+    - "애플 카메라 독점"
+    - "매출 22조"
+  weaknesses:
+    - "애플 의존 80%"
+    - "마진 3% 악화"
+  keyMetrics: {revenue: 2.21, opm: 3.0, roe: 0.0, fcf: 0.0}
+  dataAsOf: "2026-04-12"
 ---
 
 <script>

@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/012330-hyundai-mobis.webp
 youtubeId: ""
+ai:
+  verdict: "연결 OPM 5.5%, 별도 21%. 15.5%p 갭은 AS 부품 독점."
+  direction: 유지
+  confidence: 높음
+  archetype: 지주
+  strengths:
+    - "AS 부품 독점 OPM 20-25%"
+    - "별도 기준 고수익"
+  weaknesses:
+    - "연결 마진 낮음"
+    - "순환출자 리스크"
+  keyMetrics: {revenue: 6.1, opm: 5.5, roe: 0.0, fcf: 0.0}
+  dataAsOf: "2026-04-12"
 ---
 
 <script>

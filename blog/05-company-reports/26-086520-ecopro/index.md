@@ -20,6 +20,19 @@ tags:
   - 지주사
   - 물적분할
   - 재무분석
+ai:
+  verdict: "시총 78조 찍었는데 영업이익 864억. 리튬 가격에 100% 종속."
+  direction: 악화
+  confidence: 낮음
+  archetype: 사이클
+  strengths:
+    - "양극재 세계 공급"
+    - "리튬 원가율 85%"
+  weaknesses:
+    - "리튬 가격 극변동"
+    - "매출 반토막"
+  keyMetrics: {revenue: 3.1, opm: -4.0, roe: 0.0, fcf: 0.0}
+  dataAsOf: "2026-04-12"
 ---
 
 <script>

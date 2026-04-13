@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/004370-nongshim.webp
 youtubeId: ""
+ai:
+  verdict: "라면 1위(55%) 맞는데 마진 5%. 삼양이 2배 마진으로 역전."
+  direction: 악화
+  confidence: 높음
+  archetype: 프랜차이즈
+  strengths:
+    - "국내 점유율 55%"
+    - "매출 3.5조"
+  weaknesses:
+    - "마진 삼양의 1/4"
+    - "가격 결정권 없음"
+  keyMetrics: {revenue: 3.51, opm: 5.2, roe: 0.0, fcf: 0.0}
+  dataAsOf: "2026-04-11"
 ---
 
 <script>

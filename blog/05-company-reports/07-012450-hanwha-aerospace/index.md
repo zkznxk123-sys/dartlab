@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/012450-hanwha-aerospace.webp
 youtubeId: "NvVg08Dzogk"
+ai:
+  verdict: "K9 세계 52% 점유. 수주잔고 37조. 삼성이 8400억에 버린 무기가 37조."
+  direction: 개선
+  confidence: 높음
+  archetype: 사이클
+  strengths:
+    - "K9 수출(폴란드 672문)"
+    - "수주잔고 37조"
+  weaknesses:
+    - "부채비율 221%"
+    - "정치적 리스크"
+  keyMetrics: {revenue: 2.66, opm: 29.6, roe: 0.0, fcf: 0.4}
+  dataAsOf: "2026-04-09"
 ---
 
 <script>

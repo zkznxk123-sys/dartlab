@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/010130-korea-zinc.webp
 youtubeId: "n9QhLmlvun8"
+ai:
+  verdict: "경영권 전쟁으로 부채비율 25%→96%. 순손실 2457억이나 영업이익은 사상최대 1.2조."
+  direction: 유지
+  confidence: 보통
+  archetype: 사이클
+  strengths:
+    - "회수율 96.5% 연금술"
+    - "영업이익 1.2조 사상최대"
+  weaknesses:
+    - "경영권 분쟁"
+    - "자사주 방어 비용"
+  keyMetrics: {revenue: 0.0, opm: 0.0, roe: 0.0, fcf: -0.63}
+  dataAsOf: "2026-04-09"
 ---
 
 <script>

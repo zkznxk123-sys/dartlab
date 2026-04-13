@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/294870-hdc-hyundai-dev.webp
 youtubeId: ""
+ai:
+  verdict: "계약금 2500억 날리고 6명 죽인 사고. 그런데 2년 뒤 2486억 흑자."
+  direction: 개선
+  confidence: 보통
+  archetype: 턴어라운드
+  strengths:
+    - "도시정비 수주 4.8조"
+    - "영업이익 2486억"
+  weaknesses:
+    - "PF 리스크"
+    - "평판 회복 불완전"
+  keyMetrics: {revenue: 0.0, opm: 0.0, roe: 0.0, fcf: 0.0}
+  dataAsOf: "2026-04-12"
 ---
 
 <script>

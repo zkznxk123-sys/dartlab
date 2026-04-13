@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/196170-alteogen.webp
 youtubeId: ""
+ai:
+  verdict: "9년 적자 바이오텍이 라이선스 한 건으로 OPM 49.5%. R&D 회수 시작."
+  direction: 개선
+  confidence: 높음
+  archetype: 성장
+  strengths:
+    - "라이선스 수익화(머크)"
+    - "OPM 49.5% 초고마진"
+  weaknesses:
+    - "파이프라인 집중 리스크"
+    - "매출 기저 낮음"
+  keyMetrics: {revenue: 0.22, opm: 49.52, roe: 0.0, fcf: 0.12}
+  dataAsOf: "2026-04-08"
 ---
 
 <script>

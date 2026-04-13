@@ -21,6 +21,19 @@ tags:
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/011780-kumho-petrochemical.webp
 youtubeId: ""
+ai:
+  verdict: "빅4 석유화학 유일 흑자. NCC 없어서 에틸렌 붕괴 회피."
+  direction: 개선
+  confidence: 보통
+  archetype: 사이클
+  strengths:
+    - "NCC 미보유가 강점"
+    - "다운스트림 전문화"
+  weaknesses:
+    - "원료 사이클 의존"
+    - "기저 매출 낮음"
+  keyMetrics: {revenue: 7.16, opm: 3.81, roe: 0.0, fcf: 0.0}
+  dataAsOf: "2026-04-12"
 ---
 
 <script>

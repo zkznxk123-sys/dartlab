@@ -20,6 +20,19 @@ tags:
   - Sam Altman
   - EDGAR
   - 재무분석
+ai:
+  verdict: "매출 0원 직원 120명 시총 18조. 가동 원자로 0기. Altman SPAC."
+  direction: 유지
+  confidence: 낮음
+  archetype: 성장
+  strengths:
+    - "SMR 기술 플랫폼"
+    - "계약 14GW(메타)"
+  weaknesses:
+    - "매출 0"
+    - "인허가 거절 이력"
+  keyMetrics: {revenue: 0.0, opm: 0.0, roe: 0.0, fcf: -0.11}
+  dataAsOf: "2026-04-13"
 ---
 
 <script>
