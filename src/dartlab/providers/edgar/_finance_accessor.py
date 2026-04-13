@@ -37,10 +37,7 @@ class _FinanceAccessor:
         krLabels = get_korean_labels()
         rows = []
         for snakeId, values in stmtData.items():
-            label = krLabels.get(snakeId)
-            if label is None:
-                # snake_case → Title Case fallback (e.g., "cash_and_cash_equivalents" → "Cash And Cash Equivalents")
-                label = snakeId.replace("_", " ").title()
+            label = krLabels.get(snakeId, snakeId)  # 한국어 매핑 없으면 snakeId 그대로
             # 컬럼명 표준: "항목" (sections 사상)
             row: dict[str, Any] = {
                 "snakeId": snakeId,

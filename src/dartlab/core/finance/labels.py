@@ -35,6 +35,16 @@ def _load_label_supplements() -> dict[str, str]:
 
 
 @lru_cache(maxsize=1)
+def _load_edgar_standard_accounts() -> dict[str, str]:
+    """EDGAR standardAccounts.json에서 snakeId → korName."""
+    p = Path(__file__).parent.parent.parent / "providers" / "edgar" / "finance" / "mapperData" / "standardAccounts.json"
+    if not p.exists():
+        return {}
+    data = json.loads(p.read_text(encoding="utf-8"))
+    return {a["snakeId"]: a["korName"] for a in data.get("accounts", []) if a.get("korName")}
+
+
+@lru_cache(maxsize=1)
 def get_korean_labels() -> dict[str, str]:
     """snakeId → 한글 라벨 SSOT.
 
@@ -76,12 +86,21 @@ def get_korean_labels() -> dict[str, str]:
                 result[snakeId] = candidate
             used.add(result[snakeId])
 
-    # 3. 보충 (labelSupplements.json SSOT)
+    # 3. EDGAR standardAccounts korName (DART에 없는 US-GAAP 계정)
+    try:
+        _edgar_labels = _load_edgar_standard_accounts()
+        for snakeId, korName in _edgar_labels.items():
+            if snakeId not in result and korName:
+                result[snakeId] = korName
+    except (FileNotFoundError, KeyError):
+        pass
+
+    # 4. 보충 (labelSupplements.json SSOT)
     for sid, name in _load_label_supplements().items():
         if sid not in result:
             result[sid] = name
 
-    # 4. SNAKEID_ALIASES 역참조 — alias 양방향으로 한국어 전파
+    # 5. SNAKEID_ALIASES 역참조 — alias 양방향으로 한국어 전파
     for src, tgt in SNAKEID_ALIASES.items():
         if tgt not in result and src in result:
             result[tgt] = result[src]

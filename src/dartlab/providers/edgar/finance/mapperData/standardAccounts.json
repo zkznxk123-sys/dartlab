@@ -406,8 +406,12 @@
       ]
     },
     {
+      "code": "BS050",
       "snakeId": "equity_including_nci",
+      "korName": "자본총계(비지배지분포함)",
+      "engName": "Total Equity Including NCI",
       "stmt": "BS",
+      "level": 1,
       "commonTags": [
         "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"
       ]
