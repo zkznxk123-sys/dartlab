@@ -2067,5 +2067,95 @@
       "source": "network",
       "evidence": "단순투자 지분 0.0%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 비용 절감 + 자산 효율화 + ROE 상승.\n영업비용률이 3.8%에서 -2.0%로 하락하고, 자산회전율이 0.04에서 0.06로 개선되었다. ROE도 2.2%에서 6.3%로 상승하여 구조적 효율화가 진행 중이다.",
+    "strengths": [
+      "비용 절감 + 자산 효율화 + ROE 상승",
+      "ROE 상위 10% (4.3%)",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**"
+    ],
+    "weaknesses": [
+      "영업CF 적자 — 본업에서 현금이 나오지 않음",
+      "영업CF 마진 -12.7% — 매출 대비 현금 유출",
+      "ROE의 레버리지 의존도 높음 (자산/자본 = 11.2배)"
+    ],
+    "sector": "금융 > 다각화된금융",
+    "source": "audit",
+    "createdAt": "1775430966.5572314"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2023",
+      "sales": 20359463366897.0,
+      "operating_profit": 521036811624.0,
+      "net_profit": 0.0,
+      "total_assets": 128177312090956.0
+    },
+    {
+      "year": "2024",
+      "sales": 22242327609027.0,
+      "operating_profit": 1188076348199.0,
+      "net_profit": 0.0,
+      "total_assets": 137176998056307.0
+    },
+    {
+      "year": "2025",
+      "sales": 29283028000000.0,
+      "operating_profit": 1915104000000.0,
+      "net_profit": 1582916000000.0,
+      "total_assets": 150283930000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    },
+    {
+      "stockCode": "006040",
+      "corpName": "동원산업",
+      "stage": "securities",
+      "revenue": 95837
+    }
   ]
 }

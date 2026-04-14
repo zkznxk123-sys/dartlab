@@ -51,5 +51,114 @@
       "source": "docs",
       "evidence": "3. 원재료 및 생산설비"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1902394224458.0,
+      "operating_profit": 71108716318.0,
+      "net_profit": 0.0,
+      "total_assets": 550023979312.0
+    },
+    {
+      "year": "2022",
+      "sales": 2177261973592.0,
+      "operating_profit": 50047663225.0,
+      "net_profit": 30363688765.0,
+      "total_assets": 534356690809.0
+    },
+    {
+      "year": "2023",
+      "sales": 2047566232203.0,
+      "operating_profit": 59013290449.0,
+      "net_profit": 0.0,
+      "total_assets": 554118292957.0
+    },
+    {
+      "year": "2025",
+      "sales": 2438838573193.0,
+      "operating_profit": 75973592094.0,
+      "net_profit": 0.0,
+      "total_assets": 534570098866.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "machinery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "special",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "259630",
+      "corpName": "엠플러스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "456190",
+      "corpName": "큐라켐",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
   ]
 }

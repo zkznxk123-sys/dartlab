@@ -337,5 +337,209 @@
       "source": "network",
       "evidence": "기타 지분 0.4%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 매출 성장 + 마진 확대 + FCF 양수.\n매출이 +55.0% 성장하면서 영업이익률이 -15.6%에서 -10.2%로 확대되었다. FCF도 양수를 유지하여 질적 성장이 확인된다.",
+    "strengths": [
+      "매출 성장 + 마진 확대 + FCF 양수",
+      "매출 고성장 (55.0%)",
+      "내부유보 비중 88% — 자기 힘으로 성장",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출 성장(55%)에도 이익 감소(-1%) -- 수익성 희석",
+      "영업적자 (-10.2%)",
+      "이익 변동계수 0.84 — 이익 변동성 높음"
+    ],
+    "sector": "소재 > 금속과광물",
+    "source": "audit",
+    "createdAt": "1775430966.5290446"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3582074826364.0,
+      "operating_profit": -26784314362.0,
+      "net_profit": 170063546594.0,
+      "total_assets": 5521001405617.0
+    },
+    {
+      "year": "2022",
+      "sales": 4429488166601.0,
+      "operating_profit": 68871997441.0,
+      "net_profit": 367167778524.0,
+      "total_assets": 5871933652466.0
+    },
+    {
+      "year": "2023",
+      "sales": 3761732632263.0,
+      "operating_profit": -169812608768.0,
+      "net_profit": 0.0,
+      "total_assets": 5568116970055.0
+    },
+    {
+      "year": "2024",
+      "sales": 2787414358375.0,
+      "operating_profit": -160701935806.0,
+      "net_profit": -327809725720.0,
+      "total_assets": 5701707714763.0
+    },
+    {
+      "year": "2025",
+      "sales": 2908974321148.0,
+      "operating_profit": -259688708486.0,
+      "net_profit": 30876821465.0,
+      "total_assets": 6002694219498.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 6,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 5,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        2
+      ],
+      [
+        "semiconductor",
+        1
+      ],
+      [
+        "realestate",
+        1
+      ],
+      [
+        "software",
+        1
+      ],
+      [
+        "aerospace",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "module",
+        2
+      ],
+      [
+        "packaging",
+        1
+      ],
+      [
+        "general",
+        1
+      ],
+      [
+        "ai",
+        1
+      ],
+      [
+        "defense",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "033170",
+      "corpName": "시그네틱스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "007810",
+      "corpName": "코리아써키트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "051370",
+      "corpName": "인터플렉스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "317120",
+      "corpName": "라닉스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "272210",
+      "corpName": "한화시스템",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
   ]
 }

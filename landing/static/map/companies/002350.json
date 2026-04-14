@@ -277,5 +277,199 @@
       "source": "network",
       "evidence": "기타 지분 0.4%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 매출 성장 + 마진 확대 + FCF 양수 / 비용 절감 + 자산 효율화 + ROE 상승.\n매출이 +19.4% 성장하면서 영업이익률이 2.2%에서 4.9%로 확대되었다. FCF도 양수를 유지하여 질적 성장이 확인된다.",
+    "strengths": [
+      "매출 성장 + 마진 확대 + FCF 양수",
+      "비용 절감 + 자산 효율화 + ROE 상승",
+      "내부유보 비중 85% — 자기 힘으로 성장",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**"
+    ],
+    "weaknesses": [
+      "영업레버리지(DOL) 8.3 — 매출 변동에 이익 민감",
+      "이익 변동계수 0.88 — 이익 변동성 높음",
+      "이자보상 심각 (1.0배)"
+    ],
+    "sector": "소재 > 화학",
+    "source": "audit",
+    "createdAt": "1775430966.5426927"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2079407029590.0,
+      "operating_profit": 4391879556.0,
+      "net_profit": 4634237831.0,
+      "total_assets": 3823413438265.0
+    },
+    {
+      "year": "2022",
+      "sales": 2597424486492.0,
+      "operating_profit": -54253533449.0,
+      "net_profit": -27769276768.0,
+      "total_assets": 3944336739608.0
+    },
+    {
+      "year": "2023",
+      "sales": 2701720151279.0,
+      "operating_profit": 186991098059.0,
+      "net_profit": 102791698822.0,
+      "total_assets": 4232661554569.0
+    },
+    {
+      "year": "2024",
+      "sales": 2847925036412.0,
+      "operating_profit": 172136969776.0,
+      "net_profit": 126718873995.0,
+      "total_assets": 4574474470953.0
+    },
+    {
+      "year": "2025",
+      "sales": 3189610448781.0,
+      "operating_profit": 170297371324.0,
+      "net_profit": 0.0,
+      "total_assets": 4709514375870.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        3
+      ],
+      [
+        "steel",
+        1
+      ],
+      [
+        "finance",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "polymer",
+        2
+      ],
+      [
+        "product",
+        1
+      ],
+      [
+        "specialty",
+        1
+      ],
+      [
+        "securities",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "002240",
+      "corpName": "고려제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "011780",
+      "corpName": "금호석유화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "456040",
+      "corpName": "OCI",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002020",
+      "corpName": "코오롱",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "005720",
+      "corpName": "넥센",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005720",
+      "corpName": "넥센",
+      "stage": "general",
+      "revenue": 35865
+    },
+    {
+      "stockCode": "013520",
+      "corpName": "화승코퍼레이션",
+      "stage": "general",
+      "revenue": 16398
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "stage": "general",
+      "revenue": 13729
+    },
+    {
+      "stockCode": "004840",
+      "corpName": "DRB동일",
+      "stage": "general",
+      "revenue": 8027
+    },
+    {
+      "stockCode": "378850",
+      "corpName": "화승알앤에이",
+      "stage": "general",
+      "revenue": 7146
+    }
   ]
 }

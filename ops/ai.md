@@ -29,9 +29,16 @@ AI가 엔진을 쓸 때는 AI가 주체자:
 
 ```python
 import dartlab
-dartlab.ask("삼성전자 수익성 분석해줘")    # 자연어 → AI 가 도구 자동 선택
-dartlab.chat("005930", "배당 추세는?")     # Company-bound
+dartlab.ask("삼성전자 수익성 분석해줘")     # 자연어 → AI 가 tool 자율 선택
+dartlab.ask("반도체 업황 어때")              # 종목 불필요 (macro tool 자율 호출)
+dartlab.ask("삼성전자 vs SK하이닉스 비교")  # 다종목 비교도 자연어
+
+# Company-bound (프로그래밍 경로)
+c = dartlab.Company("005930")
+c.ask("배당 추세는?")                        # stockCode 힌트 자동 전달
 ```
+
+**단일 진입점**: `dartlab.ask()` 하나. `chat()` / `reviewer()` 같은 변종 없음.
 
 ## 노트북
 
@@ -43,22 +50,63 @@ dartlab.chat("005930", "배당 추세는?")     # Company-bound
 | 항목 | 내용 |
 |------|------|
 | 레이어 | L3 |
-| 진입점 | `dartlab.ask()`, `dartlab.chat()`, `c.reviewer()` |
-| 소비 | analysis, macro, scan, gather, review, Company 전체 |
-| 생산 | 사용자에게 해석 + 재현 가능한 코드 제공 |
-| provider | gemini, groq, cerebras, mistral, openai, ollama |
+| 진입점 | `dartlab.ask(question)` 단일 — `c.ask(query)` 는 Company bound helper |
+| 소비 | analysis, macro, scan, gather, review, credit, Company 전체 (tool 로 호출) |
+| 생산 | 사용자에게 해석 + 판단. tool_call/tool_result 이벤트 투명 공개 |
+| provider | oauth-codex (기본), claude, openai, gemini, groq, cerebras, mistral, ollama |
+
+## 아키텍처 (현재 데이터 흐름)
+
+```
+ dartlab.ask(question)
+   │
+   ├─ (1) 시스템 프롬프트 조립 (core.py::_buildSystemPromptParts)
+   │      ├─ static  : 5원칙 + tool 연쇄 원칙 + 질문 유형별 축 조합 (cache_control)
+   │      └─ dynamic : market(KR/US) + CAPABILITIES 레퍼런스 + 사용자 템플릿
+   │
+   ├─ (2) streamWithTools 루프 (runtime/toolLoop.py, max 10 라운드)
+   │      ├─ llm.stream_with_tools(messages, tools) — 실시간 SSE delta
+   │      │     text delta → 즉시 chunk yield
+   │      │     라운드 종료 → ToolResponse (tool_calls / finish_reason)
+   │      ├─ tool 실행: executeTool(toolList, name, args)
+   │      │     serializeForLlm → LLM 메시지 (8KB, autoEnrich 적용)
+   │      │     serializeForUi  → UI 표시 (무제한)
+   │      ├─ 이벤트 emit : tool_call / tool_result / chunk
+   │      └─ 종료: finish_reason=stop → 최종 answer
+   │
+   ├─ (3) 이벤트 분기 (consumer 결정)
+   │      ├─ server/streaming.py   SSE (Web / VSCode)
+   │      ├─ cli/stdio.py          JSON lines (터미널)
+   │      └─ standalone._stream_chunks Python generator (노트북)
+   │
+   └─ (4) 학습 루프 (post-response)
+          ├─ memory.store.saveAnalysis   executions 테이블
+          ├─ _updateInsightFromResponse  insights (regex 추출)
+          └─ playbook.curate             ACE bullet delta merge
+```
+
+**떠먹이기 없음**: Pre-grounding thread / ContextBuilder / ACE selectors 전부 제거됨. AI 가 tool 로 **자율 호출**.
+
+## 사상 4축 (ai_identity 5원칙 ↔ 4축)
+
+| 4축 | 재정의 | 코드 위치 | ai_identity |
+|---|---|---|---|
+| **CAPABILITIES 기반** | 도구 목록 = AI 가 꺼내 쓰는 근육. docstring → CAPABILITIES 자동 생성. `pythonExec` 은 escape hatch. | `ai/tools/__init__.py::buildTools`, `guide/_generated.py` | #1 적극적 분석가 |
+| **시스템 프롬프트 주도** | 5원칙 + 6막 골격 + 질문 유형별 축 조합 을 static 프롬프트에 못박음. 캐시 대상. | `runtime/core.py::_SYSTEM_PROMPT` | #2 원본 검증, #3 override |
+| **AI 자율 개입** | tool 선택/순서/반복 모두 LLM 판단. 코드에 하드코딩 플로우 없음 (max 10 라운드 안전장치 외). | `runtime/toolLoop.py::streamWithTools` | #4 dartlab 뿌리끝까지 |
+| **적극적 분석가** | 엔진 결과 낭독 금지. 원본 → 재계산 → override → 개선안. 낭독기 금지. | 시스템 프롬프트 + serialize | #5 audit 개선 제안 |
 
 ## 설계 원칙
 
-- **AI는 dartlab을 대표하는 적극적 분석가** — 엔진 결과를 읽어주는 게 아니라, 직접 판단하고 검증하고 개입한다.
-- **모든 분석에 개입** — 엔진이 계산한 결과를 맹신하지 않는다. 원본 재무제표로 직접 비율을 계산하여 교차 검증한다.
-- **이상 시 직접 행동** — 가정이 비현실적이면 override로 재계산. 데이터가 이상하면 원본(`c.show`)을 파고든다.
+- **AI는 dartlab을 대표하는 적극적 분석가** — 엔진 결과를 읽어주는 게 아니라 직접 판단하고 검증하고 개입한다.
+- **모든 분석에 개입** — 엔진 결과를 맹신하지 않는다. 원본 재무제표(`show` tool)로 직접 비율을 계산하여 교차 검증한다.
+- **이상 시 직접 행동** — 가정이 비현실적이면 `analysis(overrides=...)` 로 재계산. 데이터가 이상하면 원본을 파고든다.
 - **audit 시 개선 제안** — 엔진/데이터의 문제를 발견하면 구체적 개선안을 제시한다.
-- dartlab 엔진(analysis, scan, gather, macro, credit, quant)은 AI의 **도구** — AI가 조합해서 질문에 최적화된 흐름을 설계.
-- **CAPABILITIES-Driven**: 코드블록 자동실행. 데이터는 코드가 가져온다.
-- **사용자 학습 지원** — AI가 실행하는 코드와 결과를 투명하게 보여준다.
-- **모든 provider에서 기본 기능 동작** — 도구 호출 불가 시 코드 실행으로 보충
-- defaultProvider 기본 = 없음
+- dartlab 엔진 (analysis/scan/gather/macro/credit) 은 AI 의 **도구** — AI 가 질문에 맞게 자율 조합.
+- **CAPABILITIES-Driven**: tool calling 기반 자율 엔진 호출. `pythonExec` 은 escape hatch (커스텀 비율/조합 계산 전용).
+- **모든 provider 에서 기본 기능 동작** — tool calling 미지원 provider 는 명시 에러 + 다른 provider 권장.
+- **떠먹이기 금지**: Pre-grounding/ContextBuilder/ACE bullet 사전 주입 같은 것은 AI 자율성을 침해. 정보는 tool 로 직접 가져오게 한다.
+- defaultProvider 기본 = 없음 (사용자 환경에서 auto_detect).
 
 ## Provider
 
@@ -95,8 +143,8 @@ dartlab.chat("005930", "배당 추세는?")     # Company-bound
 
 ```python
 dartlab.ask("삼성전자 재무건전성 분석해줘")
-dartlab.ask("분석", provider="openai", model="gpt-4o")
-dartlab.chat("005930", "배당 추세를 분석하고 이상 징후를 찾아줘")
+dartlab.ask("분석", provider="claude", model="claude-sonnet-4-6")
+c = dartlab.Company("005930"); c.ask("배당 추세 분석해줘")   # stockCode 힌트 자동
 ```
 
 ## Spec 관리 체계
@@ -366,72 +414,22 @@ db.pull()                   # HF → 로컬 merge
 
 **seed:** `scripts/audit/seed_recipes.json` — 10개 초기 패턴 (수익성/현금흐름/안정성/scan/macro).
 
-## ContextBuilder + ACE Playbook (2026-04-09 도입)
+## [폐기] ContextBuilder / ACE Playbook / Phase 1.5 Pre-grounding
 
-prompt engineering → **context engineering** 전환. ACE (Agentic Context Engineering, ICLR 2026) 패턴 적용.
-arxiv.org/abs/2510.04618 — Generator/Reflector/Curator 폐쇄 루프 + delta merge.
+이전 세대 구조 (`prompt engineering` 단계의 사전 주입 레이어) 는 **전부 제거**됨. 사상 위반:
+AI 가 자율적으로 tool 호출해야 할 정보를 시스템이 미리 user message 에 박아 넣어 "떠먹여 주는" 구조.
 
-### 활성화
+제거된 레이어:
+- `ai/context/builder.py / bundle.py / budget.py / encoder.py / selectors/` — ContextBuilder + act1~6 + legacy selectors
+- `core.py::_preGroundDisclosure / _preGroundSearch / _gatherInsightHints` — 백그라운드 prefetch thread
+- `context/selectors/financials.py / assumptions.py` (Phase 1.5/2 계획이었으나 구현 안 됨)
 
-**기본 ON** (2026-04-09 병합). ContextBuilder가 userParts를 조립하고 응답 종료 후 Curator가 playbook을 갱신한다.
+**대체**: AI 가 시스템 프롬프트 원칙(원본 검증/overrides/6막 인과)에 따라 `show`/`analysis`/`scan`/`credit` 등 tool 을 자율 호출.
 
-A/B 검증: v2 응답 풍부도 **+31.6%** (적정PER +618%, 사업구성 +333%), 10/10 성공, 에러 0.
-
-legacy 강제 복원: `DARTLAB_CONTEXT_V1=1` (디버깅 전용).
-
-### 구조
-
-```
-ai/context/
-├── intent.py         # 8 Intent 결정론 분류기 (act1~6 + compare + concept)
-├── encoder.py        # TOON 인코딩 (큰 표는 ~60% 토큰 절감)
-├── budget.py         # 11 provider 토큰 한도 + 우선순위 트리밍
-├── bundle.py         # ContextPart + PartPriority + ContextBundle
-├── builder.py        # ContextBuilder 메인 진입점
-├── playbook.py       # ACE Reflector(extractBullets) + Curator(curate) + retrieveBullets
-└── selectors/
-    ├── legacy.py     # 기존 5 pre-grounding 헬퍼 래퍼
-    └── playbook.py   # bullets → ContextPart HIGH 주입
-```
-
-### ACE 폐쇄 루프
-
-```
-Question
-  → ContextBuilder.build()
-       intent 분류 → selectors 호출 → budget 트리밍
-       playbook bullets retrieval (intent + sector)
-  → Generator (ai/runtime/_streamWithCodeExecution)
-  → Reflector (extractBullets — 결정론 regex)
-       응답 텍스트 → "결론:", "핵심:", "- bullet" 패턴 추출
-  → Curator (curate → KnowledgeDB.upsert_bullet)
-       grade(G/P→success, C/V→fail, T→neutral)에 따라 카운트 갱신
-       delta merge: 신규는 INSERT, 중복은 카운트만 (UNIQUE intent+sector+bullet)
-       quality = Beta posterior 근사 (success+1)/(success+fail+2)
-  → 다음 호출 시 retrieveBullets가 quality desc로 top-N 주입
-```
-
-### selfai 폐기 학습 적용
-
-- LLM Reflector 사용 X (페이퍼는 LLM 사용) — 결정론 regex만
-- 자동 진화 X — 모든 selector는 명시적 코드
-- KnowledgeDB와 SQLite 위에 얇은 레이어 — 디버깅 가능, 토큰 비용 0
-- bullet 절대 삭제 X (context collapse 방지)
-
-### 검증 (2026-04-09)
-
-- intent 분류: **30/30 (100%)**
-- TOON 토큰 절감: 평균 **+59%** (균질 표 데이터에서 +63%까지)
-- KnowledgeDB delta merge: 같은 bullet 5회 호출 시 row 1개, success/fail 카운트만 갱신
-- ContextBuilder 통합: bullets가 `ace.playbook` key로 HIGH 우선순위 주입
-- 회귀: test_ai_runtime 77 + test_ai_context 28 + test_ai_context_playbook 27 = **132 PASS**
-
-### Phase 1.5 완료 (2026-04-09)
-
-- selectors/act1~6.py — 분석 calc 결과를 intent별로 선택 주입 ✅
-- A/B 평가: 10질문 × v1/v2, **+31.6%** 응답 풍부도 ✅
-- Phase 2 Graph — 인과 질문 9/9 graph 주입 ✅
-- **기본 ON으로 병합** — feature flag 제거 ✅
+**유지된 학습 루프** (post-response, 자율 개입과 독립):
+- `ai/context/intent.py` — 응답 후 질문 intent 분류 (KnowledgeDB 태그용)
+- `ai/context/playbook.py` — ACE Curator (결정론 regex bullet 추출 → delta merge)
+- `ai/context/aiview.py` — `autoEnrich()` (tool_result dict 에 시계열 요약 부착, LLM 및 UI 에 맥락 공급)
 
 ## AIView — 정량 데이터 맥락 보강 (2026-04-10 도입)
 
@@ -517,61 +515,27 @@ dict
 엔진이 새 축을 추가해도 `history + period + 숫자` 패턴만 유지하면 autoEnrich가 자동 적용.
 scan 업종 백분위 조회도 company가 있으면 자동.
 
-## AI 개입 레이어 — 도구 조율자 (2026-04-13 도입)
+## AI 개입 매커니즘 (현재)
 
-AI가 분석 엔진의 "소비자"에서 "조율자"로 진화하는 레이어.
-Kim et al. (2024, 시카고대) 참고: 표준화 재무제표 + CoT → 인간 초과 60% 정확도.
+사상: AI 가 엔진 결과 "소비자" 가 아니라 "조율자". 엔진을 tool 로 **자율 호출** + 결과를 의심하고 원본으로 검증.
+Kim et al. (2024, 시카고대): 표준화 재무제표 + CoT → 인간 초과 60% 정확도.
 
-### 3 Phase 구조
+### 작동 방식 (구현됨)
 
-**Phase 1: CoT 강제 + 구조화 출력** (시스템 프롬프트)
+1. **CoT 강제 + 판단 형식** — 시스템 프롬프트에 "도구 연쇄 원칙" + "판단 형식 (방향/강도/확신도/근거)" 명시. core.py `_SYSTEM_PROMPT` 참조.
 
-시스템 프롬프트에 4단계 사고 구조를 강제:
-1. **추세(Trend)**: 3~5기 시계열 방향/변곡점
-2. **��율(Ratio)**: 핵심 비율 + 업종 대비 + 5년 평균 대비
-3. **근거(Rationale)**: 6막 인과 추적 + 외부 요인
-4. **판단(Prediction)**: Direction(개선/악화/유지) + Magnitude(대폭/소폭/미미) + Confidence(높음/보통/낮음)
+2. **원본 검증 = AI 가 tool 로 직접** — Phase 1.5 처럼 사전 주입하지 않는다. AI 가 필요하면 `show(IS/BS/CF)` tool 을 호출해서 원본을 가져와 직접 나눗셈. 엔진 calc 와 5% 이상 불일치 시 AI 가 명시.
 
-**Phase 1.5: 표준화 재무제표 직접 주입** (Kim et al. 핵심)
+3. **질문 유형별 축 조합** (시스템 프롬프트) — review 보고서 타입(credit/valuation/growth/crisis 등) 을 참고해 축 조합 선택. review tool 은 "보고서 요청" 전용.
 
-`ai/context/selectors/financials.py` — BS/IS/CF 핵심 항목을 AI context에 원본 주입.
-AI가 엔진 calc 결과만 해석하지 않고, 원본 숫자로 직접 비율 계산 → calc 결과와 교차 검증.
-5%p 이상 불일치 시 AI가 원인을 밝히고 자체 판단 사용.
-
-| 주입 항목 | 소스 |
-|---|---|
-| IS 7행 | 매출액, 매출원가, 매출총이익, 판관비, 영업이익, 세전이익, 순이익 |
-| BS 8행 | 자산총계, 유동자산, 현금, 비유동자산, 부채총계, 유동부채, 비유동부채, 자본총계 |
-| CF 3행 | 영업CF, 투자CF, 재무CF |
-
-**Phase 2: Assumption Review** (결정론 검증기)
-
-`ai/context/selectors/assumptions.py` — LLM 호출 없이 임계값 기반 가정 경고.
-ACT6_OUTLOOK/ACT_ALL intent에서 ContextBuilder가 자동 주입.
-
-| 검증 | 임계값 | 경고 |
-|---|---|---|
-| WACC 범위 | <3% 또는 >20% | 리스크 ��리미엄 누락/과대 |
-| FCF 부호 | 최근 2기 음수 | DCF 부적합 |
-| 매출 성장률 | |g| > 30% | 극단적 전망 |
-| 적정주가 괴리 | |gap| > 50% | 가정 과대/과소 |
-
-**Phase 3: Override 재실행 경로**
-
-AI가 비현실적 가정 발견 시 코드블록으로 직접 override:
-```python
-r = c.analysis("가치평가", overrides={"wacc": 9.0})
-```
-
-override 흐름: `Analysis.__call__(overrides=)` → `_run(overrides=)` → `_acceptsOverrides(fn)` 체크 → calc에 전달.
-
-override 키 정의: `core/overrides.py` — FORECAST/VALUATION/CREDIT/MACRO 4그룹.
+4. **Override 재실행 경로** — AI 가 가정이 비현실적이라고 판단하면 `analysis(axis="가치평가", overrides={"wacc": 9.0})` tool 호출. override 키: `core/overrides.py` (FORECAST/VALUATION/CREDIT/MACRO 4그룹).
 
 ### 설계 원칙
 
-- 기존 코드 실행 루프(`_streamWithCodeExecution` 3라운드) 활용 — 새 agent 루프 불필요
-- 결정론 먼저, LLM ��중 — 가정 검증은 임계값 기반 (환각 방지)
-- override는 AI가 명시적으로 판단하고 코드로 적용 — 자동 적용 금지
+- **떠먹이기 금지** — Pre-grounding thread, ContextBuilder selectors, ACE bullet 사전 주입 전부 폐기. AI 가 tool 호출로 직접.
+- **결정론 먼저, LLM 중심** — tool 결과는 dartlab 엔진이 만든 숫자. LLM 은 그 위에서 판단만.
+- **override 는 AI 자율 판단** — 시스템이 자동 적용 금지.
+- **scan 같은 횡단 데이터 이상치** — AI 가 원본과 교차 검증하며 자율 감지 (ROE 68.5 같은 사례).
 
 ### 학술 근거
 
@@ -612,15 +576,21 @@ ai:
 
 ## 관련 코드
 
-- `src/dartlab/ai/context/aiview.py` — autoEnrich 공통 변환 레이어
-- `src/dartlab/ai/context/` — ContextBuilder + ACE 폐쇄 루프 (intent/encoder/budget/builder/playbook/selectors)
-- `src/dartlab/ai/` — providers, tools, runtime, memory, persistence, conversation
-- `src/dartlab/ai/runtime/core.py` — 시스템 프롬프트, 코드 실행, 마크다운 변환, 인사이트 주입, preGround 백그라운드 thread
-- `src/dartlab/ai/persistence/knowledge_db.py` — 단일 영속 DB (CRUD + 마이그레이션 + HF push/pull). selfai 폐기 후 영속성만 분리 보존
-- `src/dartlab/ai/persistence/__init__.py` — KnowledgeDB re-export
-- `src/dartlab/ai/memory/store.py` — analyze() 결과 저장 wrapper (KnowledgeDB 위임)
-- `src/dartlab/cli/stdio.py` — `_handleWarmup` 으로 KnowledgeDB init 사전 지불
-- `src/dartlab/analysis/financial/_memoize.py` — calc 캐시 데코레이터
+- `src/dartlab/ai/runtime/core.py` — `analyze(question, *, stockCode=...)` 진입점 + 시스템 프롬프트 조립 + post-response 학습 루프
+- `src/dartlab/ai/runtime/toolLoop.py` — `streamWithTools` (provider.stream_with_tools 소비자)
+- `src/dartlab/ai/runtime/standalone.py` — `ask(question)` wrapper
+- `src/dartlab/ai/tools/__init__.py` — `buildTools()` (CAPABILITIES 자동 소비 + inspect.signature 로 schema 생성)
+- `src/dartlab/ai/tools/serialize.py` — tool_result LLM/UI 직렬화 (autoEnrich 적용)
+- `src/dartlab/ai/tools/coding.py` — `pythonExec` tool 용 subprocess executor (escape hatch 전용)
+- `src/dartlab/ai/providers/*.py` — `stream_with_tools` (text delta 실시간 + tool_call 누적)
+- `src/dartlab/ai/context/aiview.py` — autoEnrich (tool_result dict 에 시계열 요약 부착)
+- `src/dartlab/ai/context/intent.py` — post-response intent 분류 (KnowledgeDB 태그)
+- `src/dartlab/ai/context/playbook.py` — ACE Curator (응답 → bullet regex 추출 → KnowledgeDB delta merge)
+- `src/dartlab/ai/persistence/knowledge_db.py` — executions/insights/skills bullets 단일 DB
+- `src/dartlab/ai/memory/store.py` — saveAnalysis wrapper
+- `src/dartlab/cli/stdio.py` — `_handleAsk` JSON lines 출력
+- `src/dartlab/server/streaming.py` — SSE 변환
+- `scripts/build/generateSpec.py` — docstring → `guide/_generated.py::CAPABILITIES` 자동 생성
 
-> selfai 엔진 (few_shot/router/reflexion/output_validator) 은 2026-04-06 폐기됨.
-> KnowledgeDB 영속성만 `ai/persistence/` 로 분리하여 보존.
+> 폐기 히스토리: selfai (2026-04-06), python exec 루프 (2026-04-14), ContextBuilder/Pre-grounding/ACE selectors (2026-04-15).
+> AI 는 tool calling 으로 모든 엔진 자율 호출.

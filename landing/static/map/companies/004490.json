@@ -358,5 +358,137 @@
       "source": "network",
       "evidence": "단순투자 지분 0.1%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 18103829111.0,
+      "operating_profit": 99704951541.0,
+      "net_profit": 85232535955.0,
+      "total_assets": 1684408564314.0
+    },
+    {
+      "year": "2022",
+      "sales": 20521306330.0,
+      "operating_profit": 81090384601.0,
+      "net_profit": 42678284284.0,
+      "total_assets": 1676981981164.0
+    },
+    {
+      "year": "2023",
+      "sales": 22085522651.0,
+      "operating_profit": 129915669248.0,
+      "net_profit": 118398646064.0,
+      "total_assets": 1840970162003.0
+    },
+    {
+      "year": "2024",
+      "sales": 2059542800914.0,
+      "operating_profit": 179667570936.0,
+      "net_profit": 0.0,
+      "total_assets": 2094117786877.0
+    },
+    {
+      "year": "2025",
+      "sales": 2118737292932.0,
+      "operating_profit": 153763577366.0,
+      "net_profit": 141070751329.0,
+      "total_assets": 2242840512109.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "084180",
+      "corpName": "수성웹툰",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "007340",
+      "corpName": "DN오토모티브",
+      "stage": "cell",
+      "revenue": 36757
+    },
+    {
+      "stockCode": "066970",
+      "corpName": "엘앤에프",
+      "stage": "cathode",
+      "revenue": 21549
+    },
+    {
+      "stockCode": "005070",
+      "corpName": "코스모신소재",
+      "stage": "cathode",
+      "revenue": 4563
+    },
+    {
+      "stockCode": "348370",
+      "corpName": "엔켐",
+      "stage": "electrolyte",
+      "revenue": 3128
+    },
+    {
+      "stockCode": "064760",
+      "corpName": "티씨케이",
+      "stage": "anode",
+      "revenue": 3013
+    }
   ]
 }

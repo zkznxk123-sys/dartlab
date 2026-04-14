@@ -177,5 +177,172 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2518896106070.0,
+      "operating_profit": 38513882668.0,
+      "net_profit": 304155972.0,
+      "total_assets": 1969372521092.0
+    },
+    {
+      "year": "2022",
+      "sales": 2838303860365.0,
+      "operating_profit": 26331500743.0,
+      "net_profit": -36967492015.0,
+      "total_assets": 2049217755236.0
+    },
+    {
+      "year": "2023",
+      "sales": 2993468191302.0,
+      "operating_profit": 61981274528.0,
+      "net_profit": 19515792298.0,
+      "total_assets": 2156789583390.0
+    },
+    {
+      "year": "2024",
+      "sales": 3213696853910.0,
+      "operating_profit": 91829407927.0,
+      "net_profit": 34386551192.0,
+      "total_assets": 2331157705861.0
+    },
+    {
+      "year": "2025",
+      "sales": 3380189222782.0,
+      "operating_profit": 93173090796.0,
+      "net_profit": 15159940983.0,
+      "total_assets": 2348153156973.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "food",
+        2
+      ],
+      [
+        "medicalDevice",
+        1
+      ],
+      [
+        "pharma",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        2
+      ],
+      [
+        "therapeutic",
+        1
+      ],
+      [
+        "research",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "388790",
+      "corpName": "라이콤",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "145990",
+      "corpName": "삼양사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "049960",
+      "corpName": "쎌바이오텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "272550",
+      "corpName": "삼양패키징",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "stage": "build",
+      "revenue": 712594
+    },
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "stage": "shipping",
+      "revenue": 299332
+    },
+    {
+      "stockCode": "329180",
+      "corpName": "HD현대중공업",
+      "stage": "build",
+      "revenue": 175806
+    },
+    {
+      "stockCode": "018260",
+      "corpName": "삼성에스디에스",
+      "stage": "shipping",
+      "revenue": 139299
+    },
+    {
+      "stockCode": "042660",
+      "corpName": "한화오션",
+      "stage": "build",
+      "revenue": 127835
+    }
   ]
 }

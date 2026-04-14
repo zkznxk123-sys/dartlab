@@ -377,8 +377,6 @@
 		list-style: none;
 		padding: 0;
 		margin: 0;
-		max-height: 400px;
-		overflow-y: auto;
 	}
 	.industry-item {
 		padding: 3px 0;

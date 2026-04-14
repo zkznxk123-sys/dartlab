@@ -2201,5 +2201,218 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "[악화/높음] OPM 10% 공식 8년 유지→6.3% 붕괴. 유심 해킹 2500만명.",
+    "strengths": [
+      "통신 기본 현금흐름",
+      "ROCE 10.2%→4.3%"
+    ],
+    "weaknesses": [
+      "유심 해킹 후유증",
+      "배당성향 143%→0%"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2756865"
+  },
+  "blogPosts": [
+    {
+      "slug": "22-017670-skt",
+      "title": "SK텔레콤 (017670) — 해킹 한 번이 어떻게 OPM 10%를 6%로 만들었는가",
+      "description": "8년간 OPM 10%를 지킨 고배당주가 2025년 6.3%로 급락했다. 2025년 4월 유심 해킹 사태, 2,500만명 피해. 일회성 비용 수천억, 배당 성향 143%→사실상 0%, ROCE 10%→4%. 5G 투자가 끝난 통신사가 AI(에이닷)로 전환할 수 있는가. 고배당 구조의 천장을 추적한다.",
+      "date": "2026-04-12",
+      "grade": "dCR 미산출",
+      "storyTemplate": "전환",
+      "verdict": "OPM 10% 공식 8년 유지→6.3% 붕괴. 유심 해킹 2500만명.",
+      "direction": "악화",
+      "confidence": "높음",
+      "archetype": "프랜차이즈",
+      "strengths": [
+        "통신 기본 현금흐름",
+        "ROCE 10.2%→4.3%"
+      ],
+      "weaknesses": [
+        "유심 해킹 후유증",
+        "배당성향 143%→0%"
+      ],
+      "keyMetrics": {
+        "revenue": 0.0,
+        "opm": 6.3,
+        "roe": 4.3,
+        "fcf": 0.0
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/017670-skt.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 16748585000000.0,
+      "operating_profit": 1387162000000.0,
+      "net_profit": 2418989000000.0,
+      "total_assets": 30911277000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 17304973000000.0,
+      "operating_profit": 1612070000000.0,
+      "net_profit": 947831000000.0,
+      "total_assets": 31308262000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 17608511000000.0,
+      "operating_profit": 1753204000000.0,
+      "net_profit": null,
+      "total_assets": 30119227000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 17940609000000.0,
+      "operating_profit": 1823409000000.0,
+      "net_profit": 0.0,
+      "total_assets": 30515255000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 17099213000000.0,
+      "operating_profit": 1073215000000.0,
+      "net_profit": 375084000000.0,
+      "total_assets": 30107783000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "media",
+        2
+      ],
+      [
+        "chemical",
+        1
+      ],
+      [
+        "pharma",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "polymer",
+        1
+      ],
+      [
+        "content",
+        1
+      ],
+      [
+        "platform",
+        1
+      ],
+      [
+        "formulation",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "083550",
+      "corpName": "케이엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "060570",
+      "corpName": "드림어스컴퍼니",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "216050",
+      "corpName": "인크로스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "011040",
+      "corpName": "경동제약",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    },
+    {
+      "stockCode": "031820",
+      "corpName": "아이티센씨티에스",
+      "stage": "infra",
+      "revenue": 10952
+    }
   ]
 }

@@ -1934,5 +1934,264 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "순현금 상태",
+    "strengths": [
+      "순현금 상태",
+      "Piotroski F 재무 건전 (8/9)"
+    ],
+    "weaknesses": [
+      "이자보상 심각 (0.0배)",
+      "유동성 위기 (유동비율 100%)",
+      "Altman Z 부실 경계 (1.04)"
+    ],
+    "sector": "에너지 > 석유와가스",
+    "source": "audit",
+    "createdAt": "1775430966.5752547"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 46842929105000.0,
+      "operating_profit": 1754170704000.0,
+      "net_profit": 304589651000.0,
+      "total_assets": 49557440204000.0
+    },
+    {
+      "year": "2022",
+      "sales": 78056939448000.0,
+      "operating_profit": 3917340789000.0,
+      "net_profit": 1895179127000.0,
+      "total_assets": 67218924277000.0
+    },
+    {
+      "year": "2023",
+      "sales": 77288485864000.0,
+      "operating_profit": 1903886320000.0,
+      "net_profit": 256250365000.0,
+      "total_assets": 80835513251000.0
+    },
+    {
+      "year": "2024",
+      "sales": 74716970174000.0,
+      "operating_profit": 315488338000.0,
+      "net_profit": 0.0,
+      "total_assets": 110530097549000.0
+    },
+    {
+      "year": "2025",
+      "sales": 80296054243000.0,
+      "operating_profit": 448683859000.0,
+      "net_profit": null,
+      "total_assets": 105608481396000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 12,
+    "customerCount": 0,
+    "preciseEdgeCount": 3,
+    "totalSupplyAmount": 9102540.0,
+    "hhi": 3333.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 33.3,
+    "top3Ratio": 100.0,
+    "industryDiversity": 6,
+    "stageDiversity": 7,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        5
+      ],
+      [
+        "chemical",
+        3
+      ],
+      [
+        "battery",
+        1
+      ],
+      [
+        "energy",
+        1
+      ],
+      [
+        "software",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "component",
+        4
+      ],
+      [
+        "specialty",
+        2
+      ],
+      [
+        "cathode",
+        1
+      ],
+      [
+        "set",
+        1
+      ],
+      [
+        "basic",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "247540",
+      "corpName": "에코프로비엠",
+      "product": "",
+      "amount": 3034180.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "066970",
+      "corpName": "엘앤에프",
+      "product": "",
+      "amount": 3034180.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "023800",
+      "corpName": "인지컨트롤스",
+      "product": "",
+      "amount": 3034180.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "066790",
+      "corpName": "씨씨에스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "013570",
+      "corpName": "디와이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "006650",
+      "corpName": "대한유화",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "361610",
+      "corpName": "SK아이이테크놀로지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "024900",
+      "corpName": "디와이덕양",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "086520",
+      "corpName": "에코프로",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "131400",
+      "corpName": "이브이첨단소재",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    },
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "stage": "basic",
+      "revenue": 184830
+    }
   ]
 }

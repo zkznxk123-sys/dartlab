@@ -189,5 +189,129 @@
       "source": "docs",
       "evidence": "X. 대주주 등과의 거래내용"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1761584870866.0,
+      "operating_profit": 21649870870.0,
+      "net_profit": 2542504988.0,
+      "total_assets": 911509144237.0
+    },
+    {
+      "year": "2022",
+      "sales": 2093667836219.0,
+      "operating_profit": 46358890455.0,
+      "net_profit": 16355781953.0,
+      "total_assets": 1047177776032.0
+    },
+    {
+      "year": "2023",
+      "sales": 2451930583574.0,
+      "operating_profit": 73758587434.0,
+      "net_profit": 8774247165.0,
+      "total_assets": 1246163222587.0
+    },
+    {
+      "year": "2024",
+      "sales": 2589137132700.0,
+      "operating_profit": 36521257119.0,
+      "net_profit": 11044705938.0,
+      "total_assets": 1582555135682.0
+    },
+    {
+      "year": "2025",
+      "sales": 2941851720462.0,
+      "operating_profit": 26809316912.0,
+      "net_profit": 0.0,
+      "total_assets": 2037923964426.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "retail",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "retail",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "095340",
+      "corpName": "ISC",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "038110",
+      "corpName": "에코플라스틱",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    },
+    {
+      "stockCode": "000990",
+      "corpName": "DB하이텍",
+      "stage": "fab",
+      "revenue": 13972
+    }
   ]
 }

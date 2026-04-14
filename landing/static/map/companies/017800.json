@@ -410,5 +410,194 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "순현금 상태",
+    "strengths": [
+      "순현금 상태",
+      "사외이사비율 57% -- 이사회 독립성 양호",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "Altman Z 부실 경계 (1.39)",
+      "CAPEX/감가상각 0.1배 — 투자 부족 (자산 노후화 위험)",
+      "부채 3기 연속 증가 (최근 +2%)"
+    ],
+    "sector": "산업재 > 기계",
+    "source": "audit",
+    "createdAt": "1775430966.5647311"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1973426415772.0,
+      "operating_profit": 129001779541.0,
+      "net_profit": 113119187435.0,
+      "total_assets": 2987393730479.0
+    },
+    {
+      "year": "2022",
+      "sales": 2129301101267.0,
+      "operating_profit": 43016096622.0,
+      "net_profit": null,
+      "total_assets": 3014471063421.0
+    },
+    {
+      "year": "2023",
+      "sales": 2602099212000.0,
+      "operating_profit": 82620343000.0,
+      "net_profit": 0.0,
+      "total_assets": 3535433379000.0
+    },
+    {
+      "year": "2024",
+      "sales": 2885296849309.0,
+      "operating_profit": 225738463277.0,
+      "net_profit": 0.0,
+      "total_assets": 3573751146561.0
+    },
+    {
+      "year": "2025",
+      "sales": 2467378018763.0,
+      "operating_profit": 209221822358.0,
+      "net_profit": 7235281669.0,
+      "total_assets": 3723057252310.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        3
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "processing",
+        1
+      ],
+      [
+        "product",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "114920",
+      "corpName": "대주이엔티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002240",
+      "corpName": "고려제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "012630",
+      "corpName": "HDC",
+      "product": "",
+      "amount": 40401.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "294870",
+      "corpName": "IPARK현대산업개발",
+      "product": "",
+      "amount": 40401.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "002990",
+      "corpName": "금호건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "006360",
+      "corpName": "GS건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "stage": "build",
+      "revenue": 712594
+    },
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "stage": "shipping",
+      "revenue": 299332
+    },
+    {
+      "stockCode": "329180",
+      "corpName": "HD현대중공업",
+      "stage": "build",
+      "revenue": 175806
+    },
+    {
+      "stockCode": "018260",
+      "corpName": "삼성에스디에스",
+      "stage": "shipping",
+      "revenue": 139299
+    },
+    {
+      "stockCode": "042660",
+      "corpName": "한화오션",
+      "stage": "build",
+      "revenue": 127835
+    }
   ]
 }

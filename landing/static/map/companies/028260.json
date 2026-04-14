@@ -1736,5 +1736,280 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 34455181882704.0,
+      "operating_profit": 1195982736408.0,
+      "net_profit": 1829084039967.0,
+      "total_assets": 55245423114466.0
+    },
+    {
+      "year": "2022",
+      "sales": 43161653399535.0,
+      "operating_profit": 2528524413589.0,
+      "net_profit": 500876749419.0,
+      "total_assets": 58981492466950.0
+    },
+    {
+      "year": "2023",
+      "sales": 41895681215734.0,
+      "operating_profit": 2870173816853.0,
+      "net_profit": 2719106116709.0,
+      "total_assets": 66127029212679.0
+    },
+    {
+      "year": "2024",
+      "sales": 42103238027336.0,
+      "operating_profit": 2983396694918.0,
+      "net_profit": 0.0,
+      "total_assets": 61990426835548.0
+    },
+    {
+      "year": "2025",
+      "sales": 40742240967149.0,
+      "operating_profit": 3292747495925.0,
+      "net_profit": 0.0,
+      "total_assets": 86532745699428.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 8,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 6,
+    "stageDiversity": 6,
+    "topSupplyIndustries": [
+      [
+        "construction",
+        3
+      ],
+      [
+        "steel",
+        1
+      ],
+      [
+        "textile",
+        1
+      ],
+      [
+        "pharma",
+        1
+      ],
+      [
+        "buildingMaterials",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        2
+      ],
+      [
+        "material",
+        2
+      ],
+      [
+        "product",
+        1
+      ],
+      [
+        "fiber",
+        1
+      ],
+      [
+        "research",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "032080",
+      "corpName": "아즈텍WB",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004440",
+      "corpName": "삼일씨엔에스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "344820",
+      "corpName": "케이씨씨글라스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002380",
+      "corpName": "케이씨씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "023410",
+      "corpName": "유진기업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "045060",
+      "corpName": "오공",
+      "product": "비닐아세테이트모노머",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "014680",
+      "corpName": "한솔케미칼",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "020000",
+      "corpName": "한섬",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "025820",
+      "corpName": "이구산업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "049070",
+      "corpName": "인탑스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "057050",
+      "corpName": "현대홈쇼핑",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "120240",
+      "corpName": "대정화금",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "344820",
+      "corpName": "케이씨씨글라스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    },
+    {
+      "stockCode": "375500",
+      "corpName": "DL이앤씨",
+      "stage": "general",
+      "revenue": 74024
+    }
   ]
 }

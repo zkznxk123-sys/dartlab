@@ -496,5 +496,162 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "내부유보 비중 71% — 자기 힘으로 성장",
+    "strengths": [
+      "내부유보 비중 71% — 자기 힘으로 성장",
+      "Piotroski F 재무 건전 (7/9)",
+      "DCF 안전마진 32% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "영업CF 적자 — 본업에서 현금이 나오지 않음",
+      "CF 패턴: 축소형 — 자산 매각으로 영업 적자 보전 (재무CF 미보고)",
+      "영업CF 마진 -2.3% — 매출 대비 현금 유출"
+    ],
+    "sector": "금융 > 다각화된금융",
+    "source": "audit",
+    "createdAt": "1775430966.5602314"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3243996752000.0,
+      "operating_profit": 625984935000.0,
+      "net_profit": 647647565000.0,
+      "total_assets": 59451245000.0
+    },
+    {
+      "year": "2022",
+      "sales": 4671316051000.0,
+      "operating_profit": 976672782000.0,
+      "net_profit": 877756345000.0,
+      "total_assets": 55764180000.0
+    },
+    {
+      "year": "2023",
+      "sales": 2649691893000.0,
+      "operating_profit": 531217297000.0,
+      "net_profit": 713510158000.0,
+      "total_assets": 5956551773000.0
+    },
+    {
+      "year": "2024",
+      "sales": 3577383349000.0,
+      "operating_profit": 101527729000.0,
+      "net_profit": 0.0,
+      "total_assets": 8093654722000.0
+    },
+    {
+      "year": "2025",
+      "sales": 3380060390000.0,
+      "operating_profit": -57627064000.0,
+      "net_profit": -146247800000.0,
+      "total_assets": 7870870449000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "finance",
+        1
+      ],
+      [
+        "construction",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "securities",
+        1
+      ],
+      [
+        "engineering",
+        1
+      ],
+      [
+        "specialty",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "012630",
+      "corpName": "HDC",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "456040",
+      "corpName": "OCI",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
   ]
 }

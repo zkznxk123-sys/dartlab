@@ -182,5 +182,129 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 비용 절감 + 자산 효율화 + ROE 상승.\n영업비용률이 100.6%에서 92.2%로 하락하고, 자산회전율이 0.22에서 0.22로 개선되었다. ROE도 -2.8%에서 0.5%로 상승하여 구조적 효율화가 진행 중이다.",
+    "strengths": [
+      "비용 절감 + 자산 효율화 + ROE 상승",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "FCF 적자 — 영업CF보다 투자가 큼",
+      "영업CF 3년 연속 감소",
+      "이익 변동계수 4.90 — 이익 변동성 높음"
+    ],
+    "sector": "소재 > 금속과광물",
+    "source": "audit",
+    "createdAt": "1775430966.5366871"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3651102951303.0,
+      "operating_profit": 238429625560.0,
+      "net_profit": 183668658624.0,
+      "total_assets": 3525996555495.0
+    },
+    {
+      "year": "2022",
+      "sales": 4386332748546.0,
+      "operating_profit": 127856465832.0,
+      "net_profit": 88310592966.0,
+      "total_assets": 1971744747023.0
+    },
+    {
+      "year": "2023",
+      "sales": 4083481175925.0,
+      "operating_profit": 196690160681.0,
+      "net_profit": 125991352125.0,
+      "total_assets": 3665171000621.0
+    },
+    {
+      "year": "2024",
+      "sales": 3636063257694.0,
+      "operating_profit": 52332166350.0,
+      "net_profit": 36427151.0,
+      "total_assets": 3826646864046.0
+    },
+    {
+      "year": "2025",
+      "sales": 3651585276954.0,
+      "operating_profit": 98411992401.0,
+      "net_profit": 56196198013.0,
+      "total_assets": 3914568488213.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "auto",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "oem",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "009160",
+      "corpName": "SIMPAC",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
   ]
 }

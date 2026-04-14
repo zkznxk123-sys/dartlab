@@ -591,5 +591,109 @@
       "source": "network",
       "evidence": "단순투자 지분 0.2%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 4616107000000.0,
+      "operating_profit": 572946000000.0,
+      "net_profit": 549305000000.0,
+      "total_assets": 6488779000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 6420312000000.0,
+      "operating_profit": 789618000000.0,
+      "net_profit": 677081000000.0,
+      "total_assets": 7548942000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 4360982000000.0,
+      "operating_profit": 385854000000.0,
+      "net_profit": 245041000000.0,
+      "total_assets": 7853946000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 5161218000000.0,
+      "operating_profit": 471180000000.0,
+      "net_profit": 268143000000.0,
+      "total_assets": 10271506000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 5432888000000.0,
+      "operating_profit": 491948000000.0,
+      "net_profit": 301407000000.0,
+      "total_assets": 10853668000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "002140",
+      "corpName": "고려산업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "086280",
+      "corpName": "현대글로비스",
+      "stage": "general",
+      "revenue": 295664
+    },
+    {
+      "stockCode": "003490",
+      "corpName": "대한항공",
+      "stage": "general",
+      "revenue": 252255
+    },
+    {
+      "stockCode": "002320",
+      "corpName": "한진",
+      "stage": "general",
+      "revenue": 30649
+    },
+    {
+      "stockCode": "089860",
+      "corpName": "롯데렌탈",
+      "stage": "",
+      "revenue": 29188
+    },
+    {
+      "stockCode": "004360",
+      "corpName": "세방",
+      "stage": "general",
+      "revenue": 12418
+    }
   ]
 }

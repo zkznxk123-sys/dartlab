@@ -835,5 +835,151 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 매출 성장 + 마진 확대 + FCF 양수 / 비용 절감 + 자산 효율화 + ROE 상승.\n매출이 +3.5% 성장하면서 영업이익률이 8.5%에서 9.2%로 확대되었다. FCF도 양수를 유지하여 질적 성장이 확인된다.",
+    "strengths": [
+      "매출 성장 + 마진 확대 + FCF 양수",
+      "비용 절감 + 자산 효율화 + ROE 상승",
+      "사외이사비율 56% -- 이사회 독립성 양호",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**"
+    ],
+    "weaknesses": [
+      "유동성 위기 (유동비율 82%)",
+      "Altman Z 부실 경계 (1.24)",
+      "CCC 155일 — 현금 회수 매우 느림"
+    ],
+    "sector": "경기관련소비재 > 소매(유통)",
+    "source": "audit",
+    "createdAt": "1775430966.5742524"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3572433182000.0,
+      "operating_profit": 264365188000.0,
+      "net_profit": 233388925000.0,
+      "total_assets": 8969196456000.0
+    },
+    {
+      "year": "2022",
+      "sales": 5014123629000.0,
+      "operating_profit": 320928734000.0,
+      "net_profit": 41945684000.0,
+      "total_assets": 12069249655000.0
+    },
+    {
+      "year": "2023",
+      "sales": 4207452895000.0,
+      "operating_profit": 303469763000.0,
+      "net_profit": 0.0,
+      "total_assets": 11712592639000.0
+    },
+    {
+      "year": "2024",
+      "sales": 4187614464000.0,
+      "operating_profit": 284042489000.0,
+      "net_profit": 0.0,
+      "total_assets": 11217721674000.0
+    },
+    {
+      "year": "2025",
+      "sales": 4230320613000.0,
+      "operating_profit": 377947571000.0,
+      "net_profit": 141528509000.0,
+      "total_assets": 11249807365000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "paper",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "013890",
+      "corpName": "지누스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "005440",
+      "corpName": "현대지에프홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
   ]
 }

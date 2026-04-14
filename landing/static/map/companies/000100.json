@@ -884,5 +884,171 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1687810317744.0,
+      "operating_profit": 48596120264.0,
+      "net_profit": 99126677873.0,
+      "total_assets": 2463811804950.0
+    },
+    {
+      "year": "2022",
+      "sales": 1775846942745.0,
+      "operating_profit": 36028967211.0,
+      "net_profit": 90592526174.0,
+      "total_assets": 2472728072149.0
+    },
+    {
+      "year": "2023",
+      "sales": 1858983759666.0,
+      "operating_profit": 56759795062.0,
+      "net_profit": 134031517424.0,
+      "total_assets": 2814070521926.0
+    },
+    {
+      "year": "2024",
+      "sales": 2067791451854.0,
+      "operating_profit": 54880319609.0,
+      "net_profit": 55163455235.0,
+      "total_assets": 2942048836634.0
+    },
+    {
+      "year": "2025",
+      "sales": 2186637586358.0,
+      "operating_profit": 104374493823.0,
+      "net_profit": 185318996567.0,
+      "total_assets": 3220925833989.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "pharma",
+        1
+      ],
+      [
+        "plastic",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "formulation",
+        1
+      ],
+      [
+        "general",
+        1
+      ],
+      [
+        "set",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "307750",
+      "corpName": "국전약품",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "069510",
+      "corpName": "에스텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "069620",
+      "corpName": "대웅제약",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "358570",
+      "corpName": "지아이이노베이션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    },
+    {
+      "stockCode": "006280",
+      "corpName": "녹십자",
+      "stage": "formulation",
+      "revenue": 19913
+    }
   ]
 }

@@ -64,7 +64,7 @@ def _handleAsk(msg: dict[str, Any]) -> None:
     # AI가 종목을 자율 판단 — 서버/CLI가 resolve하지 않는다
     kwargs: dict[str, Any] = {}
     if company:
-        kwargs["company_hint"] = company
+        kwargs["stockCode"] = company
     if provider:
         kwargs["provider"] = provider
     if model:
@@ -90,7 +90,7 @@ def _handleAsk(msg: dict[str, Any]) -> None:
 
     emittedDone = False
     try:
-        for event in analyze(None, question, **kwargs):
+        for event in analyze(question, **kwargs):
             if event.kind == "error" and isinstance(event.data, dict):
                 _emit({"id": reqId, "event": "error", "data": _sanitizeErrorForUi(event.data)})
             else:

@@ -908,5 +908,147 @@
       "source": "network",
       "evidence": "기타"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 15573550042665.0,
+      "operating_profit": 207602693266.0,
+      "net_profit": -292279479719.0,
+      "total_assets": 33426533819002.0
+    },
+    {
+      "year": "2022",
+      "sales": 15476035656554.0,
+      "operating_profit": 386225594610.0,
+      "net_profit": 0.0,
+      "total_assets": 31703575873070.0
+    },
+    {
+      "year": "2023",
+      "sales": 14555863880290.0,
+      "operating_profit": 508404731640.0,
+      "net_profit": 174403554447.0,
+      "total_assets": 30644698696537.0
+    },
+    {
+      "year": "2024",
+      "sales": 13986578270060.0,
+      "operating_profit": 473113964780.0,
+      "net_profit": -994075271502.0,
+      "total_assets": 39003044584713.0
+    },
+    {
+      "year": "2025",
+      "sales": 13738354725833.0,
+      "operating_profit": 547037221095.0,
+      "net_profit": 73555557525.0,
+      "total_assets": 37910298847681.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "retail",
+        2
+      ],
+      [
+        "food",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "retail",
+        2
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "071840",
+      "corpName": "롯데하이마트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "145990",
+      "corpName": "삼양사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    },
+    {
+      "stockCode": "105630",
+      "corpName": "한세실업",
+      "stage": "apparel",
+      "revenue": 19418
+    }
   ]
 }

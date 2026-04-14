@@ -803,5 +803,168 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2751710633294.0,
+      "operating_profit": 174547312597.0,
+      "net_profit": 75118161429.0,
+      "total_assets": 3734783195004.0
+    },
+    {
+      "year": "2022",
+      "sales": 2605096732189.0,
+      "operating_profit": 91547554846.0,
+      "net_profit": 49070962250.0,
+      "total_assets": 4323308266498.0
+    },
+    {
+      "year": "2023",
+      "sales": 3352921775830.0,
+      "operating_profit": -404531815195.0,
+      "net_profit": 0.0,
+      "total_assets": 4640488559862.0
+    },
+    {
+      "year": "2024",
+      "sales": 2686174110954.0,
+      "operating_profit": 20642182140.0,
+      "net_profit": 66803953317.0,
+      "total_assets": 4323923757006.0
+    },
+    {
+      "year": "2025",
+      "sales": 2174483568714.0,
+      "operating_profit": 52789167779.0,
+      "net_profit": 0.0,
+      "total_assets": 4127053459058.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "construction",
+        2
+      ],
+      [
+        "steel",
+        2
+      ],
+      [
+        "paper",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        2
+      ],
+      [
+        "material",
+        1
+      ],
+      [
+        "product",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "104700",
+      "corpName": "한국철강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "084010",
+      "corpName": "대한제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "079430",
+      "corpName": "현대리바트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
   ]
 }

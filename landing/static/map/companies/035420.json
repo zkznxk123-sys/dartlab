@@ -1052,5 +1052,121 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 6817599707250.0,
+      "operating_profit": 1325478171117.0,
+      "net_profit": 16477625559645.0,
+      "total_assets": 33691006757040.0
+    },
+    {
+      "year": "2022",
+      "sales": 8220078708810.0,
+      "operating_profit": 1304664410543.0,
+      "net_profit": -87080576160.0,
+      "total_assets": 33899042889136.0
+    },
+    {
+      "year": "2023",
+      "sales": 9670643576585.0,
+      "operating_profit": 1488820269608.0,
+      "net_profit": 1012321527624.0,
+      "total_assets": 35737826964395.0
+    },
+    {
+      "year": "2024",
+      "sales": 10737719264647.0,
+      "operating_profit": 1979263438827.0,
+      "net_profit": 1931976372953.0,
+      "total_assets": 38167876036020.0
+    },
+    {
+      "year": "2025",
+      "sales": 12035007218975.0,
+      "operating_profit": 2208138388720.0,
+      "net_profit": 1953214734956.0,
+      "total_assets": 41084496327318.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "media",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "platform",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "042000",
+      "corpName": "카페24",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "447690",
+      "corpName": "아이오바이오",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    },
+    {
+      "stockCode": "018670",
+      "corpName": "SK가스",
+      "stage": "solution",
+      "revenue": 76763
+    }
   ]
 }

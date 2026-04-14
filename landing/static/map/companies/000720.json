@@ -2294,5 +2294,296 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 매출 성장 + 마진 확대 + FCF 양수 / 비용 절감 + 자산 효율화 + ROE 상승.\n매출이 +11.2% 성장하면서 영업이익률이 -24.5%에서 1.5%로 확대되었다. FCF도 양수를 유지하여 질적 성장이 확인된다.",
+    "strengths": [
+      "매출 성장 + 마진 확대 + FCF 양수",
+      "비용 절감 + 자산 효율화 + ROE 상승",
+      "유효세율 변동계수 0.59 — 세금 비용 불안정",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**"
+    ],
+    "weaknesses": [
+      "CCC 152일 — 현금 회수 매우 느림",
+      "CAPEX/감가상각 0.3배 — 투자 부족 (자산 노후화 위험)",
+      "부채 3기 연속 증가 (최근 +2%)"
+    ],
+    "sector": "산업재 > 건설",
+    "source": "audit",
+    "createdAt": "1775430966.530045"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 18065534000000.0,
+      "operating_profit": 753504000000.0,
+      "net_profit": 554377000000.0,
+      "total_assets": 19637264000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 21239082000000.0,
+      "operating_profit": 574902000000.0,
+      "net_profit": 408886000000.0,
+      "total_assets": 20911708000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 29651357000000.0,
+      "operating_profit": 785430000000.0,
+      "net_profit": 118377000000.0,
+      "total_assets": 23714495000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 32670268000000.0,
+      "operating_profit": -1263420000000.0,
+      "net_profit": -168663000000.0,
+      "total_assets": 27005385000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 31062912000000.0,
+      "operating_profit": 653006000000.0,
+      "net_profit": 185921000000.0,
+      "total_assets": 27791708000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 66,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 22,
+    "stageDiversity": 24,
+    "topSupplyIndustries": [
+      [
+        "construction",
+        11
+      ],
+      [
+        "steel",
+        9
+      ],
+      [
+        "machinery",
+        7
+      ],
+      [
+        "electronics",
+        6
+      ],
+      [
+        "electrical",
+        4
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        22
+      ],
+      [
+        "material",
+        5
+      ],
+      [
+        "raw",
+        4
+      ],
+      [
+        "product",
+        3
+      ],
+      [
+        "component",
+        3
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "023160",
+      "corpName": "태광",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "002220",
+      "corpName": "한일철강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "014280",
+      "corpName": "금강공업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "017800",
+      "corpName": "현대엘리베이터",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "267260",
+      "corpName": "HD현대일렉트릭",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "014620",
+      "corpName": "성광벤드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "024880",
+      "corpName": "케이피에프",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "010060",
+      "corpName": "OCI홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "053160",
+      "corpName": "프리엠스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "267270",
+      "corpName": "HD건설기계",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    },
+    {
+      "stockCode": "375500",
+      "corpName": "DL이앤씨",
+      "stage": "general",
+      "revenue": 74024
+    }
   ]
 }

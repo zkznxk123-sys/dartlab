@@ -1,0 +1,261 @@
+"""회사 JSON 데이터 통합 — AI insights + 블로그 + 재무 시계열 + 신용등급.
+
+기존 companies/{code}.json에 풍부한 메타데이터를 추가한다.
+한 번 빌드해서 landing static으로 배포.
+"""
+
+from __future__ import annotations
+
+import logging
+import re
+from pathlib import Path
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+_BLOG_DIR = Path(__file__).resolve().parents[4] / "blog" / "05-company-reports"
+
+
+def _parseFrontmatter(md_text: str) -> dict:
+    """마크다운 frontmatter 파싱 (YAML 간단 버전)."""
+    import yaml
+
+    m = re.match(r"^---\n(.*?)\n---", md_text, re.DOTALL)
+    if not m:
+        return {}
+    try:
+        return yaml.safe_load(m.group(1)) or {}
+    except Exception:
+        return {}
+
+
+def _loadBlogIndex() -> dict[str, list[dict]]:
+    """blog/05-company-reports의 포스트를 stockCode로 인덱싱.
+
+    Returns
+    -------
+    dict[str, list[dict]]
+        {stockCode: [{slug, title, verdict, grade, strengths, weaknesses, ...}]}
+    """
+    index: dict[str, list[dict]] = {}
+    if not _BLOG_DIR.exists():
+        return index
+
+    for postDir in _BLOG_DIR.iterdir():
+        if not postDir.is_dir():
+            continue
+        indexFile = postDir / "index.md"
+        if not indexFile.exists():
+            continue
+        try:
+            text = indexFile.read_text(encoding="utf-8")
+        except OSError:
+            continue
+
+        fm = _parseFrontmatter(text)
+        stockCode = str(fm.get("stockCode", "")).strip()
+        if not stockCode:
+            continue
+
+        ai = fm.get("ai", {}) or {}
+        entry = {
+            "slug": postDir.name,
+            "title": fm.get("title", ""),
+            "description": fm.get("description", ""),
+            "date": str(fm.get("date", "")),
+            "grade": fm.get("grade", ""),
+            "storyTemplate": fm.get("storyTemplate", ""),
+            "verdict": ai.get("verdict", ""),
+            "direction": ai.get("direction", ""),
+            "confidence": ai.get("confidence", ""),
+            "archetype": ai.get("archetype", ""),
+            "strengths": ai.get("strengths", []) or [],
+            "weaknesses": ai.get("weaknesses", []) or [],
+            "keyMetrics": ai.get("keyMetrics", {}) or {},
+            "thumbnail": fm.get("thumbnail", ""),
+            "ogImage": fm.get("ogImage", ""),
+        }
+        index.setdefault(stockCode, []).append(entry)
+
+    # 날짜 내림차순
+    for code in index:
+        index[code].sort(key=lambda x: x["date"], reverse=True)
+
+    return index
+
+
+def _getAIInsight(stockCode: str) -> dict | None:
+    """KnowledgeDB에서 AI 인사이트 조회."""
+    try:
+        from dartlab.ai.persistence.knowledge_db import KnowledgeDB
+
+        db = KnowledgeDB.get()
+        rec = db.get_insight(stockCode)
+        if not rec:
+            return None
+        return {
+            "narrative": rec.narrative or "",
+            "strengths": list(rec.strengths or []),
+            "weaknesses": list(rec.weaknesses or []),
+            "sector": rec.sector or "",
+            "source": rec.source or "",
+            "createdAt": str(rec.created_at) if rec.created_at else "",
+        }
+    except Exception as e:
+        logger.debug("AI insight 조회 실패 (%s): %s", stockCode, e)
+        return None
+
+
+def _getFinancials5y(stockCode: str) -> list[dict]:
+    """scan/finance.parquet에서 5년 연간 재무 추출 (2021~2025)."""
+    try:
+        import polars as pl
+
+        from dartlab.core.dataConfig import DATA_RELEASES
+        from dartlab.core.dataLoader import _getDataRoot
+
+        finPath = _getDataRoot() / DATA_RELEASES["scan"]["dir"] / "finance.parquet"
+        if not finPath.exists():
+            return []
+
+        df = (
+            pl.scan_parquet(str(finPath))
+            .filter(pl.col("stockCode") == stockCode)
+            .filter(pl.col("reprt_nm") == "4분기")  # 연간 누적
+            .filter(pl.col("account_id_std").is_in(["sales", "operating_profit", "net_profit", "total_assets"]))
+            .filter(pl.col("bsns_year").is_in(["2021", "2022", "2023", "2024", "2025"]))
+            .select(["bsns_year", "fs_div", "account_id_std", "thstrm_amount"])
+            .collect()
+        )
+
+        if df.height == 0:
+            return []
+
+        df = df.with_columns(
+            pl.col("thstrm_amount").str.replace_all(",", "").cast(pl.Float64, strict=False).alias("amount")
+        )
+
+        # CFS 우선, OFS fallback 계정별
+        result: list[dict] = []
+        for year in ["2021", "2022", "2023", "2024", "2025"]:
+            year_df = df.filter(pl.col("bsns_year") == year)
+            if year_df.height == 0:
+                continue
+
+            entry: dict = {"year": year}
+            for acct in ["sales", "operating_profit", "net_profit", "total_assets"]:
+                subset = year_df.filter(pl.col("account_id_std") == acct)
+                cfs_rows = subset.filter(pl.col("fs_div") == "CFS")
+                if cfs_rows.height > 0:
+                    val = cfs_rows["amount"][0]
+                else:
+                    ofs_rows = subset.filter(pl.col("fs_div") == "OFS")
+                    val = ofs_rows["amount"][0] if ofs_rows.height > 0 else None
+                entry[acct] = val
+
+            if any(entry.get(k) for k in ["sales", "operating_profit"]):
+                result.append(entry)
+
+        return result
+    except Exception as e:
+        logger.debug("재무 추출 실패 (%s): %s", stockCode, e)
+        return []
+
+
+def enrichCompanyData(
+    stockCode: str,
+    egoData: dict,
+    edges: list[Any],
+    nodes: list[Any],
+    blogIndex: dict[str, list[dict]] | None = None,
+) -> dict:
+    """기존 ego JSON에 추가 데이터를 병합.
+
+    Parameters
+    ----------
+    stockCode : str
+    egoData : dict
+        buildCompanyEgograph(stockCode) 결과.
+    edges : list
+        전체 엣지.
+    nodes : list
+        전체 노드.
+    blogIndex : dict | None
+        블로그 인덱스 (없으면 로드).
+    """
+    from dartlab.industry.build.insights import calcSupplyInsights
+
+    if blogIndex is None:
+        blogIndex = _loadBlogIndex()
+
+    supplyInsights = calcSupplyInsights(stockCode, edges, nodes)
+    aiInsight = _getAIInsight(stockCode)
+    financials5y = _getFinancials5y(stockCode)
+    blogPosts = blogIndex.get(stockCode, [])
+
+    # 상위 공급사 10 (엣지 기반)
+    supplierEdges = sorted(
+        [e for e in edges if e.toCode == stockCode and e.edgeType == "supplier"],
+        key=lambda e: e.amount or 0,
+        reverse=True,
+    )[:10]
+    suppliers = []
+    nodeByCode = {n.stockCode: n for n in nodes}
+    for e in supplierEdges:
+        fromNode = nodeByCode.get(e.fromCode)
+        suppliers.append({
+            "stockCode": e.fromCode,
+            "corpName": e.fromName or (fromNode.corpName if fromNode else ""),
+            "product": e.product,
+            "amount": e.amount,
+            "ratio": e.ratio,
+            "confidence": e.confidence,
+            "source": e.source,
+        })
+
+    # 상위 고객사 10
+    customerEdges = sorted(
+        [e for e in edges if e.fromCode == stockCode and e.edgeType in ("customer", "supplier")],
+        key=lambda e: e.amount or 0,
+        reverse=True,
+    )[:10]
+    customers = []
+    for e in customerEdges:
+        toNode = nodeByCode.get(e.toCode)
+        customers.append({
+            "stockCode": e.toCode,
+            "corpName": e.toName or (toNode.corpName if toNode else ""),
+            "product": e.product,
+            "amount": e.amount,
+            "type": e.edgeType,
+            "confidence": e.confidence,
+        })
+
+    # 동종사 상위 5 (같은 산업, 매출 순)
+    ego = egoData.get("ego", {})
+    industryId = ego.get("industry", "")
+    peers: list[dict] = []
+    if industryId:
+        industryNodes = [
+            n for n in nodes
+            if n.industry == industryId and n.stockCode != stockCode and n.revenue
+        ]
+        industryNodes.sort(key=lambda n: n.revenue or 0, reverse=True)
+        for n in industryNodes[:5]:
+            peers.append({
+                "stockCode": n.stockCode,
+                "corpName": n.corpName,
+                "stage": n.stage,
+                "revenue": round((n.revenue or 0) / 1e8),  # 억
+            })
+
+    return {
+        **egoData,
+        "aiInsight": aiInsight,
+        "blogPosts": blogPosts,
+        "financials5y": financials5y,
+        "supplyInsights": supplyInsights,
+        "suppliers": suppliers,
+        "customers": customers,
+        "peers": peers,
+    }

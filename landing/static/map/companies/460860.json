@@ -940,5 +940,152 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2023",
+      "sales": 2632104129307.0,
+      "operating_profit": 235489924847.0,
+      "net_profit": 142170864518.0,
+      "total_assets": 3531787086236.0
+    },
+    {
+      "year": "2025",
+      "sales": 3203431341223.0,
+      "operating_profit": 59380409698.0,
+      "net_profit": 0.0,
+      "total_assets": 4134274429969.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "product": "강재, 기자재, 의장재 등",
+      "amount": 6519885.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "product": "",
+      "amount": 174793.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "375500",
+      "corpName": "DL이앤씨",
+      "product": "",
+      "amount": 93947.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "002460",
+      "corpName": "HS화성",
+      "product": "",
+      "amount": 6179.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "084690",
+      "corpName": "대상홀딩스",
+      "product": "",
+      "amount": 3574.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "317400",
+      "corpName": "자이에스앤디",
+      "product": "",
+      "amount": 3114.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "007680",
+      "corpName": "대원",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000210",
+      "corpName": "DL",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
   ]
 }

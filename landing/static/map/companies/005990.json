@@ -132,5 +132,92 @@
       "source": "docs",
       "evidence": "X. 대주주 등과의 거래내용"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1806735439065.0,
+      "operating_profit": 93830177568.0,
+      "net_profit": 45373895068.0,
+      "total_assets": 1256733566909.0
+    },
+    {
+      "year": "2022",
+      "sales": 1979261381048.0,
+      "operating_profit": 73433706538.0,
+      "net_profit": 10339289640.0,
+      "total_assets": 1271527183829.0
+    },
+    {
+      "year": "2023",
+      "sales": 2146398739613.0,
+      "operating_profit": 82233894530.0,
+      "net_profit": 36657827865.0,
+      "total_assets": 1298730028996.0
+    },
+    {
+      "year": "2024",
+      "sales": 2190170660149.0,
+      "operating_profit": 78276734399.0,
+      "net_profit": 24197736174.0,
+      "total_assets": 1357651330931.0
+    },
+    {
+      "year": "2025",
+      "sales": 2196211284329.0,
+      "operating_profit": 63972718206.0,
+      "net_profit": 70217748135.0,
+      "total_assets": 1423606242799.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
   ]
 }

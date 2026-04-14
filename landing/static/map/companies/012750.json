@@ -1972,5 +1972,165 @@
       "source": "docs",
       "evidence": "IX. 계열회사 등에 관한 사항"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2312489059004.0,
+      "operating_profit": 179664944147.0,
+      "net_profit": 128991676920.0,
+      "total_assets": 1972972502257.0
+    },
+    {
+      "year": "2022",
+      "sales": 2467960276573.0,
+      "operating_profit": 204138904290.0,
+      "net_profit": 151030832821.0,
+      "total_assets": 2075658595502.0
+    },
+    {
+      "year": "2023",
+      "sales": 2620810541515.0,
+      "operating_profit": 212609320684.0,
+      "net_profit": 3220861.0,
+      "total_assets": 2179505358177.0
+    },
+    {
+      "year": "2024",
+      "sales": 2804739466536.0,
+      "operating_profit": 209247073877.0,
+      "net_profit": 176718837100.0,
+      "total_assets": 2322698505650.0
+    },
+    {
+      "year": "2025",
+      "sales": 2889412422255.0,
+      "operating_profit": 234566491629.0,
+      "net_profit": 0.0,
+      "total_assets": 2431985312121.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "140430",
+      "corpName": "카티스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "002620",
+      "corpName": "제일파마홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "003220",
+      "corpName": "대원제약",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "004060",
+      "corpName": "SG세계물산",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "014100",
+      "corpName": "메디앙스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "039420",
+      "corpName": "케이엘넷",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "072130",
+      "corpName": "유엔젤",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "271980",
+      "corpName": "제일약품",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "297890",
+      "corpName": "HB솔루션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
   ]
 }

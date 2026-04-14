@@ -417,5 +417,101 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2291433979355.0,
+      "operating_profit": 55629220994.0,
+      "net_profit": 26652804842.0,
+      "total_assets": 1216483927069.0
+    },
+    {
+      "year": "2022",
+      "sales": 2747691651727.0,
+      "operating_profit": 97840086516.0,
+      "net_profit": 3146477302.0,
+      "total_assets": 1484726893096.0
+    },
+    {
+      "year": "2023",
+      "sales": 3074242286759.0,
+      "operating_profit": 99255535636.0,
+      "net_profit": 54475803309.0,
+      "total_assets": 1374744040154.0
+    },
+    {
+      "year": "2024",
+      "sales": 3224779013185.0,
+      "operating_profit": 94025267830.0,
+      "net_profit": 0.0,
+      "total_assets": 1564362058881.0
+    },
+    {
+      "year": "2025",
+      "sales": 3481081567935.0,
+      "operating_profit": 101652510024.0,
+      "net_profit": 50106428488.0,
+      "total_assets": 1589129723279.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
   ]
 }

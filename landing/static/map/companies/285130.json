@@ -1696,5 +1696,280 @@
       "source": "network",
       "evidence": "단순투자 지분 0.0%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2089631876416.0,
+      "operating_profit": 555185910439.0,
+      "net_profit": 268743338018.0,
+      "total_assets": 3955632394256.0
+    },
+    {
+      "year": "2022",
+      "sales": 1829191322924.0,
+      "operating_profit": 230480673367.0,
+      "net_profit": 191266054717.0,
+      "total_assets": 3945682879744.0
+    },
+    {
+      "year": "2023",
+      "sales": 1748777740387.0,
+      "operating_profit": 83302487079.0,
+      "net_profit": 7974072168.0,
+      "total_assets": 4158774903691.0
+    },
+    {
+      "year": "2024",
+      "sales": 1736778902011.0,
+      "operating_profit": -45175568334.0,
+      "net_profit": 0.0,
+      "total_assets": 5367048627339.0
+    },
+    {
+      "year": "2025",
+      "sales": 2365164441719.0,
+      "operating_profit": -207363696.0,
+      "net_profit": 27297323639.0,
+      "total_assets": 6087624380520.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 8,
+    "customerCount": 0,
+    "preciseEdgeCount": 2,
+    "totalSupplyAmount": 180693.0,
+    "hhi": 8684.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 92.9,
+    "top3Ratio": 100.0,
+    "industryDiversity": 5,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        3
+      ],
+      [
+        "pharma",
+        2
+      ],
+      [
+        "energy",
+        1
+      ],
+      [
+        "software",
+        1
+      ],
+      [
+        "aerospace",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "basic",
+        3
+      ],
+      [
+        "research",
+        2
+      ],
+      [
+        "distribution",
+        1
+      ],
+      [
+        "solution",
+        1
+      ],
+      [
+        "airframe",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "006650",
+      "corpName": "대한유화",
+      "product": "",
+      "amount": 167893.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "183490",
+      "corpName": "엔지켐생명과학",
+      "product": "",
+      "amount": 12800.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "003240",
+      "corpName": "태광산업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "302440",
+      "corpName": "SK바이오사이언스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "001740",
+      "corpName": "SK네트웍스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "067390",
+      "corpName": "아스트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "005070",
+      "corpName": "코스모신소재",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005420",
+      "corpName": "코스모화학",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "011790",
+      "corpName": "SKC",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "024720",
+      "corpName": "콜마홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "079980",
+      "corpName": "휴비스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "090350",
+      "corpName": "노루페인트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
   ]
 }

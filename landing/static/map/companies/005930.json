@@ -3717,5 +3717,344 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "은 세 가지입니다.",
+    "strengths": [
+      "중**입니다. 다만 “완전 정상화”보다는 **메모리 업황 반등에 따른 개선 국면**으로 보는 게 맞습니다.",
+      "흐름입니다.",
+      "기여의 **약 90%를 DS가 담당**했습니다.",
+      "전사 체질 변화라기보다, **반도체 업황 반등 영향이 가장 크다**는 뜻입니다.",
+      "방향**입니다."
+    ],
+    "weaknesses": [],
+    "sector": "SectorInfo(IT/반도체와반도체장비, conf=1.00, src=override)",
+    "source": "live",
+    "createdAt": "1776152249.4620113"
+  },
+  "blogPosts": [
+    {
+      "slug": "30-005930-samsung",
+      "title": "삼성전자 — 매출 334조, 반도체 빼면 영업이익률 7%",
+      "description": "매출 334조, 영업이익률 13%. 그런데 반도체를 빼면 7%. 파운드리 적자 7조가 메모리 이익을 까먹고, 현금 110조는 해외에 묶여 있고, 이재용 지분 1.63%로 500조를 지배한다. 삼성전자의 재무제표를 뜯어본다.",
+      "date": "2026-04-13",
+      "grade": "",
+      "storyTemplate": "사이클",
+      "verdict": "매출 334조이나 반도체 빼면 OPM 7%. 파운드리 적자 7조. 현금 110조 해외 고착.",
+      "direction": "유지",
+      "confidence": "높음",
+      "archetype": "사이클",
+      "strengths": [
+        "분기 이익 57.2조 역대 최대",
+        "OPM 2.5%→13.1% 회복"
+      ],
+      "weaknesses": [
+        "파운드리 적자 7조",
+        "현금 110조 해외 고착"
+      ],
+      "keyMetrics": {
+        "revenue": 334.0,
+        "opm": 13.1,
+        "roe": 10.4,
+        "fcf": 33.2
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/005930-samsung.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 279604799000000.0,
+      "operating_profit": 51633856000000.0,
+      "net_profit": 39243791000000.0,
+      "total_assets": 426621158000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 302231360000000.0,
+      "operating_profit": 43376630000000.0,
+      "net_profit": 924059000000.0,
+      "total_assets": 448424507000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 258935494000000.0,
+      "operating_profit": 6566976000000.0,
+      "net_profit": 14473401000000.0,
+      "total_assets": 455905980000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 300870903000000.0,
+      "operating_profit": 32725961000000.0,
+      "net_profit": 34451351000000.0,
+      "total_assets": 514531948000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 333605938000000.0,
+      "operating_profit": 43601051000000.0,
+      "net_profit": 45206805000000.0,
+      "total_assets": 566942110000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 11,
+    "customerCount": 0,
+    "preciseEdgeCount": 4,
+    "totalSupplyAmount": 174508.0,
+    "hhi": 2814.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 33.8,
+    "top3Ratio": 84.8,
+    "industryDiversity": 4,
+    "stageDiversity": 6,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        8
+      ],
+      [
+        "buildingMaterials",
+        1
+      ],
+      [
+        "finance",
+        1
+      ],
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "module",
+        5
+      ],
+      [
+        "component",
+        2
+      ],
+      [
+        "display",
+        1
+      ],
+      [
+        "general",
+        1
+      ],
+      [
+        "securities",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "product": "Camera Module",
+      "amount": 59043.0,
+      "ratio": 7.9,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "097520",
+      "corpName": "엠씨넥스",
+      "product": "Camera Module",
+      "amount": 59043.0,
+      "ratio": 7.9,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "357780",
+      "corpName": "솔브레인",
+      "product": "Chemical",
+      "amount": 29900.0,
+      "ratio": 17.1,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "090460",
+      "corpName": "비에이치",
+      "product": "FPCA",
+      "amount": 26522.0,
+      "ratio": 20.3,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "000910",
+      "corpName": "유니온",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "160550",
+      "corpName": "NEW",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "376290",
+      "corpName": "씨유테크",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "091700",
+      "corpName": "파트론",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "047310",
+      "corpName": "파워로직스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "050110",
+      "corpName": "캠시스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "product": "",
+      "amount": 1293843.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "045970",
+      "corpName": "코아시아",
+      "product": "",
+      "amount": 2981.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "254490",
+      "corpName": "미래반도체",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "001000",
+      "corpName": "신라섬유",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "002880",
+      "corpName": "대유에이텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "003550",
+      "corpName": "LG",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005360",
+      "corpName": "모나미",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "011690",
+      "corpName": "와이투솔루션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    },
+    {
+      "stockCode": "000990",
+      "corpName": "DB하이텍",
+      "stage": "fab",
+      "revenue": 13972
+    }
   ]
 }

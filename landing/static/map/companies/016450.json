@@ -168,5 +168,129 @@
       "source": "docs",
       "evidence": "IX. 계열회사 등에 관한 사항"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2798895736344.0,
+      "operating_profit": 134681974504.0,
+      "net_profit": 40290353809.0,
+      "total_assets": 2241273059610.0
+    },
+    {
+      "year": "2022",
+      "sales": 3322113533739.0,
+      "operating_profit": 192868855902.0,
+      "net_profit": 21313817870.0,
+      "total_assets": 2036963741120.0
+    },
+    {
+      "year": "2023",
+      "sales": 2780751628151.0,
+      "operating_profit": 189745000099.0,
+      "net_profit": 56437067683.0,
+      "total_assets": 2152345946852.0
+    },
+    {
+      "year": "2024",
+      "sales": 2830854661888.0,
+      "operating_profit": 152254632037.0,
+      "net_profit": 4554297402.0,
+      "total_assets": 2825659862512.0
+    },
+    {
+      "year": "2025",
+      "sales": 3409830339365.0,
+      "operating_profit": 65466584992.0,
+      "net_profit": -23184360138.0,
+      "total_assets": 3034736690123.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "retail",
+        1
+      ],
+      [
+        "textile",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "retail",
+        1
+      ],
+      [
+        "apparel",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "069640",
+      "corpName": "한세엠케이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "105630",
+      "corpName": "한세실업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "105630",
+      "corpName": "한세실업",
+      "stage": "apparel",
+      "revenue": 19418
+    }
   ]
 }

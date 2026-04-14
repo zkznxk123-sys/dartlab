@@ -751,5 +751,206 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 4486585681366.0,
+      "operating_profit": -1754651375507.0,
+      "net_profit": -1699829429734.0,
+      "total_assets": 10623209555073.0
+    },
+    {
+      "year": "2022",
+      "sales": 4860150249534.0,
+      "operating_profit": -1613564533698.0,
+      "net_profit": -1744778447657.0,
+      "total_assets": 12235665304876.0
+    },
+    {
+      "year": "2023",
+      "sales": 7408312265643.0,
+      "operating_profit": -196498300366.0,
+      "net_profit": 160043854483.0,
+      "total_assets": 13944772692394.0
+    },
+    {
+      "year": "2024",
+      "sales": 10776004933627.0,
+      "operating_profit": 237876379317.0,
+      "net_profit": 0.0,
+      "total_assets": 17843809161295.0
+    },
+    {
+      "year": "2025",
+      "sales": 12783512278323.0,
+      "operating_profit": 1167590137928.0,
+      "net_profit": 1245838500547.0,
+      "total_assets": 20140914014349.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 6,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "shipbuilding",
+        2
+      ],
+      [
+        "steel",
+        2
+      ],
+      [
+        "aerospace",
+        1
+      ],
+      [
+        "machinery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "build",
+        2
+      ],
+      [
+        "raw",
+        1
+      ],
+      [
+        "product",
+        1
+      ],
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "329180",
+      "corpName": "HD현대중공업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "082740",
+      "corpName": "한화엔진",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "136150",
+      "corpName": "원일티엔아이",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "stage": "build",
+      "revenue": 712594
+    },
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "stage": "shipping",
+      "revenue": 299332
+    },
+    {
+      "stockCode": "329180",
+      "corpName": "HD현대중공업",
+      "stage": "build",
+      "revenue": 175806
+    },
+    {
+      "stockCode": "018260",
+      "corpName": "삼성에스디에스",
+      "stage": "shipping",
+      "revenue": 139299
+    },
+    {
+      "stockCode": "011200",
+      "corpName": "HMM",
+      "stage": "build",
+      "revenue": 108914
+    }
   ]
 }

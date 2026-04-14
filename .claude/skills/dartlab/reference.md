@@ -16,10 +16,9 @@
 | `OpenDart` | class | OpenDART API 통합 클라이언트. |
 | `OpenEdgar` | class | SEC public API facade. |
 | `config` | module | dartlab 전역 설정. |
-| `ask` | function | LLM에게 기업에 대해 질문. |
-| `chat` | function | 에이전트 모드: LLM이 도구를 선택하여 심화 분석. |
+| `ask` | function | AI 에게 질문. AI 가 모든 엔진(analysis/scan/macro/credit/gather/search)을 tool 로 다룬다. |
 | `setup` | function | AI provider 설정 안내 + 인터랙티브 설정. |
-| `search` | function | 공시 원문 검색. *(alpha)* |
+| `search` | function | 공시 검색. *(alpha)* |
 | `listing` | function | 목록 조회 단일 진입점. |
 | `collect` | function | 지정 종목 DART 데이터 수집 (OpenAPI). |
 | `collectAll` | function | 전체 상장종목 DART 데이터 일괄 수집. |
@@ -29,7 +28,8 @@
 | `gather` | function | 외부 시장 데이터 통합 수집 — 8축, 전부 Polars DataFrame. |
 | `quant` | function | 종목 레벨 정량분석 엔진 — 30축 7그룹. |
 | `credit` | function | 신용등급 산출 단일 진입점. |
-| `macro` | function | 시장 레벨 매크로 분석 — Company 불필요. |
+| `macro` | function | 시��� 레��� 매크로 분석 — 6막 인과 서사. |
+| `industry` | function | 산업 매퍼엔진 진입점. |
 | `topdown` | function | `dartlab.topdown(...)` 를 callable로 노출. |
 | `verbose` | module | bool(x) -> bool |
 | `dataDir` | module | str(object='') -> str |
@@ -69,41 +69,15 @@ analysis: 14축 전략분석
 gather: 주가/수급/거시 데이터
 
 #### ask
-**Capabilities:** 자연어로 기업 분석 질문 (종목 자동 감지)
+**Capabilities:** 자연어로 기업/시장 분석 (종목은 질문 텍스트에서 AI 가 자동 감지)
 스트리밍 출력 (기본) / 배치 반환 / Generator 직접 제어
-엔진 자동 계산 → LLM 해석 (Engine-First)
-데이터 모듈 include/exclude로 분석 범위 제어
-자체 검증 (reflect=True)
+원본 검증 · 가정 조정 · 업종 비교 전부 AI 자율
 **Requires:** AI: provider 설정 (dartlab.setup() 참조)
-**AIContext:** 재무비율, 추세, 동종업계 비교를 자동 계산하여 LLM에 제공
-sections 서술형 데이터 + finance 숫자 데이터 동시 주입
-tool calling provider에서는 LLM이 추가 데이터 자율 탐색
-**Guide:** "삼성전자 분석해줘" -> ask("삼성전자 재무건전성 분석해줘")
-"이 회사 괜찮아?" -> ask("종목코드", "이 회사 투자해도 괜찮아?")
-"AI 설정 어떻게 해?" -> dartlab.setup()으로 provider/키 설정 안내
-provider 미설정 시 자동 감지. 설정 방법: dartlab.llm.configure(provider="openai", api_key="sk-...")
-보안: API 키는 로컬 .env에만 저장, 외부 전송 절대 없음
-**SeeAlso:** chat: 대화형 연속 분석 (멀티턴)
-Company: 프로그래밍 방식 데이터 접근
-scan: 전종목 비교 (ask보다 직접적)
-
-#### chat
-**Capabilities:** LLM이 dartlab 도구를 자율적으로 선택/실행
-원본 공시 탐색, 계정 시계열 비교, 섹터 통계 등 심화 분석
-최대 N회 도구 호출 반복 (multi-turn)
-도구 호출/결과 콜백으로 UI 연동
-종목 없이도 동작 (시장 전체 질문, 메타 질문 등)
-**Requires:** AI: provider 설정 (tool calling 지원 provider 권장)
-**AIContext:** ask()와 동일한 기본 컨텍스트 + 저수준 도구 접근
-LLM이 부족하다 판단하면 추가 데이터 자율 수집
-company=None이면 scan/gather/system 도구만 활성화
-**Guide:** "깊게 분석해줘" -> chat("005930", "배당 추세를 분석하고 이상 징후를 찾아줘")
-"시장 전체 거버넌스 비교" -> chat("코스피 거버넌스 좋은 회사 찾아줘")
-"dartlab 뭐 할 수 있어?" -> chat("dartlab 기능 알려줘")
-ask()보다 심화 분석이 필요할 때 사용. LLM이 자율적으로 도구 호출
-**SeeAlso:** ask: 단일 질문 (간단한 분석)
-Company: 프로그래밍 방식 직접 접근
-scan: 전종목 횡단분석
+**Guide:** "삼성전자 수익성 분석" -> dartlab.ask("삼성전자 수익성 분석해줘")
+"삼성 vs SK하이닉스" -> dartlab.ask("삼성전자와 SK하이닉스 비교")
+"반도체 업황" -> dartlab.ask("반도체 업황 어때")  (종목 불필요)
+**SeeAlso:** Company: 원본 데이터 조회 (show/select)
+scan: 전종목 비교 (프로그래밍)
 
 #### setup
 **Capabilities:** 전체 AI provider 설정 현황 테이블 표시
@@ -124,15 +98,15 @@ chat: AI 대화 (setup 완료 후 사용)
 llm.configure: 프로그래밍 방식 provider 설정
 
 #### search
-**Capabilities:** 전체 공시 원문 검색 (수시공시 포함)
-자연어 동의어 확장 ("돈을 빌렸다" → 사채/차입/전환사채)
+**Capabilities:** 제목 검색: 공시 유형명/섹션 제목에서 매칭 ("유상증자", "대표이사 변경")
+본문 검색: 사업보고서 등 본문에서 개념 매칭 ("반도체 HBM 투자", "환율 리스크")
 종목/기간 필터 지원
 DART 공시 뷰어 링크 포함 (dartUrl 컬럼)
-**Requires:** 데이터: allFilings (수집 + buildIndex 필요)
-**AIContext:** 공시 내용을 자연어로 찾을 때 사용. 결과의 dartUrl로 원문 확인 가능.
-종목 찾기는 Company("삼성전자")를 사용.
-**Guide:** "유상증자 한 회사?" -> search("유상증자 결정")
-"삼성전자 최근 공시?" -> search("공시", corp="005930")
+**Requires:** 데이터: stemIndex (scope=title) + contentIndex (scope=content)
+**AIContext:** 공시를 찾을 때 사용. 공시 유형명으로 찾으면 제목 검색, 내용으로 찾으면 본문 검색.
+scope 지정 없이 자동 판별.
+**Guide:** "유상증자 한 회사?" -> search("유상증자")
+"반도체 투자 트렌드?" -> search("반도체 HBM 투자")
 **SeeAlso:** Company: 종목코드/회사명으로 Company 생성
 listing: 전체 상장법인 목록
 
@@ -238,7 +212,7 @@ setup: AI provider 설정 (capabilities 확인 후 설정)
 
 ---
 
-## CLI (19개 명령)
+## CLI (18개 명령)
 
 `dartlab <command>` 형태로 사용.
 
@@ -251,7 +225,6 @@ setup: AI provider 설정 (capabilities 확인 후 설정)
 | `profile` | Company index/facts 출력 |
 | `modules` | 사용 가능한 데이터 모듈 목록 |
 | `ask` | 자연어 원스톱 AI 분석 |
-| `chat` | 대화형 AI 분석 REPL |
 | `report` | Markdown 분석 보고서 생성 |
 | `excel` | 기업 데이터 Excel 내보내기 |
 | `review` | 기업 분석 검토서 (데이터/AI) |
@@ -501,7 +474,7 @@ us.market                    # "US"
 
 ### Company 메서드/프로퍼티
 
-DartCompany에서 동적 추출 (52개).
+DartCompany에서 동적 추출 (51개).
 
 | 이름 | 종류 | 설명 |
 |------|------|------|
@@ -510,7 +483,6 @@ DartCompany에서 동적 추출 (52개).
 | `audit` | method | 감사 리스크 종합 분석. |
 | `canHandle` | method | DART 종목코드(6자) 또는 한글 회사명이면 처리 가능. |
 | `capital` | method | 주주환원 분석 (배당, 자사주, 총환원율). |
-| `chat` | method | 에이전트 모드: LLM이 도구를 선택하여 심화 분석. |
 | `codeName` | method | 종목코드 → 회사명 변환. |
 | `contextSlices` | property | LLM 투입용 context slice DataFrame. |
 | `credit` | property | 독립 신용평가 — dual access. |
@@ -524,6 +496,7 @@ DartCompany에서 동적 추출 (52개).
 | `gather` | method | 외부 시장 데이터 수집 — 4축 (price/flow/macro/news). |
 | `governance` | method | 지배구조 분석 (이사회, 감사위원, 최대주주). |
 | `index` | property | 현재 공개 Company 구조 인덱스 DataFrame -- 전체 데이터 목차. |
+| `industry` | method | 이 회사의 밸류체인 산업 내 위치를 분석한다. |
 | `keywordTrend` | method | 공시 텍스트 키워드 빈도 추이 (topic x period x keyword). |
 | `listing` | method | KRX 전체 상장법인 목록 (KIND 기준). |
 | `liveFilings` | method | OpenDART 기준 실시간 공시 목록 조회. |
@@ -540,7 +513,6 @@ DartCompany에서 동적 추출 (52개).
 | `resolve` | method | 종목코드 또는 회사명 → 종목코드 변환. |
 | `retrievalBlocks` | property | 원문 markdown 보존 retrieval block DataFrame. |
 | `review` | property | 재무제표 구조화 보고서 — dual access. |
-| `reviewer` | method | AI 분석 보고서 — review() + 섹션별 AI 종합의견. |
 | `search` | method | 회사명 부분 검색 (KIND 목록 기준). |
 | `sections` | property | sections — docs + finance + report 통합 지도. |
 | `sector` | property | WICS 투자 섹터 분류 (KIND 업종 + 키워드 기반). |
@@ -605,20 +577,6 @@ review: 재무정합성 섹션에서 감사 결과 활용
 **SeeAlso:** show: c.show("dividend")로 docs 기반 배당 상세
 sceMatrix: 자본변동표 (배당/자사주가 자본에 미치는 영향)
 debt: 부채 구조 (자본 정책의 다른 면)
-
-#### Company.chat
-**Capabilities:** Tier 2 LLM 주도 분석 (tool calling)
-LLM이 부족한 정보를 자율적으로 도구 호출하여 보충
-원본 시계열, 공시 텍스트 검색, 복수 기업 비교 등 심화 탐색
-멀티 턴 대화 지원
-**Requires:** API 키: tool calling 지원 LLM provider API 키
-**AIContext:** Tier 2 에이전트 모드. Tier 1 결과를 본 LLM이 부족하다고 판단하면
-저수준 tool(시계열 조회, 공시 검색 등)을 직접 호출하여 심화 분석.
-**Guide:** "심층 분석해줘" → c.chat("질문")
-"AI가 직접 데이터 찾아서 분석" → c.chat("질문")
-"여러 단계 분석 필요한 질문" → c.chat("복합 질문")
-**SeeAlso:** ask: 단일 턴 질문 (chat보다 빠르지만 덜 심층)
-reviewer: 구조화된 AI 보고서
 
 #### Company.contextSlices
 **Capabilities:** retrievalBlocks를 LLM 컨텍스트 윈도우에 맞게 슬라이싱
@@ -861,22 +819,6 @@ retrieval 기반 컨텍스트 주입의 원천 데이터
 "RAG용 데이터" → c.retrievalBlocks
 **SeeAlso:** contextSlices: retrievalBlocks를 LLM 윈도우에 맞게 슬라이싱한 결과
 sections: 구조화된 데이터 지도 (retrievalBlocks의 원본)
-
-#### Company.reviewer
-**Capabilities:** review() 데이터 위에 AI 섹션별 종합의견 추가
-도메인 특화 가이드로 분석 관점 지정 가능
-각 섹션 시작에 AI 해석 삽입
-**Requires:** AI: provider 설정 (dartlab.setup() 참조)
-데이터: finance + report (자동 다운로드)
-**AIContext:** review() 결과(재무비율, 추세, 동종업계 비교)를 LLM에 제공
-LLM이 각 섹션을 해석하여 종합의견 생성
-guide 파라미터로 분석 관점 커스텀
-**Guide:** "AI가 분석한 보고서" → c.reviewer()
-"반도체 관점에서 분석" → c.reviewer(guide="반도체 사이클 관점에서 평가해줘")
-"특정 섹션만 AI 분석" → c.reviewer("수익구조")
-**SeeAlso:** review: AI 없는 순수 데이터 검토서 (reviewer의 기반)
-ask: 자유 질문 기반 AI 분석
-chat: 에이전트 모드 심화 분석
 
 #### Company.sections
 **Capabilities:** topic × period 수평화 통합 DataFrame
@@ -1189,7 +1131,7 @@ show: c.show("employee")로 docs 기반 직원 상세
 
 ### SectorInfo
 
-섹터 분류 결과.
+SectorInfo(sector: 'Sector', industryGroup: 'IndustryGroup', confidence: 'float', source: 'str')
 
 | 필드 | 타입 | 기본값 |
 |------|------|--------|
@@ -1200,19 +1142,18 @@ show: c.show("employee")로 docs 기반 직원 상세
 
 ### SectorParams
 
-섹터별 밸류에이션 파라미터.
+SectorParams(discountRate: 'float' = 10.0, growthRate: 'float' = 3.0, perMultiple: 'float' = 15, pbrMultiple: 'float' = 1.2, evEbitdaMultiple: 'float' = 8, beta: 'float' = 1.0, exitMultiple: 'float' = 8.0, label: 'str' = '')
 
 | 필드 | 타입 | 기본값 |
 |------|------|--------|
-| `discountRate` | `float` |  |
-| `growthRate` | `float` |  |
-| `perMultiple` | `float` |  |
-| `pbrMultiple` | `float` |  |
-| `evEbitdaMultiple` | `float` |  |
-| `label` | `str` |  |
-| `description` | `str` |  |
+| `discountRate` | `float` | 10.0 |
+| `growthRate` | `float` | 3.0 |
+| `perMultiple` | `float` | 15 |
+| `pbrMultiple` | `float` | 1.2 |
+| `evEbitdaMultiple` | `float` | 8 |
 | `beta` | `float` | 1.0 |
-| `exitMultiple` | `float` | 0.0 |
+| `exitMultiple` | `float` | 8.0 |
+| `label` | `str` |  |
 
 ### RankInfo
 

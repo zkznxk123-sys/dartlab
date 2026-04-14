@@ -1161,5 +1161,154 @@
       "source": "network",
       "evidence": "단순투자 지분 0.1%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 13851135000000.0,
+      "operating_profit": 979014000000.0,
+      "net_profit": 712335000000.0,
+      "total_assets": 19370515000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 13905990000000.0,
+      "operating_profit": 1081260000000.0,
+      "net_profit": -467000000.0,
+      "total_assets": 19774800000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 14372626000000.0,
+      "operating_profit": 998031000000.0,
+      "net_profit": 630241000000.0,
+      "total_assets": 20100605000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 14625198000000.0,
+      "operating_profit": 863130000000.0,
+      "net_profit": 0.0,
+      "total_assets": 19707730000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 15451745000000.0,
+      "operating_profit": 892131000000.0,
+      "net_profit": 509226000000.0,
+      "total_assets": 19681792000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ],
+      [
+        "semiconductor",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "set",
+        1
+      ],
+      [
+        "fab",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "037560",
+      "corpName": "LG헬로비전",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "003550",
+      "corpName": "LG",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "037560",
+      "corpName": "LG헬로비전",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "126560",
+      "corpName": "현대퓨처넷",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    },
+    {
+      "stockCode": "031820",
+      "corpName": "아이티센씨티에스",
+      "stage": "infra",
+      "revenue": 10952
+    }
   ]
 }

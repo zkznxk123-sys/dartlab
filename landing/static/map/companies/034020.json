@@ -691,5 +691,237 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "[개선/높음] 부채비율 305%→129%. 체코 5.6조 수주 전환점이나 이자가 이익을 먹는 구조.",
+    "strengths": [
+      "9년 연속 영업흑자",
+      "체코 5.6조 수주"
+    ],
+    "weaknesses": [
+      "이자비용이 영업이익 대부분 흡수",
+      "부채비율 129%"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.238717"
+  },
+  "blogPosts": [
+    {
+      "slug": "03-034020-doosan-enerbility",
+      "title": "두산에너빌리티 (034020) — 부채비율 305%에서 129%까지, 9년 다이어트의 진짜 모습",
+      "description": "2018년 부채비율 305%였던 회사가 7년 만에 129%로. 9년 동안 영업이익은 매년 흑자였지만 이자비용이 그 흑자를 거의 매번 잡아먹었다. 2025년 12월 체코 5조 6천억 잭팟은 다이어트가 끝났다는 외부 인증이다.",
+      "date": "2026-04-05",
+      "grade": "dCR-AA+",
+      "storyTemplate": "위기 탈출",
+      "verdict": "부채비율 305%→129%. 체코 5.6조 수주 전환점이나 이자가 이익을 먹는 구조.",
+      "direction": "개선",
+      "confidence": "높음",
+      "archetype": "턴어라운드",
+      "strengths": [
+        "9년 연속 영업흑자",
+        "체코 5.6조 수주"
+      ],
+      "weaknesses": [
+        "이자비용이 영업이익 대부분 흡수",
+        "부채비율 129%"
+      ],
+      "keyMetrics": {
+        "revenue": 17.4,
+        "opm": 8.4,
+        "roe": 5.0,
+        "fcf": 0.3
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/034020-doosan-enerbility.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 11283610608993.0,
+      "operating_profit": 877882794101.0,
+      "net_profit": 645821146630.0,
+      "total_assets": 23720545628641.0
+    },
+    {
+      "year": "2022",
+      "sales": 15421058082388.0,
+      "operating_profit": 1106120868237.0,
+      "net_profit": 319342732472.0,
+      "total_assets": 23049781799921.0
+    },
+    {
+      "year": "2023",
+      "sales": 17589887709510.0,
+      "operating_profit": 1467318338124.0,
+      "net_profit": 517521903042.0,
+      "total_assets": 24640833945624.0
+    },
+    {
+      "year": "2024",
+      "sales": 16233055000000.0,
+      "operating_profit": 1017600000000.0,
+      "net_profit": 111365000000.0,
+      "total_assets": 26314835000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 17057876000000.0,
+      "operating_profit": 762712000000.0,
+      "net_profit": 205163000000.0,
+      "total_assets": 27513223000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "machinery",
+        2
+      ],
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "336260",
+      "corpName": "두산퓨얼셀",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "241560",
+      "corpName": "두산밥캣",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "product": "강재, 기자재, 의장재 등",
+      "amount": 6519885.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "012620",
+      "corpName": "원일특강",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "042660",
+      "corpName": "한화오션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "082740",
+      "corpName": "한화엔진",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    },
+    {
+      "stockCode": "014680",
+      "corpName": "한솔케미칼",
+      "stage": "precision",
+      "revenue": 8840
+    }
   ]
 }

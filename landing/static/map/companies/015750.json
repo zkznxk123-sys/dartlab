@@ -201,5 +201,138 @@
       "source": "network",
       "evidence": "단순투자 지분 5.5%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3348589918051.0,
+      "operating_profit": 76353909960.0,
+      "net_profit": 39036280685.0,
+      "total_assets": 3506320374266.0
+    },
+    {
+      "year": "2022",
+      "sales": 3977034638341.0,
+      "operating_profit": 99182732498.0,
+      "net_profit": 38511491705.0,
+      "total_assets": 3664171049813.0
+    },
+    {
+      "year": "2023",
+      "sales": 4321987308635.0,
+      "operating_profit": 256728659148.0,
+      "net_profit": 169933804180.0,
+      "total_assets": 4035672129355.0
+    },
+    {
+      "year": "2024",
+      "sales": 4245092707610.0,
+      "operating_profit": 205882638168.0,
+      "net_profit": 0.0,
+      "total_assets": 4563110591664.0
+    },
+    {
+      "year": "2025",
+      "sales": 4382670411366.0,
+      "operating_profit": 242683147425.0,
+      "net_profit": 177848204213.0,
+      "total_assets": 4867042087907.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "auto",
+        1
+      ],
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "oem",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
   ]
 }

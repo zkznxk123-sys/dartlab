@@ -522,5 +522,186 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "종합 판정: 저평가",
+    "strengths": [
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출 고집중 (HHI 8,955) -- 단일 부문 의존",
+      "고부채 (부채비율 375%)",
+      "이자보상 심각 (0.8배)"
+    ],
+    "sector": "유틸리티 > 가스",
+    "source": "audit",
+    "createdAt": "1775430966.570748"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 27520756430324.0,
+      "operating_profit": 1239699333407.0,
+      "net_profit": 964522139121.0,
+      "total_assets": 43669902324183.0
+    },
+    {
+      "year": "2022",
+      "sales": 51724286632369.0,
+      "operating_profit": 2463421952045.0,
+      "net_profit": 3905136174.0,
+      "total_assets": 62424983096053.0
+    },
+    {
+      "year": "2023",
+      "sales": 44555995015027.0,
+      "operating_profit": 1553418857598.0,
+      "net_profit": -761211081792.0,
+      "total_assets": 57254666338284.0
+    },
+    {
+      "year": "2024",
+      "sales": 38388740000000.0,
+      "operating_profit": 3003363000000.0,
+      "net_profit": 1146749000000.0,
+      "total_assets": 57669637000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 35727336000000.0,
+      "operating_profit": 2101151000000.0,
+      "net_profit": 0.0,
+      "total_assets": 53627847000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "product": "LNG 등",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "product": "발전용",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "003480",
+      "corpName": "한진중공업홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "016710",
+      "corpName": "대성홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "034590",
+      "corpName": "인천도시가스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "053050",
+      "corpName": "지에스이",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "stage": "generation",
+      "revenue": 974293
+    },
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "stage": "distribution",
+      "revenue": 52755
+    },
+    {
+      "stockCode": "071320",
+      "corpName": "지역난방공사",
+      "stage": "generation",
+      "revenue": 39982
+    },
+    {
+      "stockCode": "112610",
+      "corpName": "씨에스윈드",
+      "stage": "generation",
+      "revenue": 29316
+    },
+    {
+      "stockCode": "005090",
+      "corpName": "SGC에너지",
+      "stage": "generation",
+      "revenue": 24607
+    }
   ]
 }

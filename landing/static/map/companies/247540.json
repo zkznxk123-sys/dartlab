@@ -444,5 +444,138 @@
       "source": "network",
       "evidence": "단순투자 지분 0.0%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1485628623826.0,
+      "operating_profit": 115031248500.0,
+      "net_profit": 100835673353.0,
+      "total_assets": 1425857751938.0
+    },
+    {
+      "year": "2022",
+      "sales": 5357607238956.0,
+      "operating_profit": 380676718075.0,
+      "net_profit": 272653525172.0,
+      "total_assets": 3374166378975.0
+    },
+    {
+      "year": "2023",
+      "sales": 6900867843535.0,
+      "operating_profit": 156029935394.0,
+      "net_profit": -8734809082.0,
+      "total_assets": 4361774597751.0
+    },
+    {
+      "year": "2024",
+      "sales": 2766837750152.0,
+      "operating_profit": -34109364109.0,
+      "net_profit": 38002559110.0,
+      "total_assets": 4323660098124.0
+    },
+    {
+      "year": "2025",
+      "sales": 2531576384113.0,
+      "operating_profit": 143309899725.0,
+      "net_profit": 39371066751.0,
+      "total_assets": 4882022445703.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        2
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "specialty",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "086520",
+      "corpName": "에코프로",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "450080",
+      "corpName": "에코프로머티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "product": "",
+      "amount": 3034180.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "086520",
+      "corpName": "에코프로",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
   ]
 }

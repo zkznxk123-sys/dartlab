@@ -876,5 +876,215 @@
       "source": "network",
       "evidence": "단순투자 지분 0.5%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 매출 성장 + 마진 확대 + FCF 양수 / 비용 절감 + 자산 효율화 + ROE 상승.\n매출이 +27.8% 성장하면서 영업이익률이 5.2%에서 7.1%로 확대되었다. FCF도 양수를 유지하여 질적 성장이 확인된다.",
+    "strengths": [
+      "매출 성장 + 마진 확대 + FCF 양수",
+      "비용 절감 + 자산 효율화 + ROE 상승",
+      "내부유보 비중 78% — 자기 힘으로 성장",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**"
+    ],
+    "weaknesses": [
+      "매출 고집중 (HHI 9,324) -- 단일 부문 의존",
+      "고부채 (부채비율 306%)",
+      "이자보상 주의 (1.7배)"
+    ],
+    "sector": "소재 > 화학",
+    "source": "audit",
+    "createdAt": "1775430966.5782537"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1591487621503.0,
+      "operating_profit": 122599910142.0,
+      "net_profit": 74435535611.0,
+      "total_assets": 1411928775762.0
+    },
+    {
+      "year": "2022",
+      "sales": 1600125770194.0,
+      "operating_profit": 53100853848.0,
+      "net_profit": -37294517511.0,
+      "total_assets": 1396450504662.0
+    },
+    {
+      "year": "2023",
+      "sales": 1777494448320.0,
+      "operating_profit": 115685779856.0,
+      "net_profit": 37799983055.0,
+      "total_assets": 1557077274819.0
+    },
+    {
+      "year": "2024",
+      "sales": 2166089636742.0,
+      "operating_profit": 175395279105.0,
+      "net_profit": 88417411666.0,
+      "total_assets": 1933713489313.0
+    },
+    {
+      "year": "2025",
+      "sales": 2398757972848.0,
+      "operating_profit": 195791661624.0,
+      "net_profit": 123064158267.0,
+      "total_assets": 2125418400005.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "battery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "cell",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "278990",
+      "corpName": "EMB",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "278470",
+      "corpName": "에이피알",
+      "product": "",
+      "amount": 368611.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "032940",
+      "corpName": "원익",
+      "product": "",
+      "amount": 24026.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "078520",
+      "corpName": "에이블씨엔씨",
+      "product": "기 초",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "002790",
+      "corpName": "아모레퍼시픽홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "004720",
+      "corpName": "팜젠사이언스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "014100",
+      "corpName": "메디앙스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "027050",
+      "corpName": "코리아나",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "044820",
+      "corpName": "코스맥스비티아이",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "047770",
+      "corpName": "코데즈컴바인",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "stage": "manufacturing",
+      "revenue": 42528
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "278470",
+      "corpName": "에이피알",
+      "stage": "manufacturing",
+      "revenue": 15273
+    },
+    {
+      "stockCode": "257720",
+      "corpName": "실리콘투",
+      "stage": "manufacturing",
+      "revenue": 11163
+    },
+    {
+      "stockCode": "241710",
+      "corpName": "코스메카코리아",
+      "stage": "manufacturing",
+      "revenue": 6409
+    }
   ]
 }

@@ -489,9 +489,9 @@ def _auto_stream(gen) -> str:
 
 
 def ask(
-    *args: str,
-    include: list[str] | None = None,
-    exclude: list[str] | None = None,
+    question: str,
+    *,
+    stockCode: str | None = None,
     provider: str | None = None,
     model: str | None = None,
     stream: bool = True,
@@ -502,72 +502,48 @@ def ask(
     modules: list[str] | None = None,
     **kwargs,
 ):
-    """LLM에게 기업에 대해 질문.
+    """AI 에게 질문. AI 가 모든 엔진(analysis/scan/macro/credit/gather/search)을 tool 로 다룬다.
 
     Capabilities:
-        - 자연어로 기업 분석 질문 (종목 자동 감지)
+        - 자연어로 기업/시장 분석 (종목은 질문 텍스트에서 AI 가 자동 감지)
         - 스트리밍 출력 (기본) / 배치 반환 / Generator 직접 제어
-        - 엔진 자동 계산 → LLM 해석 (Engine-First)
-        - 데이터 모듈 include/exclude로 분석 범위 제어
-        - 자체 검증 (reflect=True)
+        - 원본 검증 · 가정 조정 · 업종 비교 전부 AI 자율
 
     Requires:
         AI: provider 설정 (dartlab.setup() 참조)
 
-    AIContext:
-        - 재무비율, 추세, 동종업계 비교를 자동 계산하여 LLM에 제공
-        - sections 서술형 데이터 + finance 숫자 데이터 동시 주입
-        - tool calling provider에서는 LLM이 추가 데이터 자율 탐색
-
     Guide:
-        - "삼성전자 분석해줘" -> ask("삼성전자 재무건전성 분석해줘")
-        - "이 회사 괜찮아?" -> ask("종목코드", "이 회사 투자해도 괜찮아?")
-        - "AI 설정 어떻게 해?" -> dartlab.setup()으로 provider/키 설정 안내
-        - provider 미설정 시 자동 감지. 설정 방법: dartlab.llm.configure(provider="openai", api_key="sk-...")
-        - 보안: API 키는 로컬 .env에만 저장, 외부 전송 절대 없음
+        - "삼성전자 수익성 분석" -> dartlab.ask("삼성전자 수익성 분석해줘")
+        - "삼성 vs SK하이닉스" -> dartlab.ask("삼성전자와 SK하이닉스 비교")
+        - "반도체 업황" -> dartlab.ask("반도체 업황 어때")  (종목 불필요)
 
     SeeAlso:
-        - chat: 대화형 연속 분석 (멀티턴)
-        - Company: 프로그래밍 방식 데이터 접근
-        - scan: 전종목 비교 (ask보다 직접적)
+        - Company: 원본 데이터 조회 (show/select)
+        - scan: 전종목 비교 (프로그래밍)
 
     Args:
-        *args: 자연어 질문 (1개) 또는 (종목, 질문) 2개.
-        provider: LLM provider ("openai", "codex", "oauth-codex", "ollama").
-        model: 모델 override.
-        stream: True면 스트리밍 출력 (기본값). False면 조용히 전체 텍스트 반환.
-        raw: True면 Generator를 직접 반환 (커스텀 UI용).
-        include: 포함할 데이터 모듈.
-        exclude: 제외할 데이터 모듈.
-        reflect: True면 답변 자체 검증 (1회 reflection).
+        question: 자연어 질문.
+        stockCode: UI/서버가 현재 화면 종목코드를 힌트로 전달 (선택).
+        provider: LLM provider.
+        stream: True 면 실시간 스트리밍 출력 (기본). False 면 조용히 전체 텍스트 반환.
+        raw: True 면 Generator 를 직접 반환 (커스텀 UI 용).
 
     Returns:
-        str | None: 전체 답변 텍스트. 설정 오류 시 None. (raw=True일 때만 Generator[str])
+        str | None: 전체 답변 텍스트. 설정 오류 시 None. (raw=True 일 때만 Generator[str])
 
     Example::
 
         import dartlab
-        dartlab.llm.configure(provider="openai", api_key="sk-...")
-
-        # 호출하면 스트리밍 출력 + 전체 텍스트 반환
-        answer = dartlab.ask("삼성전자 재무건전성 분석해줘")
-
-        # provider + model 지정
-        answer = dartlab.ask("삼성전자 분석", provider="openai", model="gpt-4o")
-
-        # (종목, 질문) 분리
-        answer = dartlab.ask("005930", "영업이익률 추세는?")
-
-        # 조용히 전체 텍스트만 (배치용)
-        answer = dartlab.ask("삼성전자 분석", stream=False)
-
-        # Generator 직접 제어 (커스텀 UI용)
-        for chunk in dartlab.ask("삼성전자 분석", raw=True):
-            custom_process(chunk)
+        dartlab.ask("삼성전자 수익성 분석해줘")
+        dartlab.ask("삼성전자 분석", stream=False)  # 조용히 전체 텍스트
     """
     from dartlab.ai.runtime.standalone import ask as _ask
 
-    # provider 미지정 시 auto-detect
+    if not question or not question.strip():
+        print("\n  질문을 입력해 주세요.")
+        print("  예: dartlab.ask('삼성전자 재무건전성 분석해줘')\n")
+        return None
+
     if provider is None:
         from dartlab.core.ai.detect import auto_detect_provider
 
@@ -579,36 +555,8 @@ def ask(
             return None
         provider = detected
 
-    if len(args) == 2:
-        import warnings
-
-        warnings.warn(
-            "dartlab.ask(stock, question) is deprecated. Use dartlab.ask('삼성전자 분석해줘') instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        company = Company(args[0])
-        question = args[1]
-    elif len(args) == 1:
-        company = None
-        question = args[0]
-    elif len(args) == 0:
-        print("\n  질문을 입력해 주세요.")
-        print("  예: dartlab.ask('삼성전자 재무건전성 분석해줘')")
-        print("  예: dartlab.ask('005930', '영업이익률 추세는?')\n")
-        return None
-    else:
-        print(f"\n  인자는 1~2개만 허용됩니다 (받은 수: {len(args)})")
-        print("  예: dartlab.ask('삼성전자 분석해줘')")
-        print("  예: dartlab.ask('005930', '영업이익률 추세는?')\n")
-        return None
-
-    # kwargs에서 company 제거 (내부에서 직접 전달)
-    kwargs.pop("company", None)
     _call_kwargs = dict(
-        company=company,
-        include=include,
-        exclude=exclude,
+        stockCode=stockCode,
         provider=provider,
         model=model,
         reflect=reflect,
@@ -651,90 +599,6 @@ def saveTemplate(name: str, *, content: str | None = None, file: str | None = No
     from dartlab.ai import saveTemplate as _save
 
     return _save(name, content=content, file=file)
-
-
-def chat(
-    *args: str,
-    provider: str | None = None,
-    model: str | None = None,
-    max_turns: int = 5,
-    on_tool_call=None,
-    on_tool_result=None,
-    **kwargs,
-) -> str:
-    """에이전트 모드: LLM이 도구를 선택하여 심화 분석.
-
-    Capabilities:
-        - LLM이 dartlab 도구를 자율적으로 선택/실행
-        - 원본 공시 탐색, 계정 시계열 비교, 섹터 통계 등 심화 분석
-        - 최대 N회 도구 호출 반복 (multi-turn)
-        - 도구 호출/결과 콜백으로 UI 연동
-        - 종목 없이도 동작 (시장 전체 질문, 메타 질문 등)
-
-    Requires:
-        AI: provider 설정 (tool calling 지원 provider 권장)
-
-    AIContext:
-        - ask()와 동일한 기본 컨텍스트 + 저수준 도구 접근
-        - LLM이 부족하다 판단하면 추가 데이터 자율 수집
-        - company=None이면 scan/gather/system 도구만 활성화
-
-    Guide:
-        - "깊게 분석해줘" -> chat("005930", "배당 추세를 분석하고 이상 징후를 찾아줘")
-        - "시장 전체 거버넌스 비교" -> chat("코스피 거버넌스 좋은 회사 찾아줘")
-        - "dartlab 뭐 할 수 있어?" -> chat("dartlab 기능 알려줘")
-        - ask()보다 심화 분석이 필요할 때 사용. LLM이 자율적으로 도구 호출
-
-    SeeAlso:
-        - ask: 단일 질문 (간단한 분석)
-        - Company: 프로그래밍 방식 직접 접근
-        - scan: 전종목 횡단분석
-
-    Args:
-        *args: (종목, 질문) 2개 또는 질문만 1개.
-        provider: LLM provider.
-        model: 모델 override.
-        max_turns: 최대 도구 호출 반복 횟수.
-
-    Returns:
-        str: 최종 답변 텍스트.
-
-    Example::
-
-        import dartlab
-        dartlab.chat("005930", "배당 추세를 분석하고 이상 징후를 찾아줘")
-        dartlab.chat("코스피 ROE 높은 회사 알려줘")  # 종목 없이 시장 질문
-    """
-    from dartlab.ai.runtime.standalone import chat as _chat
-
-    if len(args) == 2:
-        company = Company(args[0])
-        question = args[1]
-    elif len(args) == 1:
-        from dartlab.core.resolve import resolve_from_text
-
-        company, question = resolve_from_text(args[0])
-        if company is None:
-            question = args[0]
-    elif len(args) == 0:
-        print("\n  질문을 입력해 주세요.")
-        print("  예: dartlab.chat('005930', '배당 추세 분석해줘')")
-        print("  예: dartlab.chat('코스피 ROE 높은 회사 알려줘')\n")
-        return ""
-    else:
-        print(f"\n  인자는 1~2개만 허용됩니다 (받은 수: {len(args)})")
-        return ""
-
-    return _chat(
-        company,
-        question,
-        provider=provider,
-        model=model,
-        max_turns=max_turns,
-        on_tool_call=on_tool_call,
-        on_tool_result=on_tool_result,
-        **kwargs,
-    )
 
 
 def plugins():
@@ -1005,7 +869,6 @@ __all__ = [
     "OpenEdgar",
     "config",
     "ask",
-    "chat",
     "setup",
     "search",
     "listing",

@@ -365,17 +365,33 @@ def main() -> None:
         )
     print(f"  - {len(taxonomy)}개 산업 JSON 생성")
 
-    # L3 Companies (상위 N개)
-    print(f"[L3] 상위 {args.companies}개사 egograph...")
+    # L3 Companies (상위 N개) + enrichment (AI insights, blog, 재무, 공급망 인사이트)
+    print(f"[L3] 상위 {args.companies}개사 enrich egograph...")
+    from dartlab.industry.build.enrichCompany import _loadBlogIndex, enrichCompanyData
+
     nodes = loadNodes()
+    edges = loadEdges()
+    blogIndex = _loadBlogIndex()
+    print(f"  - 블로그 인덱스: {sum(len(v) for v in blogIndex.values())}건, {len(blogIndex)}사 커버")
+
     topCompanies = sorted(nodes, key=lambda n: n.revenue or 0, reverse=True)[: args.companies]
+    enrichedCount = 0
     for n in topCompanies:
         ego = buildCompanyEgograph(n.stockCode)
-        if ego:
-            (OUT_DIR / "companies" / f"{n.stockCode}.json").write_text(
-                json.dumps(ego, ensure_ascii=False, indent=2), encoding="utf-8"
-            )
-    print(f"  - {len(topCompanies)}개사 생성")
+        if not ego:
+            continue
+        try:
+            enriched = enrichCompanyData(n.stockCode, ego, edges, nodes, blogIndex)
+            if enriched.get("aiInsight") or enriched.get("blogPosts") or enriched.get("financials5y"):
+                enrichedCount += 1
+        except Exception as e:
+            print(f"  ⚠ enrich 실패 ({n.stockCode}): {e}")
+            enriched = ego
+
+        (OUT_DIR / "companies" / f"{n.stockCode}.json").write_text(
+            json.dumps(enriched, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+    print(f"  - {len(topCompanies)}개사 생성 (enrich: {enrichedCount}사)")
 
     # Search index
     print("[검색] search-index.json")

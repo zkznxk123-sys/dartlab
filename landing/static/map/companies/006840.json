@@ -610,5 +610,225 @@
       "source": "network",
       "evidence": "기타 지분 0.1%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3167699652090.0,
+      "operating_profit": -165714944091.0,
+      "net_profit": -199326056742.0,
+      "total_assets": 4548736656905.0
+    },
+    {
+      "year": "2022",
+      "sales": 3787959855335.0,
+      "operating_profit": -21822473627.0,
+      "net_profit": -119048517003.0,
+      "total_assets": 5004334961394.0
+    },
+    {
+      "year": "2023",
+      "sales": 4479660141625.0,
+      "operating_profit": 279123890558.0,
+      "net_profit": 130395492971.0,
+      "total_assets": 5314995084396.0
+    },
+    {
+      "year": "2024",
+      "sales": 4488280532801.0,
+      "operating_profit": 130320128409.0,
+      "net_profit": -16585694879.0,
+      "total_assets": 5336874928103.0
+    },
+    {
+      "year": "2025",
+      "sales": 3235721337340.0,
+      "operating_profit": -147853720731.0,
+      "net_profit": 0.0,
+      "total_assets": 5976455656558.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 16,
+    "customerCount": 0,
+    "preciseEdgeCount": 2,
+    "totalSupplyAmount": 112886.0,
+    "hhi": 8235.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 90.2,
+    "top3Ratio": 100.0,
+    "industryDiversity": 12,
+    "stageDiversity": 11,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        5
+      ],
+      [
+        "cosmetics",
+        1
+      ],
+      [
+        "retail",
+        1
+      ],
+      [
+        "machinery",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "basic",
+        4
+      ],
+      [
+        "general",
+        3
+      ],
+      [
+        "raw",
+        1
+      ],
+      [
+        "wholesale",
+        1
+      ],
+      [
+        "special",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "161000",
+      "corpName": "애경케미칼",
+      "product": "",
+      "amount": 101847.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "420570",
+      "corpName": "제이투케이바이오",
+      "product": "",
+      "amount": 11039.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "038530",
+      "corpName": "케이바이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "259630",
+      "corpName": "엠플러스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "045660",
+      "corpName": "에이텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002820",
+      "corpName": "SUN&L",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "009830",
+      "corpName": "한화솔루션",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "089590",
+      "corpName": "제주항공",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002320",
+      "corpName": "한진",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
   ]
 }

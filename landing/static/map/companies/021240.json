@@ -660,5 +660,218 @@
       "source": "network",
       "evidence": "기타"
     }
+  ],
+  "aiInsight": {
+    "narrative": "내부유보 비중 93% — 자기 힘으로 성장",
+    "strengths": [
+      "내부유보 비중 93% — 자기 힘으로 성장",
+      "이자보상 우수 (12배)",
+      "사외이사비율 67% -- 이사회 독립성 양호",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "유동성 위기 (유동비율 100%)",
+      "CCC 200일 — 현금 회수 매우 느림",
+      "FCF 적자 — 영업CF보다 투자가 큼"
+    ],
+    "sector": "경기관련소비재 > 소비자서비스",
+    "source": "audit",
+    "createdAt": "1775430966.5657303"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3664259556788.0,
+      "operating_profit": 640219263049.0,
+      "net_profit": 465486095093.0,
+      "total_assets": 3800627982540.0
+    },
+    {
+      "year": "2022",
+      "sales": 3856132895084.0,
+      "operating_profit": 677378551681.0,
+      "net_profit": 458174984699.0,
+      "total_assets": 4365074875331.0
+    },
+    {
+      "year": "2023",
+      "sales": 3966519721923.0,
+      "operating_profit": 731255078054.0,
+      "net_profit": 471301137426.0,
+      "total_assets": 4850965736396.0
+    },
+    {
+      "year": "2024",
+      "sales": 4310141694596.0,
+      "operating_profit": 795373861343.0,
+      "net_profit": 0.0,
+      "total_assets": 5761561091079.0
+    },
+    {
+      "year": "2025",
+      "sales": 4963566073111.0,
+      "operating_profit": 878651769382.0,
+      "net_profit": 617724967901.0,
+      "total_assets": 7000122151656.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 6,
+    "customerCount": 0,
+    "preciseEdgeCount": 2,
+    "totalSupplyAmount": 93124.0,
+    "hhi": 9377.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 96.8,
+    "top3Ratio": 100.0,
+    "industryDiversity": 3,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        4
+      ],
+      [
+        "electrical",
+        1
+      ],
+      [
+        "food",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "set",
+        3
+      ],
+      [
+        "power",
+        1
+      ],
+      [
+        "component",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "037030",
+      "corpName": "파워넷",
+      "product": "",
+      "amount": 90128.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "264850",
+      "corpName": "이랜시스",
+      "product": "",
+      "amount": 2996.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "085310",
+      "corpName": "엔케이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "352700",
+      "corpName": "씨앤투스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "037070",
+      "corpName": "파세코",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "069510",
+      "corpName": "에스텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "018290",
+      "corpName": "브이티",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "024720",
+      "corpName": "콜마홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
   ]
 }

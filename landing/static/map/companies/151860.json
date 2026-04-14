@@ -427,5 +427,172 @@
       "source": "network",
       "evidence": "단순투자 지분 4.5%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3536889858339.0,
+      "operating_profit": 325596666378.0,
+      "net_profit": 47920141424.0,
+      "total_assets": 3067463381624.0
+    },
+    {
+      "year": "2022",
+      "sales": 4944241256184.0,
+      "operating_profit": 356188977348.0,
+      "net_profit": 416316655420.0,
+      "total_assets": 5091878937151.0
+    },
+    {
+      "year": "2023",
+      "sales": 7257169608818.0,
+      "operating_profit": 309777861059.0,
+      "net_profit": 66399700291.0,
+      "total_assets": 5841149745398.0
+    },
+    {
+      "year": "2024",
+      "sales": 7284861546790.0,
+      "operating_profit": 226534824514.0,
+      "net_profit": 214231564334.0,
+      "total_assets": 6213358821304.0
+    },
+    {
+      "year": "2025",
+      "sales": 7577196875286.0,
+      "operating_profit": 191256023803.0,
+      "net_profit": 101285537314.0,
+      "total_assets": 6224016845900.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        2
+      ],
+      [
+        "electronics",
+        1
+      ],
+      [
+        "steel",
+        1
+      ],
+      [
+        "shipbuilding",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "module",
+        1
+      ],
+      [
+        "raw",
+        1
+      ],
+      [
+        "build",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "047310",
+      "corpName": "파워로직스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "006400",
+      "corpName": "삼성SDI",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001390",
+      "corpName": "KG케미칼",
+      "stage": "general",
+      "revenue": 91016
+    },
+    {
+      "stockCode": "014580",
+      "corpName": "태경비케이",
+      "stage": "general",
+      "revenue": 3859
+    },
+    {
+      "stockCode": "066980",
+      "corpName": "한성크린텍",
+      "stage": "general",
+      "revenue": 1999
+    },
+    {
+      "stockCode": "060150",
+      "corpName": "인선이엔티",
+      "stage": "general",
+      "revenue": 1872
+    },
+    {
+      "stockCode": "037370",
+      "corpName": "EG",
+      "stage": "general",
+      "revenue": 628
+    }
   ]
 }

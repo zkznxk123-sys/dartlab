@@ -596,5 +596,207 @@
       "source": "network",
       "evidence": "기타"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 7141136827775.0,
+      "operating_profit": 642192906442.0,
+      "net_profit": 597813528959.0,
+      "total_assets": 11703918122819.0
+    },
+    {
+      "year": "2022",
+      "sales": 8394203036511.0,
+      "operating_profit": 705818089039.0,
+      "net_profit": 705774525978.0,
+      "total_assets": 12581364159005.0
+    },
+    {
+      "year": "2023",
+      "sales": 8939621475507.0,
+      "operating_profit": 1327945320791.0,
+      "net_profit": 720217649290.0,
+      "total_assets": 12763305688360.0
+    },
+    {
+      "year": "2024",
+      "sales": 9411947926996.0,
+      "operating_profit": 1762260288101.0,
+      "net_profit": 1114628550190.0,
+      "total_assets": 15849744509888.0
+    },
+    {
+      "year": "2025",
+      "sales": 21202299462815.0,
+      "operating_profit": 1841075890332.0,
+      "net_profit": 971594538868.0,
+      "total_assets": 26647188444916.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 7,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 7,
+    "stageDiversity": 7,
+    "topSupplyIndustries": [
+      [
+        "machinery",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ],
+      [
+        "semiconductor",
+        1
+      ],
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "special",
+        1
+      ],
+      [
+        "set",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ],
+      [
+        "test",
+        1
+      ],
+      [
+        "product",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "417970",
+      "corpName": "모델솔루션",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "069510",
+      "corpName": "에스텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "053610",
+      "corpName": "프로텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "089790",
+      "corpName": "제이티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "138070",
+      "corpName": "신진에스엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "0007C0",
+      "corpName": "아크릴",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000240",
+      "corpName": "한국앤컴퍼니",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    },
+    {
+      "stockCode": "204320",
+      "corpName": "HL만도",
+      "stage": "chassis",
+      "revenue": 94548
+    }
   ]
 }

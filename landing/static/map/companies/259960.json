@@ -320,5 +320,145 @@
       "source": "network",
       "evidence": "기타 지분 2.2%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "[악화/보통] PUBG 5년 FCF 2.9조인데 현금 3조→6천억. 배당 0원. 금융자산에 분산.",
+    "strengths": [
+      "PUBG 누적 12.6조",
+      "모바일 텐센트 고마진"
+    ],
+    "weaknesses": [
+      "현금 3조→6천억",
+      "배당 0원",
+      "무형자산 1.8조 리스크"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2545664"
+  },
+  "blogPosts": [
+    {
+      "slug": "11-259960-krafton",
+      "title": "크래프톤 (259960) — PUBG가 5년간 3조를 벌었다, 그 돈은 어디로 갔는가",
+      "description": "현금 30,193억(2021)이 5,967억(2025)이 됐다. 5년간 FCF 누적 29,352억인데 배당 0원. PUBG가 매 분기 수천억을 벌어다 주는 동안 크래프톤이 사들인 것 — 서브노티카, 인도 결제 앱, 일본 3대 광고회사. 무형자산 1.8조의 정체를 추적한다.",
+      "date": "2026-04-09",
+      "grade": "dCR 미산출",
+      "storyTemplate": "성장 + 자본배분",
+      "verdict": "PUBG 5년 FCF 2.9조인데 현금 3조→6천억. 배당 0원. 금융자산에 분산.",
+      "direction": "악화",
+      "confidence": "보통",
+      "archetype": "현금부자",
+      "strengths": [
+        "PUBG 누적 12.6조",
+        "모바일 텐센트 고마진"
+      ],
+      "weaknesses": [
+        "현금 3조→6천억",
+        "배당 0원",
+        "무형자산 1.8조 리스크"
+      ],
+      "keyMetrics": {
+        "revenue": 3.33,
+        "opm": 35.0,
+        "roe": 20.0,
+        "fcf": 0.6
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/259960-krafton.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1886316491444.0,
+      "operating_profit": 639639249890.0,
+      "net_profit": 0.0,
+      "total_assets": 5635100724323.0
+    },
+    {
+      "year": "2022",
+      "sales": 1854016090527.0,
+      "operating_profit": 751606569542.0,
+      "net_profit": 0.0,
+      "total_assets": 6030311640765.0
+    },
+    {
+      "year": "2023",
+      "sales": 1910576180288.0,
+      "operating_profit": 768045608970.0,
+      "net_profit": 594060314352.0,
+      "total_assets": 6440456619598.0
+    },
+    {
+      "year": "2024",
+      "sales": 2709774106588.0,
+      "operating_profit": 1182487684188.0,
+      "net_profit": -3497103611.0,
+      "total_assets": 7919463568015.0
+    },
+    {
+      "year": "2025",
+      "sales": 3326553694966.0,
+      "operating_profit": 1054380980188.0,
+      "net_profit": 733703643561.0,
+      "total_assets": 9433648042482.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "016710",
+      "corpName": "대성홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
   ]
 }

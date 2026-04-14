@@ -517,5 +517,227 @@
       "source": "network",
       "evidence": "단순투자 지분 0.1%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "[개선/보통] 빅4 석유화학 유일 흑자. NCC 없어서 에틸렌 붕괴 회피.",
+    "strengths": [
+      "NCC 미보유가 강점",
+      "다운스트림 전문화"
+    ],
+    "weaknesses": [
+      "원료 사이클 의존",
+      "기저 매출 낮음"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2686296"
+  },
+  "blogPosts": [
+    {
+      "slug": "19-011780-kumho-petrochemical",
+      "title": "금호석유화학 (011780) — 빅4 중 유일하게 흑자인 이유",
+      "description": "LG화학 적자, 롯데케미칼 적자, 한화솔루션 적자. 그런데 금호석유화학만 영업이익 2,728억 흑자. 형 박삼구가 대우건설로 금호그룹을 무너뜨리는 동안, 쫓겨난 박찬구의 금호석화만 살아남았다. NB라텍스 세계 1위, 조카의 난, 중국 346만톤 증설 — 이 회사의 재무제표가 말하는 것.",
+      "date": "2026-04-12",
+      "grade": "dCR 미산출",
+      "storyTemplate": "사이클",
+      "verdict": "빅4 석유화학 유일 흑자. NCC 없어서 에틸렌 붕괴 회피.",
+      "direction": "개선",
+      "confidence": "보통",
+      "archetype": "사이클",
+      "strengths": [
+        "NCC 미보유가 강점",
+        "다운스트림 전문화"
+      ],
+      "weaknesses": [
+        "원료 사이클 의존",
+        "기저 매출 낮음"
+      ],
+      "keyMetrics": {
+        "revenue": 7.16,
+        "opm": 3.81,
+        "roe": 0.0,
+        "fcf": 0.0
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/011780-kumho-petrochemical.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 8461841500290.0,
+      "operating_profit": 2406835526956.0,
+      "net_profit": 1965576708770.0,
+      "total_assets": 8115674806919.0
+    },
+    {
+      "year": "2022",
+      "sales": 7975625981021.0,
+      "operating_profit": 1147745512728.0,
+      "net_profit": 1025448311762.0,
+      "total_assets": 7719272223622.0
+    },
+    {
+      "year": "2023",
+      "sales": 6322528187782.0,
+      "operating_profit": 358961881960.0,
+      "net_profit": 0.0,
+      "total_assets": 7979694633685.0
+    },
+    {
+      "year": "2024",
+      "sales": 7155003786012.0,
+      "operating_profit": 272804307588.0,
+      "net_profit": 348602013402.0,
+      "total_assets": 8340238952259.0
+    },
+    {
+      "year": "2025",
+      "sales": 6915145099921.0,
+      "operating_profit": 271828509546.0,
+      "net_profit": 290934780649.0,
+      "total_assets": 8474479180387.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "pharma",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "device",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "340570",
+      "corpName": "티앤엘",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "001810",
+      "corpName": "무림SP",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "002350",
+      "corpName": "넥센타이어",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005720",
+      "corpName": "넥센",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "012630",
+      "corpName": "HDC",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "012860",
+      "corpName": "모베이스전자",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "027970",
+      "corpName": "한국제지",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "034810",
+      "corpName": "해성산업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "073240",
+      "corpName": "금호타이어",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "089470",
+      "corpName": "HDC현대EP",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
   ]
 }

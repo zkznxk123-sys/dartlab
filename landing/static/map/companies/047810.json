@@ -427,5 +427,149 @@
       "source": "network",
       "evidence": "단순투자 지분 10.0%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "핵심 위험: 매출 하락 -> 마진 압박 -> 현금 악화.\n매출이 -27.5% 감소하며 영업이익률이 10.2%에서 3.8%로 하락했다. 영업현금흐름도 동반 감소하여 수익-현금 순환이 약화되고 있다.",
+    "strengths": [],
+    "weaknesses": [
+      "매출 하락 -> 마진 압박 -> 현금 악화",
+      "고부채 (부채비율 446%)",
+      "이자보상 심각 (1.3배)"
+    ],
+    "sector": "산업재 > 항공우주와국방",
+    "source": "audit",
+    "createdAt": "1775430966.5727441"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2562283675152.0,
+      "operating_profit": 58259436460.0,
+      "net_profit": -10627953850.0,
+      "total_assets": 5855223992714.0
+    },
+    {
+      "year": "2022",
+      "sales": 2786888282702.0,
+      "operating_profit": 141617667318.0,
+      "net_profit": 115919395720.0,
+      "total_assets": 7772406693424.0
+    },
+    {
+      "year": "2023",
+      "sales": 3819344382446.0,
+      "operating_profit": 247510483155.0,
+      "net_profit": 221401119895.0,
+      "total_assets": 7139576928721.0
+    },
+    {
+      "year": "2024",
+      "sales": 3633742105840.0,
+      "operating_profit": 240718310400.0,
+      "net_profit": 170895410977.0,
+      "total_assets": 8025538409393.0
+    },
+    {
+      "year": "2025",
+      "sales": 3696379351601.0,
+      "operating_profit": 269190196660.0,
+      "net_profit": 187312615904.0,
+      "total_assets": 10370256890187.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "telecom",
+        1
+      ],
+      [
+        "food",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "infra",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "361390",
+      "corpName": "제노코",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "085310",
+      "corpName": "엔케이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "099320",
+      "corpName": "쎄트렉아이",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "stage": "airframe",
+      "revenue": 747854
+    },
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "stage": "airframe",
+      "revenue": 267029
+    },
+    {
+      "stockCode": "020560",
+      "corpName": "아시아나항공",
+      "stage": "airline",
+      "revenue": 72668
+    },
+    {
+      "stockCode": "079550",
+      "corpName": "LIG넥스원",
+      "stage": "defense",
+      "revenue": 43069
+    },
+    {
+      "stockCode": "272210",
+      "corpName": "한화시스템",
+      "stage": "defense",
+      "revenue": 36642
+    }
   ]
 }

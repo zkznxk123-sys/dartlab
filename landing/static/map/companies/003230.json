@@ -322,5 +322,202 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "[개선/높음] 라면 꼴등이 불닭 베팅으로 OPM 21.8% 달성. FCF -1,397억 공격투자 사이클.",
+    "strengths": [
+      "불닭 K-콘텐츠화로 수출 6배",
+      "OPM 5%→22%"
+    ],
+    "weaknesses": [
+      "FCF -1,397억",
+      "원재료비 리스크"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2374253"
+  },
+  "blogPosts": [
+    {
+      "slug": "02-003230-samyang-foods",
+      "title": "삼양식품 (003230) — 라면 빅3 꼴등이 매출 2.3조 글로벌 식품 거인이 되기까지",
+      "description": "2014년 라면 시장 꼴등 회사가 9년 만에 영업이익률 21.83%, 매출 5.1배. 그 사이 한 사람의 매운맛 베팅이 있었고, 호황의 정중앙에서 잉여현금이 -1,397억으로 떨어지는 공격투자 사이클이 있었다.",
+      "date": "2026-04-03",
+      "grade": "dCR-AA-",
+      "storyTemplate": "반전 폭발",
+      "verdict": "라면 꼴등이 불닭 베팅으로 OPM 21.8% 달성. FCF -1,397억 공격투자 사이클.",
+      "direction": "개선",
+      "confidence": "높음",
+      "archetype": "성장",
+      "strengths": [
+        "불닭 K-콘텐츠화로 수출 6배",
+        "OPM 5%→22%"
+      ],
+      "weaknesses": [
+        "FCF -1,397억",
+        "원재료비 리스크"
+      ],
+      "keyMetrics": {
+        "revenue": 2.3,
+        "opm": 21.83,
+        "roe": 30.0,
+        "fcf": -0.14
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/003230-samyang-foods.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 642030314159.0,
+      "operating_profit": 65363413971.0,
+      "net_profit": 56657565902.0,
+      "total_assets": 753080320659.0
+    },
+    {
+      "year": "2022",
+      "sales": 909036571591.0,
+      "operating_profit": 90375676138.0,
+      "net_profit": 79794753917.0,
+      "total_assets": 924929490964.0
+    },
+    {
+      "year": "2023",
+      "sales": 1192914607980.0,
+      "operating_profit": 147514090779.0,
+      "net_profit": 126591199633.0,
+      "total_assets": 1170302770895.0
+    },
+    {
+      "year": "2024",
+      "sales": 1728015003746.0,
+      "operating_profit": 344569150443.0,
+      "net_profit": 271985324667.0,
+      "total_assets": 1594782196967.0
+    },
+    {
+      "year": "2025",
+      "sales": 2351785163786.0,
+      "operating_profit": 524188406060.0,
+      "net_profit": 0.0,
+      "total_assets": 2196495586892.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "food",
+        2
+      ],
+      [
+        "paper",
+        2
+      ],
+      [
+        "consulting",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        3
+      ],
+      [
+        "raw",
+        2
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "145990",
+      "corpName": "삼양사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "002310",
+      "corpName": "아세아제지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "280360",
+      "corpName": "롯데웰푸드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "016590",
+      "corpName": "신대양제지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
   ]
 }

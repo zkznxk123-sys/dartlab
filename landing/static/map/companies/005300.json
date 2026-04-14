@@ -711,5 +711,203 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2506093270200.0,
+      "operating_profit": 182218380367.0,
+      "net_profit": 1561072637.0,
+      "total_assets": 3596830123178.0
+    },
+    {
+      "year": "2022",
+      "sales": 2841747049867.0,
+      "operating_profit": 222858437341.0,
+      "net_profit": 131094281214.0,
+      "total_assets": 3695935640310.0
+    },
+    {
+      "year": "2023",
+      "sales": 3224680481809.0,
+      "operating_profit": 210669752581.0,
+      "net_profit": 166513593085.0,
+      "total_assets": 4257669750821.0
+    },
+    {
+      "year": "2024",
+      "sales": 4024503304484.0,
+      "operating_profit": 184926837143.0,
+      "net_profit": 59101609655.0,
+      "total_assets": 4372529473212.0
+    },
+    {
+      "year": "2025",
+      "sales": 3971143829134.0,
+      "operating_profit": 167159917902.0,
+      "net_profit": 51198353335.0,
+      "total_assets": 4284698593709.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 7,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 5,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "food",
+        3
+      ],
+      [
+        "chemical",
+        1
+      ],
+      [
+        "steel",
+        1
+      ],
+      [
+        "plastic",
+        1
+      ],
+      [
+        "energy",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        3
+      ],
+      [
+        "polymer",
+        1
+      ],
+      [
+        "general",
+        1
+      ],
+      [
+        "generation",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "001790",
+      "corpName": "대한제당",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "280360",
+      "corpName": "롯데웰푸드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "272550",
+      "corpName": "삼양패키징",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "145990",
+      "corpName": "삼양사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004450",
+      "corpName": "삼화왕관",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "005090",
+      "corpName": "SGC에너지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
   ]
 }

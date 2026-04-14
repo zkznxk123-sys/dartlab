@@ -1042,5 +1042,177 @@
       "source": "docs",
       "evidence": "IX. 계열회사 등에 관한 사항"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2500016130715.0,
+      "operating_profit": 93143552951.0,
+      "net_profit": 0.0,
+      "total_assets": 816261260508.0
+    },
+    {
+      "year": "2022",
+      "sales": 2922015004340.0,
+      "operating_profit": 88492683439.0,
+      "net_profit": 77998504635.0,
+      "total_assets": 993238731390.0
+    },
+    {
+      "year": "2023",
+      "sales": 2526207927918.0,
+      "operating_profit": 78343445249.0,
+      "net_profit": 31646373973.0,
+      "total_assets": 1015542680922.0
+    },
+    {
+      "year": "2024",
+      "sales": 3359681220937.0,
+      "operating_profit": 115613198250.0,
+      "net_profit": 94101246232.0,
+      "total_assets": 1201881762849.0
+    },
+    {
+      "year": "2025",
+      "sales": 4291096557599.0,
+      "operating_profit": 162447915281.0,
+      "net_profit": 42688819718.0,
+      "total_assets": 1825577701009.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "semiconductor",
+        2
+      ],
+      [
+        "electronics",
+        2
+      ],
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "fab",
+        1
+      ],
+      [
+        "module",
+        1
+      ],
+      [
+        "materials",
+        1
+      ],
+      [
+        "display",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "006400",
+      "corpName": "삼성SDI",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "232530",
+      "corpName": "이엠티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "031330",
+      "corpName": "에스에이엠티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "030530",
+      "corpName": "원익홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    },
+    {
+      "stockCode": "031820",
+      "corpName": "아이티센씨티에스",
+      "stage": "infra",
+      "revenue": 10952
+    }
   ]
 }

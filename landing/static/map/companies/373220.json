@@ -1005,5 +1005,223 @@
       "source": "network",
       "evidence": "단순투자 지분 10.0%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "순현금 상태",
+    "strengths": [
+      "순현금 상태"
+    ],
+    "weaknesses": [
+      "이자보상 심각 (0.7배)",
+      "Altman Z 부실 경계 (0.77)",
+      "CCC 394일 — 현금 회수 매우 느림"
+    ],
+    "sector": "소재 > 화학",
+    "source": "audit",
+    "createdAt": "1775430966.5832536"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 17851906000000.0,
+      "operating_profit": 768470000000.0,
+      "net_profit": 792519000000.0,
+      "total_assets": 23764137000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 25598609000000.0,
+      "operating_profit": 1213719000000.0,
+      "net_profit": 779826000000.0,
+      "total_assets": 38299445000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 33745470000000.0,
+      "operating_profit": 2163234000000.0,
+      "net_profit": 1237180000000.0,
+      "total_assets": 45437144000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 25619585000000.0,
+      "operating_profit": 575387000000.0,
+      "net_profit": 1357343000000.0,
+      "total_assets": 60306791000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 23671759000000.0,
+      "operating_profit": 1346120000000.0,
+      "net_profit": 80803000000.0,
+      "total_assets": 67147953000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "003670",
+      "corpName": "포스코퓨처엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "061970",
+      "corpName": "LB세미콘",
+      "product": "",
+      "amount": 4094.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "001390",
+      "corpName": "KG케미칼",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "003550",
+      "corpName": "LG",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "003620",
+      "corpName": "KG모빌리티",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "065350",
+      "corpName": "신성델타테크",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "151860",
+      "corpName": "KG에코솔루션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "267260",
+      "corpName": "HD현대일렉트릭",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "419050",
+      "corpName": "삼기에너지솔루션즈",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "stage": "basic",
+      "revenue": 184830
+    }
   ]
 }

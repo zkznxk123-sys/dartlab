@@ -194,5 +194,103 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "핵심 위험: 매출 하락 -> 마진 압박 -> 현금 악화.\n매출이 -9.1% 감소하며 영업이익률이 3.4%에서 -1.6%로 하락했다. 영업현금흐름도 동반 감소하여 수익-현금 순환이 약화되고 있다.",
+    "strengths": [],
+    "weaknesses": [
+      "매출 하락 -> 마진 압박 -> 현금 악화",
+      "매출 중간 집중 (HHI 3,447)",
+      "영업이익률 3기 연속 하락 (-1.6%)"
+    ],
+    "sector": "필수소비재 > 식품,음료,담배",
+    "source": "audit",
+    "createdAt": "1775430966.52453"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2202903850371.0,
+      "operating_profit": 174111104900.0,
+      "net_profit": 71771637523.0,
+      "total_assets": 3631051439683.0
+    },
+    {
+      "year": "2022",
+      "sales": 2497554821448.0,
+      "operating_profit": 190571249139.0,
+      "net_profit": 86816258840.0,
+      "total_assets": 3333438311387.0
+    },
+    {
+      "year": "2023",
+      "sales": 2520181551629.0,
+      "operating_profit": 123919983380.0,
+      "net_profit": 35511119931.0,
+      "total_assets": 3358347205530.0
+    },
+    {
+      "year": "2024",
+      "sales": 2599183408023.0,
+      "operating_profit": 208141871425.0,
+      "net_profit": 95735005249.0,
+      "total_assets": 3441538598928.0
+    },
+    {
+      "year": "2025",
+      "sales": 2498566821284.0,
+      "operating_profit": 172338670998.0,
+      "net_profit": 41117248572.0,
+      "total_assets": 3272507702370.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
   ]
 }

@@ -1225,5 +1225,173 @@
       "source": "network",
       "evidence": "기타 지분 0.5%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1255926483000.0,
+      "operating_profit": 190247657000.0,
+      "net_profit": 4033118000.0,
+      "total_assets": 4728915303000.0
+    },
+    {
+      "year": "2022",
+      "sales": 1776153957000.0,
+      "operating_profit": 236907930000.0,
+      "net_profit": 52320842000.0,
+      "total_assets": 4870434315000.0
+    },
+    {
+      "year": "2023",
+      "sales": 2178088207000.0,
+      "operating_profit": 295643307000.0,
+      "net_profit": 0.0,
+      "total_assets": 5345681487000.0
+    },
+    {
+      "year": "2024",
+      "sales": 2255648536000.0,
+      "operating_profit": 184045287000.0,
+      "net_profit": 9379803000.0,
+      "total_assets": 5479186860000.0
+    },
+    {
+      "year": "2025",
+      "sales": 2649870246000.0,
+      "operating_profit": 49318276000.0,
+      "net_profit": -17104903000.0,
+      "total_assets": 5485474443000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "017860",
+      "corpName": "DS단석",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "024910",
+      "corpName": "경창산업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "038110",
+      "corpName": "에코플라스틱",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "042700",
+      "corpName": "한미반도체",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "053270",
+      "corpName": "구영테크",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "060570",
+      "corpName": "드림어스컴퍼니",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "067170",
+      "corpName": "오텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "072950",
+      "corpName": "빛샘전자",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "098120",
+      "corpName": "마이크로컨텍솔",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "198940",
+      "corpName": "한주라이트메탈",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "035760",
+      "corpName": "CJ ENM",
+      "stage": "content",
+      "revenue": 51345
+    },
+    {
+      "stockCode": "030000",
+      "corpName": "제일기획",
+      "stage": "content",
+      "revenue": 45469
+    },
+    {
+      "stockCode": "214320",
+      "corpName": "이노션",
+      "stage": "platform",
+      "revenue": 21460
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "stage": "agency",
+      "revenue": 11749
+    },
+    {
+      "stockCode": "036420",
+      "corpName": "콘텐트리중앙",
+      "stage": "content",
+      "revenue": 10833
+    }
   ]
 }

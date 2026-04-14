@@ -488,5 +488,108 @@
       "source": "network",
       "evidence": "기타"
     }
+  ],
+  "aiInsight": {
+    "narrative": "내부유보 비중 82% — 자기 힘으로 성장",
+    "strengths": [
+      "내부유보 비중 82% — 자기 힘으로 성장",
+      "Piotroski F 재무 건전 (7/9)",
+      "유효세율 변동계수 0.71 — 세금 비용 불안정",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "총자산회전율 3기 연속 하락 (0.26회)",
+      "영업외손실 비중 73% — 영업이익을 상쇄",
+      "이익 변동계수 0.75 — 이익 변동성 높음"
+    ],
+    "sector": "산업재 > 상업서비스와공급품",
+    "source": "audit",
+    "createdAt": "1775430966.5667443"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 7486696121177.0,
+      "operating_profit": 503288807347.0,
+      "net_profit": 351071466376.0,
+      "total_assets": 6058722396874.0
+    },
+    {
+      "year": "2022",
+      "sales": 10054344625186.0,
+      "operating_profit": 702942994188.0,
+      "net_profit": 595319035026.0,
+      "total_assets": 7848723222714.0
+    },
+    {
+      "year": "2023",
+      "sales": 10624917993595.0,
+      "operating_profit": 993128866188.0,
+      "net_profit": 695607943011.0,
+      "total_assets": 7801398613122.0
+    },
+    {
+      "year": "2024",
+      "sales": 9966551344477.0,
+      "operating_profit": 971611686017.0,
+      "net_profit": -118256882176.0,
+      "total_assets": 10013337796132.0
+    },
+    {
+      "year": "2025",
+      "sales": 9028769083650.0,
+      "operating_profit": 792078846892.0,
+      "net_profit": 30826941019.0,
+      "total_assets": 10039557572475.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    },
+    {
+      "stockCode": "375500",
+      "corpName": "DL이앤씨",
+      "stage": "general",
+      "revenue": 74024
+    }
   ]
 }

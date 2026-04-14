@@ -710,5 +710,304 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 매출 성장 + 마진 확대 + FCF 양수 / 비용 절감 + 자산 효율화 + ROE 상승.\n매출이 +17.4% 성장하면서 영업이익률이 4.1%에서 7.0%로 확대되었다. FCF도 양수를 유지하여 질적 성장이 확인된다.",
+    "strengths": [
+      "매출 성장 + 마진 확대 + FCF 양수",
+      "비용 절감 + 자산 효율화 + ROE 상승",
+      "순현금 상태",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**"
+    ],
+    "weaknesses": [
+      "고부채 (부채비율 222%)",
+      "이자보상 심각 (0.5배)",
+      "유동성 위기 (유동비율 93%)"
+    ],
+    "sector": "산업재 > 조선",
+    "source": "audit",
+    "createdAt": "1775430966.582254"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 8311275924000.0,
+      "operating_profit": -800262777000.0,
+      "net_profit": -814227962000.0,
+      "total_assets": 15078671491000.0
+    },
+    {
+      "year": "2022",
+      "sales": 9045480488000.0,
+      "operating_profit": -289151153000.0,
+      "net_profit": -352064622000.0,
+      "total_assets": 16289398053000.0
+    },
+    {
+      "year": "2023",
+      "sales": 11963925991000.0,
+      "operating_profit": 178639965000.0,
+      "net_profit": 24689214000.0,
+      "total_assets": 17133618109000.0
+    },
+    {
+      "year": "2024",
+      "sales": 14486453544000.0,
+      "operating_profit": 705223483000.0,
+      "net_profit": 0.0,
+      "total_assets": 19390946750000.0
+    },
+    {
+      "year": "2025",
+      "sales": 17580633257000.0,
+      "operating_profit": 2037510103000.0,
+      "net_profit": 1415484774000.0,
+      "total_assets": 26163044535000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 10,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 5,
+    "stageDiversity": 6,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        6
+      ],
+      [
+        "shipbuilding",
+        1
+      ],
+      [
+        "consulting",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ],
+      [
+        "machinery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "product",
+        2
+      ],
+      [
+        "build",
+        1
+      ],
+      [
+        "raw",
+        1
+      ],
+      [
+        "general",
+        1
+      ],
+      [
+        "component",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "013030",
+      "corpName": "하이록코리아",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "045100",
+      "corpName": "한양이엔지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "090460",
+      "corpName": "비에이치",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "083650",
+      "corpName": "비에이치아이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "053260",
+      "corpName": "금강철강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "044490",
+      "corpName": "태웅",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "306200",
+      "corpName": "세아제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "product": "강재, 기자재, 의장재 등",
+      "amount": 6519885.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "010140",
+      "corpName": "삼성중공업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "042660",
+      "corpName": "한화오션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "439260",
+      "corpName": "대한조선",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "stage": "build",
+      "revenue": 712594
+    },
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "stage": "shipping",
+      "revenue": 299332
+    },
+    {
+      "stockCode": "018260",
+      "corpName": "삼성에스디에스",
+      "stage": "shipping",
+      "revenue": 139299
+    },
+    {
+      "stockCode": "042660",
+      "corpName": "한화오션",
+      "stage": "build",
+      "revenue": 127835
+    },
+    {
+      "stockCode": "011200",
+      "corpName": "HMM",
+      "stage": "build",
+      "revenue": 108914
+    }
   ]
 }

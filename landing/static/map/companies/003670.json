@@ -446,5 +446,145 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1989542181862.0,
+      "operating_profit": 121675892582.0,
+      "net_profit": 133761698843.0,
+      "total_assets": 3922480303898.0
+    },
+    {
+      "year": "2022",
+      "sales": 3301915805063.0,
+      "operating_profit": 165871669943.0,
+      "net_profit": 121928567124.0,
+      "total_assets": 4637476140189.0
+    },
+    {
+      "year": "2023",
+      "sales": 4759871486264.0,
+      "operating_profit": 35882185999.0,
+      "net_profit": 28722208549.0,
+      "total_assets": 6334593297871.0
+    },
+    {
+      "year": "2024",
+      "sales": 3699944235821.0,
+      "operating_profit": 721245866.0,
+      "net_profit": -231338259262.0,
+      "total_assets": 7932459834018.0
+    },
+    {
+      "year": "2025",
+      "sales": 2938698184392.0,
+      "operating_profit": 32827283494.0,
+      "net_profit": 36521891144.0,
+      "total_assets": 9143896515830.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "specialty",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "456040",
+      "corpName": "OCI",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "003550",
+      "corpName": "LG",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
   ]
 }

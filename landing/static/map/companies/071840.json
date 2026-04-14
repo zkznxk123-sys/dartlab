@@ -701,5 +701,102 @@
       "source": "docs",
       "evidence": "IX. 계열회사 등에 관한 사항"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3869748651455.0,
+      "operating_profit": 106834726260.0,
+      "net_profit": -57451960348.0,
+      "total_assets": 2943544893057.0
+    },
+    {
+      "year": "2022",
+      "sales": 3336820850782.0,
+      "operating_profit": -52011444171.0,
+      "net_profit": -527891084368.0,
+      "total_assets": 2464219074235.0
+    },
+    {
+      "year": "2023",
+      "sales": 2610137030353.0,
+      "operating_profit": 8223020506.0,
+      "net_profit": -35368734888.0,
+      "total_assets": 2370680945827.0
+    },
+    {
+      "year": "2025",
+      "sales": 2300095883091.0,
+      "operating_profit": 9639450324.0,
+      "net_profit": -2442674088.0,
+      "total_assets": 1790866620415.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
   ]
 }

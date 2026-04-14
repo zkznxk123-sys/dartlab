@@ -1297,6 +1297,47 @@ def _generateCatalog() -> str:
 # ─── _generatedCapabilities.py 생성 ───────────────────────────
 
 
+def _parseAxisRegistry(entries: dict[str, dict[str, str]], path: Path, *, prefix: str) -> None:
+    """엔진의 `_AXIS_REGISTRY` dict 를 AST 로 읽어 `{prefix}.{axis}` 로 entries 에 주입.
+
+    Assign + AnnAssign(`_AXIS_REGISTRY: dict[...] = {...}`) 둘 다 지원.
+    각 axis 의 keyword 중 label/description 을 summary/capabilities 로 매핑.
+    """
+    if not path.exists():
+        return
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+    except (SyntaxError, OSError):
+        return
+
+    for node in ast.walk(tree):
+        dictNode = None
+        if isinstance(node, ast.Assign):
+            for tgt in node.targets:
+                if isinstance(tgt, ast.Name) and tgt.id == "_AXIS_REGISTRY":
+                    dictNode = node.value
+                    break
+        elif isinstance(node, ast.AnnAssign):
+            tgt = node.target
+            if isinstance(tgt, ast.Name) and tgt.id == "_AXIS_REGISTRY":
+                dictNode = node.value
+        if not isinstance(dictNode, ast.Dict):
+            continue
+        for k, v in zip(dictNode.keys, dictNode.values):
+            if not isinstance(k, ast.Constant) or not isinstance(v, ast.Call):
+                continue
+            axisName = str(k.value)
+            axisEntry: dict[str, str] = {"kind": f"{prefix}_axis"}
+            for kw in v.keywords:
+                if not isinstance(kw.value, ast.Constant):
+                    continue
+                if kw.arg == "label":
+                    axisEntry["summary"] = str(kw.value.value)
+                elif kw.arg == "description":
+                    axisEntry["capabilities"] = str(kw.value.value)
+            entries[f"{prefix}.{axisName}"] = axisEntry
+
+
 def _generateCapabilitiesPy() -> str:
     """런타임 capabilities 카탈로그 Python 파일 생성.
 
@@ -1369,51 +1410,11 @@ def _generateCapabilitiesPy() -> str:
             entry["seeAlso"] = seeAlso
         entries[f"Company.{memberName}"] = entry
 
-    # 3) Scan 축 (AST)
-    scanInit = SRC / "dartlab" / "scan" / "__init__.py"
-    if scanInit.exists():
-        try:
-            tree = ast.parse(scanInit.read_text(encoding="utf-8"))
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Assign):
-                    for target in node.targets:
-                        if isinstance(target, ast.Name) and target.id == "_AXIS_REGISTRY":
-                            if isinstance(node.value, ast.Dict):
-                                for k, v in zip(node.value.keys, node.value.values):
-                                    if isinstance(k, ast.Constant) and isinstance(v, ast.Call):
-                                        axisName = str(k.value)
-                                        axisEntry: dict[str, str] = {"kind": "scan_axis"}
-                                        for kw in v.keywords:
-                                            if kw.arg == "label" and isinstance(kw.value, ast.Constant):
-                                                axisEntry["summary"] = str(kw.value.value)
-                                            elif kw.arg == "description" and isinstance(kw.value, ast.Constant):
-                                                axisEntry["capabilities"] = str(kw.value.value)
-                                        entries[f"scan.{axisName}"] = axisEntry
-        except SyntaxError:
-            pass
-
-    # 4) Gather 축 (AST)
-    gatherEntry = SRC / "dartlab" / "gather" / "entry.py"
-    if gatherEntry.exists():
-        try:
-            tree = ast.parse(gatherEntry.read_text(encoding="utf-8"))
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Assign):
-                    for target in node.targets:
-                        if isinstance(target, ast.Name) and target.id == "_AXIS_REGISTRY":
-                            if isinstance(node.value, ast.Dict):
-                                for k, v in zip(node.value.keys, node.value.values):
-                                    if isinstance(k, ast.Constant) and isinstance(v, ast.Call):
-                                        axisName = str(k.value)
-                                        axisEntry = {"kind": "gather_axis"}
-                                        for kw in v.keywords:
-                                            if kw.arg == "label" and isinstance(kw.value, ast.Constant):
-                                                axisEntry["summary"] = str(kw.value.value)
-                                            elif kw.arg == "description" and isinstance(kw.value, ast.Constant):
-                                                axisEntry["capabilities"] = str(kw.value.value)
-                                        entries[f"gather.{axisName}"] = axisEntry
-        except SyntaxError:
-            pass
+    # 3~6) 각 엔진의 _AXIS_REGISTRY AST 파싱 — scan/macro/gather 통합
+    # Assign + AnnAssign 양쪽 지원 (type annotation 있는 선언도 처리)
+    _parseAxisRegistry(entries, SRC / "dartlab" / "scan" / "__init__.py", prefix="scan")
+    _parseAxisRegistry(entries, SRC / "dartlab" / "macro" / "__init__.py", prefix="macro")
+    _parseAxisRegistry(entries, SRC / "dartlab" / "gather" / "entry.py", prefix="gather")
 
     dictRepr = json.dumps(entries, ensure_ascii=False, indent=4, sort_keys=True)
 

@@ -289,5 +289,92 @@
       "source": "docs",
       "evidence": "X. 대주주 등과의 거래내용"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3280884490810.0,
+      "operating_profit": 31538468377.0,
+      "net_profit": -2729009946.0,
+      "total_assets": 686717465463.0
+    },
+    {
+      "year": "2022",
+      "sales": 2621054378127.0,
+      "operating_profit": 30445407072.0,
+      "net_profit": 1697865017.0,
+      "total_assets": 830502514685.0
+    },
+    {
+      "year": "2023",
+      "sales": 2815145201364.0,
+      "operating_profit": 30518767988.0,
+      "net_profit": 650164821.0,
+      "total_assets": 777368404527.0
+    },
+    {
+      "year": "2024",
+      "sales": 4961847499151.0,
+      "operating_profit": 58564721273.0,
+      "net_profit": 36063285864.0,
+      "total_assets": 945435946398.0
+    },
+    {
+      "year": "2025",
+      "sales": 8870844790093.0,
+      "operating_profit": 279925759631.0,
+      "net_profit": 198284338685.0,
+      "total_assets": 1599392088824.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    },
+    {
+      "stockCode": "018670",
+      "corpName": "SK가스",
+      "stage": "solution",
+      "revenue": 76763
+    }
   ]
 }

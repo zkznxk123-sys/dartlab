@@ -74,6 +74,24 @@ class BaseProvider(ABC):
             context_tables=response.context_tables,
         )
 
+    def stream_with_tools(
+        self,
+        messages: list[dict],
+        tools: list[dict],
+    ) -> Generator:
+        """Tool calling + 실시간 스트리밍 동시 지원.
+
+        yield 규약:
+            - str (text delta) — LLM 이 생성한 텍스트 chunk. 즉시 yield.
+            - ToolResponse (최종) — 라운드 종료 시 정확히 1회 yield.
+              tool_calls 가 있으면 tool 호출 루프 진입, 없으면 답변 완료.
+
+        Fallback: 미구현 provider 는 complete_with_tools 를 1회 호출 후
+        최종 ToolResponse 만 yield (스트리밍 안 됨, 기존 동작).
+        """
+        resp = self.complete_with_tools(messages, tools)
+        yield resp
+
     def format_tool_result(self, tool_call_id: str, result: str) -> dict:
         """도구 실행 결과를 메시지로 변환 (OpenAI 형식 기본)."""
         return {

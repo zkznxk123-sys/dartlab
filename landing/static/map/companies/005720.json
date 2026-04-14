@@ -346,5 +346,185 @@
       "source": "network",
       "evidence": "기타 지분 0.6%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2403881270993.0,
+      "operating_profit": 33579042980.0,
+      "net_profit": 29421638925.0,
+      "total_assets": 4572292481109.0
+    },
+    {
+      "year": "2022",
+      "sales": 134779070158.0,
+      "operating_profit": -22542977056.0,
+      "net_profit": 1776893536.0,
+      "total_assets": 4726896214044.0
+    },
+    {
+      "year": "2023",
+      "sales": 3036061854464.0,
+      "operating_profit": 221038045467.0,
+      "net_profit": 100449037121.0,
+      "total_assets": 5060957367879.0
+    },
+    {
+      "year": "2024",
+      "sales": 3214304005061.0,
+      "operating_profit": 209664273178.0,
+      "net_profit": 158440823943.0,
+      "total_assets": 5422551860511.0
+    },
+    {
+      "year": "2025",
+      "sales": 3586518022664.0,
+      "operating_profit": 204209668629.0,
+      "net_profit": 177869505319.0,
+      "total_assets": 5611910810908.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 6,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        3
+      ],
+      [
+        "steel",
+        1
+      ],
+      [
+        "plastic",
+        1
+      ],
+      [
+        "finance",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "polymer",
+        2
+      ],
+      [
+        "product",
+        1
+      ],
+      [
+        "general",
+        1
+      ],
+      [
+        "specialty",
+        1
+      ],
+      [
+        "securities",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "002240",
+      "corpName": "고려제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002350",
+      "corpName": "넥센타이어",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "011780",
+      "corpName": "금호석유화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "456040",
+      "corpName": "OCI",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002020",
+      "corpName": "코오롱",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "002350",
+      "corpName": "넥센타이어",
+      "stage": "general",
+      "revenue": 31896
+    },
+    {
+      "stockCode": "013520",
+      "corpName": "화승코퍼레이션",
+      "stage": "general",
+      "revenue": 16398
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "stage": "general",
+      "revenue": 13729
+    },
+    {
+      "stockCode": "004840",
+      "corpName": "DRB동일",
+      "stage": "general",
+      "revenue": 8027
+    },
+    {
+      "stockCode": "378850",
+      "corpName": "화승알앤에이",
+      "stage": "general",
+      "revenue": 7146
+    }
   ]
 }

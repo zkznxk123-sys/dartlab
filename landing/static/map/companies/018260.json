@@ -968,5 +968,172 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 13630002438924.0,
+      "operating_profit": 808097771607.0,
+      "net_profit": 633381433112.0,
+      "total_assets": 10517432175247.0
+    },
+    {
+      "year": "2022",
+      "sales": 17234749537662.0,
+      "operating_profit": 916074023314.0,
+      "net_profit": 1130012585621.0,
+      "total_assets": 11952424889489.0
+    },
+    {
+      "year": "2023",
+      "sales": 13276844204872.0,
+      "operating_profit": 808230946594.0,
+      "net_profit": 0.0,
+      "total_assets": 12321024561023.0
+    },
+    {
+      "year": "2024",
+      "sales": 13828232033800.0,
+      "operating_profit": 911096907001.0,
+      "net_profit": 789501325293.0,
+      "total_assets": 13238330251696.0
+    },
+    {
+      "year": "2025",
+      "sales": 13929868497711.0,
+      "operating_profit": 957102744609.0,
+      "net_profit": 782669219514.0,
+      "total_assets": 13453704199195.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "semiconductor",
+        1
+      ],
+      [
+        "finance",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ],
+      [
+        "leisure",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "fab",
+        1
+      ],
+      [
+        "insurance",
+        1
+      ],
+      [
+        "module",
+        1
+      ],
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "032830",
+      "corpName": "삼성생명",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "008770",
+      "corpName": "호텔신라",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "006840",
+      "corpName": "AK홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "stage": "build",
+      "revenue": 712594
+    },
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "stage": "shipping",
+      "revenue": 299332
+    },
+    {
+      "stockCode": "329180",
+      "corpName": "HD현대중공업",
+      "stage": "build",
+      "revenue": 175806
+    },
+    {
+      "stockCode": "042660",
+      "corpName": "한화오션",
+      "stage": "build",
+      "revenue": 127835
+    },
+    {
+      "stockCode": "011200",
+      "corpName": "HMM",
+      "stage": "build",
+      "revenue": 108914
+    }
   ]
 }

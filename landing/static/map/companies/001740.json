@@ -1541,5 +1541,236 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "순현금 상태",
+    "strengths": [
+      "순현금 상태",
+      "Piotroski F 재무 건전 (7/9)",
+      "유효세율 변동계수 1.14 — 세금 비용 불안정",
+      "DCF 안전마진 37% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "이자보상 심각 (0.6배)",
+      "Altman Z 부실 경계 (1.80)",
+      "영업CF 적자 — 본업에서 현금이 나오지 않음"
+    ],
+    "sector": "IT > IT서비스",
+    "source": "audit",
+    "createdAt": "1775430966.5386875"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 11018140000000.0,
+      "operating_profit": 121978000000.0,
+      "net_profit": 103540000000.0,
+      "total_assets": 9410916000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 9666446000000.0,
+      "operating_profit": 154211000000.0,
+      "net_profit": 90765000000.0,
+      "total_assets": 9499259000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 9133867000000.0,
+      "operating_profit": 237283000000.0,
+      "net_profit": 6170000000.0,
+      "total_assets": 9110359000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 7657281000000.0,
+      "operating_profit": 113915000000.0,
+      "net_profit": 46292000000.0,
+      "total_assets": 5157129000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 6745127000000.0,
+      "operating_profit": 86293000000.0,
+      "net_profit": 49981000000.0,
+      "total_assets": 5040792000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ],
+      [
+        "energy",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "specialty",
+        1
+      ],
+      [
+        "display",
+        1
+      ],
+      [
+        "generation",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "307180",
+      "corpName": "아이엘",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "001000",
+      "corpName": "신라섬유",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "002020",
+      "corpName": "코오롱",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "003070",
+      "corpName": "코오롱글로벌",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "069410",
+      "corpName": "엔텔스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "078000",
+      "corpName": "텔코웨어",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "079980",
+      "corpName": "휴비스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "210980",
+      "corpName": "SK디앤디",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "285130",
+      "corpName": "SK케미칼",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
   ]
 }

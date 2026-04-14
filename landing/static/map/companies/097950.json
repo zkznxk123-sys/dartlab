@@ -976,5 +976,227 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 26289227767000.0,
+      "operating_profit": 1524429392000.0,
+      "net_profit": 279502715000.0,
+      "total_assets": 26855804277000.0
+    },
+    {
+      "year": "2022",
+      "sales": 30079513121000.0,
+      "operating_profit": 1664708210000.0,
+      "net_profit": 802674084000.0,
+      "total_assets": 30013241845000.0
+    },
+    {
+      "year": "2023",
+      "sales": 29023472909000.0,
+      "operating_profit": 1291582413000.0,
+      "net_profit": 559462096000.0,
+      "total_assets": 29606279551000.0
+    },
+    {
+      "year": "2024",
+      "sales": 29359081823000.0,
+      "operating_profit": 1553017638000.0,
+      "net_profit": 148181177000.0,
+      "total_assets": 30149997467000.0
+    },
+    {
+      "year": "2025",
+      "sales": 27342589100000.0,
+      "operating_profit": 1233604641000.0,
+      "net_profit": 0.0,
+      "total_assets": 29744790534000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "construction",
+        1
+      ],
+      [
+        "food",
+        1
+      ],
+      [
+        "energy",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "material",
+        1
+      ],
+      [
+        "distribution",
+        1
+      ],
+      [
+        "generation",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "023410",
+      "corpName": "유진기업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "011150",
+      "corpName": "CJ씨푸드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "101530",
+      "corpName": "해태제과식품",
+      "product": "정백,박력1급외",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "product": "밀가루, 치즈, 크림, 유지류, 초콜릿 등",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "004370",
+      "corpName": "농심",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005440",
+      "corpName": "현대지에프홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005740",
+      "corpName": "크라운해태홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "011150",
+      "corpName": "CJ씨푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "017810",
+      "corpName": "풀무원",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    },
+    {
+      "stockCode": "280360",
+      "corpName": "롯데웰푸드",
+      "stage": "raw",
+      "revenue": 42160
+    }
   ]
 }

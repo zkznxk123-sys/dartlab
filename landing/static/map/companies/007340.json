@@ -108,5 +108,92 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 930752730400.0,
+      "operating_profit": 89645343410.0,
+      "net_profit": 85081181274.0,
+      "total_assets": 1484962432663.0
+    },
+    {
+      "year": "2022",
+      "sales": 3156376223570.0,
+      "operating_profit": 421528485860.0,
+      "net_profit": 184899013321.0,
+      "total_assets": 4591590751746.0
+    },
+    {
+      "year": "2023",
+      "sales": 3269243065116.0,
+      "operating_profit": 490389697147.0,
+      "net_profit": 274781001046.0,
+      "total_assets": 4567386501437.0
+    },
+    {
+      "year": "2024",
+      "sales": 3434542268000.0,
+      "operating_profit": 522916807000.0,
+      "net_profit": 284931413000.0,
+      "total_assets": 5006031529000.0
+    },
+    {
+      "year": "2025",
+      "sales": 3675704255000.0,
+      "operating_profit": 527907609000.0,
+      "net_profit": 43382773000.0,
+      "total_assets": 5275680667000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066970",
+      "corpName": "엘앤에프",
+      "stage": "cathode",
+      "revenue": 21549
+    },
+    {
+      "stockCode": "004490",
+      "corpName": "세방전지",
+      "stage": "cell",
+      "revenue": 21187
+    },
+    {
+      "stockCode": "005070",
+      "corpName": "코스모신소재",
+      "stage": "cathode",
+      "revenue": 4563
+    },
+    {
+      "stockCode": "348370",
+      "corpName": "엔켐",
+      "stage": "electrolyte",
+      "revenue": 3128
+    },
+    {
+      "stockCode": "064760",
+      "corpName": "티씨케이",
+      "stage": "anode",
+      "revenue": 3013
+    }
   ]
 }

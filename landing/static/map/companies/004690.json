@@ -341,5 +341,146 @@
       "source": "network",
       "evidence": "단순투자 지분 0.7%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 220303670259.0,
+      "operating_profit": 69998065700.0,
+      "net_profit": 59528098183.0,
+      "total_assets": 4245308851227.0
+    },
+    {
+      "year": "2022",
+      "sales": 319971723472.0,
+      "operating_profit": 91236419550.0,
+      "net_profit": 66728900984.0,
+      "total_assets": 5021952466150.0
+    },
+    {
+      "year": "2023",
+      "sales": 5664041261167.0,
+      "operating_profit": 174490517245.0,
+      "net_profit": 0.0,
+      "total_assets": 4432766185103.0
+    },
+    {
+      "year": "2024",
+      "sales": 5120527432173.0,
+      "operating_profit": 114302576748.0,
+      "net_profit": 0.0,
+      "total_assets": 4518198223654.0
+    },
+    {
+      "year": "2025",
+      "sales": 5275461012669.0,
+      "operating_profit": 159630890886.0,
+      "net_profit": 0.0,
+      "total_assets": 4459314886311.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "energy",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "distribution",
+        1
+      ],
+      [
+        "specialty",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "036640",
+      "corpName": "HRS",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "014160",
+      "corpName": "대영포장",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "stage": "generation",
+      "revenue": 974293
+    },
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "stage": "distribution",
+      "revenue": 357273
+    },
+    {
+      "stockCode": "071320",
+      "corpName": "지역난방공사",
+      "stage": "generation",
+      "revenue": 39982
+    },
+    {
+      "stockCode": "112610",
+      "corpName": "씨에스윈드",
+      "stage": "generation",
+      "revenue": 29316
+    },
+    {
+      "stockCode": "005090",
+      "corpName": "SGC에너지",
+      "stage": "generation",
+      "revenue": 24607
+    }
   ]
 }

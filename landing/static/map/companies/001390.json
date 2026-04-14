@@ -565,5 +565,225 @@
       "source": "network",
       "evidence": "단순투자 지분 1.7%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 매출 성장 + 마진 확대 + FCF 양수 / 비용 절감 + 자산 효율화 + ROE 상승.\n매출이 +8.6% 성장하면서 영업이익률이 2.0%에서 3.5%로 확대되었다. FCF도 양수를 유지하여 질적 성장이 확인된다.",
+    "strengths": [
+      "매출 성장 + 마진 확대 + FCF 양수",
+      "비용 절감 + 자산 효율화 + ROE 상승",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출 중간 집중 (HHI 4,631)",
+      "영업레버리지(DOL) 10.1 — 매출 변동에 이익 민감",
+      "이익 변동계수 0.57 — 이익 변동성 높음"
+    ],
+    "sector": "소재 > 화학",
+    "source": "audit",
+    "createdAt": "1775430966.5356877"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 4931505172315.0,
+      "operating_profit": 467167837233.0,
+      "net_profit": 281961177811.0,
+      "total_assets": 4884892280208.0
+    },
+    {
+      "year": "2022",
+      "sales": 6607355088852.0,
+      "operating_profit": 501083594243.0,
+      "net_profit": 303498786901.0,
+      "total_assets": 6981908974784.0
+    },
+    {
+      "year": "2023",
+      "sales": 8933057023552.0,
+      "operating_profit": 442583708062.0,
+      "net_profit": 350715471304.0,
+      "total_assets": 7818145771325.0
+    },
+    {
+      "year": "2024",
+      "sales": 8863142439982.0,
+      "operating_profit": 318801578803.0,
+      "net_profit": 61855875898.0,
+      "total_assets": 8160948249649.0
+    },
+    {
+      "year": "2025",
+      "sales": 9101646921664.0,
+      "operating_profit": 305678686344.0,
+      "net_profit": 174329193136.0,
+      "total_assets": 8343678242449.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 8,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 7,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        3
+      ],
+      [
+        "electronics",
+        2
+      ],
+      [
+        "steel",
+        2
+      ],
+      [
+        "shipbuilding",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "basic",
+        1
+      ],
+      [
+        "module",
+        1
+      ],
+      [
+        "build",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "047310",
+      "corpName": "파워로직스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "006400",
+      "corpName": "삼성SDI",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "003620",
+      "corpName": "KG모빌리티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "016380",
+      "corpName": "KG스틸",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "151860",
+      "corpName": "KG에코솔루션",
+      "stage": "general",
+      "revenue": 75772
+    },
+    {
+      "stockCode": "014580",
+      "corpName": "태경비케이",
+      "stage": "general",
+      "revenue": 3859
+    },
+    {
+      "stockCode": "066980",
+      "corpName": "한성크린텍",
+      "stage": "general",
+      "revenue": 1999
+    },
+    {
+      "stockCode": "060150",
+      "corpName": "인선이엔티",
+      "stage": "general",
+      "revenue": 1872
+    },
+    {
+      "stockCode": "037370",
+      "corpName": "EG",
+      "stage": "general",
+      "revenue": 628
+    }
   ]
 }

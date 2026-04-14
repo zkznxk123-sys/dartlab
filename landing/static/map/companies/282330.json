@@ -170,5 +170,129 @@
       "source": "docs",
       "evidence": "IX. 계열회사 등에 관한 사항"
     }
+  ],
+  "aiInsight": {
+    "narrative": "내부유보 비중 72% — 자기 힘으로 성장",
+    "strengths": [
+      "내부유보 비중 72% — 자기 힘으로 성장",
+      "순현금 상태",
+      "Piotroski F 재무 건전 (9/9)",
+      "DCF 안전마진 59% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "영업이익률 3기 연속 하락 (2.3%)",
+      "판관비율 3년 연속 상승 (15.2% -> 16.1%)",
+      "유동비율 주의 (88%) — 순현금이므로 실질 위험 낮음"
+    ],
+    "sector": "경기관련소비재 > 소매(유통)",
+    "source": "audit",
+    "createdAt": "1775430966.5812533"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 6781161259022.0,
+      "operating_profit": 199441703668.0,
+      "net_profit": 147642852239.0,
+      "total_assets": 2596378756682.0
+    },
+    {
+      "year": "2022",
+      "sales": 7615769467741.0,
+      "operating_profit": 252407573570.0,
+      "net_profit": 193538863026.0,
+      "total_assets": 2946235271626.0
+    },
+    {
+      "year": "2023",
+      "sales": 8194753978897.0,
+      "operating_profit": 253187753623.0,
+      "net_profit": 0.0,
+      "total_assets": 3219078523118.0
+    },
+    {
+      "year": "2024",
+      "sales": 8698757469111.0,
+      "operating_profit": 251641247239.0,
+      "net_profit": 195217876198.0,
+      "total_assets": 3402590175982.0
+    },
+    {
+      "year": "2025",
+      "sales": 9061216107616.0,
+      "operating_profit": 253947326677.0,
+      "net_profit": 195263084525.0,
+      "total_assets": 3556166960339.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "retail",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "wholesale",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "027410",
+      "corpName": "BGF",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    },
+    {
+      "stockCode": "073240",
+      "corpName": "금호타이어",
+      "stage": "wholesale",
+      "revenue": 47013
+    }
   ]
 }

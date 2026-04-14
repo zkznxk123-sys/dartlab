@@ -1287,5 +1287,228 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 비용 절감 + 자산 효율화 + ROE 상승.\n영업비용률이 95.4%에서 91.7%로 하락하고, 자산회전율이 0.19에서 0.20로 개선되었다. ROE도 1.3%에서 2.4%로 상승하여 구조적 효율화가 진행 중이다.",
+    "strengths": [
+      "비용 절감 + 자산 효율화 + ROE 상승",
+      "순현금 상태",
+      "이자보상 우수 (12배)",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**"
+    ],
+    "weaknesses": [
+      "매출 중간 집중 (HHI 3,415)",
+      "Piotroski F 재무 약화 (2/9)",
+      "CCC 392일 — 현금 회수 매우 느림"
+    ],
+    "sector": "IT > 반도체와반도체장비",
+    "source": "audit",
+    "createdAt": "1775430966.5592315"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 9675036127726.0,
+      "operating_profit": 1486872833804.0,
+      "net_profit": 915432452695.0,
+      "total_assets": null
+    },
+    {
+      "year": "2022",
+      "sales": 9424551868027.0,
+      "operating_profit": 1182835924271.0,
+      "net_profit": 993519182170.0,
+      "total_assets": null
+    },
+    {
+      "year": "2023",
+      "sales": 8909448483915.0,
+      "operating_profit": 639423737120.0,
+      "net_profit": 450482125173.0,
+      "total_assets": 11657871601848.0
+    },
+    {
+      "year": "2024",
+      "sales": 10294102976435.0,
+      "operating_profit": 735005856995.0,
+      "net_profit": 24085567459.0,
+      "total_assets": 12792402920884.0
+    },
+    {
+      "year": "2025",
+      "sales": 11314459238100.0,
+      "operating_profit": 913331178557.0,
+      "net_profit": 706113165450.0,
+      "total_assets": null
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 1293843.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "semiconductor",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "fab",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "product": "",
+      "amount": 1293843.0,
+      "ratio": 49.4,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "248070",
+      "corpName": "솔루엠",
+      "product": "",
+      "amount": 93312.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "product": "Camera Module",
+      "amount": 59043.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "033170",
+      "corpName": "시그네틱스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000670",
+      "corpName": "영풍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "007810",
+      "corpName": "코리아써키트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "018260",
+      "corpName": "삼성에스디에스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "031330",
+      "corpName": "에스에이엠티",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "036540",
+      "corpName": "SFA반도체",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    },
+    {
+      "stockCode": "064400",
+      "corpName": "LG씨엔에스",
+      "stage": "module",
+      "revenue": 61295
+    }
   ]
 }

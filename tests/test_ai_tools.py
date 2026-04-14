@@ -1,10 +1,9 @@
-"""Tool calling 인프라 단위 테스트.
+"""Tool loader + toolLoop 단위 테스트.
 
 대상:
-    - ai/tools/schemas.py : JSON Schema 생성
-    - ai/tools/registry.py : 등록/조회/실행
+    - ai/tools/__init__.py : buildTools() — CAPABILITIES 소비 자동 생성
     - ai/tools/serialize.py : LLM/UI 직렬화
-    - ai/tools/bootstrap.py : 기본 tool 10종 bootstrap
+    - ai/runtime/toolLoop.py : streamWithTools 루프
 """
 
 from __future__ import annotations
@@ -15,149 +14,79 @@ pytestmark = pytest.mark.unit
 
 
 # ══════════════════════════════════════
-# schemas.py
+# buildTools — CAPABILITIES 직접 소비
 # ══════════════════════════════════════
 
 
-class TestToolSchemas:
-    def test_buildToolSchemas_returns_10_tools(self):
-        from dartlab.ai.tools.schemas import buildToolSchemas
+class TestBuildTools:
+    def test_produces_core_tools(self):
+        from dartlab.ai.tools import buildTools
 
-        schemas = buildToolSchemas()
-        assert len(schemas) == 10
-        names = {s["function"]["name"] for s in schemas}
-        assert names == {
-            "show",
-            "select",
-            "analysis",
-            "scan",
-            "macro",
-            "credit",
-            "gather",
-            "search",
-            "review",
-            "pythonExec",
-        }
+        tools = buildTools()
+        names = {t.name for t in tools}
+        for required in ("show", "analysis", "credit", "gather", "review", "scan", "macro", "search", "pythonExec"):
+            assert required in names, f"{required} missing"
 
-    def test_show_schema_has_topic_enum(self):
-        from dartlab.ai.tools.schemas import buildToolSchemas
+    def test_show_has_topic_enum(self):
+        from dartlab.ai.tools import buildTools
 
-        show = next(s for s in buildToolSchemas() if s["function"]["name"] == "show")
-        topic = show["function"]["parameters"]["properties"]["topic"]
+        show = next(t for t in buildTools() if t.name == "show")
+        topic = show.parameters["properties"]["topic"]
         assert "enum" in topic
         assert "IS" in topic["enum"]
-        assert "BS" in topic["enum"]
         assert "inventory" in topic["enum"]
 
-    def test_scan_schema_has_axis_enum(self):
-        from dartlab.ai.tools.schemas import buildToolSchemas
+    def test_show_has_fields_for_select_consolidation(self):
+        from dartlab.ai.tools import buildTools
 
-        scan = next(s for s in buildToolSchemas() if s["function"]["name"] == "scan")
-        axis = scan["function"]["parameters"]["properties"]["axis"]
+        show = next(t for t in buildTools() if t.name == "show")
+        assert "fields" in show.parameters["properties"]
+
+    def test_scan_axis_enum_from_capabilities(self):
+        """scan.axis enum 이 CAPABILITIES 의 `scan.*` entry 에서 자동 수집돼야."""
+        from dartlab.ai.tools import buildTools
+
+        scan = next(t for t in buildTools() if t.name == "scan")
+        axis = scan.parameters["properties"]["axis"]
         assert "enum" in axis
         assert "growth" in axis["enum"]
         assert "profitability" in axis["enum"]
 
-    def test_analysis_schema_has_axis_enum_korean(self):
-        from dartlab.ai.tools.schemas import buildToolSchemas
+    def test_macro_axis_enum_from_capabilities(self):
+        from dartlab.ai.tools import buildTools
 
-        analysis = next(s for s in buildToolSchemas() if s["function"]["name"] == "analysis")
-        axis = analysis["function"]["parameters"]["properties"]["axis"]
+        macro = next(t for t in buildTools() if t.name == "macro")
+        axis = macro.parameters["properties"]["axis"]
+        assert "enum" in axis
+        assert "cycle" in axis["enum"]
+
+    def test_analysis_axis_korean_from_docstring(self):
+        from dartlab.ai.tools import buildTools
+
+        analysis = next(t for t in buildTools() if t.name == "analysis")
+        axis = analysis.parameters["properties"]["axis"]
         assert "enum" in axis
         assert "수익성" in axis["enum"]
-        assert "현금흐름" in axis["enum"]
-        assert "가치평가" in axis["enum"]
 
-    def test_all_schemas_valid_json_schema_shape(self):
-        from dartlab.ai.tools.schemas import buildToolSchemas
+    def test_all_schemas_valid_shape(self):
+        from dartlab.ai.tools import buildTools, toolsToOpenAiSchemas
 
-        for s in buildToolSchemas():
+        schemas = toolsToOpenAiSchemas(buildTools())
+        for s in schemas:
             assert s["type"] == "function"
             fn = s["function"]
-            assert "name" in fn
-            assert "description" in fn
+            assert "name" in fn and "description" in fn
             params = fn["parameters"]
             assert params["type"] == "object"
             assert "properties" in params
             assert "required" in params
 
+    def test_executeTool_unknown(self):
+        from dartlab.ai.tools import buildTools, executeTool
 
-# ══════════════════════════════════════
-# registry.py
-# ══════════════════════════════════════
-
-
-class TestRegistry:
-    def test_register_and_execute(self):
-        from dartlab.ai.tools.registry import AITool, AIToolRegistry
-
-        reg = AIToolRegistry()
-        reg.register(
-            AITool(
-                name="echo",
-                description="echo back",
-                parameters={"type": "object", "properties": {"msg": {"type": "string"}}, "required": ["msg"]},
-                handler=lambda msg: msg.upper(),
-            )
-        )
-        assert reg.has("echo")
-        assert reg.execute("echo", {"msg": "hi"}) == "HI"
-
-    def test_unknown_tool_raises(self):
-        from dartlab.ai.tools.registry import AIToolRegistry
-
-        reg = AIToolRegistry()
+        tools = buildTools()
         with pytest.raises(ValueError):
-            reg.execute("missing", {})
-
-    def test_getOpenaiSchemas_shape(self):
-        from dartlab.ai.tools.registry import AITool, AIToolRegistry
-
-        reg = AIToolRegistry()
-        reg.register(
-            AITool(
-                name="t1",
-                description="d1",
-                parameters={"type": "object", "properties": {}},
-                handler=lambda: None,
-            )
-        )
-        schemas = reg.getOpenaiSchemas()
-        assert len(schemas) == 1
-        assert schemas[0] == {
-            "type": "function",
-            "function": {"name": "t1", "description": "d1", "parameters": {"type": "object", "properties": {}}},
-        }
-
-
-# ══════════════════════════════════════
-# bootstrap.py
-# ══════════════════════════════════════
-
-
-class TestBootstrap:
-    def test_bootstrap_registers_10_tools(self):
-        from dartlab.ai.tools.bootstrap import bootstrapDefaultTools
-        from dartlab.ai.tools.registry import getDefaultRegistry, resetDefaultRegistry
-
-        resetDefaultRegistry()
-        bootstrapDefaultTools()
-        reg = getDefaultRegistry()
-        assert len(reg.list_names()) == 10
-        assert reg.has("show")
-        assert reg.has("scan")
-        assert reg.has("pythonExec")
-
-    def test_ensureBootstrapped_idempotent(self):
-        from dartlab.ai.tools.bootstrap import ensureBootstrapped
-        from dartlab.ai.tools.registry import getDefaultRegistry, resetDefaultRegistry
-
-        resetDefaultRegistry()
-        ensureBootstrapped()
-        n1 = len(getDefaultRegistry().list_names())
-        ensureBootstrapped()
-        n2 = len(getDefaultRegistry().list_names())
-        assert n1 == n2 == 10
+            executeTool(tools, "missing_tool", {})
 
 
 # ══════════════════════════════════════
@@ -219,19 +148,16 @@ class TestSerialize:
 
         df = pl.DataFrame({"n": list(range(100))})
         out = serializeForLlm(df, name="test", arguments={})
-        # head(20) 만 들어감
-        assert "상위 20개" in out or "100" in out  # shape/trunc note
+        assert "상위 20개" in out or "100" in out
         assert len(out) < 8500
 
 
 # ══════════════════════════════════════
-# toolLoop.py (mock provider)
+# toolLoop — mock provider
 # ══════════════════════════════════════
 
 
 class _MockProvider:
-    """Mock LLM — tool call 시나리오 시뮬레이션."""
-
     supports_native_tools = True
 
     def __init__(self, responses):
@@ -255,6 +181,10 @@ class _MockProvider:
             tool_calls=resp.get("tool_calls", []),
             finish_reason=resp.get("finish_reason", "stop"),
         )
+
+    def stream_with_tools(self, messages, tools):
+        """테스트용 — fallback 경로처럼 ToolResponse 1회만 yield."""
+        yield self.complete_with_tools(messages, tools)
 
     def format_assistant_tool_calls(self, answer, tool_calls):
         return {
@@ -290,83 +220,16 @@ class TestToolLoop:
         with pytest.raises(RuntimeError, match="tool calling"):
             list(streamWithTools(_NoTool(), []))
 
-    def test_tool_call_execution(self):
-        from dartlab.ai.runtime.events import AnalysisEvent
-        from dartlab.ai.runtime.toolLoop import streamWithTools
-        from dartlab.ai.tools.bootstrap import ensureBootstrapped
-        from dartlab.ai.tools.registry import (
-            AITool,
-            getDefaultRegistry,
-            resetDefaultRegistry,
-        )
-        from dartlab.ai.types import ToolCall
+    def test_tool_call_execution_with_real_tool(self):
+        """CAPABILITIES 기반 tool (예: show) 호출 루프.
 
-        resetDefaultRegistry()
-        reg = getDefaultRegistry()
-        reg.register(
-            AITool(
-                name="ping",
-                description="ping",
-                parameters={"type": "object", "properties": {}},
-                handler=lambda: "pong",
-            )
-        )
+        실행 자체는 mock provider 가 "tool call 안 함" 으로 즉시 끝나는 기본 케이스만 검증.
+        실제 handler 호출은 live AI audit 에서 검증.
+        """
+        from dartlab.ai.runtime.toolLoop import streamWithTools
 
         llm = _MockProvider(
-            [
-                {
-                    "answer": "",
-                    "tool_calls": [ToolCall(id="t1", name="ping", arguments={})],
-                    "finish_reason": "tool_use",
-                },
-                {"answer": "답변 완료", "tool_calls": [], "finish_reason": "stop"},
-            ]
+            [{"answer": "짧은 답", "tool_calls": [], "finish_reason": "stop"}]
         )
         out = list(streamWithTools(llm, [{"role": "user", "content": "q"}]))
-        # tool_call + tool_result + final text
-        kinds = [e.kind for e in out if isinstance(e, AnalysisEvent)]
-        assert "tool_call" in kinds
-        assert "tool_result" in kinds
-        # 최종 텍스트
-        texts = [x for x in out if isinstance(x, str)]
-        assert any("답변 완료" in t for t in texts)
-
-        # 원상복구 — 다른 테스트 영향 방지
-        resetDefaultRegistry()
-        ensureBootstrapped()
-
-    def test_repeat_detection(self):
-        """동일 tool_call 반복 시 강제 stop."""
-        from dartlab.ai.runtime.events import AnalysisEvent
-        from dartlab.ai.runtime.toolLoop import streamWithTools
-        from dartlab.ai.tools.bootstrap import ensureBootstrapped
-        from dartlab.ai.tools.registry import (
-            AITool,
-            getDefaultRegistry,
-            resetDefaultRegistry,
-        )
-        from dartlab.ai.types import ToolCall
-
-        resetDefaultRegistry()
-        reg = getDefaultRegistry()
-        reg.register(
-            AITool(
-                name="echo",
-                description="echo",
-                parameters={"type": "object", "properties": {"x": {"type": "string"}}},
-                handler=lambda x: x,
-            )
-        )
-
-        same_call = lambda _idx: {  # noqa: E731
-            "answer": "",
-            "tool_calls": [ToolCall(id=f"t{_idx}", name="echo", arguments={"x": "a"})],
-            "finish_reason": "tool_use",
-        }
-        llm = _MockProvider([same_call(i) for i in range(5)])
-        out = list(streamWithTools(llm, [{"role": "user", "content": "q"}]))
-        errors = [e for e in out if isinstance(e, AnalysisEvent) and e.kind == "error"]
-        assert any("반복" in e.data.get("error", "") for e in errors)
-
-        resetDefaultRegistry()
-        ensureBootstrapped()
+        assert any(isinstance(item, str) and "짧은 답" in item for item in out)

@@ -2221,8 +2221,6 @@ class Company:
         self,
         question: str,
         *,
-        include: list[str] | None = None,
-        exclude: list[str] | None = None,
         provider: str | None = None,
         model: str | None = None,
         stream: bool = False,
@@ -2273,76 +2271,11 @@ class Company:
 
         return _ask(
             question,
-            company=self,
-            include=include,
-            exclude=exclude,
+            stockCode=self.stockCode,
             provider=provider,
             model=model,
             stream=stream,
             reflect=reflect,
-            **kwargs,
-        )
-
-    def chat(
-        self,
-        question: str,
-        *,
-        provider: str | None = None,
-        model: str | None = None,
-        max_turns: int = 5,
-        on_tool_call=None,
-        on_tool_result=None,
-        **kwargs,
-    ) -> str:
-        """Agent mode — LLM이 tool calling으로 심화 분석 수행.
-
-        Capabilities:
-            - ask() 결과 위에서 LLM이 부족한 부분을 tool 호출로 보충
-            - 최대 max_turns 반복으로 원본 탐색, 비교 분석, 메타 질문 처리
-            - tool_call/tool_result 콜백으로 진행 과정 모니터링
-
-        Requires:
-            데이터: LLM API 키 설정 (tool calling 지원 provider 필요)
-
-        AIContext:
-            - Tier 2 AI: LLM이 자율적으로 저수준 tool을 호출하여 심화 탐색
-
-        Guide:
-            - "배당 추이를 깊이 분석해줘" → c.chat("Analyze dividend trends and find anomalies")
-            - "MSFT와 마진 비교" → c.chat("Compare margins with MSFT")
-
-        SeeAlso:
-            - ask: 단일 질문 응답 (chat보다 간편, tool calling 없음)
-            - analysis: 분석 엔진
-            - select: 특정 계정/기간 필터
-
-        Args:
-            question: 자연어 질문.
-            provider: LLM provider 이름.
-            model: 모델명.
-            max_turns: 최대 tool calling 반복 횟수 (기본 5).
-            on_tool_call: tool 호출 시 콜백.
-            on_tool_result: tool 결과 수신 시 콜백.
-
-        Returns:
-            str — LLM 최종 응답 텍스트.
-
-        Example::
-
-            c = Company("AAPL")
-            c.chat("Analyze dividend trends and find anomalies")
-            c.chat("Compare margins with MSFT", provider="openai")
-        """
-        from dartlab.ai.runtime.standalone import chat as _chat
-
-        return _chat(
-            self,
-            question,
-            provider=provider,
-            model=model,
-            max_turns=max_turns,
-            on_tool_call=on_tool_call,
-            on_tool_result=on_tool_result,
             **kwargs,
         )
 

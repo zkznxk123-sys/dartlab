@@ -587,5 +587,117 @@
       "source": "network",
       "evidence": "단순투자 지분 0.2%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2504131193753.0,
+      "operating_profit": 99432891702.0,
+      "net_profit": 161832906995.0,
+      "total_assets": 3877620716229.0
+    },
+    {
+      "year": "2022",
+      "sales": 2849420869433.0,
+      "operating_profit": 114501782947.0,
+      "net_profit": 47599588844.0,
+      "total_assets": 4093197691709.0
+    },
+    {
+      "year": "2023",
+      "sales": 2807528782563.0,
+      "operating_profit": 122526979246.0,
+      "net_profit": 26123599184.0,
+      "total_assets": 4201363599974.0
+    },
+    {
+      "year": "2024",
+      "sales": 3015479161930.0,
+      "operating_profit": 100088306580.0,
+      "net_profit": -4281880745.0,
+      "total_assets": 4189506445715.0
+    },
+    {
+      "year": "2025",
+      "sales": 3064925190779.0,
+      "operating_profit": 112195809190.0,
+      "net_profit": 0.0,
+      "total_assets": 4316986683575.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "006840",
+      "corpName": "AK홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "089590",
+      "corpName": "제주항공",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "180640",
+      "corpName": "한진칼",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "086280",
+      "corpName": "현대글로비스",
+      "stage": "general",
+      "revenue": 295664
+    },
+    {
+      "stockCode": "003490",
+      "corpName": "대한항공",
+      "stage": "general",
+      "revenue": 252255
+    },
+    {
+      "stockCode": "028670",
+      "corpName": "팬오션",
+      "stage": "general",
+      "revenue": 54329
+    },
+    {
+      "stockCode": "089860",
+      "corpName": "롯데렌탈",
+      "stage": "",
+      "revenue": 29188
+    },
+    {
+      "stockCode": "004360",
+      "corpName": "세방",
+      "stage": "general",
+      "revenue": 12418
+    }
   ]
 }

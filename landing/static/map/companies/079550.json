@@ -246,5 +246,137 @@
       "source": "network",
       "evidence": "기타"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1822194315440.0,
+      "operating_profit": 97201006836.0,
+      "net_profit": 105055805629.0,
+      "total_assets": 2576847035470.0
+    },
+    {
+      "year": "2022",
+      "sales": 2220751868438.0,
+      "operating_profit": 179111737872.0,
+      "net_profit": 122939587371.0,
+      "total_assets": 3012727223129.0
+    },
+    {
+      "year": "2023",
+      "sales": 2308571092877.0,
+      "operating_profit": 186378438940.0,
+      "net_profit": 0.0,
+      "total_assets": 3815758833285.0
+    },
+    {
+      "year": "2024",
+      "sales": 3276339508425.0,
+      "operating_profit": 229779392271.0,
+      "net_profit": 216648719554.0,
+      "total_assets": 6125264653217.0
+    },
+    {
+      "year": "2025",
+      "sales": 4306936127418.0,
+      "operating_profit": 319442306790.0,
+      "net_profit": 237479536396.0,
+      "total_assets": 8064772884180.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "display",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "272210",
+      "corpName": "한화시스템",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "stage": "airframe",
+      "revenue": 747854
+    },
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "stage": "airframe",
+      "revenue": 267029
+    },
+    {
+      "stockCode": "020560",
+      "corpName": "아시아나항공",
+      "stage": "airline",
+      "revenue": 72668
+    },
+    {
+      "stockCode": "047810",
+      "corpName": "한국항공우주",
+      "stage": "airframe",
+      "revenue": 36964
+    },
+    {
+      "stockCode": "272210",
+      "corpName": "한화시스템",
+      "stage": "defense",
+      "revenue": 36642
+    }
   ]
 }

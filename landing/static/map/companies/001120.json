@@ -801,5 +801,150 @@
       "source": "network",
       "evidence": "단순투자 지분 0.0%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "종합 판정: 저평가",
+    "strengths": [
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "이익 변동계수 0.84 — 이익 변동성 높음",
+      "이자보상 심각 (0.7배)",
+      "부채 3기 연속 증가 (최근 +3%)"
+    ],
+    "sector": "산업재 > 상업서비스와공급품",
+    "source": "audit",
+    "createdAt": "1775430966.5346448"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 16686532633651.0,
+      "operating_profit": 656217086586.0,
+      "net_profit": 540331627454.0,
+      "total_assets": 6746889021744.0
+    },
+    {
+      "year": "2022",
+      "sales": 18759549404034.0,
+      "operating_profit": 965543470335.0,
+      "net_profit": 515223865636.0,
+      "total_assets": 7719007333629.0
+    },
+    {
+      "year": "2023",
+      "sales": 14514349869122.0,
+      "operating_profit": 433109594096.0,
+      "net_profit": 117082888989.0,
+      "total_assets": 7995340730864.0
+    },
+    {
+      "year": "2024",
+      "sales": 16637572685167.0,
+      "operating_profit": 489185373375.0,
+      "net_profit": 269491720840.0,
+      "total_assets": 8930865616216.0
+    },
+    {
+      "year": "2025",
+      "sales": 16706309561513.0,
+      "operating_profit": 292193349331.0,
+      "net_profit": 141810366263.0,
+      "total_assets": 9328302981413.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 55392.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "specialty",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "456040",
+      "corpName": "OCI",
+      "product": "",
+      "amount": 55392.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "005090",
+      "corpName": "SGC에너지",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "383800",
+      "corpName": "LX홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    },
+    {
+      "stockCode": "105630",
+      "corpName": "한세실업",
+      "stage": "apparel",
+      "revenue": 19418
+    }
   ]
 }

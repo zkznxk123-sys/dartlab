@@ -146,5 +146,160 @@
       "source": "docs",
       "evidence": "X. 대주주 등과의 거래내용"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2561801412006.0,
+      "operating_profit": 232741989538.0,
+      "net_profit": 155907363835.0,
+      "total_assets": 2327054067482.0
+    },
+    {
+      "year": "2022",
+      "sales": 2949680250000.0,
+      "operating_profit": 132836469827.0,
+      "net_profit": 60478812402.0,
+      "total_assets": 2560028661008.0
+    },
+    {
+      "year": "2023",
+      "sales": 2977005044488.0,
+      "operating_profit": 100697392316.0,
+      "net_profit": 4681118601.0,
+      "total_assets": 2726892636022.0
+    },
+    {
+      "year": "2024",
+      "sales": 3169362271108.0,
+      "operating_profit": 97717241740.0,
+      "net_profit": 54515873225.0,
+      "total_assets": 2941317715233.0
+    },
+    {
+      "year": "2025",
+      "sales": 2887440609690.0,
+      "operating_profit": 166870229835.0,
+      "net_profit": 99962415842.0,
+      "total_assets": 3224879415213.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "construction",
+        3
+      ],
+      [
+        "consulting",
+        1
+      ],
+      [
+        "buildingMaterials",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        3
+      ],
+      [
+        "material",
+        2
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "183190",
+      "corpName": "아세아시멘트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "228340",
+      "corpName": "동양파일",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "084010",
+      "corpName": "대한제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "023410",
+      "corpName": "유진기업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
   ]
 }

@@ -366,5 +366,231 @@
       "source": "network",
       "evidence": "단순투자 지분 3.0%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1813694742925.0,
+      "operating_profit": 102255264027.0,
+      "net_profit": 66562485727.0,
+      "total_assets": 1139785734195.0
+    },
+    {
+      "year": "2022",
+      "sales": 2018752698679.0,
+      "operating_profit": 97652234741.0,
+      "net_profit": 73810464942.0,
+      "total_assets": 1168252667285.0
+    },
+    {
+      "year": "2023",
+      "sales": 2063074655686.0,
+      "operating_profit": 128637166378.0,
+      "net_profit": 107150333560.0,
+      "total_assets": 1262971666006.0
+    },
+    {
+      "year": "2024",
+      "sales": 2642956274496.0,
+      "operating_profit": 133016935612.0,
+      "net_profit": 95780719849.0,
+      "total_assets": 2123550790244.0
+    },
+    {
+      "year": "2025",
+      "sales": 3499812746968.0,
+      "operating_profit": 94682992676.0,
+      "net_profit": -73563368883.0,
+      "total_assets": 2184824778039.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 7,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 5,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "realestate",
+        2
+      ],
+      [
+        "food",
+        2
+      ],
+      [
+        "agriculture",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ],
+      [
+        "pharma",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        3
+      ],
+      [
+        "raw",
+        1
+      ],
+      [
+        "processing",
+        1
+      ],
+      [
+        "component",
+        1
+      ],
+      [
+        "formulation",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "006090",
+      "corpName": "사조오양",
+      "product": "맛살,육가공외",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "007160",
+      "corpName": "사조산업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "008040",
+      "corpName": "사조동아원",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "007310",
+      "corpName": "오뚜기",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "014710",
+      "corpName": "사조씨푸드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "090460",
+      "corpName": "비에이치",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "060590",
+      "corpName": "씨티씨바이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "014710",
+      "corpName": "사조씨푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
   ]
 }

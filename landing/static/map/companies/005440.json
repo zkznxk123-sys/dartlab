@@ -997,5 +997,225 @@
       "source": "network",
       "evidence": "기타 지분 1.9%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3486080421000.0,
+      "operating_profit": 58615990000.0,
+      "net_profit": -2116998000.0,
+      "total_assets": 3109986792000.0
+    },
+    {
+      "year": "2022",
+      "sales": 3923177808000.0,
+      "operating_profit": 60030394000.0,
+      "net_profit": -13526215000.0,
+      "total_assets": 3185133373000.0
+    },
+    {
+      "year": "2023",
+      "sales": 2629493454000.0,
+      "operating_profit": -11033826000.0,
+      "net_profit": 1100908213000.0,
+      "total_assets": 5051682271000.0
+    },
+    {
+      "year": "2024",
+      "sales": 7409277127000.0,
+      "operating_profit": 198099994000.0,
+      "net_profit": 93097203000.0,
+      "total_assets": null
+    },
+    {
+      "year": "2025",
+      "sales": 8091605017000.0,
+      "operating_profit": 274073694000.0,
+      "net_profit": 411983219000.0,
+      "total_assets": null
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 17,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 13,
+    "stageDiversity": 10,
+    "topSupplyIndustries": [
+      [
+        "paper",
+        3
+      ],
+      [
+        "retail",
+        2
+      ],
+      [
+        "chemical",
+        2
+      ],
+      [
+        "construction",
+        1
+      ],
+      [
+        "auto",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        5
+      ],
+      [
+        "raw",
+        2
+      ],
+      [
+        "polymer",
+        2
+      ],
+      [
+        "retail",
+        1
+      ],
+      [
+        "wholesale",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "069960",
+      "corpName": "현대백화점",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "453340",
+      "corpName": "현대그린푸드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "001070",
+      "corpName": "대한방직",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "041440",
+      "corpName": "현대에버다임",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "048410",
+      "corpName": "현대바이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "079430",
+      "corpName": "현대리바트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "009830",
+      "corpName": "한화솔루션",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "025900",
+      "corpName": "동화기업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "023590",
+      "corpName": "다우기술",
+      "stage": "general",
+      "revenue": 174950
+    },
+    {
+      "stockCode": "058650",
+      "corpName": "세아홀딩스",
+      "stage": "general",
+      "revenue": 66111
+    },
+    {
+      "stockCode": "034810",
+      "corpName": "해성산업",
+      "stage": "general",
+      "revenue": 22601
+    },
+    {
+      "stockCode": "002990",
+      "corpName": "금호건설",
+      "stage": "general",
+      "revenue": 20185
+    },
+    {
+      "stockCode": "006060",
+      "corpName": "화승인더스트리",
+      "stage": "general",
+      "revenue": 17810
+    }
   ]
 }

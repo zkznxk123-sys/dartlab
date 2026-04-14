@@ -687,5 +687,237 @@
       "source": "network",
       "evidence": "단순투자 지분 0.2%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "주의 신호: 운전자본 팽창 -> 현금 고갈 -> 유동성 위기.\n순운전자본이 +18.9% 팽창하며 현금이 묶이고 있다. 영업CF/순이익 비율이 -424%로 이익 대비 현금 회수가 부족하고, 유동비율도 1.23에서 1.19로 하락했다.",
+    "strengths": [
+      "DCF 안전마진 549% -- 저평가 가능"
+    ],
+    "weaknesses": [
+      "운전자본 팽창 -> 현금 고갈 -> 유동성 위기",
+      "재고자산 27% — 재고 비대화 주의",
+      "CCC 367일 — 현금 회수 매우 느림"
+    ],
+    "sector": "산업재 > 기계",
+    "source": "audit",
+    "createdAt": "1775430966.5562322"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 13089102000000.0,
+      "operating_profit": 583656000000.0,
+      "net_profit": 74344000000.0,
+      "total_assets": 12625931000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 17491338000000.0,
+      "operating_profit": 670941000000.0,
+      "net_profit": 53925000000.0,
+      "total_assets": 16813978000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 24480743000000.0,
+      "operating_profit": 899674000000.0,
+      "net_profit": 570596000000.0,
+      "total_assets": 18245954000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 27544663000000.0,
+      "operating_profit": 1072943000000.0,
+      "net_profit": 0.0,
+      "total_assets": 20527939000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 31870031000000.0,
+      "operating_profit": 1052554000000.0,
+      "net_profit": 270815000000.0,
+      "total_assets": 24994792000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 8,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 6,
+    "stageDiversity": 6,
+    "topSupplyIndustries": [
+      [
+        "machinery",
+        3
+      ],
+      [
+        "leisure",
+        1
+      ],
+      [
+        "media",
+        1
+      ],
+      [
+        "retail",
+        1
+      ],
+      [
+        "energy",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "special",
+        2
+      ],
+      [
+        "general",
+        1
+      ],
+      [
+        "agency",
+        1
+      ],
+      [
+        "wholesale",
+        1
+      ],
+      [
+        "distribution",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "365900",
+      "corpName": "브이씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "322180",
+      "corpName": "LS티라유텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "000500",
+      "corpName": "가온전선",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "417200",
+      "corpName": "LS머트리얼즈",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "060370",
+      "corpName": "LS마린솔루션",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "023160",
+      "corpName": "태광",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "217590",
+      "corpName": "티엠씨",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    },
+    {
+      "stockCode": "014680",
+      "corpName": "한솔케미칼",
+      "stage": "precision",
+      "revenue": 8840
+    }
   ]
 }

@@ -936,5 +936,242 @@
       "source": "network",
       "evidence": "기타 지분 0.1%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "내부유보 비중 79% — 자기 힘으로 성장",
+    "strengths": [
+      "내부유보 비중 79% — 자기 힘으로 성장",
+      "순현금 상태",
+      "Piotroski F 재무 건전 (9/9)",
+      "DCF 안전마진 34% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출 고집중 (HHI 5,050) -- 단일 부문 의존",
+      "유동성 위기 (유동비율 99%)",
+      "Altman Z 부실 경계 (1.76)"
+    ],
+    "sector": "에너지 > 석유와가스",
+    "source": "audit",
+    "createdAt": "1775430966.5752547"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 20240085000000.0,
+      "operating_profit": 2640272000000.0,
+      "net_profit": 0.0,
+      "total_assets": 31191287000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 28777048000000.0,
+      "operating_profit": 5005127000000.0,
+      "net_profit": 2142967000000.0,
+      "total_assets": 33922242000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 25978494000000.0,
+      "operating_profit": 3721802000000.0,
+      "net_profit": 1578711000000.0,
+      "total_assets": 34448425000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 25297467000000.0,
+      "operating_profit": 3060163000000.0,
+      "net_profit": 567020000000.0,
+      "total_assets": 35063398000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 25184127000000.0,
+      "operating_profit": 2936061000000.0,
+      "net_profit": 1038137000000.0,
+      "total_assets": 35707911000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 15,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 8,
+    "stageDiversity": 9,
+    "topSupplyIndustries": [
+      [
+        "food",
+        3
+      ],
+      [
+        "chemical",
+        3
+      ],
+      [
+        "energy",
+        3
+      ],
+      [
+        "steel",
+        2
+      ],
+      [
+        "software",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        3
+      ],
+      [
+        "distribution",
+        3
+      ],
+      [
+        "polymer",
+        2
+      ],
+      [
+        "platform",
+        1
+      ],
+      [
+        "processing",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "261520",
+      "corpName": "이지스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "003680",
+      "corpName": "한성기업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "036640",
+      "corpName": "HRS",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "038680",
+      "corpName": "에스넷",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "001250",
+      "corpName": "GS글로벌",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    },
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "stage": "basic",
+      "revenue": 184830
+    }
   ]
 }

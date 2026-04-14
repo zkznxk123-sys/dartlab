@@ -889,5 +889,179 @@
       "source": "network",
       "evidence": "기타 지분 0.0%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "[개선/높음] 물류가 아니라 배 회사. PCC선 98척. 해운이 영업이익 36%.",
+    "strengths": [
+      "PCC선 98척 글로벌 1위",
+      "영업이익 2조"
+    ],
+    "weaknesses": [
+      "현대차 의존",
+      "해운 사이클"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2608218"
+  },
+  "blogPosts": [
+    {
+      "slug": "15-086280-hyundai-glovis",
+      "title": "현대글로비스 (086280) — 물류회사 장부에 로봇과 경쟁사의 차가 숨어있다",
+      "description": "매출 29.6조, 영업이익 2.07조. 물류업 OPM 7%는 CJ대한통운(4.4%)의 1.6배. 현대차 경쟁사 BYD의 차를 현대가 실어 나르고, 보스턴다이내믹스 지분 3.3조가 장부에 숨어있다. PCC선 98척으로 글로벌 1위를 향하는 현대글로비스의 재무제표를 추적한다.",
+      "date": "2026-04-11",
+      "grade": "dCR 미산출",
+      "storyTemplate": "성장 + 지주",
+      "verdict": "물류가 아니라 배 회사. PCC선 98척. 해운이 영업이익 36%.",
+      "direction": "개선",
+      "confidence": "높음",
+      "archetype": "성장",
+      "strengths": [
+        "PCC선 98척 글로벌 1위",
+        "영업이익 2조"
+      ],
+      "weaknesses": [
+        "현대차 의존",
+        "해운 사이클"
+      ],
+      "keyMetrics": {
+        "revenue": 2.96,
+        "opm": 7.0,
+        "roe": 0.0,
+        "fcf": 0.4
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/086280-hyundai-glovis.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 21779581931003.0,
+      "operating_profit": 1126245705403.0,
+      "net_profit": 278855829.0,
+      "total_assets": 12170928242765.0
+    },
+    {
+      "year": "2022",
+      "sales": 26981880971123.0,
+      "operating_profit": 1798516596130.0,
+      "net_profit": 1192805576043.0,
+      "total_assets": 13877784500296.0
+    },
+    {
+      "year": "2023",
+      "sales": 25683197164064.0,
+      "operating_profit": 1554032510087.0,
+      "net_profit": 1061133294855.0,
+      "total_assets": 14725019903938.0
+    },
+    {
+      "year": "2024",
+      "sales": 28407374301315.0,
+      "operating_profit": 1752867442226.0,
+      "net_profit": 1093860048142.0,
+      "total_assets": 16849145438725.0
+    },
+    {
+      "year": "2025",
+      "sales": 29566409336616.0,
+      "operating_profit": 2073007545910.0,
+      "net_profit": 1734697253045.0,
+      "total_assets": 18587219950287.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "product": "",
+      "amount": 42690.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000300",
+      "corpName": "DH오토넥스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "003490",
+      "corpName": "대한항공",
+      "stage": "general",
+      "revenue": 252255
+    },
+    {
+      "stockCode": "028670",
+      "corpName": "팬오션",
+      "stage": "general",
+      "revenue": 54329
+    },
+    {
+      "stockCode": "002320",
+      "corpName": "한진",
+      "stage": "general",
+      "revenue": 30649
+    },
+    {
+      "stockCode": "089860",
+      "corpName": "롯데렌탈",
+      "stage": "",
+      "revenue": 29188
+    },
+    {
+      "stockCode": "004360",
+      "corpName": "세방",
+      "stage": "general",
+      "revenue": 12418
+    }
   ]
 }

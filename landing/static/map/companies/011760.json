@@ -408,5 +408,187 @@
       "source": "network",
       "evidence": "단순투자 지분 2.0%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "[악화/높음] 상사 매출 7.5조 OPM 1.85%. 순이익 868억인데 영업CF -2947억.",
+    "strengths": [
+      "종합상사 전환 시도",
+      "자원개발 포트폴리오"
+    ],
+    "weaknesses": [
+      "상사 마진 최악",
+      "현금흐름 음수"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2793791"
+  },
+  "blogPosts": [
+    {
+      "slug": "24-011760-hyundai-corp",
+      "title": "현대코퍼레이션 (011760) — 종합상사가 영업이익 4배? 이 회사는 무역회사가 아니다",
+      "description": "2025년 영업이익 1,401억, 전년 대비 +400%. 종합상사 시대는 끝났다던데 이 숫자는 뭔가. 사실 현대코퍼레이션은 무역 매출의 절반만 자기 매출이고 나머지는 자원개발/철강/물류 자회사에서 나온다. 정몽혁 회장(정몽구 사촌)의 개인 지배 회사가 만들어가는 상사의 다음 모델.",
+      "date": "2026-04-12",
+      "grade": "dCR 미산출",
+      "storyTemplate": "성장",
+      "verdict": "상사 매출 7.5조 OPM 1.85%. 순이익 868억인데 영업CF -2947억.",
+      "direction": "악화",
+      "confidence": "높음",
+      "archetype": "성장",
+      "strengths": [
+        "종합상사 전환 시도",
+        "자원개발 포트폴리오"
+      ],
+      "weaknesses": [
+        "상사 마진 최악",
+        "현금흐름 음수"
+      ],
+      "keyMetrics": {
+        "revenue": 7.55,
+        "opm": 1.85,
+        "roe": 0.0,
+        "fcf": -0.29
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/011760-hyundai-corp.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3782497523034.0,
+      "operating_profit": 35069901698.0,
+      "net_profit": 38005996297.0,
+      "total_assets": 1707383175608.0
+    },
+    {
+      "year": "2022",
+      "sales": 6126968751169.0,
+      "operating_profit": 66827508014.0,
+      "net_profit": 78715077815.0,
+      "total_assets": 1831301801553.0
+    },
+    {
+      "year": "2023",
+      "sales": 6580447881815.0,
+      "operating_profit": 99330569136.0,
+      "net_profit": 83387483943.0,
+      "total_assets": 2059712572964.0
+    },
+    {
+      "year": "2024",
+      "sales": 6995662947758.0,
+      "operating_profit": 133529291485.0,
+      "net_profit": 0.0,
+      "total_assets": 2062309184431.0
+    },
+    {
+      "year": "2025",
+      "sales": 7554286077242.0,
+      "operating_profit": 140131311551.0,
+      "net_profit": null,
+      "total_assets": 2324710834164.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "finance",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "securities",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "160550",
+      "corpName": "NEW",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "139990",
+      "corpName": "아주스틸",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "227840",
+      "corpName": "현대코퍼레이션홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "460850",
+      "corpName": "동국씨엠",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "375500",
+      "corpName": "DL이앤씨",
+      "stage": "general",
+      "revenue": 74024
+    }
   ]
 }

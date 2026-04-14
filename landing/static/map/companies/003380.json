@@ -299,5 +299,164 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 10808699503695.0,
+      "operating_profit": 744588607216.0,
+      "net_profit": 311757621040.0,
+      "total_assets": 11578947867846.0
+    },
+    {
+      "year": "2022",
+      "sales": 13775295981364.0,
+      "operating_profit": 941306774707.0,
+      "net_profit": 325052342650.0,
+      "total_assets": 13268988298801.0
+    },
+    {
+      "year": "2023",
+      "sales": 12062362764029.0,
+      "operating_profit": 567544768592.0,
+      "net_profit": 37052772011.0,
+      "total_assets": 13385071963493.0
+    },
+    {
+      "year": "2024",
+      "sales": 12272959000000.0,
+      "operating_profit": 765480000000.0,
+      "net_profit": 174817000000.0,
+      "total_assets": 16078958000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 13214884000000.0,
+      "operating_profit": 887427000000.0,
+      "net_profit": 229743000000.0,
+      "total_assets": 17008288000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "food",
+        3
+      ],
+      [
+        "logistics",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        3
+      ],
+      [
+        "general",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "136480",
+      "corpName": "하림",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "136490",
+      "corpName": "선진",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "028670",
+      "corpName": "팬오션",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "036580",
+      "corpName": "팜스코",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "353810",
+      "corpName": "이지바이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    },
+    {
+      "stockCode": "006040",
+      "corpName": "동원산업",
+      "stage": "securities",
+      "revenue": 95837
+    }
   ]
 }

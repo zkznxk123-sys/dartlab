@@ -234,5 +234,176 @@
       "source": "docs",
       "evidence": "IX. 계열회사 등에 관한 사항"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 4205969181748.0,
+      "operating_profit": 163034063085.0,
+      "net_profit": 53851814419.0,
+      "total_assets": 3626092434065.0
+    },
+    {
+      "year": "2022",
+      "sales": 5226659820074.0,
+      "operating_profit": 143809242039.0,
+      "net_profit": 32222647741.0,
+      "total_assets": 4015327448810.0
+    },
+    {
+      "year": "2023",
+      "sales": 5259400430149.0,
+      "operating_profit": 114614891500.0,
+      "net_profit": 65516157066.0,
+      "total_assets": 4159485425647.0
+    },
+    {
+      "year": "2024",
+      "sales": 5357890370159.0,
+      "operating_profit": 184029822016.0,
+      "net_profit": 20359268263.0,
+      "total_assets": 4418554230618.0
+    },
+    {
+      "year": "2025",
+      "sales": 5628798766399.0,
+      "operating_profit": 199828484303.0,
+      "net_profit": -293172577001.0,
+      "total_assets": 4391788005285.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 3574.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 4,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "food",
+        2
+      ],
+      [
+        "steel",
+        1
+      ],
+      [
+        "paper",
+        1
+      ],
+      [
+        "construction",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "product",
+        1
+      ],
+      [
+        "general",
+        1
+      ],
+      [
+        "raw",
+        1
+      ],
+      [
+        "distribution",
+        1
+      ],
+      [
+        "material",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "product": "",
+      "amount": 3574.0,
+      "ratio": 13.2,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "026960",
+      "corpName": "동서",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "270870",
+      "corpName": "뉴트리",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "010780",
+      "corpName": "아이에스동서",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "023410",
+      "corpName": "유진기업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
   ]
 }

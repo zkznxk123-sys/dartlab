@@ -534,5 +534,218 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "사외이사비율 57% -- 이사회 독립성 양호",
+    "strengths": [
+      "사외이사비율 57% -- 이사회 독립성 양호",
+      "DCF 안전마진 69% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "이자보상 주의 (1.7배)",
+      "유동성 위기 (유동비율 77%)",
+      "Altman Z 부실 경계 (1.38)"
+    ],
+    "sector": "필수소비재 > 식품,음료,담배",
+    "source": "audit",
+    "createdAt": "1775430966.5332184"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 34484026554000.0,
+      "operating_profit": 1881800099000.0,
+      "net_profit": 274974387000.0,
+      "total_assets": 41955995804000.0
+    },
+    {
+      "year": "2022",
+      "sales": 40924879773000.0,
+      "operating_profit": 2154201790000.0,
+      "net_profit": 484775835000.0,
+      "total_assets": 48240408307000.0
+    },
+    {
+      "year": "2023",
+      "sales": 41352688159000.0,
+      "operating_profit": 2039057889000.0,
+      "net_profit": 194790703000.0,
+      "total_assets": 47203762893000.0
+    },
+    {
+      "year": "2024",
+      "sales": 43646656090000.0,
+      "operating_profit": 2547483645000.0,
+      "net_profit": 0.0,
+      "total_assets": 47496993224000.0
+    },
+    {
+      "year": "2025",
+      "sales": 45018829227000.0,
+      "operating_profit": 2527738458000.0,
+      "net_profit": 0.0,
+      "total_assets": 46966393292000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 8,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 6,
+    "topSupplyIndustries": [
+      [
+        "food",
+        4
+      ],
+      [
+        "media",
+        2
+      ],
+      [
+        "construction",
+        1
+      ],
+      [
+        "energy",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "content",
+        2
+      ],
+      [
+        "raw",
+        1
+      ],
+      [
+        "processing",
+        1
+      ],
+      [
+        "material",
+        1
+      ],
+      [
+        "distribution",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "035760",
+      "corpName": "CJ ENM",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "253450",
+      "corpName": "스튜디오드래곤",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "051500",
+      "corpName": "CJ프레시웨이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "023410",
+      "corpName": "유진기업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "011150",
+      "corpName": "CJ씨푸드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    },
+    {
+      "stockCode": "280360",
+      "corpName": "롯데웰푸드",
+      "stage": "raw",
+      "revenue": 42160
+    }
   ]
 }

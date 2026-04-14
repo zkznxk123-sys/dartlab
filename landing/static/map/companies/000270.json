@@ -741,5 +741,258 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "[악화/높음] 매출 107.4조로 현대차의 61%이지만 OPM 11.8%로 3.7%p 높았다. 2025년 판관비 폭증으로 OPM 8.0%까지 하락. 순현금 11.9조, 영업CF 항상 플러스.",
+    "strengths": [
+      "OPM 11.8%(2024) 현대차 대비 +3.7%p",
+      "순현금 11.9조",
+      "영업CF 5년 연속 플러스"
+    ],
+    "weaknesses": [
+      "판관비 4배 폭증(3.3→13.4조)",
+      "OPM 11.8%→8.0% 급락",
+      "관세 25% 연간 3.3조 부담"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2942414"
+  },
+  "blogPosts": [
+    {
+      "slug": "32-000270-kia",
+      "title": "기아 — 매출은 형의 60%인데 이익은 90%, 왜 동생이 더 잘 버는가",
+      "description": "매출 114조, 형(현대차) 175조의 60%. 그런데 영업이익은 12.7조 vs 14.2조로 89%. 같은 플랫폼, 같은 연구소인데 영업이익률이 3.7%포인트 높다. 디자인 혁신, 판관비 4배 폭증, 순현금 12조, 시총 역전.",
+      "date": "2026-04-13",
+      "grade": "",
+      "storyTemplate": "프랜차이즈",
+      "verdict": "매출 107.4조로 현대차의 61%이지만 OPM 11.8%로 3.7%p 높았다. 2025년 판관비 폭증으로 OPM 8.0%까지 하락. 순현금 11.9조, 영업CF 항상 플러스.",
+      "direction": "악화",
+      "confidence": "높음",
+      "archetype": "프랜차이즈",
+      "strengths": [
+        "OPM 11.8%(2024) 현대차 대비 +3.7%p",
+        "순현금 11.9조",
+        "영업CF 5년 연속 플러스"
+      ],
+      "weaknesses": [
+        "판관비 4배 폭증(3.3→13.4조)",
+        "OPM 11.8%→8.0% 급락",
+        "관세 25% 연간 3.3조 부담"
+      ],
+      "keyMetrics": {
+        "revenue": 114.1,
+        "opm": 8.0,
+        "netCash": 11.9,
+        "ocf": 9.1
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/000270-kia.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 69862366000000.0,
+      "operating_profit": 5065685000000.0,
+      "net_profit": 4760311000000.0,
+      "total_assets": 66849997000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 86559029000000.0,
+      "operating_profit": 7233120000000.0,
+      "net_profit": 5408976000000.0,
+      "total_assets": 73710965000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 99808420000000.0,
+      "operating_profit": 11607873000000.0,
+      "net_profit": 8777817000000.0,
+      "total_assets": 80627826000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 107448752000000.0,
+      "operating_profit": 12667139000000.0,
+      "net_profit": 9775005000000.0,
+      "total_assets": 92755874000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 114140919000000.0,
+      "operating_profit": 9078148000000.0,
+      "net_profit": 7554174000000.0,
+      "total_assets": 98979055000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 8,
+    "customerCount": 0,
+    "preciseEdgeCount": 3,
+    "totalSupplyAmount": 1017262.0,
+    "hhi": 4607.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 47.9,
+    "top3Ratio": 100.0,
+    "industryDiversity": 4,
+    "stageDiversity": 7,
+    "topSupplyIndustries": [
+      [
+        "auto",
+        5
+      ],
+      [
+        "logistics",
+        1
+      ],
+      [
+        "shipbuilding",
+        1
+      ],
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "oem",
+        2
+      ],
+      [
+        "chassis",
+        1
+      ],
+      [
+        "general",
+        1
+      ],
+      [
+        "build",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "product": "",
+      "amount": 487286.0,
+      "ratio": 91.4,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "011210",
+      "corpName": "현대위아",
+      "product": "",
+      "amount": 487286.0,
+      "ratio": 91.4,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "086280",
+      "corpName": "현대글로비스",
+      "product": "",
+      "amount": 42690.0,
+      "ratio": 96.9,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "011200",
+      "corpName": "HMM",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "250060",
+      "corpName": "모비스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "015750",
+      "corpName": "성우하이텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "353590",
+      "corpName": "오토앤",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    },
+    {
+      "stockCode": "204320",
+      "corpName": "HL만도",
+      "stage": "chassis",
+      "revenue": 94548
+    }
   ]
 }

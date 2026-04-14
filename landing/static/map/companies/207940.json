@@ -1215,5 +1215,145 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1568006928039.0,
+      "operating_profit": 537309408072.0,
+      "net_profit": 0.0,
+      "total_assets": 7970010786863.0
+    },
+    {
+      "year": "2022",
+      "sales": 3001295197683.0,
+      "operating_profit": 983627394377.0,
+      "net_profit": 798056210082.0,
+      "total_assets": 16582050258486.0
+    },
+    {
+      "year": "2023",
+      "sales": 3694588767068.0,
+      "operating_profit": 1113680009715.0,
+      "net_profit": 0.0,
+      "total_assets": 16046197209196.0
+    },
+    {
+      "year": "2024",
+      "sales": 4547322176421.0,
+      "operating_profit": 1320052380133.0,
+      "net_profit": 0.0,
+      "total_assets": 17336296349511.0
+    },
+    {
+      "year": "2025",
+      "sales": 4556971695180.0,
+      "operating_profit": 2069221266630.0,
+      "net_profit": 0.0,
+      "total_assets": 11060741976837.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 4034.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "retail",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "wholesale",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "122900",
+      "corpName": "아이마켓코리아",
+      "product": "Filter 등",
+      "amount": 4034.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "214330",
+      "corpName": "금호에이치티",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "358570",
+      "corpName": "지아이이노베이션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "397030",
+      "corpName": "에이프릴바이오",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    },
+    {
+      "stockCode": "006280",
+      "corpName": "녹십자",
+      "stage": "formulation",
+      "revenue": 19913
+    }
   ]
 }

@@ -682,5 +682,138 @@
       "source": "network",
       "evidence": "단순투자 지분 0.0%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2422658838497.0,
+      "operating_profit": 245494852201.0,
+      "net_profit": -5171370313.0,
+      "total_assets": 6125007656105.0
+    },
+    {
+      "year": "2022",
+      "sales": 2738939589270.0,
+      "operating_profit": 308394412876.0,
+      "net_profit": -6062841706.0,
+      "total_assets": 6927204106064.0
+    },
+    {
+      "year": "2023",
+      "sales": 2752292105099.0,
+      "operating_profit": 305192202982.0,
+      "net_profit": 119991066833.0,
+      "total_assets": 6718109060318.0
+    },
+    {
+      "year": "2024",
+      "sales": 2792395464171.0,
+      "operating_profit": 284811996731.0,
+      "net_profit": 0.0,
+      "total_assets": 7006616781040.0
+    },
+    {
+      "year": "2025",
+      "sales": 2918751542343.0,
+      "operating_profit": 312502750438.0,
+      "net_profit": 127605882990.0,
+      "total_assets": 7348326627803.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ],
+      [
+        "finance",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "component",
+        1
+      ],
+      [
+        "bank",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "003620",
+      "corpName": "KG모빌리티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "044990",
+      "corpName": "에이치엔에스하이텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "086280",
+      "corpName": "현대글로비스",
+      "stage": "general",
+      "revenue": 295664
+    },
+    {
+      "stockCode": "003490",
+      "corpName": "대한항공",
+      "stage": "general",
+      "revenue": 252255
+    },
+    {
+      "stockCode": "028670",
+      "corpName": "팬오션",
+      "stage": "general",
+      "revenue": 54329
+    },
+    {
+      "stockCode": "002320",
+      "corpName": "한진",
+      "stage": "general",
+      "revenue": 30649
+    },
+    {
+      "stockCode": "004360",
+      "corpName": "세방",
+      "stage": "general",
+      "revenue": 12418
+    }
   ]
 }

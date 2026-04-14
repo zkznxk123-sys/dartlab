@@ -2932,5 +2932,227 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 24898005000000.0,
+      "operating_profit": 1671824000000.0,
+      "net_profit": 1459395000000.0,
+      "total_assets": 37159341000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 25650011000000.0,
+      "operating_profit": 1690088000000.0,
+      "net_profit": 1262498000000.0,
+      "total_assets": 40980681000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 26376273000000.0,
+      "operating_profit": 1649774000000.0,
+      "net_profit": 988718000000.0,
+      "total_assets": 42709982000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 26431204000000.0,
+      "operating_profit": 809471000000.0,
+      "net_profit": 0.0,
+      "total_assets": 41879957000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 28244161000000.0,
+      "operating_profit": 2469133000000.0,
+      "net_profit": 0.0,
+      "total_assets": 42948573000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "media",
+        1
+      ],
+      [
+        "telecom",
+        1
+      ],
+      [
+        "medicalDevice",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "content",
+        1
+      ],
+      [
+        "service",
+        1
+      ],
+      [
+        "imaging",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "035760",
+      "corpName": "CJ ENM",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "053210",
+      "corpName": "케이티스카이라이프",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "006040",
+      "corpName": "동원산업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "011790",
+      "corpName": "SKC",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "013720",
+      "corpName": "THE CUBE&",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "025540",
+      "corpName": "한국단자공업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "053210",
+      "corpName": "케이티스카이라이프",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "060370",
+      "corpName": "LS마린솔루션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "089600",
+      "corpName": "KT나스미디어",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "121060",
+      "corpName": "유니포인트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    },
+    {
+      "stockCode": "031820",
+      "corpName": "아이티센씨티에스",
+      "stage": "infra",
+      "revenue": 10952
+    }
   ]
 }

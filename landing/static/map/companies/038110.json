@@ -189,5 +189,138 @@
       "source": "docs",
       "evidence": "2. 계열회사 현황(상세)"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1517574986027.0,
+      "operating_profit": 15774824600.0,
+      "net_profit": 1038416607.0,
+      "total_assets": 683487201549.0
+    },
+    {
+      "year": "2022",
+      "sales": 1821519312265.0,
+      "operating_profit": 38516830106.0,
+      "net_profit": 23603633658.0,
+      "total_assets": 810930537123.0
+    },
+    {
+      "year": "2023",
+      "sales": 2160621914515.0,
+      "operating_profit": 72420507238.0,
+      "net_profit": 43673048050.0,
+      "total_assets": 988358418257.0
+    },
+    {
+      "year": "2024",
+      "sales": 2255119700370.0,
+      "operating_profit": 32889283467.0,
+      "net_profit": 13213450353.0,
+      "total_assets": 1307174745967.0
+    },
+    {
+      "year": "2025",
+      "sales": 2562025593000.0,
+      "operating_profit": 35744891000.0,
+      "net_profit": null,
+      "total_assets": 1696948724000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "media",
+        1
+      ],
+      [
+        "auto",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "content",
+        1
+      ],
+      [
+        "oem",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
   ]
 }

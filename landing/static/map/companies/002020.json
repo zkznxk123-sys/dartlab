@@ -1354,5 +1354,320 @@
       "source": "docs",
       "evidence": "IX. 계열회사 등에 관한 사항"
     }
+  ],
+  "aiInsight": {
+    "narrative": "DCF 안전마진 70% -- 저평가 가능",
+    "strengths": [
+      "DCF 안전마진 70% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출 고집중 (HHI 9,991) -- 단일 부문 의존",
+      "영업이익률 3기 연속 하락 (-15.6%)",
+      "영업적자 (-15.6%)"
+    ],
+    "sector": "금융 > 다각화된금융",
+    "source": "audit",
+    "createdAt": "1775430966.5416944"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 5410414957004.0,
+      "operating_profit": 332198227180.0,
+      "net_profit": 28417433533.0,
+      "total_assets": 3966282959333.0
+    },
+    {
+      "year": "2022",
+      "sales": 3090914187709.0,
+      "operating_profit": 310967816142.0,
+      "net_profit": 29644971658.0,
+      "total_assets": 4477491140077.0
+    },
+    {
+      "year": "2023",
+      "sales": 77895003586.0,
+      "operating_profit": 102926776246.0,
+      "net_profit": 8566289654.0,
+      "total_assets": 5231418956586.0
+    },
+    {
+      "year": "2024",
+      "sales": 6028363775125.0,
+      "operating_profit": -89552863444.0,
+      "net_profit": 157626660908.0,
+      "total_assets": 7040484502325.0
+    },
+    {
+      "year": "2025",
+      "sales": 5886133083763.0,
+      "operating_profit": 60501208348.0,
+      "net_profit": -296605779721.0,
+      "total_assets": 7446985208816.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 17,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 10,
+    "stageDiversity": 12,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        3
+      ],
+      [
+        "pharma",
+        3
+      ],
+      [
+        "food",
+        2
+      ],
+      [
+        "construction",
+        2
+      ],
+      [
+        "plastic",
+        2
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "basic",
+        2
+      ],
+      [
+        "raw",
+        2
+      ],
+      [
+        "general",
+        2
+      ],
+      [
+        "research",
+        2
+      ],
+      [
+        "processing",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "003240",
+      "corpName": "태광산업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "484590",
+      "corpName": "삼양컴텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004800",
+      "corpName": "효성",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "021820",
+      "corpName": "세원정공",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "060590",
+      "corpName": "씨티씨바이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "003070",
+      "corpName": "코오롱글로벌",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "120110",
+      "corpName": "코오롱인더",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "950160",
+      "corpName": "코오롱티슈진",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "000430",
+      "corpName": "대원강업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "001380",
+      "corpName": "SG글로벌",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "001620",
+      "corpName": "케이비아이동국실업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "002350",
+      "corpName": "넥센타이어",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "003070",
+      "corpName": "코오롱글로벌",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005070",
+      "corpName": "코스모신소재",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005420",
+      "corpName": "코스모화학",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005720",
+      "corpName": "넥센",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "007660",
+      "corpName": "이수페타시스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
   ]
 }

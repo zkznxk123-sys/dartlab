@@ -448,5 +448,241 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "내부유보 비중 136% — 자기 힘으로 성장",
+    "strengths": [
+      "내부유보 비중 136% — 자기 힘으로 성장",
+      "순현금 상태",
+      "DCF 안전마진 75% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "이익 변동계수 24.77 — 이익 변동성 높음",
+      "이자보상 심각 (0.9배)",
+      "Altman Z 부실 경계 (1.25)"
+    ],
+    "sector": "산업재 > 건설",
+    "source": "audit",
+    "createdAt": "1775430966.5260382"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2358774796779.0,
+      "operating_profit": 193162085397.0,
+      "net_profit": 728618667120.0,
+      "total_assets": 8180715293855.0
+    },
+    {
+      "year": "2022",
+      "sales": 5174950425108.0,
+      "operating_profit": 287459456441.0,
+      "net_profit": 101846515303.0,
+      "total_assets": 12018993889708.0
+    },
+    {
+      "year": "2023",
+      "sales": 5017815821242.0,
+      "operating_profit": 150696391721.0,
+      "net_profit": -120978168525.0,
+      "total_assets": null
+    },
+    {
+      "year": "2024",
+      "sales": 5615368498981.0,
+      "operating_profit": 412518392958.0,
+      "net_profit": 94839002886.0,
+      "total_assets": null
+    },
+    {
+      "year": "2025",
+      "sales": 5326721292281.0,
+      "operating_profit": 298546039560.0,
+      "net_profit": -96298295176.0,
+      "total_assets": null
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 16,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 8,
+    "stageDiversity": 9,
+    "topSupplyIndustries": [
+      [
+        "construction",
+        5
+      ],
+      [
+        "steel",
+        3
+      ],
+      [
+        "paper",
+        2
+      ],
+      [
+        "electronics",
+        2
+      ],
+      [
+        "buildingMaterials",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        5
+      ],
+      [
+        "material",
+        3
+      ],
+      [
+        "basic",
+        1
+      ],
+      [
+        "set",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "038500",
+      "corpName": "삼표시멘트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004440",
+      "corpName": "삼일씨엔에스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "006650",
+      "corpName": "대한유화",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "375500",
+      "corpName": "DL이앤씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "079430",
+      "corpName": "현대리바트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "034120",
+      "corpName": "SBS",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "023410",
+      "corpName": "유진기업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "009240",
+      "corpName": "한샘",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
   ]
 }

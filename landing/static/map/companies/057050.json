@@ -847,5 +847,216 @@
       "source": "network",
       "evidence": "단순투자 지분 0.1%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2209872707722.0,
+      "operating_profit": 128486910189.0,
+      "net_profit": 101664964613.0,
+      "total_assets": 2600338275866.0
+    },
+    {
+      "year": "2022",
+      "sales": 2101667569062.0,
+      "operating_profit": 110640961829.0,
+      "net_profit": 86322217345.0,
+      "total_assets": 2782027992185.0
+    },
+    {
+      "year": "2023",
+      "sales": 2064457266714.0,
+      "operating_profit": 59952400171.0,
+      "net_profit": 136205234371.0,
+      "total_assets": 3432527148806.0
+    },
+    {
+      "year": "2024",
+      "sales": 3853462322479.0,
+      "operating_profit": 130128245059.0,
+      "net_profit": null,
+      "total_assets": 5175067326608.0
+    },
+    {
+      "year": "2025",
+      "sales": 3789834264000.0,
+      "operating_profit": 130771283000.0,
+      "net_profit": 99012094000.0,
+      "total_assets": 4972561213000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 8,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 7,
+    "stageDiversity": 6,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        2
+      ],
+      [
+        "cosmetics",
+        1
+      ],
+      [
+        "telecom",
+        1
+      ],
+      [
+        "textile",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "polymer",
+        2
+      ],
+      [
+        "raw",
+        1
+      ],
+      [
+        "service",
+        1
+      ],
+      [
+        "apparel",
+        1
+      ],
+      [
+        "component",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "009830",
+      "corpName": "한화솔루션",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "048410",
+      "corpName": "현대바이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "052260",
+      "corpName": "현대바이오랜드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "126560",
+      "corpName": "현대퓨처넷",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "020000",
+      "corpName": "한섬",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "090460",
+      "corpName": "비에이치",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "083650",
+      "corpName": "비에이치아이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "005440",
+      "corpName": "현대지에프홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
   ]
 }

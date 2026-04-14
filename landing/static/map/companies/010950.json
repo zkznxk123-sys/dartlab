@@ -538,5 +538,193 @@
       "source": "network",
       "evidence": "단순투자 지분 0.0%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 27463918000000.0,
+      "operating_profit": 2140942000000.0,
+      "net_profit": 1378541000000.0,
+      "total_assets": 18693235000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 42446028000000.0,
+      "operating_profit": 3405166000000.0,
+      "net_profit": 2104387000000.0,
+      "total_assets": 19613135000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 35726694000000.0,
+      "operating_profit": 1354582000000.0,
+      "net_profit": 948848000000.0,
+      "total_assets": 21576123000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 36637031000000.0,
+      "operating_profit": 422177000000.0,
+      "net_profit": 0.0,
+      "total_assets": 24451433000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 34246957000000.0,
+      "operating_profit": 235631000000.0,
+      "net_profit": 176952000000.0,
+      "total_assets": 26556957000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "construction",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "engineering",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "272450",
+      "corpName": "진에어",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "002960",
+      "corpName": "한국쉘석유",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "003490",
+      "corpName": "대한항공",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "004870",
+      "corpName": "티웨이홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005950",
+      "corpName": "이수화학",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "006840",
+      "corpName": "AK홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "009830",
+      "corpName": "한화솔루션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "025000",
+      "corpName": "KPX케미칼",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "036000",
+      "corpName": "예림당",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    },
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "stage": "basic",
+      "revenue": 184830
+    }
   ]
 }

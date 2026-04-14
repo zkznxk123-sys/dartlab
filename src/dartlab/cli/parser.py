@@ -19,7 +19,6 @@ COMMAND_SPECS = (
     CommandSpec("modules", "dartlab.cli.commands.modules", "사용 가능한 데이터 모듈 목록"),
     # AI / 내보내기
     CommandSpec("ask", "dartlab.cli.commands.ask", "자연어 원스톱 AI 분석"),
-    CommandSpec("chat", "dartlab.cli.commands.chat", "대화형 AI 분석 REPL"),
     CommandSpec("report", "dartlab.cli.commands.report", "Markdown 분석 보고서 생성"),
     CommandSpec("excel", "dartlab.cli.commands.excel", "기업 데이터 Excel 내보내기"),
     # 분석

@@ -562,5 +562,92 @@
       "source": "network",
       "evidence": "단순투자 지분 0.2%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": null,
+      "operating_profit": -241445734017.0,
+      "net_profit": -338788006843.0,
+      "total_assets": 3785492375609.0
+    },
+    {
+      "year": "2022",
+      "sales": null,
+      "operating_profit": -76765794985.0,
+      "net_profit": -48350062847.0,
+      "total_assets": 3601468386488.0
+    },
+    {
+      "year": "2023",
+      "sales": 1545839243146.0,
+      "operating_profit": 49065796701.0,
+      "net_profit": -96175196527.0,
+      "total_assets": 3194214710432.0
+    },
+    {
+      "year": "2024",
+      "sales": 1957884214182.0,
+      "operating_profit": 75933768898.0,
+      "net_profit": null,
+      "total_assets": 3997014314732.0
+    },
+    {
+      "year": "2025",
+      "sales": 2275369359771.0,
+      "operating_profit": 96217499551.0,
+      "net_profit": null,
+      "total_assets": 4122622000546.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
   ]
 }

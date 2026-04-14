@@ -270,5 +270,92 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 6005522183889.0,
+      "operating_profit": 308204380275.0,
+      "net_profit": 133614656404.0,
+      "total_assets": 5537774298653.0
+    },
+    {
+      "year": "2022",
+      "sales": 6745801494898.0,
+      "operating_profit": 196126337931.0,
+      "net_profit": 156073095388.0,
+      "total_assets": 5919958905229.0
+    },
+    {
+      "year": "2023",
+      "sales": 6419203603021.0,
+      "operating_profit": 200772104770.0,
+      "net_profit": 131836418211.0,
+      "total_assets": 5789382238682.0
+    },
+    {
+      "year": "2024",
+      "sales": 6016826083760.0,
+      "operating_profit": 99186065812.0,
+      "net_profit": 0.0,
+      "total_assets": 6105540014922.0
+    },
+    {
+      "year": "2025",
+      "sales": 6611085565727.0,
+      "operating_profit": 175467417940.0,
+      "net_profit": 0.0,
+      "total_assets": 6190781950964.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "023590",
+      "corpName": "다우기술",
+      "stage": "general",
+      "revenue": 174950
+    },
+    {
+      "stockCode": "005440",
+      "corpName": "현대지에프홀딩스",
+      "stage": "general",
+      "revenue": 80916
+    },
+    {
+      "stockCode": "034810",
+      "corpName": "해성산업",
+      "stage": "general",
+      "revenue": 22601
+    },
+    {
+      "stockCode": "002990",
+      "corpName": "금호건설",
+      "stage": "general",
+      "revenue": 20185
+    },
+    {
+      "stockCode": "006060",
+      "corpName": "화승인더스트리",
+      "stage": "general",
+      "revenue": 17810
+    }
   ]
 }

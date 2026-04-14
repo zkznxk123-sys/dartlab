@@ -705,5 +705,168 @@
       "source": "network",
       "evidence": "단순투자 지분 0.0%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2355499705531.0,
+      "operating_profit": 372909907402.0,
+      "net_profit": 257704400534.0,
+      "total_assets": 3120428660902.0
+    },
+    {
+      "year": "2022",
+      "sales": 2873246771346.0,
+      "operating_profit": 466654503027.0,
+      "net_profit": 392351423524.0,
+      "total_assets": 3371683914220.0
+    },
+    {
+      "year": "2023",
+      "sales": 2912358051475.0,
+      "operating_profit": 492391149504.0,
+      "net_profit": 384981955249.0,
+      "total_assets": 3521385127842.0
+    },
+    {
+      "year": "2024",
+      "sales": 3104338576129.0,
+      "operating_profit": 543587778241.0,
+      "net_profit": 0.0,
+      "total_assets": 4308449797008.0
+    },
+    {
+      "year": "2025",
+      "sales": 3332442536373.0,
+      "operating_profit": 558258027192.0,
+      "net_profit": 0.0,
+      "total_assets": 4598663246300.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "food",
+        3
+      ],
+      [
+        "software",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        2
+      ],
+      [
+        "processing",
+        1
+      ],
+      [
+        "platform",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "145990",
+      "corpName": "삼양사",
+      "product": "유 지 류",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "280360",
+      "corpName": "롯데웰푸드",
+      "product": "유 지 류",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "007310",
+      "corpName": "오뚜기",
+      "product": "유 지 류",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "001800",
+      "corpName": "오리온홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "004710",
+      "corpName": "한솔테크닉스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
   ]
 }

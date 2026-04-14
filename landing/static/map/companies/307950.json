@@ -651,5 +651,131 @@
       "source": "network",
       "evidence": "기타"
     }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 매출 성장 + 마진 확대 + FCF 양수.\n매출이 +28.9% 성장하면서 영업이익률이 5.9%에서 6.3%로 확대되었다. FCF도 양수를 유지하여 질적 성장이 확인된다.",
+    "strengths": [
+      "매출 성장 + 마진 확대 + FCF 양수",
+      "순현금 상태",
+      "이자보상 우수 (21배)",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**"
+    ],
+    "weaknesses": [
+      "CCC 164일 — 현금 회수 매우 느림",
+      "FCF 적자 — 영업CF보다 투자가 큼",
+      "영업CF 3년 연속 감소"
+    ],
+    "sector": "IT > 소프트웨어와서비스",
+    "source": "audit",
+    "createdAt": "1775430966.5812533"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2070382112277.0,
+      "operating_profit": 96106277138.0,
+      "net_profit": 69811094404.0,
+      "total_assets": 2346122844458.0
+    },
+    {
+      "year": "2022",
+      "sales": 2754508002996.0,
+      "operating_profit": 142362193871.0,
+      "net_profit": 116170013150.0,
+      "total_assets": 2619436326622.0
+    },
+    {
+      "year": "2023",
+      "sales": 3065015134000.0,
+      "operating_profit": 181413573000.0,
+      "net_profit": 2548325000.0,
+      "total_assets": null
+    },
+    {
+      "year": "2024",
+      "sales": 3713617277000.0,
+      "operating_profit": 224434118000.0,
+      "net_profit": 170788484000.0,
+      "total_assets": null
+    },
+    {
+      "year": "2025",
+      "sales": 4252067261000.0,
+      "operating_profit": 255302187000.0,
+      "net_profit": 182484125000.0,
+      "total_assets": null
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "auto",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "oem",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
   ]
 }

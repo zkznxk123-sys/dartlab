@@ -826,5 +826,193 @@
       "source": "docs",
       "evidence": "3. 원재료 및 생산설비"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 33948864785000.0,
+      "operating_profit": 585385807000.0,
+      "net_profit": 356487962000.0,
+      "total_assets": 10770734147000.0
+    },
+    {
+      "year": "2022",
+      "sales": 37989588330000.0,
+      "operating_profit": 902507009000.0,
+      "net_profit": 0.0,
+      "total_assets": 12516336931000.0
+    },
+    {
+      "year": "2023",
+      "sales": 33132821374000.0,
+      "operating_profit": 1163112035000.0,
+      "net_profit": 0.0,
+      "total_assets": 16617748008000.0
+    },
+    {
+      "year": "2024",
+      "sales": 32340793124000.0,
+      "operating_profit": 1116921237000.0,
+      "net_profit": 0.0,
+      "total_assets": 17336325971000.0
+    },
+    {
+      "year": "2025",
+      "sales": 32373603908000.0,
+      "operating_profit": 1165316105000.0,
+      "net_profit": 614085020000.0,
+      "total_assets": 18753010588000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "energy",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "distribution",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "027710",
+      "corpName": "팜스토리",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "365330",
+      "corpName": "에스와이스틸텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "006360",
+      "corpName": "GS건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "020150",
+      "corpName": "롯데에너지머티리얼즈",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "036530",
+      "corpName": "SNT홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "038010",
+      "corpName": "제일테크노스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "064960",
+      "corpName": "SNT모티브",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "stage": "product",
+      "revenue": 32034
+    }
   ]
 }

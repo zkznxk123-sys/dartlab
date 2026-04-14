@@ -463,5 +463,197 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 4749508021023.0,
+      "operating_profit": 241515934058.0,
+      "net_profit": 136960474296.0,
+      "total_assets": 2575745971605.0
+    },
+    {
+      "year": "2022",
+      "sales": 2602076874673.0,
+      "operating_profit": 166687315258.0,
+      "net_profit": 142130138551.0,
+      "total_assets": 2834147586184.0
+    },
+    {
+      "year": "2023",
+      "sales": 2663480259991.0,
+      "operating_profit": 12788879964.0,
+      "net_profit": -400831210.0,
+      "total_assets": 2571300487925.0
+    },
+    {
+      "year": "2024",
+      "sales": 2911960747188.0,
+      "operating_profit": -56668787248.0,
+      "net_profit": 24098166328.0,
+      "total_assets": 2719945901907.0
+    },
+    {
+      "year": "2025",
+      "sales": 2684430963154.0,
+      "operating_profit": 3650749780.0,
+      "net_profit": -191179996023.0,
+      "total_assets": 2958310102203.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 5,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "retail",
+        1
+      ],
+      [
+        "finance",
+        1
+      ],
+      [
+        "steel",
+        1
+      ],
+      [
+        "construction",
+        1
+      ],
+      [
+        "software",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "retail",
+        1
+      ],
+      [
+        "securities",
+        1
+      ],
+      [
+        "raw",
+        1
+      ],
+      [
+        "material",
+        1
+      ],
+      [
+        "solution",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002020",
+      "corpName": "코오롱",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "023410",
+      "corpName": "유진기업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "001740",
+      "corpName": "SK네트웍스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "002020",
+      "corpName": "코오롱",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "251270",
+      "corpName": "넷마블",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
   ]
 }

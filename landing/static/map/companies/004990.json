@@ -1073,5 +1073,240 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "핵심 위험: 매출 하락 -> 마진 압박 -> 현금 악화.\n매출이 -0.3% 감소하며 영업이익률이 -1.9%에서 -2.8%로 하락했다. 영업현금흐름도 동반 감소하여 수익-현금 순환이 약화되고 있다.",
+    "strengths": [
+      "부채비율 145% -- 금융업 양호",
+      "DCF 안전마진 90% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출 하락 -> 마진 압박 -> 현금 악화",
+      "매출 중간 집중 (HHI 2,574)",
+      "FCF 적자 — 영업CF보다 투자가 큼"
+    ],
+    "sector": "금융 > 다각화된금융",
+    "source": "audit",
+    "createdAt": "1775430966.5542254"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 9924864014193.0,
+      "operating_profit": 216401073913.0,
+      "net_profit": 150433761012.0,
+      "total_assets": 19921883103681.0
+    },
+    {
+      "year": "2022",
+      "sales": 14111852309175.0,
+      "operating_profit": 489830602915.0,
+      "net_profit": 170760973538.0,
+      "total_assets": 22175416666050.0
+    },
+    {
+      "year": "2023",
+      "sales": 15159775895639.0,
+      "operating_profit": 493689284141.0,
+      "net_profit": -15357995337.0,
+      "total_assets": 23160430746458.0
+    },
+    {
+      "year": "2024",
+      "sales": 15756975627179.0,
+      "operating_profit": 340468760521.0,
+      "net_profit": -946077909988.0,
+      "total_assets": 22660277693897.0
+    },
+    {
+      "year": "2025",
+      "sales": 15539626589471.0,
+      "operating_profit": 239439333968.0,
+      "net_profit": -595003287583.0,
+      "total_assets": 23071072297336.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 20,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 10,
+    "stageDiversity": 11,
+    "topSupplyIndustries": [
+      [
+        "food",
+        6
+      ],
+      [
+        "chemical",
+        4
+      ],
+      [
+        "energy",
+        2
+      ],
+      [
+        "retail",
+        2
+      ],
+      [
+        "textile",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        6
+      ],
+      [
+        "polymer",
+        2
+      ],
+      [
+        "generation",
+        2
+      ],
+      [
+        "retail",
+        2
+      ],
+      [
+        "apparel",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "280360",
+      "corpName": "롯데웰푸드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "001790",
+      "corpName": "대한제당",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "272550",
+      "corpName": "삼양패키징",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "0007C0",
+      "corpName": "아크릴",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "005300",
+      "corpName": "롯데칠성음료",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004000",
+      "corpName": "롯데정밀화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    },
+    {
+      "stockCode": "006040",
+      "corpName": "동원산업",
+      "stage": "securities",
+      "revenue": 95837
+    }
   ]
 }

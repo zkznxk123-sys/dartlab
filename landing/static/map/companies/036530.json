@@ -275,5 +275,172 @@
       "source": "network",
       "evidence": "기타 지분 0.1%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1404072098504.0,
+      "operating_profit": 125567101979.0,
+      "net_profit": 77214851957.0,
+      "total_assets": 2372324440132.0
+    },
+    {
+      "year": "2022",
+      "sales": 1629520924776.0,
+      "operating_profit": 144692982304.0,
+      "net_profit": 64162663304.0,
+      "total_assets": 2558426986621.0
+    },
+    {
+      "year": "2023",
+      "sales": 1895715059417.0,
+      "operating_profit": 178996899903.0,
+      "net_profit": 76949482243.0,
+      "total_assets": 2701797834311.0
+    },
+    {
+      "year": "2024",
+      "sales": 1820513622453.0,
+      "operating_profit": 231159021166.0,
+      "net_profit": 246510750990.0,
+      "total_assets": 2832564017795.0
+    },
+    {
+      "year": "2025",
+      "sales": 2235693848887.0,
+      "operating_profit": 300655857307.0,
+      "net_profit": 129921212176.0,
+      "total_assets": 3262277587123.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "machinery",
+        2
+      ],
+      [
+        "steel",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ],
+      [
+        "battery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        1
+      ],
+      [
+        "special",
+        1
+      ],
+      [
+        "component",
+        1
+      ],
+      [
+        "cell",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "100840",
+      "corpName": "SNT에너지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "003570",
+      "corpName": "SNT다이내믹스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "064960",
+      "corpName": "SNT모티브",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "278990",
+      "corpName": "EMB",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
   ]
 }

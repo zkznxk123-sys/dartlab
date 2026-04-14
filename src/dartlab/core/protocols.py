@@ -134,19 +134,6 @@ class CompanyProtocol(Protocol):
         """LLM에게 기업 분석 질문."""
         ...
 
-    def chat(
-        self,
-        question: str,
-        *,
-        provider: str | None = None,
-        model: str | None = None,
-        max_turns: int = 5,
-        **kwargs: Any,
-    ) -> str:
-        """에이전트 모드 대화형 분석."""
-        ...
-
-
 @runtime_checkable
 class DocsProtocol(Protocol):
     """docs namespace 공통 인터페이스."""

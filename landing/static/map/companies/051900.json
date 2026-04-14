@@ -991,5 +991,177 @@
       "source": "network",
       "evidence": "단순투자 지분 5.1%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 8091511297961.0,
+      "operating_profit": 1289630423605.0,
+      "net_profit": 861127851880.0,
+      "total_assets": 7555239417717.0
+    },
+    {
+      "year": "2022",
+      "sales": 7185759184335.0,
+      "operating_profit": 711122934369.0,
+      "net_profit": 21767621073.0,
+      "total_assets": 7302929652203.0
+    },
+    {
+      "year": "2023",
+      "sales": 6804839370129.0,
+      "operating_profit": 486981224742.0,
+      "net_profit": 20768740624.0,
+      "total_assets": 7220285811725.0
+    },
+    {
+      "year": "2024",
+      "sales": 6811918756741.0,
+      "operating_profit": 459045912180.0,
+      "net_profit": 0.0,
+      "total_assets": null
+    },
+    {
+      "year": "2025",
+      "sales": 6355489977342.0,
+      "operating_profit": 170688596929.0,
+      "net_profit": -85778983809.0,
+      "total_assets": null
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 6,
+    "customerCount": 0,
+    "preciseEdgeCount": 3,
+    "totalSupplyAmount": 6359.0,
+    "hhi": 3759.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 41.8,
+    "top3Ratio": 100.0,
+    "industryDiversity": 4,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "cosmetics",
+        3
+      ],
+      [
+        "food",
+        1
+      ],
+      [
+        "realestate",
+        1
+      ],
+      [
+        "plastic",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        2
+      ],
+      [
+        "general",
+        2
+      ],
+      [
+        "manufacturing",
+        2
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "005950",
+      "corpName": "이수화학",
+      "product": "소다회, AOS, 우지, Palm Stearin Oil 등",
+      "amount": 2655.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "023450",
+      "corpName": "동남합성",
+      "product": "소다회, AOS, 우지, Palm Stearin Oil 등",
+      "amount": 2655.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "265740",
+      "corpName": "엔에프씨",
+      "product": "스쿠알란, 알부틴, Macadamia Oil 등",
+      "amount": 1049.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "257990",
+      "corpName": "나우코스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "064400",
+      "corpName": "LG씨엔에스",
+      "stage": "module",
+      "revenue": 61295
+    }
   ]
 }

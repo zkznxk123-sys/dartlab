@@ -1141,5 +1141,316 @@
       "source": "network",
       "evidence": "단순투자 지분 0.0%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "[개선/높음] K9 세계 52% 점유. 수주잔고 37조. 삼성이 8400억에 버린 무기가 37조.",
+    "strengths": [
+      "K9 수출(폴란드 672문)",
+      "수주잔고 37조"
+    ],
+    "weaknesses": [
+      "부채비율 221%",
+      "정치적 리스크"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2472737"
+  },
+  "blogPosts": [
+    {
+      "slug": "07-012450-hanwha-aerospace",
+      "title": "한화에어로스페이스 (012450) — 삼성이 8,400억에 버린 무기가 수주잔고 37조가 됐다",
+      "description": "세계 자주포 시장 52%를 가졌는데 매출 1.6조. 이 모순이 깨진 건 폴란드가 672문을 주문한 순간이었다. 7년 뒤 매출 26.6조, 영업CF 4.1조. 부채비율 221%인데 은행 빚이 0원인 회사의 재무 구조.",
+      "date": "2026-04-09",
+      "grade": "dCR 미산출",
+      "storyTemplate": "성장 + 사이클",
+      "verdict": "K9 세계 52% 점유. 수주잔고 37조. 삼성이 8400억에 버린 무기가 37조.",
+      "direction": "개선",
+      "confidence": "높음",
+      "archetype": "사이클",
+      "strengths": [
+        "K9 수출(폴란드 672문)",
+        "수주잔고 37조"
+      ],
+      "weaknesses": [
+        "부채비율 221%",
+        "정치적 리스크"
+      ],
+      "keyMetrics": {
+        "revenue": 2.66,
+        "opm": 29.6,
+        "roe": 0.0,
+        "fcf": 0.4
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/012450-hanwha-aerospace.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 6415087932347.0,
+      "operating_profit": 383046885903.0,
+      "net_profit": 301762016281.0,
+      "total_assets": 11045830630560.0
+    },
+    {
+      "year": "2022",
+      "sales": 6539605817572.0,
+      "operating_profit": 377215126599.0,
+      "net_profit": -48799568388.0,
+      "total_assets": 15157301978809.0
+    },
+    {
+      "year": "2023",
+      "sales": 9359005981309.0,
+      "operating_profit": 691114682400.0,
+      "net_profit": 0.0,
+      "total_assets": null
+    },
+    {
+      "year": "2024",
+      "sales": 11240121484118.0,
+      "operating_profit": 1731878825342.0,
+      "net_profit": 240928189914.0,
+      "total_assets": null
+    },
+    {
+      "year": "2025",
+      "sales": 26702901249000.0,
+      "operating_profit": 3089320181000.0,
+      "net_profit": 1404962303000.0,
+      "total_assets": 53953669604000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 21,
+    "customerCount": 0,
+    "preciseEdgeCount": 5,
+    "totalSupplyAmount": 32599425.0,
+    "hhi": 2000.0,
+    "hhiRisk": "중간",
+    "top1Ratio": 20.0,
+    "top3Ratio": 60.0,
+    "industryDiversity": 12,
+    "stageDiversity": 11,
+    "topSupplyIndustries": [
+      [
+        "aerospace",
+        4
+      ],
+      [
+        "shipbuilding",
+        3
+      ],
+      [
+        "telecom",
+        3
+      ],
+      [
+        "steel",
+        2
+      ],
+      [
+        "machinery",
+        2
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        4
+      ],
+      [
+        "build",
+        3
+      ],
+      [
+        "infra",
+        3
+      ],
+      [
+        "defense",
+        2
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "강재, 기자재, 의장재 등",
+      "amount": 6519885.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "product": "강재, 기자재, 의장재 등",
+      "amount": 6519885.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "329180",
+      "corpName": "HD현대중공업",
+      "product": "강재, 기자재, 의장재 등",
+      "amount": 6519885.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "082740",
+      "corpName": "한화엔진",
+      "product": "강재, 기자재, 의장재 등",
+      "amount": 6519885.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "product": "강재, 기자재, 의장재 등",
+      "amount": 6519885.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "099320",
+      "corpName": "쎄트렉아이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "272210",
+      "corpName": "한화시스템",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "042660",
+      "corpName": "한화오션",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "005810",
+      "corpName": "풍산홀딩스",
+      "product": "화공품",
+      "amount": 6116.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "product": "",
+      "amount": 6116.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "258610",
+      "corpName": "케일럼",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "stage": "airframe",
+      "revenue": 747854
+    },
+    {
+      "stockCode": "020560",
+      "corpName": "아시아나항공",
+      "stage": "airline",
+      "revenue": 72668
+    },
+    {
+      "stockCode": "079550",
+      "corpName": "LIG넥스원",
+      "stage": "defense",
+      "revenue": 43069
+    },
+    {
+      "stockCode": "047810",
+      "corpName": "한국항공우주",
+      "stage": "airframe",
+      "revenue": 36964
+    },
+    {
+      "stockCode": "272210",
+      "corpName": "한화시스템",
+      "stage": "defense",
+      "revenue": 36642
+    }
   ]
 }

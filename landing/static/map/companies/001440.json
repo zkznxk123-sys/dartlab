@@ -279,5 +279,183 @@
       "source": "docs",
       "evidence": "3. 원재료 및 생산설비"
     }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 매출 성장 + 마진 확대 + FCF 양수.\n매출이 +21.0% 성장하면서 영업이익률이 2.6%에서 4.3%로 확대되었다. FCF도 양수를 유지하여 질적 성장이 확인된다.",
+    "strengths": [
+      "매출 성장 + 마진 확대 + FCF 양수",
+      "매출 고성장 (21.0%)",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**"
+    ],
+    "weaknesses": [
+      "영업레버리지(DOL) 4.7 — 매출 변동에 이익 민감",
+      "영업CF 3년 연속 감소",
+      "부채 3기 연속 증가 (최근 +62%)"
+    ],
+    "sector": "산업재 > 기계",
+    "source": "audit",
+    "createdAt": "1775430966.5366871"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1997709556000.0,
+      "operating_profit": 39462123000.0,
+      "net_profit": 28937337000.0,
+      "total_assets": 1420870615000.0
+    },
+    {
+      "year": "2022",
+      "sales": 2450545975000.0,
+      "operating_profit": 48173734000.0,
+      "net_profit": 0.0,
+      "total_assets": 1620264871000.0
+    },
+    {
+      "year": "2023",
+      "sales": 2843980012000.0,
+      "operating_profit": 79823888000.0,
+      "net_profit": 70616029000.0,
+      "total_assets": 1878565100000.0
+    },
+    {
+      "year": "2024",
+      "sales": null,
+      "operating_profit": 115169757000.0,
+      "net_profit": 0.0,
+      "total_assets": 2642726208000.0
+    },
+    {
+      "year": "2025",
+      "sales": 3636018215712.0,
+      "operating_profit": 128613046536.0,
+      "net_profit": 0.0,
+      "total_assets": 3493282185409.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "217590",
+      "corpName": "티엠씨",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "024840",
+      "corpName": "KBI메탈",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "032960",
+      "corpName": "동일기연",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "037330",
+      "corpName": "인지디스플레",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "091590",
+      "corpName": "남화토건",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "267260",
+      "corpName": "HD현대일렉트릭",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "010120",
+      "corpName": "엘에스일렉트릭",
+      "stage": "power",
+      "revenue": 49658
+    },
+    {
+      "stockCode": "015860",
+      "corpName": "일진홀딩스",
+      "stage": "power",
+      "revenue": 22827
+    },
+    {
+      "stockCode": "103590",
+      "corpName": "일진전기",
+      "stage": "power",
+      "revenue": 20446
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "stage": "cable",
+      "revenue": 6245
+    },
+    {
+      "stockCode": "023810",
+      "corpName": "인팩",
+      "stage": "cable",
+      "revenue": 5864
+    }
   ]
 }

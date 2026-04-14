@@ -1025,5 +1025,163 @@
       "source": "network",
       "evidence": "단순투자 지분 10.0%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 29878043000000.0,
+      "operating_profit": 2230608000000.0,
+      "net_profit": 0.0,
+      "total_assets": 38154515000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 26151781000000.0,
+      "operating_profit": -2085047000000.0,
+      "net_profit": -3071565000000.0,
+      "total_assets": 35686019000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 21330819000000.0,
+      "operating_profit": -2510164000000.0,
+      "net_profit": -2576729000000.0,
+      "total_assets": 35759298000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 26615347000000.0,
+      "operating_profit": -560596000000.0,
+      "net_profit": null,
+      "total_assets": 32859566000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 25810082000000.0,
+      "operating_profit": 516977000000.0,
+      "net_profit": 0.0,
+      "total_assets": 26916700000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 8773.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 4,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ],
+      [
+        "semiconductor",
+        1
+      ],
+      [
+        "finance",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "component",
+        1
+      ],
+      [
+        "design",
+        1
+      ],
+      [
+        "securities",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "092300",
+      "corpName": "현우산업",
+      "product": "PCB",
+      "amount": 8773.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "383800",
+      "corpName": "LX홀딩스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    },
+    {
+      "stockCode": "064400",
+      "corpName": "LG씨엔에스",
+      "stage": "module",
+      "revenue": 61295
+    }
   ]
 }

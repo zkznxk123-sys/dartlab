@@ -265,5 +265,134 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 매출 성장 + 마진 확대 + FCF 양수 / 비용 절감 + 자산 효율화 + ROE 상승.\n매출이 +80.0% 성장하면서 영업이익률이 -0.9%에서 3.9%로 확대되었다. FCF도 양수를 유지하여 질적 성장이 확인된다.",
+    "strengths": [
+      "매출 성장 + 마진 확대 + FCF 양수",
+      "비용 절감 + 자산 효율화 + ROE 상승",
+      "Piotroski F 재무 건전 (8/9)",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**"
+    ],
+    "weaknesses": [
+      "이자보상 주의 (1.9배)",
+      "Altman Z 부실 경계 (1.62)",
+      "CCC 737일 — 현금 회수 매우 느림"
+    ],
+    "sector": "에너지 > 에너지장비및서비스",
+    "source": "audit",
+    "createdAt": "1775430966.576256"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1203418059900.0,
+      "operating_profit": 100965948942.0,
+      "net_profit": 64744833476.0,
+      "total_assets": 1773903614452.0
+    },
+    {
+      "year": "2022",
+      "sales": 1374893317788.0,
+      "operating_profit": 42121940314.0,
+      "net_profit": -9830182561.0,
+      "total_assets": 1779540149764.0
+    },
+    {
+      "year": "2023",
+      "sales": 1520162115494.0,
+      "operating_profit": 104666101614.0,
+      "net_profit": -938650141.0,
+      "total_assets": 2832647674558.0
+    },
+    {
+      "year": "2024",
+      "sales": 3072529196695.0,
+      "operating_profit": 255481950329.0,
+      "net_profit": 1374327245.0,
+      "total_assets": 3609483010970.0
+    },
+    {
+      "year": "2025",
+      "sales": 2931648581449.0,
+      "operating_profit": 320323178301.0,
+      "net_profit": 34701475321.0,
+      "total_assets": 3216594965195.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "machinery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "297090",
+      "corpName": "씨에스베어링",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "stage": "generation",
+      "revenue": 974293
+    },
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "stage": "distribution",
+      "revenue": 357273
+    },
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "stage": "distribution",
+      "revenue": 52755
+    },
+    {
+      "stockCode": "071320",
+      "corpName": "지역난방공사",
+      "stage": "generation",
+      "revenue": 39982
+    },
+    {
+      "stockCode": "005090",
+      "corpName": "SGC에너지",
+      "stage": "generation",
+      "revenue": 24607
+    }
   ]
 }

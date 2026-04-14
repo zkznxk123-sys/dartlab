@@ -1349,5 +1349,225 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 6614328160700.0,
+      "operating_profit": 74366472698.0,
+      "net_profit": 212899093756.0,
+      "total_assets": 6881873214685.0
+    },
+    {
+      "year": "2022",
+      "sales": 8717115148765.0,
+      "operating_profit": 362228951564.0,
+      "net_profit": 427432392634.0,
+      "total_assets": 11780098492498.0
+    },
+    {
+      "year": "2023",
+      "sales": 8939216850779.0,
+      "operating_profit": 256702034546.0,
+      "net_profit": 191034756926.0,
+      "total_assets": 12250710294978.0
+    },
+    {
+      "year": "2024",
+      "sales": 9039602889123.0,
+      "operating_profit": 172557836004.0,
+      "net_profit": 0.0,
+      "total_assets": 15077692130416.0
+    },
+    {
+      "year": "2025",
+      "sales": 10164013989611.0,
+      "operating_profit": 361353559282.0,
+      "net_profit": 144626599785.0,
+      "total_assets": 16299659050645.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 13,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 5,
+    "stageDiversity": 6,
+    "topSupplyIndustries": [
+      [
+        "software",
+        6
+      ],
+      [
+        "chemical",
+        3
+      ],
+      [
+        "pharma",
+        2
+      ],
+      [
+        "realestate",
+        1
+      ],
+      [
+        "aerospace",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "platform",
+        4
+      ],
+      [
+        "basic",
+        3
+      ],
+      [
+        "solution",
+        2
+      ],
+      [
+        "research",
+        2
+      ],
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "003240",
+      "corpName": "태광산업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "018670",
+      "corpName": "SK가스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "302440",
+      "corpName": "SK바이오사이언스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "285130",
+      "corpName": "SK케미칼",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "210980",
+      "corpName": "SK디앤디",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "006650",
+      "corpName": "대한유화",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "183490",
+      "corpName": "엔지켐생명과학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "003160",
+      "corpName": "디아이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "475150",
+      "corpName": "SK이터닉스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    },
+    {
+      "stockCode": "018670",
+      "corpName": "SK가스",
+      "stage": "solution",
+      "revenue": 76763
+    }
   ]
 }

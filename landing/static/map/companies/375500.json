@@ -593,5 +593,234 @@
       "source": "network",
       "evidence": "단순투자 지분 0.0%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 7631650898582.0,
+      "operating_profit": 957257982914.0,
+      "net_profit": 577044183539.0,
+      "total_assets": 8701690202744.0
+    },
+    {
+      "year": "2022",
+      "sales": 7496823679468.0,
+      "operating_profit": 496965230080.0,
+      "net_profit": 431557865893.0,
+      "total_assets": 8974717444285.0
+    },
+    {
+      "year": "2023",
+      "sales": 7991063616680.0,
+      "operating_profit": 330659390232.0,
+      "net_profit": 187861736625.0,
+      "total_assets": 9344058758180.0
+    },
+    {
+      "year": "2024",
+      "sales": 8318442435057.0,
+      "operating_profit": 270944859542.0,
+      "net_profit": 229223745163.0,
+      "total_assets": 9712402219987.0
+    },
+    {
+      "year": "2025",
+      "sales": 7402425126660.0,
+      "operating_profit": 386953267819.0,
+      "net_profit": 0.0,
+      "total_assets": 9669288095980.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 12,
+    "customerCount": 0,
+    "preciseEdgeCount": 5,
+    "totalSupplyAmount": 414770.0,
+    "hhi": 2438.0,
+    "hhiRisk": "중간",
+    "top1Ratio": 33.1,
+    "top3Ratio": 78.4,
+    "industryDiversity": 6,
+    "stageDiversity": 6,
+    "topSupplyIndustries": [
+      [
+        "construction",
+        4
+      ],
+      [
+        "steel",
+        3
+      ],
+      [
+        "paper",
+        2
+      ],
+      [
+        "buildingMaterials",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        4
+      ],
+      [
+        "material",
+        3
+      ],
+      [
+        "product",
+        1
+      ],
+      [
+        "raw",
+        1
+      ],
+      [
+        "display",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "023410",
+      "corpName": "유진기업",
+      "product": "",
+      "amount": 137414.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "product": "",
+      "amount": 93947.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": 93947.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "079430",
+      "corpName": "현대리바트",
+      "product": "",
+      "amount": 71217.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "038500",
+      "corpName": "삼표시멘트",
+      "product": "",
+      "amount": 18245.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "004440",
+      "corpName": "삼일씨엔에스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "009240",
+      "corpName": "한샘",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "068790",
+      "corpName": "DMS",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "016800",
+      "corpName": "퍼시스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "300720",
+      "corpName": "한일시멘트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000210",
+      "corpName": "DL",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
   ]
 }

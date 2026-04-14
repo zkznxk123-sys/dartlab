@@ -569,5 +569,137 @@
       "source": "network",
       "evidence": "단순투자 지분 0.0%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "Piotroski F 재무 건전 (7/9)",
+    "strengths": [
+      "Piotroski F 재무 건전 (7/9)",
+      "사외이사비율 60% -- 이사회 독립성 양호",
+      "DCF 안전마진 30% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "이자보상 주의 (1.9배)",
+      "유동성 위기 (유동비율 89%)",
+      "Altman Z 부실 경계 (1.75)"
+    ],
+    "sector": "필수소비재 > 식품,음료,담배",
+    "source": "audit",
+    "createdAt": "1775430966.5255308"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 11343651787492.0,
+      "operating_profit": 343880765667.0,
+      "net_profit": 158279696245.0,
+      "total_assets": 8993928516384.0
+    },
+    {
+      "year": "2022",
+      "sales": 12130712862374.0,
+      "operating_profit": 411786887242.0,
+      "net_profit": 196821784424.0,
+      "total_assets": 9693299818264.0
+    },
+    {
+      "year": "2023",
+      "sales": 11767893663269.0,
+      "operating_profit": 480234863157.0,
+      "net_profit": 242876054885.0,
+      "total_assets": 9357587266747.0
+    },
+    {
+      "year": "2024",
+      "sales": 12116761147160.0,
+      "operating_profit": 530663067133.0,
+      "net_profit": 268320297629.0,
+      "total_assets": 9743855522383.0
+    },
+    {
+      "year": "2025",
+      "sales": 12284652471280.0,
+      "operating_profit": 508080820628.0,
+      "net_profit": 258742959823.0,
+      "total_assets": 10339205686286.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "construction",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "material",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "023410",
+      "corpName": "유진기업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    },
+    {
+      "stockCode": "280360",
+      "corpName": "롯데웰푸드",
+      "stage": "raw",
+      "revenue": 42160
+    }
   ]
 }

@@ -1026,5 +1026,235 @@
       "source": "network",
       "evidence": "단순투자 지분 0.8%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "[유지/보통] 경영권 전쟁으로 부채비율 25%→96%. 순손실 2457억이나 영업이익은 사상최대 1.2조.",
+    "strengths": [
+      "회수율 96.5% 연금술",
+      "영업이익 1.2조 사상최대"
+    ],
+    "weaknesses": [
+      "경영권 분쟁",
+      "자사주 방어 비용"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.25083"
+  },
+  "blogPosts": [
+    {
+      "slug": "09-010130-korea-zinc",
+      "title": "고려아연 (010130) — 50년 만에 첫 순손실 2,457억, 그런데 영업이익은 사상 최대",
+      "description": "75년 동업 파탄. 자사주 방어 2.3조. 부채비율 25%에서 96%로. 50년 만에 첫 분기 순손실. 그런데 2025년 영업이익은 사상 최대 1.2조. 경영권 전쟁이 재무제표에 남긴 흔적을 dartlab으로 뜯어본다.",
+      "date": "2026-04-09",
+      "grade": "dCR 미산출",
+      "storyTemplate": "지배구조 + 사이클",
+      "verdict": "경영권 전쟁으로 부채비율 25%→96%. 순손실 2457억이나 영업이익은 사상최대 1.2조.",
+      "direction": "유지",
+      "confidence": "보통",
+      "archetype": "사이클",
+      "strengths": [
+        "회수율 96.5% 연금술",
+        "영업이익 1.2조 사상최대"
+      ],
+      "weaknesses": [
+        "경영권 분쟁",
+        "자사주 방어 비용"
+      ],
+      "keyMetrics": {
+        "revenue": 0.0,
+        "opm": 0.0,
+        "roe": 0.0,
+        "fcf": -0.63
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/010130-korea-zinc.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 9976776443636.0,
+      "operating_profit": 1096146343693.0,
+      "net_profit": null,
+      "total_assets": 9964048634649.0
+    },
+    {
+      "year": "2022",
+      "sales": 11219358600107.0,
+      "operating_profit": 919171130822.0,
+      "net_profit": null,
+      "total_assets": 12097918358974.0
+    },
+    {
+      "year": "2023",
+      "sales": null,
+      "operating_profit": 659935424598.0,
+      "net_profit": null,
+      "total_assets": 12046071311650.0
+    },
+    {
+      "year": "2024",
+      "sales": null,
+      "operating_profit": 723472208523.0,
+      "net_profit": null,
+      "total_assets": 14792322181548.0
+    },
+    {
+      "year": "2025",
+      "sales": 16587850779912.0,
+      "operating_profit": 1231926775791.0,
+      "net_profit": null,
+      "total_assets": 20395719724719.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "005420",
+      "corpName": "코스모화학",
+      "product": "황산",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000240",
+      "corpName": "한국앤컴퍼니",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "002240",
+      "corpName": "고려제강",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "004490",
+      "corpName": "세방전지",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005810",
+      "corpName": "풍산홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "007770",
+      "corpName": "한일화학",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "012160",
+      "corpName": "영흥",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "014280",
+      "corpName": "금강공업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "025820",
+      "corpName": "이구산업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "stage": "product",
+      "revenue": 32034
+    }
   ]
 }

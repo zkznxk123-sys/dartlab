@@ -391,5 +391,225 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 5326080007289.0,
+      "operating_profit": 356171273550.0,
+      "net_profit": 291978846416.0,
+      "total_assets": 8038142932125.0
+    },
+    {
+      "year": "2022",
+      "sales": 4494956806652.0,
+      "operating_profit": 271900712401.0,
+      "net_profit": 62237028846.0,
+      "total_assets": 7651003801454.0
+    },
+    {
+      "year": "2023",
+      "sales": 4021343038942.0,
+      "operating_profit": 152001477210.0,
+      "net_profit": 115412927632.0,
+      "total_assets": 7631430777862.0
+    },
+    {
+      "year": "2024",
+      "sales": 4259886701995.0,
+      "operating_profit": 249277525878.0,
+      "net_profit": 400840142184.0,
+      "total_assets": 8540521424208.0
+    },
+    {
+      "year": "2025",
+      "sales": 4623175217447.0,
+      "operating_profit": 367999917421.0,
+      "net_profit": 292155732971.0,
+      "total_assets": 8769409589796.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 15,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 5,
+    "stageDiversity": 8,
+    "topSupplyIndustries": [
+      [
+        "cosmetics",
+        8
+      ],
+      [
+        "chemical",
+        4
+      ],
+      [
+        "media",
+        1
+      ],
+      [
+        "energy",
+        1
+      ],
+      [
+        "construction",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "manufacturing",
+        7
+      ],
+      [
+        "specialty",
+        2
+      ],
+      [
+        "agency",
+        1
+      ],
+      [
+        "generation",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "352480",
+      "corpName": "씨앤씨인터내셔널",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "048410",
+      "corpName": "현대바이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "251970",
+      "corpName": "펌텍코리아",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "052260",
+      "corpName": "현대바이오랜드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "017890",
+      "corpName": "한국알콜",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "460870",
+      "corpName": "에스엠씨지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
   ]
 }

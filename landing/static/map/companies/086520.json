@@ -592,5 +592,213 @@
       "source": "network",
       "evidence": "단순투자 지분 1.8%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "[악화/낮음] 시총 78조 찍었는데 영업이익 864억. 리튬 가격에 100% 종속.",
+    "strengths": [
+      "양극재 세계 공급",
+      "리튬 원가율 85%"
+    ],
+    "weaknesses": [
+      "리튬 가격 극변동",
+      "매출 반토막"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2826374"
+  },
+  "blogPosts": [
+    {
+      "slug": "26-086520-ecopro",
+      "title": "에코프로 — 시총 78조를 찍은 회사의 영업이익은 864억이었다",
+      "description": "시총 78조, 창업주는 감옥, 매출 반토막, 매출원가율 102%. 2차전지 대장주 에코프로의 재무제표를 뜯어보면 — 시장이 산 건 숫자가 아니라 서사였다.",
+      "date": "2026-04-12",
+      "grade": "",
+      "storyTemplate": "사이클",
+      "verdict": "시총 78조 찍었는데 영업이익 864억. 리튬 가격에 100% 종속.",
+      "direction": "악화",
+      "confidence": "낮음",
+      "archetype": "사이클",
+      "strengths": [
+        "양극재 세계 공급",
+        "리튬 원가율 85%"
+      ],
+      "weaknesses": [
+        "리튬 가격 극변동",
+        "매출 반토막"
+      ],
+      "keyMetrics": {
+        "revenue": 3.1,
+        "opm": -4.0,
+        "roe": 0.0,
+        "fcf": 0.0
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/086520-ecopro.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1504112975430.0,
+      "operating_profit": 86470031942.0,
+      "net_profit": 240455770049.0,
+      "total_assets": 3400958086996.0
+    },
+    {
+      "year": "2022",
+      "sales": 5639741327318.0,
+      "operating_profit": 613226487106.0,
+      "net_profit": 220591650311.0,
+      "total_assets": 5345782603044.0
+    },
+    {
+      "year": "2023",
+      "sales": 7260200345722.0,
+      "operating_profit": 298172334242.0,
+      "net_profit": 135268663790.0,
+      "total_assets": 7556978775072.0
+    },
+    {
+      "year": "2024",
+      "sales": 3127853158129.0,
+      "operating_profit": -293038698088.0,
+      "net_profit": -205950752375.0,
+      "total_assets": 8138264562531.0
+    },
+    {
+      "year": "2025",
+      "sales": 3413021590101.0,
+      "operating_profit": 213763514884.0,
+      "net_profit": -105539603168.0,
+      "total_assets": 9778714530496.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        3
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "specialty",
+        2
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "383310",
+      "corpName": "에코프로에이치엔",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "247540",
+      "corpName": "에코프로비엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "450080",
+      "corpName": "에코프로머티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "006400",
+      "corpName": "삼성SDI",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "247540",
+      "corpName": "에코프로비엠",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "383310",
+      "corpName": "에코프로에이치엔",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "450080",
+      "corpName": "에코프로머티",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
   ]
 }

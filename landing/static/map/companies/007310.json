@@ -158,5 +158,159 @@
       "source": "docs",
       "evidence": "X. 대주주 등과의 거래내용"
     }
+  ],
+  "aiInsight": {
+    "narrative": "내부유보 비중 92% — 자기 힘으로 성장",
+    "strengths": [
+      "내부유보 비중 92% — 자기 힘으로 성장",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출 중간 집중 (HHI 3,354)",
+      "CCC 251일 — 현금 회수 매우 느림",
+      "FCF 적자 — 영업CF보다 투자가 큼"
+    ],
+    "sector": "필수소비재 > 식품,음료,담배",
+    "source": "audit",
+    "createdAt": "1775430966.5582323"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2739036859209.0,
+      "operating_profit": 166575352719.0,
+      "net_profit": 129409945612.0,
+      "total_assets": 2605839008802.0
+    },
+    {
+      "year": "2022",
+      "sales": 3183314853660.0,
+      "operating_profit": 185656436842.0,
+      "net_profit": 278494298320.0,
+      "total_assets": 3569760859068.0
+    },
+    {
+      "year": "2023",
+      "sales": 3454548477401.0,
+      "operating_profit": 254893843560.0,
+      "net_profit": 0.0,
+      "total_assets": 3496482529068.0
+    },
+    {
+      "year": "2024",
+      "sales": 3539120882890.0,
+      "operating_profit": 222014509063.0,
+      "net_profit": 0.0,
+      "total_assets": 3597403088294.0
+    },
+    {
+      "year": "2025",
+      "sales": 3674545422005.0,
+      "operating_profit": 177251297728.0,
+      "net_profit": 0.0,
+      "total_assets": 3641076426477.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "food",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "001790",
+      "corpName": "대한제당",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "271560",
+      "corpName": "오리온",
+      "product": "유 지 류",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "001800",
+      "corpName": "오리온홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "003960",
+      "corpName": "사조대림",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005610",
+      "corpName": "SPC삼립",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
   ]
 }

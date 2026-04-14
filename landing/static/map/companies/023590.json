@@ -475,5 +475,117 @@
       "source": "network",
       "evidence": "단순투자 지분 3.7%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 6086980401897.0,
+      "operating_profit": 1257233834443.0,
+      "net_profit": 914188890009.0,
+      "total_assets": 46322445969793.0
+    },
+    {
+      "year": "2022",
+      "sales": 9210610313082.0,
+      "operating_profit": 718687487393.0,
+      "net_profit": 372564511396.0,
+      "total_assets": 49260008742513.0
+    },
+    {
+      "year": "2023",
+      "sales": 9855141797134.0,
+      "operating_profit": 639880017159.0,
+      "net_profit": 490015745774.0,
+      "total_assets": 53342459330150.0
+    },
+    {
+      "year": "2024",
+      "sales": 11625798455732.0,
+      "operating_profit": 1174681942719.0,
+      "net_profit": 496927234010.0,
+      "total_assets": 57147924043319.0
+    },
+    {
+      "year": "2025",
+      "sales": 17495003836308.0,
+      "operating_profit": 1559283728269.0,
+      "net_profit": 1156018987903.0,
+      "total_assets": 82950227249756.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "053300",
+      "corpName": "한국정보인증",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "273060",
+      "corpName": "와이즈버즈",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005440",
+      "corpName": "현대지에프홀딩스",
+      "stage": "general",
+      "revenue": 80916
+    },
+    {
+      "stockCode": "058650",
+      "corpName": "세아홀딩스",
+      "stage": "general",
+      "revenue": 66111
+    },
+    {
+      "stockCode": "034810",
+      "corpName": "해성산업",
+      "stage": "general",
+      "revenue": 22601
+    },
+    {
+      "stockCode": "002990",
+      "corpName": "금호건설",
+      "stage": "general",
+      "revenue": 20185
+    },
+    {
+      "stockCode": "006060",
+      "corpName": "화승인더스트리",
+      "stage": "general",
+      "revenue": 17810
+    }
   ]
 }

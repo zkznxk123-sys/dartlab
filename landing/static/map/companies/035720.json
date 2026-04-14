@@ -2087,5 +2087,177 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 5910512880994.0,
+      "operating_profit": 587884339202.0,
+      "net_profit": 1640484195406.0,
+      "total_assets": 22784559108590.0
+    },
+    {
+      "year": "2022",
+      "sales": 6799047881222.0,
+      "operating_profit": 569355650551.0,
+      "net_profit": 1066994242805.0,
+      "total_assets": 22963651561449.0
+    },
+    {
+      "year": "2023",
+      "sales": 7557001757272.0,
+      "operating_profit": 460857845673.0,
+      "net_profit": -1816669011014.0,
+      "total_assets": 25179968939321.0
+    },
+    {
+      "year": "2024",
+      "sales": 7871692199887.0,
+      "operating_profit": 460212161525.0,
+      "net_profit": -161870567171.0,
+      "total_assets": 25773028304462.0
+    },
+    {
+      "year": "2025",
+      "sales": 8099147815086.0,
+      "operating_profit": 732036535379.0,
+      "net_profit": 517959587282.0,
+      "total_assets": 27783524545811.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "semiconductor",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "equipment",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "187870",
+      "corpName": "디바이스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "003550",
+      "corpName": "LG",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "004590",
+      "corpName": "한국가구",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "064400",
+      "corpName": "LG씨엔에스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "271560",
+      "corpName": "오리온",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "362990",
+      "corpName": "드림인사이트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "377300",
+      "corpName": "카카오페이",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "403550",
+      "corpName": "쏘카",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "486990",
+      "corpName": "노타",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "018670",
+      "corpName": "SK가스",
+      "stage": "solution",
+      "revenue": 76763
+    }
   ]
 }

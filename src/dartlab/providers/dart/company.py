@@ -2816,10 +2816,10 @@ class Company:
             - "감사용 리뷰" -> c.review(preset="audit")
             - "이 회사 스토리는?" -> c.review(template="auto")
             - "요약만 보여줘" -> c.review(detail=False)
-            - "AI 의견 포함 보고서" -> c.reviewer() (review + AI 해석)
+            - "AI 가 해석한 보고서" -> dartlab.ask("005930 보고서 작성해줘") (AI 가 review tool 호출)
 
         SeeAlso:
-            - reviewer: review() + AI 섹션별 종합의견 (AI 해석 포함)
+            - dartlab.ask: AI 자율 분석 (분석 질문은 여기로)
             - analysis: 14축 개별 분석 (review가 내부적으로 소비)
             - insights: 7영역 등급 + 이상치 요약
         """
@@ -2838,62 +2838,6 @@ class Company:
             preset=preset,
             perspective=perspective,
         )
-
-    def reviewer(
-        self,
-        section: str | None = None,
-        layout=None,
-        helper: bool | None = None,
-        guide: str | None = None,
-        *,
-        preset: str | None = None,
-        detail: bool | None = None,
-        basePeriod: str | None = None,
-    ):
-        """AI 분석 보고서 — review() + 섹션별 AI 종합의견.
-
-        Capabilities:
-            - review() 데이터 위에 AI 섹션별 종합의견 추가
-            - 도메인 특화 가이드로 분석 관점 지정 가능
-            - 각 섹션 시작에 AI 해석 삽입
-
-        AIContext:
-            - review() 결과(재무비율, 추세, 동종업계 비교)를 LLM에 제공
-            - LLM이 각 섹션을 해석하여 종합의견 생성
-            - guide 파라미터로 분석 관점 커스텀
-
-        Args:
-            section: 섹션명. None이면 전체.
-            layout: ReviewLayout 커스텀.
-            helper: True면 해석 힌트 포함.
-            guide: AI에게 전달할 분석 관점 ("반도체 사이클 관점에서 평가해줘").
-
-        Returns:
-            Review — AI 의견이 포함된 보고서.
-
-        Requires:
-            AI: provider 설정 (dartlab.setup() 참조)
-            데이터: finance + report (자동 다운로드)
-
-        Example::
-
-            c.reviewer()
-            c.reviewer("수익구조")
-            c.reviewer(guide="반도체 사이클 관점에서 평가해줘")
-
-        Guide:
-            - "AI가 분석한 보고서" → c.reviewer()
-            - "반도체 관점에서 분석" → c.reviewer(guide="반도체 사이클 관점에서 평가해줘")
-            - "특정 섹션만 AI 분석" → c.reviewer("수익구조")
-
-        SeeAlso:
-            - review: AI 없는 순수 데이터 검토서 (reviewer의 기반)
-            - ask: 자유 질문 기반 AI 분석
-            - chat: 에이전트 모드 심화 분석
-        """
-        from dartlab.review.registry import buildReview
-
-        return buildReview(self, section=section, layout=layout, basePeriod=basePeriod)
 
     @property
     def analysis(self):
@@ -4613,8 +4557,6 @@ class Company:
         self,
         question: str,
         *,
-        include: list[str] | None = None,
-        exclude: list[str] | None = None,
         provider: str | None = None,
         model: str | None = None,
         stream: bool = False,
@@ -4673,9 +4615,7 @@ class Company:
 
         return _ask(
             question,
-            company=self,
-            include=include,
-            exclude=exclude,
+            stockCode=self.stockCode,
             provider=provider,
             model=model,
             stream=stream,
@@ -4683,67 +4623,3 @@ class Company:
             **kwargs,
         )
 
-    def chat(
-        self,
-        question: str,
-        *,
-        provider: str | None = None,
-        model: str | None = None,
-        max_turns: int = 5,
-        on_tool_call=None,
-        on_tool_result=None,
-        **kwargs,
-    ) -> str:
-        """에이전트 모드: LLM이 도구를 선택하여 심화 분석.
-
-        Capabilities:
-            - Tier 2 LLM 주도 분석 (tool calling)
-            - LLM이 부족한 정보를 자율적으로 도구 호출하여 보충
-            - 원본 시계열, 공시 텍스트 검색, 복수 기업 비교 등 심화 탐색
-            - 멀티 턴 대화 지원
-
-        AIContext:
-            Tier 2 에이전트 모드. Tier 1 결과를 본 LLM이 부족하다고 판단하면
-            저수준 tool(시계열 조회, 공시 검색 등)을 직접 호출하여 심화 분석.
-
-        Args:
-            question: 질문 텍스트.
-            provider: LLM provider 이름. None이면 기본값.
-            model: 모델명. None이면 provider 기본값.
-            max_turns: 최대 tool calling 턴 수. 기본 5.
-            on_tool_call: tool 호출 시 콜백.
-            on_tool_result: tool 결과 수신 시 콜백.
-            **kwargs: provider별 추가 옵션.
-
-        Returns:
-            str -- LLM 최종 응답 텍스트.
-
-        Requires:
-            API 키: tool calling 지원 LLM provider API 키
-
-        Example::
-
-            c = Company("005930")
-            c.chat("배당 추세를 분석하고 이상 징후를 찾아줘")
-
-        Guide:
-            - "심층 분석해줘" → c.chat("질문")
-            - "AI가 직접 데이터 찾아서 분석" → c.chat("질문")
-            - "여러 단계 분석 필요한 질문" → c.chat("복합 질문")
-
-        SeeAlso:
-            - ask: 단일 턴 질문 (chat보다 빠르지만 덜 심층)
-            - reviewer: 구조화된 AI 보고서
-        """
-        from dartlab.ai.runtime.standalone import chat as _chat
-
-        return _chat(
-            self,
-            question,
-            provider=provider,
-            model=model,
-            max_turns=max_turns,
-            on_tool_call=on_tool_call,
-            on_tool_result=on_tool_result,
-            **kwargs,
-        )

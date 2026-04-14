@@ -705,5 +705,151 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "[유지/높음] 운임 사이클이 주가 90% 결정. 베타 0.37 R² 10%. OPM -18%~53%.",
+    "strengths": [
+      "호황기 OPM 53%",
+      "2년 9.95조 영업이익"
+    ],
+    "weaknesses": [
+      "영업이익 -8,300억~+9,950억",
+      "베타 0.37 시장 무상관"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2429721"
+  },
+  "blogPosts": [
+    {
+      "slug": "05-011200-hmm",
+      "title": "HMM (011200) — 시장이 아니라 사이클이 주가를 결정하는 회사, dartlab quant 베타 0.37 R² 10%",
+      "description": "HMM의 베타는 0.37, R²는 10%다. 시장이 HMM 주가의 10%만 설명한다는 뜻이다. 나머지 90%는 글로벌 컨테이너 운임 사이클이 결정한다. 9년 동안 5번 회전한 사이클을 dartlab의 quant + analysis + credit 4개 엔진으로 분해한다.",
+      "date": "2026-04-08",
+      "grade": "dCR-AA-",
+      "storyTemplate": "사이클 회사",
+      "verdict": "운임 사이클이 주가 90% 결정. 베타 0.37 R² 10%. OPM -18%~53%.",
+      "direction": "유지",
+      "confidence": "높음",
+      "archetype": "사이클",
+      "strengths": [
+        "호황기 OPM 53%",
+        "2년 9.95조 영업이익"
+      ],
+      "weaknesses": [
+        "영업이익 -8,300억~+9,950억",
+        "베타 0.37 시장 무상관"
+      ],
+      "keyMetrics": {
+        "revenue": 10.89,
+        "opm": 15.0,
+        "roe": 10.0,
+        "fcf": 2.0
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/011200-hmm.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 13794148000000.0,
+      "operating_profit": 7377522000000.0,
+      "net_profit": 5337151000000.0,
+      "total_assets": 17876100000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 18582770000000.0,
+      "operating_profit": 9951555000000.0,
+      "net_profit": 10085271000000.0,
+      "total_assets": 25973455000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 8400969000000.0,
+      "operating_profit": 584770000000.0,
+      "net_profit": 968692000000.0,
+      "total_assets": 25713363000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 11700224000000.0,
+      "operating_profit": 3512847000000.0,
+      "net_profit": 3782129000000.0,
+      "total_assets": 33848562000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 10891443000000.0,
+      "operating_profit": 1461202000000.0,
+      "net_profit": 1878732000000.0,
+      "total_assets": 33563133000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "stage": "build",
+      "revenue": 712594
+    },
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "stage": "shipping",
+      "revenue": 299332
+    },
+    {
+      "stockCode": "329180",
+      "corpName": "HD현대중공업",
+      "stage": "build",
+      "revenue": 175806
+    },
+    {
+      "stockCode": "018260",
+      "corpName": "삼성에스디에스",
+      "stage": "shipping",
+      "revenue": 139299
+    },
+    {
+      "stockCode": "042660",
+      "corpName": "한화오션",
+      "stage": "build",
+      "revenue": 127835
+    }
   ]
 }

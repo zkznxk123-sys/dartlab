@@ -689,5 +689,251 @@
       "source": "network",
       "evidence": "단순투자 지분 0.1%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "내부유보 비중 89% — 자기 힘으로 성장",
+    "strengths": [
+      "내부유보 비중 89% — 자기 힘으로 성장",
+      "사외이사비율 57% -- 이사회 독립성 양호",
+      "순이익률 상위 7% (17.7%)"
+    ],
+    "weaknesses": [
+      "이자보상 심각 (0.6배)",
+      "Altman Z 부실 경계 (1.18)",
+      "비영업자산 42% — 지주/투자 성격"
+    ],
+    "sector": "소재 > 화학",
+    "source": "audit",
+    "createdAt": "1775430966.5436924"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 5874899292339.0,
+      "operating_profit": 388769767968.0,
+      "net_profit": -45780239737.0,
+      "total_assets": 12878863208936.0
+    },
+    {
+      "year": "2022",
+      "sales": 6774793651227.0,
+      "operating_profit": 467661528938.0,
+      "net_profit": 28661656966.0,
+      "total_assets": 13118486307658.0
+    },
+    {
+      "year": "2023",
+      "sales": 6288442613717.0,
+      "operating_profit": 312530203929.0,
+      "net_profit": null,
+      "total_assets": 13353471078397.0
+    },
+    {
+      "year": "2024",
+      "sales": 6658762417820.0,
+      "operating_profit": 471118235184.0,
+      "net_profit": 310568028257.0,
+      "total_assets": 13108550142754.0
+    },
+    {
+      "year": "2025",
+      "sales": 6483819486096.0,
+      "operating_profit": 427615116299.0,
+      "net_profit": 1538496275573.0,
+      "total_assets": 16803559405446.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "paper",
+        1
+      ],
+      [
+        "consulting",
+        1
+      ],
+      [
+        "energy",
+        1
+      ],
+      [
+        "buildingMaterials",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        3
+      ],
+      [
+        "distribution",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "002310",
+      "corpName": "아세아제지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "010040",
+      "corpName": "한국내화",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "006050",
+      "corpName": "국영지앤엠",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "007810",
+      "corpName": "코리아써키트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "008350",
+      "corpName": "남선알미늄",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "012630",
+      "corpName": "HDC",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "033170",
+      "corpName": "시그네틱스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "097230",
+      "corpName": "HJ중공업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "294870",
+      "corpName": "IPARK현대산업개발",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "344820",
+      "corpName": "케이씨씨글라스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
   ]
 }

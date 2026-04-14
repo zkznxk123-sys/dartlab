@@ -730,5 +730,223 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2449866532333.0,
+      "operating_profit": 144268811828.0,
+      "net_profit": 58164226681.0,
+      "total_assets": 3083783180088.0
+    },
+    {
+      "year": "2022",
+      "sales": 2752922079169.0,
+      "operating_profit": 145242618665.0,
+      "net_profit": 69015234806.0,
+      "total_assets": 3378563521222.0
+    },
+    {
+      "year": "2023",
+      "sales": 2818916782455.0,
+      "operating_profit": 96985264990.0,
+      "net_profit": 19000281399.0,
+      "total_assets": 3484123285552.0
+    },
+    {
+      "year": "2024",
+      "sales": 3038327065807.0,
+      "operating_profit": 174263701108.0,
+      "net_profit": 100883643521.0,
+      "total_assets": 3521880947809.0
+    },
+    {
+      "year": "2025",
+      "sales": 3242560195759.0,
+      "operating_profit": 198097014621.0,
+      "net_profit": 0.0,
+      "total_assets": 3680345644320.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 7,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 6,
+    "stageDiversity": 6,
+    "topSupplyIndustries": [
+      [
+        "telecom",
+        2
+      ],
+      [
+        "software",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ],
+      [
+        "auto",
+        1
+      ],
+      [
+        "consulting",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "device",
+        2
+      ],
+      [
+        "ai",
+        1
+      ],
+      [
+        "component",
+        1
+      ],
+      [
+        "body",
+        1
+      ],
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "030190",
+      "corpName": "NICE평가정보",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "084850",
+      "corpName": "아이티엠반도체",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "073110",
+      "corpName": "엘엠에스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "063570",
+      "corpName": "NICE인프라",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "036800",
+      "corpName": "나이스정보통신",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "105760",
+      "corpName": "포스뱅크",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "089790",
+      "corpName": "제이티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "030190",
+      "corpName": "NICE평가정보",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "036800",
+      "corpName": "나이스정보통신",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "245620",
+      "corpName": "EDGC",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
   ]
 }

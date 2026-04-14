@@ -496,5 +496,101 @@
       "source": "network",
       "evidence": "단순투자 지분 0.0%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 5152300897477.0,
+      "operating_profit": 5575314498.0,
+      "net_profit": 138568374513.0,
+      "total_assets": 3999326311289.0
+    },
+    {
+      "year": "2022",
+      "sales": 7990767897663.0,
+      "operating_profit": 278730692433.0,
+      "net_profit": 141859118476.0,
+      "total_assets": 4339655185507.0
+    },
+    {
+      "year": "2023",
+      "sales": 7827737066529.0,
+      "operating_profit": 93175065859.0,
+      "net_profit": 214389244510.0,
+      "total_assets": 4597407646185.0
+    },
+    {
+      "year": "2024",
+      "sales": 11192411812013.0,
+      "operating_profit": 217605533069.0,
+      "net_profit": 0.0,
+      "total_assets": 14539774932856.0
+    },
+    {
+      "year": "2025",
+      "sales": 10392522604756.0,
+      "operating_profit": 324063026338.0,
+      "net_profit": 114200487289.0,
+      "total_assets": 15915640404006.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "339770",
+      "corpName": "교촌에프앤비",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "006040",
+      "corpName": "동원산업",
+      "stage": "securities",
+      "revenue": 95837
+    }
   ]
 }

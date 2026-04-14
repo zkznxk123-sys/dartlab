@@ -539,5 +539,92 @@
       "source": "network",
       "evidence": "단순투자 지분 1.6%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1840558602978.0,
+      "operating_profit": 86244224819.0,
+      "net_profit": 127657537369.0,
+      "total_assets": 3496833926967.0
+    },
+    {
+      "year": "2022",
+      "sales": 2079559970740.0,
+      "operating_profit": 71159596357.0,
+      "net_profit": 58897358703.0,
+      "total_assets": 3592060734923.0
+    },
+    {
+      "year": "2023",
+      "sales": 2057935704611.0,
+      "operating_profit": -16437917061.0,
+      "net_profit": -54136304676.0,
+      "total_assets": 3737707402310.0
+    },
+    {
+      "year": "2024",
+      "sales": 2204855223217.0,
+      "operating_profit": -10716124374.0,
+      "net_profit": -11089572564.0,
+      "total_assets": null
+    },
+    {
+      "year": "2025",
+      "sales": 2451476280927.0,
+      "operating_profit": 36227417620.0,
+      "net_profit": null,
+      "total_assets": null
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    },
+    {
+      "stockCode": "006280",
+      "corpName": "녹십자",
+      "stage": "formulation",
+      "revenue": 19913
+    }
   ]
 }

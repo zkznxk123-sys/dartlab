@@ -577,5 +577,146 @@
       "source": "network",
       "evidence": "단순투자 지분 4.0%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3094698644786.0,
+      "operating_profit": 120066031213.0,
+      "net_profit": 57607329861.0,
+      "total_assets": 4022701434672.0
+    },
+    {
+      "year": "2022",
+      "sales": 3510143917637.0,
+      "operating_profit": 143248629974.0,
+      "net_profit": 10215533944.0,
+      "total_assets": 4693470608273.0
+    },
+    {
+      "year": "2023",
+      "sales": 4300571503251.0,
+      "operating_profit": 257836947601.0,
+      "net_profit": 0.0,
+      "total_assets": 4761300218430.0
+    },
+    {
+      "year": "2024",
+      "sales": 4894979612220.0,
+      "operating_profit": 362479487133.0,
+      "net_profit": 296129649.0,
+      "total_assets": 6218812921202.0
+    },
+    {
+      "year": "2025",
+      "sales": 5968511616609.0,
+      "operating_profit": 746968417289.0,
+      "net_profit": 0.0,
+      "total_assets": 7227883006296.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 64240.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "medicalDevice",
+        1
+      ],
+      [
+        "construction",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "imaging",
+        1
+      ],
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "125020",
+      "corpName": "티씨머티리얼즈",
+      "product": "",
+      "amount": 64240.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "002780",
+      "corpName": "진흥기업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "004800",
+      "corpName": "효성",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
   ]
 }

@@ -270,5 +270,202 @@
       "source": "network",
       "evidence": "기타 지분 0.0%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "[악화/높음] 라면 1위(55%) 맞는데 마진 5%. 삼양이 2배 마진으로 역전.",
+    "strengths": [
+      "국내 점유율 55%",
+      "매출 3.5조"
+    ],
+    "weaknesses": [
+      "마진 삼양의 1/4",
+      "가격 결정권 없음"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2636604"
+  },
+  "blogPosts": [
+    {
+      "slug": "16-004370-nongshim",
+      "title": "농심 (004370) — 라면 1위인데 왜 마진은 삼양의 1/4인가",
+      "description": "매출은 농심이 2배인데, 영업이익은 삼양이 2배. 시총도 역전. 같은 라면인데 OPM 5% vs 22%, 4배 차이의 정체를 재무제표로 추적한다. 1위의 저주, 해외 가격대 격차, 멀티 vs 불닭 올인. 신라면 툼바가 이 구조를 바꿀 수 있는가.",
+      "date": "2026-04-11",
+      "grade": "dCR 미산출",
+      "storyTemplate": "성장",
+      "verdict": "라면 1위(55%) 맞는데 마진 5%. 삼양이 2배 마진으로 역전.",
+      "direction": "악화",
+      "confidence": "높음",
+      "archetype": "프랜차이즈",
+      "strengths": [
+        "국내 점유율 55%",
+        "매출 3.5조"
+      ],
+      "weaknesses": [
+        "마진 삼양의 1/4",
+        "가격 결정권 없음"
+      ],
+      "keyMetrics": {
+        "revenue": 3.51,
+        "opm": 5.2,
+        "roe": 0.0,
+        "fcf": 0.0
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/004370-nongshim.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2662982988213.0,
+      "operating_profit": 106139720895.0,
+      "net_profit": 99637362533.0,
+      "total_assets": 2899907793800.0
+    },
+    {
+      "year": "2022",
+      "sales": 3485322408848.0,
+      "operating_profit": 112172856716.0,
+      "net_profit": 116033570018.0,
+      "total_assets": 3034718535547.0
+    },
+    {
+      "year": "2023",
+      "sales": 3786820706916.0,
+      "operating_profit": 212064743455.0,
+      "net_profit": 171904567174.0,
+      "total_assets": 3234751426458.0
+    },
+    {
+      "year": "2024",
+      "sales": 3438730857998.0,
+      "operating_profit": 163073931930.0,
+      "net_profit": 0.0,
+      "total_assets": 3597461570702.0
+    },
+    {
+      "year": "2025",
+      "sales": 4082094544245.0,
+      "operating_profit": 183933032197.0,
+      "net_profit": 0.0,
+      "total_assets": 3822122467403.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "food",
+        3
+      ],
+      [
+        "paper",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        2
+      ],
+      [
+        "processing",
+        1
+      ],
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "008040",
+      "corpName": "사조동아원",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "001130",
+      "corpName": "대한제분",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "008730",
+      "corpName": "율촌화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "072710",
+      "corpName": "농심홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
   ]
 }

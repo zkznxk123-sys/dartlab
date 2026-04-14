@@ -403,5 +403,155 @@
       "source": "network",
       "evidence": "경영참여 지분 23.0%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3597777100369.0,
+      "operating_profit": 437309926236.0,
+      "net_profit": 330023237559.0,
+      "total_assets": 2908681837826.0
+    },
+    {
+      "year": "2022",
+      "sales": 3841372825700.0,
+      "operating_profit": 315070313327.0,
+      "net_profit": 125340084777.0,
+      "total_assets": 2934713477994.0
+    },
+    {
+      "year": "2023",
+      "sales": 3202331179495.0,
+      "operating_profit": 172374384077.0,
+      "net_profit": 47255354037.0,
+      "total_assets": 3034402591578.0
+    },
+    {
+      "year": "2024",
+      "sales": 3311227813004.0,
+      "operating_profit": 219722228984.0,
+      "net_profit": 0.0,
+      "total_assets": 3820765107830.0
+    },
+    {
+      "year": "2025",
+      "sales": 3283044948859.0,
+      "operating_profit": 157433130038.0,
+      "net_profit": 37292589336.0,
+      "total_assets": 3903414776514.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 304243.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 1,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        3
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "basic",
+        1
+      ],
+      [
+        "specialty",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "298020",
+      "corpName": "효성티앤씨",
+      "product": "",
+      "amount": 304243.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "083450",
+      "corpName": "GST",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "298000",
+      "corpName": "효성화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "487570",
+      "corpName": "HS효성",
+      "product": "",
+      "amount": 34307.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "484590",
+      "corpName": "삼양컴텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
   ]
 }

@@ -470,5 +470,116 @@
       "source": "docs",
       "evidence": "IX. 계열회사 등에 관한 사항"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 390470563901.0,
+      "operating_profit": 4309069589.0,
+      "net_profit": 60088302833.0,
+      "total_assets": 1309373198056.0
+    },
+    {
+      "year": "2022",
+      "sales": 362911031595.0,
+      "operating_profit": 8016374672.0,
+      "net_profit": -2397223065.0,
+      "total_assets": 1300442455061.0
+    },
+    {
+      "year": "2023",
+      "sales": 379631754364.0,
+      "operating_profit": 11618277292.0,
+      "net_profit": 10704983628.0,
+      "total_assets": 1309219122467.0
+    },
+    {
+      "year": "2024",
+      "sales": 1933813959649.0,
+      "operating_profit": 25619240717.0,
+      "net_profit": -31890828301.0,
+      "total_assets": 9601505118160.0
+    },
+    {
+      "year": "2025",
+      "sales": 2615245130367.0,
+      "operating_profit": 22287447432.0,
+      "net_profit": -19102992842.0,
+      "total_assets": 11685359914888.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [
+      [
+        "machinery",
+        1
+      ]
+    ],
+    "topSupplyStages": []
+  },
+  "suppliers": [
+    {
+      "stockCode": "078020",
+      "corpName": "LS증권",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    },
+    {
+      "stockCode": "014680",
+      "corpName": "한솔케미칼",
+      "stage": "precision",
+      "revenue": 8840
+    }
   ]
 }

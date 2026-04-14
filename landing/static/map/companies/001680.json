@@ -341,5 +341,167 @@
       "source": "network",
       "evidence": "단순투자 지분 2.4%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "내부유보 비중 70% — 자기 힘으로 성장",
+    "strengths": [
+      "내부유보 비중 70% — 자기 힘으로 성장",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "ROE의 레버리지 의존도 높음 (자산/자본 = 3.2배)",
+      "고부채 (부채비율 217%)",
+      "이자보상 주의 (2.2배)"
+    ],
+    "sector": "필수소비재 > 식품,음료,담배",
+    "source": "audit",
+    "createdAt": "1775430966.5386875"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3469992522829.0,
+      "operating_profit": 153245195127.0,
+      "net_profit": 0.0,
+      "total_assets": 2870530105668.0
+    },
+    {
+      "year": "2022",
+      "sales": 4084090277577.0,
+      "operating_profit": 139998990821.0,
+      "net_profit": 0.0,
+      "total_assets": 3190196448368.0
+    },
+    {
+      "year": "2023",
+      "sales": 4107493943805.0,
+      "operating_profit": 123716647215.0,
+      "net_profit": 67078680843.0,
+      "total_assets": 3334370027478.0
+    },
+    {
+      "year": "2024",
+      "sales": 4255134757567.0,
+      "operating_profit": 176941145485.0,
+      "net_profit": 1504281975.0,
+      "total_assets": 3509835110048.0
+    },
+    {
+      "year": "2025",
+      "sales": 4401305371276.0,
+      "operating_profit": 169282317428.0,
+      "net_profit": -303088987280.0,
+      "total_assets": 3479148559839.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "paper",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "026960",
+      "corpName": "동서",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "005610",
+      "corpName": "SPC삼립",
+      "product": "당류",
+      "amount": 8068920.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "001340",
+      "corpName": "PKC",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "280360",
+      "corpName": "롯데웰푸드",
+      "stage": "raw",
+      "revenue": 42160
+    }
   ]
 }

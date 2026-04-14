@@ -447,5 +447,190 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "DCF 안전마진 7542% -- 저평가 가능",
+    "strengths": [
+      "DCF 안전마진 7542% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출 중간 집중 (HHI 4,492)",
+      "매출 성장(12%)에도 이익 감소(-113%) -- 수익성 희석",
+      "영업적자 (-0.2%)"
+    ],
+    "sector": "금융 > 다각화된금융",
+    "source": "audit",
+    "createdAt": "1775430966.52453"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3107313000000.0,
+      "operating_profit": 351700000000.0,
+      "net_profit": 36385000000.0,
+      "total_assets": 4460589000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 3316778000000.0,
+      "operating_profit": 132324000000.0,
+      "net_profit": 34840000000.0,
+      "total_assets": 4547781000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 3210853491794.0,
+      "operating_profit": 94802726814.0,
+      "net_profit": null,
+      "total_assets": 5136660179005.0
+    },
+    {
+      "year": "2024",
+      "sales": 3553264096673.0,
+      "operating_profit": 127538574846.0,
+      "net_profit": null,
+      "total_assets": 5290507469287.0
+    },
+    {
+      "year": "2025",
+      "sales": 3348286833611.0,
+      "operating_profit": 108765726889.0,
+      "net_profit": -298132876106.0,
+      "total_assets": 5272055814759.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 5,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        1
+      ],
+      [
+        "cosmetics",
+        1
+      ],
+      [
+        "food",
+        1
+      ],
+      [
+        "energy",
+        1
+      ],
+      [
+        "semiconductor",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        2
+      ],
+      [
+        "polymer",
+        1
+      ],
+      [
+        "distribution",
+        1
+      ],
+      [
+        "materials",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "272550",
+      "corpName": "삼양패키징",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "036670",
+      "corpName": "삼양케이씨아이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "145990",
+      "corpName": "삼양사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "482630",
+      "corpName": "삼양엔씨켐",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "003030",
+      "corpName": "세아제강지주",
+      "stage": "general",
+      "revenue": 37596
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "036710",
+      "corpName": "심텍홀딩스",
+      "stage": "general",
+      "revenue": 15281
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "stage": "general",
+      "revenue": 13276
+    },
+    {
+      "stockCode": "045100",
+      "corpName": "한양이엔지",
+      "stage": "general",
+      "revenue": 11182
+    }
   ]
 }

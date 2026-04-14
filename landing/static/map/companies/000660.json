@@ -1991,5 +1991,205 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "[개선/높음] 5번 죽을 뻔한 회사가 HBM ��점으로 메모리 30년 최강 사이클 진입. OPM 58%는 구조적 가격결정력.",
+    "strengths": [
+      "HBM3E 양산 수율 1위 → NVIDIA 점유율 61%",
+      "순현금 7.4조 (차입금 22조 < 현금 30조)",
+      "ROIC 35% vs WACC 11% → spread +24pp",
+      "OPM 58.4% — 삼성전자 추월"
+    ],
+    "weaknesses": [
+      "배당성향 1.1% (영업이익 47조 대비 5,221억)",
+      "CAPEX 27.5조 베팅 — 2027년 수요 미달 시 감가상각 리스크",
+      "NVIDIA 매출 비중 27% — 단일 고객 집중"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2314262"
+  },
+  "blogPosts": [
+    {
+      "slug": "01-000660-skhynix",
+      "title": "SK하이닉스 (000660) — 한국 반도체 30년의 미스터리, 그리고 영업이익률 58%",
+      "description": "1983 현대전자로 시작해 다섯 번 망할 뻔한 회사가 2025년 4분기 영업이익률 58.40%, 사상 처음으로 모회사 삼성전자를 추월했다. 9년 사이클 + 가격결정력 + CAPEX 27조 베팅을 dartlab으로 펼친다.",
+      "date": "2026-04-01",
+      "grade": "dCR-AA",
+      "storyTemplate": "장기 사이클 + 위기 탈출",
+      "verdict": "5번 죽을 뻔한 회사가 HBM ��점으로 메모리 30년 최강 사이클 진입. OPM 58%는 구조적 가격결정력.",
+      "direction": "개선",
+      "confidence": "높음",
+      "archetype": "사이클",
+      "strengths": [
+        "HBM3E 양산 수율 1위 → NVIDIA 점유율 61%",
+        "순현금 7.4조 (차입금 22조 < 현금 30조)",
+        "ROIC 35% vs WACC 11% → spread +24pp",
+        "OPM 58.4% — 삼성전자 추월"
+      ],
+      "weaknesses": [
+        "배당성향 1.1% (영업이익 47조 대비 5,221억)",
+        "CAPEX 27.5조 베팅 — 2027년 수요 미달 시 감가상각 리스크",
+        "NVIDIA 매출 비중 27% — 단일 고객 집중"
+      ],
+      "keyMetrics": {
+        "revenue": 97.15,
+        "opm": 48.59,
+        "roe": 35.27,
+        "fcf": 21.3
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/000660-skhynix.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 42997792000000.0,
+      "operating_profit": 12410340000000.0,
+      "net_profit": 9616188000000.0,
+      "total_assets": 96386474000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 44621568000000.0,
+      "operating_profit": 6809417000000.0,
+      "net_profit": 2241669000000.0,
+      "total_assets": 103871512000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 32765719000000.0,
+      "operating_profit": -7730313000000.0,
+      "net_profit": -9137547000000.0,
+      "total_assets": 100330165000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 66192960000000.0,
+      "operating_profit": 23467319000000.0,
+      "net_profit": 19796902000000.0,
+      "total_assets": 119855209000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 97146675000000.0,
+      "operating_profit": 47206319000000.0,
+      "net_profit": 42947902000000.0,
+      "total_assets": 176107659000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "003550",
+      "corpName": "LG",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "060260",
+      "corpName": "뉴보텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "226590",
+      "corpName": "엠디바이스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "234030",
+      "corpName": "싸이닉솔루션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "402340",
+      "corpName": "SK스퀘어",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    },
+    {
+      "stockCode": "000990",
+      "corpName": "DB하이텍",
+      "stage": "fab",
+      "revenue": 13972
+    }
   ]
 }

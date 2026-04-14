@@ -836,5 +836,145 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3552396542302.0,
+      "operating_profit": 296876105378.0,
+      "net_profit": 34112272804.0,
+      "total_assets": 7940624818521.0
+    },
+    {
+      "year": "2022",
+      "sales": 4792237788876.0,
+      "operating_profit": 137375904912.0,
+      "net_profit": -176815032777.0,
+      "total_assets": 10332246645583.0
+    },
+    {
+      "year": "2023",
+      "sales": 4368360656512.0,
+      "operating_profit": -14600377588.0,
+      "net_profit": -315881661063.0,
+      "total_assets": 9949859715419.0
+    },
+    {
+      "year": "2024",
+      "sales": 5231360073502.0,
+      "operating_profit": 104478244497.0,
+      "net_profit": -503387159332.0,
+      "total_assets": 9316636930911.0
+    },
+    {
+      "year": "2025",
+      "sales": 5134511101925.0,
+      "operating_profit": 132887741945.0,
+      "net_profit": 0.0,
+      "total_assets": 8666766089199.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "media",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "content",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "253450",
+      "corpName": "스튜디오드래곤",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "043610",
+      "corpName": "KT지니뮤직",
+      "product": "MD상품(포토북앨범 등)",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "253450",
+      "corpName": "스튜디오드래곤",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "030000",
+      "corpName": "제일기획",
+      "stage": "content",
+      "revenue": 45469
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "214320",
+      "corpName": "이노션",
+      "stage": "platform",
+      "revenue": 21460
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "stage": "agency",
+      "revenue": 11749
+    },
+    {
+      "stockCode": "036420",
+      "corpName": "콘텐트리중앙",
+      "stage": "content",
+      "revenue": 10833
+    }
   ]
 }

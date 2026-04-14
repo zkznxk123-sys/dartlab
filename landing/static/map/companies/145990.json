@@ -920,5 +920,227 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2384454000000.0,
+      "operating_profit": 82553000000.0,
+      "net_profit": 56393000000.0,
+      "total_assets": 2802047000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 2652439000000.0,
+      "operating_profit": 82016000000.0,
+      "net_profit": 82247000000.0,
+      "total_assets": 2949649000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 2651439171359.0,
+      "operating_profit": 113199757649.0,
+      "net_profit": 0.0,
+      "total_assets": null
+    },
+    {
+      "year": "2024",
+      "sales": 2671821461625.0,
+      "operating_profit": 133523122893.0,
+      "net_profit": 136441364604.0,
+      "total_assets": 3319926499915.0
+    },
+    {
+      "year": "2025",
+      "sales": 2562499706149.0,
+      "operating_profit": 111724649074.0,
+      "net_profit": 11514858009.0,
+      "total_assets": 3625448840653.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        1
+      ],
+      [
+        "energy",
+        1
+      ],
+      [
+        "cosmetics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "polymer",
+        1
+      ],
+      [
+        "distribution",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "272550",
+      "corpName": "삼양패키징",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "036670",
+      "corpName": "삼양케이씨아이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "005610",
+      "corpName": "SPC삼립",
+      "product": "당류",
+      "amount": 8068920.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000640",
+      "corpName": "동아쏘시오홀딩스",
+      "product": "고과당",
+      "amount": 5015.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "001800",
+      "corpName": "오리온홀딩스",
+      "product": "유지류",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "003230",
+      "corpName": "삼양식품",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "271560",
+      "corpName": "오리온",
+      "product": "유 지 류",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000070",
+      "corpName": "삼양홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "001340",
+      "corpName": "PKC",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005300",
+      "corpName": "롯데칠성음료",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "009300",
+      "corpName": "삼아제약",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
   ]
 }

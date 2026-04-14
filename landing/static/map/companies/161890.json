@@ -971,5 +971,306 @@
       "source": "network",
       "evidence": "단순투자 지분 0.0%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1586332710248.0,
+      "operating_profit": 84267552991.0,
+      "net_profit": 43534832905.0,
+      "total_assets": 2606037352397.0
+    },
+    {
+      "year": "2022",
+      "sales": 1865731523035.0,
+      "operating_profit": 73280441382.0,
+      "net_profit": -4101004683.0,
+      "total_assets": 2933309479342.0
+    },
+    {
+      "year": "2023",
+      "sales": 2155675927422.0,
+      "operating_profit": 136143339992.0,
+      "net_profit": 25138828951.0,
+      "total_assets": 3009429377714.0
+    },
+    {
+      "year": "2024",
+      "sales": 2452063980463.0,
+      "operating_profit": 193850424348.0,
+      "net_profit": 90074028307.0,
+      "total_assets": 3126693019808.0
+    },
+    {
+      "year": "2025",
+      "sales": 2722419169325.0,
+      "operating_profit": 239594740448.0,
+      "net_profit": 125078561970.0,
+      "total_assets": 3457768462781.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 13,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 10,
+    "stageDiversity": 12,
+    "topSupplyIndustries": [
+      [
+        "pharma",
+        3
+      ],
+      [
+        "electronics",
+        2
+      ],
+      [
+        "cosmetics",
+        1
+      ],
+      [
+        "medicalDevice",
+        1
+      ],
+      [
+        "auto",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "research",
+        2
+      ],
+      [
+        "manufacturing",
+        1
+      ],
+      [
+        "therapeutic",
+        1
+      ],
+      [
+        "powertrain",
+        1
+      ],
+      [
+        "airframe",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "251970",
+      "corpName": "펌텍코리아",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "044780",
+      "corpName": "에이치케이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "092780",
+      "corpName": "DYP",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "214390",
+      "corpName": "경보제약",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "067390",
+      "corpName": "아스트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "021240",
+      "corpName": "코웨이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "285130",
+      "corpName": "SK케미칼",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "009780",
+      "corpName": "엠에스씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "272550",
+      "corpName": "삼양패키징",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "483650",
+      "corpName": "달바글로벌",
+      "product": "",
+      "amount": 155679.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "032940",
+      "corpName": "원익",
+      "product": "",
+      "amount": 24026.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "078520",
+      "corpName": "에이블씨엔씨",
+      "product": "기 초",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "002790",
+      "corpName": "아모레퍼시픽홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "024720",
+      "corpName": "콜마홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "114840",
+      "corpName": "아이패밀리에스씨",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "142760",
+      "corpName": "모아라이프플러스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "195940",
+      "corpName": "HK이노엔",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "204620",
+      "corpName": "글로벌텍스프리",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "stage": "manufacturing",
+      "revenue": 42528
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "278470",
+      "corpName": "에이피알",
+      "stage": "manufacturing",
+      "revenue": 15273
+    },
+    {
+      "stockCode": "257720",
+      "corpName": "실리콘투",
+      "stage": "manufacturing",
+      "revenue": 11163
+    },
+    {
+      "stockCode": "241710",
+      "corpName": "코스메카코리아",
+      "stage": "manufacturing",
+      "revenue": 6409
+    }
   ]
 }

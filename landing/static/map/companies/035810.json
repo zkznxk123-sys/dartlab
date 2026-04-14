@@ -597,5 +597,194 @@
       "source": "network",
       "evidence": "단순투자 지분 2.4%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1984045508989.0,
+      "operating_profit": 100417145072.0,
+      "net_profit": 9207549180.0,
+      "total_assets": 2313396923362.0
+    },
+    {
+      "year": "2022",
+      "sales": 3010255248617.0,
+      "operating_profit": 99922519563.0,
+      "net_profit": 26917170536.0,
+      "total_assets": 2656291440321.0
+    },
+    {
+      "year": "2023",
+      "sales": 3119160305224.0,
+      "operating_profit": 103781080293.0,
+      "net_profit": 54489016848.0,
+      "total_assets": 2528222762362.0
+    },
+    {
+      "year": "2024",
+      "sales": 3284975746816.0,
+      "operating_profit": 123396227384.0,
+      "net_profit": 0.0,
+      "total_assets": 2855885536721.0
+    },
+    {
+      "year": "2025",
+      "sales": 3388904350275.0,
+      "operating_profit": 151350122116.0,
+      "net_profit": 0.0,
+      "total_assets": 2896618126429.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 7,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "food",
+        4
+      ],
+      [
+        "pharma",
+        1
+      ],
+      [
+        "realestate",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        3
+      ],
+      [
+        "research",
+        1
+      ],
+      [
+        "general",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ],
+      [
+        "processing",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "153710",
+      "corpName": "옵티팜",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "027740",
+      "corpName": "마니커",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "353810",
+      "corpName": "이지바이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "208140",
+      "corpName": "정다운",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "073560",
+      "corpName": "우리손에프앤지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "195500",
+      "corpName": "마니커에프앤지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "027710",
+      "corpName": "팜스토리",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
   ]
 }

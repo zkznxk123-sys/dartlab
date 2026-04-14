@@ -1039,5 +1039,219 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 비용 절감 + 자산 효율화 + ROE 상승.\n영업비용률이 93.5%에서 83.9%로 하락하고, 자산회전율이 0.16에서 0.19로 개선되었다. ROE도 4.6%에서 7.2%로 상승하여 구조적 효율화가 진행 중이다.",
+    "strengths": [
+      "비용 절감 + 자산 효율화 + ROE 상승",
+      "Piotroski F 재무 건전 (8/9)",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**"
+    ],
+    "weaknesses": [
+      "고부채 (부채비율 265%)",
+      "이자보상 심각 (1.4배)",
+      "유동성 위기 (유동비율 79%)"
+    ],
+    "sector": "산업재 > 조선",
+    "source": "audit",
+    "createdAt": "1775430966.5612319"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 6622001487326.0,
+      "operating_profit": -1311956174022.0,
+      "net_profit": -1452069565718.0,
+      "total_assets": 12138595961258.0
+    },
+    {
+      "year": "2022",
+      "sales": 5944667452285.0,
+      "operating_profit": -854420950816.0,
+      "net_profit": -619438307027.0,
+      "total_assets": 14491697984864.0
+    },
+    {
+      "year": "2023",
+      "sales": 8009429912108.0,
+      "operating_profit": 233344768042.0,
+      "net_profit": -148272721730.0,
+      "total_assets": 15593389152394.0
+    },
+    {
+      "year": "2024",
+      "sales": 9903077919464.0,
+      "operating_profit": 502698683088.0,
+      "net_profit": 0.0,
+      "total_assets": 17194637128138.0
+    },
+    {
+      "year": "2025",
+      "sales": 10650010702818.0,
+      "operating_profit": 862210880029.0,
+      "net_profit": 535753735212.0,
+      "total_assets": 14948871093928.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 6,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 5,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "shipbuilding",
+        2
+      ],
+      [
+        "machinery",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ],
+      [
+        "aerospace",
+        1
+      ],
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "build",
+        2
+      ],
+      [
+        "precision",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ],
+      [
+        "product",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "900290",
+      "corpName": "GRT",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "329180",
+      "corpName": "HD현대중공업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "017960",
+      "corpName": "한국카본",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "082740",
+      "corpName": "한화엔진",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "054540",
+      "corpName": "삼영엠텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "082740",
+      "corpName": "한화엔진",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "stage": "build",
+      "revenue": 712594
+    },
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "stage": "shipping",
+      "revenue": 299332
+    },
+    {
+      "stockCode": "329180",
+      "corpName": "HD현대중공업",
+      "stage": "build",
+      "revenue": 175806
+    },
+    {
+      "stockCode": "018260",
+      "corpName": "삼성에스디에스",
+      "stage": "shipping",
+      "revenue": 139299
+    },
+    {
+      "stockCode": "042660",
+      "corpName": "한화오션",
+      "stage": "build",
+      "revenue": 127835
+    }
   ]
 }

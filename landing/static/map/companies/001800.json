@@ -351,5 +351,160 @@
       "source": "network",
       "evidence": "단순투자 지분 1.7%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "순현금 상태",
+    "strengths": [
+      "순현금 상태",
+      "Piotroski F 재무 건전 (7/9)",
+      "사외이사비율 60% -- 이사회 독립성 양호",
+      "DCF 안전마진 76% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출원가율 3년 연속 상승 (61.3% -> 63.6%)",
+      "ROIC 2.2% — 3년 연속 저수익 (자본비용 미회수 가능성)",
+      "IS-CF 괴리 -97% — 순이익 대비 현금흐름 극심한 차이"
+    ],
+    "sector": "필수소비재 > 식품,음료,담배",
+    "source": "audit",
+    "createdAt": "1775430966.5396948"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2415059149467.0,
+      "operating_profit": 315697398867.0,
+      "net_profit": 85985012798.0,
+      "total_assets": 4961788340261.0
+    },
+    {
+      "year": "2022",
+      "sales": 2934623360638.0,
+      "operating_profit": 399824809538.0,
+      "net_profit": 323574721674.0,
+      "total_assets": 5102168431194.0
+    },
+    {
+      "year": "2023",
+      "sales": null,
+      "operating_profit": 405463095002.0,
+      "net_profit": 204788957917.0,
+      "total_assets": 5138300057884.0
+    },
+    {
+      "year": "2024",
+      "sales": 3195245858433.0,
+      "operating_profit": 506240029274.0,
+      "net_profit": 318892215497.0,
+      "total_assets": 5933196336149.0
+    },
+    {
+      "year": "2025",
+      "sales": 3393126199452.0,
+      "operating_profit": 487728621983.0,
+      "net_profit": 0.0,
+      "total_assets": 6183410426053.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "food",
+        4
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "processing",
+        3
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "145990",
+      "corpName": "삼양사",
+      "product": "유지류",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "271560",
+      "corpName": "오리온",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "005180",
+      "corpName": "빙그레",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "007310",
+      "corpName": "오뚜기",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
   ]
 }

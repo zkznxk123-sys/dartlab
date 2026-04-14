@@ -11,8 +11,7 @@ import traceback
 from typing import Any, Generator
 
 from dartlab.ai.runtime.events import AnalysisEvent
-from dartlab.ai.tools.bootstrap import ensureBootstrapped
-from dartlab.ai.tools.registry import getDefaultRegistry
+from dartlab.ai.tools import buildTools, executeTool, toolsToOpenAiSchemas
 from dartlab.ai.tools.serialize import serializeForLlm, serializeForUi
 
 log = logging.getLogger("dartlab.ai.toolLoop")
@@ -45,15 +44,24 @@ def streamWithTools(
             "claude / openai / gemini / groq / cerebras / mistral 중 선택하세요."
         )
 
-    ensureBootstrapped()
-    registry = getDefaultRegistry()
-    tools = registry.getOpenaiSchemas()
+    toolList = buildTools()
+    tools = toolsToOpenAiSchemas(toolList)
+
+    from dartlab.ai.types import ToolResponse
 
     seenCalls: dict[str, int] = {}
 
     for roundIdx in range(maxRounds):
+        resp: ToolResponse | None = None
+        streamedText = False
         try:
-            resp = llm.complete_with_tools(messages, tools)
+            # stream_with_tools: text delta → str 실시간 yield, 라운드 종료 → ToolResponse
+            for item in llm.stream_with_tools(messages, tools):
+                if isinstance(item, ToolResponse):
+                    resp = item
+                elif isinstance(item, str):
+                    streamedText = True
+                    yield item  # 실시간 text chunk
         except Exception as e:  # noqa: BLE001
             yield AnalysisEvent(
                 "error",
@@ -64,6 +72,13 @@ def streamWithTools(
             )
             raise
 
+        if resp is None:
+            yield AnalysisEvent(
+                "error",
+                {"error": f"provider '{getattr(llm.config, 'provider', '?')}' stream_with_tools 가 ToolResponse 미반환"},
+            )
+            return
+
         # assistant 메시지 기록 (tool_calls 포함)
         if resp.tool_calls:
             messages.append(llm.format_assistant_tool_calls(resp.answer, resp.tool_calls))
@@ -72,7 +87,8 @@ def streamWithTools(
 
         # 종료: tool_calls 없음 → 최종 답변
         if not resp.tool_calls:
-            if resp.answer:
+            # streamedText=True 면 이미 delta 로 흘렀음. False 면 (fallback provider) 전체 yield.
+            if not streamedText and resp.answer:
                 yield resp.answer
             return
 
@@ -92,7 +108,7 @@ def streamWithTools(
             )
 
             try:
-                raw = registry.execute(tc.name, tc.arguments)
+                raw = executeTool(toolList, tc.name, tc.arguments)
                 llmText = serializeForLlm(raw, name=tc.name, arguments=tc.arguments)
                 uiText = serializeForUi(raw, name=tc.name)
                 status = "ok"

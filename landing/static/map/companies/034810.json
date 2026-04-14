@@ -330,5 +330,229 @@
       "source": "docs",
       "evidence": "IX. 계열회사 등에 관한 사항"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1872899717019.0,
+      "operating_profit": 93413922428.0,
+      "net_profit": 49449097286.0,
+      "total_assets": 2313511681240.0
+    },
+    {
+      "year": "2022",
+      "sales": 2531646680380.0,
+      "operating_profit": 210386941652.0,
+      "net_profit": 80851252118.0,
+      "total_assets": 2623339635438.0
+    },
+    {
+      "year": "2023",
+      "sales": 2308405711864.0,
+      "operating_profit": 106286094900.0,
+      "net_profit": 2515935451.0,
+      "total_assets": 2517374926358.0
+    },
+    {
+      "year": "2024",
+      "sales": 2220427942778.0,
+      "operating_profit": 71417635539.0,
+      "net_profit": null,
+      "total_assets": 2592029582345.0
+    },
+    {
+      "year": "2025",
+      "sales": 280566360.0,
+      "operating_profit": 41841478585.0,
+      "net_profit": -44884964945.0,
+      "total_assets": 2591018293239.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 9,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 89555.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 5,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "paper",
+        5
+      ],
+      [
+        "consulting",
+        1
+      ],
+      [
+        "semiconductor",
+        1
+      ],
+      [
+        "auto",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        6
+      ],
+      [
+        "packaging",
+        1
+      ],
+      [
+        "powertrain",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "002310",
+      "corpName": "아세아제지",
+      "product": "",
+      "amount": 89555.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "195870",
+      "corpName": "해성디에스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "027970",
+      "corpName": "한국제지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "078130",
+      "corpName": "국일제지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "037230",
+      "corpName": "한국팩키지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "012200",
+      "corpName": "계양전기",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "009580",
+      "corpName": "무림P&P",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "011780",
+      "corpName": "금호석유화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "037950",
+      "corpName": "엘컴텍",
+      "product": "MASK",
+      "amount": 123.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "091700",
+      "corpName": "파트론",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "023590",
+      "corpName": "다우기술",
+      "stage": "general",
+      "revenue": 174950
+    },
+    {
+      "stockCode": "005440",
+      "corpName": "현대지에프홀딩스",
+      "stage": "general",
+      "revenue": 80916
+    },
+    {
+      "stockCode": "058650",
+      "corpName": "세아홀딩스",
+      "stage": "general",
+      "revenue": 66111
+    },
+    {
+      "stockCode": "002990",
+      "corpName": "금호건설",
+      "stage": "general",
+      "revenue": 20185
+    },
+    {
+      "stockCode": "006060",
+      "corpName": "화승인더스트리",
+      "stage": "general",
+      "revenue": 17810
+    }
   ]
 }

@@ -441,5 +441,101 @@
       "source": "network",
       "evidence": "단순투자 지분 14.3%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 970760874482.0,
+      "operating_profit": 44252213145.0,
+      "net_profit": -113092847715.0,
+      "total_assets": 1532199428137.0
+    },
+    {
+      "year": "2022",
+      "sales": 3887293713353.0,
+      "operating_profit": 266321029961.0,
+      "net_profit": 271012385909.0,
+      "total_assets": 3023932974764.0
+    },
+    {
+      "year": "2023",
+      "sales": 4644090367589.0,
+      "operating_profit": -222296651919.0,
+      "net_profit": 0.0,
+      "total_assets": 3351444610588.0
+    },
+    {
+      "year": "2024",
+      "sales": 1907478512809.0,
+      "operating_profit": -558685355192.0,
+      "net_profit": -380729239417.0,
+      "total_assets": 2799831517733.0
+    },
+    {
+      "year": "2025",
+      "sales": 2154938965103.0,
+      "operating_profit": -156849943423.0,
+      "net_profit": -534701333152.0,
+      "total_assets": 3134104265112.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "product": "",
+      "amount": 3034180.0,
+      "type": "supplier",
+      "confidence": 0.9
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "007340",
+      "corpName": "DN오토모티브",
+      "stage": "cell",
+      "revenue": 36757
+    },
+    {
+      "stockCode": "004490",
+      "corpName": "세방전지",
+      "stage": "cell",
+      "revenue": 21187
+    },
+    {
+      "stockCode": "005070",
+      "corpName": "코스모신소재",
+      "stage": "cathode",
+      "revenue": 4563
+    },
+    {
+      "stockCode": "348370",
+      "corpName": "엔켐",
+      "stage": "electrolyte",
+      "revenue": 3128
+    },
+    {
+      "stockCode": "064760",
+      "corpName": "티씨케이",
+      "stage": "anode",
+      "revenue": 3013
+    }
   ]
 }

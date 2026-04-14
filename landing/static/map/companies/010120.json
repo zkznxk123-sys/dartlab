@@ -658,5 +658,179 @@
       "source": "network",
       "evidence": "경영참여 지분 2.1%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2668264980253.0,
+      "operating_profit": 155131916609.0,
+      "net_profit": 85310345509.0,
+      "total_assets": 2796731557614.0
+    },
+    {
+      "year": "2022",
+      "sales": 3377070215838.0,
+      "operating_profit": 187524016869.0,
+      "net_profit": 90303429399.0,
+      "total_assets": 3322804977898.0
+    },
+    {
+      "year": "2023",
+      "sales": 4230482628448.0,
+      "operating_profit": 324877723039.0,
+      "net_profit": 205961759130.0,
+      "total_assets": null
+    },
+    {
+      "year": "2024",
+      "sales": 4551837252467.0,
+      "operating_profit": 389717122317.0,
+      "net_profit": 238715669205.0,
+      "total_assets": 4485197464384.0
+    },
+    {
+      "year": "2025",
+      "sales": 4965798552980.0,
+      "operating_profit": 426407143017.0,
+      "net_profit": 286623001987.0,
+      "total_assets": 4956680318372.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "machinery",
+        1
+      ],
+      [
+        "media",
+        1
+      ],
+      [
+        "medicalDevice",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "special",
+        1
+      ],
+      [
+        "agency",
+        1
+      ],
+      [
+        "imaging",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "322180",
+      "corpName": "LS티라유텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "125020",
+      "corpName": "티씨머티리얼즈",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "006360",
+      "corpName": "GS건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "014790",
+      "corpName": "HL D&I",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "317400",
+      "corpName": "자이에스앤디",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "stage": "cable",
+      "revenue": 36360
+    },
+    {
+      "stockCode": "015860",
+      "corpName": "일진홀딩스",
+      "stage": "power",
+      "revenue": 22827
+    },
+    {
+      "stockCode": "103590",
+      "corpName": "일진전기",
+      "stage": "power",
+      "revenue": 20446
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "stage": "cable",
+      "revenue": 6245
+    },
+    {
+      "stockCode": "023810",
+      "corpName": "인팩",
+      "stage": "cable",
+      "revenue": 5864
+    }
   ]
 }

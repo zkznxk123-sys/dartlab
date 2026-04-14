@@ -70,5 +70,101 @@
       "source": "docs",
       "evidence": "3. 원재료 및 생산설비"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2536798009719.0,
+      "operating_profit": 39686157248.0,
+      "net_profit": 21459011218.0,
+      "total_assets": 6517362464357.0
+    },
+    {
+      "year": "2022",
+      "sales": 4173027136426.0,
+      "operating_profit": -403893693760.0,
+      "net_profit": -183875394305.0,
+      "total_assets": 7478129879658.0
+    },
+    {
+      "year": "2023",
+      "sales": 3953697605651.0,
+      "operating_profit": 314719522031.0,
+      "net_profit": 199385845707.0,
+      "total_assets": 7968409129278.0
+    },
+    {
+      "year": "2024",
+      "sales": 3570309804422.0,
+      "operating_profit": 327942028598.0,
+      "net_profit": 209870098091.0,
+      "total_assets": 8362237776886.0
+    },
+    {
+      "year": "2025",
+      "sales": 3998187000000.0,
+      "operating_profit": 529624000000.0,
+      "net_profit": 338886000000.0,
+      "total_assets": 8228997000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "016710",
+      "corpName": "대성홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "stage": "generation",
+      "revenue": 974293
+    },
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "stage": "distribution",
+      "revenue": 357273
+    },
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "stage": "distribution",
+      "revenue": 52755
+    },
+    {
+      "stockCode": "112610",
+      "corpName": "씨에스윈드",
+      "stage": "generation",
+      "revenue": 29316
+    },
+    {
+      "stockCode": "005090",
+      "corpName": "SGC에너지",
+      "stage": "generation",
+      "revenue": 24607
+    }
   ]
 }

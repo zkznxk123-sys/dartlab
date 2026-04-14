@@ -1973,5 +1973,173 @@
       "source": "network",
       "evidence": "단순투자 지분 0.3%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 22849920977857.0,
+      "operating_profit": 2447503013134.0,
+      "net_profit": 1461422624509.0,
+      "total_assets": 37042298365641.0
+    },
+    {
+      "year": "2022",
+      "sales": 27340601237802.0,
+      "operating_profit": 1616457125289.0,
+      "net_profit": 1038192930309.0,
+      "total_assets": 36800955829773.0
+    },
+    {
+      "year": "2023",
+      "sales": 25914760456167.0,
+      "operating_profit": 798325068073.0,
+      "net_profit": 0.0,
+      "total_assets": 35218841930044.0
+    },
+    {
+      "year": "2024",
+      "sales": 23226141091217.0,
+      "operating_profit": 159492008580.0,
+      "net_profit": null,
+      "total_assets": 34743788025637.0
+    },
+    {
+      "year": "2025",
+      "sales": 22733237259727.0,
+      "operating_profit": 219235156230.0,
+      "net_profit": 0.0,
+      "total_assets": 34442304939493.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "product": "강재, 기자재, 의장재 등",
+      "amount": 6519885.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "460850",
+      "corpName": "동국씨엠",
+      "product": "HRC",
+      "amount": 936740.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "product": "",
+      "amount": 174793.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "012630",
+      "corpName": "HDC",
+      "product": "",
+      "amount": 96889.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "294870",
+      "corpName": "IPARK현대산업개발",
+      "product": "",
+      "amount": 96889.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "375500",
+      "corpName": "DL이앤씨",
+      "product": "",
+      "amount": 93947.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "005810",
+      "corpName": "풍산홀딩스",
+      "product": "스테인레스 스틸",
+      "amount": 55381.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "002460",
+      "corpName": "HS화성",
+      "product": "",
+      "amount": 6179.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "product": "기 자 재",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "stage": "product",
+      "revenue": 32034
+    }
   ]
 }

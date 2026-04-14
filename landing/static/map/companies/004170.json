@@ -865,5 +865,203 @@
       "source": "network",
       "evidence": "단순투자 지분 4.8%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 6316435934254.0,
+      "operating_profit": 517400647833.0,
+      "net_profit": 82039464572.0,
+      "total_assets": 13644510517083.0
+    },
+    {
+      "year": "2022",
+      "sales": 7812755198909.0,
+      "operating_profit": 645448993543.0,
+      "net_profit": 406065274588.0,
+      "total_assets": 14348412322688.0
+    },
+    {
+      "year": "2023",
+      "sales": 6357088542148.0,
+      "operating_profit": 639780613579.0,
+      "net_profit": 225111670925.0,
+      "total_assets": 14751983355128.0
+    },
+    {
+      "year": "2024",
+      "sales": 6570412728809.0,
+      "operating_profit": 477024306786.0,
+      "net_profit": 0.0,
+      "total_assets": 15071774121951.0
+    },
+    {
+      "year": "2025",
+      "sales": 6929498818333.0,
+      "operating_profit": 479961762138.0,
+      "net_profit": 0.0,
+      "total_assets": 15833341277876.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "retail",
+        3
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "retail",
+        3
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "037710",
+      "corpName": "광주신세계",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "031430",
+      "corpName": "신세계인터내셔날",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "002420",
+      "corpName": "세기상사",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "031430",
+      "corpName": "신세계인터내셔날",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "035510",
+      "corpName": "신세계I&C",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "036420",
+      "corpName": "콘텐트리중앙",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "215480",
+      "corpName": "토박스코리아",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "218150",
+      "corpName": "미래생명자원",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "257720",
+      "corpName": "실리콘투",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "073240",
+      "corpName": "금호타이어",
+      "stage": "wholesale",
+      "revenue": 47013
+    }
   ]
 }

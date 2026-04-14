@@ -308,5 +308,196 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3509498278523.0,
+      "operating_profit": 314125035707.0,
+      "net_profit": 243387043769.0,
+      "total_assets": 3148260459261.0
+    },
+    {
+      "year": "2022",
+      "sales": 4372982501228.0,
+      "operating_profit": 231619553412.0,
+      "net_profit": 175261942564.0,
+      "total_assets": 3395297191796.0
+    },
+    {
+      "year": "2023",
+      "sales": 4125263947257.0,
+      "operating_profit": 228636480718.0,
+      "net_profit": 0.0,
+      "total_assets": 3660628679317.0
+    },
+    {
+      "year": "2024",
+      "sales": 4554411454633.0,
+      "operating_profit": 323768893078.0,
+      "net_profit": 236045982790.0,
+      "total_assets": 4096582596724.0
+    },
+    {
+      "year": "2025",
+      "sales": 5048580386639.0,
+      "operating_profit": 297427463130.0,
+      "net_profit": 0.0,
+      "total_assets": 4329189509985.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 6116.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 4,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "aerospace",
+        1
+      ],
+      [
+        "steel",
+        1
+      ],
+      [
+        "retail",
+        1
+      ],
+      [
+        "battery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "airframe",
+        1
+      ],
+      [
+        "raw",
+        1
+      ],
+      [
+        "wholesale",
+        1
+      ],
+      [
+        "electrolyte",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "product": "",
+      "amount": 6116.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "005810",
+      "corpName": "풍산홀딩스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "082920",
+      "corpName": "비츠로셀",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "195870",
+      "corpName": "해성디에스",
+      "product": "",
+      "amount": 103962.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "005810",
+      "corpName": "풍산홀딩스",
+      "product": "판ㆍ대",
+      "amount": 83413.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "024850",
+      "corpName": "HLB이노베이션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "025540",
+      "corpName": "한국단자공업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "stage": "product",
+      "revenue": 32034
+    }
   ]
 }

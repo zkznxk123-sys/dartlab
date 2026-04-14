@@ -642,5 +642,255 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": {
+    "narrative": "사외이사비율 57% -- 이사회 독립성 양호",
+    "strengths": [
+      "사외이사비율 57% -- 이사회 독립성 양호"
+    ],
+    "weaknesses": [
+      "이자보상 심각 (0.5배)",
+      "Altman Z 부실 경계 (0.96)",
+      "CCC 174일 — 현금 회수 매우 느림"
+    ],
+    "sector": "산업재 > 기계",
+    "source": "audit",
+    "createdAt": "1775430966.5260382"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 13204153075980.0,
+      "operating_profit": 945931226947.0,
+      "net_profit": 656730965019.0,
+      "total_assets": 26009852171749.0
+    },
+    {
+      "year": "2022",
+      "sales": 16995760103010.0,
+      "operating_profit": 1126028726422.0,
+      "net_profit": -581168717784.0,
+      "total_assets": 26315352623211.0
+    },
+    {
+      "year": "2023",
+      "sales": 19130129881903.0,
+      "operating_profit": 1436262204451.0,
+      "net_profit": 272073643932.0,
+      "total_assets": 28286808651585.0
+    },
+    {
+      "year": "2024",
+      "sales": 18132874000000.0,
+      "operating_profit": 1003759000000.0,
+      "net_profit": 302227000000.0,
+      "total_assets": 30143063000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 19784138000000.0,
+      "operating_profit": 1062715000000.0,
+      "net_profit": 249511000000.0,
+      "total_assets": 32927788000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 12,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 9,
+    "stageDiversity": 9,
+    "topSupplyIndustries": [
+      [
+        "machinery",
+        4
+      ],
+      [
+        "semiconductor",
+        1
+      ],
+      [
+        "finance",
+        1
+      ],
+      [
+        "pharma",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        3
+      ],
+      [
+        "test",
+        1
+      ],
+      [
+        "special",
+        1
+      ],
+      [
+        "securities",
+        1
+      ],
+      [
+        "research",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "131970",
+      "corpName": "두산테스나",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "336260",
+      "corpName": "두산퓨얼셀",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "454910",
+      "corpName": "두산로보틱스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002020",
+      "corpName": "코오롱",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "005690",
+      "corpName": "파미셀",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "241560",
+      "corpName": "두산밥캣",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "007690",
+      "corpName": "국도화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "120110",
+      "corpName": "코오롱인더",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "010470",
+      "corpName": "오리콤",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "090460",
+      "corpName": "비에이치",
+      "product": "CCL",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "336260",
+      "corpName": "두산퓨얼셀",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    },
+    {
+      "stockCode": "014680",
+      "corpName": "한솔케미칼",
+      "stage": "precision",
+      "revenue": 8840
+    }
   ]
 }

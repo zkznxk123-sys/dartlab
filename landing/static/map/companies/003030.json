@@ -244,5 +244,107 @@
       "source": "network",
       "evidence": "단순투자 지분 0.1%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2841722127579.0,
+      "operating_profit": 298952263629.0,
+      "net_profit": 0.0,
+      "total_assets": 2898999027652.0
+    },
+    {
+      "year": "2022",
+      "sales": 3953834150660.0,
+      "operating_profit": 567163868807.0,
+      "net_profit": 376265181568.0,
+      "total_assets": 3572067658664.0
+    },
+    {
+      "year": "2023",
+      "sales": 3913342472741.0,
+      "operating_profit": 590946429587.0,
+      "net_profit": 409652266510.0,
+      "total_assets": 4340755996109.0
+    },
+    {
+      "year": "2024",
+      "sales": 3675086864147.0,
+      "operating_profit": 211611279793.0,
+      "net_profit": 0.0,
+      "total_assets": 5555573758508.0
+    },
+    {
+      "year": "2025",
+      "sales": 3759574982771.0,
+      "operating_profit": 205826153302.0,
+      "net_profit": 97853853614.0,
+      "total_assets": 6046779971967.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": []
+  },
+  "suppliers": [
+    {
+      "stockCode": "306200",
+      "corpName": "세아제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "000070",
+      "corpName": "삼양홀딩스",
+      "stage": "general",
+      "revenue": 33483
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "036710",
+      "corpName": "심텍홀딩스",
+      "stage": "general",
+      "revenue": 15281
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "stage": "general",
+      "revenue": 13276
+    },
+    {
+      "stockCode": "045100",
+      "corpName": "한양이엔지",
+      "stage": "general",
+      "revenue": 11182
+    }
   ]
 }

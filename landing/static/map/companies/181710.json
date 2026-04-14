@@ -793,5 +793,92 @@
       "source": "network",
       "evidence": "단순투자 지분 8.8%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1923677420336.0,
+      "operating_profit": 97869201232.0,
+      "net_profit": 116850751812.0,
+      "total_assets": 3027171506519.0
+    },
+    {
+      "year": "2022",
+      "sales": 2114869816089.0,
+      "operating_profit": 39053530657.0,
+      "net_profit": 356143909.0,
+      "total_assets": 3025182021029.0
+    },
+    {
+      "year": "2023",
+      "sales": 2269614866943.0,
+      "operating_profit": 55598405513.0,
+      "net_profit": -23094179176.0,
+      "total_assets": 3449677276360.0
+    },
+    {
+      "year": "2024",
+      "sales": 2456107865377.0,
+      "operating_profit": -32619646834.0,
+      "net_profit": -132530342697.0,
+      "total_assets": 3193036597819.0
+    },
+    {
+      "year": "2025",
+      "sales": 2516233825224.0,
+      "operating_profit": 132434145572.0,
+      "net_profit": 32091574976.0,
+      "total_assets": 3851415641250.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
   ]
 }

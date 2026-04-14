@@ -908,5 +908,220 @@
       "source": "network",
       "evidence": "단순투자 지분 0.2%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 7527739000000.0,
+      "operating_profit": 102725000000.0,
+      "net_profit": 56071000000.0,
+      "total_assets": 7749507000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 8207614000000.0,
+      "operating_profit": 212115000000.0,
+      "net_profit": 43482000000.0,
+      "total_assets": 7546451000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 8590316000000.0,
+      "operating_profit": 229216000000.0,
+      "net_profit": 91461000000.0,
+      "total_assets": 6825905000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 8180886000000.0,
+      "operating_profit": 218810000000.0,
+      "net_profit": 129472000000.0,
+      "total_assets": 7075991000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 8481561000000.0,
+      "operating_profit": 204413000000.0,
+      "net_profit": 0.0,
+      "total_assets": 7025106000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "machinery",
+        1
+      ],
+      [
+        "steel",
+        1
+      ],
+      [
+        "retail",
+        1
+      ],
+      [
+        "auto",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "special",
+        1
+      ],
+      [
+        "raw",
+        1
+      ],
+      [
+        "retail",
+        1
+      ],
+      [
+        "oem",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "095190",
+      "corpName": "이엠코리아",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "095340",
+      "corpName": "ISC",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "013870",
+      "corpName": "지엠비코리아",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "product": "",
+      "amount": 487286.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "095190",
+      "corpName": "이엠코리아",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "900140",
+      "corpName": "엘브이엠씨",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "006660",
+      "corpName": "삼성공조",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "010660",
+      "corpName": "화천기계",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "212560",
+      "corpName": "네오오토",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
   ]
 }

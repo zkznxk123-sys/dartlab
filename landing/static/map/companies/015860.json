@@ -344,5 +344,180 @@
       "source": "docs",
       "evidence": "IX. 계열회사 등에 관한 사항"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1190071995775.0,
+      "operating_profit": 38724294545.0,
+      "net_profit": 33290727259.0,
+      "total_assets": 1611593519855.0
+    },
+    {
+      "year": "2022",
+      "sales": 1433888289336.0,
+      "operating_profit": 44921597875.0,
+      "net_profit": 28691536536.0,
+      "total_assets": 1586114519184.0
+    },
+    {
+      "year": "2023",
+      "sales": 1471896022592.0,
+      "operating_profit": 57518695514.0,
+      "net_profit": 20459087171.0,
+      "total_assets": 1664779334525.0
+    },
+    {
+      "year": "2024",
+      "sales": 1800024002531.0,
+      "operating_profit": 72521206741.0,
+      "net_profit": 22561772074.0,
+      "total_assets": 1967342079451.0
+    },
+    {
+      "year": "2025",
+      "sales": 2282724142096.0,
+      "operating_profit": 145590773490.0,
+      "net_profit": 54418137509.0,
+      "total_assets": 2344464482276.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 5,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "retail",
+        1
+      ],
+      [
+        "railroad",
+        1
+      ],
+      [
+        "auto",
+        1
+      ],
+      [
+        "electrical",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "wholesale",
+        1
+      ],
+      [
+        "general",
+        1
+      ],
+      [
+        "oem",
+        1
+      ],
+      [
+        "power",
+        1
+      ],
+      [
+        "display",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "081000",
+      "corpName": "일진다이아",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "271940",
+      "corpName": "일진하이솔루스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "103590",
+      "corpName": "일진전기",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "068790",
+      "corpName": "DMS",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "010120",
+      "corpName": "엘에스일렉트릭",
+      "stage": "power",
+      "revenue": 49658
+    },
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "stage": "cable",
+      "revenue": 36360
+    },
+    {
+      "stockCode": "103590",
+      "corpName": "일진전기",
+      "stage": "power",
+      "revenue": 20446
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "stage": "cable",
+      "revenue": 6245
+    },
+    {
+      "stockCode": "023810",
+      "corpName": "인팩",
+      "stage": "cable",
+      "revenue": 5864
+    }
   ]
 }

@@ -241,5 +241,267 @@
       "source": "docs",
       "evidence": "3. 원재료 및 생산설비"
     }
+  ],
+  "aiInsight": {
+    "narrative": "[개선/보통] 계약금 2500억 날리고 6명 죽인 사고. 그런데 2년 뒤 2486억 흑자.",
+    "strengths": [
+      "도시정비 수주 4.8조",
+      "영업이익 2486억"
+    ],
+    "weaknesses": [
+      "PF 리스크",
+      "평판 회복 불완전"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2702582"
+  },
+  "blogPosts": [
+    {
+      "slug": "20-294870-hdc-hyundai-dev",
+      "title": "HDC현대산업개발 (294870) — 계약금 2,500억 날리고 6명이 죽은 사고까지 낸 회사가 살아남은 이유",
+      "description": "2019년 아시아나항공 2.5조 인수, 2020년 코로나로 계약 파기, 2,500억 계약금 증발. 2022년 광주 화정아이파크 붕괴로 6명 사망, 영업정지 1년. 브랜드 평판지수 꼴찌. 그런데 2025년 영업이익 2,486억 흑자, 도시정비 수주 4.8조. 5년 만에 어떻게 다시 일어섰는가.",
+      "date": "2026-04-12",
+      "grade": "dCR 미산출",
+      "storyTemplate": "턴어라운드",
+      "verdict": "계약금 2500억 날리고 6명 죽인 사고. 그런데 2년 뒤 2486억 흑자.",
+      "direction": "개선",
+      "confidence": "보통",
+      "archetype": "턴어라운드",
+      "strengths": [
+        "도시정비 수주 4.8조",
+        "영업이익 2486억"
+      ],
+      "weaknesses": [
+        "PF 리스크",
+        "평판 회복 불완전"
+      ],
+      "keyMetrics": {
+        "revenue": 0.0,
+        "opm": 0.0,
+        "roe": 0.0,
+        "fcf": 0.0
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/294870-hdc-hyundai-dev.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3363905605791.0,
+      "operating_profit": 273435124620.0,
+      "net_profit": 176280916096.0,
+      "total_assets": 6566377904144.0
+    },
+    {
+      "year": "2022",
+      "sales": 3298299641730.0,
+      "operating_profit": 116379700606.0,
+      "net_profit": 50367009070.0,
+      "total_assets": 7336326609377.0
+    },
+    {
+      "year": "2023",
+      "sales": 4190788148341.0,
+      "operating_profit": 195313165155.0,
+      "net_profit": -179399508.0,
+      "total_assets": 7016268809820.0
+    },
+    {
+      "year": "2024",
+      "sales": 4256233201783.0,
+      "operating_profit": 184636983859.0,
+      "net_profit": 155717171971.0,
+      "total_assets": 7461863865856.0
+    },
+    {
+      "year": "2025",
+      "sales": 4147006988796.0,
+      "operating_profit": 248613789437.0,
+      "net_profit": 0.0,
+      "total_assets": 7599100705541.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 11,
+    "customerCount": 0,
+    "preciseEdgeCount": 6,
+    "totalSupplyAmount": 392849.0,
+    "hhi": 2668.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 36.6,
+    "top3Ratio": 85.9,
+    "industryDiversity": 7,
+    "stageDiversity": 6,
+    "topSupplyIndustries": [
+      [
+        "construction",
+        3
+      ],
+      [
+        "steel",
+        2
+      ],
+      [
+        "paper",
+        2
+      ],
+      [
+        "shipbuilding",
+        1
+      ],
+      [
+        "buildingMaterials",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        4
+      ],
+      [
+        "raw",
+        2
+      ],
+      [
+        "material",
+        2
+      ],
+      [
+        "shipping",
+        1
+      ],
+      [
+        "distribution",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "023410",
+      "corpName": "유진기업",
+      "product": "",
+      "amount": 143718.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": 96889.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "007280",
+      "corpName": "한국특강",
+      "product": "",
+      "amount": 96889.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "017800",
+      "corpName": "현대엘리베이터",
+      "product": "",
+      "amount": 40401.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "228340",
+      "corpName": "동양파일",
+      "product": "",
+      "amount": 7476.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "344820",
+      "corpName": "케이씨씨글라스",
+      "product": "",
+      "amount": 7476.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002380",
+      "corpName": "케이씨씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "079430",
+      "corpName": "현대리바트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "038010",
+      "corpName": "제일테크노스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
   ]
 }

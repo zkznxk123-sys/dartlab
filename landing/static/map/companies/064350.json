@@ -625,5 +625,137 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2872511952000.0,
+      "operating_profit": 80217965000.0,
+      "net_profit": -15096511000.0,
+      "total_assets": 4107182672000.0
+    },
+    {
+      "year": "2022",
+      "sales": 3163343615000.0,
+      "operating_profit": 147486669000.0,
+      "net_profit": -3263289000.0,
+      "total_assets": 4823869784000.0
+    },
+    {
+      "year": "2023",
+      "sales": 3587382453000.0,
+      "operating_profit": 210046594000.0,
+      "net_profit": 161027789000.0,
+      "total_assets": 5241484775000.0
+    },
+    {
+      "year": "2024",
+      "sales": 4376597857000.0,
+      "operating_profit": 456565534000.0,
+      "net_profit": 405259414000.0,
+      "total_assets": 5285394740000.0
+    },
+    {
+      "year": "2025",
+      "sales": 5839031553000.0,
+      "operating_profit": 1005640509000.0,
+      "net_profit": 770492199000.0,
+      "total_assets": 9318033774000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "product",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "004560",
+      "corpName": "현대비앤지스틸",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "054180",
+      "corpName": "메디콕스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "045390",
+      "corpName": "대아티아이",
+      "stage": "general",
+      "revenue": 1532
+    },
+    {
+      "stockCode": "271940",
+      "corpName": "일진하이솔루스",
+      "stage": "general",
+      "revenue": 816
+    },
+    {
+      "stockCode": "088390",
+      "corpName": "이녹스",
+      "stage": "",
+      "revenue": 591
+    },
+    {
+      "stockCode": "123750",
+      "corpName": "알톤",
+      "stage": "",
+      "revenue": 322
+    },
+    {
+      "stockCode": "115500",
+      "corpName": "케이씨에스",
+      "stage": "general",
+      "revenue": 249
+    }
   ]
 }

@@ -767,5 +767,242 @@
       "source": "network",
       "evidence": "기타"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 4863128496699.0,
+      "operating_profit": 343357809050.0,
+      "net_profit": 193680578727.0,
+      "total_assets": 6116713932912.0
+    },
+    {
+      "year": "2022",
+      "sales": 4134932512111.0,
+      "operating_profit": 214233255761.0,
+      "net_profit": 134474812450.0,
+      "total_assets": 5801783178159.0
+    },
+    {
+      "year": "2023",
+      "sales": 3673963593157.0,
+      "operating_profit": 108171257062.0,
+      "net_profit": 180101845362.0,
+      "total_assets": 5886510888702.0
+    },
+    {
+      "year": "2024",
+      "sales": 3885110699186.0,
+      "operating_profit": 220481343913.0,
+      "net_profit": 8454160762.0,
+      "total_assets": 6783507800768.0
+    },
+    {
+      "year": "2025",
+      "sales": 4252820221496.0,
+      "operating_profit": 335826547063.0,
+      "net_profit": 11633898544.0,
+      "total_assets": 6961213309494.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 14,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 5,
+    "stageDiversity": 8,
+    "topSupplyIndustries": [
+      [
+        "cosmetics",
+        7
+      ],
+      [
+        "chemical",
+        4
+      ],
+      [
+        "media",
+        1
+      ],
+      [
+        "energy",
+        1
+      ],
+      [
+        "construction",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "manufacturing",
+        6
+      ],
+      [
+        "specialty",
+        2
+      ],
+      [
+        "agency",
+        1
+      ],
+      [
+        "generation",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "352480",
+      "corpName": "씨앤씨인터내셔널",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "048410",
+      "corpName": "현대바이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "251970",
+      "corpName": "펌텍코리아",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "052260",
+      "corpName": "현대바이오랜드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "017890",
+      "corpName": "한국알콜",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "460870",
+      "corpName": "에스엠씨지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "080530",
+      "corpName": "코디",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "002790",
+      "corpName": "아모레퍼시픽홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "460870",
+      "corpName": "에스엠씨지",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "278470",
+      "corpName": "에이피알",
+      "stage": "manufacturing",
+      "revenue": 15273
+    },
+    {
+      "stockCode": "257720",
+      "corpName": "실리콘투",
+      "stage": "manufacturing",
+      "revenue": 11163
+    },
+    {
+      "stockCode": "241710",
+      "corpName": "코스메카코리아",
+      "stage": "manufacturing",
+      "revenue": 6409
+    }
   ]
 }

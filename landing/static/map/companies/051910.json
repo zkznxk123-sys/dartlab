@@ -2307,5 +2307,227 @@
       "source": "network",
       "evidence": "단순투자 지분 0.0%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 42654722000000.0,
+      "operating_profit": null,
+      "net_profit": 3669787000000.0,
+      "total_assets": 51135302000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 51864888000000.0,
+      "operating_profit": 2995698000000.0,
+      "net_profit": 350155000000.0,
+      "total_assets": 67973823000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 55249785000000.0,
+      "operating_profit": 2529196000000.0,
+      "net_profit": 2053425000000.0,
+      "total_assets": null
+    },
+    {
+      "year": "2024",
+      "sales": 48916104000000.0,
+      "operating_profit": 916798000000.0,
+      "net_profit": 515011000000.0,
+      "total_assets": null
+    },
+    {
+      "year": "2025",
+      "sales": 45932167000000.0,
+      "operating_profit": 1180900000000.0,
+      "net_profit": 0.0,
+      "total_assets": 101061661000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "software",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ],
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "platform",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "0007C0",
+      "corpName": "아크릴",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "003670",
+      "corpName": "포스코퓨처엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "344820",
+      "corpName": "케이씨씨글라스",
+      "product": "가소제, 우레탄수지, 염화비닐수지, 홈씨씨 및 유통상품 外",
+      "amount": 794855.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "024070",
+      "corpName": "WISCOM",
+      "product": "BASE RESIN류",
+      "amount": 19481.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "060260",
+      "corpName": "뉴보텍",
+      "product": "PVC RESIN",
+      "amount": 7544.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "012860",
+      "corpName": "모베이스전자",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "product": "Resin",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "108670",
+      "corpName": "LX하우시스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000320",
+      "corpName": "노루홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "000390",
+      "corpName": "삼화페인트공업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    },
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "stage": "basic",
+      "revenue": 184830
+    }
   ]
 }

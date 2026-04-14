@@ -535,5 +535,154 @@
       "source": "network",
       "evidence": "단순투자 지분 11.0%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 4339706411421.0,
+      "operating_profit": 93203600406.0,
+      "net_profit": -516809974210.0,
+      "total_assets": 13082664860149.0
+    },
+    {
+      "year": "2022",
+      "sales": 6206669334674.0,
+      "operating_profit": 598763774896.0,
+      "net_profit": -83920821585.0,
+      "total_assets": 13455341411799.0
+    },
+    {
+      "year": "2023",
+      "sales": 7623348347364.0,
+      "operating_profit": 619928673329.0,
+      "net_profit": null,
+      "total_assets": 13016745781139.0
+    },
+    {
+      "year": "2024",
+      "sales": 8318567228711.0,
+      "operating_profit": 275690391993.0,
+      "net_profit": null,
+      "total_assets": 13449903474132.0
+    },
+    {
+      "year": "2025",
+      "sales": 7266849939986.0,
+      "operating_profit": -345190261173.0,
+      "net_profit": null,
+      "total_assets": 12187613804660.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "aerospace",
+        1
+      ],
+      [
+        "software",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "airline",
+        1
+      ],
+      [
+        "ai",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "298690",
+      "corpName": "에어부산",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "267850",
+      "corpName": "아시아나IDT",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "003490",
+      "corpName": "대한항공",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "036800",
+      "corpName": "나이스정보통신",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "180640",
+      "corpName": "한진칼",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "stage": "airframe",
+      "revenue": 747854
+    },
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "stage": "airframe",
+      "revenue": 267029
+    },
+    {
+      "stockCode": "079550",
+      "corpName": "LIG넥스원",
+      "stage": "defense",
+      "revenue": 43069
+    },
+    {
+      "stockCode": "047810",
+      "corpName": "한국항공우주",
+      "stage": "airframe",
+      "revenue": 36964
+    },
+    {
+      "stockCode": "272210",
+      "corpName": "한화시스템",
+      "stage": "defense",
+      "revenue": 36642
+    }
   ]
 }

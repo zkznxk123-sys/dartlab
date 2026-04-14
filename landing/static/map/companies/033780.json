@@ -612,5 +612,225 @@
       "source": "network",
       "evidence": "단순투자 지분 0.0%"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 5228351596536.0,
+      "operating_profit": 1338383479632.0,
+      "net_profit": 0.0,
+      "total_assets": 11637271194200.0
+    },
+    {
+      "year": "2022",
+      "sales": 5851406367817.0,
+      "operating_profit": 1267649967727.0,
+      "net_profit": 0.0,
+      "total_assets": 12301715783797.0
+    },
+    {
+      "year": "2023",
+      "sales": 5862608000000.0,
+      "operating_profit": 1167336000000.0,
+      "net_profit": 0.0,
+      "total_assets": 12772452000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 5908792000000.0,
+      "operating_profit": 1188814000000.0,
+      "net_profit": 1164999000000.0,
+      "total_assets": 13925237000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 6579707000000.0,
+      "operating_profit": 1343666000000.0,
+      "net_profit": 12244000000.0,
+      "total_assets": 14189127000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 19,
+    "customerCount": 0,
+    "preciseEdgeCount": 3,
+    "totalSupplyAmount": 73709.0,
+    "hhi": 4553.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 47.6,
+    "top3Ratio": 100.0,
+    "industryDiversity": 9,
+    "stageDiversity": 13,
+    "topSupplyIndustries": [
+      [
+        "pharma",
+        5
+      ],
+      [
+        "cosmetics",
+        3
+      ],
+      [
+        "electronics",
+        3
+      ],
+      [
+        "chemical",
+        2
+      ],
+      [
+        "food",
+        2
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        3
+      ],
+      [
+        "research",
+        2
+      ],
+      [
+        "specialty",
+        2
+      ],
+      [
+        "general",
+        2
+      ],
+      [
+        "api",
+        2
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "002840",
+      "corpName": "미원상사",
+      "product": "Ethyl Alcohol, XF49-C3281/SF-C0813,Mihapol PBS-50, Micolin A-526 외",
+      "amount": 35080.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "078140",
+      "corpName": "대봉엘에스",
+      "product": "Ethyl Alcohol, XF49-C3281/SF-C0813,Mihapol PBS-50, Micolin A-526 외",
+      "amount": 35080.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "271980",
+      "corpName": "제일약품",
+      "product": "CMZ(I)",
+      "amount": 3549.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "054210",
+      "corpName": "이랜텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "009460",
+      "corpName": "한창제지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "187870",
+      "corpName": "디바이스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "000910",
+      "corpName": "유니온",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "214390",
+      "corpName": "경보제약",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "006110",
+      "corpName": "삼아알미늄",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "003520",
+      "corpName": "영진약품",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    },
+    {
+      "stockCode": "280360",
+      "corpName": "롯데웰푸드",
+      "stage": "raw",
+      "revenue": 42160
+    }
   ]
 }

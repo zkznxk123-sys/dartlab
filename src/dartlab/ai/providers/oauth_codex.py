@@ -607,6 +607,121 @@ class OAuthCodexProvider(BaseProvider):
             finish_reason=finishReason,
         )
 
+    def stream_with_tools(
+        self,
+        messages: list[dict],
+        tools: list[dict],
+        *,
+        tool_choice: str | None = None,
+    ):
+        """Responses API 스트리밍 tool calling — **실시간 SSE**.
+
+        SSE delta 를 즉시 yield (str), 라운드 종료 시 ToolResponse 1회 yield.
+        `_request_with_retry(stream=True)` 로 httpx streaming 응답 획득 → iter_lines 로 실시간 파싱.
+        """
+        token = self._get_token_or_raise()
+        body = self._build_body(messages, tools=tools, tool_choice=tool_choice)
+        resp = self._request_with_retry(token, body, stream=True)
+
+        deltaAnswer = ""
+        completedAnswer = ""
+        fcBuffers: dict[str, dict] = {}
+        finishedCalls: list[dict] = []
+
+        try:
+            lines_iter = resp.iter_lines()
+        except AttributeError:
+            # fallback: non-stream response
+            lines_iter = resp.text.split("\n")
+
+        for line in lines_iter:
+            if not line or not line.startswith("data: "):
+                continue
+            data_str = line[6:]
+            if data_str == "[DONE]":
+                break
+            try:
+                event = json.loads(data_str)
+            except json.JSONDecodeError:
+                continue
+
+            etype = event.get("type")
+
+            if etype == "response.output_item.added":
+                item = event.get("item", {})
+                if item.get("type") == "function_call":
+                    itemId = item.get("id") or f"fc_{len(fcBuffers)}"
+                    fcBuffers[itemId] = {
+                        "id": item.get("call_id") or itemId,
+                        "name": item.get("name", ""),
+                        "args": "",
+                    }
+            elif etype == "response.function_call_arguments.delta":
+                itemId = event.get("item_id", "")
+                buf = fcBuffers.get(itemId)
+                if buf is not None:
+                    buf["args"] += event.get("delta", "")
+            elif etype == "response.function_call_arguments.done":
+                itemId = event.get("item_id", "")
+                buf = fcBuffers.pop(itemId, None)
+                finalArgs = event.get("arguments") if isinstance(event.get("arguments"), str) else None
+                if buf is not None:
+                    finishedCalls.append(
+                        {
+                            "id": buf["id"],
+                            "name": buf["name"],
+                            "args": finalArgs or buf["args"],
+                        }
+                    )
+            elif etype == "response.output_item.done":
+                item = event.get("item", {})
+                if item.get("type") == "function_call":
+                    itemId = item.get("id", "")
+                    buf = fcBuffers.pop(itemId, None)
+                    if buf is not None:
+                        finalArgs = item.get("arguments")
+                        finishedCalls.append(
+                            {
+                                "id": buf["id"],
+                                "name": buf["name"],
+                                "args": finalArgs if isinstance(finalArgs, str) else buf["args"],
+                            }
+                        )
+            elif etype == "response.output_text.delta":
+                delta = event.get("delta", "")
+                if delta:
+                    deltaAnswer += delta
+                    yield delta  # ← 실시간 text chunk
+            elif etype == "response.completed":
+                resp_obj = event.get("response", {})
+                for output in resp_obj.get("output", []):
+                    if output.get("type") == "message":
+                        for content in output.get("content", []):
+                            if content.get("type") == "output_text":
+                                completedAnswer += content.get("text", "")
+
+        toolCalls: list[ToolCall] = []
+        for fc in finishedCalls:
+            try:
+                args = json.loads(fc["args"]) if fc["args"] else {}
+            except json.JSONDecodeError:
+                args = {}
+            toolCalls.append(ToolCall(id=fc["id"], name=fc["name"], arguments=args))
+
+        # streaming 응답 자원 정리
+        try:
+            resp.close()
+        except (AttributeError, RuntimeError):
+            pass
+
+        yield ToolResponse(
+            answer=completedAnswer or deltaAnswer,
+            provider="oauth-codex",
+            model=self.resolved_model,
+            tool_calls=toolCalls,
+            finish_reason="tool_calls" if toolCalls else "stop",
+        )
+
     def format_assistant_tool_calls(self, answer: str | None, tool_calls: list) -> dict:
         """assistant 메시지에 tool_calls 정보 포함."""
         serialized = []

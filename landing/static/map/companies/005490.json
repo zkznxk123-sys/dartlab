@@ -992,5 +992,169 @@
       "source": "network",
       "evidence": "단순투자"
     }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 76332345050013.0,
+      "operating_profit": 9238089232877.0,
+      "net_profit": 6617238627273.0,
+      "total_assets": 91471614111915.0
+    },
+    {
+      "year": "2022",
+      "sales": 84750203702240.0,
+      "operating_profit": 4850053015766.0,
+      "net_profit": 3144086508618.0,
+      "total_assets": 98406780635254.0
+    },
+    {
+      "year": "2023",
+      "sales": 77127197108585.0,
+      "operating_profit": 3531422506439.0,
+      "net_profit": 1845849532200.0,
+      "total_assets": 100945394185079.0
+    },
+    {
+      "year": "2024",
+      "sales": 72688143160111.0,
+      "operating_profit": 2173573272904.0,
+      "net_profit": 1094917125078.0,
+      "total_assets": 103404198997805.0
+    },
+    {
+      "year": "2025",
+      "sales": 69094886192787.0,
+      "operating_profit": 1827063210829.0,
+      "net_profit": 0.0,
+      "total_assets": 105192437963565.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        4
+      ],
+      [
+        "energy",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        2
+      ],
+      [
+        "product",
+        2
+      ],
+      [
+        "distribution",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "003670",
+      "corpName": "포스코퓨처엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "009520",
+      "corpName": "포스코엠텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "058430",
+      "corpName": "포스코스틸리온",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "002710",
+      "corpName": "TCC스틸",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "stage": "product",
+      "revenue": 32034
+    }
   ]
 }

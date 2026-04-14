@@ -1260,5 +1260,256 @@
       "source": "network",
       "evidence": "단순투자 지분 7.0%"
     }
+  ],
+  "aiInsight": {
+    "narrative": "DCF 안전마진 88% -- 저평가 가능",
+    "strengths": [
+      "DCF 안전마진 88% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "Altman Z 부실 경계 (1.00)",
+      "CCC 310일 — 현금 회수 매우 느림",
+      "ROE의 레버리지 의존도 높음 (자산/자본 = 6.0배)"
+    ],
+    "sector": "산업재 > 항공우주와국방",
+    "source": "audit",
+    "createdAt": "1775430966.5310457"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 52836069000000.0,
+      "operating_profit": 2927888000000.0,
+      "net_profit": 0.0,
+      "total_assets": null
+    },
+    {
+      "year": "2022",
+      "sales": 62278395000000.0,
+      "operating_profit": 2516091000000.0,
+      "net_profit": 0.0,
+      "total_assets": null
+    },
+    {
+      "year": "2023",
+      "sales": 53134813000000.0,
+      "operating_profit": 2411920000000.0,
+      "net_profit": 0.0,
+      "total_assets": 209738149000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 55646829000000.0,
+      "operating_profit": 2416109000000.0,
+      "net_profit": 772976000000.0,
+      "total_assets": 252036985000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 74785440000000.0,
+      "operating_profit": 4146883000000.0,
+      "net_profit": 1991600000000.0,
+      "total_assets": 289329420000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 38,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 15,
+    "stageDiversity": 18,
+    "topSupplyIndustries": [
+      [
+        "aerospace",
+        6
+      ],
+      [
+        "chemical",
+        6
+      ],
+      [
+        "construction",
+        4
+      ],
+      [
+        "telecom",
+        3
+      ],
+      [
+        "semiconductor",
+        3
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        6
+      ],
+      [
+        "raw",
+        3
+      ],
+      [
+        "basic",
+        3
+      ],
+      [
+        "infra",
+        3
+      ],
+      [
+        "polymer",
+        3
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "023410",
+      "corpName": "유진기업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "003960",
+      "corpName": "사조대림",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "099320",
+      "corpName": "쎄트렉아이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "104700",
+      "corpName": "한국철강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "006650",
+      "corpName": "대한유화",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "050890",
+      "corpName": "쏠리드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "272210",
+      "corpName": "한화시스템",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "001340",
+      "corpName": "PKC",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "010960",
+      "corpName": "삼호개발",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "stage": "airframe",
+      "revenue": 267029
+    },
+    {
+      "stockCode": "020560",
+      "corpName": "아시아나항공",
+      "stage": "airline",
+      "revenue": 72668
+    },
+    {
+      "stockCode": "079550",
+      "corpName": "LIG넥스원",
+      "stage": "defense",
+      "revenue": 43069
+    },
+    {
+      "stockCode": "047810",
+      "corpName": "한국항공우주",
+      "stage": "airframe",
+      "revenue": 36964
+    },
+    {
+      "stockCode": "272210",
+      "corpName": "한화시스템",
+      "stage": "defense",
+      "revenue": 36642
+    }
   ]
 }
