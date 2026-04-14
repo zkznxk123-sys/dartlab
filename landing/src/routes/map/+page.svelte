@@ -9,8 +9,15 @@
 	let allLinks = $derived(data.ecosystem.links);
 	let industries = $derived(data.ecosystem.industries);
 
-	// 필터 상태
-	let enabledIndustries = $state<Set<string>>(new Set(industries.map((i: any) => i.id)));
+	// 필터 상태 — 초기에는 모든 산업 활성화
+	let enabledIndustries = $state<Set<string>>(new Set());
+	let initialized = $state(false);
+	$effect(() => {
+		if (!initialized && data?.ecosystem?.industries) {
+			enabledIndustries = new Set(data.ecosystem.industries.map((i: any) => i.id));
+			initialized = true;
+		}
+	});
 	let showSupplier = $state(true);
 	let showAffiliate = $state(false);
 	let showInvestor = $state(false);
@@ -260,29 +267,32 @@
 		display: grid;
 		grid-template-columns: 280px 1fr;
 		height: calc(100vh - 64px);
-		background: #fafafa;
+		background: #050811;
+		color: #f1f5f9;
 	}
 
 	.sidebar {
 		overflow-y: auto;
-		background: white;
-		border-right: 1px solid #e5e7eb;
+		background: #0f1219;
+		border-right: 1px solid #1e2433;
 		padding: 16px;
+		color: #f1f5f9;
 	}
 	.header h1 {
 		margin: 0 0 4px;
 		font-size: 18px;
+		color: #f1f5f9;
 	}
 	.header .sub {
 		margin: 0;
 		font-size: 12px;
-		color: #6b7280;
+		color: #94a3b8;
 	}
 
 	.section {
 		margin-top: 16px;
 		padding-top: 16px;
-		border-top: 1px solid #f3f4f6;
+		border-top: 1px solid #1e2433;
 	}
 	.section:first-of-type {
 		border-top: none;
@@ -290,7 +300,7 @@
 	.section h3 {
 		font-size: 11px;
 		font-weight: 600;
-		color: #6b7280;
+		color: #94a3b8;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		margin: 0 0 8px;
@@ -300,19 +310,29 @@
 	.controls button {
 		font-size: 10px;
 		padding: 2px 6px;
-		background: #f3f4f6;
+		background: #1e2433;
+		color: #94a3b8;
 		border: none;
 		border-radius: 3px;
 		cursor: pointer;
 		margin-left: 4px;
 	}
+	.controls button:hover {
+		background: #2a3142;
+		color: #f1f5f9;
+	}
 
 	.search {
 		width: 100%;
 		padding: 8px 12px;
-		border: 1px solid #e5e7eb;
+		background: #050811;
+		border: 1px solid #1e2433;
 		border-radius: 6px;
 		font-size: 13px;
+		color: #f1f5f9;
+	}
+	.search::placeholder {
+		color: #64748b;
 	}
 
 	.check {
@@ -322,6 +342,7 @@
 		font-size: 13px;
 		padding: 4px 0;
 		cursor: pointer;
+		color: #cbd5e1;
 	}
 	.check input {
 		margin: 0;
@@ -344,7 +365,7 @@
 	.range {
 		display: block;
 		font-size: 12px;
-		color: #4b5563;
+		color: #cbd5e1;
 		margin-bottom: 8px;
 	}
 	.range input {
@@ -373,7 +394,7 @@
 	}
 	.industry-item .count {
 		font-size: 11px;
-		color: #9ca3af;
+		color: #64748b;
 	}
 
 	.map-main {
@@ -387,11 +408,12 @@
 		right: 0;
 		width: 360px;
 		height: calc(100vh - 64px);
-		background: white;
-		border-left: 1px solid #e5e7eb;
+		background: #0f1219;
+		border-left: 1px solid #1e2433;
 		padding: 16px;
 		overflow-y: auto;
-		box-shadow: -4px 0 12px rgba(0, 0, 0, 0.05);
+		box-shadow: -4px 0 12px rgba(0, 0, 0, 0.5);
+		color: #f1f5f9;
 	}
 	.close {
 		position: absolute;
@@ -401,16 +423,20 @@
 		border: none;
 		font-size: 18px;
 		cursor: pointer;
-		color: #9ca3af;
+		color: #64748b;
+	}
+	.close:hover {
+		color: #f1f5f9;
 	}
 	.detail-head h2 {
 		margin: 0;
 		font-size: 20px;
+		color: #f1f5f9;
 	}
 	.code {
 		margin: 2px 0 8px;
 		font-family: monospace;
-		color: #9ca3af;
+		color: #64748b;
 		font-size: 12px;
 	}
 	.badges {
@@ -425,24 +451,26 @@
 		font-weight: 500;
 	}
 	.stage-badge {
-		background: #ecfdf5;
-		color: #059669;
+		background: rgba(52, 211, 153, 0.15);
+		color: #34d399;
 	}
 	.big-stat {
-		background: #f9fafb;
+		background: #050811;
 		padding: 12px;
 		border-radius: 8px;
 		margin-bottom: 12px;
+		border: 1px solid #1e2433;
 	}
 	.big-stat .label {
 		font-size: 11px;
-		color: #6b7280;
+		color: #94a3b8;
 		display: block;
 		margin-bottom: 4px;
 	}
 	.big-stat .value {
 		font-size: 20px;
 		font-weight: 600;
+		color: #f1f5f9;
 	}
 
 	.rel-list {
@@ -452,31 +480,35 @@
 	}
 	.rel-list li {
 		padding: 8px 0;
-		border-bottom: 1px solid #f3f4f6;
+		border-bottom: 1px solid #1e2433;
 	}
 	.rel-list li:last-child {
 		border-bottom: none;
 	}
 	.rel-partner {
 		font-size: 13px;
+		color: #cbd5e1;
+	}
+	.rel-partner strong {
+		color: #f1f5f9;
 	}
 	.rel-partner .product {
-		color: #6b7280;
+		color: #94a3b8;
 		font-size: 11px;
 	}
 	.rel-amount {
 		font-size: 12px;
-		color: #d97706;
+		color: #fb923c;
 		margin-top: 2px;
 	}
 	.rel-amount .ratio {
-		color: #9ca3af;
+		color: #64748b;
 		font-size: 10px;
 	}
 	.full-link {
 		display: inline-block;
 		margin-top: 8px;
-		color: #0ea5e9;
+		color: #60a5fa;
 		text-decoration: none;
 		font-size: 13px;
 	}
