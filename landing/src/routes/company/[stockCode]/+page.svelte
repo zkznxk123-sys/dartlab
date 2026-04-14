@@ -1,6 +1,7 @@
 <script lang="ts">
 	import CompanyEgograph from '$lib/components/CompanyEgograph.svelte';
 	import type { PageData } from './$types';
+	import { base } from '$app/paths';
 
 	let { data }: { data: PageData } = $props();
 	let ego = $derived(data.data.ego);
@@ -21,9 +22,9 @@
 
 <div class="wrap">
 	<nav class="breadcrumb">
-		<a href="/map">산업지도</a>
+		<a href="{base}/map">산업지도</a>
 		<span>›</span>
-		<a href="/industry/{ego.industry}">{ego.industry}</a>
+		<a href="{base}/industry/{ego.industry}">{ego.industry}</a>
 		<span>›</span>
 		<span>{ego.corpName}</span>
 	</nav>
