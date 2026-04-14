@@ -104,6 +104,90 @@ def applyOverride(auto_value: Any, override_key: str, overrides: dict) -> Any:
     return overrides[override_key]
 
 
+def detectExtremeFlags(assumptions: dict | None) -> list[dict]:
+    """assumptions 값을 룰 기반으로 검사 → "의심스럽다 + 재호출 권고" flag 리스트.
+
+    엔진 자가 의심 매커니즘. AI 가 판단하기 전에 엔진이 먼저 "이 가정은 비정상" 이라고
+    말한다. 각 flag 에는 `suggestedRetry` (override 재호출 dict) 가 동봉되어 AI 가
+    복사 수준으로 실행할 수 있다.
+    """
+    if not assumptions or not isinstance(assumptions, dict):
+        return []
+
+    flags: list[dict] = []
+
+    # WACC 범위 검사 (한국 주식 일반적 8~12% 기준)
+    wacc = assumptions.get("wacc")
+    if isinstance(wacc, (int, float)):
+        if wacc > 15.0:
+            flags.append({
+                "flag": "wacc_extreme_high",
+                "reason": f"WACC {wacc:.1f}% 는 대형주에 과도 — 정상 범위 초과",
+                "suggestedRetry": {"wacc": 9.0},
+            })
+        elif wacc < 6.0:
+            flags.append({
+                "flag": "wacc_extreme_low",
+                "reason": f"WACC {wacc:.1f}% 는 지나치게 공격적 — 리스크 과소평가 가능",
+                "suggestedRetry": {"wacc": 9.0},
+            })
+
+    # Kd (타인자본비용) — 회사채 수준 대비 과도
+    kd = assumptions.get("kd")
+    if isinstance(kd, (int, float)) and kd > 12.0:
+        flags.append({
+            "flag": "kd_high",
+            "reason": f"타인자본비용 Kd {kd:.1f}% 는 회사채 시장 대비 비현실적",
+            "suggestedRetry": {"wacc": 9.0},
+        })
+
+    # 영구성장률
+    tg = assumptions.get("terminalGrowth")
+    if isinstance(tg, (int, float)):
+        if tg > 4.0:
+            flags.append({
+                "flag": "tg_extreme_high",
+                "reason": f"영구성장률 {tg:.1f}% 는 장기 GDP 성장률 초과 — 구조적 과대",
+                "suggestedRetry": {"terminalGrowth": 2.5},
+            })
+        elif tg <= 0:
+            flags.append({
+                "flag": "tg_negative",
+                "reason": f"영구성장률 {tg:.1f}% 음수 — 소멸 가정",
+                "suggestedRetry": {"terminalGrowth": 2.0},
+            })
+
+    # 부채비율
+    debt = assumptions.get("debtRatio")
+    if isinstance(debt, (int, float)):
+        if debt > 200.0:
+            flags.append({
+                "flag": "debt_high",
+                "reason": f"부채비율 {debt:.0f}% 는 경계 수준 — 스트레스 시나리오 점검 필요",
+                "suggestedRetry": {"debtRatio": debt * 1.3, "scenarioStress": "severe"},
+            })
+
+    # 이자보상배율
+    icr = assumptions.get("interestCoverage")
+    if isinstance(icr, (int, float)) and icr < 1.5:
+        flags.append({
+            "flag": "icr_weak",
+            "reason": f"이자보상배율 {icr:.2f}x — 영업이익으로 이자도 못 버는 경계",
+            "suggestedRetry": {"interestCoverage": max(icr * 0.7, 0.5), "scenarioStress": "severe"},
+        })
+
+    # 매크로 사이클
+    phase = assumptions.get("cyclePhase")
+    if phase in ("contraction", "trough"):
+        flags.append({
+            "flag": "macro_stress",
+            "reason": f"매크로 사이클 {phase} — 스트레스 시나리오 비교 권장",
+            "suggestedRetry": {"cyclePhase": "contraction"},
+        })
+
+    return flags
+
+
 def describeOverrides(engine: str) -> str:
     """tool schema description 용 override 키 요약.
 

@@ -859,8 +859,28 @@ def _aggregateAssumptions(results: dict, overrides: dict | None) -> dict:
             if isinstance(top[1], (int, float)) and top[1] > 0:
                 collected["primaryModel"] = top[0]
 
+    # Kd (타인자본비용) — priceTarget.waccDetails 에서 추출 (DCF 내부 가정 노출)
+    pt = results.get("priceTarget")
+    if isinstance(pt, dict):
+        wd = pt.get("waccDetails")
+        if isinstance(wd, dict):
+            if isinstance(wd.get("kd"), (int, float)):
+                collected["kd"] = wd["kd"]
+            if isinstance(wd.get("ke"), (int, float)):
+                collected["ke"] = wd["ke"]
+            if isinstance(wd.get("beta"), (int, float)):
+                collected["beta"] = wd["beta"]
+
     # override 적용 여부 명시
     collected["_overridden"] = sorted(overrides.keys()) if overrides else []
+
+    # 엔진 자가 의심 — 극단값 감지 → 구체 재호출 권고
+    from dartlab.core.overrides import detectExtremeFlags
+
+    flags = detectExtremeFlags(collected)
+    if flags:
+        collected["_flags"] = flags
+
     # 아무것도 안 잡히면 빈 dict 반환 (상위에서 생략 판단)
     if len(collected) == 1 and collected["_overridden"] == []:
         return {}

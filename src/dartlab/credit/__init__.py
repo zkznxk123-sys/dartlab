@@ -284,6 +284,14 @@ def _buildCreditAssumptions(result: dict, overrides: dict | None) -> dict:
                     a[stdKey] = m
                     break
     a["_overridden"] = sorted(overrides.keys()) if overrides else []
+
+    # 엔진 자가 의심 — 극단값 감지 → 구체 재호출 권고
+    from dartlab.core.overrides import detectExtremeFlags
+
+    flags = detectExtremeFlags(a)
+    if flags:
+        a["_flags"] = flags
+
     return a
 
 

@@ -268,6 +268,24 @@ def _formatAssumptions(assumptions: dict) -> str:
         head += f" (override 적용: {', '.join(overridden)})"
     else:
         head += " (의심되면 overrides={…} 로 재호출)"
+
+    # 엔진 자가 의심 flags — 구체 재호출 JSON 주입
+    flags = assumptions.get("_flags") or []
+    if isinstance(flags, list) and flags:
+        import json as _json
+
+        lines = [head]
+        for fl in flags[:3]:  # 최대 3개
+            if not isinstance(fl, dict):
+                continue
+            reason = fl.get("reason", "")
+            retry = fl.get("suggestedRetry")
+            if retry:
+                retry_json = _json.dumps(retry, ensure_ascii=False)
+                lines.append(f"⚠ {reason} → 다음 호출 실행 권장: overrides={retry_json}")
+            else:
+                lines.append(f"⚠ {reason}")
+        return "\n".join(lines)
     return head
 
 

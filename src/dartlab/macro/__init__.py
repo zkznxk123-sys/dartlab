@@ -306,6 +306,14 @@ class Macro:
             if "confidence" in result:
                 a["confidence"] = result["confidence"]
             a["_overridden"] = sorted(clean.keys()) if clean else []
+
+            # 엔진 자가 의심 — 사이클 수축기면 스트레스 비교 권고
+            from dartlab.core.overrides import detectExtremeFlags
+
+            flags_ = detectExtremeFlags(a)
+            if flags_:
+                a["_flags"] = flags_
+
             result["assumptions"] = a
         return result
 
