@@ -322,6 +322,9 @@
 				<a href="{base}/company/{selectedNode.id}" class="full-link">
 					전체 페이지 보기 →
 				</a>
+				<a href="{base}/compare?a={selectedNode.id}" class="full-link" style="margin-top:6px">
+					다른 회사와 비교 →
+				</a>
 			</div>
 		</aside>
 	{/if}
