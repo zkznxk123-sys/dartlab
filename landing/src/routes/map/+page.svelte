@@ -46,6 +46,37 @@
 		})
 	);
 
+	// 필터 상태 기반 인사이트 — 현재 보이는 기업 통계
+	let filterInsights = $derived.by(() => {
+		const nodes = filteredNodes;
+		if (nodes.length === 0) return null;
+		const totalRev = nodes.reduce((s: number, n: any) => s + (n.revenue || 0), 0);
+		const avgRev = totalRev / nodes.length;
+		const sorted = [...nodes].sort((a: any, b: any) => (b.revenue || 0) - (a.revenue || 0));
+		const top1 = sorted[0]?.revenue || 0;
+		const top3 = sorted.slice(0, 3).reduce((s: number, n: any) => s + (n.revenue || 0), 0);
+		const top1Ratio = totalRev > 0 ? (top1 / totalRev) * 100 : 0;
+		const top3Ratio = totalRev > 0 ? (top3 / totalRev) * 100 : 0;
+		const preciseEdges = filteredLinks.filter((l: any) => l.amount).length;
+		const singleIndustry = enabledIndustries.size === 1;
+		let singleIndId: string | null = null;
+		if (singleIndustry) {
+			const iter = enabledIndustries.values().next();
+			singleIndId = iter.value ?? null;
+		}
+		return {
+			count: nodes.length,
+			totalRev,
+			avgRev,
+			top1,
+			top1Name: sorted[0]?.label || '',
+			top1Ratio,
+			top3Ratio,
+			preciseEdges,
+			singleIndId,
+		};
+	});
+
 	// 선택된 회사의 관계
 	let selectedRelations = $derived.by(() => {
 		if (!selectedNode) return { suppliers: [], customers: [] };
@@ -148,6 +179,39 @@
 				금액 공개 엣지만
 			</label>
 		</div>
+
+		<!-- 필터 상태 요약 인사이트 -->
+		{#if filterInsights}
+			<div class="section insight-box">
+				<h3>현재 선택</h3>
+				<div class="ins-grid">
+					<div class="ins-cell">
+						<div class="ins-label">기업</div>
+						<div class="ins-value">{filterInsights.count.toLocaleString()}사</div>
+					</div>
+					<div class="ins-cell">
+						<div class="ins-label">총 매출</div>
+						<div class="ins-value">{formatRev(filterInsights.totalRev)}</div>
+					</div>
+					<div class="ins-cell">
+						<div class="ins-label">Top1 비중</div>
+						<div class="ins-value">{filterInsights.top1Ratio.toFixed(1)}%</div>
+					</div>
+					<div class="ins-cell">
+						<div class="ins-label">Top3 비중</div>
+						<div class="ins-value">{filterInsights.top3Ratio.toFixed(1)}%</div>
+					</div>
+				</div>
+				{#if filterInsights.top1Name}
+					<div class="ins-sub">최대: {filterInsights.top1Name} · 정밀 엣지 {filterInsights.preciseEdges}건</div>
+				{/if}
+				{#if filterInsights.singleIndId}
+					<a href="{base}/industry/{filterInsights.singleIndId}" class="ins-link">
+						이 산업 상세 페이지 →
+					</a>
+				{/if}
+			</div>
+		{/if}
 
 		<!-- 산업 토글 -->
 		<div class="section industries">
@@ -372,6 +436,55 @@
 	.range input {
 		width: 100%;
 		margin-top: 4px;
+	}
+
+	.insight-box {
+		background: #050811;
+		border: 1px solid #1e2433;
+		border-radius: 8px;
+		padding: 12px;
+	}
+	.insight-box h3 {
+		margin: 0 0 10px;
+	}
+	.ins-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+	}
+	.ins-cell {
+		padding: 6px 8px;
+		background: #0f1219;
+		border-radius: 6px;
+	}
+	.ins-label {
+		font-size: 10px;
+		color: #94a3b8;
+		margin-bottom: 2px;
+	}
+	.ins-value {
+		font-size: 14px;
+		font-weight: 600;
+		color: #f1f5f9;
+	}
+	.ins-sub {
+		margin-top: 8px;
+		font-size: 11px;
+		color: #64748b;
+	}
+	.ins-link {
+		display: block;
+		margin-top: 10px;
+		padding: 6px 10px;
+		background: rgba(96, 165, 250, 0.1);
+		border-radius: 6px;
+		color: #60a5fa;
+		text-decoration: none;
+		font-size: 12px;
+		text-align: center;
+	}
+	.ins-link:hover {
+		background: rgba(96, 165, 250, 0.2);
 	}
 
 	.industries ul {
