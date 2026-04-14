@@ -399,6 +399,21 @@ def main() -> None:
     (OUT_DIR / "search-index.json").write_text(json.dumps(searchIdx, ensure_ascii=False), encoding="utf-8")
     print(f"  - {len(searchIdx)}개 종목")
 
+    # Insight rankings (공급망 집중도/분산/허브/위험)
+    print("[인사이트 랭킹] insights.json")
+    import subprocess
+
+    try:
+        subprocess.run(
+            ["python", "-X", "utf8", str(Path(__file__).parent / "buildInsightRankings.py")],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        print("  - insights.json 생성")
+    except subprocess.CalledProcessError as e:
+        print(f"  ⚠ 인사이트 랭킹 생성 실패: {e.stderr}")
+
     print(f"\n완료: {OUT_DIR}")
 
 

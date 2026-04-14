@@ -146,6 +146,10 @@
 			<p class="sub">
 				{filteredNodes.length.toLocaleString()}사 · {filteredLinks.length.toLocaleString()}관계
 			</p>
+			<div class="nav-links">
+				<a href="{base}/insights">인사이트 랭킹</a>
+				<a href="{base}/compare">기업 비교</a>
+			</div>
 		</div>
 
 		<!-- 검색 -->
@@ -346,6 +350,23 @@
 		padding: 16px;
 		color: #f1f5f9;
 	}
+	.nav-links {
+		display: flex;
+		gap: 8px;
+		margin-top: 8px;
+	}
+	.nav-links a {
+		font-size: 11px;
+		color: #60a5fa;
+		text-decoration: none;
+		padding: 3px 8px;
+		background: rgba(96, 165, 250, 0.1);
+		border-radius: 4px;
+	}
+	.nav-links a:hover {
+		background: rgba(96, 165, 250, 0.25);
+	}
+
 	.header h1 {
 		margin: 0 0 4px;
 		font-size: 18px;
