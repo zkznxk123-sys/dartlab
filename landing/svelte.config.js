@@ -83,12 +83,14 @@ const config = {
 		prerender: {
 			entries: ['*', '/docs/', '/blog/', ...companyEntries],
 			handleHttpError: ({ path, referrer, message }) => {
+				// basePath prefix 제거 후 검사 (CI에서 path는 /dartlab/... 형태)
+				const stripped = basePath && path.startsWith(basePath) ? path.slice(basePath.length) : path;
 				// /industry/ 는 아직 구현 전 — 무시
-				if (path.startsWith('/industry/')) {
+				if (stripped.startsWith('/industry/')) {
 					return;
 				}
 				// /company/ 중 top 200에 없는 회사 링크 + JSON fetch 실패는 무시
-				if (path.startsWith('/company/') || path.startsWith('/map/companies/')) {
+				if (stripped.startsWith('/company/') || stripped.startsWith('/map/companies/')) {
 					return;
 				}
 				throw new Error(`${message} (linked from ${referrer})`);
