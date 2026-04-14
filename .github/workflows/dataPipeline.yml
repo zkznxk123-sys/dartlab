@@ -52,7 +52,7 @@ jobs:
         category: ${{ fromJSON(github.event.inputs.sync_category == 'all' && '["finance","report","docs"]' || format('["{0}"]', github.event.inputs.sync_category)) }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -64,7 +64,7 @@ jobs:
         run: uv sync
 
       - name: Restore data cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: data/dart/${{ matrix.category }}
           key: dartlab-data-${{ matrix.category }}-${{ github.run_id }}
@@ -78,7 +78,7 @@ jobs:
           SYNC_MODE: all
 
       - name: Save data cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: data/dart/${{ matrix.category }}
           key: dartlab-data-${{ matrix.category }}-${{ github.run_id }}
@@ -99,7 +99,7 @@ jobs:
     timeout-minutes: 120
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -111,21 +111,21 @@ jobs:
         run: uv sync
 
       - name: Restore finance cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: data/dart/finance
           key: dartlab-data-finance-
           restore-keys: dartlab-data-finance-
 
       - name: Restore report cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: data/dart/report
           key: dartlab-data-report-
           restore-keys: dartlab-data-report-
 
       - name: Restore docs cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: data/dart/docs
           key: dartlab-data-docs-
@@ -137,7 +137,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Save scan cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: data/dart/scan
           key: dartlab-data-scan-${{ github.run_id }}
@@ -150,7 +150,7 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5

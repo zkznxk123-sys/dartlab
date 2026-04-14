@@ -34,7 +34,7 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -46,7 +46,7 @@ jobs:
         run: uv sync
 
       - name: Restore allFilings cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: data/dart/allFilings
           key: dartlab-allFilings-${{ github.run_id }}
@@ -85,7 +85,7 @@ jobs:
 
       - name: Save allFilings cache
         if: always()
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: data/dart/allFilings
           key: dartlab-allFilings-${{ github.run_id }}

@@ -58,7 +58,7 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -70,28 +70,28 @@ jobs:
         run: uv sync
 
       - name: Restore finance cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: data/dart/finance
           key: dartlab-data-finance-${{ github.run_id }}
           restore-keys: dartlab-data-finance-
 
       - name: Restore report cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: data/dart/report
           key: dartlab-data-report-${{ github.run_id }}
           restore-keys: dartlab-data-report-
 
       - name: Restore docs cache (비교용)
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: data/dart/docs
           key: dartlab-data-docs-${{ github.run_id }}
           restore-keys: dartlab-data-docs-
 
       - name: Restore collect state (pending.txt)
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: data/dart/_collect_state
           key: dartlab-collect-state-${{ github.run_id }}
@@ -130,19 +130,19 @@ jobs:
       # data-finance/data-report 태그는 정리됨. uploadData.py --target gh 호출 금지.
 
       - name: Save finance cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: data/dart/finance
           key: dartlab-data-finance-${{ github.run_id }}
 
       - name: Save report cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: data/dart/report
           key: dartlab-data-report-${{ github.run_id }}
 
       - name: Save collect state
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: data/dart/_collect_state
           key: dartlab-collect-state-${{ github.run_id }}
@@ -154,7 +154,7 @@ jobs:
     timeout-minutes: 150
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -166,7 +166,7 @@ jobs:
         run: uv sync
 
       - name: Restore docs cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: data/dart/docs
           key: dartlab-data-docs-${{ github.run_id }}
@@ -193,7 +193,7 @@ jobs:
       # GitHub Releases 업로드 폐지 (2026-04-08): HF만 유지.
 
       - name: Save docs cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: data/dart/docs
           key: dartlab-data-docs-${{ github.run_id }}
@@ -210,7 +210,7 @@ jobs:
         category: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', inputs.category == 'all' && 'finance","report","docs' || inputs.category)) || fromJSON('["finance","report","docs"]') }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -222,7 +222,7 @@ jobs:
         run: uv sync
 
       - name: Restore data cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: data/dart/${{ matrix.category }}
           key: dartlab-data-${{ matrix.category }}-${{ github.run_id }}
@@ -236,7 +236,7 @@ jobs:
           SYNC_MODE: all
 
       - name: Save data cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: data/dart/${{ matrix.category }}
           key: dartlab-data-${{ matrix.category }}-${{ github.run_id }}
