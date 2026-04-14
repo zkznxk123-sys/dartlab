@@ -847,14 +847,21 @@ if not _IS_PYODIDE:
 
         return Quant()
 
-    # scan/analysis/quant — 모듈 자체를 callable로 변환
+    def _macroFactory():
+        from dartlab.macro import Macro
+
+        return Macro()
+
+    # scan/analysis/quant/macro — 모듈 자체를 callable로 변환
     import dartlab.analysis.financial as _analysis_mod  # noqa: F401
+    import dartlab.macro as _macro_mod  # noqa: F401
     import dartlab.quant as _quant_mod  # noqa: F401
     import dartlab.scan as _scan_mod  # noqa: F401
 
     _makeCallableModule("dartlab.scan", _scanFactory)
     _makeCallableModule("dartlab.analysis.financial", _analysisFactory)
     _makeCallableModule("dartlab.quant", _quantFactory)
+    _makeCallableModule("dartlab.macro", _macroFactory)
 
     # credit은 함수형 (이미 callable)
     from dartlab.credit import credit as _credit_callable
