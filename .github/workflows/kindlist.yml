@@ -92,9 +92,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fetch OpenDART CORPCODE.xml
-        run: python .github/scripts/updateDartList.py
+        run: |
+          export DART_API_KEY="${DART_API_KEYS%%,*}"
+          python .github/scripts/updateDartList.py
         env:
-          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+          DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
 
       - name: Upload DartList to Release
         if: ${{ !hashFiles('dist/SKIP_DARTLIST') }}
