@@ -61,8 +61,13 @@ def main() -> int:
         r=args.rank,
         lora_alpha=args.alpha,
         target_modules=[
-            "q_proj", "k_proj", "v_proj", "o_proj",
-            "gate_proj", "up_proj", "down_proj",
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj",
         ],
         lora_dropout=0.05,
     )
@@ -71,10 +76,13 @@ def main() -> int:
     print("[3/5] 데이터셋 로드...")
     from datasets import load_dataset
 
-    dataset = load_dataset("json", data_files={
-        "train": args.data,
-        "val": args.val,
-    })
+    dataset = load_dataset(
+        "json",
+        data_files={
+            "train": args.data,
+            "val": args.val,
+        },
+    )
 
     # ShareGPT 포맷 → chat template 변환
     from unsloth.chat_templates import get_chat_template, standardize_sharegpt

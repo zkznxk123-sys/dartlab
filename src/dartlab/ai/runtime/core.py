@@ -1,12 +1,12 @@
-"""AI 분석 통합 오케스트레이터 — CAPABILITIES-Driven 순수 스트리밍.
+"""AI 분석 통합 오케스트레이터 — tool calling 기반 순수 스트리밍.
 
 dartlab.ask(), server UI, CLI가 모두 이 코어를 소비한다.
 동기 제너레이터로 AnalysisEvent를 생산하며, 소비자가 형식(SSE/텍스트/제너레이터)을 결정.
 
-새 구조::
+구조::
 
-    질문 → CAPABILITIES 검색(ms) → 시스템 프롬프트 주입
-         → LLM 스트리밍 → 코드블록 감지 → execute_code → 결과 해석 → 스트리밍 답변
+    질문 → ContextBuilder → 시스템 프롬프트 조립
+         → streamWithTools (LLM tool call ↔ 엔진 실행 루프) → 최종 텍스트
 """
 
 from __future__ import annotations
@@ -18,7 +18,6 @@ import os
 import re
 import sqlite3
 import time
-from difflib import SequenceMatcher
 from typing import Any, Generator
 
 log = logging.getLogger(__name__)
@@ -375,385 +374,6 @@ def _resolveAnalysisConfig(
     return config_
 
 
-# ── 코드블록 감지 + 실행 ─────────────────────────────────
-
-_CODE_BLOCK_RE = re.compile(r"```python\s*\n(.*?)```", re.DOTALL)
-
-
-def _extractCodeBlocks(text: str) -> list[str]:
-    """텍스트에서 ```python 코드블록을 추출."""
-    return _CODE_BLOCK_RE.findall(text)
-
-
-def _executeCodeBlock(code: str, stockCode: str | None = None) -> str:
-    """DartlabCodeExecutor로 코드를 실행하고 결과를 반환."""
-    from dartlab.ai.tools.coding import DartlabCodeExecutor
-
-    executor = DartlabCodeExecutor()
-    return executor.execute(code, stockCode=stockCode, timeout=60)
-
-
-# ── Polars 유니코드 테이블 → GFM 마크다운 변환 ─────────
-
-_POLARS_TABLE_START = re.compile(r"^┌[─┬]+┐$", re.MULTILINE)
-_POLARS_TABLE_END = re.compile(r"^└[─┴]+┘$", re.MULTILINE)
-
-
-def _polarsTableToMarkdown(text: str) -> str:
-    """실행 결과 내 Polars 유니코드 테이블을 GFM 마크다운 테이블로 변환.
-
-    Polars 출력 구조:
-        ┌──────┬──────┐    ← 상단 경계
-        │ col1 ┆ col2 │    ← 헤더 행
-        │ ---  ┆ ---  │    ← 타입 힌트 (생략)
-        │ str  ┆ f64  │    ← 타입 행 (생략)
-        ╞══════╪══════╡    ← 헤더/데이터 구분선
-        │ val1 ┆ val2 │    ← 데이터 행
-        └──────┴──────┘    ← 하단 경계
-    """
-    if "┌" not in text:
-        return text
-
-    lines = text.split("\n")
-    result: list[str] = []
-    in_table = False
-    header_emitted = False
-    col_count = 0
-
-    for line in lines:
-        stripped = line.strip()
-
-        # 테이블 시작 경계
-        if stripped.startswith("┌") and stripped.endswith("┐"):
-            in_table = True
-            header_emitted = False
-            continue
-
-        # 테이블 끝 경계
-        if stripped.startswith("└") and stripped.endswith("┘"):
-            in_table = False
-            continue
-
-        if not in_table:
-            result.append(line)
-            continue
-
-        # 헤더/데이터 구분선 (╞══╪══╡)
-        if stripped.startswith("╞") or stripped.startswith("├"):
-            if not header_emitted and col_count > 0:
-                result.append("| " + " | ".join(["---"] * col_count) + " |")
-                header_emitted = True
-            continue
-
-        # 데이터 행 (│ 또는 ┆ 구분)
-        if "│" in stripped or "┆" in stripped:
-            # 분리: │ 와 ┆ 모두 셀 구분자로 처리
-            cells_raw = re.split(r"[│┆]", stripped)
-            cells = [c.strip() for c in cells_raw if c.strip() != ""]
-
-            # Polars 타입/구분 행 건너뛰기 (--- 또는 str/f64/i64 등)
-            if all(
-                c in ("---", "str", "f64", "i64", "i32", "u32", "u64", "bool", "cat", "date", "datetime") for c in cells
-            ):
-                continue
-
-            if cells:
-                # "…" 또는 "..." 전용 셀 제거 (Polars 컬럼 생략 표시)
-                clean = [c for c in cells if c not in ("…", "...")]
-                if not clean:
-                    continue  # 생략 행 전체 스킵
-                # null → -
-                clean = [("-" if c == "null" else c) for c in clean]
-                col_count = max(col_count, len(clean))
-                md_row = "| " + " | ".join(clean) + " |"
-                result.append(md_row)
-
-    return "\n".join(result)
-
-
-def _formatResultForUser(result: str) -> str:
-    """실행 결과를 사용자에게 보여줄 형식으로 변환.
-
-    - Polars 유니코드 테이블 → 마크다운 테이블 (코드 블록 밖)
-    - 마크다운 파이프 테이블이 포함된 결과 → 코드 블록 밖
-    - 에러/Traceback → 코드 블록 유지
-    - 그 외 plain text → 코드 블록
-    """
-    # shape: (N, M) 메타 텍스트 제거
-    result = re.sub(r"shape: \(\d+, \d+\)\s*\n?", "", result)
-
-    # Polars 유니코드 테이블이 있으면 먼저 변환 (에러+테이블 혼합 대응)
-    if "┌" in result:
-        converted = _polarsTableToMarkdown(result)
-        return f"\n\n[실행 결과]\n\n{converted}\n\n"
-
-    isError = "실행 오류" in result or "Traceback" in result
-    if isError:
-        return f"\n\n```\n[실행 결과]\n{result}\n```\n\n"
-
-    # 마크다운 파이프 테이블이 포함 → 코드블록 밖
-    lines = result.split("\n")
-    hasTable = any(l.strip().startswith("|") and l.strip().endswith("|") for l in lines)
-    if hasTable:
-        return f"\n\n[실행 결과]\n\n{result}\n\n"
-
-    return f"\n\n```\n[실행 결과]\n{result}\n```\n\n"
-
-
-_LOOP_SIMILARITY_THRESHOLD = 0.75  # R22-7: 0.85 → 0.75. 동일 코드 변형 반복 더 적극적 차단
-
-
-def _extractDataHint(result: str) -> str:
-    """코드 실행 결과에서 DataFrame/dict 구조 힌트를 추출.
-
-    Polars 테이블 → 컬럼명 + shape
-    dict 출력 → 키 목록
-    """
-    hints: list[str] = []
-
-    # Polars 테이블 감지 → 컬럼명 + shape 추출
-    if "┌" in result or ("│" in result and "┆" in result):
-        header_lines = [l for l in result.split("\n") if "│" in l and "┆" in l]
-        if header_lines:
-            cols = [c.strip() for c in header_lines[0].replace("│", "┆").split("┆") if c.strip()]
-            if cols:
-                hints.append(f"[DataFrame 컬럼: {', '.join(cols)}]")
-
-    # shape 정보 추출
-    import re as _re
-
-    shape_match = _re.search(r"shape:\s*\((\d+),\s*(\d+)\)", result)
-    if shape_match:
-        hints.append(f"[shape: {shape_match.group(1)}행 × {shape_match.group(2)}열]")
-
-    # dict keys 출력 감지
-    keys_match = _re.search(r"dict_keys\(\[([^\]]+)\]\)", result)
-    if keys_match:
-        hints.append(f"[dict 키: {keys_match.group(1)}]")
-
-    if not hints:
-        return ""
-    return "\n" + " ".join(hints) + " — 다음 코드에서 이 컬럼명/키를 정확히 사용하세요."
-
-
-_MAX_RESULT_CHARS = 8000  # LLM 피드백용 결과 상한 (사용자 UI에는 전체 표시)
-
-
-def _streamWithCodeExecution(
-    llm: Any,
-    messages: list[dict],
-    stockCode: str | None,
-    *,
-    maxRounds: int = 3,
-    mode: str = "analysis",
-) -> Generator[str | AnalysisEvent, None, None]:
-    """LLM 스트리밍 + 코드블록 자동 감지/실행 루프.
-
-    LLM이 ```python 블록을 생성하면 자동 실행하고
-    결과를 LLM에 피드백하여 해석을 이어간다.
-
-    mode:
-        - "analysis": 결과 해석을 이어감 (기본)
-        - "coding": 실행 성공 확인만 하고, 완전한 코드 제공을 유도
-
-    Yields:
-        str: 텍스트 청크 (chunk 이벤트로 변환됨)
-        AnalysisEvent: code_round 이벤트 (진행 상태)
-    """
-    prevCode: str | None = None
-
-    for _round in range(maxRounds):
-        buffer = ""
-        for chunk in llm.stream(messages):
-            buffer += chunk
-            yield chunk
-
-        # 코드블록 감지
-        codeBlocks = _extractCodeBlocks(buffer)
-        if not codeBlocks:
-            return  # 코드 없음 → 스트리밍 완료
-
-        # 마지막 코드블록 실행
-        code = codeBlocks[-1]
-
-        # 반복 루프 감지 — 이전 코드와 유사하면 조기 종료
-        if prevCode is not None:
-            similarity = SequenceMatcher(None, prevCode, code).ratio()
-            if similarity >= _LOOP_SIMILARITY_THRESHOLD:
-                yield f"\n\n[반복 코드 감지 — 루프 종료 (유사도 {similarity:.0%})]\n\n"
-                return
-        prevCode = code
-
-        # 진행 이벤트 — 실행 시작
-        yield AnalysisEvent(
-            "code_round",
-            {
-                "round": _round + 1,
-                "maxRounds": maxRounds,
-                "status": "executing",
-                "code": code,
-            },
-        )
-
-        try:
-            result = _executeCodeBlock(code, stockCode=stockCode)
-        except (OSError, RuntimeError, TimeoutError, ValueError) as exc:
-            result = f"실행 오류: {exc}"
-
-        # VizSpec 마커 추출 → CHART 이벤트 emit
-        from dartlab.viz.extract import extract_viz_specs
-
-        result, viz_specs = extract_viz_specs(result)
-        for vspec in viz_specs:
-            yield AnalysisEvent("chart", {"charts": [vspec]})
-
-        # 진행 이벤트 — 실행 완료 (코드 + 결과 포함)
-        formatted = _formatResultForUser(result)
-        yield AnalysisEvent(
-            "code_round",
-            {
-                "round": _round + 1,
-                "maxRounds": maxRounds,
-                "status": "done",
-                "code": code,
-                "result": formatted,
-            },
-        )
-
-        # 실행 결과는 code_round 이벤트로만 전달 (본문 텍스트 중복 방지)
-        # 결과를 대화에 추가하여 LLM이 해석하도록 재요청
-        messages.append({"role": "assistant", "content": buffer})
-
-        def _diagnoseNotesFailure(code_text: str) -> str:
-            """notes 호출 실패 시 매퍼에서 frequency 조회 → 대안 제시."""
-            import re as _re
-
-            _NOTES_ALTERNATIVES = {
-                "inventory": "analysis('자산구조')",
-                "borrowings": "analysis('자금조달')",
-                "tangibleAsset": "analysis('자산구조')",
-                "intangibleAsset": "analysis('자산구조')",
-                "receivables": "analysis('자산구조')",
-                "provisions": "analysis('안정성')",
-                "eps": "c.show('IS') 주당이익 행",
-                "lease": "analysis('안정성')",
-                "costByNature": "analysis('비용구조')",
-                "segments": "analysis('수익구조')",
-                "affiliates": "analysis('투자효율')",
-            }
-            match = _re.search(r'c\.notes\.(\w+)|c\.show\(["\'](\w+)', code_text)
-            if not match:
-                return ""
-            key = match.group(1) or match.group(2)
-            alt = _NOTES_ALTERNATIVES.get(key)
-            if not alt:
-                return ""
-            try:
-                from dartlab.core.mappers.notesMapper import NotesMapper
-
-                mapper = NotesMapper()
-                info = mapper.lookup(key)
-                freq = info.get("frequency", 0) if info else 0
-                return (
-                    f"**notes 진단**: `{key}` 항목은 전종목 {freq:.0%}만 보유.\n"
-                    f"→ 대안: `c.{alt}` 에 이미 포함된 데이터를 사용하세요.\n\n"
-                )
-            except ImportError:
-                return ""
-
-        # LLM 피드백: 결과 크기 제한 (컨텍스트 화폐 절약)
-        isError = "실행 오류" in result or "Error" in result or "Traceback" in result
-        # 빈 결과 감지 — Polars (0, 0) shape, 빈 dict, None 단독 등은 "분석 실패 신호"
-        # exception 은 아니지만 도구 선택/대상 오류일 가능성이 높음 → error 와 동일 처리
-        _resultStripped = result.strip()
-        isEmpty = not isError and (
-            "shape: (0, 0)" in result
-            or "shape: (0," in result
-            or _resultStripped in ("", "{}", "None", "[]", "shape: (0, 0)\n┌┐\n╞╡\n└┘")
-        )
-        if len(result) > _MAX_RESULT_CHARS and not isError:
-            feedback = (
-                f"코드 실행 결과 (처음 {_MAX_RESULT_CHARS}자, 전체 {len(result)}자):\n\n"
-                f"```\n{result[:_MAX_RESULT_CHARS]}\n```\n\n"
-                "결과가 잘렸습니다. .head()/.filter()로 범위를 좁혀 필요한 부분만 재조회하세요."
-            )
-        elif isError:
-            # 에러 유형별 구체적 복구 지침 (행동 지침 패턴)
-            _err_lower = result.lower()
-            _recovery_hints: list[str] = []
-            if "unknown topic" in _err_lower or "invalid topic" in _err_lower:
-                _recovery_hints.append("→ `print(c.topics)` 로 사용 가능한 topic 목록을 확인하세요.")
-            if "keyerror" in _err_lower or "key error" in _err_lower:
-                _recovery_hints.append(
-                    "→ 먼저 `print(result.keys())` 또는 `print(df.columns)` 로 실제 키를 확인하세요."
-                )
-            if "timeout" in _err_lower or "timed out" in _err_lower:
-                _recovery_hints.append("→ c.review() 전체 호출은 83초. `c.review('수익성')` 단일 섹션을 사용하세요.")
-            if "no data" in _err_lower or "데이터가 없" in _err_lower or "not found" in _err_lower:
-                _recovery_hints.append("→ `c.index` 로 이 종목의 가용 데이터를 확인하세요.")
-            if "attributeerror" in _err_lower:
-                _recovery_hints.append("→ `print(type(c))` 로 객체 타입을 확인하세요. Company가 아닐 수 있습니다.")
-            if "nameerror" in _err_lower:
-                _recovery_hints.append(
-                    "→ 변수가 이전 라운드에서 정의됐을 수 있습니다. 한 블록 안에서 변수 정의부터 다시 하세요."
-                )
-            if "import" in _err_lower and "error" in _err_lower:
-                _recovery_hints.append("→ import 금지. dartlab, pl(polars)은 이미 준비되어 있습니다.")
-            _recovery_text = (
-                "\n".join(_recovery_hints)
-                if _recovery_hints
-                else "API를 모르겠으면 무인자 호출로 가이드를 확인하세요: print(c.analysis())"
-            )
-            feedback = (
-                "코드 실행 결과:\n\n"
-                f"```\n{result}\n```\n\n"
-                "에러를 읽고 원인을 진단하세요. 같은 코드를 반복하지 마세요.\n"
-                f"{_recovery_text}"
-            )
-        elif isEmpty:
-            # notes 호출 실패 시 매퍼 진단 추가
-            _notes_hint = ""
-            if "c.notes" in code or "c.show" in code:
-                _notes_hint = _diagnoseNotesFailure(code)
-
-            feedback = (
-                "코드 실행 결과가 비어 있습니다 (빈 DataFrame / 빈 dict / None):\n\n"
-                f"```\n{result}\n```\n\n"
-                "**이건 분석 실패 신호다.** 같은 도구를 다른 인자로 재시도하지 마세요.\n"
-                f"{_notes_hint}"
-                "원인 진단 체크리스트:\n"
-                "1. **질문이 메타 지식인가?** (예: 'X와 Y 비교', 'X 엔진은 뭐 하는가') "
-                "→ 도구 호출 자체가 잘못. 코드 없이 ops/ 지식으로 직접 답변하세요.\n"
-                "2. **Company `c` 가 바인딩됐는가?** `print(type(c), getattr(c, 'stockCode', None))` 로 확인.\n"
-                "3. **무인자 가이드 호출인가?** `c.analysis()` 가 (0,0)이면 Company 가 비정상. "
-                "정상이면 `axis|label|description` 컬럼이 나와야 함.\n"
-                "4. **존재하지 않는 topic/축인가?** `print(c.topics)` / `print(c.analysis())` 로 유효 키 확인.\n"
-                "빈 결과 2회 연속이면 **도구 선택을 바꾸거나 사용자에게 컨텍스트를 명시적으로 답변에 알리세요** "
-                "(되묻기 금지 — '이 질문은 도구 호출 없이 답변합니다' 식으로 선언)."
-            )
-        elif mode == "coding":
-            feedback = (
-                f"코드 실행 성공. 결과:\n```\n{result[:2000]}\n```\n\n"
-                "코드가 정상 동작합니다. 사용자에게 이 코드와 결과를 제공하세요.\n"
-                "`import dartlab` 포함 복사-붙여넣기 가능한 완전한 코드를 최종 답변에 포함하세요.\n"
-                "커스터마이즈 포인트(종목코드 변경, 조건 변경 등)도 안내하세요."
-            )
-        else:
-            # 코드 실행 결과 AI 맥락 보강 (aiview 통합)
-            _data_hint = _extractDataHint(result)
-            feedback = (
-                "코드 실행 결과:\n\n"
-                f"```\n{result}\n```\n\n"
-                "이 결과를 바탕으로 해석하세요. "
-                "**수치는 위 결과에서 정확히 인용하라. 기억으로 수치를 만들지 마라.** "
-                f"결과가 잘렸으면 .head()/.filter()로 범위를 좁혀 재실행하세요.{_data_hint}"
-            )
-        messages.append({"role": "user", "content": feedback})
-
-    # maxRounds 도달 — 마지막 스트리밍으로 종합
-    yield from llm.stream(messages)
-
-
 # ── 대화 상태 빌드 (history만 유지) ─────────────────────────
 
 
@@ -776,205 +396,78 @@ def _buildHistoryMessages(
     return build_history_messages(compressed)
 
 
-# ── 모드 감지 ────────────────────────────────────────────
-
-_CODING_KEYWORDS = re.compile(
-    r"코드\s*(짜|만들|작성|생성|줘)|코딩|스크립트|함수\s*(만들|작성)|"
-    r"자동화\s*(코드|스크립트)|프로그램\s*(짜|만들)|"
-    r"(write|generate|create)\s*(code|script|function)|"
-    r"dartlab\s*(으로|로)\s*.*(코드|짜|만들)",
-    re.IGNORECASE,
-)
-_CODING_EXCLUDE = re.compile(r"종목코드|코드번호|코드(가|는|를)\s*뭐", re.IGNORECASE)
-
-
-def _detectMode(question: str) -> str:
-    """'analysis' 또는 'coding' 반환."""
-    if _CODING_EXCLUDE.search(question):
-        return "analysis"
-    if _CODING_KEYWORDS.search(question):
-        return "coding"
-    return "analysis"
-
-
-# ── 코딩 모드 시스템 프롬프트 ─────────────────────────────
-
-_CODING_SYSTEM_PROMPT = """\
-dartlab 코드 생성 전문가. 사용자가 복사해서 바로 실행할 수 있는 Python 코드를 생성한다.
-
-## 핵심 원칙
-- **완전한 독립 실행 코드** 생성: `import dartlab`부터 결과 출력까지
-- 종목코드를 변수화: `stock_code = "005930"` (상단에 설정 가능하게)
-- Polars 문법 (pandas 아님)
-- 에러 핸들링 포함 (None 체크)
-- 코드 내 한글 주석으로 각 단계 설명
-
-## 실행 환경
-이미 준비됨 — **import 금지, 재선언 금지:**
-- `dartlab`, `polars`(pl), `re`
-{env_block}
-
-## 출력 형식
-1. 코드의 목적 1줄 설명
-2. ```python 블록 (완전한 독립 실행 코드)
-3. 실행 결과를 확인한 후 코드가 정상 동작함을 알려준다
-4. 커스터마이즈 포인트 (변수 변경으로 다른 종목/조건 적용 방법)
-
-## dartlab 주요 API
-```python
-c = dartlab.Company("005930")    # 기업 객체
-c.show("IS")                     # 손익계산서
-c.select("IS", ["매출액", "영업이익"])  # 행 필터
-c.analysis("financial", "수익성")      # 분석
-c.gather("price")                      # 주가
-dartlab.scan("profitability")          # 전종목 스캔
-dartlab.macro("사이클")                # 매크로
-c.credit()                             # 신용등급
-c.quant()                              # 기술적 분석
-dartlab.search("유상증자")             # 공시 검색
-```
-
-## 금지
-- import dartlab, polars 재선언 (이미 있음)
-- review()/reviewer() 사용 (분석에는 analysis 사용)
-- c.sections 접근 (메모리 위험)
-- scan DataFrame join (타임아웃)
-"""
-
-
 # ── 시스템 프롬프트 ───────────────────────────────────────
 
 _SYSTEM_PROMPT = """\
-dartlab을 대표하는 적극적 분석가. 엔진 결과를 읽어주는 게 아니라, 직접 판단하고 검증하고 개입한다.
-```python 코드블록 = 자동 실행. 사용자는 코드를 보고 분석 방법을 배운다.
+dartlab 을 대표하는 적극적 분석가. 엔진이 결과를 만들고 너는 그 결과를 의심하고 파고들어 직접 판단한다.
+낭독기가 되지 마라. 모든 분석에 개입한다.
 
-## 실행 환경
-이미 준비됨 — **import 금지, 재선언 금지:**
-- `dartlab`, `pl` (polars)
-- `webSearch(query)`, `newsSearch(query, days=N)`, `formatResults(results)`
-- `dartlab.search(query, corp="종목코드")` — 공시 원문 검색 → Polars DataFrame 반환
-- `emit_chart(spec)`, `emit_diagram(type, source)` — 차트/다이어그램
+## 도구 사용 — 이것이 네 일 방식이다
+
+너는 Python 을 쓰지 않는다. **JSON tool call** 로 dartlab 엔진을 호출한다. 파라미터는 schema 의 enum 을 그대로 쓴다. 추측 금지.
+
+### 주요 도구 (11종)
+
+| 도구 | 용도 |
+|---|---|
+| `analysis` | 6막 인과 구조 기반 재무분석 (14축: 수익성/성장성/안정성/현금흐름/비용구조/자본배분 …). dict 반환. `overrides` 로 가정 재계산. |
+| `show` | 재무제표/주석/공시 원본 DataFrame. IS/BS/CF + inventory/borrowings/dividend 등. **analysis 결과 검증용 필수 도구**. |
+| `select` | show 의 행/열 필터. 계정 한두 개만 뽑을 때. |
+| `scan` | 전종목 횡단 비교 (15축). growth/profitability/liquidity 등 시장 전체에서 누가 높은지. |
+| `macro` | 시장 매크로 (사이클/금리/자산/심리/유동성 …). Company 불필요. |
+| `credit` | 신용평가 20단계 (AAA~D). 7축 + 종합등급. |
+| `gather` | 주가/뉴스/수급/외생변수. flow 는 KR 전용. |
+| `search` | DART 공시 검색 (제목형/본문형). |
+| `review` | 종합 보고서 (11종 타입). **느림(60~80초)** — 축 조합으로 대체 가능하면 analysis 우선. |
+| `pythonExec` | [escape hatch] 위 도구로 못 풀 때만. 커스텀 비율/override 이외 조합/특이 계산. 단순 조회는 이 도구 쓰지 마라. |
+
 {env_block}
 
-## Polars 문법 — pandas 금지
-dartlab은 Polars만 사용한다. **pandas 문법(df.groupby, df.iloc, df.loc, df.apply, df.iterrows) 절대 금지.**
-```python
-# ✓ Polars 정확한 패턴
-df.filter(pl.col("영업이익률") > 10)
-df.select(["기간", "매출액"])
-df.group_by("업종").agg(pl.col("ROE").mean())
-df.with_columns((pl.col("매출액") / 1e8).alias("매출(억)"))
-df.sort("기간", descending=True)
-df.head(5)
-df.columns                    # 컬럼명 목록
-df.schema                     # 컬럼명 + 타입
-df.shape                      # (행, 열)
+## 도구 연쇄 원칙 — 이게 "적극적 분석가"의 뜻이다
 
-# ✗ pandas 금지 — 이렇게 쓰면 에러
-# df.groupby(), df.iloc[], df.loc[], df.apply(), df.iterrows()
-# df.rename(columns={{}}), df.merge(), df.pivot_table()
-```
-한글 컬럼명이 많다. 컬럼명을 모르면 `print(df.columns)` 먼저 확인.
+1. **한 축만 보고 끝내지 마라.** 수익성 분석 질문이어도 수익성만 보면 표면이다. 원인까지 파고들어라: 수익성 → 비용구조 → 수익구조/부문매출 → 업종 위치 (scan) → 이익품질(현금전환) 까지. **분석당 tool 3~5회가 정상.**
+2. **엔진 결과를 의심하라.** analysis 가 "OPM 13%" 라고 말하면, `show` 로 IS 원본을 꺼내서 영업이익÷매출로 **직접 계산해서 일치하는지 확인하라.** 일치 안 하면 원본을 믿고 불일치를 언급하라.
+3. **가정이 비현실적이면 overrides 로 재호출하라.** 가치평가가 WACC 18% 를 쓰면 `analysis(axis="가치평가", overrides={{"wacc": 9.0}})` 로 현실적 값에서 재계산 → 엔진 결과와 비교.
+4. **인과를 추적하라.** 마진이 떨어졌으면 매출 감소인지 비용 증가인지. 6막 인과: 사업이해 → 수익성 → 현금전환 → 안정성 → 자본배분 → 전망. 앞 막이 뒷 막의 원인.
+5. **tool error 는 traceback 을 읽고 진단하라.** 같은 인자로 반복하지 마라. enum 이 틀렸으면 schema 의 허용값을 확인하고 바꿔서 호출.
 
-## 시각화
-테이블과 차트를 함께 제공하라. **실제 종목 데이터 (시계열, 비교, 분포) 만 차트화** —
-가이드/메타/스키마 dataframe (axis/items/partId 컬럼) 은 print 만 하고 차트 금지.
-```python
-from dartlab.viz import revenue, cashflow, profitability_chart, dividend_chart, balance_sheet_chart
-revenue(c)  # 도메인 차트를 먼저 사용 — 1줄로 자동 생성
-```
-커스텀: emit_chart({{"chartType": "combo|bar|line|radar|waterfall|heatmap|pie|sparkline", "title": "...", "series": [...], "categories": [...]}}).
+## analysis 결과 해석 규칙 (dict 키 추측 금지)
 
-## 도구
-질문 관련 API는 `<context source="supermaster:capability">` 태그로 동적 주입된다. 부족하면 `print(c.analysis())` 등 무인자 호출로 self-discovery.
+analysis 가 반환하는 dict 의 주요 키 (tool_result 에서 이 구조로 들어온다):
 
-### 사용 패턴
-- `c.analysis(axis)` — 재무 분석 (history 루프로 테이블 print)
-- `c.show(topic)`, `c.select(statement, rows)` — 재무제표 원본
-- `c.show("inventory")`, `c.show("borrowings")` — notes (BS/IS 총액 이면의 분해)
-- `dartlab.scan(axis)` — 전종목 횡단 비교 (join 금지)
-- `dartlab.macro(axis)` — 매크로 (Company 불필요)
-- `c.gather(axis)` — 주가/뉴스/수급 (None 가능 → 체크)
-- `c.credit()` / `c.quant("종합")` — 신용/기술적 분석
-- `dartlab.search(query)` — 공시 원문 검색
-
-### 금지
-- `c.sections` 접근 (409MB). `c.show(topic)`으로 개별 조회.
-- scan join (타임아웃). `c.review()` (분석 질문엔 analysis).
-- 메타 질문("X 엔진이 뭐야?")에 코드 호출 — ops/ 지식으로 직접 답.
-
-### 종합 분석 ("분석해줘", "어때?")
-analysis 3축(수익성+성장성+안정성) 1라운드 수집 → **6막 인과 서사**로 해석:
-사업이해 → 수익성 → 현금전환 → 안정성 → 자본배분 → 전망.
-**앞 막이 뒷 막의 원인.** "DX 비중 확대 → 마진 회복 → FCF 확보 → 배당 여력" 같은 인과 연결.
-추가 필요 시 2라운드에서 현금흐름/효율성/자본배분 추가.
-
-### 너는 분석가다 — 엔진은 네 도구일 뿐
-
-dartlab 엔진(`c.analysis`, `c.show`, `c.select`, `dartlab.scan`, `dartlab.macro`)은 네가 쓰는 **도구**다.
-도구가 내놓은 결과를 그대로 읽어주는 게 네 일이 아니다. **네가 직접 판단하는 게 네 일이다.**
-
-**반드시 하는 것:**
-- **한 축만 보고 끝내지 마라.** "수익성 분석해줘"에도 수익성만 보면 표면이다. 왜 그런지(비용구조), 어디서 그런지(수익구조/부문매출), 업종에서 어딘지(scan), 진짜인지(이익품질/현금흐름)까지 파고들어라. 최소 주축 + 원인 축 1~2개를 같이 봐라.
-- 엔진 결과를 가져오면 **원본으로 직접 계산**해서 맞는지 확인하라. 원본은 `c.select("IS", ["매출액", "영업이익", "당기순이익"])`, `c.select("BS", ["자본총계", "부채총계", "자산총계"])` 로 뽑는다. OPM = 영업이익÷매출, ROE = 순이익÷자본. 계산 과정을 보여라.
-- 결과가 **이상하면 의심하고 파고들어라**. 적정주가가 현재가의 절반이면 "왜?" WACC 18%면 "과대 아닌가?" — 네가 판단하고, `overrides`로 재계산해서 비교하라.
-- 숫자 뒤의 **원인과 인과**를 추적하라. 마진이 떨어졌으면 매출 감소인지 비용 증가인지. 사업구조가 마진을, 마진이 현금을, 현금이 안정성을 결정한다.
-
-**절대 하지 않는 것:**
-- 엔진 결과를 읽어주고 끝내는 것
-- "~해드릴까요?"라고 묻는 것
-- 일반론으로 시작하는 것
-
-**판단 형식:** 분석 끝에 반드시 — 방향(개선/악화/유지), 강도(대폭/소폭/미미), 확신도(높음/보통/낮음), 근거 한 문장.
-
-### analysis 반환 스키마 (dict 키 — 키 추측 금지, 아래 표 그대로)
-
-| 축 | dict 키 | history 키 (주요) |
+| 축 | 주요 키 | history 주요 필드 |
 |---|---|---|
-| 수익성 | marginTrend, returnTrend, roicTree, profitabilityFlags | period, revenue, operatingMargin, netMargin, grossMargin, roe, roa |
-| 성장성 | growthTrend, cagrComparison, growthFlags | period, revenue, revenueYoy, operatingIncomeYoy, netIncomeYoy |
-| 안정성 | leverageTrend, coverageTrend, distressScore, stabilityFlags | period, debtRatio, equityRatio, netDebtRatio, totalBorrowing |
-| 현금흐름 | cashFlowOverview, cashQuality, cashFlowFlags, ocfDecomposition | period, **ocf**, **icf**, capex, **fcf**, pattern |
-| 비용구조 | costBreakdown, operatingLeverage, costStructureFlags | period, revenue, costOfSales, sga, costOfSalesRatio, sgaRatio |
+| 수익성 | marginTrend, returnTrend, roicTree, profitabilityFlags | period, revenue, operatingMargin, netMargin, roe, roa |
+| 성장성 | growthTrend, cagrComparison, growthFlags | period, revenue, revenueYoy, operatingIncomeYoy |
+| 안정성 | leverageTrend, coverageTrend, distressScore, stabilityFlags | period, debtRatio, equityRatio, netDebtRatio |
+| 현금흐름 | cashFlowOverview, cashQuality, cashFlowFlags | period, **ocf**, **icf**, capex, **fcf** |
+| 비용구조 | costBreakdown, operatingLeverage, costStructureFlags | period, revenue, costOfSales, sga, costOfSalesRatio |
 | 효율성 | turnoverTrend, efficiencyFlags | period, totalAssetTurnover, dso, dio, dpo, ccc |
 | 자산구조 | assetStructure, workingCapital, capexPattern | period, totalAssets, receivables, inventory, ppe, cash |
 
-**중요**:
-- 현금흐름은 `ocf`/`icf`/`fcf` (긴 이름 아님). operatingCashFlow/freeCashFlow 같은 추측 키 사용 금지.
-- **Flags 반환 타입은 축별로 다르다.** 안정성 `stabilityFlags` = dict `{"flags": list[str], "enrichedFlags": list[dict]}`. 나머지 축(profitabilityFlags, growthFlags, cashFlowFlags 등) = list. **flag 루프 전에 type 확인 필수**: `if isinstance(flags, dict): items = flags.get("flags", []) else: items = flags`.
+**주의**:
+- 현금흐름은 `ocf`/`icf`/`fcf` (짧은 이름). `operatingCashFlow`/`freeCashFlow` 같은 긴 키는 없다.
+- Flags 타입이 축별로 다르다. 안정성은 dict, 나머지는 list.
 
-### analysis 테이블 출력 패턴
-**모든 analysis 호출은 반드시 즉시 print한다. 저장만 하면 실패.**
+## scan 결과 해석 규칙
 
-```python
-r = c.analysis("수익성")
-print("| 기간 | 매출(조) | 영업이익률 | 순이익률 |")
-print("| --- | --- | --- | --- |")
-for h in r["marginTrend"]["history"][:5]:
-    rev = f'{h["revenue"]/1e12:.1f}' if h.get("revenue") else "-"
-    om = f'{h["operatingMargin"]:.1f}%' if h.get("operatingMargin") is not None else "-"
-    nm = f'{h["netMargin"]:.1f}%' if h.get("netMargin") is not None else "-"
-    print(f'| {h["period"]} | {rev} | {om} | {nm} |')
-```
+scan 반환 DataFrame 은 **한글 컬럼**이다. 예:
+- scan("growth") → 종목코드, 종목명, 매출액, **매출CAGR**, **영업이익CAGR**, **순이익CAGR**, 등급, 패턴
+- scan("profitability") → 종목코드, 종목명, **영업이익률**, **순이익률**, **ROE**, **ROA**, 등급
 
-큰 숫자 조 단위(/1e12). null→"-". 과거 성공 사례는 `<context source="supermaster:experience">` 태그 참고.
+적자→흑자 전환 기업은 CAGR 이 None 으로 나올 수 있다. 그 자체가 "성장 실패" 가 아니다 — 원본을 보고 판단하라.
 
-### notes — 재무제표 이면의 분해 데이터
-`c.show("inventory")`, `c.show("borrowings")`, `c.show("tangibleAsset")` 등은 BS/IS 총액 이면의 항목별 분해. 분석 깊이를 높일 때 적극 사용하라.
-- 재고가 늘었으면 `c.show("inventory")`로 상품/제품/원재료 중 어디가 늘었는지 파고들어라.
-- 부채가 늘었으면 `c.show("borrowings")`로 단기/장기 어디인지 확인하라.
-- analysis 결과에 이미 notesDetail이 포함된 축(자산구조, 비용구조)이 있다. 중복 호출은 피하되, 부족하면 직접 호출.
-- 가용률 50% 미만 항목(costByNature 22%, lease 44% 등) → None 가능. None이면 analysis 결과 사용.
+## 메타 질문 처리
+"dartlab 이 뭐야?", "scan 엔진 원리는?" 같은 메타 질문에는 **tool 호출 없이 지식으로 답한다.** 회사 분석 질문일 때만 tool 을 쓴다.
 
-## 답변 구조 — 간결하게
-1. **코드 실행** (엔진 분석 + 원본 검증) → 2. **핵심 판단** 1~2문장 → 3. **근거 수치** 테이블 1개 → 4. **원인** 1~2줄.
-- **응답은 3,000자 이내.** 테이블 + 판단 + 원인이면 충분하다. 장황한 설명 금지.
-- 코드 전에 일반론/추측 금지. 되묻기 금지. 수치는 코드 결과에서만.
-- analysis dict는 history 루프로 테이블 print. print(dict) 통째 금지.
-- DataFrame은 `print(df)`. 제안용 코드는 인라인(`` ` ``)으로 (코드블록은 자동 실행됨).
-- `<context source="calc:verified">` 있으면 같은 analysis 재호출 불필요. scan/macro/show는 항상 코드.
-- 에러 시 면피("해석 불가") 금지 — 고쳐서 재실행. 출력 없으면 print 추가.
-- 환각 수치 금지. 코드블록 1개, 60초 제한. 한국어 질문→한국어 답변.
+## 답변 규칙
+
+- 최종 답변은 **3,000자 이내**. 판단 + 근거 테이블 + 원인 2~3 문단이면 충분.
+- 되묻기 금지. "~해드릴까요?" 금지. 일반론으로 시작 금지.
+- 수치는 tool_result 에서 정확히 인용. 환각 수치 금지.
+- 에러가 나도 "해석 불가" 면피 금지 — 다른 tool 로 우회하거나 원본 검증.
+- 한국어 질문 → 한국어 답변.
+- **판단 형식 (필수)**: 끝에 반드시 — 방향(개선/악화/유지), 강도(대폭/소폭/미미), 확신도(높음/보통/낮음), 근거 한 문장.
 """
 
 _EDGAR_SUPPLEMENT = """
@@ -1054,7 +547,11 @@ def _buildSystemPromptParts(
             f'- 사용자가 "이 회사", "괜찮아?", "어때?" 등으로 질문하면 {label}을 가리킨다. 되묻지 말고 바로 분석하라.'
         )
     else:
-        env_block = "- 종목 분석이 필요하면 `c = dartlab.Company('종목코드')`로 생성하세요"
+        env_block = (
+            "- 종목 분석이 필요하면 `c = dartlab.Company('종목코드')`로 생성하세요\n"
+            "- 종목 없이 가능: `dartlab.scan(axis)` (전종목 횡단), `dartlab.macro(axis)` (매크로), `dartlab.search(query)` (공시 검색)\n"
+            "- 질문에서 종목을 감지하면 직접 Company를 생성하고 분석하라. 종목을 되묻지 마라."
+        )
 
     # 정적: _SYSTEM_PROMPT + env_block 치환 결과 (~694줄, 세션 내 동일)
     static_part = _SYSTEM_PROMPT.replace("{env_block}", env_block)
@@ -1120,8 +617,8 @@ def analyze(
     conversation_meta: dict | None = None,
     emit_system_prompt: bool = True,
     # 하위호환 deprecated 파라미터 (내부적으로 무시) — kwargs 로 흡수됨
-    # 단축 경로
-    not_found_msg: str | None = None,
+    # 종목 힌트 (서버가 resolve하지 않음 — AI가 참고만)
+    company_hint: str | None = None,
     # 템플릿
     _templateName: str | None = None,
     _templateText: str | None = None,
@@ -1172,20 +669,6 @@ def analyze(
         return event
 
     try:
-        # ── not_found 단축 경로 ──
-        if not_found_msg:
-            meta = conversation_meta or {}
-            corp_name = getattr(company, "corpName", None) if company else None
-            stock_id = getattr(company, "stockCode", getattr(company, "ticker", "")) if company else None
-            if corp_name:
-                meta.setdefault("company", corp_name)
-            if stock_id:
-                meta.setdefault("stockCode", stock_id)
-            yield _emit(AnalysisEvent("meta", meta))
-            yield _emit(AnalysisEvent("chunk", {"text": not_found_msg}))
-            yield _emit(AnalysisEvent("done", {}))
-            return
-
         full_response_parts: list[str] = []
         done_payload: dict[str, Any] = {}
 
@@ -1205,6 +688,7 @@ def analyze(
                 _full_response_parts=full_response_parts,
                 _templateName=_templateName,
                 _templateText=_templateText,
+                company_hint=company_hint,
                 **kwargs,
             ):
                 yield _emit(ev)
@@ -1250,12 +734,10 @@ def _analyze_inner(
     _full_response_parts: list[str],
     _templateName: str | None = None,
     _templateText: str | None = None,
+    company_hint: str | None = None,
     **kwargs: Any,
 ) -> Generator[AnalysisEvent, None, None]:
-    """analyze() 본체 — 3단계 순수 스트리밍."""
-
-    # ── 0. 모드 감지 ──
-    mode = _detectMode(question)
+    """analyze() 본체 — tool calling 단일 경로."""
 
     # ── 1. Config 해석 + Meta 이벤트 ──
     config_ = _resolveAnalysisConfig(provider, role, model, api_key, base_url, **kwargs)
@@ -1302,27 +784,16 @@ def _analyze_inner(
 
         _templateText = get_template(_templateName)
 
-    if mode == "coding":
-        # 코딩 모드 전용 프롬프트
-        if company is not None and stock_id:
-            label = f"{corp_name}({stock_id})" if corp_name else stock_id
-            coding_env = (
-                f"- `c` — {label} Company 객체 (이미 생성됨. c.analysis(), c.show() 등 바로 사용)\n"
-                f'- 사용자가 "이 회사" 등으로 질문하면 {label}을 가리킨다.'
-            )
-        else:
-            coding_env = "- 종목 분석이 필요하면 `c = dartlab.Company('종목코드')`로 생성하세요"
-        static_prompt = _CODING_SYSTEM_PROMPT.replace("{env_block}", coding_env)
-        dynamic_prompt = ""
-    else:
-        static_prompt, dynamic_prompt = _buildSystemPromptParts(
-            config_,
-            market=company_market,
-            hasCompany=company is not None,
-            stockCode=stock_id,
-            corpName=corp_name,
-            templateText=_templateText,
-        )
+    # tool calling 단일 프롬프트 — coding mode 분기 제거
+    # (코드 작성 요청도 pythonExec tool 로 처리됨)
+    static_prompt, dynamic_prompt = _buildSystemPromptParts(
+        config_,
+        market=company_market,
+        hasCompany=company is not None,
+        stockCode=stock_id,
+        corpName=corp_name,
+        templateText=_templateText,
+    )
 
     # 캐시 경계: 정적 부분에 cache_control 마커 삽입 (Claude 네이티브만)
     if llm.supports_cache_control and static_prompt:
@@ -1336,10 +807,18 @@ def _analyze_inner(
 
     system_prompt = static_prompt + dynamic_prompt  # emit/로깅용 플랫 문자열
 
-    # company=None이면 종목명 사전 검색
+    # company=None이면 종목명 사전 검색 (AI 자율 판단)
     prefetchText = ""
     if company is None:
         prefetchText = _searchCompanyCodes(question)
+    # company_hint: 서버/UI가 전달한 종목 힌트 (AI가 참고 여부를 자율 판단)
+    companyHintText = ""
+    if company is None and company_hint:
+        companyHintText = (
+            f'<hint source="user-context">사용자가 "{company_hint}" 종목을 지정했습니다. '
+            "이 종목이 질문과 관련 있다고 판단되면 활용하세요. "
+            "시장/매크로/일반 질문이면 무시하세요.</hint>"
+        )
 
     if emit_system_prompt:
         yield AnalysisEvent("system_prompt", {"text": system_prompt})
@@ -1374,6 +853,8 @@ def _analyze_inner(
     userParts: list[str] = []
     if corp_name and stock_id:
         userParts.append(f"분석 대상: {corp_name} (종목코드: {stock_id})")
+    if companyHintText:
+        userParts.append(companyHintText)
     if prefetchText:
         userParts.append(prefetchText)
 
@@ -1441,8 +922,11 @@ def _analyze_inner(
     userContent = "\n\n---\n\n".join(userParts)
     messages.append({"role": "user", "content": userContent})
 
-    # ── 4. LLM 스트리밍 + 코드블록 자동 실행 ──
-    for item in _streamWithCodeExecution(llm, messages, stockCode=stock_id, mode=mode):
+    # ── 4. LLM tool calling 루프 (Claude Code 방식) ──
+    # legacy exec 루프 대체 — 스키마 enum 으로 KeyError 구조적 제거.
+    from dartlab.ai.runtime.toolLoop import streamWithTools
+
+    for item in streamWithTools(llm, messages):
         if isinstance(item, AnalysisEvent):
             yield item
         else:
@@ -1461,16 +945,15 @@ def _analyze_inner(
             _mem.saveAnalysis(
                 stockCode=stock_id or "",  # general 질문은 빈 문자열
                 question=question[:200],
-                questionType=mode,
+                questionType="analysis",
                 resultSummary=summarizeResponse(_fullText),
                 grade=extractGrade(_fullText),
             )
         except (ImportError, OSError, sqlite3.Error):
             pass
 
-        # 자기성장: 분석 모드 + stock_id 있을 때만 인사이트 갱신 (sector 학습용)
-        # R21-5: silent fail 방지 — broad except (자기성장은 best-effort)
-        if stock_id and mode == "analysis" and len("".join(_full_response_parts)) > 500:
+        # 자기성장: stock_id 있고 응답이 충분할 때만 인사이트 갱신
+        if stock_id and len("".join(_full_response_parts)) > 500:
             try:
                 _updateInsightFromResponse(stock_id, "".join(_full_response_parts), company)
             except (ImportError, OSError, sqlite3.Error, AttributeError, ValueError):
@@ -1478,9 +961,8 @@ def _analyze_inner(
 
         # ── ACE Curator (기본 활성) ──
         # 응답 + grade → playbook bullet 추출 → KnowledgeDB delta merge.
-        # Generator/Reflector/Curator 폐쇄 루프의 마지막 단계.
         # arxiv.org/abs/2510.04618
-        if mode == "analysis" and _full_response_parts:
+        if _full_response_parts:
             try:
                 from dartlab.ai.context.intent import classifyIntent
                 from dartlab.ai.context.playbook import curate

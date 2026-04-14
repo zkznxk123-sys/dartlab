@@ -12,6 +12,7 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import dartlab
+
     c = dartlab.Company("005930")
     # 가이드 — 7축 dCR 등급
     c.credit()

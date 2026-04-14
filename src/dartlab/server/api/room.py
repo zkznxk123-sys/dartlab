@@ -148,9 +148,8 @@ async def room_ask(req: RoomAskRequest, request: Request):
             },
         )
 
-        # 기존 스트리밍 인프라 재사용
+        # 스트리밍 인프라 — AI가 종목을 자율 판단
         from ..models import AskRequest
-        from ..resolve import try_resolve_company
         from ..streaming import stream_ask
 
         ask_req = AskRequest(
@@ -158,17 +157,8 @@ async def room_ask(req: RoomAskRequest, request: Request):
             question=req.question,
             stream=True,
         )
-        resolved = try_resolve_company(ask_req)
-        c = resolved.company
 
-        if c:
-            from ..cache import company_cache
-
-            cached = company_cache.get(c.stockCode)
-            if cached:
-                c = cached[0]
-
-        async for sse_event in stream_ask(c, ask_req):
+        async for sse_event in stream_ask(ask_req):
             event_name = sse_event.get("event", "chunk")
             try:
                 data = json.loads(sse_event.get("data", "{}"))

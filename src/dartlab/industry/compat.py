@@ -103,7 +103,9 @@ class SectorInfo:
     source: str
 
     def __repr__(self):
-        return f"SectorInfo({self.sector.value}/{self.industryGroup.value}, conf={self.confidence:.2f}, src={self.source})"
+        return (
+            f"SectorInfo({self.sector.value}/{self.industryGroup.value}, conf={self.confidence:.2f}, src={self.source})"
+        )
 
 
 @dataclass
@@ -287,8 +289,12 @@ class MarketParams:
         return self.riskFreeRate + beta * self.totalErp
 
 
-MARKET_KR = MarketParams(riskFreeRate=3.5, equityRiskPremium=5.5, countryRiskPremium=0.9, defaultTaxRate=22.0, gdpGrowth=4.0)
-MARKET_US = MarketParams(riskFreeRate=4.2, equityRiskPremium=5.5, countryRiskPremium=0.0, defaultTaxRate=21.0, gdpGrowth=4.5)
+MARKET_KR = MarketParams(
+    riskFreeRate=3.5, equityRiskPremium=5.5, countryRiskPremium=0.9, defaultTaxRate=22.0, gdpGrowth=4.0
+)
+MARKET_US = MarketParams(
+    riskFreeRate=4.2, equityRiskPremium=5.5, countryRiskPremium=0.0, defaultTaxRate=21.0, gdpGrowth=4.5
+)
 MARKET_PARAMS: dict[str, MarketParams] = {"KRW": MARKET_KR, "USD": MARKET_US}
 
 

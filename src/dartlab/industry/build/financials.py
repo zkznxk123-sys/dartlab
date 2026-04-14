@@ -60,10 +60,7 @@ def _extractYearly(year: str) -> pl.DataFrame:
 
     # 금액 변환
     df = df.with_columns(
-        pl.col("thstrm_amount")
-        .str.replace_all(",", "")
-        .cast(pl.Float64, strict=False)
-        .alias("amount")
+        pl.col("thstrm_amount").str.replace_all(",", "").cast(pl.Float64, strict=False).alias("amount")
     )
 
     # 계정별로 CFS 우선, OFS fallback
@@ -74,7 +71,12 @@ def _extractYearly(year: str) -> pl.DataFrame:
         subset = df.filter(pl.col("account_id_std") == snakeId)
         cfs = subset.filter(pl.col("fs_div") == "CFS").group_by("stockCode").agg(pl.col("amount").first().alias(alias))
         ofsCodes = cfs.select("stockCode")
-        ofs = subset.filter(pl.col("fs_div") == "OFS").join(ofsCodes, on="stockCode", how="anti").group_by("stockCode").agg(pl.col("amount").first().alias(alias))
+        ofs = (
+            subset.filter(pl.col("fs_div") == "OFS")
+            .join(ofsCodes, on="stockCode", how="anti")
+            .group_by("stockCode")
+            .agg(pl.col("amount").first().alias(alias))
+        )
         acct = pl.concat([cfs, ofs])
         result = result.join(acct, on="stockCode", how="left")
 
@@ -159,9 +161,7 @@ def buildIndustrySummary(
     )
 
     joined = fin.join(nodesDf, on="stockCode", how="inner")
-    filtered = joined.filter(
-        (pl.col("industry") == industryId) & (pl.col("stage") != "")
-    )
+    filtered = joined.filter((pl.col("industry") == industryId) & (pl.col("stage") != ""))
 
     if filtered.height == 0:
         return pl.DataFrame()
@@ -186,9 +186,7 @@ def buildIndustrySummary(
 
     # 공정명 추가
     result = result.with_columns(
-        pl.col("stage")
-        .replace_strict(stageLabels, default=None, return_dtype=pl.Utf8)
-        .alias("공정명")
+        pl.col("stage").replace_strict(stageLabels, default=None, return_dtype=pl.Utf8).alias("공정명")
     )
 
     return result.select(["stage", "공정명", "매출(조)", "영업이익(조)", "기업수"])
@@ -220,6 +218,8 @@ def buildTimelineSummary(
     if not frames:
         return pl.DataFrame()
 
-    return pl.concat(frames).select(
-        ["연도", "stage", "공정명", "매출(조)", "영업이익(조)", "기업수"]
-    ).sort(["stage", "연도"])
+    return (
+        pl.concat(frames)
+        .select(["연도", "stage", "공정명", "매출(조)", "영업이익(조)", "기업수"])
+        .sort(["stage", "연도"])
+    )

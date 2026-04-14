@@ -11,7 +11,7 @@ import sys
 
 BLOG_DIR = "blog/05-company-reports"
 FORBIDDEN_PATTERNS = [
-    r"~입니다$",          # 존댓말 (블로그 톤 아님)
+    r"~입니다$",  # 존댓말 (블로그 톤 아님)
     r"살펴보겠습니다",
     r"알아보겠습니다",
     r"~하겠습니다$",
@@ -205,16 +205,18 @@ def main():
             results.append((folder, s))
 
     # 콘솔 출력
-    print(f"\n{'='*80}")
+    print(f"\n{'=' * 80}")
     print(f"블로그 SEO 스코어링 — {len(results)}편")
-    print(f"{'='*80}\n")
+    print(f"{'=' * 80}\n")
 
     print(f"{'글':<45} {'점수':>6} {'건강':>4} {'글자':>7} {'H2':>4} {'링크':>4} {'SVG':>4} {'IMG':>4} {'코드':>4}")
     print("-" * 90)
 
     for folder, s in results:
         name = folder[:44]
-        print(f"{name:<45} {s['pct']:>5}% {s['health']:>4} {s['length_chars']:>6} {s['h2_count']:>4} {s['internal_links_count']:>4} {s['svg_count']:>4} {s['img_count']:>4} {s['code_count']:>4}")
+        print(
+            f"{name:<45} {s['pct']:>5}% {s['health']:>4} {s['length_chars']:>6} {s['h2_count']:>4} {s['internal_links_count']:>4} {s['svg_count']:>4} {s['img_count']:>4} {s['code_count']:>4}"
+        )
 
     # 약한 글 경고
     weak = [(f, s) for f, s in results if s["pct"] < 70]
@@ -225,7 +227,7 @@ def main():
             if s["internal_links_count"] < 3:
                 issues.append(f"내부링크 {s['internal_links_count']}개")
             if s["svg_count"] + s["img_count"] < 3:
-                issues.append(f"시각자산 {s['svg_count']+s['img_count']}개")
+                issues.append(f"시각자산 {s['svg_count'] + s['img_count']}개")
             if s["length_chars"] < 8000:
                 issues.append(f"글자수 {s['length_chars']}")
             print(f"  🔴 {f}: {s['pct']}% — {', '.join(issues)}")

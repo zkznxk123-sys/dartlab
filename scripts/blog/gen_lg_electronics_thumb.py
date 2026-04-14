@@ -3,6 +3,7 @@
 실행: uv run python -X utf8 scripts/blog/gen_lg_electronics_thumb.py
 사전 조건: 34-lg-factory.webp가 assets/ 또는 thumbnails/에 있어야 함
 """
+
 from PIL import Image, ImageDraw, ImageFont
 from pathlib import Path
 

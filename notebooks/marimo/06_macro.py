@@ -12,6 +12,7 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import dartlab
+
     # 가이드 — 사이클/금리/자산/심리/유동성
     dartlab.macro()
     return (dartlab,)

@@ -132,7 +132,9 @@ _CUSTOMER_TITLE = re.compile(r"매출처|판매처|수주처|주요.*고객")
 _RELATED_PARTY = re.compile(r"대주주.*거래|특수관계자|계열회사")
 
 # 법인명 추출 패턴 — ㈜, (주), 주식회사 앞뒤로 회사명
-_CORP_PATTERN = re.compile(r"㈜\s*([가-힣A-Za-z0-9]+)|([가-힣A-Za-z0-9]+)\s*㈜|\(주\)\s*([가-힣A-Za-z0-9]+)|주식회사\s+([가-힣A-Za-z0-9]+)")
+_CORP_PATTERN = re.compile(
+    r"㈜\s*([가-힣A-Za-z0-9]+)|([가-힣A-Za-z0-9]+)\s*㈜|\(주\)\s*([가-힣A-Za-z0-9]+)|주식회사\s+([가-힣A-Za-z0-9]+)"
+)
 
 
 def _extractCorpNames(content: str) -> list[str]:
@@ -220,30 +222,42 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
                 if isSupplier:
                     edges.append(
                         IndustryEdge(
-                            fromCode=targetCode, fromName=targetName,
-                            toCode=code, toName=c2n.get(code, ""),
-                            edgeType="supplier", industry=node.industry,
-                            confidence=confidence, source="docs",
+                            fromCode=targetCode,
+                            fromName=targetName,
+                            toCode=code,
+                            toName=c2n.get(code, ""),
+                            edgeType="supplier",
+                            industry=node.industry,
+                            confidence=confidence,
+                            source="docs",
                             evidence=f"{title}",
                         )
                     )
                 elif isCustomer:
                     edges.append(
                         IndustryEdge(
-                            fromCode=code, fromName=c2n.get(code, ""),
-                            toCode=targetCode, toName=targetName,
-                            edgeType="customer", industry=node.industry,
-                            confidence=confidence, source="docs",
+                            fromCode=code,
+                            fromName=c2n.get(code, ""),
+                            toCode=targetCode,
+                            toName=targetName,
+                            edgeType="customer",
+                            industry=node.industry,
+                            confidence=confidence,
+                            source="docs",
                             evidence=f"{title}",
                         )
                     )
                 elif isRelated:
                     edges.append(
                         IndustryEdge(
-                            fromCode=code, fromName=c2n.get(code, ""),
-                            toCode=targetCode, toName=targetName,
-                            edgeType="affiliate", industry=node.industry,
-                            confidence=0.5, source="docs",
+                            fromCode=code,
+                            fromName=c2n.get(code, ""),
+                            toCode=targetCode,
+                            toName=targetName,
+                            edgeType="affiliate",
+                            industry=node.industry,
+                            confidence=0.5,
+                            source="docs",
                             evidence=f"{title}",
                         )
                     )

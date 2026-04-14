@@ -12,6 +12,7 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import dartlab
+
     # 가이드 — 13축
     dartlab.scan()
     return (dartlab,)

@@ -47,7 +47,7 @@ def main() -> int:
         return 1
 
     elapsed = time.time() - t0
-    print(f"\n완료: {len(paths)}개 보고서 ({elapsed/3600:.1f}시간)")
+    print(f"\n완료: {len(paths)}개 보고서 ({elapsed / 3600:.1f}시간)")
     gc.collect()
     return 0
 

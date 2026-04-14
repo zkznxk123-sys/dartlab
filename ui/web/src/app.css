@@ -247,6 +247,7 @@ button, a, input, textarea {
 
 .chat-stream-shell {
 	position: relative;
+	--tl-line-left: 12px;
 }
 
 .message-shell {
@@ -707,19 +708,17 @@ button, a, input, textarea {
 	0%, 100% { opacity: 0.4; }
 	50% { opacity: 1; }
 }
-.msg-timeline::after {
+/* Timeline vertical line — single continuous line on the container */
+.chat-stream-shell::before {
 	content: "";
 	position: absolute;
 	width: 1px;
 	top: 0;
 	bottom: 0;
-	left: 12px;
+	left: var(--tl-line-left);
 	background-color: rgba(148, 163, 184, 0.12);
+	pointer-events: none;
 }
-.msg-timeline:first-child::after,
-.msg-user:first-child::after { top: 18px; }
-.msg-timeline:last-child::after,
-.msg-user:last-child::after { height: 18px; }
 
 /* User message — same timeline, hollow dot */
 .msg-user {
@@ -737,15 +736,6 @@ button, a, input, textarea {
 	background-color: transparent;
 	border: 1.5px solid var(--color-dl-text-dim);
 	z-index: 1;
-}
-.msg-user::after {
-	content: "";
-	position: absolute;
-	width: 1px;
-	top: 0;
-	bottom: 0;
-	left: 12px;
-	background-color: rgba(148, 163, 184, 0.12);
 }
 
 /* ── Stagger animation ── */

@@ -3,6 +3,7 @@
 fal.ai FLUX schnell 사용.
 실행: FAL_KEY=xxx uv run python -X utf8 scripts/blog/gen_oklo_flux.py
 """
+
 import os, sys, requests
 from pathlib import Path
 

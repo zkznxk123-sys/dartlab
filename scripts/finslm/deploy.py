@@ -28,6 +28,7 @@ def upload_hf() -> bool:
 
     try:
         from huggingface_hub import HfApi
+
         api = HfApi(token=token)
 
         repo_id = "eddmpython/dartlab-finslm-8b"
@@ -89,9 +90,12 @@ def test_provider() -> bool:
     """dartlab.ask()로 로컬 모델 테스트."""
     try:
         import subprocess
+
         result = subprocess.run(
             ["ollama", "list"],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         if "dartlab-finslm" not in result.stdout:
             print("[SKIP] dartlab-finslm 모델 미설치")

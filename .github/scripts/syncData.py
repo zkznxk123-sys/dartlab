@@ -37,10 +37,10 @@ def _cloneExisting(category: str, dataDir: str) -> int:
     print(f"[syncData] HuggingFace shallow clone 시작...")
     env = {**os.environ, "GIT_LFS_SKIP_SMUDGE": "1"}
     result = subprocess.run(
-        ["git", "clone", "--depth", "1",
-         "https://huggingface.co/datasets/eddmpython/dartlab-data",
-         str(cloneDir)],
-        capture_output=True, text=True, env=env,
+        ["git", "clone", "--depth", "1", "https://huggingface.co/datasets/eddmpython/dartlab-data", str(cloneDir)],
+        capture_output=True,
+        text=True,
+        env=env,
     )
 
     if result.returncode != 0:
@@ -51,7 +51,9 @@ def _cloneExisting(category: str, dataDir: str) -> int:
     print(f"[syncData] LFS pull: {dirPath}/*.parquet")
     subprocess.run(
         ["git", "lfs", "pull", "--include", f"{dirPath}/*.parquet"],
-        cwd=str(cloneDir), capture_output=True, text=True,
+        cwd=str(cloneDir),
+        capture_output=True,
+        text=True,
     )
 
     # clone에서 데이터 디렉토리로 복사
@@ -142,10 +144,7 @@ def main():
     # 4단계: 변경 파일 감지
     afterHashes = _snapshotHashes(localDir)
     newFiles = [f for f in afterHashes if f not in beforeHashes]
-    updatedFiles = [
-        f for f in afterHashes
-        if f in beforeHashes and afterHashes[f] != beforeHashes[f]
-    ]
+    updatedFiles = [f for f in afterHashes if f in beforeHashes and afterHashes[f] != beforeHashes[f]]
     changedFiles = newFiles + updatedFiles
 
     # changed.txt 기록 → uploadData.py가 참조

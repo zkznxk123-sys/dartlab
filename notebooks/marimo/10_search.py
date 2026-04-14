@@ -12,6 +12,7 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import dartlab
+
     dartlab.search("유상증자")
     return (dartlab,)
 

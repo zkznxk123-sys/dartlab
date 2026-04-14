@@ -56,7 +56,7 @@ def _sharegpt(system: str, human: str, gpt: str, meta: dict) -> dict:
 
 def main() -> int:
     codes = sorted([f.stem for f in AUDIT_DIR.glob("*.md")])
-    print(f"[graph] {len(codes)}종목 × {len(METRICS)} 지표 = 최대 {len(codes)*len(METRICS)} 페어")
+    print(f"[graph] {len(codes)}종목 × {len(METRICS)} 지표 = 최대 {len(codes) * len(METRICS)} 페어")
 
     pairs: list[dict] = []
     success = 0
@@ -65,6 +65,7 @@ def main() -> int:
     for i, code in enumerate(codes):
         try:
             import dartlab
+
             c = dartlab.Company(code)
             corp_name = getattr(c, "corpName", code)
         except (FileNotFoundError, OSError, RuntimeError, KeyError, ValueError):
@@ -100,19 +101,21 @@ def main() -> int:
                 continue
 
             q = QUESTIONS[metric].replace("해줘", f"해줘. 회사: {corp_name}({code})")
-            pairs.append(_sharegpt(
-                SYSTEM_PROMPT,
-                q,
-                "\n\n".join(answer_parts),
-                {"stock_code": code, "intent": "graph_causes", "source": "graph", "metric": metric},
-            ))
+            pairs.append(
+                _sharegpt(
+                    SYSTEM_PROMPT,
+                    q,
+                    "\n\n".join(answer_parts),
+                    {"stock_code": code, "intent": "graph_causes", "source": "graph", "metric": metric},
+                )
+            )
 
         success += 1
         del c, g
         gc.collect()
 
         if (i + 1) % 20 == 0:
-            print(f"  [{i+1}/{len(codes)}] pairs={len(pairs)} ok={success} fail={fail}")
+            print(f"  [{i + 1}/{len(codes)}] pairs={len(pairs)} ok={success} fail={fail}")
 
     # 저장
     with open(OUT, "w", encoding="utf-8") as f:

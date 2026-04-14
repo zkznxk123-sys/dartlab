@@ -1704,7 +1704,11 @@ def _collectSpecAxesLabels(specPath: Path) -> dict[str, str]:
                                 for ak, av in zip(v.keys, v.values):
                                     if isinstance(ak, ast.Constant) and isinstance(av, ast.Dict):
                                         for avk, avv in zip(av.keys, av.values):
-                                            if isinstance(avk, ast.Constant) and avk.value == "label" and isinstance(avv, ast.Constant):
+                                            if (
+                                                isinstance(avk, ast.Constant)
+                                                and avk.value == "label"
+                                                and isinstance(avv, ast.Constant)
+                                            ):
                                                 result[str(ak.value)] = str(avv.value)
     return result
 
@@ -1722,9 +1726,20 @@ def _generateMcpToolsPy() -> str:
 
     # analysis 축은 scan의 financial 그룹과 유사하지만 별도 정의
     analysisAxes = [
-        "수익구조", "안정성", "성장성", "현금흐름", "자금조달", "자산구조",
-        "수익성", "효율성", "이익품질", "비용구조", "자본배분", "투자효율",
-        "재무정합성", "종합평가",
+        "수익구조",
+        "안정성",
+        "성장성",
+        "현금흐름",
+        "자금조달",
+        "자산구조",
+        "수익성",
+        "효율성",
+        "이익품질",
+        "비용구조",
+        "자본배분",
+        "투자효율",
+        "재무정합성",
+        "종합평가",
     ]
     reviewSections = analysisAxes + ["가치평가", "지배구조", "공시변화", "비교분석", "매출전망"]
 
@@ -1748,117 +1763,215 @@ def _generateMcpToolsPy() -> str:
     def _tool(name, desc, params, required, feature="data"):
         """도구 하나를 문자열로."""
         toolDefs.append((name, feature))
-        return (
-            f'    {{"name": {name!r}, '
-            f'"description": {desc!r}, '
-            f'"params": {params!r}, '
-            f'"required": {required!r}}},'
-        )
+        return f'    {{"name": {name!r}, "description": {desc!r}, "params": {params!r}, "required": {required!r}}},'
 
     # ── 정적 도구 (Company-bound) ──
     tools = []
-    tools.append(_tool("companyInsights",
-        "[먼저 사용] 7영역 등급 (A~F) + 투자 프로파일 + 핵심 서사.",
-        {"stockCode": "_STOCK"}, ["stockCode"], "ai"))
-    tools.append(_tool("searchCompany",
-        "한국 상장기업 검색. 종목코드(005930), 회사명(삼성전자), 부분검색(삼성) 가능.",
-        {"query": {"type": "string", "description": "검색어"}}, ["query"]))
-    tools.append(_tool("companyFinancials",
-        "재무제표 원본 조회. IS(손익), BS(재무상태), CF(현금흐름), CIS(포괄손익), SCE(자본변동).",
-        {"stockCode": "_STOCK", "statement": {"type": "string", "enum": ["IS", "BS", "CF", "CIS", "SCE"]}},
-        ["stockCode", "statement"]))
-    tools.append(_tool("companyRatios",
-        "재무비율 55개 시계열. ROE, ROA, 부채비율, 영업이익률, PER, PBR 등.",
-        {"stockCode": "_STOCK"}, ["stockCode"]))
-    tools.append(_tool("companyAnalysis",
-        f"14축 재무 심층 분석. 축: {', '.join(analysisAxes)}",
-        {"stockCode": "_STOCK",
-         "axis": {"type": "string", "description": "그룹명 또는 축명"},
-         "sub": {"type": "string", "description": "그룹 내 하위 축"}},
-        ["stockCode"]))
-    tools.append(_tool("companyValuation",
-        "종합 밸류에이션 (DCF + DDM + 상대가치 + RIM).",
-        {"stockCode": "_STOCK"}, ["stockCode"]))
-    tools.append(_tool("companyForecast",
-        "매출 예측 (Base/Bull/Bear 시나리오).",
-        {"stockCode": "_STOCK"}, ["stockCode"]))
-    tools.append(_tool("companyShow",
-        "공시 토픽 원문 조회. companyTopics로 목록 확인.",
-        {"stockCode": "_STOCK", "topic": {"type": "string", "description": "토픽명"}},
-        ["stockCode", "topic"]))
-    tools.append(_tool("companyTopics",
-        "이 기업에서 조회 가능한 공시 토픽 목록.",
-        {"stockCode": "_STOCK"}, ["stockCode"]))
-    tools.append(_tool("companyDiff",
-        "기간간 공시 텍스트 변경 비교.",
-        {"stockCode": "_STOCK", "topic": {"type": "string", "description": "토픽명 (생략 시 전체)"}},
-        ["stockCode"]))
-    tools.append(_tool("companyGovernance",
-        "지배구조 분석 (사외이사, 감사위원, 최대주주 지분율).",
-        {"stockCode": "_STOCK"}, ["stockCode"]))
-    tools.append(_tool("companyAudit",
-        "감사 리스크 (감사의견, 감사인 변경, 계속기업 불확실성).",
-        {"stockCode": "_STOCK"}, ["stockCode"]))
-    tools.append(_tool("companyProfile",
-        "기업 기본 정보 (회사명, 업종, 시장, 대표자).",
-        {"stockCode": "_STOCK"}, ["stockCode"]))
-    tools.append(_tool("companySections",
-        "전체 데이터 구조 지도 (topic x period).",
-        {"stockCode": "_STOCK"}, ["stockCode"]))
-    tools.append(_tool("companyReview",
-        f"정리된 종합 보고서. 섹션: {', '.join(reviewSections)}",
-        {"stockCode": "_STOCK", "section": {"type": "string", "description": "특정 섹션만"}},
-        ["stockCode"], "ai"))
-    tools.append(_tool("companyCredit",
-        "독립 신용등급 분석 (7축). 채무상환, 자본구조, 유동성, 현금흐름, 사업안정성, 재무신뢰성, 공시리스크.",
-        {"stockCode": "_STOCK", "axis": {"type": "string", "description": "축명 (생략 시 종합)"}},
-        ["stockCode"]))
-    tools.append(_tool("companyGather",
-        "종목별 시장 데이터. 주가(price), 수급(flow), 뉴스(news).",
-        {"stockCode": "_STOCK", "axis": {"type": "string", "enum": ["price", "flow", "news"]}},
-        ["stockCode", "axis"]))
-    tools.append(_tool("companyQuant",
-        f"종목 기술적 분석. 축: {', '.join(quantAxes[:8])}...",
-        {"stockCode": "_STOCK", "metric": {"type": "string", "description": "분석 축"}},
-        ["stockCode"]))
-    tools.append(_tool("companyFilings",
-        "개별 종목 공시 목록.",
-        {"stockCode": "_STOCK", "topK": {"type": "integer", "description": "최대 건수 (기본 10)"}},
-        ["stockCode"]))
+    tools.append(
+        _tool(
+            "companyInsights",
+            "[먼저 사용] 7영역 등급 (A~F) + 투자 프로파일 + 핵심 서사.",
+            {"stockCode": "_STOCK"},
+            ["stockCode"],
+            "ai",
+        )
+    )
+    tools.append(
+        _tool(
+            "searchCompany",
+            "한국 상장기업 검색. 종목코드(005930), 회사명(삼성전자), 부분검색(삼성) 가능.",
+            {"query": {"type": "string", "description": "검색어"}},
+            ["query"],
+        )
+    )
+    tools.append(
+        _tool(
+            "companyFinancials",
+            "재무제표 원본 조회. IS(손익), BS(재무상태), CF(현금흐름), CIS(포괄손익), SCE(자본변동).",
+            {"stockCode": "_STOCK", "statement": {"type": "string", "enum": ["IS", "BS", "CF", "CIS", "SCE"]}},
+            ["stockCode", "statement"],
+        )
+    )
+    tools.append(
+        _tool(
+            "companyRatios",
+            "재무비율 55개 시계열. ROE, ROA, 부채비율, 영업이익률, PER, PBR 등.",
+            {"stockCode": "_STOCK"},
+            ["stockCode"],
+        )
+    )
+    tools.append(
+        _tool(
+            "companyAnalysis",
+            f"14축 재무 심층 분석. 축: {', '.join(analysisAxes)}",
+            {
+                "stockCode": "_STOCK",
+                "axis": {"type": "string", "description": "그룹명 또는 축명"},
+                "sub": {"type": "string", "description": "그룹 내 하위 축"},
+            },
+            ["stockCode"],
+        )
+    )
+    tools.append(
+        _tool(
+            "companyValuation", "종합 밸류에이션 (DCF + DDM + 상대가치 + RIM).", {"stockCode": "_STOCK"}, ["stockCode"]
+        )
+    )
+    tools.append(
+        _tool("companyForecast", "매출 예측 (Base/Bull/Bear 시나리오).", {"stockCode": "_STOCK"}, ["stockCode"])
+    )
+    tools.append(
+        _tool(
+            "companyShow",
+            "공시 토픽 원문 조회. companyTopics로 목록 확인.",
+            {"stockCode": "_STOCK", "topic": {"type": "string", "description": "토픽명"}},
+            ["stockCode", "topic"],
+        )
+    )
+    tools.append(
+        _tool("companyTopics", "이 기업에서 조회 가능한 공시 토픽 목록.", {"stockCode": "_STOCK"}, ["stockCode"])
+    )
+    tools.append(
+        _tool(
+            "companyDiff",
+            "기간간 공시 텍스트 변경 비교.",
+            {"stockCode": "_STOCK", "topic": {"type": "string", "description": "토픽명 (생략 시 전체)"}},
+            ["stockCode"],
+        )
+    )
+    tools.append(
+        _tool(
+            "companyGovernance",
+            "지배구조 분석 (사외이사, 감사위원, 최대주주 지분율).",
+            {"stockCode": "_STOCK"},
+            ["stockCode"],
+        )
+    )
+    tools.append(
+        _tool(
+            "companyAudit",
+            "감사 리스크 (감사의견, 감사인 변경, 계속기업 불확실성).",
+            {"stockCode": "_STOCK"},
+            ["stockCode"],
+        )
+    )
+    tools.append(
+        _tool("companyProfile", "기업 기본 정보 (회사명, 업종, 시장, 대표자).", {"stockCode": "_STOCK"}, ["stockCode"])
+    )
+    tools.append(
+        _tool("companySections", "전체 데이터 구조 지도 (topic x period).", {"stockCode": "_STOCK"}, ["stockCode"])
+    )
+    tools.append(
+        _tool(
+            "companyReview",
+            f"정리된 종합 보고서. 섹션: {', '.join(reviewSections)}",
+            {"stockCode": "_STOCK", "section": {"type": "string", "description": "특정 섹션만"}},
+            ["stockCode"],
+            "ai",
+        )
+    )
+    tools.append(
+        _tool(
+            "companyCredit",
+            "독립 신용등급 분석 (7축). 채무상환, 자본구조, 유동성, 현금흐름, 사업안정성, 재무신뢰성, 공시리스크.",
+            {"stockCode": "_STOCK", "axis": {"type": "string", "description": "축명 (생략 시 종합)"}},
+            ["stockCode"],
+        )
+    )
+    tools.append(
+        _tool(
+            "companyGather",
+            "종목별 시장 데이터. 주가(price), 수급(flow), 뉴스(news).",
+            {"stockCode": "_STOCK", "axis": {"type": "string", "enum": ["price", "flow", "news"]}},
+            ["stockCode", "axis"],
+        )
+    )
+    tools.append(
+        _tool(
+            "companyQuant",
+            f"종목 기술적 분석. 축: {', '.join(quantAxes[:8])}...",
+            {"stockCode": "_STOCK", "metric": {"type": "string", "description": "분석 축"}},
+            ["stockCode"],
+        )
+    )
+    tools.append(
+        _tool(
+            "companyFilings",
+            "개별 종목 공시 목록.",
+            {"stockCode": "_STOCK", "topK": {"type": "integer", "description": "최대 건수 (기본 10)"}},
+            ["stockCode"],
+        )
+    )
 
     # ── 동적 도구 (시장/거시) — enum은 레지스트리에서 자동 추출 ──
-    tools.append(_tool("marketScan",
-        f"전종목 횡단분석. {len(scanAxes)}축: {', '.join(scanAxes[:8])}...",
-        {"axis": {"type": "string", "enum": scanAxes, "description": "분석 축"}},
-        ["axis"]))
-    tools.append(_tool("macroAnalysis",
-        f"경제 거시분석 (Company 불필요). {len(macroAxes)}축: {macroHints}",
-        {"axis": {"type": "string", "enum": macroAxes, "description": "분석 축"}},
-        []))
-    tools.append(_tool("gatherData",
-        f"외부 시장 데이터 수집. {len(gatherAxes)}축: {', '.join(gatherAxes)}",
-        {"axis": {"type": "string", "enum": gatherAxes, "description": "데이터 축"},
-         "target": {"type": "string", "description": "종목코드 또는 지표명"}},
-        []))
-    tools.append(_tool("quantAnalysis",
-        f"기술적/정량 분석. {len(quantAxes)}축.",
-        {"stockCode": "_STOCK", "metric": {"type": "string", "enum": quantAxes, "description": "분석 축"}},
-        ["stockCode"]))
-    tools.append(_tool("topdownScreen",
-        "사이클 → 추천 섹터 → 종목 후보 자동 선별.",
-        {"market": {"type": "string", "enum": ["KR", "US"]},
-         "topN": {"type": "integer", "description": "섹터당 종목 수 (기본 5)"}},
-        []))
-    tools.append(_tool("dartlabSearch",
-        "공시 원문 검색 (stem ID 역인덱스).",
-        {"query": {"type": "string", "description": "검색어"},
-         "corp": {"type": "string", "description": "종목코드 필터"}},
-        ["query"]))
-    tools.append(_tool("dartlabListing",
-        "상장 종목, 공시 목록, 토픽 목록 조회.",
-        {"kind": {"type": "string", "enum": ["companies", "filings", "topics"]},
-         "corp": {"type": "string", "description": "filings 시 종목코드 필터"}},
-        ["kind"]))
+    tools.append(
+        _tool(
+            "marketScan",
+            f"전종목 횡단분석. {len(scanAxes)}축: {', '.join(scanAxes[:8])}...",
+            {"axis": {"type": "string", "enum": scanAxes, "description": "분석 축"}},
+            ["axis"],
+        )
+    )
+    tools.append(
+        _tool(
+            "macroAnalysis",
+            f"경제 거시분석 (Company 불필요). {len(macroAxes)}축: {macroHints}",
+            {"axis": {"type": "string", "enum": macroAxes, "description": "분석 축"}},
+            [],
+        )
+    )
+    tools.append(
+        _tool(
+            "gatherData",
+            f"외부 시장 데이터 수집. {len(gatherAxes)}축: {', '.join(gatherAxes)}",
+            {
+                "axis": {"type": "string", "enum": gatherAxes, "description": "데이터 축"},
+                "target": {"type": "string", "description": "종목코드 또는 지표명"},
+            },
+            [],
+        )
+    )
+    tools.append(
+        _tool(
+            "quantAnalysis",
+            f"기술적/정량 분석. {len(quantAxes)}축.",
+            {"stockCode": "_STOCK", "metric": {"type": "string", "enum": quantAxes, "description": "분석 축"}},
+            ["stockCode"],
+        )
+    )
+    tools.append(
+        _tool(
+            "topdownScreen",
+            "사이클 → 추천 섹터 → 종목 후보 자동 선별.",
+            {
+                "market": {"type": "string", "enum": ["KR", "US"]},
+                "topN": {"type": "integer", "description": "섹터당 종목 수 (기본 5)"},
+            },
+            [],
+        )
+    )
+    tools.append(
+        _tool(
+            "dartlabSearch",
+            "공시 원문 검색 (stem ID 역인덱스).",
+            {
+                "query": {"type": "string", "description": "검색어"},
+                "corp": {"type": "string", "description": "종목코드 필터"},
+            },
+            ["query"],
+        )
+    )
+    tools.append(
+        _tool(
+            "dartlabListing",
+            "상장 종목, 공시 목록, 토픽 목록 조회.",
+            {
+                "kind": {"type": "string", "enum": ["companies", "filings", "topics"]},
+                "corp": {"type": "string", "description": "filings 시 종목코드 필터"},
+            },
+            ["kind"],
+        )
+    )
 
     for t in tools:
         lines.append(t)

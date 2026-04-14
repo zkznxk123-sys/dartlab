@@ -224,13 +224,40 @@ def buildEcosystem() -> dict:
 
     # 산업별 색상 팔레트 (34개)
     palette = [
-        "#0ea5e9", "#f97316", "#10b981", "#8b5cf6", "#ec4899",
-        "#eab308", "#06b6d4", "#14b8a6", "#f59e0b", "#ef4444",
-        "#22c55e", "#6366f1", "#d946ef", "#84cc16", "#f43f5e",
-        "#0891b2", "#7c3aed", "#a855f7", "#db2777", "#e11d48",
-        "#16a34a", "#0d9488", "#2563eb", "#9333ea", "#c026d3",
-        "#dc2626", "#ea580c", "#ca8a04", "#65a30d", "#059669",
-        "#0284c7", "#4f46e5", "#9ca3af", "#6b7280",
+        "#0ea5e9",
+        "#f97316",
+        "#10b981",
+        "#8b5cf6",
+        "#ec4899",
+        "#eab308",
+        "#06b6d4",
+        "#14b8a6",
+        "#f59e0b",
+        "#ef4444",
+        "#22c55e",
+        "#6366f1",
+        "#d946ef",
+        "#84cc16",
+        "#f43f5e",
+        "#0891b2",
+        "#7c3aed",
+        "#a855f7",
+        "#db2777",
+        "#e11d48",
+        "#16a34a",
+        "#0d9488",
+        "#2563eb",
+        "#9333ea",
+        "#c026d3",
+        "#dc2626",
+        "#ea580c",
+        "#ca8a04",
+        "#65a30d",
+        "#059669",
+        "#0284c7",
+        "#4f46e5",
+        "#9ca3af",
+        "#6b7280",
     ]
     ind_color: dict[str, str] = {}
     for i, ind_id in enumerate(taxonomy.keys()):
@@ -240,41 +267,47 @@ def buildEcosystem() -> dict:
     nodeList = []
     for n in nodes:
         rev_log = 1.0 if not n.revenue else max(1.0, min(20.0, 1.0 + (n.revenue / 1e11)))  # log-ish
-        nodeList.append({
-            "id": n.stockCode,
-            "label": n.corpName,
-            "industry": n.industry,
-            "industryName": taxonomy[n.industry].name if n.industry in taxonomy else n.industry,
-            "stage": n.stage or "",
-            "revenue": n.revenue or 0,
-            "size": rev_log,
-            "color": ind_color.get(n.industry, "#9ca3af"),
-        })
+        nodeList.append(
+            {
+                "id": n.stockCode,
+                "label": n.corpName,
+                "industry": n.industry,
+                "industryName": taxonomy[n.industry].name if n.industry in taxonomy else n.industry,
+                "stage": n.stage or "",
+                "revenue": n.revenue or 0,
+                "size": rev_log,
+                "color": ind_color.get(n.industry, "#9ca3af"),
+            }
+        )
 
     # 엣지 (source/target ID 기반)
     linkList = []
     for e in edges:
-        linkList.append({
-            "source": e.fromCode,
-            "target": e.toCode,
-            "type": e.edgeType,
-            "amount": e.amount,
-            "ratio": e.ratio,
-            "product": e.product,
-            "confidence": e.confidence,
-            "source_tag": e.source,
-        })
+        linkList.append(
+            {
+                "source": e.fromCode,
+                "target": e.toCode,
+                "type": e.edgeType,
+                "amount": e.amount,
+                "ratio": e.ratio,
+                "product": e.product,
+                "confidence": e.confidence,
+                "source_tag": e.source,
+            }
+        )
 
     # 산업 메타 (필터 사이드바용)
     industries = []
     for ind_id, ind_def in taxonomy.items():
         count = sum(1 for n in nodes if n.industry == ind_id)
-        industries.append({
-            "id": ind_id,
-            "name": ind_def.name,
-            "color": ind_color[ind_id],
-            "count": count,
-        })
+        industries.append(
+            {
+                "id": ind_id,
+                "name": ind_def.name,
+                "color": ind_color[ind_id],
+                "count": count,
+            }
+        )
     industries.sort(key=lambda x: x["count"], reverse=True)
 
     return {
@@ -313,17 +346,13 @@ def main() -> None:
     # 생태계 (Cosmograph용)
     print("[Ecosystem] ecosystem.json 생성...")
     eco = buildEcosystem()
-    (OUT_DIR / "ecosystem.json").write_text(
-        json.dumps(eco, ensure_ascii=False), encoding="utf-8"
-    )
+    (OUT_DIR / "ecosystem.json").write_text(json.dumps(eco, ensure_ascii=False), encoding="utf-8")
     print(f"  - {len(eco['nodes'])} 노드, {len(eco['links'])} 엣지, {len(eco['industries'])} 산업")
 
     # L1 Atlas
     print("[L1] atlas.json 생성...")
     atlas = buildAtlas()
-    (OUT_DIR / "atlas.json").write_text(
-        json.dumps(atlas, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    (OUT_DIR / "atlas.json").write_text(json.dumps(atlas, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"  - {len(atlas['industries'])}개 산업, {len(atlas['flows'])}개 플로우")
 
     # L2 Industries
@@ -351,9 +380,7 @@ def main() -> None:
     # Search index
     print("[검색] search-index.json")
     searchIdx = buildSearchIndex()
-    (OUT_DIR / "search-index.json").write_text(
-        json.dumps(searchIdx, ensure_ascii=False), encoding="utf-8"
-    )
+    (OUT_DIR / "search-index.json").write_text(json.dumps(searchIdx, ensure_ascii=False), encoding="utf-8")
     print(f"  - {len(searchIdx)}개 종목")
 
     print(f"\n완료: {OUT_DIR}")

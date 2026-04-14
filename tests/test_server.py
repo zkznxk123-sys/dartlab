@@ -701,35 +701,6 @@ class TestAsk:
         if resp.status_code == 200:
             assert "answer" in resp.json()
 
-    def test_ask_passes_request_api_key(self, client, monkeypatch):
-        captured = {}
-
-        class DummyCompany:
-            corpName = "삼성전자"
-            stockCode = "999998"
-
-            def ask(self, question, **kwargs):
-                captured["question"] = question
-                captured["kwargs"] = kwargs
-                return "ok"
-
-        monkeypatch.setattr("dartlab.server.resolve.Company", lambda identifier: DummyCompany())
-        resp = client.post(
-            "/api/ask",
-            json={
-                "company": "삼성전자",
-                "question": "매출 알려줘",
-                "stream": False,
-                "provider": "openai",
-                "model": "gpt-5.4",
-                "api_key": "sk-test",
-            },
-        )
-        assert resp.status_code == 200
-        assert captured["kwargs"]["provider"] == "openai"
-        assert captured["kwargs"]["model"] == "gpt-5.4"
-        assert captured["kwargs"]["api_key"] == "sk-test"
-
     def test_plain_chat_uses_core_analysis_path(self, client, monkeypatch):
         captured = {}
 
@@ -782,98 +753,6 @@ class TestAsk:
 
 
 # ── 유틸리티/로직 단위 테스트 ──
-
-
-class TestResolveUtils:
-    def test_is_meta_question(self):
-        from dartlab.server.resolve import is_meta_question
-
-        assert is_meta_question("버전 알려줘")
-        assert is_meta_question("도움말")
-        assert is_meta_question("뭘 할 수 있어?")
-        assert not is_meta_question("삼성전자 매출 분석해줘")
-
-    def test_has_analysis_intent(self):
-        from dartlab.server.resolve import has_analysis_intent
-
-        assert has_analysis_intent("삼성전자 매출 분석해줘")
-        assert has_analysis_intent("ROE 알려줘")
-
-    def test_build_not_found_msg_empty(self):
-        from dartlab.server.resolve import build_not_found_msg
-
-        msg = build_not_found_msg([])
-        assert "찾을 수 없습니다" in msg
-
-    def test_build_not_found_msg_with_suggestions(self):
-        from dartlab.server.resolve import build_not_found_msg
-
-        msg = build_not_found_msg([{"corpName": "삼성전자", "stockCode": "005930"}])
-        assert "삼성전자" in msg
-        assert "005930" in msg
-
-    def test_build_ambiguous_msg(self):
-        from dartlab.server.resolve import build_ambiguous_msg
-
-        msg = build_ambiguous_msg(
-            [
-                {"corpName": "현대자동차", "stockCode": "005380"},
-                {"corpName": "현대차증권", "stockCode": "001500"},
-            ]
-        )
-        assert "현대자동차" in msg
-        assert "현대차증권" in msg
-
-    def test_needs_match_verification(self):
-        from dartlab.server.resolve import needs_match_verification
-
-        assert not needs_match_verification("삼성전자 분석해줘", "삼성전자")
-        assert needs_match_verification("현대차 분석해줘", "현대차증권")
-        assert not needs_match_verification("삼전 분석해줘", "삼성전자")
-
-    def test_try_resolve_company_uses_view_context(self, monkeypatch):
-        from dartlab.server.models import AskRequest
-        from dartlab.server.resolve import try_resolve_company
-
-        class DummyCompany:
-            def __init__(self, identifier):
-                self.stockCode = "005930" if identifier == "005930" else identifier
-                self.corpName = "삼성전자"
-
-        monkeypatch.setattr("dartlab.server.resolve.Company", DummyCompany)
-        result = try_resolve_company(
-            AskRequest(
-                question="이 부분 왜 이래?",
-                viewContext={
-                    "type": "viewer",
-                    "company": {"corpName": "삼성전자", "stockCode": "005930", "market": "dart"},
-                    "topic": "dividend",
-                    "topicLabel": "배당",
-                },
-            )
-        )
-        assert result.company is not None
-        assert result.company.stockCode == "005930"
-
-    def test_try_resolve_from_history_skips_invalid_company(self, monkeypatch):
-        from dartlab.server.models import HistoryMessage, HistoryMeta
-        from dartlab.server.resolve import try_resolve_from_history
-
-        class DummyCompany:
-            def __init__(self, identifier):
-                if identifier == "111111":
-                    raise ValueError("invalid")
-                self.stockCode = identifier
-
-        monkeypatch.setattr("dartlab.server.resolve.Company", DummyCompany)
-        company = try_resolve_from_history(
-            [
-                HistoryMessage(role="assistant", text="이전 답변", meta=HistoryMeta(stockCode="111111")),
-                HistoryMessage(role="assistant", text="최근 답변", meta=HistoryMeta(stockCode="005930")),
-            ]
-        )
-        assert company is not None
-        assert company.stockCode == "005930"
 
 
 class TestCompanyCache:

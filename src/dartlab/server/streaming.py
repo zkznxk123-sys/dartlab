@@ -26,8 +26,6 @@ import asyncio
 import json
 from dataclasses import dataclass
 
-from dartlab import Company
-
 from .models import AskRequest
 
 
@@ -40,39 +38,46 @@ class AnalysisStreamError(RuntimeError):
     detail: str | None = None
 
 
-async def stream_ask(c: Company | None, req: AskRequest, *, not_found_msg: str | None = None):
+async def stream_ask(req: AskRequest):
     """core.analyze() 이벤트 → SSE 변환.
 
     모든 분석 로직은 core.analyze()에 위임.
-    이 함수는 snapshot 캐싱 + SSE 포맷 변환만 담당.
+    이 함수는 SSE 포맷 변환만 담당. 종목 resolve는 AI가 자율 판단.
     """
-    kwargs = await _build_kwargs(c, req, not_found_msg=not_found_msg)
-    async for item in stream_analysis(c, req.question, **kwargs):
+    kwargs = _build_kwargs(req)
+    async for item in stream_analysis(None, req.question, **kwargs):
         yield item
 
 
 async def stream_analysis(
-    c: Company | None,
-    question: str,
+    company=None,
+    question: str = "",
     **kwargs,
 ):
-    """Generic core.analyze() → SSE adapter."""
+    """Generic core.analyze() → SSE adapter.
+
+    company: Company-bound 경로(topic summary 등)에서만 전달.
+    ask 경로에서는 항상 None — AI가 자율 판단.
+    """
     from dartlab.ai.runtime.core import analyze
 
-    async for event in _sync_gen_to_async(analyze, c, question, **kwargs):
+    async for event in _sync_gen_to_async(analyze, company, question, **kwargs):
         yield _sse(event.kind, event.data)
 
 
 async def collect_analysis_text(
-    c: Company | None,
-    question: str,
+    company=None,
+    question: str = "",
     **kwargs,
 ) -> str:
-    """Run core.analyze() and collect chunk text for non-stream HTTP endpoints."""
+    """Run core.analyze() and collect chunk text for non-stream HTTP endpoints.
+
+    company: Company-bound 경로에서만 전달. ask 경로에서는 None.
+    """
     from dartlab.ai.runtime.core import analyze
 
     chunks: list[str] = []
-    async for event in _sync_gen_to_async(analyze, c, question, **kwargs):
+    async for event in _sync_gen_to_async(analyze, company, question, **kwargs):
         if event.kind == "chunk":
             chunks.append(event.data.get("text", ""))
         elif event.kind == "error":
@@ -84,13 +89,8 @@ async def collect_analysis_text(
     return "".join(chunks)
 
 
-async def _build_kwargs(
-    c: Company | None,
-    req: AskRequest,
-    *,
-    not_found_msg: str | None = None,
-) -> dict:
-    """AskRequest → core.analyze() kwargs 변환 + snapshot 캐싱."""
+def _build_kwargs(req: AskRequest) -> dict:
+    """AskRequest → core.analyze() kwargs 변환."""
     kwargs: dict = {
         "provider": req.provider,
         "role": req.role,
@@ -101,9 +101,16 @@ async def _build_kwargs(
         "exclude": req.exclude,
         "history": [h.model_dump() for h in req.history] if req.history else None,
         "view_context": req.viewContext.model_dump() if req.viewContext else None,
-        "not_found_msg": not_found_msg,
         "report_mode": req.reportMode,
     }
+
+    # req.company / viewContext 종목 정보 → AI 힌트로 전달
+    company_hint = req.company
+    if not company_hint and req.viewContext and req.viewContext.company:
+        vc = req.viewContext.company
+        company_hint = vc.stockCode or vc.corpName or vc.company
+    if company_hint:
+        kwargs["company_hint"] = company_hint
 
     return kwargs
 

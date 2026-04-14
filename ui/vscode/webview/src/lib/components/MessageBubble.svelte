@@ -96,14 +96,26 @@
   }
 
   const TOOL_LABELS: Record<string, string> = {
+    // 신규 tool calling registry (ai/tools/schemas.py 10종)
+    show: "원본 조회",
+    select: "계정 필터",
+    analysis: "재무분석",
+    scan: "시장 스캔",
+    macro: "매크로",
+    credit: "신용평가",
+    gather: "외부 데이터",
+    search: "공시 검색",
+    review: "보고서",
+    pythonExec: "코드 실행",
+    // 구 MCP/플러그인 tool 이름 (하위 호환)
     companyInsights: "인사이트",
     companyFinancials: "재무제표",
     companyRatios: "재무비율",
-    companyAnalysis: "분석",
+    companyAnalysis: "재무분석",
     companyValuation: "밸류에이션",
     companyForecast: "전망",
     companyReview: "보고서",
-    companyShow: "공시 원문",
+    companyShow: "원본 조회",
     companyDiff: "변경 비교",
     companyGovernance: "지배구조",
     companyAudit: "감사",
@@ -111,7 +123,7 @@
     companySections: "섹션",
     companyTopics: "토픽",
     marketScan: "시장 스캔",
-    searchCompany: "검색",
+    searchCompany: "종목 검색",
   };
 
   function toolLabel(name: string): string {
@@ -339,7 +351,7 @@
           </button>
           {#if expanded && block.toolResult != null}
             {@const resultStr = typeof block.toolResult === "string" ? block.toolResult : JSON.stringify(block.toolResult, null, 2)}
-            <div class="tool-body">
+            <div class="tool-body" class:tool-body-error={isError}>
               <div class="tool-body-row">
                 <div class="tool-body-label">OUT</div>
                 <div class="tool-body-content">{@html render(truncate(resultStr, 2000))}</div>
@@ -482,6 +494,7 @@
     top: 0;
     bottom: 0;
     left: 12px;
+    z-index: 0;
   }
   .msg:not(.user):first-of-type::after { top: 0; }
   .msg:not(.user):last-of-type::after { bottom: 8px; }
@@ -855,9 +868,10 @@
   .tool-body-label {
     grid-column: 1;
     color: var(--vscode-descriptionForeground);
-    opacity: 0.5;
+    opacity: 0.7;
     font-family: var(--vscode-editor-font-family, monospace);
     font-size: 0.85em;
+    font-weight: 600;
     padding: 4px 8px 4px 4px;
     text-align: left;
   }
@@ -872,6 +886,10 @@
     font-family: var(--vscode-editor-font-family, monospace);
     font-size: 0.85em;
     color: var(--vscode-editor-foreground);
+  }
+  .tool-body-error .tool-body-label {
+    color: var(--vscode-errorForeground, #c74e39);
+    opacity: 1;
   }
   .tool-body-content pre {
     margin: 0;

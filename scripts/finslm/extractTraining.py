@@ -95,12 +95,14 @@ def extractAuditAnalysis() -> list[dict]:
 
         # 전체 보고서
         if len(text) > 200:
-            pairs.append(_sharegpt(
-                SYSTEM_PROMPT,
-                f"{corp_name}({code}) 종합 재무분석을 해줘.",
-                text[:8000],  # 8K cap
-                {"stock_code": code, "intent": "act_all", "source": "auditAnalysis", "type": "full"},
-            ))
+            pairs.append(
+                _sharegpt(
+                    SYSTEM_PROMPT,
+                    f"{corp_name}({code}) 종합 재무분석을 해줘.",
+                    text[:8000],  # 8K cap
+                    {"stock_code": code, "intent": "act_all", "source": "auditAnalysis", "type": "full"},
+                )
+            )
 
         # 섹션별 QA
         _SECTION_QUESTIONS = {
@@ -129,12 +131,14 @@ def extractAuditAnalysis() -> list[dict]:
             content = sections.get(sec_name, "")
             if not content or len(content) < 30:
                 continue
-            pairs.append(_sharegpt(
-                SYSTEM_PROMPT,
-                question,
-                content[:4000],
-                {"stock_code": code, "intent": intent, "source": "auditAnalysis", "type": "section"},
-            ))
+            pairs.append(
+                _sharegpt(
+                    SYSTEM_PROMPT,
+                    question,
+                    content[:4000],
+                    {"stock_code": code, "intent": intent, "source": "auditAnalysis", "type": "section"},
+                )
+            )
 
     print(f"[audit] {len(pairs)}개 페어 추출")
     return pairs
@@ -168,14 +172,16 @@ def extractBlog() -> list[dict]:
         template = meta.get("storyTemplate", "")
 
         # 전체 보고서
-        body = text[fm_match.end():] if fm_match else text
+        body = text[fm_match.end() :] if fm_match else text
         if len(body) > 500:
-            pairs.append(_sharegpt(
-                SYSTEM_PROMPT,
-                f"{corp}({code}) 종합 분석 보고서를 써줘. 템플릿: {template}",
-                body[:12000],
-                {"stock_code": code, "intent": "act_all", "source": "blog", "type": "full_report"},
-            ))
+            pairs.append(
+                _sharegpt(
+                    SYSTEM_PROMPT,
+                    f"{corp}({code}) 종합 분석 보고서를 써줘. 템플릿: {template}",
+                    body[:12000],
+                    {"stock_code": code, "intent": "act_all", "source": "blog", "type": "full_report"},
+                )
+            )
 
         # 막별 분리 (# 제N막 패턴)
         act_pattern = re.compile(r"^(#{1,2})\s*(제\d막.+)", re.MULTILINE)
@@ -186,12 +192,14 @@ def extractBlog() -> list[dict]:
             act_title = m.group(2).strip()
             act_body = body[start:end].strip()
             if len(act_body) > 100:
-                pairs.append(_sharegpt(
-                    SYSTEM_PROMPT,
-                    f"{corp}({code})의 {act_title}을 분석해줘.",
-                    act_body[:6000],
-                    {"stock_code": code, "intent": f"blog_act_{i+1}", "source": "blog", "type": "act"},
-                ))
+                pairs.append(
+                    _sharegpt(
+                        SYSTEM_PROMPT,
+                        f"{corp}({code})의 {act_title}을 분석해줘.",
+                        act_body[:6000],
+                        {"stock_code": code, "intent": f"blog_act_{i + 1}", "source": "blog", "type": "act"},
+                    )
+                )
 
     print(f"[blog] {len(pairs)}개 페어 추출")
     return pairs
@@ -205,6 +213,7 @@ def extractDB() -> list[dict]:
     pairs = []
     try:
         from dartlab.ai.persistence import KnowledgeDB
+
         db = KnowledgeDB.get()
         conn = db.connection
     except (ImportError, OSError):
@@ -218,12 +227,14 @@ def extractDB() -> list[dict]:
         "ORDER BY created_at DESC LIMIT 500"
     ).fetchall()
     for code, q, summary, grade in rows:
-        pairs.append(_sharegpt(
-            SYSTEM_PROMPT,
-            q,
-            summary[:4000],
-            {"stock_code": code or "", "intent": "execution", "source": "knowledgedb", "grade": grade},
-        ))
+        pairs.append(
+            _sharegpt(
+                SYSTEM_PROMPT,
+                q,
+                summary[:4000],
+                {"stock_code": code or "", "intent": "execution", "source": "knowledgedb", "grade": grade},
+            )
+        )
 
     # skills
     skill_rows = conn.execute(
@@ -232,17 +243,18 @@ def extractDB() -> list[dict]:
         "ORDER BY quality_score DESC LIMIT 100"
     ).fetchall()
     for q, code_tmpl, cat in skill_rows:
-        pairs.append(_sharegpt(
-            SYSTEM_PROMPT,
-            q,
-            f"```python\n{code_tmpl[:3000]}\n```",
-            {"intent": "coding", "source": "knowledgedb_skill", "category": cat},
-        ))
+        pairs.append(
+            _sharegpt(
+                SYSTEM_PROMPT,
+                q,
+                f"```python\n{code_tmpl[:3000]}\n```",
+                {"intent": "coding", "source": "knowledgedb_skill", "category": cat},
+            )
+        )
 
     # playbook
     pb_rows = conn.execute(
-        "SELECT intent, sector, bullet FROM playbook "
-        "WHERE quality >= 0.5 ORDER BY quality DESC LIMIT 200"
+        "SELECT intent, sector, bullet FROM playbook WHERE quality >= 0.5 ORDER BY quality DESC LIMIT 200"
     ).fetchall()
     # intent별 그룹핑
     intent_bullets: dict[str, list[str]] = {}
@@ -253,12 +265,14 @@ def extractDB() -> list[dict]:
         intent = key.split(":")[0]
         sector = key.split(":")[1] if ":" in key else ""
         bullet_text = "\n".join(f"- {b}" for b in bullets[:8])
-        pairs.append(_sharegpt(
-            SYSTEM_PROMPT,
-            f"{intent} 분석 시 핵심 관점은 무엇인가?{f' (섹터: {sector})' if sector else ''}",
-            f"이전 분석에서 검증된 핵심 관점:\n\n{bullet_text}",
-            {"intent": intent, "source": "knowledgedb_playbook", "sector": sector},
-        ))
+        pairs.append(
+            _sharegpt(
+                SYSTEM_PROMPT,
+                f"{intent} 분석 시 핵심 관점은 무엇인가?{f' (섹터: {sector})' if sector else ''}",
+                f"이전 분석에서 검증된 핵심 관점:\n\n{bullet_text}",
+                {"intent": intent, "source": "knowledgedb_playbook", "sector": sector},
+            )
+        )
 
     print(f"[db] {len(pairs)}개 페어 추출 (exec={len(rows)}, skill={len(skill_rows)}, pb={len(intent_bullets)})")
     return pairs

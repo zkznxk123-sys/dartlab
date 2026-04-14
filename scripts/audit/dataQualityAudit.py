@@ -22,29 +22,70 @@ STOCKS = ["005930", "005380", "035420"]  # 삼성전자, 현대차, NAVER
 
 TOPICS_FINANCE = ["IS", "BS", "CF", "CIS", "SCE", "ratios"]  # ratioSeries는 의도적 None (dict 구조)
 TOPICS_NOTES = [
-    "inventory", "borrowings", "tangibleAsset", "intangibleAsset",
-    "receivables", "provisions", "eps", "lease",
-    "costByNature", "segments", "affiliates",
+    "inventory",
+    "borrowings",
+    "tangibleAsset",
+    "intangibleAsset",
+    "receivables",
+    "provisions",
+    "eps",
+    "lease",
+    "costByNature",
+    "segments",
+    "affiliates",
 ]
 
 ANALYSIS_AXES = [
-    "수익구조", "자금조달", "자산구조", "현금흐름",
-    "수익성", "성장성", "안정성", "효율성", "종합평가",
-    "이익품질", "비용구조", "자본배분", "투자효율", "재무정합성",
+    "수익구조",
+    "자금조달",
+    "자산구조",
+    "현금흐름",
+    "수익성",
+    "성장성",
+    "안정성",
+    "효율성",
+    "종합평가",
+    "이익품질",
+    "비용구조",
+    "자본배분",
+    "투자효율",
+    "재무정합성",
 ]
 
 REVIEW_SECTIONS = [
-    "수익구조", "성장성", "수익성", "비용구조",
-    "현금흐름", "이익품질", "자금조달", "안정성",
-    "자산구조", "효율성", "종합평가", "자본배분",
-    "투자효율", "재무정합성", "가치평가", "매출전망",
-    "비교분석", "시장분석", "신용평가", "지배구조",
+    "수익구조",
+    "성장성",
+    "수익성",
+    "비용구조",
+    "현금흐름",
+    "이익품질",
+    "자금조달",
+    "안정성",
+    "자산구조",
+    "효율성",
+    "종합평가",
+    "자본배분",
+    "투자효율",
+    "재무정합성",
+    "가치평가",
+    "매출전망",
+    "비교분석",
+    "시장분석",
+    "신용평가",
+    "지배구조",
 ]
 
 SCAN_AXES = [
-    "profitability", "growth", "quality", "liquidity",
-    "efficiency", "cashflow", "dividendTrend", "capital",
-    "debt", "valuation",
+    "profitability",
+    "growth",
+    "quality",
+    "liquidity",
+    "efficiency",
+    "cashflow",
+    "dividendTrend",
+    "capital",
+    "debt",
+    "valuation",
 ]
 
 MACRO_AXES = ["사이클", "금리", "자산", "심리", "유동성", "종합"]
@@ -402,7 +443,7 @@ def _writeResults(allResults: list[dict]):
     ISSUES_PATH.write_text(json.dumps(issues, ensure_ascii=False, indent=2), encoding="utf-8")
 
     # 요약
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"전수조사 완료: {total}건")
     grades = {"PASS": 0, "WARN": 0, "FAIL": 0}
     for r in allResults:

@@ -56,7 +56,8 @@ def classify(
             continue
 
         stageKey, confidence, hitKws = matchStageByKeywords(
-            node.industry, productText,
+            node.industry,
+            productText,
         )
         if stageKey and confidence > 0:
             # taxonomy에서 role/stream 가져오기

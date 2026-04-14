@@ -231,13 +231,13 @@ class TestNeedsExternalSearch:
 
 class TestPolarsTableToMarkdown:
     def test_no_table_passthrough(self):
-        from dartlab.ai.runtime.core import _polarsTableToMarkdown
+        from dartlab.ai.tools.serialize import polarsTableToMarkdown as _polarsTableToMarkdown
 
         text = "Hello world\nNo tables here"
         assert _polarsTableToMarkdown(text) == text
 
     def test_simple_polars_table(self):
-        from dartlab.ai.runtime.core import _polarsTableToMarkdown
+        from dartlab.ai.tools.serialize import polarsTableToMarkdown as _polarsTableToMarkdown
 
         text = (
             "┌──────┬──────┐\n"
@@ -258,7 +258,7 @@ class TestPolarsTableToMarkdown:
         assert "└" not in result
 
     def test_null_converted_to_dash(self):
-        from dartlab.ai.runtime.core import _polarsTableToMarkdown
+        from dartlab.ai.tools.serialize import polarsTableToMarkdown as _polarsTableToMarkdown
 
         text = (
             "┌──────┬──────┐\n"
@@ -273,7 +273,7 @@ class TestPolarsTableToMarkdown:
         assert "| a | - |" in result
 
     def test_mixed_content(self):
-        from dartlab.ai.runtime.core import _polarsTableToMarkdown
+        from dartlab.ai.tools.serialize import polarsTableToMarkdown as _polarsTableToMarkdown
 
         text = "Before table\n┌──────┐\n│ col1 │\n│ ---  │\n│ str  │\n╞══════╡\n│ val  │\n└──────┘\nAfter table"
         result = _polarsTableToMarkdown(text)
@@ -282,14 +282,14 @@ class TestPolarsTableToMarkdown:
         assert "| col1 |" in result
 
     def test_preserves_non_table_lines(self):
-        from dartlab.ai.runtime.core import _polarsTableToMarkdown
+        from dartlab.ai.tools.serialize import polarsTableToMarkdown as _polarsTableToMarkdown
 
         text = "line1\nline2\nline3"
         result = _polarsTableToMarkdown(text)
         assert result == text
 
     def test_multiple_tables(self):
-        from dartlab.ai.runtime.core import _polarsTableToMarkdown
+        from dartlab.ai.tools.serialize import polarsTableToMarkdown as _polarsTableToMarkdown
 
         text = (
             "Table 1:\n"
@@ -304,7 +304,7 @@ class TestPolarsTableToMarkdown:
         assert "| y |" in result
 
     def test_ellipsis_rows_skipped(self):
-        from dartlab.ai.runtime.core import _polarsTableToMarkdown
+        from dartlab.ai.tools.serialize import polarsTableToMarkdown as _polarsTableToMarkdown
 
         text = (
             "┌──────┬──────┐\n"
@@ -483,50 +483,6 @@ class TestReplaceLargeNumber:
         text = "비율: 12345.678"
         result = self._PATTERN.sub(self._replace, text)
         assert result == text
-
-
-# ══════════════════════════════════════
-# 8. _formatResultForUser
-# ══════════════════════════════════════
-
-
-class TestFormatResultForUser:
-    def test_plain_text_in_code_block(self):
-        from dartlab.ai.runtime.core import _formatResultForUser
-
-        result = _formatResultForUser("Hello world")
-        assert "```" in result
-        assert "Hello world" in result
-
-    def test_error_in_code_block(self):
-        from dartlab.ai.runtime.core import _formatResultForUser
-
-        result = _formatResultForUser("Traceback (most recent call last):\n  Error")
-        assert "```" in result
-        assert "Traceback" in result
-
-    def test_polars_table_converted(self):
-        from dartlab.ai.runtime.core import _formatResultForUser
-
-        polars_output = "┌──────┐\n│ col1 │\n│ ---  │\n│ str  │\n╞══════╡\n│ val  │\n└──────┘"
-        result = _formatResultForUser(polars_output)
-        assert "| col1 |" in result
-        assert "```" not in result  # should NOT be in code block
-
-    def test_markdown_table_not_in_code_block(self):
-        from dartlab.ai.runtime.core import _formatResultForUser
-
-        md_table = "| col1 | col2 |\n| --- | --- |\n| a | b |"
-        result = _formatResultForUser(md_table)
-        assert "```" not in result
-        assert "| col1 |" in result
-
-    def test_shape_metadata_removed(self):
-        from dartlab.ai.runtime.core import _formatResultForUser
-
-        text = "shape: (5, 3)\n┌──────┐\n│ col │\n│ --- │\n│ str │\n╞══════╡\n│ x │\n└──────┘"
-        result = _formatResultForUser(text)
-        assert "shape:" not in result
 
 
 # ══════════════════════════════════════

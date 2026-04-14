@@ -24,9 +24,7 @@ def _loadManualOverrides() -> dict[str, str]:
     import json
     from pathlib import Path
 
-    data = json.loads(
-        (Path(__file__).resolve().parents[1] / "sectorParams.json").read_text(encoding="utf-8")
-    )
+    data = json.loads((Path(__file__).resolve().parents[1] / "sectorParams.json").read_text(encoding="utf-8"))
     overrides = data.get("manualOverrides", {})
     igToSector = data.get("industryGroupToSector", {})
 
@@ -113,9 +111,12 @@ def classify(kindList: list[dict]) -> list[IndustryNode]:
         if name in manualOv:
             nodes.append(
                 IndustryNode(
-                    stockCode=code, corpName=name,
-                    industry=manualOv[name], stage="",
-                    confidence=1.0, source="override",
+                    stockCode=code,
+                    corpName=name,
+                    industry=manualOv[name],
+                    stage="",
+                    confidence=1.0,
+                    source="override",
                 )
             )
             continue
@@ -126,9 +127,12 @@ def classify(kindList: list[dict]) -> list[IndustryNode]:
             if ovName in name or name in ovName:
                 nodes.append(
                     IndustryNode(
-                        stockCode=code, corpName=name,
-                        industry=indId, stage="",
-                        confidence=0.95, source="override",
+                        stockCode=code,
+                        corpName=name,
+                        industry=indId,
+                        stage="",
+                        confidence=0.95,
+                        source="override",
                     )
                 )
                 matched = True
@@ -146,7 +150,9 @@ def classify(kindList: list[dict]) -> list[IndustryNode]:
                     for indId, _ in targets:
                         # 같은 industry의 키워드가 많을수록 점수 높음
                         if bestInd != indId:
-                            score = sum(1 for k, ts in productIdx.items() if k in prodLower and any(t[0] == indId for t in ts))
+                            score = sum(
+                                1 for k, ts in productIdx.items() if k in prodLower and any(t[0] == indId for t in ts)
+                            )
                             if score > bestScore:
                                 bestScore = score
                                 bestInd = indId
@@ -154,8 +160,10 @@ def classify(kindList: list[dict]) -> list[IndustryNode]:
             if bestInd and bestScore > 0:
                 nodes.append(
                     IndustryNode(
-                        stockCode=code, corpName=name,
-                        industry=bestInd, stage="",
+                        stockCode=code,
+                        corpName=name,
+                        industry=bestInd,
+                        stage="",
                         confidence=min(0.9, 0.6 + bestScore * 0.1),
                         source="product",
                     )
@@ -167,9 +175,12 @@ def classify(kindList: list[dict]) -> list[IndustryNode]:
         if industryId:
             nodes.append(
                 IndustryNode(
-                    stockCode=code, corpName=name,
-                    industry=industryId, stage="",
-                    confidence=0.7, source="kindlist",
+                    stockCode=code,
+                    corpName=name,
+                    industry=industryId,
+                    stage="",
+                    confidence=0.7,
+                    source="kindlist",
                 )
             )
 

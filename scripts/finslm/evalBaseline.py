@@ -98,6 +98,7 @@ def run_question(stock_code: str, question: str, *, provider: str, model: str | 
     has_table = "|" in full and "---" in full
 
     import gc
+
     del c
     gc.collect()
 
@@ -122,6 +123,7 @@ def main() -> int:
     # ollama 모델
     try:
         import subprocess
+
         result = subprocess.run(["ollama", "list"], capture_output=True, text=True, timeout=5)
         if result.returncode == 0:
             for line in result.stdout.split("\n"):
@@ -146,9 +148,9 @@ def main() -> int:
 
     for provider, model in models_to_test:
         label = f"{provider}:{model}" if model else provider
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"모델: {label}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         results = []
         for i, (code, q) in enumerate(QUESTIONS, 1):
@@ -163,9 +165,9 @@ def main() -> int:
         all_results[label] = results
 
     # 결과 요약
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("결과 요약")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     out_path = "data/finslm/baseline_results.md"
     with open(out_path, "w", encoding="utf-8") as f:

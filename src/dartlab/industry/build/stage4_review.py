@@ -97,7 +97,4 @@ def findLowConfidence(
     list[IndustryNode]
         confidence < threshold 또는 stage가 빈 노드.
     """
-    return [
-        n for n in nodes
-        if n.confidence < threshold or not n.stage
-    ]
+    return [n for n in nodes if n.confidence < threshold or not n.stage]

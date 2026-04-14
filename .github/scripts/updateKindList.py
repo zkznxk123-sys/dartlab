@@ -27,7 +27,6 @@ OUTPUT_FILE = OUTPUT_DIR / "corpList.parquet"
 
 
 class _TableParser(HTMLParser):
-
     def __init__(self):
         super().__init__()
         self._inTable = False
@@ -83,15 +82,9 @@ def fetchKind() -> pl.DataFrame:
         print("종목코드 컬럼이 없음")
         sys.exit(1)
 
-    df = df.with_columns(
-        pl.col("종목코드").cast(pl.Utf8).str.zfill(6)
-    )
-    df = df.filter(
-        pl.col("종목코드").str.contains(r"^[0-9A-Z]{6}$")
-    )
-    df = df.filter(
-        ~pl.col("회사명").str.contains(r"스팩|리츠")
-    )
+    df = df.with_columns(pl.col("종목코드").cast(pl.Utf8).str.zfill(6))
+    df = df.filter(pl.col("종목코드").str.contains(r"^[0-9A-Z]{6}$"))
+    df = df.filter(~pl.col("회사명").str.contains(r"스팩|리츠"))
     df = df.unique(subset=["종목코드"]).sort("종목코드")
     return df
 

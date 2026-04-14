@@ -172,10 +172,15 @@ class Industry:
         if not filtered:
             return pl.DataFrame(
                 schema={
-                    "from코드": pl.Utf8, "from이름": pl.Utf8,
-                    "to코드": pl.Utf8, "to이름": pl.Utf8,
-                    "관계": pl.Utf8, "산업": pl.Utf8,
-                    "신뢰도": pl.Float64, "소스": pl.Utf8, "근거": pl.Utf8,
+                    "from코드": pl.Utf8,
+                    "from이름": pl.Utf8,
+                    "to코드": pl.Utf8,
+                    "to이름": pl.Utf8,
+                    "관계": pl.Utf8,
+                    "산업": pl.Utf8,
+                    "신뢰도": pl.Float64,
+                    "소스": pl.Utf8,
+                    "근거": pl.Utf8,
                 }
             )
 

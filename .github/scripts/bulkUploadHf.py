@@ -61,10 +61,7 @@ def main():
         batchNum = i // BATCH_SIZE + 1
         print(f"[{batchNum}/{totalBatches}] {len(batch)}개 업로드 중...")
 
-        operations = [
-            CommitOperationAdd(path_in_repo=f"{dirPath}/{f.name}", path_or_fileobj=str(f))
-            for f in batch
-        ]
+        operations = [CommitOperationAdd(path_in_repo=f"{dirPath}/{f.name}", path_or_fileobj=str(f)) for f in batch]
 
         for attempt in range(MAX_RETRIES):
             try:

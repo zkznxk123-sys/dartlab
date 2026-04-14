@@ -51,7 +51,7 @@ def main() -> int:
     print("[1/5] Company('005930') 로드...")
     t0 = time.time()
     c = Company("005930")
-    print(f"  로드 완료 ({time.time()-t0:.1f}s)")
+    print(f"  로드 완료 ({time.time() - t0:.1f}s)")
 
     QUESTIONS = [
         ("영업이익률 추세가 어떻게 되나?", "act2_profit"),
@@ -63,7 +63,7 @@ def main() -> int:
     responses: list[str] = []
 
     for i, (q, expected_intent) in enumerate(QUESTIONS, 1):
-        print(f"\n[{i+1}/5] Q: '{q}' (expected: {expected_intent})")
+        print(f"\n[{i + 1}/5] Q: '{q}' (expected: {expected_intent})")
 
         # ContextBuilder 확인 (API 호출 전)
         bundle = ContextBuilder(question=q, company=c, provider=provider).build()
@@ -130,7 +130,9 @@ def main() -> int:
         print("[PASS] Live smoke test 통과!")
         print(f"  - 응답 3/3 (100자+)")
         print(f"  - Playbook bullets: {total_bullets}개 누적")
-        print(f"  - 3번째 호출 playbook 주입: {'YES' if has_pb else 'NO (but bullets exist — selector quality filter)'}")
+        print(
+            f"  - 3번째 호출 playbook 주입: {'YES' if has_pb else 'NO (but bullets exist — selector quality filter)'}"
+        )
         return 0
 
 

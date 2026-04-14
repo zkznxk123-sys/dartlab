@@ -189,12 +189,18 @@
 
 	// ── Tool 접기/펼치기 (Claude Code 스타일) ──
 	const TOOL_LABELS = {
+		// 신규 tool calling registry (ai/tools/schemas.py 10종)
+		show: "원본 조회", select: "계정 필터", analysis: "재무분석",
+		scan: "시장 스캔", macro: "매크로", credit: "신용평가",
+		gather: "외부 데이터", search: "공시 검색", review: "보고서",
+		pythonExec: "코드 실행",
+		// 구 MCP/플러그인 tool 이름 (하위 호환)
 		companyInsights: "인사이트", companyFinancials: "재무제표", companyRatios: "재무비율",
-		companyAnalysis: "분석", companyValuation: "밸류에이션", companyForecast: "전망",
-		companyReview: "보고서", companyShow: "공시 원문", companyDiff: "변경 비교",
+		companyAnalysis: "재무분석", companyValuation: "밸류에이션", companyForecast: "전망",
+		companyReview: "보고서", companyShow: "원본 조회", companyDiff: "변경 비교",
 		companyGovernance: "지배구조", companyAudit: "감사", companyProfile: "프로필",
 		companySections: "섹션", companyTopics: "토픽", marketScan: "시장 스캔",
-		searchCompany: "검색", list_live_filings: "실시간 공시", read_filing: "공시 원문",
+		searchCompany: "종목 검색", list_live_filings: "실시간 공시", read_filing: "공시 원문",
 		list_filings: "공시 목록", show_topic: "토픽 조회", get_data: "데이터 조회",
 	};
 	function toolLabel(name) { return TOOL_LABELS[name] || name; }
@@ -334,8 +340,11 @@
 							<Pencil size={12} />
 						</button>
 					{/if}
-					<div class="inline-block px-3 py-1.5 rounded-lg border border-dl-border/40 bg-dl-bg-card/60 text-[14px] text-dl-text leading-relaxed max-w-[85%]">
-						{message.text}
+					<div class="inline-flex flex-col gap-0.5 max-w-[85%]">
+						<span class="text-[10px] font-medium tracking-wide text-dl-text-dim/70 uppercase">You</span>
+						<div class="px-3 py-1.5 rounded-lg border border-dl-border/30 bg-dl-bg-card/40 text-[14px] text-dl-text leading-relaxed">
+							{message.text}
+						</div>
 					</div>
 				</div>
 			{/if}

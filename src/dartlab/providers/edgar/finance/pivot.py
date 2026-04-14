@@ -353,8 +353,16 @@ def _guessStmt(tag: str) -> str | None:
 
     # CF 키워드 (가장 명확)
     cfKeywords = [
-        "cashflow", "cash_flow", "netcash", "payment", "proceeds",
-        "repayment", "issuance", "capex", "purchaseof", "saleof",
+        "cashflow",
+        "cash_flow",
+        "netcash",
+        "payment",
+        "proceeds",
+        "repayment",
+        "issuance",
+        "capex",
+        "purchaseof",
+        "saleof",
     ]
     for kw in cfKeywords:
         if kw in tagLower:
@@ -362,11 +370,25 @@ def _guessStmt(tag: str) -> str | None:
 
     # IS 키워드 (명시적으로만)
     isKeywords = [
-        "revenue", "sales", "costofgood", "costofrevenue", "grossprofit",
-        "operatingincome", "operatingexpense", "sellinggeneral", "researchand",
-        "interestexpense", "incometax", "netincome", "earningspershare",
-        "dilutedearnings", "basicearnings", "operatingloss", "netloss",
-        "otheroperating", "comprehensiveincome",
+        "revenue",
+        "sales",
+        "costofgood",
+        "costofrevenue",
+        "grossprofit",
+        "operatingincome",
+        "operatingexpense",
+        "sellinggeneral",
+        "researchand",
+        "interestexpense",
+        "incometax",
+        "netincome",
+        "earningspershare",
+        "dilutedearnings",
+        "basicearnings",
+        "operatingloss",
+        "netloss",
+        "otheroperating",
+        "comprehensiveincome",
     ]
     for kw in isKeywords:
         if kw in tagLower:
@@ -374,11 +396,27 @@ def _guessStmt(tag: str) -> str | None:
 
     # BS 키워드
     bsKeywords = [
-        "asset", "liabilit", "equity", "receivable", "payable",
-        "inventory", "inventories", "cash", "debt", "borrowing",
-        "goodwill", "intangible", "property", "plant", "deferred",
-        "accruedliabilit", "leasecurrent", "leasenoncurrent",
-        "retainedearning", "treasurystock", "commonstock",
+        "asset",
+        "liabilit",
+        "equity",
+        "receivable",
+        "payable",
+        "inventory",
+        "inventories",
+        "cash",
+        "debt",
+        "borrowing",
+        "goodwill",
+        "intangible",
+        "property",
+        "plant",
+        "deferred",
+        "accruedliabilit",
+        "leasecurrent",
+        "leasenoncurrent",
+        "retainedearning",
+        "treasurystock",
+        "commonstock",
     ]
     for kw in bsKeywords:
         if kw in tagLower:

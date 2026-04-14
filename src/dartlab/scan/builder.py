@@ -404,9 +404,7 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
         # 계정명 정규화: account_nm → snakeId 컬럼 추가
         if acctMap and "account_nm" in df.columns:
             df = df.with_columns(
-                pl.col("account_nm")
-                .replace_strict(acctMap, default=None, return_dtype=pl.Utf8)
-                .alias("account_id_std")
+                pl.col("account_nm").replace_strict(acctMap, default=None, return_dtype=pl.Utf8).alias("account_id_std")
             )
 
         batchChunks.append(df)

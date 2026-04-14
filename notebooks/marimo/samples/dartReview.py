@@ -24,7 +24,7 @@ def _():
 def _(dartlab):
     # 전체 분석 보고서 — rich 텍스트 + DataFrame 교차
     c = dartlab.Company("005930")  # 삼성전자
-    # c.reviewer() # AI 전체 
+    # c.reviewer() # AI 전체
 
     # 특정 항목만
     c.review("수익구조")

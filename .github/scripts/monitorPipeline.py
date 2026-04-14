@@ -41,8 +41,16 @@ def _gh(args: list[str], *, check: bool = True) -> str:
 def _getLatestRun(workflowName: str) -> dict | None:
     """워크플로우의 최근 실행 1건 조회."""
     raw = _gh(
-        ["run", "list", "--workflow", workflowName, "--limit", "1", "--json",
-         "conclusion,status,createdAt,updatedAt,url,headBranch,displayTitle"],
+        [
+            "run",
+            "list",
+            "--workflow",
+            workflowName,
+            "--limit",
+            "1",
+            "--json",
+            "conclusion,status,createdAt,updatedAt,url,headBranch,displayTitle",
+        ],
         check=False,
     )
     if not raw:
@@ -58,14 +66,16 @@ def _ensureLabel() -> None:
     """pipeline-failure 라벨이 없으면 생성."""
     existing = _gh(["label", "list", "--search", FAILURE_LABEL, "--json", "name"], check=False)
     if FAILURE_LABEL not in existing:
-        _gh(["label", "create", FAILURE_LABEL, "--color", "d73a4a",
-             "--description", "데이터 파이프라인 자동 실패 알림"])
+        _gh(
+            ["label", "create", FAILURE_LABEL, "--color", "d73a4a", "--description", "데이터 파이프라인 자동 실패 알림"]
+        )
 
 
 def _findOpenIssue() -> int | None:
     """pipeline-failure 라벨의 열린 Issue 번호."""
-    raw = _gh(["issue", "list", "--label", FAILURE_LABEL, "--state", "open",
-               "--json", "number", "--limit", "1"], check=False)
+    raw = _gh(
+        ["issue", "list", "--label", FAILURE_LABEL, "--state", "open", "--json", "number", "--limit", "1"], check=False
+    )
     if not raw:
         return None
     try:
@@ -115,12 +125,18 @@ def main():
             title = f"Pipeline failure: {failNames}"
             if len(title) > 100:
                 title = f"Pipeline failure: {len(failures)}개 워크플로우"
-            out = _gh(["issue", "create", "--title", title, "--body", body,
-                        "--label", FAILURE_LABEL])
+            out = _gh(["issue", "create", "--title", title, "--body", body, "--label", FAILURE_LABEL])
             print(f"[monitor] Issue 생성: {out}")
     elif openIssue:
-        _gh(["issue", "close", str(openIssue), "--comment",
-             "모든 파이프라인 워크플로우가 정상 통과했습니다. 자동 닫기."])
+        _gh(
+            [
+                "issue",
+                "close",
+                str(openIssue),
+                "--comment",
+                "모든 파이프라인 워크플로우가 정상 통과했습니다. 자동 닫기.",
+            ]
+        )
         print(f"[monitor] Issue #{openIssue} 자동 닫기 (전부 성공)")
     else:
         print("[monitor] 전부 성공, 열린 Issue 없음")

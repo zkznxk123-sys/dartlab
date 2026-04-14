@@ -5,15 +5,16 @@
 
 import marimo
 
-__generated_with = "0.22.0"
+__generated_with = "0.23.1"
 app = marimo.App(width="medium")
 
 
 @app.cell
 def _():
     # AI provider 키 필요 (GEMINI_API_KEY, GROQ_API_KEY 등)
-    # import dartlab
-    # dartlab.ask("삼성전자 수익성 분석해줘")
+    import dartlab
+
+    dartlab.ask("뭐할수있니")
     return
 
 

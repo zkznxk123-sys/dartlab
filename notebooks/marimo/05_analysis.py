@@ -12,6 +12,7 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import dartlab
+
     c = dartlab.Company("005930")
     # 가이드 — 14축 + forecast + valuation
     c.analysis()

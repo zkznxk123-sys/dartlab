@@ -65,9 +65,7 @@ def _has_playbook_mention(response: str) -> bool:
 
 def _has_table_structure(response: str) -> bool:
     """마크다운 테이블 존재."""
-    return bool(re.search(r"\|\s*기간\s*\|", response)) or bool(
-        re.search(r"\|\s*---\s*\|", response)
-    )
+    return bool(re.search(r"\|\s*기간\s*\|", response)) or bool(re.search(r"\|\s*---\s*\|", response))
 
 
 def _count_dash_cells(response: str) -> int:
@@ -118,9 +116,7 @@ def _grade(response: str) -> tuple[str, list[str]]:
     return "P", []
 
 
-def runOne(
-    stockCode: str, corpName: str, axis: str, *, provider: str = "oauth-codex"
-) -> dict[str, Any]:
+def runOne(stockCode: str, corpName: str, axis: str, *, provider: str = "oauth-codex") -> dict[str, Any]:
     """단일 질문 실행 + 등급 판정."""
     import dartlab
 
@@ -216,9 +212,7 @@ def _save_recipe(question: str, axis: str, response: str) -> None:
 def writeReport(outDir: Path, results: list[dict]) -> None:
     outDir.mkdir(parents=True, exist_ok=True)
     # JSON
-    (outDir / "results.json").write_text(
-        json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    (outDir / "results.json").write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
 
     # 요약 md
     grade_counts = {g: sum(1 for r in results if r["grade"] == g) for g in "PTCV"}

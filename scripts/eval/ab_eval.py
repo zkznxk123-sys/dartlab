@@ -87,22 +87,24 @@ def main() -> int:
 
         # v1 (legacy)
         r1 = run_one(c, q, use_v2=False)
-        print(f"  v1: {r1['length']:5d}자 {r1['elapsed']:5.1f}s {'ERROR:'+r1['error'][:50] if r1['error'] else 'OK'}")
+        print(f"  v1: {r1['length']:5d}자 {r1['elapsed']:5.1f}s {'ERROR:' + r1['error'][:50] if r1['error'] else 'OK'}")
 
         # v2 (context engineering)
         r2 = run_one(c, q, use_v2=True)
-        print(f"  v2: {r2['length']:5d}자 {r2['elapsed']:5.1f}s {'ERROR:'+r2['error'][:50] if r2['error'] else 'OK'}")
+        print(f"  v2: {r2['length']:5d}자 {r2['elapsed']:5.1f}s {'ERROR:' + r2['error'][:50] if r2['error'] else 'OK'}")
 
-        results.append({
-            "question": q,
-            "category": cat,
-            "v1_len": r1["length"],
-            "v1_time": r1["elapsed"],
-            "v1_error": r1["error"],
-            "v2_len": r2["length"],
-            "v2_time": r2["elapsed"],
-            "v2_error": r2["error"],
-        })
+        results.append(
+            {
+                "question": q,
+                "category": cat,
+                "v1_len": r1["length"],
+                "v1_time": r1["elapsed"],
+                "v1_error": r1["error"],
+                "v2_len": r2["length"],
+                "v2_time": r2["elapsed"],
+                "v2_error": r2["error"],
+            }
+        )
 
     # 집계
     v1_total = sum(r["v1_len"] for r in results)
@@ -142,7 +144,7 @@ def main() -> int:
                 f"{r['v1_len']:,} | {r['v1_time']}s | "
                 f"{r['v2_len']:,} | {r['v2_time']}s | {sign}{diff:,} |\n"
             )
-        f.write(f"\n**합계**: v1={v1_total:,}자 / v2={v2_total:,}자 / diff={v2_total-v1_total:+,}\n")
+        f.write(f"\n**합계**: v1={v1_total:,}자 / v2={v2_total:,}자 / diff={v2_total - v1_total:+,}\n")
         f.write(f"\n**성공률**: v1={v1_ok}/{len(QUESTIONS)} / v2={v2_ok}/{len(QUESTIONS)}\n")
 
     print(f"결과 저장: {out_path}")

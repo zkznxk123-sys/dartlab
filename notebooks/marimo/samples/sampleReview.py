@@ -33,21 +33,25 @@ def _(c, blocks):
 @app.cell
 def _(b, Review):
     # 자유 조립 — 원하는 블록만 골라서
-    Review([
-        b["segmentComposition"],
-        b["growth"],
-        b["concentration"],
-    ])
+    Review(
+        [
+            b["segmentComposition"],
+            b["growth"],
+            b["concentration"],
+        ]
+    )
     return
 
 
 @app.cell
 def _(b, c, Review):
     # 블록 + 원시 데이터 혼합
-    Review([
-        b["segmentTrend"],
-        c.select("IS", ["매출액"]),
-    ])
+    Review(
+        [
+            b["segmentTrend"],
+            c.select("IS", ["매출액"]),
+        ]
+    )
     return
 
 

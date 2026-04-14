@@ -27,9 +27,7 @@ def _splitTableRow(line: str) -> list[str] | None:
 
 def _isSeparatorRow(cells: list[str]) -> bool:
     """`| --- | --- |` 같은 구분선 행인지."""
-    return all(re.fullmatch(r"-+", c) or c == "" for c in cells) and any(
-        "-" in c for c in cells
-    )
+    return all(re.fullmatch(r"-+", c) or c == "" for c in cells) and any("-" in c for c in cells)
 
 
 def extractTables(content: str) -> list[list[list[str]]]:
@@ -179,7 +177,9 @@ def tableToRowDictsWithHeaderRow(
             # 간단한 휴리스틱: 첫 셀이 "부문"/"소계"/"총계"/"기타"가 아니고 prev[0]이 있으면 shift
             firstCell = padded[0]
             isNewBumun = any(k in firstCell for k in ["부문", "부 문", "소 계", "소계", "총 계", "총계", "기타"])
-            isHarmonSam = firstCell in ["Harman", "SDC", "DX", "DS"] or firstCell.startswith("DS") or firstCell.startswith("DX")
+            isHarmonSam = (
+                firstCell in ["Harman", "SDC", "DX", "DS"] or firstCell.startswith("DS") or firstCell.startswith("DX")
+            )
             if not isNewBumun and not isHarmonSam and prev[0]:
                 # 한 칸 당기기: [a,b,c,d,e,''] → ['', a, b, c, d, e]
                 padded = [""] + padded[:-1]

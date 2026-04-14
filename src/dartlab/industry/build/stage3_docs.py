@@ -107,7 +107,8 @@ def enrich(nodes: list[IndustryNode]) -> list[IndustryNode]:
 
         for node in codeNodes:
             stageKey, confidence, hitKws = matchStageByKeywords(
-                node.industry, combinedText,
+                node.industry,
+                combinedText,
             )
 
             if stageKey and confidence > 0:

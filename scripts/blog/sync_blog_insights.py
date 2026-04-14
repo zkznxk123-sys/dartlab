@@ -65,9 +65,17 @@ def _parse_ai_block(text: str) -> dict | None:
         # strengths/weaknesses 리스트 아이템
         if line.startswith('- "') or line.startswith("- "):
             val = line.lstrip("- ").strip('"')
-            if "strengths" in result and isinstance(result.get("_last_list"), str) and result["_last_list"] == "strengths":
+            if (
+                "strengths" in result
+                and isinstance(result.get("_last_list"), str)
+                and result["_last_list"] == "strengths"
+            ):
                 result.setdefault("strengths", []).append(val)
-            elif "weaknesses" in result and isinstance(result.get("_last_list"), str) and result["_last_list"] == "weaknesses":
+            elif (
+                "weaknesses" in result
+                and isinstance(result.get("_last_list"), str)
+                and result["_last_list"] == "weaknesses"
+            ):
                 result.setdefault("weaknesses", []).append(val)
 
         if line == "strengths:":

@@ -36,10 +36,20 @@ _STOCKS = [
 # 핵심 analysis 축 (전체는 14개지만 quick 모드용 대표 4개)
 _CORE_AXES = ["수익성", "성장성", "안정성", "현금흐름"]
 _ALL_AXES = [
-    "수익성", "성장성", "안정성", "현금흐름",
-    "비용구조", "효율성", "자산구조",
-    "수익구조", "자금조달", "이익품질",
-    "자본배분", "투자효율", "재무정합성", "종합평가",
+    "수익성",
+    "성장성",
+    "안정성",
+    "현금흐름",
+    "비용구조",
+    "효율성",
+    "자산구조",
+    "수익구조",
+    "자금조달",
+    "이익품질",
+    "자본배분",
+    "투자효율",
+    "재무정합성",
+    "종합평가",
 ]
 
 
@@ -167,14 +177,14 @@ def auditMarketLevel(*, quick: bool = False) -> dict[str, Any]:
     status, detail = _safe_call(dartlab.scan)
     results["scan.guide"] = f"{status}{': ' + detail if detail else ''}"
 
-    for axis in (["profitability"] if quick else ["profitability", "growth", "cashflow", "governance"]):
+    for axis in ["profitability"] if quick else ["profitability", "growth", "cashflow", "governance"]:
         status, detail = _safe_call(dartlab.scan, axis)
         results[f"scan.{axis}"] = f"{status}{': ' + detail if detail else ''}"
 
     # macro
     status, detail = _safe_call(dartlab.macro)
     results["macro.guide"] = f"{status}{': ' + detail if detail else ''}"
-    for axis in (["사이클"] if quick else ["사이클", "금리", "종합"]):
+    for axis in ["사이클"] if quick else ["사이클", "금리", "종합"]:
         status, detail = _safe_call(dartlab.macro, axis)
         results[f"macro.{axis}"] = f"{status}{': ' + detail if detail else ''}"
 
@@ -186,6 +196,7 @@ def auditMarketLevel(*, quick: bool = False) -> dict[str, Any]:
     # SuperMaster
     try:
         from dartlab.ai.superfeature import getSuperMaster
+
         master = getSuperMaster()
         api_text, example_text = master.gather("삼성전자 수익성")
         if api_text and "dartlab API" in api_text:
@@ -232,9 +243,7 @@ def writeReport(outDir: Path, allResults: list[dict]) -> None:
         name = r.get("stockCode") or r.get("scope", "unknown")
         counts = r.get("counts", {})
         dur = r.get("duration_sec", 0)
-        lines.append(
-            f"| {name} | **{r['overall']}** | {counts.get('fail', 0)} | {counts.get('warning', 0)} | {dur}s |"
-        )
+        lines.append(f"| {name} | **{r['overall']}** | {counts.get('fail', 0)} | {counts.get('warning', 0)} | {dur}s |")
 
     lines.append("\n## 실패/경고 상세\n")
     for r in allResults:
@@ -265,15 +274,19 @@ def main() -> int:
         try:
             result = auditCompany(code, quick=args.quick)
             allResults.append(result)
-            print(f"  {result['overall']} — fail={result['counts']['fail']}, warn={result['counts']['warning']}, {result['duration_sec']}s")
+            print(
+                f"  {result['overall']} — fail={result['counts']['fail']}, warn={result['counts']['warning']}, {result['duration_sec']}s"
+            )
         except Exception as e:
             print(f"  CRITICAL: {type(e).__name__}: {e}")
-            allResults.append({
-                "stockCode": code,
-                "results": {"Company.create": f"Fail: {type(e).__name__}: {e}"},
-                "counts": {"fail": 1, "warning": 0, "total": 1},
-                "overall": "Fail",
-            })
+            allResults.append(
+                {
+                    "stockCode": code,
+                    "results": {"Company.create": f"Fail: {type(e).__name__}: {e}"},
+                    "counts": {"fail": 1, "warning": 0, "total": 1},
+                    "overall": "Fail",
+                }
+            )
 
     # 시장 레벨
     if not args.skip_market:
@@ -281,7 +294,9 @@ def main() -> int:
         try:
             market_result = auditMarketLevel(quick=args.quick)
             allResults.append(market_result)
-            print(f"  {market_result['overall']} — fail={market_result['counts']['fail']}, warn={market_result['counts']['warning']}")
+            print(
+                f"  {market_result['overall']} — fail={market_result['counts']['fail']}, warn={market_result['counts']['warning']}"
+            )
         except Exception as e:
             print(f"  CRITICAL: {type(e).__name__}: {e}")
 

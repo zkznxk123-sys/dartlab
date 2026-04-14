@@ -12,6 +12,7 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import dartlab
+
     c = dartlab.Company("TSLA")
     c.corpName
     return (c,)

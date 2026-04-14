@@ -29,11 +29,20 @@ def build_wheel() -> Path:
 
 _PYODIDE_STRIP = {
     # server / AI / viz — pyodide 불필요
-    "fastapi", "uvicorn", "sse-starlette", "sse_starlette",
-    "mcp", "marimo", "qrcode", "plotly",
-    "huggingface-hub", "huggingface_hub",
-    "google-genai", "google_genai",
-    "openai", "anthropic",
+    "fastapi",
+    "uvicorn",
+    "sse-starlette",
+    "sse_starlette",
+    "mcp",
+    "marimo",
+    "qrcode",
+    "plotly",
+    "huggingface-hub",
+    "huggingface_hub",
+    "google-genai",
+    "google_genai",
+    "openai",
+    "anthropic",
 }
 
 # pyodide 빌트인이지만 버전 제약이 맞지 않는 패키지 → 버전 제거 후 유지
@@ -121,12 +130,14 @@ def main():
 
     # 로컬 복사
     import shutil
+
     local_copy = Path(__file__).parent / pyodide_whl.name
     shutil.copy2(pyodide_whl, local_copy)
 
     if args.upload:
         import os
         from dotenv import load_dotenv
+
         load_dotenv(ROOT / ".env")
         token = args.token or os.environ.get("HF_TOKEN")
         if not token:

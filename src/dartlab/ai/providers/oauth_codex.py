@@ -499,14 +499,23 @@ class OAuthCodexProvider(BaseProvider):
         *,
         tool_choice: str | None = None,
     ) -> ToolResponse:
-        """Responses API tool calling."""
+        """Responses API tool calling.
+
+        store=False 모드에서는 `response.completed.output[]` 이 항상 빈 배열이라
+        function_call 은 스트리밍 이벤트(`response.output_item.added` +
+        `response.function_call_arguments.delta/done`)로 조립해야 한다.
+        """
         token = self._get_token_or_raise()
         body = self._build_body(messages, tools=tools, tool_choice=tool_choice)
         resp = self._request_with_retry(token, body)
 
         deltaAnswer = ""
         completedAnswer = ""
-        toolCalls: list[ToolCall] = []
+
+        # item_id → 진행 중 function_call 버퍼
+        fcBuffers: dict[str, dict] = {}
+        # 완료된 함수 호출 리스트 (순서 보존)
+        finishedCalls: list[dict] = []
 
         for line in resp.text.split("\n"):
             if not line.startswith("data: "):
@@ -519,26 +528,74 @@ class OAuthCodexProvider(BaseProvider):
             except json.JSONDecodeError:
                 continue
 
-            if event.get("type") == "response.completed":
+            etype = event.get("type")
+
+            # function_call item 시작
+            if etype == "response.output_item.added":
+                item = event.get("item", {})
+                if item.get("type") == "function_call":
+                    itemId = item.get("id") or f"fc_{len(fcBuffers)}"
+                    fcBuffers[itemId] = {
+                        "id": item.get("call_id") or itemId,
+                        "name": item.get("name", ""),
+                        "args": "",
+                    }
+            # arguments 점진 누적
+            elif etype == "response.function_call_arguments.delta":
+                itemId = event.get("item_id", "")
+                buf = fcBuffers.get(itemId)
+                if buf is not None:
+                    buf["args"] += event.get("delta", "")
+            # arguments 완성 → ToolCall 확정
+            elif etype == "response.function_call_arguments.done":
+                itemId = event.get("item_id", "")
+                buf = fcBuffers.pop(itemId, None)
+                # done 이벤트에 최종 arguments 가 실려 올 수도 있음 (안전 우선)
+                finalArgs = event.get("arguments") if isinstance(event.get("arguments"), str) else None
+                if buf is not None:
+                    finishedCalls.append(
+                        {
+                            "id": buf["id"],
+                            "name": buf["name"],
+                            "args": finalArgs or buf["args"],
+                        }
+                    )
+            # output_item.done — function_call 마감 백업 경로
+            elif etype == "response.output_item.done":
+                item = event.get("item", {})
+                if item.get("type") == "function_call":
+                    itemId = item.get("id", "")
+                    buf = fcBuffers.pop(itemId, None)
+                    if buf is not None:
+                        # done 이벤트에서 최종 arguments 를 덮어쓸 수도 있음
+                        finalArgs = item.get("arguments")
+                        finishedCalls.append(
+                            {
+                                "id": buf["id"],
+                                "name": buf["name"],
+                                "args": finalArgs if isinstance(finalArgs, str) else buf["args"],
+                            }
+                        )
+            elif etype == "response.output_text.delta":
+                deltaAnswer += event.get("delta", "")
+            elif etype == "response.completed":
+                # 일부 구현에서는 completed.output[] 에도 있음 (store=True 모드)
                 resp_obj = event.get("response", {})
                 for output in resp_obj.get("output", []):
-                    if output.get("type") == "function_call":
-                        callId = output.get("call_id") or output.get("id", f"call_{len(toolCalls)}")
-                        name = output.get("name", "")
-                        rawArgs = output.get("arguments", "{}")
-                        try:
-                            args = json.loads(rawArgs) if isinstance(rawArgs, str) else rawArgs
-                        except json.JSONDecodeError:
-                            args = {}
-                        toolCalls.append(ToolCall(id=callId, name=name, arguments=args))
-                    elif output.get("type") == "message":
+                    if output.get("type") == "message":
                         for content in output.get("content", []):
                             if content.get("type") == "output_text":
                                 completedAnswer += content.get("text", "")
-            elif event.get("type") == "response.output_text.delta":
-                deltaAnswer += event.get("delta", "")
 
-        # completed가 더 완전하므로 우선 사용, 없으면 delta 누적본 사용
+        # ToolCall 객체로 변환
+        toolCalls: list[ToolCall] = []
+        for fc in finishedCalls:
+            try:
+                args = json.loads(fc["args"]) if fc["args"] else {}
+            except json.JSONDecodeError:
+                args = {}
+            toolCalls.append(ToolCall(id=fc["id"], name=fc["name"], arguments=args))
+
         answer = completedAnswer or deltaAnswer
 
         finishReason = "tool_calls" if toolCalls else "stop"

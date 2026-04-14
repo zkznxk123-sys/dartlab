@@ -62,6 +62,7 @@ def _cloneCategory(category: str, dataDir: str, targetCodes: set[str]) -> int:
         url = f"{baseUrl}/{sc}.parquet"
         try:
             import urllib.request
+
             urllib.request.urlretrieve(url, str(dest))
             downloaded += 1
         except Exception:
@@ -154,9 +155,7 @@ def _reportNmToFinanceKey(reportNm: str) -> tuple[str, str] | None:
     return None
 
 
-def _discoverNewFilings(
-    keys: str, lookbackDays: int, dataDir: str
-) -> tuple[set[str], dict[str, list[dict]]]:
+def _discoverNewFilings(keys: str, lookbackDays: int, dataDir: str) -> tuple[set[str], dict[str, list[dict]]]:
     """최근 N일 정기공시에서 새 보고서 있는 종목 + rcept_no 매핑 반환.
 
     Returns:
@@ -270,10 +269,7 @@ def _discoverNewFilings(
 
         # docs는 원본 보고서만 (정정류 제외) + 영구 스킵 리스트 제외
         docsRows = [r for r in rows if _isDocsTarget(r["report_nm"])]
-        missingDocs = [
-            r for r in docsRows
-            if r["rcept_no"] not in existingDocs and r["rcept_no"] not in docsSkipped
-        ]
+        missingDocs = [r for r in docsRows if r["rcept_no"] not in existingDocs and r["rcept_no"] not in docsSkipped]
         missingFinance = [r for r in rows if r["rcept_no"] not in existingFinance]
         missingReport = [r for r in rows if r["rcept_no"] not in existingReport]
 
@@ -504,11 +500,7 @@ def main():
     # 짧으면 정정 보고서 + 늦은 제출을 놓친다. rcept_no 누락 검사가 정확하므로
     # 길어도 비용은 사실상 list.json 페이징뿐.
     lookbackDays = int(os.environ.get("SYNC_LOOKBACK_DAYS", "60"))
-    categories = [
-        c.strip()
-        for c in os.environ.get("SYNC_CATEGORIES", "finance,report,docs").split(",")
-        if c.strip()
-    ]
+    categories = [c.strip() for c in os.environ.get("SYNC_CATEGORIES", "finance,report,docs").split(",") if c.strip()]
 
     if "DARTLAB_DATA_DIR" not in os.environ:
         os.environ["DARTLAB_DATA_DIR"] = os.path.join(os.getcwd(), "data")
@@ -620,10 +612,7 @@ def main():
         beforeHashes = allBeforeHashes[cat]
 
         newFiles = [f for f in afterHashes if f not in beforeHashes]
-        updatedFiles = [
-            f for f in afterHashes
-            if f in beforeHashes and afterHashes[f] != beforeHashes[f]
-        ]
+        updatedFiles = [f for f in afterHashes if f in beforeHashes and afterHashes[f] != beforeHashes[f]]
         allNew[cat] = newFiles
         allChanged[cat] = newFiles + updatedFiles
 

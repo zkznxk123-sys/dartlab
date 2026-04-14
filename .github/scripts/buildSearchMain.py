@@ -25,7 +25,7 @@ def main() -> int:
     t0 = time.perf_counter()
     nDocs = rebuildContent(showProgress=True)
     elapsed = time.perf_counter() - t0
-    print(f"[main] {nDocs:,} 문서, {elapsed/60:.1f}분")
+    print(f"[main] {nDocs:,} 문서, {elapsed / 60:.1f}분")
 
     if nDocs == 0:
         print("[main] 빌드된 문서 없음")
@@ -60,8 +60,9 @@ def main() -> int:
 
     # delta는 main에 흡수되었으므로 제거 (로컬). HF에서도 delete 시도.
     try:
-        api.delete_file(path_in_repo="dart/contentIndex/delta.npz",
-                        repo_id="eddmpython/dartlab-data", repo_type="dataset")
+        api.delete_file(
+            path_in_repo="dart/contentIndex/delta.npz", repo_id="eddmpython/dartlab-data", repo_type="dataset"
+        )
     except Exception:
         pass
 

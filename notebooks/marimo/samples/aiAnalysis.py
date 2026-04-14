@@ -12,6 +12,7 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import dartlab
+
     # AI provider 설정 필요: dartlab setup
     # 예: ollama pull llama3.2 && ollama serve (무료 로컬)
     # 예: export GEMINI_API_KEY=... (무료 API)

@@ -19,7 +19,7 @@ tags:
   - 전자공시
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/267260-hd-hyundai-electric.webp
-youtubeId: ""
+youtubeId: "A0DO22IvgB0"
 ai:
   verdict: "765kV 변압기 독점. 적자 1,006억→이익 9,953억. OPM 24.4%."
   direction: 개선
@@ -38,12 +38,15 @@ ai:
 <script>
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
+import YouTube from '$lib/components/YouTube.svelte';
 </script>
 
 > **턴어라운드 + 성장** | 산업재 > 전력설비 | 2026-04-09 dartlab 실측
 > 같은 시리즈: [SK하이닉스](/blog/000660-skhynix) · [삼양식품](/blog/003230-samyang-foods) · [두산에너빌리티](/blog/034020-doosan-enerbility) · [알테오젠](/blog/196170-alteogen) · [HMM](/blog/011200-hmm) · [셀트리온](/blog/068270-celltrion) · [한화에어로스페이스](/blog/012450-hanwha-aerospace) · [HD현대일렉트릭](/blog/267260-hd-hyundai-electric) · [고려아연](/blog/010130-korea-zinc) · [에이피알](/blog/278470-apr) · [기업이야기 시리즈 전체](/blog/series/company-reports)
 
 ---
+
+<YouTube id="A0DO22IvgB0" title="HD현대일렉트릭 — 적자 1천억에서 영업이익 1조, 변압기 하나로" />
 
 ![HD현대일렉트릭 턴어라운드](./assets/08-turnaround-chart.svg)
 

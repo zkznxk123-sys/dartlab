@@ -38,19 +38,19 @@ def main() -> int:
 
     t0 = time.perf_counter()
     nMeta = collectMeta(startDate, endDate)
-    print(f"  수집된 메타: {nMeta:,} 건, {time.perf_counter()-t0:.0f}초")
+    print(f"  수집된 메타: {nMeta:,} 건, {time.perf_counter() - t0:.0f}초")
 
     # Phase 2: fillContent
     print("[delta] Phase 2: fillContent")
     t0 = time.perf_counter()
     fillContent()
-    print(f"  content 채우기 완료, {time.perf_counter()-t0:.0f}초")
+    print(f"  content 채우기 완료, {time.perf_counter() - t0:.0f}초")
 
     # Phase 3: delta 인덱스 빌드
     print("[delta] Phase 3: content delta 세그먼트 빌드")
     t0 = time.perf_counter()
     nDocs = rebuildContentDelta(daysBack=lookback)
-    print(f"  delta {nDocs:,} 문서, {time.perf_counter()-t0:.0f}초")
+    print(f"  delta {nDocs:,} 문서, {time.perf_counter() - t0:.0f}초")
 
     if nDocs == 0:
         print("[delta] 빌드된 문서 없음 — 업로드 스킵")

@@ -12,6 +12,7 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import dartlab
+
     # 가이드 — 어떤 축이 있는지
     dartlab.gather()
     return (dartlab,)

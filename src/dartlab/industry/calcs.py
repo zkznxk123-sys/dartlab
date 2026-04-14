@@ -53,9 +53,7 @@ def calcChainPosition(company: Any) -> dict | None:
     peers = [
         {"stockCode": n.stockCode, "corpName": n.corpName, "confidence": n.confidence}
         for n in nodes
-        if n.industry == myNode.industry
-        and n.stage == myNode.stage
-        and n.stockCode != stockCode
+        if n.industry == myNode.industry and n.stage == myNode.stage and n.stockCode != stockCode
     ]
     peers.sort(key=lambda p: p["confidence"], reverse=True)
 

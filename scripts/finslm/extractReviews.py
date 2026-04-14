@@ -61,15 +61,17 @@ def main() -> int:
         code = meta.get("stockCode", "")
         corp = meta.get("corpName", d.name)
         template = meta.get("storyTemplate", "")
-        body = text[fm_match.end():].strip() if fm_match else text
+        body = text[fm_match.end() :].strip() if fm_match else text
 
         # 전체 보고서 QA
-        pairs.append(_sharegpt(
-            SYSTEM_PROMPT,
-            f"{corp}({code}) 종합 재무분석 보고서를 작성해줘.",
-            body[:10000],
-            {"stock_code": code, "intent": "act_all", "source": "review_batch", "template": template},
-        ))
+        pairs.append(
+            _sharegpt(
+                SYSTEM_PROMPT,
+                f"{corp}({code}) 종합 재무분석 보고서를 작성해줘.",
+                body[:10000],
+                {"stock_code": code, "intent": "act_all", "source": "review_batch", "template": template},
+            )
+        )
 
         # 6막 분리
         act_re = re.compile(r"^(#{1,3})\s*((?:제\s*\d막|1막|2막|3막|4막|5막|6막).+)", re.MULTILINE)
@@ -80,12 +82,14 @@ def main() -> int:
             title = m.group(2).strip()
             content = body[start:end].strip()
             if len(content) > 100:
-                pairs.append(_sharegpt(
-                    SYSTEM_PROMPT,
-                    f"{corp}({code})의 {title}을 분석해줘.",
-                    content[:5000],
-                    {"stock_code": code, "intent": f"review_act", "source": "review_batch"},
-                ))
+                pairs.append(
+                    _sharegpt(
+                        SYSTEM_PROMPT,
+                        f"{corp}({code})의 {title}을 분석해줘.",
+                        content[:5000],
+                        {"stock_code": code, "intent": f"review_act", "source": "review_batch"},
+                    )
+                )
 
         # 섹션별 (## 헤더)
         section_re = re.compile(r"^##\s+(?!제\d막)(.+)", re.MULTILINE)
@@ -96,12 +100,14 @@ def main() -> int:
             sec_name = m.group(1).strip()
             content = body[start:end].strip()
             if len(content) > 100 and len(content) < 5000:
-                pairs.append(_sharegpt(
-                    SYSTEM_PROMPT,
-                    f"{corp}({code})의 {sec_name} 분석.",
-                    content[:4000],
-                    {"stock_code": code, "intent": "review_section", "source": "review_batch"},
-                ))
+                pairs.append(
+                    _sharegpt(
+                        SYSTEM_PROMPT,
+                        f"{corp}({code})의 {sec_name} 분석.",
+                        content[:4000],
+                        {"stock_code": code, "intent": "review_section", "source": "review_batch"},
+                    )
+                )
 
     # 저장
     with open(OUT, "w", encoding="utf-8") as f:

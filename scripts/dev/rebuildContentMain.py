@@ -21,7 +21,7 @@ def main() -> int:
     t0 = time.perf_counter()
     nDocs = rebuildContent(showProgress=True)
     elapsed = time.perf_counter() - t0
-    print(f"[main] {nDocs:,}문서, {elapsed/60:.1f}분")
+    print(f"[main] {nDocs:,}문서, {elapsed / 60:.1f}분")
 
     token = os.environ.get("HF_TOKEN")
     if token:
