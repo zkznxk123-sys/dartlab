@@ -11,6 +11,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.12] - 2026-04-15
+
+### Added
+
+- **엔진 자가 의심 flags**: WACC/Kd/terminalGrowth/debtRatio/ICR/cycle 극단값 자동 검사 → 구체 재호출 JSON `suggestedRetry` 결과에 박음
+- **autoEnrich `[엔진가정]` 한 줄 자동 주입**: tool_result `_summary` 에 엔진 가정값 + override 권장 JSON
+- **4엔진 표준 `assumptions` 필드**: analysis/credit/macro/quant 결과 통합 표준 키
+- **`pastInsight` / `sectorInsights` AI tool**: KnowledgeDB 경험 자율 조회
+- **AI tool 자동 등록 (`_autoDiscover`)**: `__all__` + Company `_xxxImpl` 순회, 수동 dict 제거
+- **`core/overrides.py` 확장**: ANALYSIS/QUANT KEYS 신설, ENGINE_KEYS, describeOverrides
+- **랜딩 신규 페이지**: `/insights` 5종 랭킹, `/compare?a=X&b=Y`, `/industry/[id]`, `/map/company/[code]` 풀스택
+- **Cosmograph WebGL 산업 지도** + L3 Egograph 공급망 시각화
+- **네이버 글로벌 API** (US 주가): Yahoo 대체
+- **원재료 테이블 파싱**: 공급망 엣지 261건, revenue 2,469사 join
+- **블로그 #34 LG전자**, **#35 Under Armour**
+
+### Changed
+
+- 모든 엔진 `_Impl` 시그니처 통일 — `overrides: dict | None`
+- ops/ai.md 전면 재작성 — 4축 + 7+1 원칙 단일 출처
+- 시스템 프롬프트 — override 재호출 명시, verbal stress 금지
+- Node.js 24 대응 — actions 메이저 일괄 bump
+
+### Fixed
+
+- **CRITICAL**: `memoized_calc` 가 override 를 silent drop — 이제 처음으로 실제 작동
+- `calcDcf` `terminalGrowthRate` 키명 오타 → DCF None 반환 버그
+- analysis tool axis enum 22축 누락 → AI 가 가치평가/매출전망 호출 불가
+- 시스템 프롬프트 `{{ }}` 이중중괄호 — AI 가 sub 에 JSON 욱여넣음
+- EDGAR 전면 점검: stmt 분류 + 한국어 100% + CI/IS 분리, 7종목 42케이스 OK
+- review Section UnboundLocalError (pyodide 순환참조)
+- landing basePath/handleHttpError prerender
+
+### Removed
+
+- AI tool 수동 `_TOOLS` dict
+- 폐기 기능 유령 테스트
+
 ## [0.9.10] - 2026-04-13
 
 ### Added

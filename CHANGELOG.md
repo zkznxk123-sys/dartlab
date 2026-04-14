@@ -7,6 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.12] - 2026-04-15
+
+### Added
+
+- **엔진 자가 의심 flags** (`core/overrides.py::detectExtremeFlags`): WACC>15%/<6%, Kd>12%, terminalGrowth>4%/≤0, debtRatio>200%, ICR<1.5, cycle contraction-trough 룰을 엔진이 자동 검사 → `{flag, reason, suggestedRetry}` 리스트로 결과에 박음. AI 가 verbal 시뮬로 도망가지 않고 구체 JSON 복사 수준으로 override 재호출.
+- **autoEnrich `[엔진가정]` 한 줄 자동 주입**: 모든 tool_result `_summary` 끝에 `[엔진가정] WACC=10.4% · g=3.0% · Kd=15.0% ...` 줄 자동 추가. flag 가 있으면 `⚠ {reason} → 다음 호출 실행 권장: overrides={"wacc":9.0}` JSON 동봉.
+- **4엔진 결과 표준 `assumptions` 필드**: analysis (FORECAST + VALUATION + ANALYSIS) / credit / macro / quant 결과에 엔진이 쓴 가정값을 표준 키(`wacc`, `terminalGrowth`, `debtRatio`, `cyclePhase` 등)로 통합. AI 가 흩어진 `discountRate`/`baseWacc`/`assumedWacc` 추측 불필요.
+- **`pastInsight(stockCode)` / `sectorInsights(sector)` AI tool**: KnowledgeDB 경험 조회 — 블로그(검증 프리미엄) 우선, 없으면 AI 축적. 떠먹이기가 아니라 AI 자율 호출. 식품 업종 분석 시 불닭 OPM 21.8% 같은 과거 인사이트 자동 인용.
+- **AI tool 자동 등록 (`_autoDiscover`)**: `dartlab.__all__` + Company `_xxxImpl` / public method 자동 순회 + 블랙리스트. 수동 `_TOOLS` dict 제거. quant 누락 해결, 새 엔진 추가 시 자동 등록.
+- **`core/overrides.py` 확장**: `ANALYSIS_KEYS`/`QUANT_KEYS` 신설, `CREDIT_KEYS`/`MACRO_KEYS` 확장 (currentRatio/quickRatio/ocfToDebt/scenarioStress, rateScenario/fxScenario 등). `ENGINE_KEYS` dict 으로 엔진별 허용 키 명시. `describeOverrides(engine)` — tool schema description 자동 생성.
+- **`/insights` 자동 인사이트 랭킹 페이지** (랜딩): 5종 랭킹 (집중도/분산/허브/다양성/의존도).
+- **`/compare?a=X&b=Y` 2사 비교 페이지**: 공급망/재무/AI verdict 나란히.
+- **`/industry/[id]` 공정 흐름 + 랭킹 + 공급망 엣지** 페이지.
+- **회사 페이지 풀스택** (`/map/company/[code]`): AI 인사이트 + 공급망 + 재무 + 블로그.
+- **Cosmograph WebGL 산업 지도** (`/map`): 살아있는 산업 생태계.
+- **L3 Egograph 공급망 시각화**: 회사별 공급망 그래프.
+- **네이버 글로벌 API 도입** (gather): US 주가 Yahoo → Naver Global 전환, 호출 간 2~4초 강제 딜레이.
+- **원재료 테이블 파싱**: 실제 공급망 엣지 261건 추출, revenue 2,469사 join, edges/summary/timeline API.
+- **DART 데이터셋 자동 수집 구조 블로그**: Actions 리듬 + HF 단일 소스 + 사용자 한 줄 경험.
+- **블로그 #34 LG전자**, **#35 Under Armour**.
+- **빠른 품질 audit 스크립트** (`scripts/audit/quickQualityAudit.py`): tool 다양성 + override 자발 호출 + pastInsight 활용 4 시나리오 검증.
+
+### Changed
+
+- **모든 엔진 `_Impl` 시그니처 통일** — `overrides: dict | None = None` 명시. credit/quant/macro 추가 (이전엔 analysis 만 수용).
+- **ops/ai.md 전면 재작성** (596줄 → ~280줄): 4축 사상 + 7+1 원칙 (P1~P7 + P4.5) + override 매커니즘 + 경험 자산화 순환 단일 출처. 메모리 (MEMORY.md, ai_identity.md) 는 포인터만.
+- **시스템 프롬프트** — override 재호출 예시 명확화, "verbal stress 금지, 반드시 overrides 인자로 재호출" 명시.
+- **macro 모듈 callable 패치** — import 순서 무관 callable 보장.
+- **Node.js 24 대응** — actions 메이저 버전 일괄 bump (checkout@v5, setup-python@v6, setup-node@v5, upload-artifact@v5, attest-build-provenance@v3).
+- **ruff format** 92개 파일 적용.
+
+### Fixed
+
+- **CRITICAL: `memoized_calc` 가 `overrides` 를 silent drop** — 모든 valuation/credit/quant calc 함수에서 override 가 캐시 래퍼에 의해 무음 무시되던 버그. 이제 override 가 실제 calc 함수에 전달되고, override 있을 때 캐시 우회. **override 매커니즘이 이번 릴리즈부터 처음으로 실제 작동.**
+- **`calcDcf` `terminalGrowthRate` vs `terminalGrowth` 키명 오타** — inner `dcfValuation()` 은 `terminalGrowth` 받는데 래퍼가 `terminalGrowthRate` 로 넘김 → TypeError silent swallow → DCF None 반환되던 버그.
+- **analysis tool axis enum 누락** — docstring 파싱이 14 financial 축만 뽑아 `가치평가`/`매출전망`/`매크로민감도` 등이 enum 에서 빠짐 → AI 가 호출 자체 불가. `_AXIS_REGISTRY` 전체 22축으로 교체.
+- **시스템 프롬프트 `{{"wacc":9.0}}` 이중중괄호** — Python format string 흔적이 AI 에게 그대로 노출 → AI 가 `sub="{...}"` 에 JSON 문자열 욱여넣음. 깔끔한 JSON 예시 + "sub 에 절대 쑤셔 넣지 마라" 지시 추가.
+- **EDGAR 전면 점검**: stmt 분류 + STMT_OVERRIDES 확장, 한국어 100% 로드, analysis/valuation/credit RuntimeError catch, CI 항목 7개 IS→CI stmt 수정, EQ/NT canonStmt 필터, getAccountStmt alias 역참조, dividends_common_stock EQ 수정. 7종목 42케이스 전부 OK.
+- **EDGAR `show()` 항목 한국어 근본 개선** — standardAccounts korName 로딩 + Title Case fallback 제거.
+- **review Section UnboundLocalError** (pyodide 환경 순환 참조).
+- **landing basePath/handleHttpError**: BASE_PATH prefix 고려, peer 링크 prerender 통과.
+- **map 필터 실시간 반영 + 회사명 라벨 + Cosmograph API 정정**.
+- **kindlist 워크플로우 시크릿 이름 불일치** — `DART_API_KEYS` 에서 첫 키 추출.
+- **블로그 데이터셋 글 내부 링크** — slug 번호 없이.
+
+### Removed
+
+- **AI tool 수동 `_TOOLS` dict** — `_autoDiscover()` 자동 등록으로 대체.
+- **폐기 기능 유령 테스트** — sector 호환 partial source / 지주사 skip / repr 정리.
+
 ## [0.9.10] - 2026-04-13
 
 ### Added
