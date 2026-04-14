@@ -83,8 +83,8 @@ const config = {
 		prerender: {
 			entries: ['*', '/docs/', '/blog/', ...companyEntries],
 			handleHttpError: ({ path, referrer, message }) => {
-				// industry/map 링크는 아직 구현 전 — 무시
-				if (path.startsWith('/industry/') || path === '/map') {
+				// /industry/ 는 아직 구현 전 — 무시 (Cosmograph 한 화면이 대체)
+				if (path.startsWith('/industry/')) {
 					return;
 				}
 				throw new Error(`${message} (linked from ${referrer})`);
