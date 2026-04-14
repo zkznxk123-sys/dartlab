@@ -24,7 +24,7 @@
 	<nav class="breadcrumb">
 		<a href="{base}/map">산업지도</a>
 		<span>›</span>
-		<a href="{base}/industry/{ego.industry}">{ego.industry}</a>
+		<span>{ego.industry}</span>
 		<span>›</span>
 		<span>{ego.corpName}</span>
 	</nav>
