@@ -1,0 +1,66 @@
+{
+  "industryId": "misc",
+  "name": "기타",
+  "totalRevenue": 12746,
+  "nodeCount": 6,
+  "stages": [
+    {
+      "key": "general",
+      "name": "기타",
+      "role": "제조",
+      "stream": "midstream",
+      "nodes": []
+    }
+  ],
+  "unclassified": [
+    {
+      "stockCode": "284740",
+      "corpName": "쿠쿠홈시스",
+      "stage": "",
+      "revenue": 11213,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "026040",
+      "corpName": "제이에스티나",
+      "stage": "",
+      "revenue": 722,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "285490",
+      "corpName": "노바텍",
+      "stage": "",
+      "revenue": 556,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "188260",
+      "corpName": "세니젠",
+      "stage": "",
+      "revenue": 154,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "373200",
+      "corpName": "엑스플러스",
+      "stage": "",
+      "revenue": 101,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "073570",
+      "corpName": "리튬포어스",
+      "stage": "",
+      "revenue": 0,
+      "confidence": 0.7,
+      "source": "kindlist"
+    }
+  ],
+  "edges": []
+}

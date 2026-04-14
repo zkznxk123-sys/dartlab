@@ -1,0 +1,2435 @@
+{
+  "industryId": "construction",
+  "name": "건설",
+  "totalRevenue": 1677882,
+  "nodeCount": 105,
+  "stages": [
+    {
+      "key": "general",
+      "name": "종합건설",
+      "role": "서비스",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "028260",
+          "corpName": "삼성물산",
+          "stage": "general",
+          "revenue": 407422,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "028050",
+          "corpName": "삼성E&A",
+          "stage": "general",
+          "revenue": 90288,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "047040",
+          "corpName": "대우건설",
+          "stage": "general",
+          "revenue": 80546,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "011760",
+          "corpName": "현대코퍼레이션",
+          "stage": "general",
+          "revenue": 75543,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "375500",
+          "corpName": "DL이앤씨",
+          "stage": "general",
+          "revenue": 74024,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "000210",
+          "corpName": "DL",
+          "stage": "general",
+          "revenue": 53267,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "294870",
+          "corpName": "IPARK현대산업개발",
+          "stage": "general",
+          "revenue": 41470,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "013580",
+          "corpName": "계룡건설산업",
+          "stage": "general",
+          "revenue": 28874,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "003070",
+          "corpName": "코오롱글로벌",
+          "stage": "general",
+          "revenue": 26844,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "009410",
+          "corpName": "태영건설",
+          "stage": "general",
+          "revenue": 21745,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "097230",
+          "corpName": "HJ중공업",
+          "stage": "general",
+          "revenue": 19997,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "344820",
+          "corpName": "케이씨씨글라스",
+          "stage": "general",
+          "revenue": 19006,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "021320",
+          "corpName": "KCC건설",
+          "stage": "general",
+          "revenue": 18334,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "009240",
+          "corpName": "한샘",
+          "stage": "general",
+          "revenue": 17445,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "014790",
+          "corpName": "HL D&I",
+          "stage": "general",
+          "revenue": 17419,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "006360",
+          "corpName": "GS건설",
+          "stage": "general",
+          "revenue": 14404,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "317400",
+          "corpName": "자이에스앤디",
+          "stage": "general",
+          "revenue": 13876,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "016250",
+          "corpName": "SGC E&C",
+          "stage": "general",
+          "revenue": 13420,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "084010",
+          "corpName": "대한제강",
+          "stage": "general",
+          "revenue": 12471,
+          "confidence": 0.84,
+          "source": "docs"
+        },
+        {
+          "stockCode": "004960",
+          "corpName": "한신공영",
+          "stage": "general",
+          "revenue": 11492,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "095570",
+          "corpName": "AJ네트웍스",
+          "stage": "general",
+          "revenue": 10701,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "014280",
+          "corpName": "금강공업",
+          "stage": "general",
+          "revenue": 8022,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "002460",
+          "corpName": "HS화성",
+          "stage": "general",
+          "revenue": 6595,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "011370",
+          "corpName": "서한",
+          "stage": "general",
+          "revenue": 6451,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "001520",
+          "corpName": "동양",
+          "stage": "general",
+          "revenue": 6306,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "002780",
+          "corpName": "진흥기업",
+          "stage": "general",
+          "revenue": 5764,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "002600",
+          "corpName": "조흥",
+          "stage": "general",
+          "revenue": 4882,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "028100",
+          "corpName": "동아지질",
+          "stage": "general",
+          "revenue": 4677,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "013360",
+          "corpName": "일성건설",
+          "stage": "general",
+          "revenue": 4527,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "066620",
+          "corpName": "국보디자인",
+          "stage": "general",
+          "revenue": 4389,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "036190",
+          "corpName": "금화피에스시",
+          "stage": "general",
+          "revenue": 4234,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "013120",
+          "corpName": "동원개발",
+          "stage": "general",
+          "revenue": 3873,
+          "confidence": 0.84,
+          "source": "docs"
+        },
+        {
+          "stockCode": "046940",
+          "corpName": "우원개발",
+          "stage": "general",
+          "revenue": 3763,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "001260",
+          "corpName": "남광토건",
+          "stage": "general",
+          "revenue": 3574,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "060560",
+          "corpName": "HC홈센타",
+          "stage": "general",
+          "revenue": 2988,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "058730",
+          "corpName": "다스코",
+          "stage": "general",
+          "revenue": 2732,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "001020",
+          "corpName": "페이퍼코리아",
+          "stage": "general",
+          "revenue": 2667,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "282720",
+          "corpName": "금양그린파워",
+          "stage": "general",
+          "revenue": 2648,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "094820",
+          "corpName": "일진파워",
+          "stage": "general",
+          "revenue": 2520,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "008970",
+          "corpName": "KBI동양철관",
+          "stage": "general",
+          "revenue": 2348,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "114190",
+          "corpName": "강원에너지",
+          "stage": "general",
+          "revenue": 2123,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "017000",
+          "corpName": "신원종합개발",
+          "stage": "general",
+          "revenue": 2113,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "054940",
+          "corpName": "엑사이엔씨",
+          "stage": "general",
+          "revenue": 1770,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "023960",
+          "corpName": "에쓰씨엔지니어링",
+          "stage": "general",
+          "revenue": 1723,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "001070",
+          "corpName": "대한방직",
+          "stage": "general",
+          "revenue": 1583,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "026150",
+          "corpName": "특수건설",
+          "stage": "general",
+          "revenue": 1490,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "067900",
+          "corpName": "와이엔텍",
+          "stage": "general",
+          "revenue": 1170,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "001840",
+          "corpName": "이화공영",
+          "stage": "general",
+          "revenue": 1152,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "007680",
+          "corpName": "대원",
+          "stage": "general",
+          "revenue": 1121,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "001470",
+          "corpName": "삼부토건",
+          "stage": "general",
+          "revenue": 1110,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "186230",
+          "corpName": "그린플러스",
+          "stage": "general",
+          "revenue": 1057,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "101970",
+          "corpName": "우양에이치씨",
+          "stage": "general",
+          "revenue": 1009,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "002290",
+          "corpName": "삼일기업공사",
+          "stage": "general",
+          "revenue": 852,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "001560",
+          "corpName": "제일연마",
+          "stage": "general",
+          "revenue": 789,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "091590",
+          "corpName": "남화토건",
+          "stage": "general",
+          "revenue": 727,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "002410",
+          "corpName": "범양건영",
+          "stage": "general",
+          "revenue": 718,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "006050",
+          "corpName": "국영지앤엠",
+          "stage": "general",
+          "revenue": 602,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "056730",
+          "corpName": "CNT85",
+          "stage": "general",
+          "revenue": 475,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "013810",
+          "corpName": "스페코",
+          "stage": "general",
+          "revenue": 380,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "025950",
+          "corpName": "동신건설",
+          "stage": "general",
+          "revenue": 334,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "044180",
+          "corpName": "KD",
+          "stage": "general",
+          "revenue": 278,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "035200",
+          "corpName": "프럼파스트",
+          "stage": "general",
+          "revenue": 252,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "053160",
+          "corpName": "프리엠스",
+          "stage": "general",
+          "revenue": 231,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "042940",
+          "corpName": "상지건설",
+          "stage": "general",
+          "revenue": 186,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "041590",
+          "corpName": "플래스크",
+          "stage": "general",
+          "revenue": 180,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "076340",
+          "corpName": "지에이이노더스",
+          "stage": "general",
+          "revenue": 0,
+          "confidence": 0.84,
+          "source": "docs"
+        },
+        {
+          "stockCode": "224760",
+          "corpName": "엔에스컴퍼니",
+          "stage": "general",
+          "revenue": 0,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "224810",
+          "corpName": "엄지하우스",
+          "stage": "general",
+          "revenue": 0,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "234070",
+          "corpName": "에이원알폼",
+          "stage": "general",
+          "revenue": 0,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "413300",
+          "corpName": "티엘엔지니어링",
+          "stage": "general",
+          "revenue": 0,
+          "confidence": 0.8,
+          "source": "product"
+        }
+      ]
+    },
+    {
+      "key": "material",
+      "name": "건자재",
+      "role": "제조",
+      "stream": "upstream",
+      "nodes": [
+        {
+          "stockCode": "002380",
+          "corpName": "케이씨씨",
+          "stage": "material",
+          "revenue": 64838,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "300720",
+          "corpName": "한일시멘트",
+          "stage": "material",
+          "revenue": 14239,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "023410",
+          "corpName": "유진기업",
+          "stage": "material",
+          "revenue": 13327,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "183190",
+          "corpName": "아세아시멘트",
+          "stage": "material",
+          "revenue": 10228,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "074600",
+          "corpName": "원익QnC",
+          "stage": "material",
+          "revenue": 9436,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "038500",
+          "corpName": "삼표시멘트",
+          "stage": "material",
+          "revenue": 6769,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "004980",
+          "corpName": "성신양회",
+          "stage": "material",
+          "revenue": 6580,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "104700",
+          "corpName": "한국철강",
+          "stage": "material",
+          "revenue": 4866,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "010960",
+          "corpName": "삼호개발",
+          "stage": "material",
+          "revenue": 4097,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "484120",
+          "corpName": "도우인시스",
+          "stage": "material",
+          "revenue": 1398,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "011390",
+          "corpName": "부산산업",
+          "stage": "material",
+          "revenue": 1075,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "006920",
+          "corpName": "모헨즈",
+          "stage": "material",
+          "revenue": 812,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "192390",
+          "corpName": "윈하이텍",
+          "stage": "material",
+          "revenue": 751,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "008870",
+          "corpName": "금비",
+          "stage": "material",
+          "revenue": 580,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "263920",
+          "corpName": "휴엠앤씨",
+          "stage": "material",
+          "revenue": 523,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "079650",
+          "corpName": "서산",
+          "stage": "material",
+          "revenue": 451,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "225530",
+          "corpName": "HC보광산업",
+          "stage": "material",
+          "revenue": 385,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "198440",
+          "corpName": "강동씨앤엘",
+          "stage": "material",
+          "revenue": 343,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "004870",
+          "corpName": "티웨이홀딩스",
+          "stage": "material",
+          "revenue": 7,
+          "confidence": 0.7,
+          "source": "product"
+        }
+      ]
+    },
+    {
+      "key": "engineering",
+      "name": "엔지니어링",
+      "role": "서비스",
+      "stream": "upstream",
+      "nodes": [
+        {
+          "stockCode": "000720",
+          "corpName": "현대건설",
+          "stage": "engineering",
+          "revenue": 310629,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "051600",
+          "corpName": "한전KPS",
+          "stage": "engineering",
+          "revenue": 15765,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "002150",
+          "corpName": "도화엔지니어링",
+          "stage": "engineering",
+          "revenue": 6985,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "052690",
+          "corpName": "한전기술",
+          "stage": "engineering",
+          "revenue": 5188,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "053690",
+          "corpName": "한미글로벌",
+          "stage": "engineering",
+          "revenue": 4488,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "023350",
+          "corpName": "한국종합기술",
+          "stage": "engineering",
+          "revenue": 4129,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "126600",
+          "corpName": "BGF에코머티리얼즈",
+          "stage": "engineering",
+          "revenue": 3979,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "054930",
+          "corpName": "유신",
+          "stage": "engineering",
+          "revenue": 3855,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "037440",
+          "corpName": "희림",
+          "stage": "engineering",
+          "revenue": 2319,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "024090",
+          "corpName": "디씨엠",
+          "stage": "engineering",
+          "revenue": 2271,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "121600",
+          "corpName": "나노신소재",
+          "stage": "engineering",
+          "revenue": 1117,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "399720",
+          "corpName": "가온칩스",
+          "stage": "engineering",
+          "revenue": 685,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "460870",
+          "corpName": "에스엠씨지",
+          "stage": "engineering",
+          "revenue": 558,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "360070",
+          "corpName": "탑머티리얼",
+          "stage": "engineering",
+          "revenue": 231,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "121060",
+          "corpName": "유니포인트",
+          "stage": "engineering",
+          "revenue": 0,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "451760",
+          "corpName": "컨텍",
+          "stage": "engineering",
+          "revenue": 0,
+          "confidence": 0.8,
+          "source": "docs"
+        }
+      ]
+    }
+  ],
+  "unclassified": [],
+  "edges": [
+    {
+      "from": "023410",
+      "to": "002460",
+      "type": "supplier",
+      "amount": 2967.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "104700",
+      "to": "002460",
+      "type": "supplier",
+      "amount": 10763.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "023410",
+      "to": "002780",
+      "type": "supplier",
+      "amount": 17208.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "023410",
+      "to": "006360",
+      "type": "supplier",
+      "amount": 275830.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "300720",
+      "to": "006360",
+      "type": "supplier",
+      "amount": 30830.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "004980",
+      "to": "011390",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "300720",
+      "to": "047040",
+      "type": "supplier",
+      "amount": 279071.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "104700",
+      "to": "047040",
+      "type": "supplier",
+      "amount": 174793.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "023410",
+      "to": "294870",
+      "type": "supplier",
+      "amount": 143718.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "344820",
+      "to": "294870",
+      "type": "supplier",
+      "amount": 7476.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "084010",
+      "to": "317400",
+      "type": "supplier",
+      "amount": 5897.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "023410",
+      "to": "375500",
+      "type": "supplier",
+      "amount": 137414.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "038500",
+      "to": "375500",
+      "type": "supplier",
+      "amount": 18245.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "038500",
+      "to": "000210",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "375500",
+      "to": "000210",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "000210",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "000210",
+      "to": "375500",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "009240",
+      "to": "000210",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "300720",
+      "to": "000210",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "014280",
+      "to": "000720",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "002380",
+      "to": "000720",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "344820",
+      "to": "000720",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "009240",
+      "to": "000720",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "000720",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "011760",
+      "to": "000720",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "047040",
+      "to": "000720",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "300720",
+      "to": "000720",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "038500",
+      "to": "000720",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "058730",
+      "to": "000720",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "192390",
+      "to": "000720",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "000720",
+      "to": "001520",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "000720",
+      "to": "001260",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "000720",
+      "to": "002410",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "001470",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "038500",
+      "to": "001520",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "001520",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "001520",
+      "to": "023410",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001520",
+      "to": "038500",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001520",
+      "to": "183190",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001520",
+      "to": "300720",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "002380",
+      "to": "344820",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "002380",
+      "to": "011760",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "002380",
+      "to": "028260",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "002380",
+      "to": "000720",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "300720",
+      "to": "002460",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "014280",
+      "to": "002460",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "084010",
+      "to": "002460",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "003070",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "003070",
+      "to": "001260",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "004960",
+      "to": "001470",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "002380",
+      "to": "006050",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "317400",
+      "to": "006360",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "084010",
+      "to": "006360",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "006360",
+      "to": "317400",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001520",
+      "to": "006360",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "006360",
+      "to": "001470",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "300720",
+      "to": "007680",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "007680",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "006920",
+      "to": "007680",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "104700",
+      "to": "009410",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "084010",
+      "to": "009410",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "009410",
+      "to": "300720",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011760",
+      "to": "002380",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "183190",
+      "to": "013580",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "084010",
+      "to": "013580",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "013580",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "104700",
+      "to": "014790",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "014790",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "021320",
+      "to": "002380",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "021320",
+      "to": "344820",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "023350",
+      "to": "001470",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "001520",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "002410",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "024090",
+      "to": "001070",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "024090",
+      "to": "067900",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "024090",
+      "to": "000720",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "024090",
+      "to": "006360",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "028050",
+      "to": "028260",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "028100",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "344820",
+      "to": "028260",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "002380",
+      "to": "028260",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "028260",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "036190",
+      "to": "224760",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "042940",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "044180",
+      "to": "023350",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "044180",
+      "to": "013360",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001520",
+      "to": "047040",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "047040",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "004980",
+      "to": "047040",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "047040",
+      "to": "001470",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "047040",
+      "to": "001260",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "047040",
+      "to": "002410",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "051600",
+      "to": "036190",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "051600",
+      "to": "094820",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "051600",
+      "to": "052690",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "052690",
+      "to": "051600",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "000720",
+      "to": "053160",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "066620",
+      "to": "037440",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "074600",
+      "to": "017000",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "300720",
+      "to": "091590",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "004980",
+      "to": "091590",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "104700",
+      "to": "091590",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "038500",
+      "to": "091590",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "183190",
+      "to": "091590",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "084010",
+      "to": "091590",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "091590",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "058730",
+      "to": "091590",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "079650",
+      "to": "091590",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "095570",
+      "to": "007680",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "095570",
+      "to": "001470",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "097230",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "002380",
+      "to": "097230",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "300720",
+      "to": "097230",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "097230",
+      "to": "023350",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "121060",
+      "to": "001260",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "183190",
+      "to": "300720",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "224760",
+      "to": "036190",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "225530",
+      "to": "060560",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "002380",
+      "to": "294870",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "300720",
+      "to": "009410",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "317400",
+      "to": "006360",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "300720",
+      "to": "317400",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "001520",
+      "to": "317400",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "023410",
+      "to": "317400",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "344820",
+      "to": "002380",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "344820",
+      "to": "000720",
+      "type": "customer",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "docs"
+    },
+    {
+      "from": "002380",
+      "to": "344820",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "344820",
+      "to": "028260",
+      "type": "customer",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "docs"
+    },
+    {
+      "from": "344820",
+      "to": "002380",
+      "type": "customer",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "docs"
+    },
+    {
+      "from": "028260",
+      "to": "344820",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "375500",
+      "to": "000210",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "009240",
+      "to": "375500",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "300720",
+      "to": "375500",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "344820",
+      "to": "460870",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "002380",
+      "to": "460870",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "000720",
+      "to": "002410",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "001470",
+      "to": "009410",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "001520",
+      "to": "001020",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "001520",
+      "to": "004980",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "002460",
+      "to": "084010",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "003070",
+      "to": "001260",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "004960",
+      "to": "001470",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "006360",
+      "to": "001470",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "009410",
+      "to": "300720",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "023410",
+      "to": "002410",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "024090",
+      "to": "067900",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "024090",
+      "to": "006360",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "024090",
+      "to": "009240",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "044180",
+      "to": "013360",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "044180",
+      "to": "023350",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "047040",
+      "to": "002410",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "047040",
+      "to": "001470",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "047040",
+      "to": "001260",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "095570",
+      "to": "001520",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "121060",
+      "to": "001260",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "224760",
+      "to": "036190",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    }
+  ]
+}

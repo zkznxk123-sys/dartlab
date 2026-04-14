@@ -1,0 +1,238 @@
+{
+  "industryId": "logistics",
+  "name": "물류·운송",
+  "totalRevenue": 738274,
+  "nodeCount": 21,
+  "stages": [
+    {
+      "key": "general",
+      "name": "물류",
+      "role": "서비스",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "086280",
+          "corpName": "현대글로비스",
+          "stage": "general",
+          "revenue": 295664,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "003490",
+          "corpName": "대한항공",
+          "stage": "general",
+          "revenue": 252255,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "028670",
+          "corpName": "팬오션",
+          "stage": "general",
+          "revenue": 54329,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "002320",
+          "corpName": "한진",
+          "stage": "general",
+          "revenue": 30649,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "004360",
+          "corpName": "세방",
+          "stage": "general",
+          "revenue": 12418,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "124560",
+          "corpName": "태웅로직스",
+          "stage": "general",
+          "revenue": 11173,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "009070",
+          "corpName": "케이씨티시",
+          "stage": "general",
+          "revenue": 9867,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "004140",
+          "corpName": "동방",
+          "stage": "general",
+          "revenue": 9156,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "129260",
+          "corpName": "인터지스",
+          "stage": "general",
+          "revenue": 7090,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "009180",
+          "corpName": "한솔로지스틱스",
+          "stage": "general",
+          "revenue": 6746,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "014130",
+          "corpName": "한익스프레스",
+          "stage": "general",
+          "revenue": 6298,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "465770",
+          "corpName": "STX그린로지스",
+          "stage": "general",
+          "revenue": 1914,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "003100",
+          "corpName": "선광",
+          "stage": "general",
+          "revenue": 1904,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "032280",
+          "corpName": "삼일",
+          "stage": "general",
+          "revenue": 1000,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "024800",
+          "corpName": "유성티엔에스",
+          "stage": "general",
+          "revenue": 670,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "052300",
+          "corpName": "오션인더블유",
+          "stage": "general",
+          "revenue": 76,
+          "confidence": 1.0,
+          "source": "docs"
+        }
+      ]
+    }
+  ],
+  "unclassified": [
+    {
+      "stockCode": "089860",
+      "corpName": "롯데렌탈",
+      "stage": "",
+      "revenue": 29188,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "038390",
+      "corpName": "레드캡투어",
+      "stage": "",
+      "revenue": 3656,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "080160",
+      "corpName": "모두투어",
+      "stage": "",
+      "revenue": 2104,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "104620",
+      "corpName": "노랑풍선",
+      "stage": "",
+      "revenue": 1197,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "094850",
+      "corpName": "참좋은여행",
+      "stage": "",
+      "revenue": 921,
+      "confidence": 0.7,
+      "source": "kindlist"
+    }
+  ],
+  "edges": [
+    {
+      "from": "002320",
+      "to": "003490",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "003100",
+      "to": "002320",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "003490",
+      "to": "002320",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "004360",
+      "to": "028670",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "024800",
+      "to": "024800",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "network"
+    }
+  ]
+}

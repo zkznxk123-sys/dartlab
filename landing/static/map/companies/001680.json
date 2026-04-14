@@ -1,0 +1,345 @@
+{
+  "ego": {
+    "stockCode": "001680",
+    "corpName": "대상",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 44013,
+    "confidence": 0.9,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "industry": "aerospace",
+      "stage": "airframe",
+      "revenue": 747854
+    },
+    {
+      "stockCode": "001340",
+      "corpName": "PKC",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 2721
+    },
+    {
+      "stockCode": "005610",
+      "corpName": "SPC삼립",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 33705
+    },
+    {
+      "stockCode": "026960",
+      "corpName": "동서",
+      "industry": "paper",
+      "stage": "general",
+      "revenue": 5329
+    },
+    {
+      "stockCode": "084690",
+      "corpName": "대상홀딩스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 56288
+    },
+    {
+      "stockCode": "067390",
+      "corpName": "아스트",
+      "industry": "aerospace",
+      "stage": "airframe",
+      "revenue": 2544
+    },
+    {
+      "stockCode": "456040",
+      "corpName": "OCI",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 20094
+    },
+    {
+      "stockCode": "089790",
+      "corpName": "제이티",
+      "industry": "semiconductor",
+      "stage": "test",
+      "revenue": 384
+    },
+    {
+      "stockCode": "004960",
+      "corpName": "한신공영",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 11492
+    },
+    {
+      "stockCode": "067830",
+      "corpName": "세이브존I&C",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 1181
+    },
+    {
+      "stockCode": "034950",
+      "corpName": "한국기업평가",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 1098
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "016250",
+      "corpName": "SGC E&C",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 13420
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373110",
+      "corpName": "엑셀세라퓨틱스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 19
+    }
+  ],
+  "edges": [
+    {
+      "from": "001680",
+      "to": "000880",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "001680",
+      "to": "001340",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "001680",
+      "to": "005610",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 8068920.0,
+      "ratio": null,
+      "product": "당류",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "당류"
+    },
+    {
+      "from": "026960",
+      "to": "001680",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001680",
+      "to": "084690",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "001680",
+      "to": "067390",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001680",
+      "to": "456040",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "001680",
+      "to": "089790",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001680",
+      "to": "004960",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001680",
+      "to": "067830",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001680",
+      "to": "034950",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001680",
+      "to": "097950",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001680",
+      "to": "005610",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001680",
+      "to": "007070",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "016250",
+      "to": "001680",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "001680",
+      "to": "078930",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "084690",
+      "to": "001680",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "001680",
+      "to": "373110",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.4%"
+    }
+  ]
+}

@@ -1,0 +1,1248 @@
+{
+  "industryId": "auto",
+  "name": "자동차",
+  "totalRevenue": 4528735,
+  "nodeCount": 82,
+  "stages": [
+    {
+      "key": "oem",
+      "name": "완성차",
+      "role": "제조",
+      "stream": "downstream",
+      "nodes": [
+        {
+          "stockCode": "005380",
+          "corpName": "현대자동차",
+          "stage": "oem",
+          "revenue": 1862545,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "000270",
+          "corpName": "기아",
+          "stage": "oem",
+          "revenue": 1141409,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "012330",
+          "corpName": "현대모비스",
+          "stage": "oem",
+          "revenue": 611181,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "161390",
+          "corpName": "한국타이어앤테크놀로지",
+          "stage": "oem",
+          "revenue": 212023,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "018880",
+          "corpName": "한온시스템",
+          "stage": "oem",
+          "revenue": 108837,
+          "confidence": 0.92,
+          "source": "docs"
+        },
+        {
+          "stockCode": "007860",
+          "corpName": "서연",
+          "stage": "oem",
+          "revenue": 49161,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "200880",
+          "corpName": "서연이화",
+          "stage": "oem",
+          "revenue": 45052,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "053700",
+          "corpName": "삼보모터스",
+          "stage": "oem",
+          "revenue": 16846,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "000430",
+          "corpName": "대원강업",
+          "stage": "oem",
+          "revenue": 15991,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "043370",
+          "corpName": "피에이치에이",
+          "stage": "oem",
+          "revenue": 12007,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "009160",
+          "corpName": "SIMPAC",
+          "stage": "oem",
+          "revenue": 11790,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "067170",
+          "corpName": "오텍",
+          "stage": "oem",
+          "revenue": 8521,
+          "confidence": 0.7,
+          "source": "docs"
+        },
+        {
+          "stockCode": "013870",
+          "corpName": "지엠비코리아",
+          "stage": "oem",
+          "revenue": 7873,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "024840",
+          "corpName": "KBI메탈",
+          "stage": "oem",
+          "revenue": 7586,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "118990",
+          "corpName": "모트렉스",
+          "stage": "oem",
+          "revenue": 7023,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "091340",
+          "corpName": "S&K폴리텍",
+          "stage": "oem",
+          "revenue": 3102,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "212560",
+          "corpName": "네오오토",
+          "stage": "oem",
+          "revenue": 2321,
+          "confidence": 0.68,
+          "source": "docs"
+        },
+        {
+          "stockCode": "024120",
+          "corpName": "KB오토시스",
+          "stage": "oem",
+          "revenue": 2150,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "024830",
+          "corpName": "세원물산",
+          "stage": "oem",
+          "revenue": 2116,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "453450",
+          "corpName": "그리드위즈",
+          "stage": "oem",
+          "revenue": 1256,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "090150",
+          "corpName": "아이윈",
+          "stage": "oem",
+          "revenue": 1159,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "265560",
+          "corpName": "영화테크",
+          "stage": "oem",
+          "revenue": 1086,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "020400",
+          "corpName": "대동금속",
+          "stage": "oem",
+          "revenue": 1018,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "002230",
+          "corpName": "피에스텍",
+          "stage": "oem",
+          "revenue": 972,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "113810",
+          "corpName": "디젠스",
+          "stage": "oem",
+          "revenue": 804,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "145210",
+          "corpName": "다이나믹디자인",
+          "stage": "oem",
+          "revenue": 802,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "078590",
+          "corpName": "휴림에이텍",
+          "stage": "oem",
+          "revenue": 644,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "101170",
+          "corpName": "우림피티에스",
+          "stage": "oem",
+          "revenue": 571,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "040610",
+          "corpName": "SG&G",
+          "stage": "oem",
+          "revenue": 477,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "417010",
+          "corpName": "나노팀",
+          "stage": "oem",
+          "revenue": 403,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "455180",
+          "corpName": "케이지에이",
+          "stage": "oem",
+          "revenue": 181,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "033200",
+          "corpName": "모아텍",
+          "stage": "oem",
+          "revenue": 76,
+          "confidence": 0.733,
+          "source": "docs"
+        }
+      ]
+    },
+    {
+      "key": "powertrain",
+      "name": "파워트레인",
+      "role": "제조",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "077970",
+          "corpName": "STX엔진",
+          "stage": "powertrain",
+          "revenue": 7893,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "064820",
+          "corpName": "케이프",
+          "stage": "powertrain",
+          "revenue": 5798,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "308170",
+          "corpName": "씨티알모빌리티",
+          "stage": "powertrain",
+          "revenue": 4615,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "092780",
+          "corpName": "DYP",
+          "stage": "powertrain",
+          "revenue": 4593,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "053270",
+          "corpName": "구영테크",
+          "stage": "powertrain",
+          "revenue": 4262,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "012200",
+          "corpName": "계양전기",
+          "stage": "powertrain",
+          "revenue": 3898,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "066590",
+          "corpName": "스모트로닉",
+          "stage": "powertrain",
+          "revenue": 3686,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "008830",
+          "corpName": "대동기어",
+          "stage": "powertrain",
+          "revenue": 2209,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "123700",
+          "corpName": "에스제이엠",
+          "stage": "powertrain",
+          "revenue": 2014,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "005030",
+          "corpName": "부산주공",
+          "stage": "powertrain",
+          "revenue": 1954,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "073010",
+          "corpName": "케이에스피",
+          "stage": "powertrain",
+          "revenue": 955,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "012340",
+          "corpName": "뉴인텍",
+          "stage": "powertrain",
+          "revenue": 828,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "085910",
+          "corpName": "네오티스",
+          "stage": "powertrain",
+          "revenue": 687,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "096350",
+          "corpName": "대창솔루션",
+          "stage": "powertrain",
+          "revenue": 599,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "317850",
+          "corpName": "대모",
+          "stage": "powertrain",
+          "revenue": 407,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "269620",
+          "corpName": "시스웍",
+          "stage": "powertrain",
+          "revenue": 110,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "193250",
+          "corpName": "링크드",
+          "stage": "powertrain",
+          "revenue": 105,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "313760",
+          "corpName": "캐리",
+          "stage": "powertrain",
+          "revenue": 75,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "250060",
+          "corpName": "모비스",
+          "stage": "powertrain",
+          "revenue": 51,
+          "confidence": 1.0,
+          "source": "docs"
+        }
+      ]
+    },
+    {
+      "key": "body",
+      "name": "차체·내장",
+      "role": "제조",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "015750",
+          "corpName": "성우하이텍",
+          "stage": "body",
+          "revenue": 43827,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "005710",
+          "corpName": "대원산업",
+          "stage": "body",
+          "revenue": 10589,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "019540",
+          "corpName": "일지테크",
+          "stage": "body",
+          "revenue": 8551,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "016740",
+          "corpName": "두올",
+          "stage": "body",
+          "revenue": 7961,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "007210",
+          "corpName": "벽산",
+          "stage": "body",
+          "revenue": 6107,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "025440",
+          "corpName": "DH오토웨어",
+          "stage": "body",
+          "revenue": 4944,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "004250",
+          "corpName": "엔피씨",
+          "stage": "body",
+          "revenue": 4503,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "170030",
+          "corpName": "현대공업",
+          "stage": "body",
+          "revenue": 3679,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "042600",
+          "corpName": "새로닉스",
+          "stage": "body",
+          "revenue": 1649,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "357580",
+          "corpName": "아모센스",
+          "stage": "body",
+          "revenue": 1221,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "004700",
+          "corpName": "조광피혁",
+          "stage": "body",
+          "revenue": 979,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "001380",
+          "corpName": "SG글로벌",
+          "stage": "body",
+          "revenue": 935,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "073110",
+          "corpName": "엘엠에스",
+          "stage": "body",
+          "revenue": 696,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "088290",
+          "corpName": "이원컴포텍",
+          "stage": "body",
+          "revenue": 566,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "318160",
+          "corpName": "셀바이오휴먼텍",
+          "stage": "body",
+          "revenue": 511,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "285800",
+          "corpName": "진영",
+          "stage": "body",
+          "revenue": 324,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "0010F0",
+          "corpName": "보원케미칼",
+          "stage": "body",
+          "revenue": -47,
+          "confidence": 0.867,
+          "source": "docs"
+        }
+      ]
+    },
+    {
+      "key": "chassis",
+      "name": "샤시·제동",
+      "role": "제조",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "204320",
+          "corpName": "HL만도",
+          "stage": "chassis",
+          "revenue": 94548,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "011210",
+          "corpName": "현대위아",
+          "stage": "chassis",
+          "revenue": 84816,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "267270",
+          "corpName": "HD건설기계",
+          "stage": "chassis",
+          "revenue": 37765,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "143210",
+          "corpName": "핸즈코퍼레이션",
+          "stage": "chassis",
+          "revenue": 7848,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "004970",
+          "corpName": "신라교역",
+          "stage": "chassis",
+          "revenue": 4547,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "290120",
+          "corpName": "DH오토리드",
+          "stage": "chassis",
+          "revenue": 3556,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "003010",
+          "corpName": "혜인",
+          "stage": "chassis",
+          "revenue": 2417,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "031510",
+          "corpName": "오스템",
+          "stage": "chassis",
+          "revenue": 1285,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "900100",
+          "corpName": "애머릿지",
+          "stage": "chassis",
+          "revenue": 0,
+          "confidence": 0.7,
+          "source": "product"
+        }
+      ]
+    },
+    {
+      "key": "electronics",
+      "name": "전장",
+      "role": "제조",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "396270",
+          "corpName": "넥스트칩",
+          "stage": "electronics",
+          "revenue": 397,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "087260",
+          "corpName": "모바일어플라이언스",
+          "stage": "electronics",
+          "revenue": 349,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "286750",
+          "corpName": "나노실리칸첨단소재",
+          "stage": "electronics",
+          "revenue": 60,
+          "confidence": 0.8,
+          "source": "docs"
+        }
+      ]
+    }
+  ],
+  "unclassified": [
+    {
+      "stockCode": "010770",
+      "corpName": "평화홀딩스",
+      "stage": "",
+      "revenue": 8837,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "023000",
+      "corpName": "삼원강재",
+      "stage": "",
+      "revenue": 3593,
+      "confidence": 0.7,
+      "source": "kindlist"
+    }
+  ],
+  "edges": [
+    {
+      "from": "012330",
+      "to": "000270",
+      "type": "supplier",
+      "amount": 487286.0,
+      "ratio": 91.4,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "011210",
+      "to": "000270",
+      "type": "supplier",
+      "amount": 487286.0,
+      "ratio": 91.4,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "005380",
+      "to": "000270",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "250060",
+      "to": "000270",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "000270",
+      "to": "005380",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "000270",
+      "to": "011210",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "000270",
+      "to": "012330",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "000270",
+      "to": "250060",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "015750",
+      "to": "000270",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "023000",
+      "to": "000430",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "000430",
+      "to": "023000",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001380",
+      "to": "040610",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "005710",
+      "to": "005380",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "012330",
+      "to": "005380",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "250060",
+      "to": "005380",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "005380",
+      "to": "011210",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "005380",
+      "to": "012330",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "005380",
+      "to": "250060",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "005710",
+      "to": "000430",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "005710",
+      "to": "023000",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "200880",
+      "to": "007860",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "007860",
+      "to": "200880",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "008830",
+      "to": "020400",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "010770",
+      "to": "005380",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "010770",
+      "to": "012330",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "010770",
+      "to": "250060",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011210",
+      "to": "005380",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011210",
+      "to": "012330",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011210",
+      "to": "250060",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "013870",
+      "to": "011210",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "012330",
+      "to": "005380",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "012330",
+      "to": "011210",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "012330",
+      "to": "250060",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "005380",
+      "to": "012330",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "005380",
+      "to": "015750",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "018880",
+      "to": "161390",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "020400",
+      "to": "008830",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "023000",
+      "to": "000430",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "005380",
+      "to": "024830",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "012330",
+      "to": "025440",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "250060",
+      "to": "025440",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "040610",
+      "to": "001380",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "005380",
+      "to": "053270",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "118990",
+      "to": "078590",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "078590",
+      "to": "016740",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "161390",
+      "to": "018880",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "200880",
+      "to": "007860",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011210",
+      "to": "212560",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "290120",
+      "to": "025440",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "005380",
+      "to": "000270",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "network"
+    },
+    {
+      "from": "005710",
+      "to": "000430",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "005710",
+      "to": "000270",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "007210",
+      "to": "012330",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "161390",
+      "to": "018880",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    }
+  ]
+}

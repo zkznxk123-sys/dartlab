@@ -1,0 +1,649 @@
+{
+  "industryId": "energy",
+  "name": "에너지·유틸리티",
+  "totalRevenue": 1597211,
+  "nodeCount": 34,
+  "stages": [
+    {
+      "key": "generation",
+      "name": "발전",
+      "role": "서비스",
+      "stream": "upstream",
+      "nodes": [
+        {
+          "stockCode": "015760",
+          "corpName": "한국전력공사",
+          "stage": "generation",
+          "revenue": 974293,
+          "confidence": 0.95,
+          "source": "product"
+        },
+        {
+          "stockCode": "071320",
+          "corpName": "지역난방공사",
+          "stage": "generation",
+          "revenue": 39982,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "112610",
+          "corpName": "씨에스윈드",
+          "stage": "generation",
+          "revenue": 29316,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "005090",
+          "corpName": "SGC에너지",
+          "stage": "generation",
+          "revenue": 24607,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "011930",
+          "corpName": "신성이엔지",
+          "stage": "generation",
+          "revenue": 5675,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "130660",
+          "corpName": "한전산업",
+          "stage": "generation",
+          "revenue": 3945,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "126720",
+          "corpName": "수산인더스트리",
+          "stage": "generation",
+          "revenue": 3377,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "119850",
+          "corpName": "지엔씨에너지",
+          "stage": "generation",
+          "revenue": 2626,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "389260",
+          "corpName": "대명에너지",
+          "stage": "generation",
+          "revenue": 1310,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "095910",
+          "corpName": "에스에너지",
+          "stage": "generation",
+          "revenue": 1024,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "099220",
+          "corpName": "SDN",
+          "stage": "generation",
+          "revenue": 875,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "018000",
+          "corpName": "유니슨",
+          "stage": "generation",
+          "revenue": 403,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "488900",
+          "corpName": "비츠로넥스텍",
+          "stage": "generation",
+          "revenue": 368,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "288620",
+          "corpName": "에스퓨얼셀",
+          "stage": "generation",
+          "revenue": 158,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "043220",
+          "corpName": "티에스넥스젠",
+          "stage": "generation",
+          "revenue": 145,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "060900",
+          "corpName": "에이전트AI",
+          "stage": "generation",
+          "revenue": 131,
+          "confidence": 1.0,
+          "source": "product"
+        }
+      ]
+    },
+    {
+      "key": "distribution",
+      "name": "공급",
+      "role": "서비스",
+      "stream": "downstream",
+      "nodes": [
+        {
+          "stockCode": "036460",
+          "corpName": "한국가스공사",
+          "stage": "distribution",
+          "revenue": 357273,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "004690",
+          "corpName": "삼천리",
+          "stage": "distribution",
+          "revenue": 52755,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "017390",
+          "corpName": "서울도시가스",
+          "stage": "distribution",
+          "revenue": 18280,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "267290",
+          "corpName": "경동도시가스",
+          "stage": "distribution",
+          "revenue": 17595,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "009450",
+          "corpName": "경동나비엔",
+          "stage": "distribution",
+          "revenue": 15022,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "003480",
+          "corpName": "한진중공업홀딩스",
+          "stage": "distribution",
+          "revenue": 12017,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "034590",
+          "corpName": "인천도시가스",
+          "stage": "distribution",
+          "revenue": 9630,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "029460",
+          "corpName": "케이씨",
+          "stage": "distribution",
+          "revenue": 7973,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "030530",
+          "corpName": "원익홀딩스",
+          "stage": "distribution",
+          "revenue": 6230,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "104830",
+          "corpName": "원익머트리얼즈",
+          "stage": "distribution",
+          "revenue": 3225,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "004780",
+          "corpName": "대륙제관",
+          "stage": "distribution",
+          "revenue": 2455,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "053050",
+          "corpName": "지에스이",
+          "stage": "distribution",
+          "revenue": 1701,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "0001A0",
+          "corpName": "덕양에너젠",
+          "stage": "distribution",
+          "revenue": 1432,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "053620",
+          "corpName": "태양",
+          "stage": "distribution",
+          "revenue": 1404,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "057540",
+          "corpName": "옴니시스템",
+          "stage": "distribution",
+          "revenue": 991,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "023150",
+          "corpName": "MH에탄올",
+          "stage": "distribution",
+          "revenue": 947,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "117580",
+          "corpName": "대성에너지",
+          "stage": "distribution",
+          "revenue": 47,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "093510",
+          "corpName": "엔지브이아이",
+          "stage": "distribution",
+          "revenue": 0,
+          "confidence": 0.8,
+          "source": "docs"
+        }
+      ]
+    }
+  ],
+  "unclassified": [],
+  "edges": [
+    {
+      "from": "036460",
+      "to": "004690",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "036460",
+      "to": "015760",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "발전용",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "036460",
+      "to": "003480",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "004690",
+      "to": "018000",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "004690",
+      "to": "071320",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "004690",
+      "to": "053050",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "009450",
+      "to": "267290",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "015760",
+      "to": "036460",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "015760",
+      "to": "071320",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "015760",
+      "to": "130660",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "017390",
+      "to": "117580",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "018000",
+      "to": "004690",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "104830",
+      "to": "030530",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "030530",
+      "to": "104830",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "036460",
+      "to": "034590",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "034590",
+      "to": "004690",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "036460",
+      "to": "015760",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "036460",
+      "to": "029460",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "036460",
+      "to": "053050",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "060900",
+      "to": "093510",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "095910",
+      "to": "060900",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "060900",
+      "to": "095910",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "095910",
+      "to": "288620",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "104830",
+      "to": "030530",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "112610",
+      "to": "099220",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "112610",
+      "to": "095910",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "036460",
+      "to": "117580",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "117580",
+      "to": "017390",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "130660",
+      "to": "015760",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "036460",
+      "to": "267290",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "267290",
+      "to": "009450",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "288620",
+      "to": "095910",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "009450",
+      "to": "267290",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "015760",
+      "to": "036460",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "034590",
+      "to": "004690",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    }
+  ]
+}

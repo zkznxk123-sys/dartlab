@@ -1,0 +1,148 @@
+{
+  "ego": {
+    "stockCode": "000140",
+    "corpName": "하이트진로홀딩스",
+    "industry": "food",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 24845,
+    "confidence": 0.95,
+    "source": "override"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000080",
+      "corpName": "하이트진로",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 24986
+    },
+    {
+      "stockCode": "040300",
+      "corpName": "YTN",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 1342
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "452400",
+      "corpName": "이닉스",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 1226
+    },
+    {
+      "stockCode": "008870",
+      "corpName": "금비",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 580
+    }
+  ],
+  "edges": [
+    {
+      "from": "000080",
+      "to": "000140",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "000140",
+      "to": "000080",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000140",
+      "to": "040300",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000140",
+      "to": "000660",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000140",
+      "to": "452400",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "008870",
+      "to": "000140",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000140",
+      "to": "040300",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.4%"
+    },
+    {
+      "from": "008870",
+      "to": "000140",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ]
+}

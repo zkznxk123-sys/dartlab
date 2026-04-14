@@ -1,0 +1,58 @@
+{
+  "industryId": "agriculture",
+  "name": "농축수산",
+  "totalRevenue": 7085,
+  "nodeCount": 5,
+  "stages": [
+    {
+      "key": "general",
+      "name": "농축수산",
+      "role": "제조",
+      "stream": "upstream",
+      "nodes": [
+        {
+          "stockCode": "014710",
+          "corpName": "사조씨푸드",
+          "stage": "general",
+          "revenue": 2380,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "030720",
+          "corpName": "동원수산",
+          "stage": "general",
+          "revenue": 1726,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "054050",
+          "corpName": "농우바이오",
+          "stage": "general",
+          "revenue": 1588,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "475460",
+          "corpName": "미트박스",
+          "stage": "general",
+          "revenue": 1356,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "154030",
+          "corpName": "아시아종묘",
+          "stage": "general",
+          "revenue": 35,
+          "confidence": 1.0,
+          "source": "docs"
+        }
+      ]
+    }
+  ],
+  "unclassified": [],
+  "edges": []
+}

@@ -1,0 +1,185 @@
+{
+  "industryId": "leisure",
+  "name": "레저·서비스",
+  "totalRevenue": 86902,
+  "nodeCount": 12,
+  "stages": [
+    {
+      "key": "general",
+      "name": "레저",
+      "role": "서비스",
+      "stream": "downstream",
+      "nodes": [
+        {
+          "stockCode": "008770",
+          "corpName": "호텔신라",
+          "stage": "general",
+          "revenue": 40683,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "035250",
+          "corpName": "강원랜드",
+          "stage": "general",
+          "revenue": 14767,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "034230",
+          "corpName": "파라다이스",
+          "stage": "general",
+          "revenue": 11499,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "215000",
+          "corpName": "골프존",
+          "stage": "general",
+          "revenue": 4833,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "114090",
+          "corpName": "GKL",
+          "stage": "general",
+          "revenue": 4229,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "121440",
+          "corpName": "골프존홀딩스",
+          "stage": "general",
+          "revenue": 3543,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "110790",
+          "corpName": "크리스에프앤씨",
+          "stage": "general",
+          "revenue": 3119,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "006730",
+          "corpName": "서부T&D",
+          "stage": "general",
+          "revenue": 2483,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "065150",
+          "corpName": "대산F&B",
+          "stage": "general",
+          "revenue": 1109,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "365900",
+          "corpName": "브이씨",
+          "stage": "general",
+          "revenue": 469,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "111710",
+          "corpName": "남화산업",
+          "stage": "general",
+          "revenue": 168,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "206950",
+          "corpName": "볼빅",
+          "stage": "general",
+          "revenue": 0,
+          "confidence": 0.7,
+          "source": "product"
+        }
+      ]
+    }
+  ],
+  "unclassified": [],
+  "edges": [
+    {
+      "from": "034230",
+      "to": "035250",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "365900",
+      "to": "121440",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "215000",
+      "to": "121440",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "121440",
+      "to": "215000",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "206950",
+      "to": "121440",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "215000",
+      "to": "121440",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "034230",
+      "to": "035250",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    }
+  ]
+}

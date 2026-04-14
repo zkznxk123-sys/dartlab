@@ -2,8 +2,25 @@ import adapter from '@sveltejs/adapter-static';
 import { mdsvex } from 'mdsvex';
 import { createHighlighter } from 'shiki';
 import { visit } from 'unist-util-visit';
+import { readdirSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 const basePath = process.env.BASE_PATH || '';
+
+// 산업지도: static/map/companies/*.json 이 있으면 해당 경로 prerender
+const mapCompaniesDir = resolve('./static/map/companies');
+const companyEntries = existsSync(mapCompaniesDir)
+	? readdirSync(mapCompaniesDir)
+			.filter((f) => f.endsWith('.json'))
+			.map((f) => `/company/${f.replace('.json', '')}`)
+	: [];
+
+const mapIndustriesDir = resolve('./static/map/industries');
+const industryEntries = existsSync(mapIndustriesDir)
+	? readdirSync(mapIndustriesDir)
+			.filter((f) => f.endsWith('.json'))
+			.map((f) => `/industry/${f.replace('.json', '')}`)
+	: [];
 
 function rehypeBaseUrl() {
 	return (tree) => {
@@ -64,7 +81,14 @@ const config = {
 			strict: false
 		}),
 		prerender: {
-			entries: ['*', '/docs/', '/blog/']
+			entries: ['*', '/docs/', '/blog/', ...companyEntries],
+			handleHttpError: ({ path, referrer, message }) => {
+				// industry/map 링크는 아직 구현 전 — 무시
+				if (path.startsWith('/industry/') || path === '/map') {
+					return;
+				}
+				throw new Error(`${message} (linked from ${referrer})`);
+			}
 		},
 		paths: {
 			base: process.env.BASE_PATH || ''

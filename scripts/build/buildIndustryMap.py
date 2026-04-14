@@ -1,0 +1,283 @@
+"""산업지도 시각화용 JSON 아티팩트 생성.
+
+landing/static/map/에 3단계 레벨별 JSON을 생성한다:
+- atlas.json: L1 — 34개 산업 + 산업간 플로우
+- industries/{id}.json: L2 — 산업별 공정 + 노드 + 내부 엣지
+- companies/{stockCode}.json: L3 — 회사 egograph (1홉 이웃)
+
+사용법::
+
+    uv run python scripts/build/buildIndustryMap.py
+    uv run python scripts/build/buildIndustryMap.py --companies 100  # 상위 N개만
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from collections import defaultdict
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "src"))
+
+from dartlab.industry.build.pipeline import loadEdges, loadNodes  # noqa: E402
+from dartlab.industry.taxonomy import getIndustry, loadTaxonomy  # noqa: E402
+
+OUT_DIR = ROOT / "landing" / "static" / "map"
+
+
+def _ensureDir(path: Path) -> None:
+    path.mkdir(parents=True, exist_ok=True)
+
+
+def buildAtlas() -> dict:
+    """L1: 34개 산업 + 산업간 supplier 플로우."""
+    nodes = loadNodes()
+    edges = loadEdges()
+    taxonomy = loadTaxonomy()
+
+    # 산업별 집계
+    industriesAgg: dict[str, dict] = {}
+    for ind_id, ind_def in taxonomy.items():
+        members = [n for n in nodes if n.industry == ind_id]
+        totalRev = sum(n.revenue or 0 for n in members) / 1e8  # 억
+        staged = [n for n in members if n.stage]
+
+        stageMix: dict[str, int] = defaultdict(int)
+        for n in staged:
+            stageMix[n.stage] += 1
+
+        industriesAgg[ind_id] = {
+            "id": ind_id,
+            "name": ind_def.name,
+            "revenue": round(totalRev),
+            "nodeCount": len(members),
+            "stagedCount": len(staged),
+            "stageMix": dict(stageMix),
+            "stages": [{"key": s.key, "name": s.name, "role": s.role, "stream": s.stream} for s in ind_def.stages],
+        }
+
+    # 산업 간 플로우 (supplier 엣지 집계)
+    flows: dict[tuple[str, str], dict] = {}
+    codeToIndustry: dict[str, str] = {n.stockCode: n.industry for n in nodes}
+    for e in edges:
+        if e.edgeType != "supplier":
+            continue
+        fromInd = codeToIndustry.get(e.fromCode)
+        toInd = codeToIndustry.get(e.toCode)
+        if not fromInd or not toInd or fromInd == toInd:
+            continue
+        key = (fromInd, toInd)
+        if key not in flows:
+            flows[key] = {"fromIndustry": fromInd, "toIndustry": toInd, "edgeCount": 0, "amount": 0.0}
+        flows[key]["edgeCount"] += 1
+        flows[key]["amount"] += e.amount or 0
+
+    flowList = sorted(flows.values(), key=lambda f: (f["amount"], f["edgeCount"]), reverse=True)[:50]
+
+    return {
+        "version": "2026-04-14",
+        "industries": list(industriesAgg.values()),
+        "flows": flowList,
+    }
+
+
+def buildIndustryDetail(industryId: str) -> dict:
+    """L2: 산업 내부 공정 + 노드 + 엣지."""
+    nodes = loadNodes()
+    edges = loadEdges()
+    ind_def = getIndustry(industryId)
+    if not ind_def:
+        return {}
+
+    members = [n for n in nodes if n.industry == industryId]
+    memberCodes = {n.stockCode for n in members}
+
+    # 공정별 그룹화, 매출 정렬
+    stages: dict[str, list[dict]] = defaultdict(list)
+    for n in sorted(members, key=lambda x: x.revenue or 0, reverse=True):
+        stages[n.stage or "unclassified"].append(
+            {
+                "stockCode": n.stockCode,
+                "corpName": n.corpName,
+                "stage": n.stage,
+                "revenue": round((n.revenue or 0) / 1e8),  # 억
+                "confidence": n.confidence,
+                "source": n.source,
+            }
+        )
+
+    # 내부 엣지 (양 끝이 같은 산업 소속)
+    internalEdges = [
+        {
+            "from": e.fromCode,
+            "to": e.toCode,
+            "type": e.edgeType,
+            "amount": e.amount,
+            "ratio": e.ratio,
+            "product": e.product,
+            "confidence": e.confidence,
+            "source": e.source,
+        }
+        for e in edges
+        if e.fromCode in memberCodes and e.toCode in memberCodes
+    ]
+
+    totalRev = sum(n.revenue or 0 for n in members) / 1e8
+    return {
+        "industryId": industryId,
+        "name": ind_def.name,
+        "totalRevenue": round(totalRev),
+        "nodeCount": len(members),
+        "stages": [
+            {
+                "key": s.key,
+                "name": s.name,
+                "role": s.role,
+                "stream": s.stream,
+                "nodes": stages.get(s.key, []),
+            }
+            for s in ind_def.stages
+        ],
+        "unclassified": stages.get("unclassified", []),
+        "edges": internalEdges,
+    }
+
+
+def buildCompanyEgograph(stockCode: str) -> dict:
+    """L3: 회사 egograph (1홉 이웃)."""
+    nodes = loadNodes()
+    edges = loadEdges()
+
+    ego = next((n for n in nodes if n.stockCode == stockCode), None)
+    if not ego:
+        return {}
+
+    # 1홉 이웃
+    neighbors: dict[str, dict] = {}
+    egoEdges: list[dict] = []
+    for e in edges:
+        if e.fromCode == stockCode:
+            neighbor = e.toCode
+            direction = "out"
+        elif e.toCode == stockCode:
+            neighbor = e.fromCode
+            direction = "in"
+        else:
+            continue
+
+        n = next((x for x in nodes if x.stockCode == neighbor), None)
+        if not n:
+            continue
+
+        if neighbor not in neighbors:
+            neighbors[neighbor] = {
+                "stockCode": n.stockCode,
+                "corpName": n.corpName,
+                "industry": n.industry,
+                "stage": n.stage,
+                "revenue": round((n.revenue or 0) / 1e8),
+            }
+
+        egoEdges.append(
+            {
+                "from": e.fromCode,
+                "to": e.toCode,
+                "direction": direction,
+                "type": e.edgeType,
+                "amount": e.amount,
+                "ratio": e.ratio,
+                "product": e.product,
+                "confidence": e.confidence,
+                "source": e.source,
+                "evidence": e.evidence,
+            }
+        )
+
+    return {
+        "ego": {
+            "stockCode": ego.stockCode,
+            "corpName": ego.corpName,
+            "industry": ego.industry,
+            "stage": ego.stage,
+            "role": ego.role,
+            "stream": ego.stream,
+            "revenue": round((ego.revenue or 0) / 1e8),
+            "confidence": ego.confidence,
+            "source": ego.source,
+        },
+        "neighbors": list(neighbors.values()),
+        "edges": egoEdges,
+    }
+
+
+def buildSearchIndex() -> list[dict]:
+    """회사명/코드 검색 인덱스."""
+    nodes = loadNodes()
+    return [
+        {
+            "stockCode": n.stockCode,
+            "corpName": n.corpName,
+            "industry": n.industry,
+            "stage": n.stage,
+            "revenue": round((n.revenue or 0) / 1e8),
+        }
+        for n in sorted(nodes, key=lambda x: x.revenue or 0, reverse=True)
+    ]
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--companies", type=int, default=500, help="상위 N개사만 생성")
+    parser.add_argument("--all-industries", action="store_true", help="모든 산업 상세 생성")
+    args = parser.parse_args()
+
+    _ensureDir(OUT_DIR)
+    _ensureDir(OUT_DIR / "industries")
+    _ensureDir(OUT_DIR / "companies")
+
+    # L1 Atlas
+    print("[L1] atlas.json 생성...")
+    atlas = buildAtlas()
+    (OUT_DIR / "atlas.json").write_text(
+        json.dumps(atlas, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    print(f"  - {len(atlas['industries'])}개 산업, {len(atlas['flows'])}개 플로우")
+
+    # L2 Industries
+    print("[L2] 산업 상세...")
+    taxonomy = loadTaxonomy()
+    for ind_id in taxonomy:
+        detail = buildIndustryDetail(ind_id)
+        (OUT_DIR / "industries" / f"{ind_id}.json").write_text(
+            json.dumps(detail, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+    print(f"  - {len(taxonomy)}개 산업 JSON 생성")
+
+    # L3 Companies (상위 N개)
+    print(f"[L3] 상위 {args.companies}개사 egograph...")
+    nodes = loadNodes()
+    topCompanies = sorted(nodes, key=lambda n: n.revenue or 0, reverse=True)[: args.companies]
+    for n in topCompanies:
+        ego = buildCompanyEgograph(n.stockCode)
+        if ego:
+            (OUT_DIR / "companies" / f"{n.stockCode}.json").write_text(
+                json.dumps(ego, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+    print(f"  - {len(topCompanies)}개사 생성")
+
+    # Search index
+    print("[검색] search-index.json")
+    searchIdx = buildSearchIndex()
+    (OUT_DIR / "search-index.json").write_text(
+        json.dumps(searchIdx, ensure_ascii=False), encoding="utf-8"
+    )
+    print(f"  - {len(searchIdx)}개 종목")
+
+    print(f"\n완료: {OUT_DIR}")
+
+
+if __name__ == "__main__":
+    main()

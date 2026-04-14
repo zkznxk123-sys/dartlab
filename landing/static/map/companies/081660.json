@@ -1,0 +1,150 @@
+{
+  "ego": {
+    "stockCode": "081660",
+    "corpName": "미스토홀딩스",
+    "industry": "retail",
+    "stage": "wholesale",
+    "role": "도매",
+    "stream": "midstream",
+    "revenue": 44686,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "044780",
+      "corpName": "에이치케이",
+      "industry": "medicalDevice",
+      "stage": "therapeutic",
+      "revenue": 542
+    },
+    {
+      "stockCode": "040300",
+      "corpName": "YTN",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 1342
+    },
+    {
+      "stockCode": "086980",
+      "corpName": "쇼박스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 627
+    },
+    {
+      "stockCode": "281820",
+      "corpName": "케이씨텍",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 3829
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 7973
+    },
+    {
+      "stockCode": "090460",
+      "corpName": "비에이치",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 17927
+    },
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "081660",
+      "to": "044780",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "081660",
+      "to": "040300",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "081660",
+      "to": "086980",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "081660",
+      "to": "281820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "081660",
+      "to": "029460",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "081660",
+      "to": "090460",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001450",
+      "to": "081660",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    }
+  ]
+}

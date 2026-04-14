@@ -1,0 +1,1009 @@
+{
+  "industryId": "cosmetics",
+  "name": "화장품·생활용품",
+  "totalRevenue": 174241,
+  "nodeCount": 53,
+  "stages": [
+    {
+      "key": "raw",
+      "name": "원료",
+      "role": "제조",
+      "stream": "upstream",
+      "nodes": [
+        {
+          "stockCode": "134380",
+          "corpName": "미원화학",
+          "stage": "raw",
+          "revenue": 2845,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "011500",
+          "corpName": "한농화성",
+          "stage": "raw",
+          "revenue": 2145,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "036670",
+          "corpName": "삼양케이씨아이",
+          "stage": "raw",
+          "revenue": 1168,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "078140",
+          "corpName": "대봉엘에스",
+          "stage": "raw",
+          "revenue": 1021,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "086710",
+          "corpName": "선진뷰티사이언스",
+          "stage": "raw",
+          "revenue": 808,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "265740",
+          "corpName": "엔에프씨",
+          "stage": "raw",
+          "revenue": 716,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "0015N0",
+          "corpName": "아로마티카",
+          "stage": "raw",
+          "revenue": 512,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "002760",
+          "corpName": "보락",
+          "stage": "raw",
+          "revenue": 501,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "420570",
+          "corpName": "제이투케이바이오",
+          "stage": "raw",
+          "revenue": 330,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "048410",
+          "corpName": "현대바이오",
+          "stage": "raw",
+          "revenue": 35,
+          "confidence": 0.8,
+          "source": "product"
+        }
+      ]
+    },
+    {
+      "key": "manufacturing",
+      "name": "제조·ODM",
+      "role": "제조",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "090430",
+          "corpName": "아모레퍼시픽",
+          "stage": "manufacturing",
+          "revenue": 42528,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "161890",
+          "corpName": "한국콜마",
+          "stage": "manufacturing",
+          "revenue": 27224,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "192820",
+          "corpName": "코스맥스",
+          "stage": "manufacturing",
+          "revenue": 23988,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "278470",
+          "corpName": "에이피알",
+          "stage": "manufacturing",
+          "revenue": 15273,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "257720",
+          "corpName": "실리콘투",
+          "stage": "manufacturing",
+          "revenue": 11163,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "241710",
+          "corpName": "코스메카코리아",
+          "stage": "manufacturing",
+          "revenue": 6409,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "053280",
+          "corpName": "예스24",
+          "stage": "manufacturing",
+          "revenue": 6265,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "251970",
+          "corpName": "펌텍코리아",
+          "stage": "manufacturing",
+          "revenue": 3720,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "237880",
+          "corpName": "클리오",
+          "stage": "manufacturing",
+          "revenue": 3289,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "352480",
+          "corpName": "씨앤씨인터내셔널",
+          "stage": "manufacturing",
+          "revenue": 2885,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "114840",
+          "corpName": "아이패밀리에스씨",
+          "stage": "manufacturing",
+          "revenue": 2241,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "214420",
+          "corpName": "토니모리",
+          "stage": "manufacturing",
+          "revenue": 2203,
+          "confidence": 0.84,
+          "source": "docs"
+        },
+        {
+          "stockCode": "362320",
+          "corpName": "청담글로벌",
+          "stage": "manufacturing",
+          "revenue": 2174,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "003350",
+          "corpName": "한국화장품제조",
+          "stage": "manufacturing",
+          "revenue": 1846,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "439090",
+          "corpName": "마녀공장",
+          "stage": "manufacturing",
+          "revenue": 1130,
+          "confidence": 0.84,
+          "source": "docs"
+        },
+        {
+          "stockCode": "260930",
+          "corpName": "씨티케이",
+          "stage": "manufacturing",
+          "revenue": 892,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "123690",
+          "corpName": "한국화장품",
+          "stage": "manufacturing",
+          "revenue": 850,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "175250",
+          "corpName": "아이큐어",
+          "stage": "manufacturing",
+          "revenue": 834,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "123330",
+          "corpName": "제닉",
+          "stage": "manufacturing",
+          "revenue": 782,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "080530",
+          "corpName": "코디",
+          "stage": "manufacturing",
+          "revenue": 765,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "027050",
+          "corpName": "코리아나",
+          "stage": "manufacturing",
+          "revenue": 737,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "257990",
+          "corpName": "나우코스",
+          "stage": "manufacturing",
+          "revenue": 695,
+          "confidence": 0.84,
+          "source": "docs"
+        },
+        {
+          "stockCode": "016100",
+          "corpName": "리더스코스메틱",
+          "stage": "manufacturing",
+          "revenue": 683,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "451250",
+          "corpName": "삐아",
+          "stage": "manufacturing",
+          "revenue": 680,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "406820",
+          "corpName": "뷰티스킨",
+          "stage": "manufacturing",
+          "revenue": 549,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "032860",
+          "corpName": "더라미",
+          "stage": "manufacturing",
+          "revenue": 509,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "219550",
+          "corpName": "디와이디",
+          "stage": "manufacturing",
+          "revenue": 449,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "227610",
+          "corpName": "아우딘퓨쳐스",
+          "stage": "manufacturing",
+          "revenue": 424,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "217480",
+          "corpName": "에스디생명공학",
+          "stage": "manufacturing",
+          "revenue": 301,
+          "confidence": 0.92,
+          "source": "docs"
+        },
+        {
+          "stockCode": "083660",
+          "corpName": "CSA 코스믹",
+          "stage": "manufacturing",
+          "revenue": 279,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "317860",
+          "corpName": "노드메이슨",
+          "stage": "manufacturing",
+          "revenue": 211,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "225430",
+          "corpName": "케이엠제약",
+          "stage": "manufacturing",
+          "revenue": 160,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "159910",
+          "corpName": "에코글로우",
+          "stage": "manufacturing",
+          "revenue": 99,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "082660",
+          "corpName": "코스나인",
+          "stage": "manufacturing",
+          "revenue": 97,
+          "confidence": 0.92,
+          "source": "docs"
+        },
+        {
+          "stockCode": "950170",
+          "corpName": "JTC",
+          "stage": "manufacturing",
+          "revenue": 82,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "025620",
+          "corpName": "차AI헬스케어",
+          "stage": "manufacturing",
+          "revenue": 73,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "900300",
+          "corpName": "오가닉티코스메틱",
+          "stage": "manufacturing",
+          "revenue": 10,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "203690",
+          "corpName": "아크솔루션스",
+          "stage": "manufacturing",
+          "revenue": 9,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "900310",
+          "corpName": "컬러레이",
+          "stage": "manufacturing",
+          "revenue": 3,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "950140",
+          "corpName": "잉글우드랩",
+          "stage": "manufacturing",
+          "revenue": 2,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "270210",
+          "corpName": "에스알바이오텍",
+          "stage": "manufacturing",
+          "revenue": 0,
+          "confidence": 0.84,
+          "source": "docs"
+        }
+      ]
+    },
+    {
+      "key": "brand",
+      "name": "브랜드",
+      "role": "소매",
+      "stream": "downstream",
+      "nodes": [
+        {
+          "stockCode": "226320",
+          "corpName": "잇츠한불",
+          "stage": "brand",
+          "revenue": 1534,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "019660",
+          "corpName": "글로본",
+          "stage": "brand",
+          "revenue": 113,
+          "confidence": 0.8,
+          "source": "docs"
+        }
+      ]
+    }
+  ],
+  "unclassified": [],
+  "edges": [
+    {
+      "from": "192820",
+      "to": "278470",
+      "type": "supplier",
+      "amount": 368611.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "251970",
+      "to": "003350",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "003350",
+      "to": "123690",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "192820",
+      "to": "027050",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "352480",
+      "to": "090430",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "048410",
+      "to": "090430",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "251970",
+      "to": "090430",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "161890",
+      "to": "090430",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "080530",
+      "to": "090430",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "241710",
+      "to": "090430",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "192820",
+      "to": "090430",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "352480",
+      "to": "114840",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "123690",
+      "to": "114840",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "003350",
+      "to": "114840",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "161890",
+      "to": "114840",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "192820",
+      "to": "114840",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "123330",
+      "to": "451250",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "123690",
+      "to": "003350",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "251970",
+      "to": "161890",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "161890",
+      "to": "123690",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "175250",
+      "to": "192820",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "175250",
+      "to": "082660",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "192820",
+      "to": "175250",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "192820",
+      "to": "237880",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "203690",
+      "to": "016100",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "241710",
+      "to": "214420",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "192820",
+      "to": "214420",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "161890",
+      "to": "214420",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "217480",
+      "to": "175250",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "241710",
+      "to": "217480",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "161890",
+      "to": "217480",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "192820",
+      "to": "217480",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "352480",
+      "to": "237880",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "192820",
+      "to": "237880",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "161890",
+      "to": "237880",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "123690",
+      "to": "237880",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "003350",
+      "to": "237880",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "241710",
+      "to": "237880",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "950140",
+      "to": "241710",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "241710",
+      "to": "950140",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "123690",
+      "to": "260930",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "241710",
+      "to": "260930",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "003350",
+      "to": "260930",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "123690",
+      "to": "278470",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "003350",
+      "to": "278470",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "241710",
+      "to": "278470",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "192820",
+      "to": "317860",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "161890",
+      "to": "317860",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "192820",
+      "to": "439090",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "451250",
+      "to": "123330",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "950140",
+      "to": "241710",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "016100",
+      "to": "203690",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "192820",
+      "to": "237880",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "203690",
+      "to": "016100",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "226320",
+      "to": "090430",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    }
+  ]
+}

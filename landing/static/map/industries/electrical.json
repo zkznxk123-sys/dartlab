@@ -1,0 +1,446 @@
+{
+  "industryId": "electrical",
+  "name": "전기장비",
+  "totalRevenue": 179965,
+  "nodeCount": 40,
+  "stages": [
+    {
+      "key": "power",
+      "name": "전력기기",
+      "role": "제조",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "010120",
+          "corpName": "엘에스일렉트릭",
+          "stage": "power",
+          "revenue": 49658,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "015860",
+          "corpName": "일진홀딩스",
+          "stage": "power",
+          "revenue": 22827,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "103590",
+          "corpName": "일진전기",
+          "stage": "power",
+          "revenue": 20446,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "062040",
+          "corpName": "산일전기",
+          "stage": "power",
+          "revenue": 5019,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "037030",
+          "corpName": "파워넷",
+          "stage": "power",
+          "revenue": 4470,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "042370",
+          "corpName": "비츠로테크",
+          "stage": "power",
+          "revenue": 4323,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "108380",
+          "corpName": "대양전기공업",
+          "stage": "power",
+          "revenue": 2301,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "033100",
+          "corpName": "제룡전기",
+          "stage": "power",
+          "revenue": 2240,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "048430",
+          "corpName": "유라테크",
+          "stage": "power",
+          "revenue": 1973,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "262260",
+          "corpName": "에이프로",
+          "stage": "power",
+          "revenue": 1471,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "0008Z0",
+          "corpName": "에스엔시스",
+          "stage": "power",
+          "revenue": 1444,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "065710",
+          "corpName": "서호전기",
+          "stage": "power",
+          "revenue": 1166,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "032820",
+          "corpName": "우리기술",
+          "stage": "power",
+          "revenue": 871,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "388050",
+          "corpName": "지투파워",
+          "stage": "power",
+          "revenue": 774,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "189860",
+          "corpName": "서전기전",
+          "stage": "power",
+          "revenue": 681,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "054220",
+          "corpName": "비츠로시스",
+          "stage": "power",
+          "revenue": 448,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "007610",
+          "corpName": "선도전기",
+          "stage": "power",
+          "revenue": 382,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "273640",
+          "corpName": "와이엠텍",
+          "stage": "power",
+          "revenue": 291,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "290670",
+          "corpName": "대보마그네틱",
+          "stage": "power",
+          "revenue": 261,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "377330",
+          "corpName": "이지트로닉스",
+          "stage": "power",
+          "revenue": 132,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "207490",
+          "corpName": "에이펙스인텍",
+          "stage": "power",
+          "revenue": 0,
+          "confidence": 0.8,
+          "source": "docs"
+        }
+      ]
+    },
+    {
+      "key": "motor",
+      "name": "모터·발전기",
+      "role": "제조",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "058610",
+          "corpName": "에스피지",
+          "stage": "motor",
+          "revenue": 3417,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "160190",
+          "corpName": "하이젠알앤엠",
+          "stage": "motor",
+          "revenue": 735,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "333620",
+          "corpName": "엔시스",
+          "stage": "motor",
+          "revenue": 488,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "043200",
+          "corpName": "파루",
+          "stage": "motor",
+          "revenue": 288,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "217320",
+          "corpName": "썬테크",
+          "stage": "motor",
+          "revenue": 0,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "448780",
+          "corpName": "마이크로엔엑스",
+          "stage": "motor",
+          "revenue": 0,
+          "confidence": 0.7,
+          "source": "product"
+        }
+      ]
+    },
+    {
+      "key": "cable",
+      "name": "전선·케이블",
+      "role": "제조",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "001440",
+          "corpName": "대한전선",
+          "stage": "cable",
+          "revenue": 36360,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "006340",
+          "corpName": "대원전선",
+          "stage": "cable",
+          "revenue": 6245,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "023810",
+          "corpName": "인팩",
+          "stage": "cable",
+          "revenue": 5864,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "011690",
+          "corpName": "와이투솔루션",
+          "stage": "cable",
+          "revenue": 1651,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "128540",
+          "corpName": "에코캡",
+          "stage": "cable",
+          "revenue": 1518,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "321370",
+          "corpName": "센서뷰",
+          "stage": "cable",
+          "revenue": 190,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "101670",
+          "corpName": "하이드로리튬",
+          "stage": "cable",
+          "revenue": 34,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "208850",
+          "corpName": "이비테크",
+          "stage": "cable",
+          "revenue": 0,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "217590",
+          "corpName": "티엠씨",
+          "stage": "cable",
+          "revenue": 0,
+          "confidence": 1.0,
+          "source": "product"
+        }
+      ]
+    }
+  ],
+  "unclassified": [
+    {
+      "stockCode": "079810",
+      "corpName": "디이엔티",
+      "stage": "",
+      "revenue": 740,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "001210",
+      "corpName": "금호전기",
+      "stage": "",
+      "revenue": 443,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "106240",
+      "corpName": "파인테크닉스",
+      "stage": "",
+      "revenue": 429,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "290690",
+      "corpName": "소룩스",
+      "stage": "",
+      "revenue": 383,
+      "confidence": 0.7,
+      "source": "kindlist"
+    }
+  ],
+  "edges": [
+    {
+      "from": "001440",
+      "to": "217590",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "0008Z0",
+      "to": "333620",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "103590",
+      "to": "006340",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "001440",
+      "to": "006340",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "103590",
+      "to": "015860",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "015860",
+      "to": "103590",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "042370",
+      "to": "054220",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "054220",
+      "to": "042370",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "103590",
+      "to": "015860",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    }
+  ]
+}

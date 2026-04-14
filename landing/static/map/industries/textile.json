@@ -1,0 +1,709 @@
+{
+  "industryId": "textile",
+  "name": "섬유·의류",
+  "totalRevenue": 625316,
+  "nodeCount": 64,
+  "stages": [
+    {
+      "key": "fiber",
+      "name": "섬유·원단",
+      "role": "제조",
+      "stream": "upstream",
+      "nodes": [
+        {
+          "stockCode": "009970",
+          "corpName": "영원무역홀딩스",
+          "stage": "fiber",
+          "revenue": 48950,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "079980",
+          "corpName": "휴비스",
+          "stage": "fiber",
+          "revenue": 8895,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "003200",
+          "corpName": "일신방직",
+          "stage": "fiber",
+          "revenue": 5172,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "035150",
+          "corpName": "백산",
+          "stage": "fiber",
+          "revenue": 5049,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "104480",
+          "corpName": "티케이케미칼",
+          "stage": "fiber",
+          "revenue": 3458,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "155660",
+          "corpName": "DSR",
+          "stage": "fiber",
+          "revenue": 3024,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "002170",
+          "corpName": "삼양통상",
+          "stage": "fiber",
+          "revenue": 1747,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "263020",
+          "corpName": "디케이앤디",
+          "stage": "fiber",
+          "revenue": 1426,
+          "confidence": 0.771,
+          "source": "docs"
+        },
+        {
+          "stockCode": "010170",
+          "corpName": "대한광통신",
+          "stage": "fiber",
+          "revenue": 1394,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "225590",
+          "corpName": "패션플랫폼",
+          "stage": "fiber",
+          "revenue": 1063,
+          "confidence": 0.68,
+          "source": "docs"
+        },
+        {
+          "stockCode": "001550",
+          "corpName": "조비",
+          "stage": "fiber",
+          "revenue": 997,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "130500",
+          "corpName": "GH신소재",
+          "stage": "fiber",
+          "revenue": 876,
+          "confidence": 0.886,
+          "source": "docs"
+        },
+        {
+          "stockCode": "478560",
+          "corpName": "블랙야크아이앤씨",
+          "stage": "fiber",
+          "revenue": 573,
+          "confidence": 0.886,
+          "source": "docs"
+        },
+        {
+          "stockCode": "000950",
+          "corpName": "전방",
+          "stage": "fiber",
+          "revenue": 408,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "008500",
+          "corpName": "일정실업",
+          "stage": "fiber",
+          "revenue": 366,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "017510",
+          "corpName": "세명전기",
+          "stage": "fiber",
+          "revenue": 323,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "032080",
+          "corpName": "아즈텍WB",
+          "stage": "fiber",
+          "revenue": 302,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "011300",
+          "corpName": "성안머티리얼스",
+          "stage": "fiber",
+          "revenue": 247,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "227420",
+          "corpName": "도부",
+          "stage": "fiber",
+          "revenue": 0,
+          "confidence": 0.84,
+          "source": "docs"
+        },
+        {
+          "stockCode": "299480",
+          "corpName": "지앤이헬스케어",
+          "stage": "fiber",
+          "revenue": 0,
+          "confidence": 0.7,
+          "source": "docs"
+        }
+      ]
+    },
+    {
+      "key": "apparel",
+      "name": "의류·패션",
+      "role": "제조",
+      "stream": "downstream",
+      "nodes": [
+        {
+          "stockCode": "001120",
+          "corpName": "LX인터내셔널",
+          "stage": "apparel",
+          "revenue": 167063,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "023530",
+          "corpName": "롯데쇼핑",
+          "stage": "apparel",
+          "revenue": 137384,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "111770",
+          "corpName": "영원무역",
+          "stage": "apparel",
+          "revenue": 40636,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "016450",
+          "corpName": "한세예스24홀딩스",
+          "stage": "apparel",
+          "revenue": 34098,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "105630",
+          "corpName": "한세실업",
+          "stage": "apparel",
+          "revenue": 19418,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "383220",
+          "corpName": "F&F",
+          "stage": "apparel",
+          "revenue": 19340,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "093050",
+          "corpName": "LF",
+          "stage": "apparel",
+          "revenue": 18824,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "241590",
+          "corpName": "화승엔터프라이즈",
+          "stage": "apparel",
+          "revenue": 15644,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "020000",
+          "corpName": "한섬",
+          "stage": "apparel",
+          "revenue": 14918,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "194370",
+          "corpName": "제이에스코퍼레이션",
+          "stage": "apparel",
+          "revenue": 12882,
+          "confidence": 0.68,
+          "source": "docs"
+        },
+        {
+          "stockCode": "007980",
+          "corpName": "TP",
+          "stage": "apparel",
+          "revenue": 10290,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "145170",
+          "corpName": "노브랜드",
+          "stage": "apparel",
+          "revenue": 6022,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "111110",
+          "corpName": "호전실업",
+          "stage": "apparel",
+          "revenue": 5209,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "472850",
+          "corpName": "폰드그룹",
+          "stage": "apparel",
+          "revenue": 4856,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "298540",
+          "corpName": "더네이쳐홀딩스",
+          "stage": "apparel",
+          "revenue": 4775,
+          "confidence": 0.84,
+          "source": "docs"
+        },
+        {
+          "stockCode": "337930",
+          "corpName": "젝시믹스",
+          "stage": "apparel",
+          "revenue": 2741,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "227840",
+          "corpName": "현대코퍼레이션홀딩스",
+          "stage": "apparel",
+          "revenue": 2502,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "036620",
+          "corpName": "감성코퍼레이션",
+          "stage": "apparel",
+          "revenue": 2502,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "204020",
+          "corpName": "그리티",
+          "stage": "apparel",
+          "revenue": 2017,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "013990",
+          "corpName": "아가방컴퍼니",
+          "stage": "apparel",
+          "revenue": 1891,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "005800",
+          "corpName": "신영와코루",
+          "stage": "apparel",
+          "revenue": 1852,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "084870",
+          "corpName": "티비에이치글로벌",
+          "stage": "apparel",
+          "revenue": 1824,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "109670",
+          "corpName": "씨싸이트",
+          "stage": "apparel",
+          "revenue": 1697,
+          "confidence": 0.84,
+          "source": "docs"
+        },
+        {
+          "stockCode": "306040",
+          "corpName": "에스제이그룹",
+          "stage": "apparel",
+          "revenue": 1634,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "000590",
+          "corpName": "CS홀딩스",
+          "stage": "apparel",
+          "revenue": 1349,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "065060",
+          "corpName": "지엔코",
+          "stage": "apparel",
+          "revenue": 1109,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "014990",
+          "corpName": "인디에프",
+          "stage": "apparel",
+          "revenue": 1046,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "090370",
+          "corpName": "메타랩스",
+          "stage": "apparel",
+          "revenue": 813,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "033340",
+          "corpName": "좋은사람들",
+          "stage": "apparel",
+          "revenue": 726,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "098660",
+          "corpName": "에스티오",
+          "stage": "apparel",
+          "revenue": 715,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "481070",
+          "corpName": "에이유브랜즈",
+          "stage": "apparel",
+          "revenue": 600,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "267790",
+          "corpName": "배럴",
+          "stage": "apparel",
+          "revenue": 592,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "011080",
+          "corpName": "형지I&C",
+          "stage": "apparel",
+          "revenue": 508,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "462310",
+          "corpName": "뉴키즈온",
+          "stage": "apparel",
+          "revenue": 490,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "250030",
+          "corpName": "진코스텍",
+          "stage": "apparel",
+          "revenue": 486,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "366030",
+          "corpName": "공구우먼",
+          "stage": "apparel",
+          "revenue": 450,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "064800",
+          "corpName": "포니링크",
+          "stage": "apparel",
+          "revenue": 449,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "047770",
+          "corpName": "코데즈컴바인",
+          "stage": "apparel",
+          "revenue": 397,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "308100",
+          "corpName": "형지글로벌",
+          "stage": "apparel",
+          "revenue": 377,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "351020",
+          "corpName": "미쥬",
+          "stage": "apparel",
+          "revenue": 352,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "291230",
+          "corpName": "엔피",
+          "stage": "apparel",
+          "revenue": 272,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "008290",
+          "corpName": "원풍물산",
+          "stage": "apparel",
+          "revenue": 169,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "321550",
+          "corpName": "티움바이오",
+          "stage": "apparel",
+          "revenue": 123,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "900110",
+          "corpName": "이스트아시아홀딩스",
+          "stage": "apparel",
+          "revenue": 3,
+          "confidence": 0.7,
+          "source": "product"
+        }
+      ]
+    }
+  ],
+  "unclassified": [],
+  "edges": [
+    {
+      "from": "000950",
+      "to": "105630",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "000950",
+      "to": "003200",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001120",
+      "to": "093050",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "111770",
+      "to": "009970",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "009970",
+      "to": "111770",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "105630",
+      "to": "016450",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "016450",
+      "to": "105630",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "003200",
+      "to": "047770",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "105630",
+      "to": "016450",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "111770",
+      "to": "009970",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "225590",
+      "to": "084870",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "267790",
+      "to": "298540",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "298540",
+      "to": "267790",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "308100",
+      "to": "011080",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "145170",
+      "to": "383220",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "111770",
+      "to": "003200",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "111770",
+      "to": "079980",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    }
+  ]
+}

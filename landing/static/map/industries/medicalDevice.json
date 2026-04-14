@@ -1,0 +1,551 @@
+{
+  "industryId": "medicalDevice",
+  "name": "의료기기",
+  "totalRevenue": 58351,
+  "nodeCount": 57,
+  "stages": [
+    {
+      "key": "diagnostic",
+      "name": "진단",
+      "role": "제조",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "099190",
+          "corpName": "아이센스",
+          "stage": "diagnostic",
+          "revenue": 3154,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "206640",
+          "corpName": "바디텍메드",
+          "stage": "diagnostic",
+          "revenue": 1621,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "036220",
+          "corpName": "오상헬스케어",
+          "stage": "diagnostic",
+          "revenue": 1286,
+          "confidence": 0.933,
+          "source": "docs"
+        },
+        {
+          "stockCode": "303360",
+          "corpName": "프로티아",
+          "stage": "diagnostic",
+          "revenue": 151,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "314930",
+          "corpName": "바이오다인",
+          "stage": "diagnostic",
+          "revenue": 70,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "317690",
+          "corpName": "퀀타매트릭스",
+          "stage": "diagnostic",
+          "revenue": 37,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "336040",
+          "corpName": "타스컴",
+          "stage": "diagnostic",
+          "revenue": 0,
+          "confidence": 0.867,
+          "source": "docs"
+        }
+      ]
+    },
+    {
+      "key": "therapeutic",
+      "name": "치료",
+      "role": "제조",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "261200",
+          "corpName": "덴티스",
+          "stage": "therapeutic",
+          "revenue": 1142,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "104540",
+          "corpName": "코렌텍",
+          "stage": "therapeutic",
+          "revenue": 1004,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "372910",
+          "corpName": "한컴라이프케어",
+          "stage": "therapeutic",
+          "revenue": 921,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "0011A0",
+          "corpName": "액스비스",
+          "stage": "therapeutic",
+          "revenue": 566,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "044780",
+          "corpName": "에이치케이",
+          "stage": "therapeutic",
+          "revenue": 542,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "115480",
+          "corpName": "씨유메디칼",
+          "stage": "therapeutic",
+          "revenue": 482,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "226400",
+          "corpName": "오스테오닉",
+          "stage": "therapeutic",
+          "revenue": 454,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "199550",
+          "corpName": "레이저옵텍",
+          "stage": "therapeutic",
+          "revenue": 257,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "452190",
+          "corpName": "한빛레이저",
+          "stage": "therapeutic",
+          "revenue": 242,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "066310",
+          "corpName": "큐에스아이",
+          "stage": "therapeutic",
+          "revenue": 233,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "388790",
+          "corpName": "라이콤",
+          "stage": "therapeutic",
+          "revenue": 177,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "043100",
+          "corpName": "알파AI",
+          "stage": "therapeutic",
+          "revenue": 168,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "199290",
+          "corpName": "바이오프로테크",
+          "stage": "therapeutic",
+          "revenue": 0,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "200580",
+          "corpName": "메디쎄이",
+          "stage": "therapeutic",
+          "revenue": 0,
+          "confidence": 0.7,
+          "source": "product"
+        }
+      ]
+    },
+    {
+      "key": "imaging",
+      "name": "영상",
+      "role": "제조",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "011560",
+          "corpName": "세보엠이씨",
+          "stage": "imaging",
+          "revenue": 7158,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "092790",
+          "corpName": "넥스틸",
+          "stage": "imaging",
+          "revenue": 5510,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "215360",
+          "corpName": "우리산업",
+          "stage": "imaging",
+          "revenue": 5320,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "043150",
+          "corpName": "바텍",
+          "stage": "imaging",
+          "revenue": 4264,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "036030",
+          "corpName": "케이티알파",
+          "stage": "imaging",
+          "revenue": 3959,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "125020",
+          "corpName": "티씨머티리얼즈",
+          "stage": "imaging",
+          "revenue": 2991,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "100120",
+          "corpName": "뷰웍스",
+          "stage": "imaging",
+          "revenue": 2393,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "041830",
+          "corpName": "인바디",
+          "stage": "imaging",
+          "revenue": 2339,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "336570",
+          "corpName": "원텍",
+          "stage": "imaging",
+          "revenue": 1568,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "214680",
+          "corpName": "디알텍",
+          "stage": "imaging",
+          "revenue": 1163,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "228850",
+          "corpName": "레이언스",
+          "stage": "imaging",
+          "revenue": 1147,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "240550",
+          "corpName": "동방메디컬",
+          "stage": "imaging",
+          "revenue": 1135,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "122310",
+          "corpName": "제노레이",
+          "stage": "imaging",
+          "revenue": 1080,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "263690",
+          "corpName": "디알젬",
+          "stage": "imaging",
+          "revenue": 1027,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "179290",
+          "corpName": "엠아이텍",
+          "stage": "imaging",
+          "revenue": 672,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "041920",
+          "corpName": "메디아나",
+          "stage": "imaging",
+          "revenue": 649,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "081180",
+          "corpName": "쎄크",
+          "stage": "imaging",
+          "revenue": 592,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "206560",
+          "corpName": "덱스터",
+          "stage": "imaging",
+          "revenue": 554,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "037950",
+          "corpName": "엘컴텍",
+          "stage": "imaging",
+          "revenue": 463,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "156100",
+          "corpName": "엘앤케이바이오",
+          "stage": "imaging",
+          "revenue": 389,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "398120",
+          "corpName": "에스지헬스케어",
+          "stage": "imaging",
+          "revenue": 246,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "302550",
+          "corpName": "리메드",
+          "stage": "imaging",
+          "revenue": 245,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "296640",
+          "corpName": "이노룰스",
+          "stage": "imaging",
+          "revenue": 229,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "258830",
+          "corpName": "세종메디칼",
+          "stage": "imaging",
+          "revenue": 185,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "043090",
+          "corpName": "더테크놀로지",
+          "stage": "imaging",
+          "revenue": 126,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "411080",
+          "corpName": "샌즈랩",
+          "stage": "imaging",
+          "revenue": 116,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "058110",
+          "corpName": "멕아이씨에스",
+          "stage": "imaging",
+          "revenue": 113,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "405000",
+          "corpName": "플라즈맵",
+          "stage": "imaging",
+          "revenue": 85,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "0088M0",
+          "corpName": "메쥬",
+          "stage": "imaging",
+          "revenue": 74,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "412350",
+          "corpName": "레이저쎌",
+          "stage": "imaging",
+          "revenue": 47,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "212310",
+          "corpName": "오건에코텍",
+          "stage": "imaging",
+          "revenue": 0,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "244880",
+          "corpName": "나눔테크",
+          "stage": "imaging",
+          "revenue": 0,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "332190",
+          "corpName": "오션스바이오",
+          "stage": "imaging",
+          "revenue": 0,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "337840",
+          "corpName": "유엑스엔",
+          "stage": "imaging",
+          "revenue": 0,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "390110",
+          "corpName": "애니메디솔루션",
+          "stage": "imaging",
+          "revenue": 0,
+          "confidence": 0.7,
+          "source": "docs"
+        },
+        {
+          "stockCode": "491000",
+          "corpName": "리브스메드",
+          "stage": "imaging",
+          "revenue": 0,
+          "confidence": 0.5,
+          "source": "docs"
+        }
+      ]
+    }
+  ],
+  "unclassified": [],
+  "edges": [
+    {
+      "from": "228850",
+      "to": "043150",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "036220",
+      "to": "336040",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "043150",
+      "to": "228850",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "044780",
+      "to": "200580",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "228850",
+      "to": "043150",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "036220",
+      "to": "336040",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    }
+  ]
+}

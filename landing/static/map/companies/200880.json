@@ -1,0 +1,186 @@
+{
+  "ego": {
+    "stockCode": "200880",
+    "corpName": "서연이화",
+    "industry": "auto",
+    "stage": "oem",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 45052,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "007860",
+      "corpName": "서연",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 49161
+    },
+    {
+      "stockCode": "012860",
+      "corpName": "모베이스전자",
+      "industry": "telecom",
+      "stage": "device",
+      "revenue": 10441
+    },
+    {
+      "stockCode": "019770",
+      "corpName": "서연탑메탈",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2071
+    },
+    {
+      "stockCode": "067570",
+      "corpName": "엔브이에이치코리아",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 16239
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "265520",
+      "corpName": "AP시스템",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 4601
+    },
+    {
+      "stockCode": "000490",
+      "corpName": "대동",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 14847
+    }
+  ],
+  "edges": [
+    {
+      "from": "200880",
+      "to": "007860",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "007860",
+      "to": "200880",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "012860",
+      "to": "200880",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "019770",
+      "to": "200880",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "200880",
+      "to": "007860",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "200880",
+      "to": "067570",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "200880",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "200880",
+      "to": "265520",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "200880",
+      "to": "019770",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "200880",
+      "to": "000490",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ]
+}

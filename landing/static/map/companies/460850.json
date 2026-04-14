@@ -1,0 +1,291 @@
+{
+  "ego": {
+    "stockCode": "460850",
+    "corpName": "동국씨엠",
+    "industry": "steel",
+    "stage": "product",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 27687,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001230",
+      "corpName": "동국홀딩스",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 19853
+    },
+    {
+      "stockCode": "139990",
+      "corpName": "아주스틸",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 10856
+    },
+    {
+      "stockCode": "365330",
+      "corpName": "에스와이스틸텍",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 974
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "129260",
+      "corpName": "인터지스",
+      "industry": "logistics",
+      "stage": "general",
+      "revenue": 7090
+    },
+    {
+      "stockCode": "069460",
+      "corpName": "대호에이엘",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 2156
+    },
+    {
+      "stockCode": "004560",
+      "corpName": "현대비앤지스틸",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 7413
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 75543
+    },
+    {
+      "stockCode": "009190",
+      "corpName": "대양금속",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 2235
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 32034
+    }
+  ],
+  "edges": [
+    {
+      "from": "460850",
+      "to": "001230",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 168969.0,
+      "ratio": null,
+      "product": "냉연강판",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "냉연강판"
+    },
+    {
+      "from": "460850",
+      "to": "139990",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "460850",
+      "to": "365330",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "004020",
+      "to": "460850",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 936740.0,
+      "ratio": null,
+      "product": "HRC",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "HRC"
+    },
+    {
+      "from": "001230",
+      "to": "460850",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "129260",
+      "to": "460850",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "139990",
+      "to": "460850",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "139990",
+      "to": "460850",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "069460",
+      "to": "460850",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004560",
+      "to": "460850",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "011760",
+      "to": "460850",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "009190",
+      "to": "460850",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "460850",
+      "to": "001230",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "460850",
+      "to": "139990",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "460850",
+      "to": "460860",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "460850",
+      "to": "129260",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "460860",
+      "to": "460850",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ]
+}

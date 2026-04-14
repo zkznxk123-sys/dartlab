@@ -1,0 +1,185 @@
+{
+  "industryId": "battery",
+  "name": "2차전지",
+  "totalRevenue": 100535,
+  "nodeCount": 16,
+  "stages": [
+    {
+      "key": "cathode",
+      "name": "양극재",
+      "role": "제조",
+      "stream": "upstream",
+      "nodes": [
+        {
+          "stockCode": "066970",
+          "corpName": "엘앤에프",
+          "stage": "cathode",
+          "revenue": 21549,
+          "confidence": 0.92,
+          "source": "docs"
+        },
+        {
+          "stockCode": "005070",
+          "corpName": "코스모신소재",
+          "stage": "cathode",
+          "revenue": 4563,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "107640",
+          "corpName": "한중엔시에스",
+          "stage": "cathode",
+          "revenue": 1753,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "434190",
+          "corpName": "탈로스",
+          "stage": "cathode",
+          "revenue": 0,
+          "confidence": 0.7,
+          "source": "docs"
+        }
+      ]
+    },
+    {
+      "key": "anode",
+      "name": "음극재",
+      "role": "제조",
+      "stream": "upstream",
+      "nodes": [
+        {
+          "stockCode": "064760",
+          "corpName": "티씨케이",
+          "stage": "anode",
+          "revenue": 3013,
+          "confidence": 0.7,
+          "source": "product"
+        }
+      ]
+    },
+    {
+      "key": "separator",
+      "name": "분리막",
+      "role": "제조",
+      "stream": "upstream",
+      "nodes": [
+        {
+          "stockCode": "393890",
+          "corpName": "더블유씨피",
+          "stage": "separator",
+          "revenue": 1108,
+          "confidence": 0.7,
+          "source": "product"
+        }
+      ]
+    },
+    {
+      "key": "electrolyte",
+      "name": "전해질",
+      "role": "제조",
+      "stream": "upstream",
+      "nodes": [
+        {
+          "stockCode": "348370",
+          "corpName": "엔켐",
+          "stage": "electrolyte",
+          "revenue": 3128,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "082920",
+          "corpName": "비츠로셀",
+          "stage": "electrolyte",
+          "revenue": 2431,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "364950",
+          "corpName": "에이아이코리아",
+          "stage": "electrolyte",
+          "revenue": 869,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "126340",
+          "corpName": "비나텍",
+          "stage": "electrolyte",
+          "revenue": 822,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "446540",
+          "corpName": "메가터치",
+          "stage": "electrolyte",
+          "revenue": 432,
+          "confidence": 0.8,
+          "source": "docs"
+        }
+      ]
+    },
+    {
+      "key": "cell",
+      "name": "셀",
+      "role": "제조",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "007340",
+          "corpName": "DN오토모티브",
+          "stage": "cell",
+          "revenue": 36757,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "004490",
+          "corpName": "세방전지",
+          "stage": "cell",
+          "revenue": 21187,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "078600",
+          "corpName": "대주전자재료",
+          "stage": "cell",
+          "revenue": 2546,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "278990",
+          "corpName": "EMB",
+          "stage": "cell",
+          "revenue": 238,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "312610",
+          "corpName": "에이에프더블류",
+          "stage": "cell",
+          "revenue": 137,
+          "confidence": 1.0,
+          "source": "docs"
+        }
+      ]
+    },
+    {
+      "key": "pack",
+      "name": "팩·BMS",
+      "role": "제조",
+      "stream": "downstream",
+      "nodes": []
+    }
+  ],
+  "unclassified": [],
+  "edges": []
+}

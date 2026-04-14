@@ -1,0 +1,98 @@
+{
+  "industryId": "railroad",
+  "name": "철도",
+  "totalRevenue": 61899,
+  "nodeCount": 6,
+  "stages": [
+    {
+      "key": "general",
+      "name": "철도장비",
+      "role": "제조",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "064350",
+          "corpName": "현대로템",
+          "stage": "general",
+          "revenue": 58390,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "045390",
+          "corpName": "대아티아이",
+          "stage": "general",
+          "revenue": 1532,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "271940",
+          "corpName": "일진하이솔루스",
+          "stage": "general",
+          "revenue": 816,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "115500",
+          "corpName": "케이씨에스",
+          "stage": "general",
+          "revenue": 249,
+          "confidence": 0.7,
+          "source": "product"
+        }
+      ]
+    }
+  ],
+  "unclassified": [
+    {
+      "stockCode": "088390",
+      "corpName": "이녹스",
+      "stage": "",
+      "revenue": 591,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "123750",
+      "corpName": "알톤",
+      "stage": "",
+      "revenue": 322,
+      "confidence": 0.7,
+      "source": "kindlist"
+    }
+  ],
+  "edges": [
+    {
+      "from": "123750",
+      "to": "088390",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "088390",
+      "to": "123750",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "123750",
+      "to": "088390",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    }
+  ]
+}

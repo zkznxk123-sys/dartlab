@@ -1,0 +1,1293 @@
+{
+  "version": "2026-04-14",
+  "industries": [
+    {
+      "id": "semiconductor",
+      "name": "반도체",
+      "revenue": 4571579,
+      "nodeCount": 125,
+      "stagedCount": 125,
+      "stageMix": {
+        "fab": 26,
+        "materials": 9,
+        "test": 18,
+        "equipment": 27,
+        "packaging": 20,
+        "design": 25
+      },
+      "stages": [
+        {
+          "key": "design",
+          "name": "설계",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "fab",
+          "name": "전공정(FAB)",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "packaging",
+          "name": "후공정(패키징)",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "test",
+          "name": "테스트",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "equipment",
+          "name": "장비",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "materials",
+          "name": "소재",
+          "role": "제조",
+          "stream": "upstream"
+        }
+      ]
+    },
+    {
+      "id": "electronics",
+      "name": "전자부품",
+      "revenue": 2904282,
+      "nodeCount": 349,
+      "stagedCount": 346,
+      "stageMix": {
+        "component": 154,
+        "set": 84,
+        "display": 80,
+        "module": 28
+      },
+      "stages": [
+        {
+          "key": "component",
+          "name": "부품",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "module",
+          "name": "모듈",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "display",
+          "name": "디스플레이",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "set",
+          "name": "완제품",
+          "role": "제조",
+          "stream": "downstream"
+        }
+      ]
+    },
+    {
+      "id": "telecom",
+      "name": "통신장비",
+      "revenue": 817130,
+      "nodeCount": 99,
+      "stagedCount": 92,
+      "stageMix": {
+        "service": 47,
+        "infra": 28,
+        "device": 17
+      },
+      "stages": [
+        {
+          "key": "infra",
+          "name": "인프라",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "device",
+          "name": "단말",
+          "role": "제조",
+          "stream": "downstream"
+        },
+        {
+          "key": "service",
+          "name": "서비스",
+          "role": "서비스",
+          "stream": "downstream"
+        }
+      ]
+    },
+    {
+      "id": "software",
+      "name": "소프트웨어·IT서비스",
+      "revenue": 2193895,
+      "nodeCount": 233,
+      "stagedCount": 228,
+      "stageMix": {
+        "platform": 85,
+        "solution": 36,
+        "ai": 67,
+        "game": 40
+      },
+      "stages": [
+        {
+          "key": "platform",
+          "name": "플랫폼",
+          "role": "서비스",
+          "stream": "downstream"
+        },
+        {
+          "key": "solution",
+          "name": "솔루션",
+          "role": "서비스",
+          "stream": "midstream"
+        },
+        {
+          "key": "game",
+          "name": "게임",
+          "role": "서비스",
+          "stream": "downstream"
+        },
+        {
+          "key": "ai",
+          "name": "AI·데이터",
+          "role": "서비스",
+          "stream": "midstream"
+        }
+      ]
+    },
+    {
+      "id": "pharma",
+      "name": "제약·바이오",
+      "revenue": 550908,
+      "nodeCount": 271,
+      "stagedCount": 270,
+      "stageMix": {
+        "api": 15,
+        "formulation": 56,
+        "device": 41,
+        "research": 157,
+        "distribution": 1
+      },
+      "stages": [
+        {
+          "key": "research",
+          "name": "연구·신약개발",
+          "role": "연구",
+          "stream": "upstream"
+        },
+        {
+          "key": "api",
+          "name": "원료의약품",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "formulation",
+          "name": "완제의약품",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "device",
+          "name": "의료기기",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "distribution",
+          "name": "유통",
+          "role": "도매",
+          "stream": "downstream"
+        }
+      ]
+    },
+    {
+      "id": "medicalDevice",
+      "name": "의료기기",
+      "revenue": 58351,
+      "nodeCount": 57,
+      "stagedCount": 57,
+      "stageMix": {
+        "therapeutic": 14,
+        "imaging": 36,
+        "diagnostic": 7
+      },
+      "stages": [
+        {
+          "key": "diagnostic",
+          "name": "진단",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "therapeutic",
+          "name": "치료",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "imaging",
+          "name": "영상",
+          "role": "제조",
+          "stream": "midstream"
+        }
+      ]
+    },
+    {
+      "id": "auto",
+      "name": "자동차",
+      "revenue": 4528735,
+      "nodeCount": 82,
+      "stagedCount": 80,
+      "stageMix": {
+        "oem": 32,
+        "body": 17,
+        "chassis": 9,
+        "powertrain": 19,
+        "electronics": 3
+      },
+      "stages": [
+        {
+          "key": "oem",
+          "name": "완성차",
+          "role": "제조",
+          "stream": "downstream"
+        },
+        {
+          "key": "powertrain",
+          "name": "파워트레인",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "body",
+          "name": "차체·내장",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "chassis",
+          "name": "샤시·제동",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "electronics",
+          "name": "전장",
+          "role": "제조",
+          "stream": "midstream"
+        }
+      ]
+    },
+    {
+      "id": "battery",
+      "name": "2차전지",
+      "revenue": 100535,
+      "nodeCount": 16,
+      "stagedCount": 16,
+      "stageMix": {
+        "cell": 5,
+        "cathode": 4,
+        "anode": 1,
+        "electrolyte": 5,
+        "separator": 1
+      },
+      "stages": [
+        {
+          "key": "cathode",
+          "name": "양극재",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "anode",
+          "name": "음극재",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "separator",
+          "name": "분리막",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "electrolyte",
+          "name": "전해질",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "cell",
+          "name": "셀",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "pack",
+          "name": "팩·BMS",
+          "role": "제조",
+          "stream": "downstream"
+        }
+      ]
+    },
+    {
+      "id": "chemical",
+      "name": "화학",
+      "revenue": 3382255,
+      "nodeCount": 131,
+      "stagedCount": 125,
+      "stageMix": {
+        "specialty": 35,
+        "polymer": 68,
+        "basic": 22
+      },
+      "stages": [
+        {
+          "key": "basic",
+          "name": "기초화학",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "specialty",
+          "name": "정밀화학",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "polymer",
+          "name": "고분자·플라스틱",
+          "role": "제조",
+          "stream": "midstream"
+        }
+      ]
+    },
+    {
+      "id": "steel",
+      "name": "철강·금속",
+      "revenue": 1816333,
+      "nodeCount": 80,
+      "stagedCount": 72,
+      "stageMix": {
+        "product": 36,
+        "raw": 20,
+        "processing": 16
+      },
+      "stages": [
+        {
+          "key": "raw",
+          "name": "원료·제련",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "product",
+          "name": "철강제품",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "processing",
+          "name": "가공",
+          "role": "제조",
+          "stream": "downstream"
+        }
+      ]
+    },
+    {
+      "id": "machinery",
+      "name": "기계·장비",
+      "revenue": 939872,
+      "nodeCount": 181,
+      "stagedCount": 165,
+      "stageMix": {
+        "general": 40,
+        "special": 72,
+        "precision": 53
+      },
+      "stages": [
+        {
+          "key": "general",
+          "name": "범용기계",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "special",
+          "name": "전용기계",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "precision",
+          "name": "정밀기기",
+          "role": "제조",
+          "stream": "midstream"
+        }
+      ]
+    },
+    {
+      "id": "electrical",
+      "name": "전기장비",
+      "revenue": 179965,
+      "nodeCount": 40,
+      "stagedCount": 36,
+      "stageMix": {
+        "power": 21,
+        "cable": 9,
+        "motor": 6
+      },
+      "stages": [
+        {
+          "key": "power",
+          "name": "전력기기",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "motor",
+          "name": "모터·발전기",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "cable",
+          "name": "전선·케이블",
+          "role": "제조",
+          "stream": "midstream"
+        }
+      ]
+    },
+    {
+      "id": "shipbuilding",
+      "name": "조선·해운",
+      "revenue": 1831495,
+      "nodeCount": 24,
+      "stagedCount": 22,
+      "stageMix": {
+        "shipping": 9,
+        "build": 13
+      },
+      "stages": [
+        {
+          "key": "build",
+          "name": "건조",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "equipment",
+          "name": "기자재",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "shipping",
+          "name": "해운",
+          "role": "서비스",
+          "stream": "downstream"
+        }
+      ]
+    },
+    {
+      "id": "aerospace",
+      "name": "항공·방산",
+      "revenue": 1360737,
+      "nodeCount": 29,
+      "stagedCount": 22,
+      "stageMix": {
+        "airframe": 10,
+        "airline": 6,
+        "defense": 6
+      },
+      "stages": [
+        {
+          "key": "airframe",
+          "name": "기체·부품",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "defense",
+          "name": "방산",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "airline",
+          "name": "항공사",
+          "role": "서비스",
+          "stream": "downstream"
+        }
+      ]
+    },
+    {
+      "id": "construction",
+      "name": "건설",
+      "revenue": 1677882,
+      "nodeCount": 105,
+      "stagedCount": 105,
+      "stageMix": {
+        "general": 70,
+        "engineering": 16,
+        "material": 19
+      },
+      "stages": [
+        {
+          "key": "general",
+          "name": "종합건설",
+          "role": "서비스",
+          "stream": "midstream"
+        },
+        {
+          "key": "material",
+          "name": "건자재",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "engineering",
+          "name": "엔지니어링",
+          "role": "서비스",
+          "stream": "upstream"
+        }
+      ]
+    },
+    {
+      "id": "food",
+      "name": "식품·음료",
+      "revenue": 1890361,
+      "nodeCount": 132,
+      "stagedCount": 129,
+      "stageMix": {
+        "distribution": 26,
+        "raw": 78,
+        "processing": 25
+      },
+      "stages": [
+        {
+          "key": "raw",
+          "name": "원료·소재",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "processing",
+          "name": "가공·제조",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "distribution",
+          "name": "유통",
+          "role": "도매",
+          "stream": "downstream"
+        }
+      ]
+    },
+    {
+      "id": "textile",
+      "name": "섬유·의류",
+      "revenue": 625316,
+      "nodeCount": 64,
+      "stagedCount": 64,
+      "stageMix": {
+        "apparel": 44,
+        "fiber": 20
+      },
+      "stages": [
+        {
+          "key": "fiber",
+          "name": "섬유·원단",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "apparel",
+          "name": "의류·패션",
+          "role": "제조",
+          "stream": "downstream"
+        }
+      ]
+    },
+    {
+      "id": "plastic",
+      "name": "플라스틱·고무",
+      "revenue": 148140,
+      "nodeCount": 31,
+      "stagedCount": 28,
+      "stageMix": {
+        "general": 28
+      },
+      "stages": [
+        {
+          "key": "general",
+          "name": "제조",
+          "role": "제조",
+          "stream": "midstream"
+        }
+      ]
+    },
+    {
+      "id": "buildingMaterials",
+      "name": "시멘트·요업",
+      "revenue": 45063,
+      "nodeCount": 13,
+      "stagedCount": 13,
+      "stageMix": {
+        "general": 13
+      },
+      "stages": [
+        {
+          "key": "general",
+          "name": "제조",
+          "role": "제조",
+          "stream": "midstream"
+        }
+      ]
+    },
+    {
+      "id": "paper",
+      "name": "제지·목재",
+      "revenue": 167008,
+      "nodeCount": 37,
+      "stagedCount": 37,
+      "stageMix": {
+        "general": 37
+      },
+      "stages": [
+        {
+          "key": "general",
+          "name": "제조",
+          "role": "제조",
+          "stream": "midstream"
+        }
+      ]
+    },
+    {
+      "id": "finance",
+      "name": "금융",
+      "revenue": 1427538,
+      "nodeCount": 107,
+      "stagedCount": 103,
+      "stageMix": {
+        "securities": 70,
+        "insurance": 12,
+        "bank": 12,
+        "fintech": 9
+      },
+      "stages": [
+        {
+          "key": "bank",
+          "name": "은행",
+          "role": "서비스",
+          "stream": "midstream"
+        },
+        {
+          "key": "securities",
+          "name": "증권",
+          "role": "서비스",
+          "stream": "midstream"
+        },
+        {
+          "key": "insurance",
+          "name": "보험",
+          "role": "서비스",
+          "stream": "midstream"
+        },
+        {
+          "key": "fintech",
+          "name": "핀테크",
+          "role": "서비스",
+          "stream": "downstream"
+        }
+      ]
+    },
+    {
+      "id": "media",
+      "name": "미디어·엔터",
+      "revenue": 243183,
+      "nodeCount": 70,
+      "stagedCount": 67,
+      "stageMix": {
+        "platform": 24,
+        "content": 38,
+        "agency": 5
+      },
+      "stages": [
+        {
+          "key": "content",
+          "name": "콘텐츠 제작",
+          "role": "서비스",
+          "stream": "upstream"
+        },
+        {
+          "key": "platform",
+          "name": "플랫폼·유통",
+          "role": "서비스",
+          "stream": "downstream"
+        },
+        {
+          "key": "agency",
+          "name": "기획사·엔터",
+          "role": "서비스",
+          "stream": "midstream"
+        }
+      ]
+    },
+    {
+      "id": "retail",
+      "name": "유통·소매",
+      "revenue": 1279684,
+      "nodeCount": 113,
+      "stagedCount": 99,
+      "stageMix": {
+        "wholesale": 50,
+        "retail": 49
+      },
+      "stages": [
+        {
+          "key": "wholesale",
+          "name": "도매",
+          "role": "도매",
+          "stream": "midstream"
+        },
+        {
+          "key": "retail",
+          "name": "소매",
+          "role": "소매",
+          "stream": "downstream"
+        }
+      ]
+    },
+    {
+      "id": "logistics",
+      "name": "물류·운송",
+      "revenue": 738274,
+      "nodeCount": 21,
+      "stagedCount": 16,
+      "stageMix": {
+        "general": 16
+      },
+      "stages": [
+        {
+          "key": "general",
+          "name": "물류",
+          "role": "서비스",
+          "stream": "midstream"
+        }
+      ]
+    },
+    {
+      "id": "energy",
+      "name": "에너지·유틸리티",
+      "revenue": 1597211,
+      "nodeCount": 34,
+      "stagedCount": 34,
+      "stageMix": {
+        "distribution": 18,
+        "generation": 16
+      },
+      "stages": [
+        {
+          "key": "generation",
+          "name": "발전",
+          "role": "서비스",
+          "stream": "upstream"
+        },
+        {
+          "key": "distribution",
+          "name": "공급",
+          "role": "서비스",
+          "stream": "downstream"
+        }
+      ]
+    },
+    {
+      "id": "realestate",
+      "name": "부동산",
+      "revenue": 553092,
+      "nodeCount": 78,
+      "stagedCount": 78,
+      "stageMix": {
+        "general": 78
+      },
+      "stages": [
+        {
+          "key": "general",
+          "name": "부동산",
+          "role": "서비스",
+          "stream": "midstream"
+        }
+      ]
+    },
+    {
+      "id": "education",
+      "name": "교육",
+      "revenue": 41408,
+      "nodeCount": 15,
+      "stagedCount": 15,
+      "stageMix": {
+        "general": 15
+      },
+      "stages": [
+        {
+          "key": "general",
+          "name": "교육",
+          "role": "서비스",
+          "stream": "downstream"
+        }
+      ]
+    },
+    {
+      "id": "leisure",
+      "name": "레저·서비스",
+      "revenue": 86902,
+      "nodeCount": 12,
+      "stagedCount": 12,
+      "stageMix": {
+        "general": 12
+      },
+      "stages": [
+        {
+          "key": "general",
+          "name": "레저",
+          "role": "서비스",
+          "stream": "downstream"
+        }
+      ]
+    },
+    {
+      "id": "environment",
+      "name": "환경",
+      "revenue": 175529,
+      "nodeCount": 7,
+      "stagedCount": 7,
+      "stageMix": {
+        "general": 7
+      },
+      "stages": [
+        {
+          "key": "general",
+          "name": "환경",
+          "role": "서비스",
+          "stream": "midstream"
+        }
+      ]
+    },
+    {
+      "id": "consulting",
+      "name": "전문서비스",
+      "revenue": 177466,
+      "nodeCount": 38,
+      "stagedCount": 36,
+      "stageMix": {
+        "general": 36
+      },
+      "stages": [
+        {
+          "key": "general",
+          "name": "전문서비스",
+          "role": "서비스",
+          "stream": "midstream"
+        }
+      ]
+    },
+    {
+      "id": "agriculture",
+      "name": "농축수산",
+      "revenue": 7085,
+      "nodeCount": 5,
+      "stagedCount": 5,
+      "stageMix": {
+        "general": 5
+      },
+      "stages": [
+        {
+          "key": "general",
+          "name": "농축수산",
+          "role": "제조",
+          "stream": "upstream"
+        }
+      ]
+    },
+    {
+      "id": "railroad",
+      "name": "철도",
+      "revenue": 61899,
+      "nodeCount": 6,
+      "stagedCount": 4,
+      "stageMix": {
+        "general": 4
+      },
+      "stages": [
+        {
+          "key": "general",
+          "name": "철도장비",
+          "role": "제조",
+          "stream": "midstream"
+        }
+      ]
+    },
+    {
+      "id": "cosmetics",
+      "name": "화장품·생활용품",
+      "revenue": 174241,
+      "nodeCount": 53,
+      "stagedCount": 53,
+      "stageMix": {
+        "raw": 10,
+        "manufacturing": 41,
+        "brand": 2
+      },
+      "stages": [
+        {
+          "key": "raw",
+          "name": "원료",
+          "role": "제조",
+          "stream": "upstream"
+        },
+        {
+          "key": "manufacturing",
+          "name": "제조·ODM",
+          "role": "제조",
+          "stream": "midstream"
+        },
+        {
+          "key": "brand",
+          "name": "브랜드",
+          "role": "소매",
+          "stream": "downstream"
+        }
+      ]
+    },
+    {
+      "id": "misc",
+      "name": "기타",
+      "revenue": 12746,
+      "nodeCount": 6,
+      "stagedCount": 0,
+      "stageMix": {},
+      "stages": [
+        {
+          "key": "general",
+          "name": "기타",
+          "role": "제조",
+          "stream": "midstream"
+        }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "fromIndustry": "retail",
+      "toIndustry": "machinery",
+      "edgeCount": 5,
+      "amount": 23684401.0
+    },
+    {
+      "fromIndustry": "electronics",
+      "toIndustry": "auto",
+      "edgeCount": 11,
+      "amount": 13184533.0
+    },
+    {
+      "fromIndustry": "steel",
+      "toIndustry": "aerospace",
+      "edgeCount": 6,
+      "amount": 13039770.0
+    },
+    {
+      "fromIndustry": "shipbuilding",
+      "toIndustry": "aerospace",
+      "edgeCount": 7,
+      "amount": 6519885.0
+    },
+    {
+      "fromIndustry": "machinery",
+      "toIndustry": "aerospace",
+      "edgeCount": 6,
+      "amount": 6519885.0
+    },
+    {
+      "fromIndustry": "energy",
+      "toIndustry": "buildingMaterials",
+      "edgeCount": 2,
+      "amount": 3304658.0
+    },
+    {
+      "fromIndustry": "electronics",
+      "toIndustry": "chemical",
+      "edgeCount": 15,
+      "amount": 3034469.0
+    },
+    {
+      "fromIndustry": "battery",
+      "toIndustry": "chemical",
+      "edgeCount": 2,
+      "amount": 3034180.0
+    },
+    {
+      "fromIndustry": "chemical",
+      "toIndustry": "construction",
+      "edgeCount": 15,
+      "amount": 1589710.0
+    },
+    {
+      "fromIndustry": "semiconductor",
+      "toIndustry": "electronics",
+      "edgeCount": 55,
+      "amount": 1293843.0
+    },
+    {
+      "fromIndustry": "buildingMaterials",
+      "toIndustry": "construction",
+      "edgeCount": 14,
+      "amount": 850138.0
+    },
+    {
+      "fromIndustry": "steel",
+      "toIndustry": "construction",
+      "edgeCount": 57,
+      "amount": 749844.0
+    },
+    {
+      "fromIndustry": "medicalDevice",
+      "toIndustry": "electronics",
+      "edgeCount": 7,
+      "amount": 444680.0
+    },
+    {
+      "fromIndustry": "chemical",
+      "toIndustry": "finance",
+      "edgeCount": 31,
+      "amount": 323086.0
+    },
+    {
+      "fromIndustry": "steel",
+      "toIndustry": "finance",
+      "edgeCount": 7,
+      "amount": 197352.0
+    },
+    {
+      "fromIndustry": "electronics",
+      "toIndustry": "semiconductor",
+      "edgeCount": 34,
+      "amount": 176550.0
+    },
+    {
+      "fromIndustry": "chemical",
+      "toIndustry": "software",
+      "edgeCount": 12,
+      "amount": 167893.0
+    },
+    {
+      "fromIndustry": "cosmetics",
+      "toIndustry": "pharma",
+      "edgeCount": 14,
+      "amount": 155679.0
+    },
+    {
+      "fromIndustry": "construction",
+      "toIndustry": "finance",
+      "edgeCount": 8,
+      "amount": 151194.0
+    },
+    {
+      "fromIndustry": "steel",
+      "toIndustry": "retail",
+      "edgeCount": 11,
+      "amount": 138794.0
+    },
+    {
+      "fromIndustry": "chemical",
+      "toIndustry": "textile",
+      "edgeCount": 11,
+      "amount": 119157.0
+    },
+    {
+      "fromIndustry": "steel",
+      "toIndustry": "semiconductor",
+      "edgeCount": 5,
+      "amount": 103962.0
+    },
+    {
+      "fromIndustry": "chemical",
+      "toIndustry": "electronics",
+      "edgeCount": 42,
+      "amount": 93312.0
+    },
+    {
+      "fromIndustry": "electrical",
+      "toIndustry": "electronics",
+      "edgeCount": 7,
+      "amount": 90128.0
+    },
+    {
+      "fromIndustry": "paper",
+      "toIndustry": "realestate",
+      "edgeCount": 10,
+      "amount": 89555.0
+    },
+    {
+      "fromIndustry": "machinery",
+      "toIndustry": "electronics",
+      "edgeCount": 24,
+      "amount": 84749.0
+    },
+    {
+      "fromIndustry": "software",
+      "toIndustry": "chemical",
+      "edgeCount": 16,
+      "amount": 77685.0
+    },
+    {
+      "fromIndustry": "paper",
+      "toIndustry": "construction",
+      "edgeCount": 17,
+      "amount": 75677.0
+    },
+    {
+      "fromIndustry": "medicalDevice",
+      "toIndustry": "chemical",
+      "edgeCount": 2,
+      "amount": 64240.0
+    },
+    {
+      "fromIndustry": "cosmetics",
+      "toIndustry": "semiconductor",
+      "edgeCount": 3,
+      "amount": 48052.0
+    },
+    {
+      "fromIndustry": "logistics",
+      "toIndustry": "auto",
+      "edgeCount": 1,
+      "amount": 42690.0
+    },
+    {
+      "fromIndustry": "shipbuilding",
+      "toIndustry": "construction",
+      "edgeCount": 9,
+      "amount": 40401.0
+    },
+    {
+      "fromIndustry": "shipbuilding",
+      "toIndustry": "finance",
+      "edgeCount": 3,
+      "amount": 40401.0
+    },
+    {
+      "fromIndustry": "machinery",
+      "toIndustry": "semiconductor",
+      "edgeCount": 3,
+      "amount": 38837.0
+    },
+    {
+      "fromIndustry": "chemical",
+      "toIndustry": "food",
+      "edgeCount": 17,
+      "amount": 35080.0
+    },
+    {
+      "fromIndustry": "cosmetics",
+      "toIndustry": "food",
+      "edgeCount": 7,
+      "amount": 35080.0
+    },
+    {
+      "fromIndustry": "retail",
+      "toIndustry": "construction",
+      "edgeCount": 8,
+      "amount": 31122.0
+    },
+    {
+      "fromIndustry": "electrical",
+      "toIndustry": "construction",
+      "edgeCount": 14,
+      "amount": 13679.0
+    },
+    {
+      "fromIndustry": "pharma",
+      "toIndustry": "software",
+      "edgeCount": 11,
+      "amount": 12800.0
+    },
+    {
+      "fromIndustry": "buildingMaterials",
+      "toIndustry": "steel",
+      "edgeCount": 2,
+      "amount": 11327.0
+    },
+    {
+      "fromIndustry": "cosmetics",
+      "toIndustry": "chemical",
+      "edgeCount": 15,
+      "amount": 11039.0
+    },
+    {
+      "fromIndustry": "cosmetics",
+      "toIndustry": "finance",
+      "edgeCount": 2,
+      "amount": 11039.0
+    },
+    {
+      "fromIndustry": "construction",
+      "toIndustry": "realestate",
+      "edgeCount": 8,
+      "amount": 9921.0
+    },
+    {
+      "fromIndustry": "software",
+      "toIndustry": "telecom",
+      "edgeCount": 6,
+      "amount": 9569.0
+    },
+    {
+      "fromIndustry": "software",
+      "toIndustry": "machinery",
+      "edgeCount": 6,
+      "amount": 9569.0
+    },
+    {
+      "fromIndustry": "buildingMaterials",
+      "toIndustry": "finance",
+      "edgeCount": 1,
+      "amount": 7476.0
+    },
+    {
+      "fromIndustry": "education",
+      "toIndustry": "realestate",
+      "edgeCount": 1,
+      "amount": 6825.0
+    },
+    {
+      "fromIndustry": "aerospace",
+      "toIndustry": "retail",
+      "edgeCount": 5,
+      "amount": 6116.0
+    },
+    {
+      "fromIndustry": "aerospace",
+      "toIndustry": "steel",
+      "edgeCount": 1,
+      "amount": 6116.0
+    },
+    {
+      "fromIndustry": "pharma",
+      "toIndustry": "food",
+      "edgeCount": 28,
+      "amount": 5090.0
+    }
+  ]
+}

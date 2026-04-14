@@ -1,0 +1,384 @@
+{
+  "industryId": "consulting",
+  "name": "전문서비스",
+  "totalRevenue": 177466,
+  "nodeCount": 38,
+  "stages": [
+    {
+      "key": "general",
+      "name": "전문서비스",
+      "role": "서비스",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "003030",
+          "corpName": "세아제강지주",
+          "stage": "general",
+          "revenue": 37596,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "000070",
+          "corpName": "삼양홀딩스",
+          "stage": "general",
+          "revenue": 33483,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "002030",
+          "corpName": "아세아",
+          "stage": "general",
+          "revenue": 18845,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "036710",
+          "corpName": "심텍홀딩스",
+          "stage": "general",
+          "revenue": 15281,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "015360",
+          "corpName": "INVENI",
+          "stage": "general",
+          "revenue": 13276,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "045100",
+          "corpName": "한양이엔지",
+          "stage": "general",
+          "revenue": 11182,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "004150",
+          "corpName": "한솔홀딩스",
+          "stage": "general",
+          "revenue": 10983,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "000700",
+          "corpName": "유수홀딩스",
+          "stage": "general",
+          "revenue": 4185,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "063570",
+          "corpName": "NICE인프라",
+          "stage": "general",
+          "revenue": 3840,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "180640",
+          "corpName": "한진칼",
+          "stage": "general",
+          "revenue": 2984,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "480370",
+          "corpName": "씨케이솔루션",
+          "stage": "general",
+          "revenue": 2910,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "006200",
+          "corpName": "한국전자홀딩스",
+          "stage": "general",
+          "revenue": 2759,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "038290",
+          "corpName": "마크로젠",
+          "stage": "general",
+          "revenue": 1953,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "049720",
+          "corpName": "고려신용정보",
+          "stage": "general",
+          "revenue": 1780,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "020710",
+          "corpName": "시공테크",
+          "stage": "general",
+          "revenue": 1684,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "000180",
+          "corpName": "성창기업지주",
+          "stage": "general",
+          "revenue": 1272,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "187220",
+          "corpName": "디티앤씨",
+          "stage": "general",
+          "revenue": 1258,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "034950",
+          "corpName": "한국기업평가",
+          "stage": "general",
+          "revenue": 1098,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "072990",
+          "corpName": "에이치시티",
+          "stage": "general",
+          "revenue": 1075,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "130580",
+          "corpName": "나이스디앤비",
+          "stage": "general",
+          "revenue": 914,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "408920",
+          "corpName": "메쎄이상",
+          "stage": "general",
+          "revenue": 728,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "405100",
+          "corpName": "큐알티",
+          "stage": "general",
+          "revenue": 689,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "359090",
+          "corpName": "씨엔알리서치",
+          "stage": "general",
+          "revenue": 650,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "418550",
+          "corpName": "제이오",
+          "stage": "general",
+          "revenue": 552,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "356890",
+          "corpName": "싸이버원",
+          "stage": "general",
+          "revenue": 337,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "448280",
+          "corpName": "에코아이",
+          "stage": "general",
+          "revenue": 309,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "180400",
+          "corpName": "DXVX",
+          "stage": "general",
+          "revenue": 294,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "347740",
+          "corpName": "피엔케이피부임상연구센타",
+          "stage": "general",
+          "revenue": 228,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "169330",
+          "corpName": "엠브레인",
+          "stage": "general",
+          "revenue": 218,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "038870",
+          "corpName": "에코바이오",
+          "stage": "general",
+          "revenue": 172,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "270520",
+          "corpName": "앱튼",
+          "stage": "general",
+          "revenue": 169,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "307870",
+          "corpName": "비투엔",
+          "stage": "general",
+          "revenue": 146,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "275630",
+          "corpName": "에스에스알",
+          "stage": "general",
+          "revenue": 130,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "950200",
+          "corpName": "소마젠",
+          "stage": "general",
+          "revenue": 0,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "0015S0",
+          "corpName": "페스카로",
+          "stage": "general",
+          "revenue": 0,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "060980",
+          "corpName": "HL홀딩스",
+          "stage": "general",
+          "revenue": 0,
+          "confidence": 0.7,
+          "source": "product"
+        }
+      ]
+    }
+  ],
+  "unclassified": [
+    {
+      "stockCode": "039830",
+      "corpName": "오로라",
+      "stage": "",
+      "revenue": 3281,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "035610",
+      "corpName": "솔본",
+      "stage": "",
+      "revenue": 1207,
+      "confidence": 0.7,
+      "source": "kindlist"
+    }
+  ],
+  "edges": [
+    {
+      "from": "038290",
+      "to": "950200",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "063570",
+      "to": "130580",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "130580",
+      "to": "063570",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "180400",
+      "to": "038290",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "180640",
+      "to": "000700",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "950200",
+      "to": "038290",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "industryId": "buildingMaterials",
+  "name": "시멘트·요업",
+  "totalRevenue": 45063,
+  "nodeCount": 13,
+  "stages": [
+    {
+      "key": "general",
+      "name": "제조",
+      "role": "제조",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "003300",
+          "corpName": "한일홀딩스",
+          "stage": "general",
+          "revenue": 19305,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "000480",
+          "corpName": "시알홀딩스",
+          "stage": "general",
+          "revenue": 8278,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "462520",
+          "corpName": "조선내화",
+          "stage": "general",
+          "revenue": 5320,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "010040",
+          "corpName": "한국내화",
+          "stage": "general",
+          "revenue": 4063,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "004440",
+          "corpName": "삼일씨엔에스",
+          "stage": "general",
+          "revenue": 2231,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "000910",
+          "corpName": "유니온",
+          "stage": "general",
+          "revenue": 2024,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "075970",
+          "corpName": "동국알앤에스",
+          "stage": "general",
+          "revenue": 1107,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "255220",
+          "corpName": "SG",
+          "stage": "general",
+          "revenue": 1022,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "252990",
+          "corpName": "샘씨엔에스",
+          "stage": "general",
+          "revenue": 780,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "228340",
+          "corpName": "동양파일",
+          "stage": "general",
+          "revenue": 559,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "222420",
+          "corpName": "쎄노텍",
+          "stage": "general",
+          "revenue": 356,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "006570",
+          "corpName": "대림통상",
+          "stage": "general",
+          "revenue": 17,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "112190",
+          "corpName": "KC산업",
+          "stage": "general",
+          "revenue": 0,
+          "confidence": 0.5,
+          "source": "docs"
+        }
+      ]
+    }
+  ],
+  "unclassified": [],
+  "edges": [
+    {
+      "from": "462520",
+      "to": "000480",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "000480",
+      "to": "462520",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "462520",
+      "to": "000480",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    }
+  ]
+}

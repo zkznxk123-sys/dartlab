@@ -1,0 +1,5448 @@
+{
+  "industryId": "software",
+  "name": "소프트웨어·IT서비스",
+  "totalRevenue": 2193895,
+  "nodeCount": 233,
+  "stages": [
+    {
+      "key": "platform",
+      "name": "플랫폼",
+      "role": "서비스",
+      "stream": "downstream",
+      "nodes": [
+        {
+          "stockCode": "035420",
+          "corpName": "NAVER",
+          "stage": "platform",
+          "revenue": 120350,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "006120",
+          "corpName": "SK디스커버리",
+          "stage": "platform",
+          "revenue": 101640,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "035720",
+          "corpName": "카카오",
+          "stage": "platform",
+          "revenue": 80991,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "307950",
+          "corpName": "현대오토에버",
+          "stage": "platform",
+          "revenue": 42521,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "285130",
+          "corpName": "SK케미칼",
+          "stage": "platform",
+          "revenue": 23652,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "035600",
+          "corpName": "KG이니시스",
+          "stage": "platform",
+          "revenue": 13589,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "051160",
+          "corpName": "지어소프트",
+          "stage": "platform",
+          "revenue": 5871,
+          "confidence": 0.7,
+          "source": "docs"
+        },
+        {
+          "stockCode": "403550",
+          "corpName": "쏘카",
+          "stage": "platform",
+          "revenue": 4707,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "067160",
+          "corpName": "SOOP",
+          "stage": "platform",
+          "revenue": 4666,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "210980",
+          "corpName": "SK디앤디",
+          "stage": "platform",
+          "revenue": 4458,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "038540",
+          "corpName": "상상인",
+          "stage": "platform",
+          "revenue": 4186,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "028080",
+          "corpName": "휴맥스홀딩스",
+          "stage": "platform",
+          "revenue": 4007,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "475150",
+          "corpName": "SK이터닉스",
+          "stage": "platform",
+          "revenue": 3856,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "214180",
+          "corpName": "헥토이노베이션",
+          "stage": "platform",
+          "revenue": 3758,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "033230",
+          "corpName": "인성정보",
+          "stage": "platform",
+          "revenue": 3427,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "079940",
+          "corpName": "가비아",
+          "stage": "platform",
+          "revenue": 3357,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "030520",
+          "corpName": "한글과컴퓨터",
+          "stage": "platform",
+          "revenue": 3267,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "041020",
+          "corpName": "폴라리스오피스",
+          "stage": "platform",
+          "revenue": 3242,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "053300",
+          "corpName": "한국정보인증",
+          "stage": "platform",
+          "revenue": 1385,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "143240",
+          "corpName": "사람인",
+          "stage": "platform",
+          "revenue": 1212,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "136540",
+          "corpName": "윈스테크넷",
+          "stage": "platform",
+          "revenue": 986,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "298830",
+          "corpName": "슈어소프트테크",
+          "stage": "platform",
+          "revenue": 939,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "236810",
+          "corpName": "엔비티",
+          "stage": "platform",
+          "revenue": 923,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "163730",
+          "corpName": "핑거",
+          "stage": "platform",
+          "revenue": 916,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "440320",
+          "corpName": "오픈놀",
+          "stage": "platform",
+          "revenue": 883,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "058970",
+          "corpName": "엠로",
+          "stage": "platform",
+          "revenue": 840,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "263700",
+          "corpName": "케어랩스",
+          "stage": "platform",
+          "revenue": 817,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "060850",
+          "corpName": "영림원소프트랩",
+          "stage": "platform",
+          "revenue": 799,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "372800",
+          "corpName": "아이티아이즈",
+          "stage": "platform",
+          "revenue": 781,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "473980",
+          "corpName": "노머스",
+          "stage": "platform",
+          "revenue": 757,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "053580",
+          "corpName": "웹케시",
+          "stage": "platform",
+          "revenue": 744,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "303530",
+          "corpName": "이노뎁",
+          "stage": "platform",
+          "revenue": 707,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "336060",
+          "corpName": "웨이버스",
+          "stage": "platform",
+          "revenue": 702,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "294570",
+          "corpName": "쿠콘",
+          "stage": "platform",
+          "revenue": 695,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "328380",
+          "corpName": "솔트웨어",
+          "stage": "platform",
+          "revenue": 637,
+          "confidence": 0.7,
+          "source": "docs"
+        },
+        {
+          "stockCode": "377450",
+          "corpName": "리파인",
+          "stage": "platform",
+          "revenue": 616,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "064480",
+          "corpName": "브리지텍",
+          "stage": "platform",
+          "revenue": 497,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "131370",
+          "corpName": "알서포트",
+          "stage": "platform",
+          "revenue": 488,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "075130",
+          "corpName": "플랜티넷",
+          "stage": "platform",
+          "revenue": 456,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "088340",
+          "corpName": "유라클",
+          "stage": "platform",
+          "revenue": 438,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "033130",
+          "corpName": "디지틀조선",
+          "stage": "platform",
+          "revenue": 399,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "290270",
+          "corpName": "휴네시온",
+          "stage": "platform",
+          "revenue": 377,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "041460",
+          "corpName": "한국전자인증",
+          "stage": "platform",
+          "revenue": 367,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "032850",
+          "corpName": "비트컴퓨터",
+          "stage": "platform",
+          "revenue": 360,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "300080",
+          "corpName": "플리토",
+          "stage": "platform",
+          "revenue": 360,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "039310",
+          "corpName": "세중",
+          "stage": "platform",
+          "revenue": 356,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "096250",
+          "corpName": "와이즈넛",
+          "stage": "platform",
+          "revenue": 347,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "352910",
+          "corpName": "오비고",
+          "stage": "platform",
+          "revenue": 335,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "220180",
+          "corpName": "핸디소프트",
+          "stage": "platform",
+          "revenue": 314,
+          "confidence": 0.84,
+          "source": "docs"
+        },
+        {
+          "stockCode": "393210",
+          "corpName": "토마토시스템",
+          "stage": "platform",
+          "revenue": 273,
+          "confidence": 0.7,
+          "source": "docs"
+        },
+        {
+          "stockCode": "377030",
+          "corpName": "비트맥스",
+          "stage": "platform",
+          "revenue": 272,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "079970",
+          "corpName": "투비소프트",
+          "stage": "platform",
+          "revenue": 268,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "430690",
+          "corpName": "한싹",
+          "stage": "platform",
+          "revenue": 263,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "376900",
+          "corpName": "로킷헬스케어",
+          "stage": "platform",
+          "revenue": 262,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "217330",
+          "corpName": "싸이토젠",
+          "stage": "platform",
+          "revenue": 261,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "099390",
+          "corpName": "브레인즈컴퍼니",
+          "stage": "platform",
+          "revenue": 251,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "067010",
+          "corpName": "이씨에스",
+          "stage": "platform",
+          "revenue": 216,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "465480",
+          "corpName": "인스피언",
+          "stage": "platform",
+          "revenue": 200,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "419120",
+          "corpName": "산돌",
+          "stage": "platform",
+          "revenue": 200,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "434480",
+          "corpName": "모니터랩",
+          "stage": "platform",
+          "revenue": 192,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "099750",
+          "corpName": "이지케어텍",
+          "stage": "platform",
+          "revenue": 177,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "290560",
+          "corpName": "파라택시스이더리움",
+          "stage": "platform",
+          "revenue": 140,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "340810",
+          "corpName": "시선AI",
+          "stage": "platform",
+          "revenue": 140,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "0007C0",
+          "corpName": "아크릴",
+          "stage": "platform",
+          "revenue": 133,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "376270",
+          "corpName": "HEM파마",
+          "stage": "platform",
+          "revenue": 130,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "189690",
+          "corpName": "포시에스",
+          "stage": "platform",
+          "revenue": 126,
+          "confidence": 0.7,
+          "source": "docs"
+        },
+        {
+          "stockCode": "139670",
+          "corpName": "키네마스터",
+          "stage": "platform",
+          "revenue": 123,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "377480",
+          "corpName": "마음AI",
+          "stage": "platform",
+          "revenue": 98,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "315640",
+          "corpName": "딥노이드",
+          "stage": "platform",
+          "revenue": 75,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "322510",
+          "corpName": "제이엘케이",
+          "stage": "platform",
+          "revenue": 33,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "438700",
+          "corpName": "버넥트",
+          "stage": "platform",
+          "revenue": 31,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "389470",
+          "corpName": "인벤티지랩",
+          "stage": "platform",
+          "revenue": 29,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "287840",
+          "corpName": "인투셀",
+          "stage": "platform",
+          "revenue": 23,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "418620",
+          "corpName": "E8",
+          "stage": "platform",
+          "revenue": 17,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "241820",
+          "corpName": "피씨엘",
+          "stage": "platform",
+          "revenue": 12,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "418250",
+          "corpName": "시큐레터",
+          "stage": "platform",
+          "revenue": 12,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "244460",
+          "corpName": "올리패스",
+          "stage": "platform",
+          "revenue": 8,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "363250",
+          "corpName": "진시스템",
+          "stage": "platform",
+          "revenue": 4,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "122830",
+          "corpName": "원포유",
+          "stage": "platform",
+          "revenue": 0,
+          "confidence": 0.8,
+          "source": "product"
+        },
+        {
+          "stockCode": "217880",
+          "corpName": "틸론",
+          "stage": "platform",
+          "revenue": 0,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "243870",
+          "corpName": "아이티센코어",
+          "stage": "platform",
+          "revenue": 0,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "261520",
+          "corpName": "이지스",
+          "stage": "platform",
+          "revenue": 0,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "327610",
+          "corpName": "펨토바이오메드",
+          "stage": "platform",
+          "revenue": 0,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "331740",
+          "corpName": "아우토크립트",
+          "stage": "platform",
+          "revenue": 0,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "495810",
+          "corpName": "유비씨",
+          "stage": "platform",
+          "revenue": 0,
+          "confidence": 0.733,
+          "source": "docs"
+        }
+      ]
+    },
+    {
+      "key": "solution",
+      "name": "솔루션",
+      "role": "서비스",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "034730",
+          "corpName": "SK",
+          "stage": "solution",
+          "revenue": 1227033,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "124500",
+          "corpName": "아이티센글로벌",
+          "stage": "solution",
+          "revenue": 88708,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "018670",
+          "corpName": "SK가스",
+          "stage": "solution",
+          "revenue": 76763,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "001740",
+          "corpName": "SK네트웍스",
+          "stage": "solution",
+          "revenue": 67451,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "011790",
+          "corpName": "SKC",
+          "stage": "solution",
+          "revenue": 18400,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "025000",
+          "corpName": "KPX케미칼",
+          "stage": "solution",
+          "revenue": 8084,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "092190",
+          "corpName": "서울바이오시스",
+          "stage": "solution",
+          "revenue": 7638,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "010280",
+          "corpName": "아이티센엔텍",
+          "stage": "solution",
+          "revenue": 5720,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "203650",
+          "corpName": "드림시큐리티",
+          "stage": "solution",
+          "revenue": 3189,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "232830",
+          "corpName": "아이티센피엔에스",
+          "stage": "solution",
+          "revenue": 2696,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "045510",
+          "corpName": "정원엔시스",
+          "stage": "solution",
+          "revenue": 2009,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "234300",
+          "corpName": "에스트래픽",
+          "stage": "solution",
+          "revenue": 1682,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "053980",
+          "corpName": "오상자이엘",
+          "stage": "solution",
+          "revenue": 1364,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "263800",
+          "corpName": "데이타솔루션",
+          "stage": "solution",
+          "revenue": 1038,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "082270",
+          "corpName": "젬백스",
+          "stage": "solution",
+          "revenue": 815,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "049120",
+          "corpName": "파인디앤씨",
+          "stage": "solution",
+          "revenue": 658,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "184230",
+          "corpName": "SGA솔루션즈",
+          "stage": "solution",
+          "revenue": 616,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "083640",
+          "corpName": "인콘",
+          "stage": "solution",
+          "revenue": 508,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "356680",
+          "corpName": "엑스게이트",
+          "stage": "solution",
+          "revenue": 481,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "039980",
+          "corpName": "폴라리스AI",
+          "stage": "solution",
+          "revenue": 436,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "262840",
+          "corpName": "아이퀘스트",
+          "stage": "solution",
+          "revenue": 436,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "036120",
+          "corpName": "서울평가정보",
+          "stage": "solution",
+          "revenue": 413,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "057680",
+          "corpName": "티사이언티픽",
+          "stage": "solution",
+          "revenue": 364,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "424760",
+          "corpName": "벨로크",
+          "stage": "solution",
+          "revenue": 354,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "053350",
+          "corpName": "이니텍",
+          "stage": "solution",
+          "revenue": 328,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "050960",
+          "corpName": "수산아이앤티",
+          "stage": "solution",
+          "revenue": 307,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "333050",
+          "corpName": "모코엠시스",
+          "stage": "solution",
+          "revenue": 300,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "258790",
+          "corpName": "소프트캠프",
+          "stage": "solution",
+          "revenue": 257,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "431190",
+          "corpName": "케이쓰리아이",
+          "stage": "solution",
+          "revenue": 166,
+          "confidence": 0.6,
+          "source": "docs"
+        },
+        {
+          "stockCode": "054780",
+          "corpName": "키이스트",
+          "stage": "solution",
+          "revenue": 157,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "226950",
+          "corpName": "올릭스",
+          "stage": "solution",
+          "revenue": 147,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "131090",
+          "corpName": "시큐브",
+          "stage": "solution",
+          "revenue": 134,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "040350",
+          "corpName": "크레오에스지",
+          "stage": "solution",
+          "revenue": 109,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "199800",
+          "corpName": "툴젠",
+          "stage": "solution",
+          "revenue": 13,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "001510",
+          "corpName": "SK증권",
+          "stage": "solution",
+          "revenue": 0,
+          "confidence": 0.3,
+          "source": "docs"
+        },
+        {
+          "stockCode": "286940",
+          "corpName": "롯데이노베이트",
+          "stage": "solution",
+          "revenue": 0,
+          "confidence": 0.7,
+          "source": "product"
+        }
+      ]
+    },
+    {
+      "key": "game",
+      "name": "게임",
+      "role": "서비스",
+      "stream": "downstream",
+      "nodes": [
+        {
+          "stockCode": "259960",
+          "corpName": "크래프톤",
+          "stage": "game",
+          "revenue": 33266,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "181710",
+          "corpName": "NHN",
+          "stage": "game",
+          "revenue": 25162,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "036570",
+          "corpName": "엔씨소프트",
+          "stage": "game",
+          "revenue": 15069,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "192080",
+          "corpName": "더블유게임즈",
+          "stage": "game",
+          "revenue": 7199,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "078340",
+          "corpName": "컴투스",
+          "stage": "game",
+          "revenue": 6964,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "112040",
+          "corpName": "위메이드",
+          "stage": "game",
+          "revenue": 6140,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "293490",
+          "corpName": "카카오게임즈",
+          "stage": "game",
+          "revenue": 4650,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "042420",
+          "corpName": "네오위즈홀딩스",
+          "stage": "game",
+          "revenue": 4368,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "095660",
+          "corpName": "네오위즈",
+          "stage": "game",
+          "revenue": 4327,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "263750",
+          "corpName": "펄어비스",
+          "stage": "game",
+          "revenue": 3656,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "194480",
+          "corpName": "데브시스터즈",
+          "stage": "game",
+          "revenue": 2956,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "462870",
+          "corpName": "시프트업",
+          "stage": "game",
+          "revenue": 2945,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "225570",
+          "corpName": "넥슨게임즈",
+          "stage": "game",
+          "revenue": 1793,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "069080",
+          "corpName": "웹젠",
+          "stage": "game",
+          "revenue": 1744,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "101730",
+          "corpName": "위메이드맥스",
+          "stage": "game",
+          "revenue": 1488,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "067000",
+          "corpName": "조이시티",
+          "stage": "game",
+          "revenue": 1404,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "123420",
+          "corpName": "위메이드플레이",
+          "stage": "game",
+          "revenue": 1253,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "217270",
+          "corpName": "넵튠",
+          "stage": "game",
+          "revenue": 1225,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "201490",
+          "corpName": "미투온",
+          "stage": "game",
+          "revenue": 1209,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "047560",
+          "corpName": "이스트소프트",
+          "stage": "game",
+          "revenue": 1068,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "063080",
+          "corpName": "컴투스홀딩스",
+          "stage": "game",
+          "revenue": 992,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "066910",
+          "corpName": "손오공",
+          "stage": "game",
+          "revenue": 970,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "058630",
+          "corpName": "엠게임",
+          "stage": "game",
+          "revenue": 917,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "052790",
+          "corpName": "액토즈소프트",
+          "stage": "game",
+          "revenue": 699,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "204610",
+          "corpName": "티쓰리",
+          "stage": "game",
+          "revenue": 695,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "348030",
+          "corpName": "모비릭스",
+          "stage": "game",
+          "revenue": 397,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "047080",
+          "corpName": "한빛소프트",
+          "stage": "game",
+          "revenue": 379,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "331520",
+          "corpName": "밸로프",
+          "stage": "game",
+          "revenue": 378,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "205500",
+          "corpName": "넥써쓰",
+          "stage": "game",
+          "revenue": 367,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "023770",
+          "corpName": "플레이위드",
+          "stage": "game",
+          "revenue": 347,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "094860",
+          "corpName": "네오리진",
+          "stage": "game",
+          "revenue": 310,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "060240",
+          "corpName": "스타코링크",
+          "stage": "game",
+          "revenue": 248,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "030350",
+          "corpName": "드래곤플라이",
+          "stage": "game",
+          "revenue": 159,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "139050",
+          "corpName": "BF랩스",
+          "stage": "game",
+          "revenue": 149,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "109960",
+          "corpName": "앱토크롬",
+          "stage": "game",
+          "revenue": 98,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "052770",
+          "corpName": "아이톡시",
+          "stage": "game",
+          "revenue": 57,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "206400",
+          "corpName": "베노티앤알",
+          "stage": "game",
+          "revenue": 48,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "266350",
+          "corpName": "팡스카이",
+          "stage": "game",
+          "revenue": 20,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "950190",
+          "corpName": "고스트스튜디오",
+          "stage": "game",
+          "revenue": 1,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "251270",
+          "corpName": "넷마블",
+          "stage": "game",
+          "revenue": 0,
+          "confidence": 1.0,
+          "source": "product"
+        }
+      ]
+    },
+    {
+      "key": "ai",
+      "name": "AI·데이터",
+      "role": "서비스",
+      "stream": "midstream",
+      "nodes": [
+        {
+          "stockCode": "402340",
+          "corpName": "SK스퀘어",
+          "stage": "ai",
+          "revenue": 14115,
+          "confidence": 0.7,
+          "source": "docs"
+        },
+        {
+          "stockCode": "100090",
+          "corpName": "SK오션플랜트",
+          "stage": "ai",
+          "revenue": 9654,
+          "confidence": 0.5,
+          "source": "docs"
+        },
+        {
+          "stockCode": "054920",
+          "corpName": "한컴위드",
+          "stage": "ai",
+          "revenue": 7712,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "089850",
+          "corpName": "유비벨록스",
+          "stage": "ai",
+          "revenue": 6679,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "030190",
+          "corpName": "NICE평가정보",
+          "stage": "ai",
+          "revenue": 6021,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "096630",
+          "corpName": "에스코넥",
+          "stage": "ai",
+          "revenue": 2787,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "214270",
+          "corpName": "FSN",
+          "stage": "ai",
+          "revenue": 2723,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "032620",
+          "corpName": "GC메디아이",
+          "stage": "ai",
+          "revenue": 1977,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "267850",
+          "corpName": "아시아나IDT",
+          "stage": "ai",
+          "revenue": 1941,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "042500",
+          "corpName": "링네트",
+          "stage": "ai",
+          "revenue": 1831,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "006140",
+          "corpName": "피제이전자",
+          "stage": "ai",
+          "revenue": 1786,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "067920",
+          "corpName": "이글루",
+          "stage": "ai",
+          "revenue": 1433,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "020180",
+          "corpName": "대신정보통신",
+          "stage": "ai",
+          "revenue": 1320,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "108860",
+          "corpName": "셀바스AI",
+          "stage": "ai",
+          "revenue": 1148,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "208860",
+          "corpName": "다산디엠씨",
+          "stage": "ai",
+          "revenue": 1137,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "040160",
+          "corpName": "누리플렉스",
+          "stage": "ai",
+          "revenue": 1016,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "376300",
+          "corpName": "디어유",
+          "stage": "ai",
+          "revenue": 838,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "328130",
+          "corpName": "루닛",
+          "stage": "ai",
+          "revenue": 831,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "463480",
+          "corpName": "모티브링크",
+          "stage": "ai",
+          "revenue": 674,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "069410",
+          "corpName": "엔텔스",
+          "stage": "ai",
+          "revenue": 668,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "452450",
+          "corpName": "피아이이",
+          "stage": "ai",
+          "revenue": 651,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "009310",
+          "corpName": "참엔지니어링",
+          "stage": "ai",
+          "revenue": 598,
+          "confidence": 1.0,
+          "source": "docs"
+        },
+        {
+          "stockCode": "032680",
+          "corpName": "소프트센",
+          "stage": "ai",
+          "revenue": 548,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "192250",
+          "corpName": "케이사인",
+          "stage": "ai",
+          "revenue": 484,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "205100",
+          "corpName": "엑셈",
+          "stage": "ai",
+          "revenue": 478,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "150900",
+          "corpName": "파수",
+          "stage": "ai",
+          "revenue": 467,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "321820",
+          "corpName": "아티스트컴퍼니",
+          "stage": "ai",
+          "revenue": 467,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "304100",
+          "corpName": "솔트룩스",
+          "stage": "ai",
+          "revenue": 416,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "208350",
+          "corpName": "지란지교시큐리티",
+          "stage": "ai",
+          "revenue": 389,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "367000",
+          "corpName": "플래티어",
+          "stage": "ai",
+          "revenue": 389,
+          "confidence": 0.68,
+          "source": "docs"
+        },
+        {
+          "stockCode": "065370",
+          "corpName": "위세아이텍",
+          "stage": "ai",
+          "revenue": 383,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "376980",
+          "corpName": "원티드랩",
+          "stage": "ai",
+          "revenue": 382,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "382480",
+          "corpName": "지아이텍",
+          "stage": "ai",
+          "revenue": 362,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "338220",
+          "corpName": "뷰노",
+          "stage": "ai",
+          "revenue": 348,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "402030",
+          "corpName": "코난테크놀로지",
+          "stage": "ai",
+          "revenue": 340,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "397810",
+          "corpName": "애드포러스",
+          "stage": "ai",
+          "revenue": 306,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "140430",
+          "corpName": "카티스",
+          "stage": "ai",
+          "revenue": 279,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "049470",
+          "corpName": "비트플래닛",
+          "stage": "ai",
+          "revenue": 248,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "417860",
+          "corpName": "오브젠",
+          "stage": "ai",
+          "revenue": 240,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "288980",
+          "corpName": "모아데이타",
+          "stage": "ai",
+          "revenue": 232,
+          "confidence": 0.9,
+          "source": "docs"
+        },
+        {
+          "stockCode": "290090",
+          "corpName": "트윔",
+          "stage": "ai",
+          "revenue": 210,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "153460",
+          "corpName": "네이블",
+          "stage": "ai",
+          "revenue": 192,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "301300",
+          "corpName": "바이브컴퍼니",
+          "stage": "ai",
+          "revenue": 190,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "100030",
+          "corpName": "인지소프트",
+          "stage": "ai",
+          "revenue": 189,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "463020",
+          "corpName": "뉴엔AI",
+          "stage": "ai",
+          "revenue": 188,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "070300",
+          "corpName": "엑스큐어",
+          "stage": "ai",
+          "revenue": 185,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "148780",
+          "corpName": "비큐AI",
+          "stage": "ai",
+          "revenue": 170,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "394280",
+          "corpName": "오픈엣지테크놀로지",
+          "stage": "ai",
+          "revenue": 161,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "357880",
+          "corpName": "SKAI",
+          "stage": "ai",
+          "revenue": 156,
+          "confidence": 0.7,
+          "source": "docs"
+        },
+        {
+          "stockCode": "239340",
+          "corpName": "이스트에이드",
+          "stage": "ai",
+          "revenue": 156,
+          "confidence": 0.84,
+          "source": "docs"
+        },
+        {
+          "stockCode": "347860",
+          "corpName": "알체라",
+          "stage": "ai",
+          "revenue": 148,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "475400",
+          "corpName": "씨메스",
+          "stage": "ai",
+          "revenue": 131,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "355390",
+          "corpName": "크라우드웍스",
+          "stage": "ai",
+          "revenue": 105,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "444530",
+          "corpName": "심플랫폼",
+          "stage": "ai",
+          "revenue": 104,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "189330",
+          "corpName": "씨이랩",
+          "stage": "ai",
+          "revenue": 103,
+          "confidence": 0.84,
+          "source": "docs"
+        },
+        {
+          "stockCode": "488280",
+          "corpName": "에스투더블유",
+          "stage": "ai",
+          "revenue": 101,
+          "confidence": 0.9,
+          "source": "product"
+        },
+        {
+          "stockCode": "225220",
+          "corpName": "제놀루션",
+          "stage": "ai",
+          "revenue": 94,
+          "confidence": 0.7,
+          "source": "product"
+        },
+        {
+          "stockCode": "317120",
+          "corpName": "라닉스",
+          "stage": "ai",
+          "revenue": 75,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "291810",
+          "corpName": "핀텔",
+          "stage": "ai",
+          "revenue": 58,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "376930",
+          "corpName": "노을",
+          "stage": "ai",
+          "revenue": 51,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "226330",
+          "corpName": "신테카바이오",
+          "stage": "ai",
+          "revenue": 34,
+          "confidence": 1.0,
+          "source": "product"
+        },
+        {
+          "stockCode": "382150",
+          "corpName": "온코크로스",
+          "stage": "ai",
+          "revenue": 4,
+          "confidence": 0.867,
+          "source": "docs"
+        },
+        {
+          "stockCode": "199150",
+          "corpName": "데이터스트림즈",
+          "stage": "ai",
+          "revenue": 0,
+          "confidence": 0.76,
+          "source": "docs"
+        },
+        {
+          "stockCode": "276040",
+          "corpName": "스코넥",
+          "stage": "ai",
+          "revenue": 0,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "318660",
+          "corpName": "타임기술",
+          "stage": "ai",
+          "revenue": 0,
+          "confidence": 0.733,
+          "source": "docs"
+        },
+        {
+          "stockCode": "403360",
+          "corpName": "라피치",
+          "stage": "ai",
+          "revenue": 0,
+          "confidence": 0.8,
+          "source": "docs"
+        },
+        {
+          "stockCode": "486990",
+          "corpName": "노타",
+          "stage": "ai",
+          "revenue": 0,
+          "confidence": 0.7,
+          "source": "product"
+        }
+      ]
+    }
+  ],
+  "unclassified": [
+    {
+      "stockCode": "053800",
+      "corpName": "안랩",
+      "stage": "",
+      "revenue": 2677,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "361610",
+      "corpName": "SK아이이테크놀로지",
+      "stage": "",
+      "revenue": 2619,
+      "confidence": 0.95,
+      "source": "override"
+    },
+    {
+      "stockCode": "090850",
+      "corpName": "현대이지웰",
+      "stage": "",
+      "revenue": 1426,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "089150",
+      "corpName": "케이씨티",
+      "stage": "",
+      "revenue": 231,
+      "confidence": 0.7,
+      "source": "kindlist"
+    },
+    {
+      "stockCode": "260870",
+      "corpName": "SK시그넷",
+      "stage": "",
+      "revenue": 0,
+      "confidence": 0.95,
+      "source": "override"
+    }
+  ],
+  "edges": [
+    {
+      "from": "336060",
+      "to": "140430",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "from": "001510",
+      "to": "088340",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001510",
+      "to": "261520",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001510",
+      "to": "244460",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001510",
+      "to": "210980",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001510",
+      "to": "018670",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001510",
+      "to": "011790",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001510",
+      "to": "034730",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001510",
+      "to": "006120",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001510",
+      "to": "001740",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001510",
+      "to": "285130",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001510",
+      "to": "241820",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001740",
+      "to": "210980",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001740",
+      "to": "361610",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001740",
+      "to": "018670",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001740",
+      "to": "011790",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001740",
+      "to": "034730",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001740",
+      "to": "402340",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001740",
+      "to": "006120",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001740",
+      "to": "475150",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001740",
+      "to": "285130",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001740",
+      "to": "100090",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001740",
+      "to": "001510",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "018670",
+      "to": "006120",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "285130",
+      "to": "006120",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "210980",
+      "to": "006120",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "475150",
+      "to": "006120",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "006120",
+      "to": "018670",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "006120",
+      "to": "001740",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "006120",
+      "to": "285130",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "006120",
+      "to": "210980",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "006120",
+      "to": "034730",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "006120",
+      "to": "475150",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "006120",
+      "to": "361610",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "006120",
+      "to": "011790",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "006120",
+      "to": "402340",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "006120",
+      "to": "100090",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "261520",
+      "to": "006120",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "001740",
+      "to": "006120",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "006120",
+      "to": "001510",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "010280",
+      "to": "232830",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "010280",
+      "to": "243870",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "010280",
+      "to": "124500",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "010280",
+      "to": "032680",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "010280",
+      "to": "096250",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "010280",
+      "to": "336060",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011790",
+      "to": "001740",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011790",
+      "to": "210980",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011790",
+      "to": "361610",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011790",
+      "to": "018670",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011790",
+      "to": "034730",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011790",
+      "to": "402340",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011790",
+      "to": "006120",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011790",
+      "to": "475150",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011790",
+      "to": "285130",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011790",
+      "to": "100090",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011790",
+      "to": "001510",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "011790",
+      "to": "260870",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "285130",
+      "to": "011790",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "018670",
+      "to": "001740",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "018670",
+      "to": "210980",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "018670",
+      "to": "285130",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "018670",
+      "to": "006120",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "018670",
+      "to": "361610",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "018670",
+      "to": "011790",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "018670",
+      "to": "402340",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "018670",
+      "to": "475150",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "018670",
+      "to": "100090",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "018670",
+      "to": "034730",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "018670",
+      "to": "001510",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "030520",
+      "to": "054920",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "033230",
+      "to": "030520",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "034730",
+      "to": "018670",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "034730",
+      "to": "001740",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "034730",
+      "to": "285130",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "034730",
+      "to": "260870",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "034730",
+      "to": "402340",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "034730",
+      "to": "361610",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "034730",
+      "to": "011790",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "034730",
+      "to": "210980",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "034730",
+      "to": "006120",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "034730",
+      "to": "475150",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "034730",
+      "to": "100090",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "034730",
+      "to": "403550",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "034730",
+      "to": "0007C0",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "034730",
+      "to": "001510",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "035420",
+      "to": "355390",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "035420",
+      "to": "486990",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "035420",
+      "to": "181710",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "035600",
+      "to": "261520",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "035600",
+      "to": "053350",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "035600",
+      "to": "181710",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "035720",
+      "to": "054780",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "035720",
+      "to": "293490",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "035720",
+      "to": "376300",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "035720",
+      "to": "217270",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "035720",
+      "to": "301300",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "035720",
+      "to": "052770",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "035720",
+      "to": "236810",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "036570",
+      "to": "251270",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "038540",
+      "to": "001510",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "038540",
+      "to": "011790",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "039980",
+      "to": "041020",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "039980",
+      "to": "220180",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "041020",
+      "to": "220180",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "041020",
+      "to": "039980",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "041020",
+      "to": "108860",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "095660",
+      "to": "042420",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "042420",
+      "to": "095660",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "042420",
+      "to": "181710",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "047080",
+      "to": "204610",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "047080",
+      "to": "058970",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "047560",
+      "to": "239340",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "049470",
+      "to": "184230",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "052790",
+      "to": "251270",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "053300",
+      "to": "143240",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "053580",
+      "to": "294570",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "053980",
+      "to": "220180",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "053980",
+      "to": "067010",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "054780",
+      "to": "035720",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "054780",
+      "to": "376300",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "054780",
+      "to": "293490",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "054780",
+      "to": "217270",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "054920",
+      "to": "030520",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "057680",
+      "to": "058630",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "058630",
+      "to": "057680",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "058970",
+      "to": "204610",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "063080",
+      "to": "078340",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "063080",
+      "to": "236810",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "053350",
+      "to": "069410",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "001740",
+      "to": "069410",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "069410",
+      "to": "153460",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "078340",
+      "to": "063080",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "078340",
+      "to": "194480",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "078340",
+      "to": "331520",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "079940",
+      "to": "356680",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "079970",
+      "to": "060850",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "082270",
+      "to": "038540",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "083640",
+      "to": "261520",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "083640",
+      "to": "251270",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "089150",
+      "to": "067010",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "095660",
+      "to": "042420",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "095660",
+      "to": "348030",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "276040",
+      "to": "096630",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "096630",
+      "to": "276040",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "100090",
+      "to": "210980",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "100090",
+      "to": "361610",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "100090",
+      "to": "018670",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "100090",
+      "to": "011790",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "100090",
+      "to": "402340",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "100090",
+      "to": "006120",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "100090",
+      "to": "475150",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "100090",
+      "to": "001740",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "100090",
+      "to": "285130",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "100090",
+      "to": "034730",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "101730",
+      "to": "112040",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "101730",
+      "to": "123420",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "112040",
+      "to": "101730",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "108860",
+      "to": "041020",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "112040",
+      "to": "101730",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "112040",
+      "to": "123420",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "101730",
+      "to": "112040",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "112040",
+      "to": "035720",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "112040",
+      "to": "462870",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "112040",
+      "to": "069080",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "112040",
+      "to": "293490",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "123420",
+      "to": "101730",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "123420",
+      "to": "112040",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "124500",
+      "to": "243870",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "124500",
+      "to": "232830",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "124500",
+      "to": "010280",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "124500",
+      "to": "032680",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "136540",
+      "to": "356680",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "139050",
+      "to": "030350",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "139050",
+      "to": "261520",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "139050",
+      "to": "263700",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "261520",
+      "to": "139050",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "139050",
+      "to": "214270",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "143240",
+      "to": "053300",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "153460",
+      "to": "069410",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "181710",
+      "to": "304100",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "181710",
+      "to": "194480",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "181710",
+      "to": "089850",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "181710",
+      "to": "095660",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "181710",
+      "to": "035600",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "181710",
+      "to": "069080",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "184230",
+      "to": "049470",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "192250",
+      "to": "208350",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "201490",
+      "to": "950190",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "204610",
+      "to": "047080",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "205500",
+      "to": "058630",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "208350",
+      "to": "434480",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "210980",
+      "to": "018670",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "210980",
+      "to": "034730",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "210980",
+      "to": "006120",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "210980",
+      "to": "261520",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "210980",
+      "to": "001740",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "210980",
+      "to": "285130",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "210980",
+      "to": "361610",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "210980",
+      "to": "011790",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "210980",
+      "to": "402340",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "210980",
+      "to": "475150",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "210980",
+      "to": "100090",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "261520",
+      "to": "210980",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "001740",
+      "to": "210980",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "210980",
+      "to": "001510",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "214270",
+      "to": "070300",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "214270",
+      "to": "261520",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "214270",
+      "to": "263700",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "217270",
+      "to": "259960",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "217270",
+      "to": "035720",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "217270",
+      "to": "293490",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "217270",
+      "to": "054780",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "217270",
+      "to": "376300",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "220180",
+      "to": "067010",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "220180",
+      "to": "053980",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "220180",
+      "to": "041020",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "226950",
+      "to": "241820",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "131090",
+      "to": "232830",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "232830",
+      "to": "010280",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "232830",
+      "to": "124500",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "232830",
+      "to": "243870",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "096250",
+      "to": "232830",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "067010",
+      "to": "232830",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "290270",
+      "to": "232830",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "232830",
+      "to": "032680",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "236810",
+      "to": "035720",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "239340",
+      "to": "047560",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "241820",
+      "to": "226950",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "243870",
+      "to": "010280",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "243870",
+      "to": "232830",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "243870",
+      "to": "124500",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "251270",
+      "to": "036570",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "251270",
+      "to": "058630",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "251270",
+      "to": "293490",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "251270",
+      "to": "035720",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "251270",
+      "to": "083640",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "259960",
+      "to": "217270",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "259960",
+      "to": "293490",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "259960",
+      "to": "035720",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "260870",
+      "to": "011790",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "260870",
+      "to": "001740",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "263700",
+      "to": "261520",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "263700",
+      "to": "214270",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "285130",
+      "to": "210980",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "285130",
+      "to": "361610",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "285130",
+      "to": "018670",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "285130",
+      "to": "011790",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "285130",
+      "to": "402340",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "285130",
+      "to": "006120",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "285130",
+      "to": "475150",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "285130",
+      "to": "001740",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "285130",
+      "to": "100090",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001740",
+      "to": "285130",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "285130",
+      "to": "034730",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "285130",
+      "to": "001510",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "286940",
+      "to": "053350",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "290560",
+      "to": "205100",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "293490",
+      "to": "035720",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "293490",
+      "to": "054780",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "293490",
+      "to": "217270",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "293490",
+      "to": "376300",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "293490",
+      "to": "259960",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "293490",
+      "to": "069080",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "293490",
+      "to": "078340",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "293490",
+      "to": "052770",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "294570",
+      "to": "053580",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "304100",
+      "to": "204610",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "307950",
+      "to": "317120",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "307950",
+      "to": "035720",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "083640",
+      "to": "336060",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "064480",
+      "to": "336060",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "348030",
+      "to": "095660",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "356680",
+      "to": "079940",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "361610",
+      "to": "001740",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "361610",
+      "to": "210980",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "361610",
+      "to": "018670",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "361610",
+      "to": "011790",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "361610",
+      "to": "402340",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "361610",
+      "to": "006120",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "361610",
+      "to": "475150",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "361610",
+      "to": "285130",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "361610",
+      "to": "100090",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "361610",
+      "to": "034730",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "361610",
+      "to": "001510",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "376300",
+      "to": "054780",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "376300",
+      "to": "035720",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "376300",
+      "to": "293490",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "376300",
+      "to": "217270",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "402340",
+      "to": "210980",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "402340",
+      "to": "361610",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "402340",
+      "to": "018670",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "402340",
+      "to": "011790",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "402340",
+      "to": "006120",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "402340",
+      "to": "475150",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "402340",
+      "to": "001740",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "402340",
+      "to": "285130",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "402340",
+      "to": "100090",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "402340",
+      "to": "034730",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "035720",
+      "to": "403550",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "403550",
+      "to": "034730",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "356680",
+      "to": "418250",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "475150",
+      "to": "018670",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "475150",
+      "to": "210980",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "475150",
+      "to": "285130",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "475150",
+      "to": "006120",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "475150",
+      "to": "317120",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "475150",
+      "to": "361610",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "475150",
+      "to": "011790",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "475150",
+      "to": "402340",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "475150",
+      "to": "001740",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "475150",
+      "to": "100090",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "475150",
+      "to": "034730",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "035720",
+      "to": "486990",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "from": "950190",
+      "to": "201490",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs"
+    },
+    {
+      "from": "001510",
+      "to": "088340",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "010280",
+      "to": "096250",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "010280",
+      "to": "336060",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "032850",
+      "to": "099750",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "035420",
+      "to": "328130",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "035720",
+      "to": "052770",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "035720",
+      "to": "301300",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "035720",
+      "to": "402340",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "038540",
+      "to": "293490",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "038540",
+      "to": "032680",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "047080",
+      "to": "058970",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "052770",
+      "to": "266350",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "053350",
+      "to": "377030",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "053580",
+      "to": "294570",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "053580",
+      "to": "060850",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "053800",
+      "to": "434480",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "054920",
+      "to": "030520",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "058630",
+      "to": "057680",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "060850",
+      "to": "294570",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "078340",
+      "to": "194480",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "078340",
+      "to": "331520",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "095660",
+      "to": "348030",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "095660",
+      "to": "112040",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "095660",
+      "to": "217270",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "100030",
+      "to": "100030",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "112040",
+      "to": "331520",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "181710",
+      "to": "304100",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "181710",
+      "to": "089850",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "208350",
+      "to": "434480",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "217270",
+      "to": "259960",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "251270",
+      "to": "036570",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "259960",
+      "to": "217270",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "259960",
+      "to": "293490",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "293490",
+      "to": "205500",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "294570",
+      "to": "053580",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "294570",
+      "to": "060850",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "301300",
+      "to": "261520",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "348030",
+      "to": "095660",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    },
+    {
+      "from": "402340",
+      "to": "259960",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network"
+    }
+  ]
+}

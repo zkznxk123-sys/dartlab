@@ -1,0 +1,616 @@
+{
+  "ego": {
+    "stockCode": "033780",
+    "corpName": "케이티앤지",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 65797,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "271980",
+      "corpName": "제일약품",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 5672
+    },
+    {
+      "stockCode": "002840",
+      "corpName": "미원상사",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 4411
+    },
+    {
+      "stockCode": "078140",
+      "corpName": "대봉엘에스",
+      "industry": "cosmetics",
+      "stage": "raw",
+      "revenue": 1021
+    },
+    {
+      "stockCode": "003520",
+      "corpName": "영진약품",
+      "industry": "pharma",
+      "stage": "api",
+      "revenue": 2543
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "054210",
+      "corpName": "이랜텍",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 7532
+    },
+    {
+      "stockCode": "009460",
+      "corpName": "한창제지",
+      "industry": "paper",
+      "stage": "general",
+      "revenue": 2670
+    },
+    {
+      "stockCode": "187870",
+      "corpName": "디바이스",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 841
+    },
+    {
+      "stockCode": "000910",
+      "corpName": "유니온",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 2024
+    },
+    {
+      "stockCode": "214390",
+      "corpName": "경보제약",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 2641
+    },
+    {
+      "stockCode": "006110",
+      "corpName": "삼아알미늄",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 2715
+    },
+    {
+      "stockCode": "011040",
+      "corpName": "경동제약",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 1963
+    },
+    {
+      "stockCode": "311390",
+      "corpName": "네오크레마",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 819
+    },
+    {
+      "stockCode": "251970",
+      "corpName": "펌텍코리아",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 3720
+    },
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "134380",
+      "corpName": "미원화학",
+      "industry": "cosmetics",
+      "stage": "raw",
+      "revenue": 2845
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 69295
+    },
+    {
+      "stockCode": "261520",
+      "corpName": "이지스",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 0
+    },
+    {
+      "stockCode": "039200",
+      "corpName": "오스코텍",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 998
+    },
+    {
+      "stockCode": "008490",
+      "corpName": "서흥",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 7223
+    },
+    {
+      "stockCode": "475660",
+      "corpName": "에스켐",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 0
+    },
+    {
+      "stockCode": "091120",
+      "corpName": "이엠텍",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2051
+    },
+    {
+      "stockCode": "128940",
+      "corpName": "한미약품",
+      "industry": "pharma",
+      "stage": "api",
+      "revenue": 129
+    },
+    {
+      "stockCode": "277070",
+      "corpName": "린드먼아시아",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 74
+    },
+    {
+      "stockCode": "353190",
+      "corpName": "휴럼",
+      "industry": "food",
+      "stage": "processing",
+      "revenue": 990
+    },
+    {
+      "stockCode": "040300",
+      "corpName": "YTN",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 1342
+    },
+    {
+      "stockCode": "001540",
+      "corpName": "안국약품",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 3069
+    },
+    {
+      "stockCode": "002900",
+      "corpName": "TYM",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 9294
+    },
+    {
+      "stockCode": "120030",
+      "corpName": "조선선재",
+      "industry": "steel",
+      "stage": "processing",
+      "revenue": 518
+    }
+  ],
+  "edges": [
+    {
+      "from": "271980",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 3549.0,
+      "ratio": null,
+      "product": "CMZ(I)",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "CMZ(I)"
+    },
+    {
+      "from": "002840",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 35080.0,
+      "ratio": null,
+      "product": "Ethyl Alcohol, XF49-C3281/SF-C0813,Mihapol PBS-50, Micolin A-526 외",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "Ethyl Alcohol, XF49-C3281/SF-C0813,Mihapol PBS-50, Micolin A-526 외"
+    },
+    {
+      "from": "078140",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 35080.0,
+      "ratio": null,
+      "product": "Ethyl Alcohol, XF49-C3281/SF-C0813,Mihapol PBS-50, Micolin A-526 외",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "Ethyl Alcohol, XF49-C3281/SF-C0813,Mihapol PBS-50, Micolin A-526 외"
+    },
+    {
+      "from": "003520",
+      "to": "033780",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "024110",
+      "to": "033780",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "054210",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "009460",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "187870",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000910",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "214390",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "006110",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "003520",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "011040",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "311390",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "251970",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "030200",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "134380",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "033780",
+      "to": "003520",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033780",
+      "to": "030200",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033780",
+      "to": "004170",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "033780",
+      "to": "261520",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033780",
+      "to": "039200",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "008490",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "475660",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "091120",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "128940",
+      "to": "033780",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "033780",
+      "to": "277070",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033780",
+      "to": "353190",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033780",
+      "to": "040300",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    },
+    {
+      "from": "001540",
+      "to": "033780",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "002900",
+      "to": "033780",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    },
+    {
+      "from": "033780",
+      "to": "039200",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.8%"
+    },
+    {
+      "from": "120030",
+      "to": "033780",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ]
+}

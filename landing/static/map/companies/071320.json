@@ -1,0 +1,74 @@
+{
+  "ego": {
+    "stockCode": "071320",
+    "corpName": "지역난방공사",
+    "industry": "energy",
+    "stage": "generation",
+    "role": "서비스",
+    "stream": "upstream",
+    "revenue": 39982,
+    "confidence": 0.6,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 52755
+    },
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 974293
+    },
+    {
+      "stockCode": "016710",
+      "corpName": "대성홀딩스",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 12226
+    }
+  ],
+  "edges": [
+    {
+      "from": "004690",
+      "to": "071320",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "015760",
+      "to": "071320",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "071320",
+      "to": "016710",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ]
+}
