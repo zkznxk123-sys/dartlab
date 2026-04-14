@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 
+	let cleanupFns: Array<() => void> = [];
+	onDestroy(() => {
+		for (const fn of cleanupFns) fn();
+	});
+
 	interface NodeDatum {
 		id: string;
 		label: string;
@@ -36,45 +41,75 @@
 	let graph: any = $state(null);
 	let currentZoom = $state(1);
 	let hoveredNode: NodeDatum | null = $state(null);
-	let industryLabels: Array<{ name: string; color: string; x: number; y: number; count: number }> = $state([]);
+	let industryLabels: Array<{ name: string; color: string; x: number; y: number; count: number; totalRev: number }> =
+		$state([]);
+	let companyLabels: Array<{ id: string; name: string; x: number; y: number; rev: number }> = $state([]);
 
-	function updateIndustryLabels() {
+	function updateLabels() {
 		if (!graph || !container) return;
-		const positions = graph.getNodePositions(); // {id: {x, y}}
+		const positions = graph.getNodePositions();
 		if (!positions) return;
 
-		// 산업별 노드 좌표 수집
-		const byIndustry: Record<string, { xs: number[]; ys: number[]; name: string; color: string }> = {};
+		const zoom = currentZoom;
+
+		// 산업별 집계
+		const byIndustry: Record<
+			string,
+			{ xs: number[]; ys: number[]; name: string; color: string; totalRev: number }
+		> = {};
+		// 개별 회사 (줌 레벨에 따라 top N)
+		const rendered: typeof companyLabels = [];
+		const sortedByRev = [...nodes].sort((a, b) => (b.revenue || 0) - (a.revenue || 0));
+
+		// 라벨 표시할 회사 수 결정 (줌 아웃 시 top 20, 줌 인 시 전체)
+		const topN = zoom < 2 ? 0 : zoom < 4 ? 30 : zoom < 8 ? 150 : 500;
+
 		for (const n of nodes) {
 			const pos = positions[n.id];
 			if (!pos) continue;
+
 			if (!byIndustry[n.industry]) {
-				byIndustry[n.industry] = { xs: [], ys: [], name: n.industryName, color: n.color };
+				byIndustry[n.industry] = { xs: [], ys: [], name: n.industryName, color: n.color, totalRev: 0 };
 			}
 			byIndustry[n.industry].xs.push(pos.x);
 			byIndustry[n.industry].ys.push(pos.y);
+			byIndustry[n.industry].totalRev += n.revenue || 0;
 		}
 
-		// 각 산업 중심(median)으로 계산 + 화면 좌표 변환
-		const labels: typeof industryLabels = [];
+		// 산업 라벨
+		const indLabels: typeof industryLabels = [];
 		for (const [_id, d] of Object.entries(byIndustry)) {
-			if (d.xs.length < 5) continue; // 너무 적은 산업은 제외
+			if (d.xs.length < 3) continue;
 			const sx = [...d.xs].sort((a, b) => a - b);
 			const sy = [...d.ys].sort((a, b) => a - b);
 			const cx = sx[Math.floor(sx.length / 2)];
 			const cy = sy[Math.floor(sy.length / 2)];
-			// space 좌표 → 화면 좌표
 			const screen = graph.spaceToScreenPosition([cx, cy]);
 			if (!screen) continue;
-			labels.push({
+			indLabels.push({
 				name: d.name,
 				color: d.color,
 				x: screen[0],
 				y: screen[1],
 				count: d.xs.length,
+				totalRev: d.totalRev,
 			});
 		}
-		industryLabels = labels;
+		industryLabels = indLabels;
+
+		// 회사 라벨 (매출 상위 N)
+		if (topN > 0) {
+			const visibleIds = new Set(sortedByRev.slice(0, topN).map((n) => n.id));
+			for (const n of nodes) {
+				if (!visibleIds.has(n.id)) continue;
+				const pos = positions[n.id];
+				if (!pos) continue;
+				const screen = graph.spaceToScreenPosition([pos.x, pos.y]);
+				if (!screen) continue;
+				rendered.push({ id: n.id, name: n.label, x: screen[0], y: screen[1], rev: n.revenue || 0 });
+			}
+		}
+		companyLabels = rendered;
 	}
 
 	onMount(async () => {
@@ -89,9 +124,9 @@
 		graph = new Graph(canvas, {
 			spaceSize: 4096,
 			backgroundColor: '#050811',
-			pointSize: 5,
-			pointColor: (n: NodeDatum) => n.color,
-			pointGreyoutOpacity: 0.08,
+			nodeSize: (n: NodeDatum) => Math.max(3, Math.min(14, n.size * 1.5)),
+			nodeColor: (n: NodeDatum) => n.color,
+			nodeGreyoutOpacity: 0.08,
 			linkColor: (l: LinkDatum) => {
 				if (l.type === 'supplier') return l.amount ? '#fb923c' : '#7c4a1e';
 				if (l.type === 'customer') return '#60a5fa';
@@ -110,34 +145,44 @@
 				linkDistance: 10,
 				friction: 0.85,
 				decay: 1000,
+				onTick: () => updateLabels(),
 			},
-			onClick: (node: NodeDatum | undefined) => {
-				onNodeClick?.(node ?? null);
-				if (node && graph) {
-					graph.zoomToNodeById(node.id, 700, 6, false);
-				}
+			events: {
+				onClick: (node: NodeDatum | undefined) => {
+					onNodeClick?.(node ?? null);
+					if (node && graph) {
+						graph.zoomToNodeById(node.id, 700, 6, false);
+					}
+				},
+				onNodeMouseOver: (node: NodeDatum) => {
+					hoveredNode = node;
+					onNodeHover?.(node);
+				},
+				onNodeMouseOut: () => {
+					hoveredNode = null;
+					onNodeHover?.(null);
+				},
+				onZoom: () => {
+					if (graph) {
+						currentZoom = graph.getZoomLevel();
+						updateLabels();
+					}
+				},
 			},
-			onPointMouseOver: (node: NodeDatum) => {
-				hoveredNode = node;
-				onNodeHover?.(node);
-			},
-			onPointMouseOut: () => {
-				hoveredNode = null;
-				onNodeHover?.(null);
-			},
-			onZoom: () => {
-				if (graph) {
-					currentZoom = graph.getZoomLevel();
-					updateIndustryLabels();
-				}
-			},
-			onSimulationTick: () => updateIndustryLabels(),
 		});
 
 		graph.setData(nodes, links);
 
 		// fit view after initial simulation
 		setTimeout(() => graph?.fitView(400), 1200);
+
+		// raf 루프로 라벨 위치 갱신 (simulation tick 외 팬/줌 시에도)
+		let rafId: number;
+		const tick = () => {
+			updateLabels();
+			rafId = requestAnimationFrame(tick);
+		};
+		rafId = requestAnimationFrame(tick);
 
 		// ResizeObserver
 		const ro = new ResizeObserver(() => {
@@ -148,10 +193,17 @@
 		});
 		ro.observe(container);
 
-		return () => {
+		cleanupFns.push(() => {
+			cancelAnimationFrame(rafId);
 			ro.disconnect();
 			graph?.destroy?.();
-		};
+		});
+	});
+
+	// props 변경 시 Cosmograph 데이터 재설정
+	$effect(() => {
+		if (!graph) return;
+		graph.setData(nodes, links);
 	});
 
 	// 외부 제어 함수
@@ -169,22 +221,56 @@
 </script>
 
 <div bind:this={container} class="ecosystem-container">
-	<!-- 산업 클러스터 라벨 오버레이 -->
+	<!-- 라벨 오버레이 -->
 	<svg class="label-overlay" xmlns="http://www.w3.org/2000/svg">
-		{#each industryLabels as label (label.name)}
-			<g transform="translate({label.x}, {label.y})">
+		<!-- 산업 클러스터 라벨 (줌 아웃~중간) -->
+		{#if currentZoom < 4}
+			{#each industryLabels as label (label.name)}
+				<g transform="translate({label.x}, {label.y})">
+					<text
+						class="industry-label"
+						text-anchor="middle"
+						dominant-baseline="central"
+						font-size={Math.max(16, Math.min(36, 14 + Math.log2(label.count) * 3))}
+						fill={label.color}
+						opacity={currentZoom < 2 ? 0.95 : currentZoom < 3 ? 0.7 : 0.4}
+					>
+						{label.name}
+					</text>
+					<text
+						class="industry-sub"
+						text-anchor="middle"
+						dominant-baseline="central"
+						y={Math.max(18, Math.min(28, 14 + Math.log2(label.count) * 2))}
+						font-size="10"
+						fill="#94a3b8"
+						opacity={currentZoom < 2 ? 0.8 : 0.4}
+					>
+						{label.count}사 · {label.totalRev >= 1e13
+							? `${(label.totalRev / 1e12).toFixed(0)}조`
+							: label.totalRev >= 1e11
+								? `${(label.totalRev / 1e12).toFixed(1)}조`
+								: `${Math.round(label.totalRev / 1e8)}억`}
+					</text>
+				</g>
+			{/each}
+		{/if}
+
+		<!-- 회사 라벨 (줌 인 상태) -->
+		{#if currentZoom >= 2}
+			{#each companyLabels as label (label.id)}
 				<text
-					class="industry-label"
+					class="company-label"
+					x={label.x}
+					y={label.y - 10}
 					text-anchor="middle"
-					dominant-baseline="central"
-					font-size={Math.max(14, Math.min(32, 12 + Math.log2(label.count) * 3))}
-					fill={label.color}
-					opacity={currentZoom < 3 ? 0.9 : 0.3}
+					font-size={Math.min(13, 8 + currentZoom * 0.3)}
+					opacity={currentZoom < 4 ? 0.7 : 0.95}
 				>
 					{label.name}
 				</text>
-			</g>
-		{/each}
+			{/each}
+		{/if}
 	</svg>
 
 	{#if hoveredNode}
@@ -236,9 +322,29 @@
 		letter-spacing: -0.02em;
 		paint-order: stroke fill;
 		stroke: #050811;
+		stroke-width: 4px;
+		stroke-linejoin: round;
+		transition: opacity 0.2s;
+	}
+	.industry-sub {
+		font-family: 'Pretendard Variable', sans-serif;
+		font-weight: 500;
+		paint-order: stroke fill;
+		stroke: #050811;
 		stroke-width: 3px;
 		stroke-linejoin: round;
-		transition: opacity 0.3s;
+		transition: opacity 0.2s;
+	}
+	.company-label {
+		font-family: 'Pretendard Variable', sans-serif;
+		font-weight: 500;
+		fill: #f1f5f9;
+		paint-order: stroke fill;
+		stroke: #050811;
+		stroke-width: 2.5px;
+		stroke-linejoin: round;
+		transition: opacity 0.2s;
+		pointer-events: none;
 	}
 	.hover-chip {
 		position: absolute;
