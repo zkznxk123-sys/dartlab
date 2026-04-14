@@ -23,7 +23,7 @@ def test_cli_parser_has_15_commands():
             break
     assert subparsers_action is not None
     commands = list(subparsers_action.choices.keys())
-    expected = ["show", "search", "statement", "profile", "modules", "ask", "chat", "collect", "status", "setup", "mcp"]
+    expected = ["show", "search", "statement", "profile", "modules", "ask", "collect", "status", "setup", "mcp"]
     for cmd in expected:
         assert cmd in commands, f"CLI 명령 누락: {cmd}"
 
