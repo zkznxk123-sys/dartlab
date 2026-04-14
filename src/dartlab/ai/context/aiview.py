@@ -147,6 +147,9 @@ def autoEnrich(data: dict | list | None, *, company: Any = None, calc_fn: Any = 
     - flat dict → 핵심 필드 요약
 
     엔진이 새 축을 추가해도 history + period + 숫자 패턴만 유지하면 자동 적용.
+
+    **assumptions 투명화**: data["assumptions"] 가 있으면 _summary 에 엔진 가정 한 줄 주입
+    → AI 가 "엔진이 무슨 가정으로 계산했나" 즉시 인지 → override 재호출 판단.
     """
     if data is None:
         return None
@@ -166,9 +169,9 @@ def autoEnrich(data: dict | list | None, *, company: Any = None, calc_fn: Any = 
         summary = _summarizeHistory(data["history"], "data", schema=_schema)
         if summary:
             enriched = dict(data)
-            enriched["_summary"] = summary
+            enriched["_summary"] = _withAssumptions(summary, data.get("assumptions"))
             return enriched
-        return data
+        return _maybeAddAssumptions(data)
 
     # 중첩 history — 전체 analysis dict: {"marginTrend": {"history": [...]}, ...}
     tsKeys = [
@@ -184,7 +187,107 @@ def autoEnrich(data: dict | list | None, *, company: Any = None, calc_fn: Any = 
     if numericKeys:
         return _enrichFlat(data)
 
-    return data
+    # assumptions 만 있는 경우 (순수 dict of dicts) 도 커버
+    return _maybeAddAssumptions(data)
+
+
+# ── assumptions 투명화 ──────────────────────────────────
+
+
+def _formatAssumptions(assumptions: dict) -> str:
+    """assumptions dict → AI 친화 한 줄 요약. override 재호출 유도 문구 포함."""
+    if not isinstance(assumptions, dict) or not assumptions:
+        return ""
+
+    overridden = assumptions.get("_overridden") or []
+    parts: list[str] = []
+    # 우선 순위 키: wacc / terminalGrowth / primaryModel / debtRatio / cyclePhase / window
+    _ORDER = (
+        "wacc",
+        "terminalGrowth",
+        "primaryModel",
+        "growthRates",
+        "opm",
+        "debtRatio",
+        "interestCoverage",
+        "currentRatio",
+        "cyclePhase",
+        "rateScenario",
+        "window",
+        "threshold",
+        "period",
+        "benchmark",
+    )
+    _LABEL = {
+        "wacc": "WACC",
+        "terminalGrowth": "g",
+        "primaryModel": "주모델",
+        "growthRates": "성장률",
+        "opm": "OPM",
+        "debtRatio": "부채비율",
+        "interestCoverage": "ICR",
+        "currentRatio": "유동비율",
+        "cyclePhase": "사이클",
+        "rateScenario": "금리시나리오",
+        "window": "window",
+        "threshold": "임계값",
+        "period": "기간",
+        "benchmark": "벤치마크",
+    }
+    for k in _ORDER:
+        if k not in assumptions:
+            continue
+        v = assumptions[k]
+        if v is None:
+            continue
+        label = _LABEL.get(k, k)
+        if isinstance(v, (int, float)):
+            # 비율 후보: 0~100 범위 + _ORDER 에 있는 rate 계열
+            if k in ("wacc", "terminalGrowth", "opm", "debtRatio", "currentRatio", "quickRatio", "threshold"):
+                parts.append(f"{label}={v:.1f}%")
+            elif k in ("interestCoverage",):
+                parts.append(f"{label}={v:.2f}x")
+            elif k in ("window", "period"):
+                parts.append(f"{label}={v}")
+            else:
+                parts.append(f"{label}={v:.2f}")
+        elif isinstance(v, (list, tuple)):
+            try:
+                head = ", ".join(f"{x:.1f}" for x in v[:3] if isinstance(x, (int, float)))
+                parts.append(f"{label}=[{head}{'...' if len(v) > 3 else ''}]")
+            except (TypeError, ValueError):
+                parts.append(f"{label}={v}")
+        else:
+            parts.append(f"{label}={v}")
+
+    if not parts:
+        return ""
+
+    head = "[엔진가정] " + " · ".join(parts)
+    if overridden:
+        head += f" (override 적용: {', '.join(overridden)})"
+    else:
+        head += " (의심되면 overrides={…} 로 재호출)"
+    return head
+
+
+def _withAssumptions(summary: str, assumptions: dict | None) -> str:
+    line = _formatAssumptions(assumptions) if assumptions else ""
+    if not line:
+        return summary
+    return f"{summary}\n{line}" if summary else line
+
+
+def _maybeAddAssumptions(data: dict) -> dict:
+    """data 에 assumptions 가 있으면 _summary 필드에 한 줄 주입."""
+    assumptions = data.get("assumptions") if isinstance(data, dict) else None
+    line = _formatAssumptions(assumptions) if assumptions else ""
+    if not line:
+        return data
+    enriched = dict(data)
+    existing = enriched.get("_summary") or ""
+    enriched["_summary"] = f"{existing}\n{line}".strip() if existing else line
+    return enriched
 
 
 # ── 패턴 1: dict with history[] ──────────────────────────
@@ -212,7 +315,8 @@ def _enrichDictWithHistory(
     if summaries:
         enriched["_summary"] = " / ".join(summaries[:4])
 
-    return enriched
+    # assumptions 한 줄 주입 (있으면)
+    return _maybeAddAssumptions(enriched)
 
 
 def _enrichHistory(rows: list[dict]) -> dict:

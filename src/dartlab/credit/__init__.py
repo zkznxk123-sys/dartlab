@@ -197,12 +197,20 @@ def credit(
     return result
 
 
-def creditCompany(company, axis: str | None = None, *, detail: bool = False, basePeriod: str | None = None):
+def creditCompany(
+    company,
+    axis: str | None = None,
+    *,
+    detail: bool = False,
+    basePeriod: str | None = None,
+    overrides: dict | None = None,
+):
     """Company 객체로 신용등급 산출 (Company-bound용).
 
     axis=None → 가이드 DataFrame (self-discovery)
     axis="등급" → 종합 등급 dict
     axis="채무상환" → 해당 축 dict
+    overrides → core/overrides.py CREDIT_KEYS. AI 가 시나리오 가정 교체.
     """
     if axis is None:
         return guide()
@@ -215,14 +223,68 @@ def creditCompany(company, axis: str | None = None, *, detail: bool = False, bas
     else:
         axis_filter = axis
 
-    result = evaluateCompany(company, detail=detail or (axis_filter is not None), basePeriod=basePeriod)
+    # overrides 전달 (engine 이 소비 가능하면 사용, 아니면 TypeError fallback 없이 무시)
+    kwargs: dict = {}
+    if overrides:
+        kwargs["overrides"] = overrides
+    try:
+        result = evaluateCompany(
+            company,
+            detail=detail or (axis_filter is not None),
+            basePeriod=basePeriod,
+            **kwargs,
+        )
+    except TypeError:
+        # engine 이 아직 overrides 수용 전 — 경고 없이 자동 계산
+        result = evaluateCompany(company, detail=detail or (axis_filter is not None), basePeriod=basePeriod)
     if result is None:
         return None
 
     if axis_filter is not None:
-        return _filterAxis(result, axis_filter)
+        result = _filterAxis(result, axis_filter)
+
+    # assumptions 투명화 — AI 가 credit 엔진이 쓴 지표값을 인지 → override 재호출
+    if isinstance(result, dict):
+        result["assumptions"] = _buildCreditAssumptions(result, overrides)
 
     return result
+
+
+def _buildCreditAssumptions(result: dict, overrides: dict | None) -> dict:
+    """credit 결과에서 엔진이 쓴 값을 표준 키로 노출.
+
+    AI 가 "이 등급이 어떤 지표로 나왔나" 즉시 인지 → 시나리오 override 판단.
+    """
+    a: dict = {}
+    # 최상위 등급/점수
+    if "grade" in result:
+        a["grade"] = result["grade"]
+    if "score" in result:
+        a["score"] = result["score"]
+    if "sector" in result:
+        a["sector"] = result["sector"]
+
+    # axis 단위 결과면 metrics 에서 지표값 추출
+    metrics = result.get("metrics") or {}
+    if isinstance(metrics, dict):
+        for stdKey, candidates in (
+            ("debtRatio", ("debtRatio", "debtToEquity", "leverage")),
+            ("interestCoverage", ("interestCoverage", "icr")),
+            ("currentRatio", ("currentRatio",)),
+            ("quickRatio", ("quickRatio",)),
+            ("ocfToDebt", ("ocfToDebt",)),
+            ("fcfToDebt", ("fcfToDebt",)),
+        ):
+            for c in candidates:
+                m = metrics.get(c)
+                if isinstance(m, dict) and "value" in m:
+                    a[stdKey] = m["value"]
+                    break
+                if isinstance(m, (int, float)):
+                    a[stdKey] = m
+                    break
+    a["_overridden"] = sorted(overrides.keys()) if overrides else []
+    return a
 
 
 def axes() -> dict[str, str]:

@@ -16,7 +16,6 @@ def customScore(stockCode: str, **kwargs) -> dict | None:
         점수 딕셔너리 또는 None.
     """
     try:
-        from dartlab.engines.common.extract import getLatest
         from dartlab.engines.dart.company import Company
 
         c = Company(stockCode)

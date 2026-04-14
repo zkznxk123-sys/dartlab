@@ -798,6 +798,75 @@ def _acceptsOverrides(fn) -> bool:
     return result
 
 
+# ── 엔진 가정 투명화 (assumptions aggregation) ──
+#
+# AI 가 엔진 결과를 조율(override)하려면 "엔진이 무슨 값을 썼는지" 알아야 한다.
+# 각 calc 결과에 흩어진 discountRate/baseWacc/assumedMargin 등을 표준 키로 모아
+# `results["assumptions"]` 에 주입. autoEnrich 가 이걸 _summary 에 반영.
+
+# 각 calc 결과 dict 의 alias → 표준 override 키 매핑
+_ASSUMPTION_ALIASES: dict[str, str] = {
+    # VALUATION
+    "discountRate": "wacc",
+    "baseWacc": "wacc",
+    "assumedWacc": "wacc",
+    "terminalGrowth": "terminalGrowth",
+    "baseTerminalGrowth": "terminalGrowth",
+    "growthRateInitial": "growthRates",
+    # FORECAST
+    "baseRevenue": "baseRevenue",
+    "projectedGrowth": "growthRates",
+    "projectedOpm": "opm",
+    "assumedMargin": "opm",
+    "opm": "opm",
+    "capexRatio": "capexRatio",
+    "depreciationRatio": "depreciationRatio",
+    "nwcRatio": "nwcRatio",
+    "taxRate": "taxRate",
+    # CREDIT
+    "debtRatio": "debtRatio",
+    "interestCoverage": "interestCoverage",
+    "currentRatio": "currentRatio",
+    "quickRatio": "quickRatio",
+}
+
+
+def _aggregateAssumptions(results: dict, overrides: dict | None) -> dict:
+    """calc 결과에서 엔진이 쓴 가정값을 표준 override 키로 수집.
+
+    AI 가 tool_result 를 보고 "wacc=18% 는 과도" 판단할 수 있게 만드는 게 목적.
+    """
+    collected: dict = {}
+    for blockKey, block in results.items():
+        if not isinstance(block, dict):
+            continue
+        for rawKey, stdKey in _ASSUMPTION_ALIASES.items():
+            if rawKey in block and stdKey not in collected:
+                val = block[rawKey]
+                # 숫자/문자열만 (리스트는 growthRates 예외)
+                if val is None:
+                    continue
+                if isinstance(val, (int, float, str)) or (stdKey == "growthRates" and isinstance(val, (list, tuple))):
+                    collected[stdKey] = val
+
+    # primaryModel 추론 — valuationSynthesis 에 companyType 이 있으면 그게 주 모델 힌트
+    synth = results.get("valuationSynthesis")
+    if isinstance(synth, dict):
+        weights = synth.get("modelWeights")
+        if isinstance(weights, dict) and weights:
+            # 가중치 최대 모델
+            top = max(weights.items(), key=lambda kv: kv[1] if isinstance(kv[1], (int, float)) else 0)
+            if isinstance(top[1], (int, float)) and top[1] > 0:
+                collected["primaryModel"] = top[0]
+
+    # override 적용 여부 명시
+    collected["_overridden"] = sorted(overrides.keys()) if overrides else []
+    # 아무것도 안 잡히면 빈 dict 반환 (상위에서 생략 판단)
+    if len(collected) == 1 and collected["_overridden"] == []:
+        return {}
+    return collected
+
+
 # ── Group Accessor ──
 
 
@@ -1035,6 +1104,12 @@ class Analysis:
                 OSError,
             ):
                 results[calc.blockKey] = None
+
+        # 엔진 투명성 — AI 가 조율 판단하려면 엔진이 쓴 가정값을 알아야 한다.
+        # 흩어진 discountRate/baseWacc/terminalGrowth 등을 표준 키로 통합.
+        assumptions = _aggregateAssumptions(results, overrides)
+        if assumptions:
+            results["assumptions"] = assumptions
         return results
 
     def __getattr__(self, name):

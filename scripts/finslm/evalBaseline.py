@@ -16,7 +16,6 @@ ops/ai.md 원칙: "벤치마크 숫자로 기본 모델을 정하지 않는다. 
 
 from __future__ import annotations
 
-import json
 import os
 import sys
 import time

@@ -2926,7 +2926,14 @@ class Company:
             self._cache["_creditAccessor"] = CallableAccessor(self._creditImpl, name="credit")
         return self._cache["_creditAccessor"]
 
-    def _creditImpl(self, axis: str | None = None, *, detail: bool = False, basePeriod: str | None = None):
+    def _creditImpl(
+        self,
+        axis: str | None = None,
+        *,
+        detail: bool = False,
+        basePeriod: str | None = None,
+        overrides: dict | None = None,
+    ):
         """독립 신용평가 — dCR 20단계 등급 (내부 구현).
 
         dartlab 독립 신용평가 엔진(credit/)이 산출하는 dCR 등급.
@@ -2936,6 +2943,9 @@ class Company:
             axis: 축 이름 ("채무상환", "자본구조" 등). None이면 등급 종합.
             detail: True이면 7축 상세 + 지표 시계열 포함.
             basePeriod: 분석 기준 기간. None이면 최신.
+            overrides: AI/사용자가 엔진 계산 가정을 직접 교체하는 dict.
+                키: debtRatio, interestCoverage, currentRatio, quickRatio, ocfToDebt,
+                fcfToDebt, scenarioStress. 상세: core/overrides.py.
 
         Returns:
             dict | None: 등급 결과. axis 지정 시 해당 축만.
@@ -2945,14 +2955,20 @@ class Company:
             c.credit()              # → {"grade": "dCR-AA", "score": 6.6, ...}
             c.credit("채무상환")     # → {"axis": "채무상환능력", "score": 2.7, ...}
             c.credit(detail=True)   # → 7축 상세 + metricsHistory
+            c.credit(overrides={"debtRatio": 150, "interestCoverage": 2.5})  # 스트레스 시나리오
 
         SeeAlso:
             - review("신용평가"): 보고서 형식으로 렌더링
             - analysis("financial", "신용평가"): analysis 축으로 접근
         """
+        from dartlab.core.overrides import validateOverrides
         from dartlab.credit import creditCompany
 
-        return creditCompany(self, axis=axis, detail=detail, basePeriod=basePeriod)
+        clean = validateOverrides(overrides, engine="credit")
+        kwargs: dict = {}
+        if clean:
+            kwargs["overrides"] = clean
+        return creditCompany(self, axis=axis, detail=detail, basePeriod=basePeriod, **kwargs)
 
     def gather(self, axis: str | None = None, **kwargs):
         """외부 시장 데이터 수집 — 4축 (price/flow/macro/news).
@@ -4467,7 +4483,7 @@ class Company:
             aggs.append(pl.col(c).median().alias(f"{c}_중간값"))
         return df_with_market.group_by("시장").agg(aggs).sort("종목수", descending=True)
 
-    def quant(self, metric=None, **kwargs):
+    def quant(self, metric=None, *, overrides: dict | None = None, **kwargs):
         """주가 기술적 분석 — self-discovery 패턴.
 
         Args:
@@ -4477,6 +4493,7 @@ class Company:
                     "신호"/"signals" → 매매 신호
                     "베타"/"beta" → 시장 베타 + CAPM
                     기타 30축 (모멘텀, 변동성, 팩터 등)
+            overrides: AI/사용자가 기술 분석 파라미터를 교체. 키: window/threshold/period/benchmark.
             **kwargs: 축별 추가 파라미터.
 
         Returns:
@@ -4491,13 +4508,26 @@ class Company:
             c.quant("종합")              # 종합 판단 dict
             c.quant("지표")              # 45개 지표 DataFrame
             c.quant("모멘텀")            # 모멘텀 분석
+            c.quant("RSI", overrides={"window": 14})  # 윈도우 override
         """
+        from dartlab.core.overrides import validateOverrides
         from dartlab.quant import Quant
 
+        clean = validateOverrides(overrides, engine="quant")
+        merged = {**clean, **kwargs}  # kwargs 가 명시적 → 우선
         q = Quant()
         if metric is None:
             return q()  # 가이드 DataFrame
-        return q(metric, self.stockCode, **kwargs)
+        result = q(metric, self.stockCode, **merged)
+        # assumptions 투명화 — window 등 엔진이 쓴 파라미터값 노출
+        if isinstance(result, dict):
+            a: dict = {}
+            for k in ("window", "threshold", "period", "benchmark"):
+                if k in merged:
+                    a[k] = merged[k]
+            a["_overridden"] = sorted(clean.keys()) if clean else []
+            result.setdefault("assumptions", a)
+        return result
 
     def industry(self) -> dict | None:
         """이 회사의 밸류체인 산업 내 위치를 분석한다.
@@ -4622,4 +4652,3 @@ class Company:
             reflect=reflect,
             **kwargs,
         )
-

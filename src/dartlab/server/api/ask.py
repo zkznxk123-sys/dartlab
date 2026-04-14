@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-import dartlab
 from fastapi import APIRouter
 from sse_starlette.sse import EventSourceResponse
+
+import dartlab
 
 from ..models import AskRequest
 from ..services.ai_analysis import run_plain_chat

@@ -107,8 +107,8 @@ def test_provider() -> bool:
     print("dartlab.ask() 테스트...")
     os.environ["DARTLAB_CONTEXT_V2"] = "1"
 
-    from dartlab.ai.runtime.core import analyze
     import dartlab
+    from dartlab.ai.runtime.core import analyze
 
     c = dartlab.Company("005930")
     full = ""

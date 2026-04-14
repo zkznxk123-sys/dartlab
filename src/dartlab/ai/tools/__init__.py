@@ -25,20 +25,94 @@ class AITool:
 
 # ── AI 가 tool 로 쓸 공개 API ────────────────────────────────
 
-# CAPABILITIES 의 key → (kind, target). kind: "company" / "module".
-# 이 매핑은 공개 API 전수 중 "LLM 이 자율로 호출하는" 것만 선별하기 위함.
-# review 는 보고서 요청 전용 가이드로 시스템 프롬프트에서 유도 — tool 은 포함.
-_TOOLS: dict[str, tuple[str, str]] = {
-    "show": ("company", "show"),
-    "analysis": ("company", "analysis"),
-    "credit": ("company", "credit"),
-    "gather": ("company", "gather"),
-    "review": ("company", "review"),
-    "scan": ("module", "scan"),
-    "macro": ("module", "macro"),
-    "search": ("module", "search"),
-    "searchCompany": ("module", "searchName"),
+# 자동 수집에서 제외할 이름. AI tool 이 될 수 없거나 되면 안 되는 것들.
+_BLACKLIST: set[str] = {
+    # 데이터 수집 / 배포
+    "setup",
+    "collect",
+    "collectAll",
+    "downloadAll",
+    # facade class / 래퍼 class
+    "Company",
+    "Fred",
+    "OpenDart",
+    "OpenEdgar",
+    "ChartResult",
+    "SelectResult",
+    "Review",
+    # 설정 / 메타
+    "config",
+    "dataDir",
+    "verbose",
+    "capabilities",
+    # 진입점 자체
+    "ask",
+    # 유틸 (searchCompany 로 대체)
+    "codeToName",
+    "nameToCode",
+    # listing = 카탈로그. AI 가 직접 쓸 일 없음
+    "listing",
+    # Company 내부 helper
+    "select",  # show(fields=...) 가 위임 처리
+    # Provider protocol (AI 가 알 필요 없음)
+    "canHandle",
+    "priority",
+    "resolve",
+    # 데이터 유지보수 (AI 가 쓰면 안 됨)
+    "status",
+    "update",
+    # 인터랙티브 (AI runtime 에 부적합)
+    "view",
+    # Low-level parser helper
+    "table",
 }
+
+
+def _autoDiscover() -> dict[str, tuple[str, str]]:
+    """dartlab.__all__ + Company 공개 method 자동 순회 + 블랙리스트.
+
+    우선순위: Company-bound (_xxxImpl 또는 직접 method) > module-level.
+    """
+    import dartlab
+    from dartlab.providers.dart.company import Company as _C
+
+    tools: dict[str, tuple[str, str]] = {}
+
+    # 1. Company-bound — dual-access _xxxImpl 또는 직접 method
+    for attr in dir(_C):
+        if attr.startswith("_") or attr in _BLACKLIST:
+            continue
+        # dual-access property (_xxxImpl 존재) 우선
+        if getattr(_C, f"_{attr}Impl", None) is not None:
+            tools[attr] = ("company", attr)
+            continue
+        # 직접 method (gather, quant 등)
+        obj = getattr(_C, attr, None)
+        if callable(obj) and (inspect.isfunction(obj) or inspect.ismethod(obj)):
+            # Company 인스턴스에서만 의미 있는 method 만 (수업 attribute, dunder 제외)
+            if not isinstance(obj, type):
+                tools[attr] = ("company", attr)
+
+    # 2. Module-level — Company 에 없는 것만 (scan/macro/search 등)
+    # 주의: dartlab.scan/macro/quant 는 _CallableModule (ismodule=True) — 명시적 허용.
+    _MODULE_WHITELIST = {"scan", "macro", "quant", "gather", "industry", "topdown"}
+    for name in getattr(dartlab, "__all__", []):
+        if name in _BLACKLIST or name.startswith("_") or name in tools:
+            continue
+        obj = getattr(dartlab, name, None)
+        if obj is None or inspect.isclass(obj):
+            continue
+        if inspect.ismodule(obj) and name not in _MODULE_WHITELIST:
+            continue
+        if not callable(obj):
+            continue
+        tools[name] = ("module", name)
+
+    # 3. searchName → searchCompany (AI 친화적 이름)
+    if "searchName" in tools:
+        tools["searchCompany"] = tools.pop("searchName")
+
+    return tools
 
 
 def buildTools() -> list[AITool]:
@@ -46,8 +120,9 @@ def buildTools() -> list[AITool]:
     from dartlab.guide._generated import CAPABILITIES
 
     tools: list[AITool] = []
+    registry = _autoDiscover()
 
-    for name, (kind, target) in _TOOLS.items():
+    for name, (kind, target) in registry.items():
         capKey = f"Company.{target}" if kind == "company" else target
         cap = CAPABILITIES.get(capKey, {})
         callable_ = _resolveCallable(kind, target)
@@ -61,6 +136,11 @@ def buildTools() -> list[AITool]:
                 handler=_buildHandler(name, kind, target),
             )
         )
+
+    # 경험 조회 tool — KnowledgeDB 직접 접근 (Company 불필요)
+    from dartlab.ai.tools._builtin import _builtinTools
+
+    tools.extend(_builtinTools())
 
     # pythonExec — 유일 특수 케이스 (subprocess)
     tools.append(
@@ -108,6 +188,13 @@ def _resolveCallable(kind: str, target: str) -> Any:
             from dartlab.macro import Macro
 
             return Macro.__call__
+        if target == "quant":
+            try:
+                from dartlab.quant import Quant  # type: ignore
+
+                return Quant.__call__
+            except ImportError:
+                pass
         # 일반 모듈 함수 (search / searchName 등)
         try:
             import dartlab
@@ -188,6 +275,19 @@ def _buildSchema(obj: Any, name: str, kind: str, caps: dict) -> dict:
             if param.default is inspect.Parameter.empty:
                 required.append(pName)
 
+    # overrides — 4 엔진 공통. AI 가 엔진 계산 가정 직접 조율.
+    if name in ("analysis", "credit", "quant", "macro"):
+        try:
+            from dartlab.core.overrides import describeOverrides
+
+            props["overrides"] = {
+                "type": "object",
+                "description": describeOverrides(name),
+                "additionalProperties": True,
+            }
+        except ImportError:
+            pass
+
     # show: select 통합을 위한 fields
     if name == "show":
         props["fields"] = {
@@ -224,7 +324,7 @@ def _enumFromCapabilities(toolName: str, paramName: str, caps: dict) -> list[str
     # axis 파라미터 → 엔진 자체 공간의 축 entry 수집
     if paramName == "axis" and toolName in ("scan", "macro", "gather"):
         prefix = f"{toolName}."
-        return sorted(k[len(prefix):] for k in caps if k.startswith(prefix))
+        return sorted(k[len(prefix) :] for k in caps if k.startswith(prefix))
     # show.topic — 재무제표/주석/docs topic 합집합 (엔진 메타에 모든게 있진 않음)
     if toolName == "show" and paramName == "topic":
         return _showTopics()
@@ -234,9 +334,14 @@ def _enumFromCapabilities(toolName: str, paramName: str, caps: dict) -> list[str
     # search.scope
     if toolName == "search" and paramName == "scope":
         return ["title", "content", "auto"]
-    # analysis.axis — docstring 의 "14축 분석: A, B, C, ..." 패턴 파싱
+    # analysis.axis — _AXIS_REGISTRY 전체 (financial + forecast + valuation 그룹)
     if toolName == "analysis" and paramName == "axis":
-        return _parseAxesFromDocstring("analysis")
+        try:
+            from dartlab.analysis.financial import _AXIS_REGISTRY as _AR
+
+            return sorted(_AR.keys())
+        except ImportError:
+            return _parseAxesFromDocstring("analysis")
     # credit.axis — 실제 _CREDIT_AXES 를 직접 사용 (추측 방지)
     if toolName == "credit" and paramName == "axis":
         try:

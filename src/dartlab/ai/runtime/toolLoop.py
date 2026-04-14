@@ -75,7 +75,9 @@ def streamWithTools(
         if resp is None:
             yield AnalysisEvent(
                 "error",
-                {"error": f"provider '{getattr(llm.config, 'provider', '?')}' stream_with_tools 가 ToolResponse 미반환"},
+                {
+                    "error": f"provider '{getattr(llm.config, 'provider', '?')}' stream_with_tools 가 ToolResponse 미반환"
+                },
             )
             return
 

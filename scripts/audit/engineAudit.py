@@ -17,7 +17,6 @@ import json
 import logging
 import sys
 import time
-import traceback
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -232,7 +231,7 @@ def writeReport(outDir: Path, allResults: list[dict]) -> None:
 
     # 요약 md
     lines = [
-        f"# Engine Audit Report\n",
+        "# Engine Audit Report\n",
         f"**실행 시각**: {datetime.now().isoformat(timespec='seconds')}\n",
         f"**점검 대상**: {len(allResults)}개\n\n",
         "## 종합 등급\n",

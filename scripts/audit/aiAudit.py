@@ -217,7 +217,7 @@ def writeReport(outDir: Path, results: list[dict]) -> None:
     # 요약 md
     grade_counts = {g: sum(1 for r in results if r["grade"] == g) for g in "PTCV"}
     lines = [
-        f"# AI Audit Report\n",
+        "# AI Audit Report\n",
         f"**실행 시각**: {datetime.now().isoformat(timespec='seconds')}\n",
         f"**총 질문**: {len(results)}개\n",
         "",

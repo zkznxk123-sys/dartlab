@@ -203,15 +203,17 @@ def enrichCompanyData(
     nodeByCode = {n.stockCode: n for n in nodes}
     for e in supplierEdges:
         fromNode = nodeByCode.get(e.fromCode)
-        suppliers.append({
-            "stockCode": e.fromCode,
-            "corpName": e.fromName or (fromNode.corpName if fromNode else ""),
-            "product": e.product,
-            "amount": e.amount,
-            "ratio": e.ratio,
-            "confidence": e.confidence,
-            "source": e.source,
-        })
+        suppliers.append(
+            {
+                "stockCode": e.fromCode,
+                "corpName": e.fromName or (fromNode.corpName if fromNode else ""),
+                "product": e.product,
+                "amount": e.amount,
+                "ratio": e.ratio,
+                "confidence": e.confidence,
+                "source": e.source,
+            }
+        )
 
     # 상위 고객사 10
     customerEdges = sorted(
@@ -222,32 +224,33 @@ def enrichCompanyData(
     customers = []
     for e in customerEdges:
         toNode = nodeByCode.get(e.toCode)
-        customers.append({
-            "stockCode": e.toCode,
-            "corpName": e.toName or (toNode.corpName if toNode else ""),
-            "product": e.product,
-            "amount": e.amount,
-            "type": e.edgeType,
-            "confidence": e.confidence,
-        })
+        customers.append(
+            {
+                "stockCode": e.toCode,
+                "corpName": e.toName or (toNode.corpName if toNode else ""),
+                "product": e.product,
+                "amount": e.amount,
+                "type": e.edgeType,
+                "confidence": e.confidence,
+            }
+        )
 
     # 동종사 상위 5 (같은 산업, 매출 순)
     ego = egoData.get("ego", {})
     industryId = ego.get("industry", "")
     peers: list[dict] = []
     if industryId:
-        industryNodes = [
-            n for n in nodes
-            if n.industry == industryId and n.stockCode != stockCode and n.revenue
-        ]
+        industryNodes = [n for n in nodes if n.industry == industryId and n.stockCode != stockCode and n.revenue]
         industryNodes.sort(key=lambda n: n.revenue or 0, reverse=True)
         for n in industryNodes[:5]:
-            peers.append({
-                "stockCode": n.stockCode,
-                "corpName": n.corpName,
-                "stage": n.stage,
-                "revenue": round((n.revenue or 0) / 1e8),  # 억
-            })
+            peers.append(
+                {
+                    "stockCode": n.stockCode,
+                    "corpName": n.corpName,
+                    "stage": n.stage,
+                    "revenue": round((n.revenue or 0) / 1e8),  # 억
+                }
+            )
 
     return {
         **egoData,

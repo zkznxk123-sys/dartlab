@@ -11,7 +11,6 @@ gh CLI로 각 워크플로우의 최근 실행을 조회하고,
 import json
 import os
 import subprocess
-import sys
 from datetime import datetime, timezone
 
 MONITORED_WORKFLOWS = [

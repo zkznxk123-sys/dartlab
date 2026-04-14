@@ -162,11 +162,11 @@ def _discoverNewFilings(keys: str, lookbackDays: int, dataDir: str) -> tuple[set
         (targetCodes, codeToFilings)
         codeToFilings: {stockCode: [{rcept_no, rcept_dt, report_nm, corp_code, corp_name}, ...]}
     """
+    import polars as pl
+
+    from dartlab.core.dataConfig import DATA_RELEASES
     from dartlab.providers.dart.openapi.client import DartApiError, DartClient
     from dartlab.providers.dart.openapi.disclosure import listFilings
-    from dartlab.core.dataConfig import DATA_RELEASES
-
-    import polars as pl
 
     end = datetime.now()
     start = end - timedelta(days=lookbackDays)
@@ -317,11 +317,11 @@ async def _collectDocsDirect(
     batchCollect._collectDocs와 달리 per-stock listing API를 호출하지 않는다.
     이것이 타임아웃의 근본 원인이었음.
     """
+    import polars as pl
+
     from dartlab.core.dataConfig import DATA_RELEASES
     from dartlab.providers.dart.openapi.batch import AsyncDartClient
     from dartlab.providers.dart.openapi.zipCollector import _parseSections
-
-    import polars as pl
 
     docsDir = Path(dataDir) / DATA_RELEASES["docs"]["dir"]
     docsDir.mkdir(parents=True, exist_ok=True)
@@ -641,7 +641,7 @@ def main():
     if summaryPath:
         with open(summaryPath, "a", encoding="utf-8") as f:
             f.write(f"## Daily Sync (최근 {lookbackDays}일 공시)\n\n")
-            f.write(f"| 항목 | 값 |\n|------|----|\n")
+            f.write("| 항목 | 값 |\n|------|----|\n")
             f.write(f"| 카테고리 | {', '.join(categories)} |\n")
             f.write(f"| 수집 대상 | {len(targetCodes)}개 |\n")
             f.write(f"| 소요 시간 | {elapsed:.0f}초 |\n")

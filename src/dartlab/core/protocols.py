@@ -134,6 +134,7 @@ class CompanyProtocol(Protocol):
         """LLM에게 기업 분석 질문."""
         ...
 
+
 @runtime_checkable
 class DocsProtocol(Protocol):
     """docs namespace 공통 인터페이스."""

@@ -29,6 +29,7 @@ def readParquetSafe(path) -> pl.DataFrame:
     if not _IS_PYODIDE:
         return pl.read_parquet(path)
     import io
+
     import pyarrow.parquet as pq
 
     data = Path(path).read_bytes() if not isinstance(path, bytes) else path
@@ -1153,9 +1154,9 @@ def _pyodideFetchToFS(stockCode: str, category: str, dirPath: str, path: Path) -
 
     # 방법 1: pyodide.http.pyfetch (async → run_sync)
     try:
-        from pyodide.http import pyfetch  # type: ignore[import-not-found]
-
         import asyncio
+
+        from pyodide.http import pyfetch  # type: ignore[import-not-found]
 
         async def _fetch():
             resp = await pyfetch(url)

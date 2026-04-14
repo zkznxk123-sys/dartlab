@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 
-from dartlab.industry.taxonomy import loadTaxonomy, matchStageByKeywords
+from dartlab.industry.taxonomy import matchStageByKeywords
 from dartlab.industry.types import IndustryNode
 
 

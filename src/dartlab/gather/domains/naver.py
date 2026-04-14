@@ -24,6 +24,8 @@ log = logging.getLogger(__name__)
 _API_BASE = "https://m.stock.naver.com/api/stock"
 # 네이버 차트 API (XML) — FDR 방식, 한번에 6000일
 _CHART_URL = "https://fchart.stock.naver.com/sise.nhn"
+# 네이버 분봉 API (JSON) — 당일 1분봉 OHLCV
+_INTRADAY_URL = "https://api.stock.naver.com/chart/domestic/item/{code}/minute"
 
 
 def _clean_number(text: str | None) -> float | None:
@@ -360,6 +362,63 @@ async def fetch_all(stock_code: str, client) -> GatherResult:
     except SourceUnavailableError as exc:
         result.error = str(exc)
     return result
+
+
+async def fetch_intraday(
+    stock_code: str,
+    client,
+    *,
+    market: str = "KR",
+    **_: object,
+) -> list[dict]:
+    """네이버 → 당일 1분봉 OHLCV.
+
+    api.stock.naver.com 엔드포인트. minuteType/count 파라미터는 서버가 무시하므로
+    당일분 전체가 한 번에 온다. 5/15/30/60분봉은 이 결과를 Polars로 리샘플하여 얻는다.
+    과거 분봉은 제공하지 않음 (fchart는 OHL=null이라 미사용).
+
+    Returns:
+        list[dict]
+            datetime : str — ISO8601 (yyyy-mm-ddTHH:MM:SS, KST)
+            open : float — 시가 (원)
+            high : float — 고가 (원)
+            low : float — 저가 (원)
+            close : float — 종가 (원)
+            volume : int — 누적 거래량 (주)
+    """
+    if market != "KR":
+        return []
+
+    url = _INTRADAY_URL.format(code=stock_code)
+    try:
+        resp = await client.get(url, headers={"Accept": "application/json"})
+        data = resp.json()
+    except (SourceUnavailableError, ValueError) as exc:
+        log.warning("naver intraday API 실패 (%s): %s", stock_code, exc)
+        return []
+
+    if not isinstance(data, list):
+        return []
+
+    rows: list[dict] = []
+    for item in data:
+        dt = item.get("localDateTime", "")
+        if len(dt) < 14:
+            continue
+        close = item.get("currentPrice")
+        if close is None:
+            continue
+        rows.append(
+            {
+                "datetime": f"{dt[:4]}-{dt[4:6]}-{dt[6:8]}T{dt[8:10]}:{dt[10:12]}:{dt[12:14]}",
+                "open": float(item.get("openPrice") or 0.0),
+                "high": float(item.get("highPrice") or 0.0),
+                "low": float(item.get("lowPrice") or 0.0),
+                "close": float(close),
+                "volume": int(item.get("accumulatedTradingVolume") or 0),
+            }
+        )
+    return rows
 
 
 async def fetch_history(

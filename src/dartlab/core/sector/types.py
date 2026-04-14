@@ -4,15 +4,15 @@
 """
 
 from dartlab.industry.compat import (
+    MARKET_KR,
+    MARKET_PARAMS,
+    MARKET_US,
     IndustryGroup,
     MarketParams,
     Sector,
     SectorInfo,
     SectorParams,
     getMarketParams,
-    MARKET_KR,
-    MARKET_US,
-    MARKET_PARAMS,
 )
 
 __all__ = [

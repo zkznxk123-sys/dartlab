@@ -16,6 +16,7 @@ app = marimo.App()
 
 with app.setup:
     import polars as pl
+
     import dartlab
 
 

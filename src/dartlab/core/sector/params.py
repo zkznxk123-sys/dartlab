@@ -6,12 +6,11 @@
 from dartlab.industry.compat import (
     IndustryGroup,
     Sector,
-    SectorInfo,
     SectorParams,
-    getParams,
-    getMarketParams,
     _byValue,
     _loadSectorData,
+    getMarketParams,
+    getParams,
 )
 
 # 하위 호환: SECTOR_PARAMS, INDUSTRY_GROUP_PARAMS dict 재현

@@ -330,23 +330,38 @@ def memoized_calc(fn: Callable[..., Any]) -> Callable[..., Any]:
     key: ``_{함수명}:{basePeriod}``
     Company._cache(BoundedCache)가 없으면 캐시 없이 실행.
     결과가 None이면 캐시하지 않는다.
+
+    overrides 가 전달되면 **캐시 skip** + override 그대로 통과 — 같은 가정
+    재실행 시 캐시가 오래된 값을 돌려주는 사고 방지.
     """
     import inspect
 
-    _has_base_period = "basePeriod" in inspect.signature(fn).parameters
+    params = inspect.signature(fn).parameters
+    _has_base_period = "basePeriod" in params
+    _has_overrides = "overrides" in params
 
     @functools.wraps(fn)
-    def wrapper(company: Any, *, basePeriod: str | None = None) -> Any:
-        cache = getattr(company, "_cache", None)
+    def wrapper(
+        company: Any,
+        *,
+        basePeriod: str | None = None,
+        overrides: dict | None = None,
+    ) -> Any:
+        kw: dict[str, Any] = {}
+        if _has_base_period:
+            kw["basePeriod"] = basePeriod
+        if _has_overrides and overrides:
+            kw["overrides"] = overrides
+
+        # override 적용 시 캐시 우회 (값이 달라지므로)
+        useCache = not overrides
+        cache = getattr(company, "_cache", None) if useCache else None
         key = f"_{fn.__name__}:{basePeriod}"
 
         if cache is not None and key in cache:
             return cache[key]
 
-        if _has_base_period:
-            result = fn(company, basePeriod=basePeriod)
-        else:
-            result = fn(company)
+        result = fn(company, **kw)
 
         if cache is not None and result is not None:
             cache[key] = result

@@ -17,7 +17,6 @@ from __future__ import annotations
 import gc
 import json
 import sys
-import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
@@ -111,7 +110,7 @@ def main() -> int:
             )
 
         success += 1
-        del c, g
+        del c, g  # noqa: F821  # 두 try 모두 통과한 경로에서만 도달 — 둘 다 정의 보장
         gc.collect()
 
         if (i + 1) % 20 == 0:

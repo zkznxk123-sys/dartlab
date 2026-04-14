@@ -1,6 +1,5 @@
 """HuggingFace 데이터셋 README 업로드."""
 
-import os
 from huggingface_hub import HfApi
 
 token = None

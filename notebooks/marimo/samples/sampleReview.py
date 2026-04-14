@@ -16,7 +16,7 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import dartlab
-    from dartlab.review import blocks, Review
+    from dartlab.review import Review, blocks
 
     c = dartlab.Company("005930")
     return c, dartlab, blocks, Review

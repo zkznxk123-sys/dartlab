@@ -4,8 +4,11 @@ fal.ai FLUX schnell 사용.
 실행: FAL_KEY=xxx uv run python -X utf8 scripts/blog/gen_oklo_flux.py
 """
 
-import os, sys, requests
+import os
+import sys
 from pathlib import Path
+
+import requests
 
 ROOT = Path(r"c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab")
 ASSETS = ROOT / "blog/05-company-reports/31-OKLO-oklo/assets"

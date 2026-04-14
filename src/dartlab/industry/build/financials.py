@@ -108,7 +108,6 @@ def attachFinancials(
         years = ["2025", "2024", "2023"]
 
     # 최신 연도부터 merge
-    import polars as pl
 
     allFin: dict[str, dict] = {}
     for year in years:

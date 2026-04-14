@@ -9,11 +9,9 @@
 
 from __future__ import annotations
 
-import gc
 import json
 import sys
 import time
-import traceback
 from pathlib import Path
 
 # ── 설정 ──
@@ -460,7 +458,7 @@ def _writeResults(allResults: list[dict]):
             engines[eng] = {"PASS": 0, "WARN": 0, "FAIL": 0}
         engines[eng][r["grade"]] = engines[eng].get(r["grade"], 0) + 1
 
-    print(f"\n엔진별:")
+    print("\n엔진별:")
     for eng, g in sorted(engines.items()):
         print(f"  {eng:25s}  PASS={g['PASS']:3d}  WARN={g['WARN']:3d}  FAIL={g['FAIL']:3d}")
 

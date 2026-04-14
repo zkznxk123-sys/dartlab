@@ -399,8 +399,6 @@ def _lookupFromProductIndex(stockCode: str) -> str | None:
         try:
             from pathlib import Path
 
-            import polars as pl
-
             path = Path(__file__).parent.parent.parent.parent.parent / "data" / "dart" / "scan" / "productIndex.parquet"
             if not path.exists():
                 _PRODUCT_INDEX_CACHE = {}

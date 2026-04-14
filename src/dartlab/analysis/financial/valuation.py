@@ -237,7 +237,8 @@ def calcDcf(
         "proformaFCF": pfFCF,
     }
     if tg_override is not None:
-        dcf_kwargs["terminalGrowthRate"] = tg_override / 100 if tg_override > 1 else tg_override
+        # dcfValuation() 은 백분위 숫자 (3.0 = 3%) 로 받는다
+        dcf_kwargs["terminalGrowth"] = tg_override * 100 if tg_override <= 1 else tg_override
 
     result = dcfValuation(series, **dcf_kwargs)
     out: dict[str, Any] = {

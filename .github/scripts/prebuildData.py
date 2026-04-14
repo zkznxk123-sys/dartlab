@@ -132,7 +132,7 @@ def main():
         _uploadScan(dataDir)
         _writeSummary(counts, results, elapsed)
     else:
-        print(f"[prebuild] scan이 targets에 없음 → 스킵")
+        print("[prebuild] scan이 targets에 없음 → 스킵")
         _writeSummary(counts, None, 0)
 
 

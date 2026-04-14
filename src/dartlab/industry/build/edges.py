@@ -10,10 +10,8 @@ Company 객체를 로드하지 않고 parquet/report를 직접 스캔한다.
 
 from __future__ import annotations
 
-import json
 import logging
 import re
-from pathlib import Path
 
 import polars as pl
 
@@ -287,6 +285,7 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     구조화된 데이터: 부문 / 품목 / 매입액 / 비중 / 매입처
     → 공급사 실명 + 제품 + 거래 비중이 포함된 정밀 엣지.
     """
+    from dartlab.industry.build.stage3_docs import _docsDir
     from dartlab.industry.build.table_parser import (
         extractCorpNames,
         extractTables,
@@ -296,7 +295,6 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
         parsePercent,
         tableToRowDictsWithHeaderRow,
     )
-    from dartlab.industry.build.stage3_docs import _docsDir
 
     edges: list[IndustryEdge] = []
     nodeIdx = _buildNodeIndex(nodes)

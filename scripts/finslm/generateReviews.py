@@ -38,7 +38,7 @@ def main() -> int:
     codes = df["종목코드"].to_list()[:200]
     print(f"{len(codes)}종목 선정")
 
-    print(f"\npublishBatch 시작... (예상 6~8시간)")
+    print("\npublishBatch 시작... (예상 6~8시간)")
     t0 = time.time()
     try:
         paths = publishBatch(codes)

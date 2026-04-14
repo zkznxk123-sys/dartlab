@@ -133,7 +133,7 @@ def main() -> int:
         f.write("# A/B 평가 결과\n\n")
         f.write(f"- 날짜: {time.strftime('%Y-%m-%d')}\n")
         f.write(f"- Provider: {provider}\n")
-        f.write(f"- 종목: 005930 삼성전자\n\n")
+        f.write("- 종목: 005930 삼성전자\n\n")
         f.write("| # | 질문 | Cat | v1 길이 | v1 시간 | v2 길이 | v2 시간 | v2-v1 |\n")
         f.write("|---|------|-----|---------|---------|---------|---------|-------|\n")
         for i, r in enumerate(results, 1):

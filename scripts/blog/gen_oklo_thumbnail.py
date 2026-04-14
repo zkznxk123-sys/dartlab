@@ -4,8 +4,9 @@ FLUX 배경 이미지 위에 텍스트 오버레이.
 실행: uv run python -X utf8 scripts/blog/gen_oklo_thumbnail.py
 """
 
-from PIL import Image, ImageDraw, ImageFont
 from pathlib import Path
+
+from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(r"c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab")
 ASSETS = ROOT / "blog/05-company-reports/31-OKLO-oklo/assets"

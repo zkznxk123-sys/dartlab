@@ -228,8 +228,6 @@ class TestToolLoop:
         """
         from dartlab.ai.runtime.toolLoop import streamWithTools
 
-        llm = _MockProvider(
-            [{"answer": "짧은 답", "tool_calls": [], "finish_reason": "stop"}]
-        )
+        llm = _MockProvider([{"answer": "짧은 답", "tool_calls": [], "finish_reason": "stop"}])
         out = list(streamWithTools(llm, [{"role": "user", "content": "q"}]))
         assert any(isinstance(item, str) and "짧은 답" in item for item in out)

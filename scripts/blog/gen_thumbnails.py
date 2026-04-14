@@ -7,8 +7,9 @@
 - 우상단 dartlab 로고, 우하단 마스코트
 """
 
-from PIL import Image, ImageDraw, ImageFont
 from pathlib import Path
+
+from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(r"c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab")
 THUMBS = ROOT / "landing/static/thumbnails"

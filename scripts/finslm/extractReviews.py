@@ -87,7 +87,7 @@ def main() -> int:
                         SYSTEM_PROMPT,
                         f"{corp}({code})의 {title}을 분석해줘.",
                         content[:5000],
-                        {"stock_code": code, "intent": f"review_act", "source": "review_batch"},
+                        {"stock_code": code, "intent": "review_act", "source": "review_batch"},
                     )
                 )
 

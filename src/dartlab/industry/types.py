@@ -5,7 +5,7 @@ taxonomy.json, nodes.json, edges.json의 행 단위 타입.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass

@@ -5,11 +5,9 @@ micropip.install(URL) 한 줄로 설치 가능하게 한다.
 PyPI wheel은 그대로 유지 (full deps).
 """
 
-import re
 import subprocess
 import sys
 import zipfile
-from io import BytesIO
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -136,6 +134,7 @@ def main():
 
     if args.upload:
         import os
+
         from dotenv import load_dotenv
 
         load_dotenv(ROOT / ".env")

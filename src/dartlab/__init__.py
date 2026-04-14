@@ -45,9 +45,8 @@ async def prefetch(*stockCodes: str, categories: list[str] | None = None) -> Non
 
     await pyodide_js.loadPackage(["pyarrow", "lxml", "polars", "numpy", "pydantic"])
 
-    from pyodide.http import pyfetch  # type: ignore[import-not-found]
-
     from dartlab.core.dataConfig import DATA_RELEASES, hfBaseUrl
+    from pyodide.http import pyfetch  # type: ignore[import-not-found]
 
     cats = categories or ["docs", "finance", "report"]
     for code in stockCodes:

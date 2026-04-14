@@ -34,7 +34,7 @@ def _cloneExisting(category: str, dataDir: str) -> int:
     if cloneDir.exists():
         shutil.rmtree(cloneDir)
 
-    print(f"[syncData] HuggingFace shallow clone 시작...")
+    print("[syncData] HuggingFace shallow clone 시작...")
     env = {**os.environ, "GIT_LFS_SKIP_SMUDGE": "1"}
     result = subprocess.run(
         ["git", "clone", "--depth", "1", "https://huggingface.co/datasets/eddmpython/dartlab-data", str(cloneDir)],
@@ -162,7 +162,7 @@ def main():
     if summaryPath:
         with open(summaryPath, "a", encoding="utf-8") as f:
             f.write(f"## Data Sync: {category}\n\n")
-            f.write(f"| 항목 | 값 |\n|------|----|\n")
+            f.write("| 항목 | 값 |\n|------|----|\n")
             f.write(f"| 모드 | {mode} (incremental) |\n")
             f.write(f"| 기존 데이터 | {existingCount}개 |\n")
             f.write(f"| 수집 대상 종목 | {len(results)}개 |\n")

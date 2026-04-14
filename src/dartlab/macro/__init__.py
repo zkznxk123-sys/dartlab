@@ -245,16 +245,19 @@ class Macro:
         target: str | None = None,
         *,
         market: str = "US",
+        overrides: dict | None = None,
         **kwargs: Any,
     ) -> pl.DataFrame | dict:
         """매크로 분석 실행.
 
         Args:
-            axis: ���석 축. None이면 가이드.
+            axis: 분석 축. None이면 가이드.
             target: 2번째 인자 (시나리오 이름 등).
                 macro("시나리오", "2008 금융위기") 형태.
             market: "US" | "KR"
-            **kwargs: 축별 추가 ���라미터
+            overrides: AI/사용자가 매크로 시나리오 강제. 키: cyclePhase/rateScenario/
+                fxScenario/liquidityScenario. 상세: core/overrides.py.
+            **kwargs: 축별 추가 파라미터
 
         Returns
         -------
@@ -263,14 +266,19 @@ class Macro:
         dict
             분석 결과
         """
+        from dartlab.core.overrides import validateOverrides
+
         if axis is None:
             return self._guide()
 
         if market not in ("US", "KR"):
             raise ValueError(
-                f"market 은 'US' 또는 'KR' 만 지원���니다. 받은 값: '{market}'\n"
+                f"market 은 'US' 또는 'KR' 만 지원합니다. 받은 값: '{market}'\n"
                 f"  사용법: dartlab.macro('{axis}', market='KR') 또는 market='US'"
             )
+
+        clean = validateOverrides(overrides, engine="macro")
+        merged: dict = {**clean, **kwargs}
 
         key = _resolve(axis)
         entry = _AXIS_REGISTRY[key]
@@ -278,9 +286,28 @@ class Macro:
         fn = getattr(mod, entry.fn)
 
         # 2번째 positional: macro("시나리오", "2008 금융위기")
-        if target is not None:
-            return fn(target, market=market, **kwargs)
-        return fn(market=market, **kwargs)
+        try:
+            if target is not None:
+                result = fn(target, market=market, **merged)
+            else:
+                result = fn(market=market, **merged)
+        except TypeError:
+            # 축 함수가 override 키 수용 전 — 키 제거 후 재시도
+            if target is not None:
+                result = fn(target, market=market, **kwargs)
+            else:
+                result = fn(market=market, **kwargs)
+
+        # assumptions 투명화 — phase/cyclePhase 등 엔진 판단값 노출
+        if isinstance(result, dict):
+            a: dict = {}
+            if "phase" in result:
+                a["cyclePhase"] = result["phase"]
+            if "confidence" in result:
+                a["confidence"] = result["confidence"]
+            a["_overridden"] = sorted(clean.keys()) if clean else []
+            result["assumptions"] = a
+        return result
 
     def _guide(self) -> pl.DataFrame:
         """6막 기반 축 가이드."""

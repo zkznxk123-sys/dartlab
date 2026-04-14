@@ -128,7 +128,7 @@ def main() -> int:
         return 1
     else:
         print("[PASS] Live smoke test 통과!")
-        print(f"  - 응답 3/3 (100자+)")
+        print("  - 응답 3/3 (100자+)")
         print(f"  - Playbook bullets: {total_bullets}개 누적")
         print(
             f"  - 3번째 호출 playbook 주입: {'YES' if has_pb else 'NO (but bullets exist — selector quality filter)'}"

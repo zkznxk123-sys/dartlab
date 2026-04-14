@@ -417,7 +417,7 @@ def sync_post(index_path: Path, target_code: str | None, dry_run: bool) -> bool:
     # 데이터 추출
     data = extract_data(stock_code)
     if data is None:
-        print(f"  SKIP: 데이터 추출 실패")
+        print("  SKIP: 데이터 추출 실패")
         return False
 
     auto_section = build_auto_section(data)
@@ -448,7 +448,7 @@ def sync_post(index_path: Path, target_code: str | None, dry_run: bool) -> bool:
                 # 수동 부록 제거하고 AUTO 삽입
                 new_text = text[: m.start()] + "\n\n---\n\n" + auto_section + "\n"
                 replaced = True
-                print(f"  기존 수동 부록 → AUTO 교체")
+                print("  기존 수동 부록 → AUTO 교체")
                 break
 
         if not replaced:
@@ -457,7 +457,7 @@ def sync_post(index_path: Path, target_code: str | None, dry_run: bool) -> bool:
                 new_text = text.rstrip() + "\n\n" + auto_section + "\n"
             else:
                 new_text = text.rstrip() + "\n\n---\n\n" + auto_section + "\n"
-            print(f"  AUTO 신규 삽입")
+            print("  AUTO 신규 삽입")
 
     # 본문 <script>에 차트 import 보장 (AUTO 안에 넣으면 mdsvex 충돌)
     chart_imports = [
