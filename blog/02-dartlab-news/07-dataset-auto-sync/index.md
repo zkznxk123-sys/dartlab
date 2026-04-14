@@ -85,7 +85,7 @@ dartlab은 그 인프라를 깃허브 리포에 공개된 워크플로우로 옮
 
 ## 검색 인덱스는 하루 단위로 성장한다
 
-공시 데이터와 별개로, dartlab은 400만 문서를 검색할 수 있는 인덱스를 같이 관리한다. [임베딩 없이 공시 검색 글](../05-search-without-embeddings/)에서 구조를 설명한 그 인덱스다. 이건 재무 parquet과는 갱신 리듬이 다르다.
+공시 데이터와 별개로, dartlab은 400만 문서를 검색할 수 있는 인덱스를 같이 관리한다. [임베딩 없이 공시 검색 글](/blog/search-without-embeddings)에서 구조를 설명한 그 인덱스다. 이건 재무 parquet과는 갱신 리듬이 다르다.
 
 인덱스는 **main + delta 두 세그먼트**로 쪼개져 있다. main은 무거운 풀리빌드라 매월 1일 KST 05시에 한 번 돈다 (`searchIndexMain.yml`, 약 18분). delta는 가벼운 증분이라 매일 KST 04시에 돈다 (`searchIndexDelta.yml`, 수 초). 검색 시 두 세그먼트를 합쳐 BM25 점수를 구하고 중복은 delta 우선으로 제거한다.
 
