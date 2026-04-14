@@ -171,6 +171,7 @@
 							<span class="name">{ind.name}</span>
 							<span class="count">{ind.count}</span>
 						</label>
+						<a href="{base}/industry/{ind.id}" class="detail-link" title="{ind.name} 상세">→</a>
 					</li>
 				{/each}
 			</ul>
@@ -378,8 +379,25 @@
 		padding: 0;
 		margin: 0;
 	}
+	.industries li {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
 	.industry-item {
 		padding: 3px 0;
+		flex: 1;
+	}
+	.detail-link {
+		color: #475569;
+		text-decoration: none;
+		font-size: 14px;
+		padding: 2px 6px;
+		border-radius: 4px;
+	}
+	.detail-link:hover {
+		color: #60a5fa;
+		background: rgba(96, 165, 250, 0.1);
 	}
 	.swatch {
 		width: 10px;
