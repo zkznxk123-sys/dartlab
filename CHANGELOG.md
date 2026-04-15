@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **AI tool 자동 등록 우선순위**: module-level > Company-bound (이전 반대). 같은 이름 존재 시 `dartlab.search` (시장 전체) 가 `Company.search` (이 회사 공시) 보다 AI tool 로 유용. Company-bound 는 module 에 없는 것만 등록.
 - **`_splitKwargs` 자동 시그니처 추출**: 기존 `_MODULE_CORE` 수동 whitelist (scan/macro/search/searchName) 제거. `inspect.signature(fn)` 으로 자동 추출 → pastInsight/sectorInsights 포함 모든 module-level tool 일관 처리.
 - **`Company.gather` 시그니처 `target: str | None = None` 명시**: 이전 `**kwargs` 에 숨어 tool schema 누락. AI 가 `gather(axis='news', target='한국 경제')` 로 시장 레벨 뉴스 검색 가능해짐.
-- **ops/ai.md P8 섹션 신설**: 3범주 분류 + 3중 방어선 단일 출처.
+- **src/dartlab/ai/README.md P8 섹션 신설**: 3범주 분류 + 3중 방어선 단일 출처.
 
 ### Removed
 
@@ -66,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **모든 엔진 `_Impl` 시그니처 통일** — `overrides: dict | None = None` 명시. credit/quant/macro 추가 (이전엔 analysis 만 수용).
-- **ops/ai.md 전면 재작성** (596줄 → ~280줄): 4축 사상 + 7+1 원칙 (P1~P7 + P4.5) + override 매커니즘 + 경험 자산화 순환 단일 출처. 메모리 (MEMORY.md, ai_identity.md) 는 포인터만.
+- **src/dartlab/ai/README.md 전면 재작성** (596줄 → ~280줄): 4축 사상 + 7+1 원칙 (P1~P7 + P4.5) + override 매커니즘 + 경험 자산화 순환 단일 출처. 메모리 (MEMORY.md, ai_identity.md) 는 포인터만.
 - **시스템 프롬프트** — override 재호출 예시 명확화, "verbal stress 금지, 반드시 overrides 인자로 재호출" 명시.
 - **macro 모듈 callable 패치** — import 순서 무관 callable 보장.
 - **Node.js 24 대응** — actions 메이저 버전 일괄 bump (checkout@v5, setup-python@v6, setup-node@v5, upload-artifact@v5, attest-build-provenance@v3).
@@ -215,7 +215,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **ContextBuilder 기본 ON**: `DARTLAB_CONTEXT_V2` feature flag 제거. legacy 복원은 `DARTLAB_CONTEXT_V1=1`
 - **축수 자랑 표기 전면 제거**: ops/코드에서 "14축/30축/7축" → 기능 설명으로 변경
-- **audit 체계 통합**: 파편 audit 10개 삭제, review audit 1개로 통합 (ops/review.md)
+- **audit 체계 통합**: 파편 audit 10개 삭제, review audit 1개로 통합 (src/dartlab/review/README.md)
 - review audit Fix 원칙 명시: 근본 1곳만, 우회로/덕지덕지 금지
 
 ## [0.9.5] - 2026-04-09
@@ -395,7 +395,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 
 #### review 엔진
 - **스토리 템플릿 확장**: keyQuestions, actFocus, detectTemplates 복수 매칭 지원
-- **ops/review.md 전면 업데이트**: 템플릿/narrate/publisher/6막 렌더링 문서화
+- **src/dartlab/review/README.md 전면 업데이트**: 템플릿/narrate/publisher/6막 렌더링 문서화
 
 #### macro 엔진
 - **보고서 서사 엔진**: 숫자 나열에서 경제 해석으로. Goldman/BIS 스타일 전파 경로.
@@ -406,7 +406,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 
 #### 운영
 - **`ops/issues.md`**: 이슈 관리 체계 (GitHub Issue + 기능별 테스트 + 커밋 연결)
-- **`ops/quant.md`**: quant 엔진 운영문서 신규
+- **`src/dartlab/quant/README.md`**: quant 엔진 운영문서 신규
 
 ### Changed
 

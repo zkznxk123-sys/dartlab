@@ -17,7 +17,7 @@ dartlab.gather("price", "005930")      # 주가 시계열
 
 ---
 
-> `gather/listing.py`(KRX 종목 매퍼)는 그대로 유지되며, 사용자 진입점은 `dartlab.listing()` 단일 facade로 통일되어 있다 → ops/listing.md.
+> `gather/listing.py`(KRX 종목 매퍼)는 그대로 유지되며, 사용자 진입점은 `dartlab.listing()` 단일 facade로 통일되어 있다 → src/dartlab/gather/LISTING.md.
 
 | 항목 | 내용 |
 |------|------|
@@ -83,7 +83,7 @@ Company-bound: `c.gather("price")` — 종목코드/market 재전달 불필요. 
 
 gather 매크로 데이터를 두 엔진이 소비한다:
 
-- **macro(L2)**: `dartlab.macro()` — 시장 레벨 매크로 해석 (사이클/금리/자산/심리/유동성). Company 불필요. → ops/macro.md
+- **macro(L2)**: `dartlab.macro()` — 시장 레벨 매크로 해석 (사이클/금리/자산/심리/유동성). Company 불필요. → src/dartlab/macro/README.md
 - **analysis(L2)**: `c.analysis("financial", "매크로민감도")` — 기업별 외생변수 회귀. Company-bound.
 
 ## 외생변수 체계 (analysis 연동)

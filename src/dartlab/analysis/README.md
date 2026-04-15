@@ -55,7 +55,7 @@ c.analysis("가치평가")  # → valuation 자동
 ## 엔진 독립 규칙
 
 - **analysis ↛ credit, credit ↛ analysis** — 같은 L2지만 상호 import 금지
-- **macro ↛ analysis, analysis ↛ macro** — 같은 L2지만 상호 import 금지. 시장 레벨 매크로 해석은 `dartlab.macro()` 엔진이 담당 (→ ops/macro.md)
+- **macro ↛ analysis, analysis ↛ macro** — 같은 L2지만 상호 import 금지. 시장 레벨 매크로 해석은 `dartlab.macro()` 엔진이 담당 (→ src/dartlab/macro/README.md)
 - 각 엔진이 데이터 필요하면 Company/core(L0/L1)에서 직접 가져온다
 - **review가 조합한다.** review에서 analysis 블록과 credit 블록을 성격별로 블록식으로 조합하여 보고서를 구성한다.
 - **import 방향**: Company(L0/L1) → analysis(L2), Company(L0/L1) → credit(L2), gather(L1) → macro(L2).
@@ -216,7 +216,7 @@ analysis는 두 소비자를 모두 최고로 지원한다:
 
 ## 축 체계
 
-> 신용평가는 독립 엔진 `c.credit()` — analysis 축이 아님. 상세: `ops/credit.md`
+> 신용평가는 독립 엔진 `c.credit()` — analysis 축이 아님. 상세: `src/dartlab/analysis/CREDIT.md`
 
 ### financial 그룹
 
@@ -239,7 +239,7 @@ analysis는 두 소비자를 모두 최고로 지원한다:
 
 ### macro 그룹 (2축) — Company-bound 매크로 연결
 
-기업에 종속된 매크로 분석. 시장 레벨 매크로 해석(사이클, 자산신호)은 독립 macro 엔진(`dartlab.macro()`)으로 이동했다. → ops/macro.md
+기업에 종속된 매크로 분석. 시장 레벨 매크로 해석(사이클, 자산신호)은 독립 macro 엔진(`dartlab.macro()`)으로 이동했다. → src/dartlab/macro/README.md
 
 | Part | 축 | 설명 | calc 파일 |
 |------|------|------|-----------|
@@ -280,7 +280,7 @@ analysis는 DART/EDGAR 양쪽에서 동일하게 동작한다.
 | 자본배분 | treasuryStockStatus | DART report `treasuryStock` 전용 |
 | 투자효율 | investmentInOther | DART report `investedCompany` 전용 |
 
-이 4건은 SEC 공시 구조의 근본적 차이. 상세: `ops/edgar.md` "구조적 한계" 섹션.
+이 4건은 SEC 공시 구조의 근본적 차이. 상세: `src/dartlab/providers/edgar/README.md` "구조적 한계" 섹션.
 
 ## 6대 설계 규칙
 

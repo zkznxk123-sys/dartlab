@@ -30,7 +30,7 @@ dartlab.searchName("삼성")
 
 ---
 
-> **search vs listing**: search는 "내용 안에서 찾기"(원문 역인덱스 매칭). 카탈로그성 "뭐가 있는지"(종목/공시메타/토픽) 조회는 `dartlab.listing()` → ops/listing.md.
+> **search vs listing**: search는 "내용 안에서 찾기"(원문 역인덱스 매칭). 카탈로그성 "뭐가 있는지"(종목/공시메타/토픽) 조회는 `dartlab.listing()` → src/dartlab/gather/LISTING.md.
 
 | 항목 | 내용 |
 |------|------|

@@ -4,36 +4,45 @@
 
 ## 진입점
 
-| 문서 | 레이어 | 엔진 | 한 줄 요약 |
-|------|--------|------|----------|
-| [company.md](company.md) | L0/L1 | Company facade | sections 사상, 4 namespace, canHandle 라우팅 |
-| [data.md](data.md) | L0 | core/dataConfig | HF 데이터셋, 수집 파이프라인, 카테고리 관리 |
-| [scan.md](scan.md) | L1.5 | scan/ | 13축 시장 횡단분석 — 전종목 사전 빌드 (parquet) |
-| [gather.md](gather.md) | L1 | gather/ | 외부 시장 데이터 (주가/수급/매크로/뉴스) |
-| [quant.md](quant.md) | L2 | quant/ | 가격 기반 정량 신호 — c.quant(), dartlab.quant() |
-| [search.md](search.md) | L0 | core/search/ | 공시 시맨틱 검색 *(alpha)* |
-| [mappers.md](mappers.md) | L0 | core/mappers/ | 매퍼 통합 엔진 — 계정/topic/alias/flow/notes, 학습 메커니즘 |
-| [listing.md](listing.md) | facade | listing.py | 목록 조회 단일 진입점 — `dartlab.listing(kind, ...)` |
-| [pyodide.md](pyodide.md) | 교차 | pyodide/ | 브라우저/Excel 실행 — Pyodide WASM *(alpha)* |
-| [analysis.md](analysis.md) | L2 | analysis/ | 재무 심층분석 + 전망 + 가치평가, 6막 인과 구조 |
-| [macro.md](macro.md) | L2 | macro/ | 시장 레벨 매크로 분석 — Company 불필요 |
-| [review.md](review.md) | L3 | review/ | 이야기꾼 — L2 엔진 4개 + scan 소비, 보고서 조립 + 4 출력 형식 |
-| [credit.md](credit.md) | L2 | credit/ | 독립 신용평가 (dCR 20단계, 7축, 투명 공개) |
-| [industry.md](industry.md) | L2 | industry/ | 산업 매퍼엔진 — 데이터 주도 산업지도, 노드-엣지, 지속 학습 |
-| [ai.md](ai.md) | L4 | ai/ | 적극적 분석가, 5 provider (AI + 사람 둘 다 L4 소비자) |
-| [guide.md](guide.md) | 교차 | guide/ | 안내 데스크 + 교육 안내자, 4층위 |
-| [channel.md](channel.md) | L4 | channel/ | 외부 공유 — Microsoft DevTunnels 자동 셋업, `dartlab channel` |
-| [experiments.md](experiments.md) | — | experiments/ | 실험 규칙, 흡수 판단 |
-| [edgar.md](edgar.md) | L1 | providers/edgar/ | EDGAR 동기화 규칙, EXEMPT 관리 (데이터/분석 동작은 각 엔진 문서에 통합) |
-| [code.md](code.md) | — | 전체 | camelCase, 독스트링 9섹션, 릴리즈, Git |
-| [spaces.md](spaces.md) | L4 | server/ + mcp/ | HuggingFace Spaces — 설치 없이 API + MCP 서버, DART 키 프록시, 자동 배포 |
-| [vscode.md](vscode.md) | L4 | vscode/ | VSCode 확장 — 프로바이더 연결, stdio 프로토콜, 배포 |
-| [ui.md](ui.md) | L4 | ui/ | Svelte SPA — 패리티 규칙 (VSCode 선행) |
-| [viz.md](viz.md) | 교차 | viz/ | 차트 + 다이어그램 시각화 엔진 |
-| **[api-contract.md](api-contract.md)** | **—** | **전체** | **모든 API 호출 규칙 — 단일 진입점 + 파라미터 계약, 분기 기본 + 연간 파라미터, 파라미터 이름 일관성. 새 함수 추가 전 필독.** |
-| **[architecture.md](architecture.md)** | **—** | **전체** | **전체 청사진 — 레이어, 엔진, 규칙, 데이터 출력** |
-| **[testing.md](testing.md)** | **—** | **전체** | **테스트 체계 — 마커, 커버리지 90% 목표, CI** |
-| **[issues.md](issues.md)** | **—** | **전체** | **이슈 관리 — GitHub Issue + 테스트 + 커밋 연결 체계** |
+## 도메인 룰 — 코드 폴더 안 README (2026-04-15 이동, 작업 위치 옆에서 즉시 노출)
+
+| 엔진 | 룰 위치 | 한 줄 요약 |
+|---|---|---|
+| Company facade | [src/dartlab/README.md](../src/dartlab/README.md) | sections 사상, 4 namespace, canHandle 라우팅 |
+| ai/ | [src/dartlab/ai/README.md](../src/dartlab/ai/README.md) | 적극적 분석가, 7+1 원칙, override 매커니즘 |
+| analysis/ | [src/dartlab/analysis/README.md](../src/dartlab/analysis/README.md) | 재무 14축 + 전망 + 가치평가, 6막 인과 |
+| analysis/credit | [src/dartlab/analysis/CREDIT.md](../src/dartlab/analysis/CREDIT.md) | 독립 신용평가 (dCR 20단계, 7축) |
+| quant/ | [src/dartlab/quant/README.md](../src/dartlab/quant/README.md) | 가격 정량 신호 |
+| macro/ | [src/dartlab/macro/README.md](../src/dartlab/macro/README.md) | 시장 매크로 — Company 불필요 |
+| scan/ | [src/dartlab/scan/README.md](../src/dartlab/scan/README.md) | 13축 시장 횡단 — 사전 빌드 |
+| gather/ | [src/dartlab/gather/README.md](../src/dartlab/gather/README.md) | 외부 시장 데이터 (주가/수급/매크로/뉴스) |
+| gather/listing | [src/dartlab/gather/LISTING.md](../src/dartlab/gather/LISTING.md) | `dartlab.listing(kind, ...)` 단일 진입점 |
+| core/search | [src/dartlab/core/search/README.md](../src/dartlab/core/search/README.md) | 공시 시맨틱 검색 *(alpha)* |
+| review/ | [src/dartlab/review/README.md](../src/dartlab/review/README.md) | 이야기꾼 — 보고서 조립 |
+| guide/ | [src/dartlab/guide/README.md](../src/dartlab/guide/README.md) | 안내 데스크 |
+| providers/edgar | [src/dartlab/providers/edgar/README.md](../src/dartlab/providers/edgar/README.md) | EDGAR 동기화 + EXEMPT |
+
+## ops/ — Cross-cutting 규칙 (한 엔진에 묶을 수 없는 것)
+
+| 문서 | 한 줄 요약 |
+|---|---|
+| **[api-contract.md](api-contract.md)** | **모든 API 호출 규칙 — 단일 진입점 + 파라미터 계약. 새 함수 추가 전 필독.** |
+| **[architecture.md](architecture.md)** | **전체 청사진 — 레이어, 엔진, 규칙** |
+| **[testing.md](testing.md)** | **테스트 체계 — 마커, 커버리지 90% 목표, CI** |
+| **[code.md](code.md)** | **camelCase, 독스트링 9섹션, 릴리즈, Git** |
+| **[issues.md](issues.md)** | **이슈 관리 — GitHub Issue + 테스트 + 커밋 연결** |
+| [data.md](data.md) | HF 데이터셋, 수집 파이프라인, 카테고리 |
+| [mappers.md](mappers.md) | 매퍼 통합 — 계정/topic/alias/flow/notes |
+| [pyodide.md](pyodide.md) | 브라우저/Excel WASM *(alpha)* |
+| [industry.md](industry.md) | 산업 매퍼엔진 |
+| [channel.md](channel.md) | 외부 공유 (DevTunnels) |
+| [spaces.md](spaces.md) | HF Spaces — API + MCP |
+| [vscode.md](vscode.md) | VSCode 확장 |
+| [ui.md](ui.md) | Svelte SPA |
+| [viz.md](viz.md) | 차트 + 다이어그램 |
+| [experiments.md](experiments.md) | 실험 규칙, 흡수 판단 |
+| [engineAudit.md](engineAudit.md) | 엔진 audit 절차 |
+| [selfai.md](selfai.md) | (deprecated 흐름 보존) |
 
 ## 레이어 아키텍처
 

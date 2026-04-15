@@ -30,7 +30,7 @@ dartlab.listing("filings", corp="005930")  # 특정 종목 공시 목록
 ## listing vs search
 
 - **listing** = "뭐가 있는지" — 종목/공시메타/토픽 카탈로그 조회. 빠르다, 항상 동작.
-- **search** = "내용 안에서 찾기" — stem ID 역인덱스 기반 원문 매칭 (→ ops/search.md). 데이터 필요.
+- **search** = "내용 안에서 찾기" — stem ID 역인덱스 기반 원문 매칭 (→ src/dartlab/core/search/README.md). 데이터 필요.
 
 `listing("filings", corp=...)`는 공시 **메타 목록**만 반환한다. 본문 검색은 `dartlab.search()`로.
 

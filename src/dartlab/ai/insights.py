@@ -3,7 +3,7 @@
 dartlab.pastInsight(stockCode) / dartlab.sectorInsights(sector) 로 노출.
 AI tool 자동 등록 경로 (`_autoDiscover`) 가 dartlab.__all__ 순회 시 자동 포함.
 
-사상 (ops/ai.md §7 경험 자산화 순환):
+사상 (src/dartlab/ai/README.md §7 경험 자산화 순환):
 - 사람 (블로그) + AI (응답) 가 쌓은 서사·bullet 이 KnowledgeDB 에 보존
 - 떠먹이기 아님 — AI 가 자율 판단 ("이 회사 전에 본 적 있나?") 으로 호출
 - 블로그 (검증 프리미엄) 우선, 없으면 AI 축적 fallback

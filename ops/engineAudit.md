@@ -149,4 +149,4 @@ engineAudit이 엔진 품질을, aiAudit이 AI 활용 품질을 본다. 둘 다 
 
 - `scripts/audit/engineAudit.py` — 실행 스크립트
 - `scripts/audit/aiAudit.py` — AI audit 실행
-- `ops/ai.md` "AI Audit 체계" — AI audit 규격
+- `src/dartlab/ai/README.md` "AI Audit 체계" — AI audit 규격

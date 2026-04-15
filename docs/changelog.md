@@ -60,7 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - 모든 엔진 `_Impl` 시그니처 통일 — `overrides: dict | None`
-- ops/ai.md 전면 재작성 — 4축 + 7+1 원칙 단일 출처
+- src/dartlab/ai/README.md 전면 재작성 — 4축 + 7+1 원칙 단일 출처
 - 시스템 프롬프트 — override 재호출 명시, verbal stress 금지
 - Node.js 24 대응 — actions 메이저 일괄 bump
 
@@ -216,7 +216,7 @@ API contract 단일 진입점 원칙 강제. 사용자 surface 를 `c.show() / c
 
 #### 운영
 - **`ops/issues.md`**: 이슈 관리 체계 (GitHub Issue + 기능별 테스트 + 커밋 연결)
-- **`ops/quant.md`**: quant 엔진 운영문서 신규
+- **`src/dartlab/quant/README.md`**: quant 엔진 운영문서 신규
 
 ### Changed
 

@@ -1,6 +1,6 @@
 """AI 분석 함수 — `dartlab.ask(question)` 단일 진입점.
 
-사상 (ops/ai.md): AI 가 모든 엔진(analysis/scan/macro/credit/gather/search) 을
+사상 (src/dartlab/ai/README.md): AI 가 모든 엔진(analysis/scan/macro/credit/gather/search) 을
 tool 로 다룬다. 사용자 API 에 Company 파라미터 · chat · reviewer 전부 노출 안 함.
 """
 

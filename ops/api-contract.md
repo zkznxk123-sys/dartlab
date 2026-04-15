@@ -391,9 +391,9 @@ source 우선순위: **finance > report > docs** (숫자 → 정형 → 서술)
 
 ## 관련 문서
 
-- `ops/company.md` — Company facade (sections 사상, 4 namespace, canHandle 라우팅)
-- `ops/analysis.md` — analysis 엔진 + SSOT 헬퍼 위치
-- `ops/credit.md` — credit 독립 엔진
-- `ops/edgar.md` — DART/EDGAR 동기화 규칙
+- `src/dartlab/README.md` — Company facade (sections 사상, 4 namespace, canHandle 라우팅)
+- `src/dartlab/analysis/README.md` — analysis 엔진 + SSOT 헬퍼 위치
+- `src/dartlab/analysis/CREDIT.md` — credit 독립 엔진
+- `src/dartlab/providers/edgar/README.md` — DART/EDGAR 동기화 규칙
 - `ops/code.md` — camelCase, 독스트링 9 섹션, 릴리즈, Git
 - `ops/architecture.md` — 전체 청사진

@@ -71,7 +71,7 @@ data/dart/scan/
 - 배포자: `dartlab collect --scan` → HF push
 - 사용자: `downloadAll("scan")` (271MB) → 즉시 횡단 분석
 - scan 파일 없으면 HF 자동 다운로드 시도, 실패 시 종목별 순회 fallback
-- **첫 호출 안내**: 로컬 프리빌드가 없으면 `scan:prebuild_missing` (271MB 안내) → 다운로드 → `scan:prebuild_ready`. 실패 시 `scan:prebuild_failed`. guide.emit `_ALWAYS_SHOW` 카테고리라 verbose=False여도 출력 (자세히는 ops/guide.md)
+- **첫 호출 안내**: 로컬 프리빌드가 없으면 `scan:prebuild_missing` (271MB 안내) → 다운로드 → `scan:prebuild_ready`. 실패 시 `scan:prebuild_failed`. guide.emit `_ALWAYS_SHOW` 카테고리라 verbose=False여도 출력 (자세히는 src/dartlab/guide/README.md)
 
 ## EDGAR scan (11축)
 

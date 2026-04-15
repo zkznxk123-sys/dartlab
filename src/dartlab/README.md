@@ -135,7 +135,7 @@ c.show("ratioSeries")  # 시계열 비율
 ### 메타
 ```python
 c.sections / c.topics             # sections 지도
-c.filings()                       # 공시 목록 (= dartlab.listing("filings", corp=...) → ops/listing.md)
+c.filings()                       # 공시 목록 (= dartlab.listing("filings", corp=...) → src/dartlab/gather/LISTING.md)
 c.insights                        # 등급 카드
 c.market / c.currency             # 시장 정보
 ```

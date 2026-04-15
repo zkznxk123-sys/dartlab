@@ -134,26 +134,26 @@ One calling convention. Each engine: `dartlab.engine()` for the guide, `dartlab.
 | Layer | Engine | What it does | Entry point | Notebook |
 |-------|--------|--------------|-------------|:--------:|
 | Data | [Data](ops/data.md) | Pre-built HuggingFace datasets, auto-download | `Company("005930")` | — |
-| L0/L1 | [Company](ops/company.md) | Filings + financials + structured data unified by ticker | `c.show()`, `c.select()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_company.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/01_company.py) |
-| L1 | [Gather](ops/gather.md) | External market data (price, flow, macro, news) | `dartlab.gather()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/02_gather.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/02_gather.py) |
-| L1 | [Scan](ops/scan.md) | Cross-company comparison (governance, ratios, cashflow, ...) | `dartlab.scan()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/03_scan.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/03_scan.py) |
-| L1 | [Quant](ops/quant.md) | Technical & quantitative analysis (momentum/factor/pattern) | `c.quant()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/04_quant.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/04_quant.py) |
-| L2 | [Analysis](ops/analysis.md) | Profitability/stability/cashflow causal analysis + valuation + forecast | `c.analysis("financial", "수익성")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/05_analysis.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/05_analysis.py) |
-| L2 | [Macro](ops/macro.md) | Market-level macro (cycle/rates/liquidity/sentiment/assets) | `dartlab.macro("사이클")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/06_macro.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/06_macro.py) |
-| L2 | [Credit](ops/credit.md) | Independent credit rating (dCR grade, default probability, health) | `c.credit("등급")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/07_credit.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/07_credit.py) |
-| L2 | [Review](ops/review.md) | Report builder — 5-engine block composition, 11 types × 7 templates (no interpretation) | `c.review("수익성")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/08_review.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/08_review.py) |
-| L3 | [AI](ops/ai.md) | Active analyst — calls engines directly, judges, verifies against raw data | `dartlab.ask()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/09_ai.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/09_ai.py) |
+| L0/L1 | [Company](src/dartlab/README.md) | Filings + financials + structured data unified by ticker | `c.show()`, `c.select()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_company.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/01_company.py) |
+| L1 | [Gather](src/dartlab/gather/README.md) | External market data (price, flow, macro, news) | `dartlab.gather()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/02_gather.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/02_gather.py) |
+| L1 | [Scan](src/dartlab/scan/README.md) | Cross-company comparison (governance, ratios, cashflow, ...) | `dartlab.scan()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/03_scan.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/03_scan.py) |
+| L1 | [Quant](src/dartlab/quant/README.md) | Technical & quantitative analysis (momentum/factor/pattern) | `c.quant()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/04_quant.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/04_quant.py) |
+| L2 | [Analysis](src/dartlab/analysis/README.md) | Profitability/stability/cashflow causal analysis + valuation + forecast | `c.analysis("financial", "수익성")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/05_analysis.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/05_analysis.py) |
+| L2 | [Macro](src/dartlab/macro/README.md) | Market-level macro (cycle/rates/liquidity/sentiment/assets) | `dartlab.macro("사이클")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/06_macro.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/06_macro.py) |
+| L2 | [Credit](src/dartlab/analysis/CREDIT.md) | Independent credit rating (dCR grade, default probability, health) | `c.credit("등급")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/07_credit.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/07_credit.py) |
+| L2 | [Review](src/dartlab/review/README.md) | Report builder — 5-engine block composition, 11 types × 7 templates (no interpretation) | `c.review("수익성")` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/08_review.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/08_review.py) |
+| L3 | [AI](src/dartlab/ai/README.md) | Active analyst — calls engines directly, judges, verifies against raw data | `dartlab.ask()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/09_ai.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/09_ai.py) |
 | L4 | [Channel](ops/channel.md) | External sharing — `dartlab channel` brings PC dartlab to your phone | `dartlab channel` | — |
-| core | [Search](ops/search.md) | Semantic filing search *(alpha)* | `dartlab.search()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/10_search.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/10_search.py) |
-| facade | [Listing](ops/listing.md) | Catalog API (companies, filings, topics) | `dartlab.listing()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/11_listing.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/11_listing.py) |
+| core | [Search](src/dartlab/core/search/README.md) | Semantic filing search *(alpha)* | `dartlab.search()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/10_search.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/10_search.py) |
+| facade | [Listing](src/dartlab/gather/LISTING.md) | Catalog API (companies, filings, topics) | `dartlab.listing()` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/11_listing.ipynb) [![marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/11_listing.py) |
 | viz | [Viz](ops/viz.md) | Charts and diagrams (`emit_chart`) | `emit_chart({...})` | — |
-| guide | [Guide](ops/guide.md) | Concierge — readiness, error handling, education | `dartlab.guide.checkReady()` | — |
+| guide | [Guide](src/dartlab/guide/README.md) | Concierge — readiness, error handling, education | `dartlab.guide.checkReady()` | — |
 
 > All notebooks: [marimo](notebooks/marimo/) · [colab](notebooks/colab/) · [![Open in marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo)
 
 ### Company
 
-> Design: [ops/company.md](ops/company.md)
+> Design: [src/dartlab/README.md](src/dartlab/README.md)
 
 Three data sources — docs (full-text disclosures), finance (XBRL statements), report (DART API) — merged into one object. Data auto-downloads from [HuggingFace](https://huggingface.co/datasets/eddmpython/dartlab-data), no setup needed.
 
@@ -188,7 +188,7 @@ c.diff()                        # what changed -- text changes across periods
 
 ### Scan — Cross-Company Comparison
 
-> Design: [ops/scan.md](ops/scan.md)
+> Design: [src/dartlab/scan/README.md](src/dartlab/scan/README.md)
 
 Cross-company analysis across all listed firms. Governance, workforce, capital, debt, cashflow, audit, insider, quality, liquidity, network, account/ratio comparison, and more.
 
@@ -204,7 +204,7 @@ dartlab.scan("account", "매출액")      # revenue time-series across all firms
 
 ### Gather — External Market Data
 
-> Design: [ops/gather.md](ops/gather.md)
+> Design: [src/dartlab/gather/README.md](src/dartlab/gather/README.md)
 
 Price, flow, macro, news — all as Polars DataFrames.
 
@@ -217,7 +217,7 @@ dartlab.gather("news", "삼성전자")             # Google News RSS
 
 ### Analysis — 14-Axis Financial Analysis
 
-> Design: [ops/analysis.md](ops/analysis.md)
+> Design: [src/dartlab/analysis/README.md](src/dartlab/analysis/README.md)
 
 Revenue structure → profitability → growth → stability → cash flow → capital allocation → valuation → forecast. Turns raw statements into a causal narrative that feeds Review, AI, and direct human reading.
 
@@ -232,7 +232,7 @@ c.credit("등급", detail=True)               # grade + narrative + metrics
 
 ### Credit — Independent Credit Rating
 
-> Design: [ops/credit.md](ops/credit.md) | Reports: [dartlab.pages.dev/blog/credit-reports](https://dartlab.pages.dev/blog/credit-reports)
+> Design: [src/dartlab/analysis/CREDIT.md](src/dartlab/analysis/CREDIT.md) | Reports: [dartlab.pages.dev/blog/credit-reports](https://dartlab.pages.dev/blog/credit-reports)
 
 Independent credit analysis with 3-Track model (general/financial/holding), Notch Adjustment, CHS market correction, and separate financial statement blending.
 
@@ -259,7 +259,7 @@ publishReport("005930")               # 6막 report including credit narrative +
 
 ### Macro — Economy Without a Ticker
 
-> Design: [ops/macro.md](ops/macro.md)
+> Design: [src/dartlab/macro/README.md](src/dartlab/macro/README.md)
 
 Analyze the economic environment without a Company. Just `import dartlab`.
 
@@ -276,7 +276,7 @@ Backtest (2000-2024, FRED): Cleveland Fed probit **detected all 3/3 US recession
 
 ### Review — Analysis to Report
 
-> Design: [ops/review.md](ops/review.md)
+> Design: [src/dartlab/review/README.md](src/dartlab/review/README.md)
 
 Assembles analysis into a structured report. 4 output formats: rich (terminal), html, markdown, json.
 
@@ -291,7 +291,7 @@ c.reviewer()            # report + AI interpretation
 
 ### Storyteller — Numbers Tell Stories
 
-> Design: [ops/review.md](ops/review.md) · Series: [Company Stories](https://eddmpython.github.io/dartlab/blog/series/company-reports)
+> Design: [src/dartlab/review/README.md](src/dartlab/review/README.md) · Series: [Company Stories](https://eddmpython.github.io/dartlab/blog/series/company-reports)
 
 Financial analysis isn't ratio tables. DartLab combines 5 engines (analysis, credit, scan, quant, macro) into a **6-act storytelling structure** that auto-generates publishable company stories.
 
@@ -323,7 +323,7 @@ publishReport("068270")    # Celltrion — auto-publish 6-act company story
 
 ### Search — Find Filings by Meaning *(alpha)*
 
-> Design: [ops/search.md](ops/search.md)
+> Design: [src/dartlab/core/search/README.md](src/dartlab/core/search/README.md)
 
 No model, no GPU, no cold start. 95% precision on 4M documents — better than neural embeddings at 1/100th the cost. See [methodology](docs/methodology.md) for benchmark details.
 
@@ -335,7 +335,7 @@ dartlab.search("회사가 돈을 빌렸다")                 # natural language 
 
 ### AI — Active Analyst
 
-> Design: [ops/ai.md](ops/ai.md)
+> Design: [src/dartlab/ai/README.md](src/dartlab/ai/README.md)
 
 The AI writes and executes Python code using dartlab's full API. You see every line of code it runs. 60+ questions validated, 95%+ first-try success. See [methodology](docs/methodology.md) for validation scope and limits.
 
