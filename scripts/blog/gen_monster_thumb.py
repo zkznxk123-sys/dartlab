@@ -2,7 +2,7 @@
 
 FLUX 배경 `36-thumbnail-bg.webp` 위에 텍스트/아바타 오버레이.
 저장 2곳:
-  - blog/05-company-reports/36-MNST-monster-beverage/assets/thumbnail.webp
+  - blog/05-company-reports/36-MNST-monster-beverage/assets/36-thumbnail.webp
   - landing/static/thumbnails/MNST-monster-beverage.webp
 
 실행: uv run python -X utf8 scripts/blog/gen_monster_thumb.py
@@ -96,7 +96,7 @@ def make_thumb() -> None:
     ASSETS.mkdir(parents=True, exist_ok=True)
     THUMBS.mkdir(parents=True, exist_ok=True)
 
-    thumb_asset = ASSETS / "thumbnail.webp"
+    thumb_asset = ASSETS / "36-thumbnail.webp"
     thumb_landing = THUMBS / "MNST-monster-beverage.webp"
 
     rgb = bg.convert("RGB")
