@@ -436,6 +436,141 @@ def buildEcosystem(scanMetrics: dict[str, dict] | None = None) -> dict:
     }
 
 
+def buildIndustryStats(scanMetrics: dict[str, dict]) -> dict:
+    """산업별 사전 집계 — `industryStats.json` 산출.
+
+    각 산업에 대해:
+    - 평균 ROE / 영업이익률 / 매출 CAGR / HHI (HHI 는 insights.json 에 기업별로 있음)
+    - Top 5: 수익성 / 성장 / 위험신호
+    - 공급 흐름: 어디로 보내고 어디서 받는지 Top 5 (atlas.flows 활용)
+
+    Returns
+    -------
+    dict
+        {industryId: {avgRoe, avgOpMargin, avgCagr, count,
+                      topRoe, topGrowth, riskFlags,
+                      supplyTo, supplyFrom}}
+    """
+    nodes = loadNodes()
+    edges = loadEdges()
+    taxonomy = loadTaxonomy()
+
+    # 산업 → primary 노드 + scan 지표 결합
+    byIndustry: dict[str, list[dict]] = {}
+    for n in nodes:
+        if not n.primary:
+            continue
+        m = scanMetrics.get(n.stockCode, {})
+        byIndustry.setdefault(n.industry, []).append({
+            "stockCode": n.stockCode,
+            "corpName": n.corpName,
+            "revenue": n.revenue or 0,
+            "roe": m.get("roe"),
+            "opMargin": m.get("opMargin"),
+            "debtRatio": m.get("debtRatio"),
+            "revCagr": m.get("revCagr"),
+            "profGrade": m.get("profGrade") or "",
+            "debtGrade": m.get("debtGrade") or "",
+            "growthGrade": m.get("growthGrade") or "",
+        })
+
+    # 산업간 supplier flow (atlas.flows 와 동일 로직 — 모든 flow 보존)
+    codeToIndustry = {n.stockCode: n.industry for n in nodes}
+    flows: dict[tuple[str, str], dict] = {}
+    for e in edges:
+        if e.edgeType != "supplier":
+            continue
+        fi = codeToIndustry.get(e.fromCode)
+        ti = codeToIndustry.get(e.toCode)
+        if not fi or not ti or fi == ti:
+            continue
+        key = (fi, ti)
+        if key not in flows:
+            flows[key] = {"fromIndustry": fi, "toIndustry": ti, "edgeCount": 0, "amount": 0.0}
+        flows[key]["edgeCount"] += 1
+        flows[key]["amount"] += e.amount or 0
+
+    # 산업별 in/out flow 집계
+    flowsByFrom: dict[str, list[dict]] = {}
+    flowsByTo: dict[str, list[dict]] = {}
+    for f in flows.values():
+        flowsByFrom.setdefault(f["fromIndustry"], []).append(f)
+        flowsByTo.setdefault(f["toIndustry"], []).append(f)
+
+    def _avg(vs: list) -> float | None:
+        cleaned = [v for v in vs if v is not None]
+        return round(sum(cleaned) / len(cleaned), 2) if cleaned else None
+
+    def _industryNameOf(iid: str) -> str:
+        return taxonomy[iid].name if iid in taxonomy else iid
+
+    out: dict = {}
+    for indId, members in byIndustry.items():
+        # 평균 (None 제외)
+        avgRoe = _avg([m["roe"] for m in members])
+        avgOp = _avg([m["opMargin"] for m in members])
+        avgCagr = _avg([m["revCagr"] for m in members])
+
+        # Top 5 — None 제외 정렬
+        sortedRoe = sorted(
+            [m for m in members if m["roe"] is not None],
+            key=lambda x: x["roe"], reverse=True
+        )[:5]
+        sortedGrowth = sorted(
+            [m for m in members if m["revCagr"] is not None],
+            key=lambda x: x["revCagr"], reverse=True
+        )[:5]
+        # 위험: 부채 등급 위험/주의 + ROE 음수
+        risks = [
+            m for m in members
+            if m.get("debtGrade") == "위험"
+            or (m.get("roe") is not None and m["roe"] < 0)
+        ]
+        risks.sort(key=lambda x: (x.get("debtRatio") or 0), reverse=True)
+        riskFlags = risks[:5]
+
+        # supply flows
+        supplyTo = sorted(
+            flowsByFrom.get(indId, []),
+            key=lambda x: x["amount"], reverse=True
+        )[:5]
+        supplyFrom = sorted(
+            flowsByTo.get(indId, []),
+            key=lambda x: x["amount"], reverse=True
+        )[:5]
+
+        out[indId] = {
+            "name": _industryNameOf(indId),
+            "count": len(members),
+            "avgRoe": avgRoe,
+            "avgOpMargin": avgOp,
+            "avgCagr": avgCagr,
+            "topRoe": [
+                {"stockCode": m["stockCode"], "corpName": m["corpName"], "roe": m["roe"], "revenue": m["revenue"]}
+                for m in sortedRoe
+            ],
+            "topGrowth": [
+                {"stockCode": m["stockCode"], "corpName": m["corpName"], "revCagr": m["revCagr"], "revenue": m["revenue"]}
+                for m in sortedGrowth
+            ],
+            "riskFlags": [
+                {"stockCode": m["stockCode"], "corpName": m["corpName"],
+                 "debtRatio": m["debtRatio"], "debtGrade": m["debtGrade"], "roe": m["roe"]}
+                for m in riskFlags
+            ],
+            "supplyTo": [
+                {**f, "fromName": _industryNameOf(f["fromIndustry"]), "toName": _industryNameOf(f["toIndustry"])}
+                for f in supplyTo
+            ],
+            "supplyFrom": [
+                {**f, "fromName": _industryNameOf(f["fromIndustry"]), "toName": _industryNameOf(f["toIndustry"])}
+                for f in supplyFrom
+            ],
+        }
+
+    return out
+
+
 def buildSearchIndex() -> list[dict]:
     """회사명/코드 검색 인덱스."""
     nodes = loadNodes()
@@ -515,6 +650,14 @@ def main() -> None:
             json.dumps(enriched, ensure_ascii=False, indent=2), encoding="utf-8"
         )
     print(f"  - {len(topCompanies)}개사 생성 (enrich: {enrichedCount}사)")
+
+    # 산업 통계 (사용자 가치 인사이트)
+    print("[산업 통계] industryStats.json")
+    indStats = buildIndustryStats(scanMetrics)
+    (OUT_DIR / "industryStats.json").write_text(
+        json.dumps(indStats, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    print(f"  - {len(indStats)}개 산업 (avgRoe + topN + supply flows)")
 
     # Search index
     print("[검색] search-index.json")

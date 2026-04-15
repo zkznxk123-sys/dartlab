@@ -2,6 +2,9 @@
 	import EcosystemMap from '$lib/components/industry/EcosystemMap.svelte';
 	import IndustryAtlas from '$lib/components/industry/IndustryAtlas.svelte';
 	import IndustryDrilldown from '$lib/components/industry/IndustryDrilldown.svelte';
+	import CompanyCard from '$lib/components/industry/CompanyCard.svelte';
+	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 	import type { PageData } from './$types';
 	import { base } from '$app/paths';
 
@@ -122,6 +125,57 @@
 
 	let selectedNode: any = $state(null);
 	let mapRef: any = $state(null);
+
+	// ── 회사 상세 (companies/{code}.json fetch) ──
+	let selectedDetail: any = $state(null);
+	let selectedDetailLoading = $state(false);
+	let selectedDetailCode: string | null = $state(null);
+
+	async function loadCompanyDetail(stockCode: string) {
+		if (selectedDetailCode === stockCode && selectedDetail) return;
+		selectedDetailLoading = true;
+		selectedDetailCode = stockCode;
+		try {
+			const r = await fetch(`${base}/map/companies/${stockCode}.json`);
+			selectedDetail = r.ok ? await r.json() : null;
+		} catch {
+			selectedDetail = null;
+		} finally {
+			selectedDetailLoading = false;
+		}
+	}
+
+	// ── 비교 슬롯 ──
+	let compareB: any = $state(null);
+	let compareBDetail: any = $state(null);
+	let comparing = $derived(!!compareB);
+
+	async function addToCompare(stockCode: string) {
+		// 첫 번째 슬롯 = 현재 selectedNode. 다음 클릭하는 회사가 두 번째 슬롯
+		// 여기선 단순화: 첫 번째 = 현재 카드, 두 번째 = "+비교에 추가" 클릭한 회사를 펜딩으로 두고
+		// 다음 노드 클릭 시 두 번째에 set
+		// 더 직관적으로: 클릭한 회사를 직접 비교 슬롯 B 로
+		if (!selectedNode || selectedNode.id === stockCode) return;
+		compareB = nodeFinderById(stockCode);
+		if (compareB) {
+			try {
+				const r = await fetch(`${base}/map/companies/${stockCode}.json`);
+				compareBDetail = r.ok ? await r.json() : null;
+			} catch {
+				compareBDetail = null;
+			}
+		}
+	}
+
+	function nodeFinderById(stockCode: string): any {
+		for (const n of allNodes) if (n.id === stockCode) return { ...n, color: colorFor(n, colorMetric) };
+		return null;
+	}
+
+	function clearCompare() {
+		compareB = null;
+		compareBDetail = null;
+	}
 
 	// ── companies 뷰 데이터 ──
 	let filteredNodes = $derived(
@@ -303,6 +357,8 @@
 	function handleNodeClick(node: any) {
 		if (!node) {
 			selectedNode = null;
+			selectedDetail = null;
+			selectedDetailCode = null;
 			return;
 		}
 		if (node.isIndustry) {
@@ -310,7 +366,35 @@
 			return;
 		}
 		selectedNode = node;
+		loadCompanyDetail(node.id);
 	}
+
+	// ── URL 쿼리 처리 (외부 진입: /map?focus=005930) ──
+	let urlHandled = $state(false);
+	onMount(() => {
+		if (urlHandled) return;
+		const focus = page.url.searchParams.get('focus');
+		const cmp = page.url.searchParams.get('compare');
+		if (focus) {
+			const n = nodeFinderById(focus);
+			if (n) {
+				selectedNode = n;
+				loadCompanyDetail(focus);
+			}
+		}
+		if (cmp) {
+			const [a, b] = cmp.split(',');
+			if (a) {
+				const na = nodeFinderById(a);
+				if (na) {
+					selectedNode = na;
+					loadCompanyDetail(a);
+				}
+			}
+			if (b) addToCompare(b);
+		}
+		urlHandled = true;
+	});
 
 	// ── 선택 회사의 공급/고객 관계 (companies/industry 뷰 공통) ──
 	let selectedRelations = $derived.by(() => {
@@ -727,216 +811,55 @@
 		{/if}
 	</main>
 
-	<!-- 오른쪽 상세 -->
-	{#if selectedNode}
+
+	<!-- 오른쪽 상세: CompanyCard (회사 카드) -->
+	{#if selectedNode && !selectedNode.isIndustry}
+		<aside class="detail-panel" class:wide={comparing}>
+			<div class="card-slot">
+				<CompanyCard
+					node={selectedNode}
+					detail={selectedDetail}
+					loading={selectedDetailLoading}
+					compareDisabled={comparing}
+					onAddCompare={addToCompare}
+					onClose={() => handleNodeClick(null)}
+				/>
+			</div>
+			{#if comparing && compareB}
+				<div class="card-slot">
+					<CompanyCard
+						node={compareB}
+						detail={compareBDetail}
+						loading={false}
+						compareDisabled={true}
+						onClose={clearCompare}
+					/>
+				</div>
+			{/if}
+		</aside>
+	{:else if selectedNode && selectedNode.isIndustry}
 		<aside class="detail">
 			<button class="close" onclick={() => (selectedNode = null)}>✕</button>
 			<div class="detail-head">
 				<h2>{selectedNode.label}</h2>
-				{#if !selectedNode.isIndustry}
-					<p class="code">{selectedNode.id}</p>
-				{/if}
 				<div class="badges">
-					<span
-						class="badge"
-						style="background:{selectedNode.color}20; color:{selectedNode.color}"
-					>
+					<span class="badge" style="background:{selectedNode.color}20; color:{selectedNode.color}">
 						{selectedNode.industryName}
 					</span>
-					{#if selectedNode.stageName || selectedNode.stage}
-						<span class="badge stage-badge"
-							>{selectedNode.stageName || selectedNode.stage}</span
-						>
-					{/if}
-					{#if selectedNode.role}
-						<span class="badge role-badge">{selectedNode.role}</span>
-					{/if}
-					{#if selectedNode.stream}
-						<span class="badge stream-badge">{selectedNode.stream}</span>
-					{/if}
 				</div>
-
-				{#if selectedNode.isIndustry}
-					<!-- 산업 노드 상세 -->
-					<div class="big-stat">
-						<span class="label">소속 회사</span>
-						<span class="value">{selectedNode.nodeCount}사</span>
-					</div>
-					<div class="big-stat">
-						<span class="label"
-							>산업 총 매출
-							<span class="info-tip" title="1억원 ≈ $75K / 1조원 = 10,000억원">ⓘ</span>
-						</span>
-						<span class="value">{formatRev(selectedNode.revenue)}</span>
-					</div>
-					{#if selectedNode.stageMix}
-						<div class="section">
-							<h3>공정 분포</h3>
-							<ul class="rel-list">
-								{#each Object.entries(selectedNode.stageMix) as [stageKey, count]}
-									{@const stageInfo = selectedNode.stages?.find(
-										(s: any) => s.key === stageKey
-									)}
-									<li>
-										<div class="rel-partner">
-											<strong>{stageInfo?.name || stageKey}</strong>
-											{#if stageInfo}
-												<span class="product">
-													· {stageInfo.role} · {stageInfo.stream}
-												</span>
-											{/if}
-										</div>
-										<div class="rel-amount">{count}사</div>
-									</li>
-								{/each}
-							</ul>
-						</div>
-					{/if}
-					<div class="section">
-						<button class="full-link" onclick={() => enterIndustry(selectedNode.industry)}>
-							이 산업 내부 보기 →
-						</button>
-						<a
-							href="{base}/industry/{selectedNode.industry}"
-							class="full-link"
-							style="margin-top:6px"
-						>
-							산업 상세 페이지 →
-						</a>
-					</div>
-				{:else}
-					<!-- 회사 노드 상세 -->
-					{#if selectedNode.revenue > 0}
-						<div class="big-stat">
-							<span class="label">
-								매출
-								<span class="info-tip" title="1억원 ≈ $75K / 1조원 = 10,000억원">ⓘ</span>
-							</span>
-							<span class="value">{formatRev(selectedNode.revenue)}</span>
-						</div>
-					{/if}
-					{#if selectedNode.industryRank}
-						<div class="meta-row">
-							<span class="meta-k">산업 내 순위</span>
-							<span class="meta-v"
-								>{selectedNode.industryRank}위 / {selectedNode.industryPeerCount ||
-									'?'}사</span
-							>
-						</div>
-					{/if}
-					{#if selectedNode.marketShare}
-						<div class="meta-row">
-							<span class="meta-k">매출 점유율</span>
-							<span class="meta-v">{selectedNode.marketShare.toFixed(2)}%</span>
-						</div>
-					{/if}
-					{#if selectedNode.confidence}
-						<div class="meta-row">
-							<span class="meta-k">분류 신뢰도</span>
-							<span class="meta-v">
-								{selectedNode.confidence.toFixed(2)}
-								{#if selectedNode.source}· {selectedNode.source}{/if}
-							</span>
-						</div>
-					{/if}
-
-					<!-- scan 재무 지표 -->
-					{#if selectedNode.roe !== null && selectedNode.roe !== undefined}
-						<div class="meta-row scan">
-							<span class="meta-k">ROE</span>
-							<span class="meta-v" style:color={colorFor({ roe: selectedNode.roe }, 'roe')}>
-								{selectedNode.roe.toFixed(1)}%
-								{#if selectedNode.profGrade}<span class="grade">· {selectedNode.profGrade}</span>{/if}
-							</span>
-						</div>
-					{/if}
-					{#if selectedNode.opMargin !== null && selectedNode.opMargin !== undefined}
-						<div class="meta-row scan">
-							<span class="meta-k">영업이익률</span>
-							<span
-								class="meta-v"
-								style:color={colorFor({ opMargin: selectedNode.opMargin }, 'opMargin')}
-							>
-								{selectedNode.opMargin.toFixed(1)}%
-							</span>
-						</div>
-					{/if}
-					{#if selectedNode.debtRatio !== null && selectedNode.debtRatio !== undefined}
-						<div class="meta-row scan">
-							<span class="meta-k">부채비율</span>
-							<span
-								class="meta-v"
-								style:color={colorFor({ debtRatio: selectedNode.debtRatio }, 'debtRatio')}
-							>
-								{selectedNode.debtRatio.toFixed(0)}%
-								{#if selectedNode.debtGrade}<span class="grade">· {selectedNode.debtGrade}</span>{/if}
-							</span>
-						</div>
-					{/if}
-					{#if selectedNode.revCagr !== null && selectedNode.revCagr !== undefined}
-						<div class="meta-row scan">
-							<span class="meta-k">매출 CAGR</span>
-							<span
-								class="meta-v"
-								style:color={colorFor({ revCagr: selectedNode.revCagr }, 'revCagr')}
-							>
-								{selectedNode.revCagr.toFixed(1)}%
-								{#if selectedNode.growthGrade}<span class="grade">· {selectedNode.growthGrade}</span>{/if}
-							</span>
-						</div>
-					{/if}
-
-					{#if selectedRelations.suppliers.length > 0}
-						<div class="section">
-							<h3>
-								공급사 ({selectedRelations.suppliers.length})
-								<span class="info-tip" title="금액 = 연간 매입액(억원)">ⓘ</span>
-							</h3>
-							<ul class="rel-list">
-								{#each selectedRelations.suppliers.slice(0, 10) as rel}
-									<li>
-										<div class="rel-partner">
-											<strong>{rel.partner.label}</strong>
-											{#if rel.product}<span class="product">· {rel.product}</span>{/if}
-										</div>
-										{#if rel.amount}
-											<div class="rel-amount">
-												{rel.amount.toLocaleString()}억원
-												{#if rel.ratio}<span class="ratio">({rel.ratio}%)</span>{/if}
-											</div>
-										{/if}
-									</li>
-								{/each}
-							</ul>
-						</div>
-					{/if}
-					{#if selectedRelations.customers.length > 0}
-						<div class="section">
-							<h3>고객/관련사 ({selectedRelations.customers.length})</h3>
-							<ul class="rel-list">
-								{#each selectedRelations.customers.slice(0, 10) as rel}
-									<li>
-										<div class="rel-partner">
-											<strong>{rel.partner.label}</strong>
-											{#if rel.product}<span class="product">· {rel.product}</span>{/if}
-										</div>
-										{#if rel.amount}
-											<div class="rel-amount">{rel.amount.toLocaleString()}억원</div>
-										{/if}
-									</li>
-								{/each}
-							</ul>
-						</div>
-					{/if}
-					<div class="section">
-						<a href="{base}/company/{selectedNode.id}" class="full-link">전체 페이지 보기 →</a>
-						<a
-							href="{base}/compare?a={selectedNode.id}"
-							class="full-link"
-							style="margin-top:6px">다른 회사와 비교 →</a
-						>
-					</div>
-				{/if}
+				<div class="big-stat">
+					<span class="label">소속 회사</span>
+					<span class="value">{selectedNode.nodeCount}사</span>
+				</div>
+				<div class="big-stat">
+					<span class="label">산업 총 매출</span>
+					<span class="value">{formatRev(selectedNode.revenue)}</span>
+				</div>
+				<div class="section">
+					<button class="full-link" onclick={() => enterIndustry(selectedNode.industry)}>
+						이 산업 내부 보기 →
+					</button>
+				</div>
 			</div>
 		</aside>
 	{/if}
@@ -1069,16 +992,6 @@
 		color: #94a3b8;
 		margin: 0 4px;
 	}
-	.meta-row.scan .meta-v {
-		font-weight: 600;
-	}
-	.meta-row .grade {
-		color: #64748b;
-		font-weight: 400;
-		font-size: 11px;
-		margin-left: 4px;
-	}
-
 	/* 관점 셀렉터 */
 	.view-switch {
 		background: rgba(96, 165, 250, 0.04);
@@ -1351,6 +1264,40 @@
 		background: rgba(96, 165, 250, 0.3);
 	}
 
+	.detail-panel {
+		position: fixed;
+		top: 0;
+		right: 0;
+		width: 380px;
+		height: 100dvh;
+		background: #0f1219;
+		border-left: 1px solid #1e2433;
+		overflow-y: auto;
+		display: grid;
+		grid-template-columns: 1fr;
+		box-shadow: -4px 0 12px rgba(0, 0, 0, 0.5);
+		z-index: 6;
+	}
+	.detail-panel.wide {
+		width: 760px;
+		grid-template-columns: 1fr 1fr;
+	}
+	.card-slot {
+		border-right: 1px solid #1e2433;
+		overflow-y: auto;
+		max-height: 100dvh;
+	}
+	.detail-panel.wide .card-slot:last-child {
+		border-right: none;
+	}
+	@media (max-width: 900px) {
+		.detail-panel,
+		.detail-panel.wide {
+			width: 100%;
+			grid-template-columns: 1fr;
+		}
+	}
+
 	.detail {
 		position: fixed;
 		top: 0;
@@ -1382,12 +1329,6 @@
 		font-size: 20px;
 		color: #f1f5f9;
 	}
-	.code {
-		margin: 2px 0 8px;
-		font-family: monospace;
-		color: #64748b;
-		font-size: 12px;
-	}
 	.badges {
 		display: flex;
 		gap: 6px;
@@ -1399,18 +1340,6 @@
 		padding: 2px 8px;
 		border-radius: 4px;
 		font-weight: 500;
-	}
-	.stage-badge {
-		background: rgba(52, 211, 153, 0.15);
-		color: #34d399;
-	}
-	.role-badge {
-		background: rgba(251, 146, 60, 0.12);
-		color: #fb923c;
-	}
-	.stream-badge {
-		background: rgba(167, 139, 250, 0.15);
-		color: #a78bfa;
 	}
 	.big-stat {
 		background: #050811;
@@ -1429,56 +1358,6 @@
 		font-size: 20px;
 		font-weight: 600;
 		color: #f1f5f9;
-	}
-	.meta-row {
-		display: flex;
-		justify-content: space-between;
-		padding: 6px 10px;
-		font-size: 12px;
-		background: #050811;
-		border: 1px solid #1e2433;
-		border-radius: 6px;
-		margin-bottom: 6px;
-	}
-	.meta-row .meta-k {
-		color: #94a3b8;
-	}
-	.meta-row .meta-v {
-		color: #f1f5f9;
-		font-weight: 500;
-	}
-
-	.rel-list {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-	}
-	.rel-list li {
-		padding: 8px 0;
-		border-bottom: 1px solid #1e2433;
-	}
-	.rel-list li:last-child {
-		border-bottom: none;
-	}
-	.rel-partner {
-		font-size: 13px;
-		color: #cbd5e1;
-	}
-	.rel-partner strong {
-		color: #f1f5f9;
-	}
-	.rel-partner .product {
-		color: #94a3b8;
-		font-size: 11px;
-	}
-	.rel-amount {
-		font-size: 12px;
-		color: #fb923c;
-		margin-top: 2px;
-	}
-	.rel-amount .ratio {
-		color: #64748b;
-		font-size: 10px;
 	}
 	.full-link {
 		display: inline-block;

@@ -1,0 +1,6204 @@
+{
+  "retail": {
+    "name": "유통·소매",
+    "count": 113,
+    "avgRoe": 10.67,
+    "avgOpMargin": -6.08,
+    "avgCagr": 3.07,
+    "topRoe": [
+      {
+        "stockCode": "027410",
+        "corpName": "BGF",
+        "roe": 526.6,
+        "revenue": 469468454559.0
+      },
+      {
+        "stockCode": "227100",
+        "corpName": "프로브잇",
+        "roe": 521.9,
+        "revenue": 66930266971.0
+      },
+      {
+        "stockCode": "282330",
+        "corpName": "BGF리테일",
+        "roe": 375.7,
+        "revenue": 9061216107616.0
+      },
+      {
+        "stockCode": "215480",
+        "corpName": "토박스코리아",
+        "roe": 37.9,
+        "revenue": 39699702190.0
+      },
+      {
+        "stockCode": "065650",
+        "corpName": "하이퍼코퍼레이션",
+        "roe": 23.0,
+        "revenue": 76186605609.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "035510",
+        "corpName": "신세계I&C",
+        "revCagr": 75.0,
+        "revenue": 687200163879.0
+      },
+      {
+        "stockCode": "067990",
+        "corpName": "도이치모터스",
+        "revCagr": 73.5,
+        "revenue": 2549096896332.0
+      },
+      {
+        "stockCode": "131220",
+        "corpName": "대한과학",
+        "revCagr": 68.4,
+        "revenue": 81117767870.0
+      },
+      {
+        "stockCode": "005160",
+        "corpName": "동국산업",
+        "revCagr": 61.7,
+        "revenue": 727764317548.0
+      },
+      {
+        "stockCode": "007070",
+        "corpName": "GS리테일",
+        "revCagr": 59.3,
+        "revenue": 11957421688837.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "069640",
+        "corpName": "한세엠케이",
+        "debtRatio": 758.8,
+        "debtGrade": "고위험",
+        "roe": -19.0
+      },
+      {
+        "stockCode": "067990",
+        "corpName": "도이치모터스",
+        "debtRatio": 337.7,
+        "debtGrade": "고위험",
+        "roe": -0.5
+      },
+      {
+        "stockCode": "008600",
+        "corpName": "윌비스",
+        "debtRatio": 254.6,
+        "debtGrade": "고위험",
+        "roe": -2.4
+      },
+      {
+        "stockCode": "290720",
+        "corpName": "푸드나무",
+        "debtRatio": 232.7,
+        "debtGrade": "주의",
+        "roe": -98.1
+      },
+      {
+        "stockCode": "009270",
+        "corpName": "신원",
+        "debtRatio": 211.2,
+        "debtGrade": "주의",
+        "roe": -0.5
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "retail",
+        "toIndustry": "machinery",
+        "edgeCount": 5,
+        "amount": 23684401.0,
+        "fromName": "유통·소매",
+        "toName": "기계·장비"
+      },
+      {
+        "fromIndustry": "retail",
+        "toIndustry": "construction",
+        "edgeCount": 8,
+        "amount": 31122.0,
+        "fromName": "유통·소매",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "retail",
+        "toIndustry": "pharma",
+        "edgeCount": 14,
+        "amount": 4034.0,
+        "fromName": "유통·소매",
+        "toName": "제약·바이오"
+      },
+      {
+        "fromIndustry": "retail",
+        "toIndustry": "medicalDevice",
+        "edgeCount": 4,
+        "amount": 434.0,
+        "fromName": "유통·소매",
+        "toName": "의료기기"
+      },
+      {
+        "fromIndustry": "retail",
+        "toIndustry": "electronics",
+        "edgeCount": 9,
+        "amount": 0.0,
+        "fromName": "유통·소매",
+        "toName": "전자부품"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "retail",
+        "edgeCount": 11,
+        "amount": 138794.0,
+        "fromName": "철강·금속",
+        "toName": "유통·소매"
+      },
+      {
+        "fromIndustry": "aerospace",
+        "toIndustry": "retail",
+        "edgeCount": 5,
+        "amount": 6116.0,
+        "fromName": "항공·방산",
+        "toName": "유통·소매"
+      },
+      {
+        "fromIndustry": "food",
+        "toIndustry": "retail",
+        "edgeCount": 20,
+        "amount": 0.0,
+        "fromName": "식품·음료",
+        "toName": "유통·소매"
+      },
+      {
+        "fromIndustry": "construction",
+        "toIndustry": "retail",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "건설",
+        "toName": "유통·소매"
+      },
+      {
+        "fromIndustry": "semiconductor",
+        "toIndustry": "retail",
+        "edgeCount": 13,
+        "amount": 0.0,
+        "fromName": "반도체",
+        "toName": "유통·소매"
+      }
+    ]
+  },
+  "food": {
+    "name": "식품·음료",
+    "count": 132,
+    "avgRoe": 15.21,
+    "avgOpMargin": -4.12,
+    "avgCagr": 5.74,
+    "topRoe": [
+      {
+        "stockCode": "005990",
+        "corpName": "매일홀딩스",
+        "roe": 1000.3,
+        "revenue": 2196211284329.0
+      },
+      {
+        "stockCode": "025870",
+        "corpName": "신라에스지",
+        "roe": 443.9,
+        "revenue": 70037103949.0
+      },
+      {
+        "stockCode": "021050",
+        "corpName": "서원",
+        "roe": 143.1,
+        "revenue": 1713611354765.0
+      },
+      {
+        "stockCode": "007310",
+        "corpName": "오뚜기",
+        "roe": 101.4,
+        "revenue": 3674545422005.0
+      },
+      {
+        "stockCode": "033780",
+        "corpName": "케이티앤지",
+        "roe": 51.4,
+        "revenue": 6579707000000.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "079160",
+        "corpName": "CJ CGV",
+        "revCagr": 116.8,
+        "revenue": 2275369359771.0
+      },
+      {
+        "stockCode": "038680",
+        "corpName": "에스넷",
+        "revCagr": 111.6,
+        "revenue": 457407231243.0
+      },
+      {
+        "stockCode": "003580",
+        "corpName": "HLB글로벌",
+        "revCagr": 104.7,
+        "revenue": 100285620415.0
+      },
+      {
+        "stockCode": "005670",
+        "corpName": "푸드웰",
+        "revCagr": 96.1,
+        "revenue": 320327563488.0
+      },
+      {
+        "stockCode": "085310",
+        "corpName": "엔케이",
+        "revCagr": 91.8,
+        "revenue": 130102265815.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "079160",
+        "corpName": "CJ CGV",
+        "debtRatio": 543.3,
+        "debtGrade": "주의",
+        "roe": -7.1
+      },
+      {
+        "stockCode": "011810",
+        "corpName": "STX",
+        "debtRatio": 466.0,
+        "debtGrade": "고위험",
+        "roe": -19.5
+      },
+      {
+        "stockCode": "005950",
+        "corpName": "이수화학",
+        "debtRatio": 291.6,
+        "debtGrade": "고위험",
+        "roe": -39.7
+      },
+      {
+        "stockCode": "276730",
+        "corpName": "한울앤제주",
+        "debtRatio": 278.1,
+        "debtGrade": "주의",
+        "roe": -5.8
+      },
+      {
+        "stockCode": "179530",
+        "corpName": "애드바이오텍",
+        "debtRatio": 257.5,
+        "debtGrade": "주의",
+        "roe": -117.7
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "food",
+        "toIndustry": "pharma",
+        "edgeCount": 16,
+        "amount": 5015.0,
+        "fromName": "식품·음료",
+        "toName": "제약·바이오"
+      },
+      {
+        "fromIndustry": "food",
+        "toIndustry": "realestate",
+        "edgeCount": 6,
+        "amount": 2717.0,
+        "fromName": "식품·음료",
+        "toName": "부동산"
+      },
+      {
+        "fromIndustry": "food",
+        "toIndustry": "electronics",
+        "edgeCount": 6,
+        "amount": 2655.0,
+        "fromName": "식품·음료",
+        "toName": "전자부품"
+      },
+      {
+        "fromIndustry": "food",
+        "toIndustry": "aerospace",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "식품·음료",
+        "toName": "항공·방산"
+      },
+      {
+        "fromIndustry": "food",
+        "toIndustry": "chemical",
+        "edgeCount": 13,
+        "amount": 0.0,
+        "fromName": "식품·음료",
+        "toName": "화학"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "food",
+        "edgeCount": 17,
+        "amount": 35080.0,
+        "fromName": "화학",
+        "toName": "식품·음료"
+      },
+      {
+        "fromIndustry": "cosmetics",
+        "toIndustry": "food",
+        "edgeCount": 7,
+        "amount": 35080.0,
+        "fromName": "화장품·생활용품",
+        "toName": "식품·음료"
+      },
+      {
+        "fromIndustry": "pharma",
+        "toIndustry": "food",
+        "edgeCount": 28,
+        "amount": 5090.0,
+        "fromName": "제약·바이오",
+        "toName": "식품·음료"
+      },
+      {
+        "fromIndustry": "realestate",
+        "toIndustry": "food",
+        "edgeCount": 5,
+        "amount": 0.0,
+        "fromName": "부동산",
+        "toName": "식품·음료"
+      },
+      {
+        "fromIndustry": "software",
+        "toIndustry": "food",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "소프트웨어·IT서비스",
+        "toName": "식품·음료"
+      }
+    ]
+  },
+  "consulting": {
+    "name": "전문서비스",
+    "count": 38,
+    "avgRoe": -61.79,
+    "avgOpMargin": 6.79,
+    "avgCagr": 16.65,
+    "topRoe": [
+      {
+        "stockCode": "180400",
+        "corpName": "DXVX",
+        "roe": 119.4,
+        "revenue": 29356591144.0
+      },
+      {
+        "stockCode": "408920",
+        "corpName": "메쎄이상",
+        "roe": 21.3,
+        "revenue": 72822323336.0
+      },
+      {
+        "stockCode": "015360",
+        "corpName": "INVENI",
+        "roe": 13.6,
+        "revenue": 1327599497000.0
+      },
+      {
+        "stockCode": "034950",
+        "corpName": "한국기업평가",
+        "roe": 12.7,
+        "revenue": 109781324514.0
+      },
+      {
+        "stockCode": "035610",
+        "corpName": "솔본",
+        "roe": 6.9,
+        "revenue": 120651025450.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "180640",
+        "corpName": "한진칼",
+        "revCagr": 87.8,
+        "revenue": 298362106000.0
+      },
+      {
+        "stockCode": "039830",
+        "corpName": "오로라",
+        "revCagr": 77.0,
+        "revenue": 328079971298.0
+      },
+      {
+        "stockCode": "003030",
+        "corpName": "세아제강지주",
+        "revCagr": 60.1,
+        "revenue": 3759574982771.0
+      },
+      {
+        "stockCode": "000070",
+        "corpName": "삼양홀딩스",
+        "revCagr": 58.7,
+        "revenue": 3348286833611.0
+      },
+      {
+        "stockCode": "045100",
+        "corpName": "한양이엔지",
+        "revCagr": 53.8,
+        "revenue": 1118180793899.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "036710",
+        "corpName": "심텍홀딩스",
+        "debtRatio": 333.9,
+        "debtGrade": "주의",
+        "roe": -2409.9
+      },
+      {
+        "stockCode": "480370",
+        "corpName": "씨케이솔루션",
+        "debtRatio": 130.6,
+        "debtGrade": "주의",
+        "roe": -6.5
+      },
+      {
+        "stockCode": "270520",
+        "corpName": "앱튼",
+        "debtRatio": 129.2,
+        "debtGrade": "주의",
+        "roe": -21.6
+      },
+      {
+        "stockCode": "187220",
+        "corpName": "디티앤씨",
+        "debtRatio": 125.4,
+        "debtGrade": "주의",
+        "roe": -2.4
+      },
+      {
+        "stockCode": "038290",
+        "corpName": "마크로젠",
+        "debtRatio": 104.1,
+        "debtGrade": "주의",
+        "roe": -0.1
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "consulting",
+        "toIndustry": "shipbuilding",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "전문서비스",
+        "toName": "조선·해운"
+      },
+      {
+        "fromIndustry": "consulting",
+        "toIndustry": "pharma",
+        "edgeCount": 5,
+        "amount": 0.0,
+        "fromName": "전문서비스",
+        "toName": "제약·바이오"
+      },
+      {
+        "fromIndustry": "consulting",
+        "toIndustry": "paper",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "전문서비스",
+        "toName": "제지·목재"
+      },
+      {
+        "fromIndustry": "consulting",
+        "toIndustry": "construction",
+        "edgeCount": 5,
+        "amount": 0.0,
+        "fromName": "전문서비스",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "consulting",
+        "toIndustry": "food",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "전문서비스",
+        "toName": "식품·음료"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "energy",
+        "toIndustry": "consulting",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "에너지·유틸리티",
+        "toName": "전문서비스"
+      },
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "consulting",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "화학",
+        "toName": "전문서비스"
+      },
+      {
+        "fromIndustry": "cosmetics",
+        "toIndustry": "consulting",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "화장품·생활용품",
+        "toName": "전문서비스"
+      },
+      {
+        "fromIndustry": "food",
+        "toIndustry": "consulting",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "식품·음료",
+        "toName": "전문서비스"
+      },
+      {
+        "fromIndustry": "semiconductor",
+        "toIndustry": "consulting",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "반도체",
+        "toName": "전문서비스"
+      }
+    ]
+  },
+  "pharma": {
+    "name": "제약·바이오",
+    "count": 271,
+    "avgRoe": 2.7,
+    "avgOpMargin": -11717.45,
+    "avgCagr": 7.86,
+    "topRoe": [
+      {
+        "stockCode": "237690",
+        "corpName": "에스티팜",
+        "roe": 1706.9,
+        "revenue": 331681282447.0
+      },
+      {
+        "stockCode": "000640",
+        "corpName": "동아쏘시오홀딩스",
+        "roe": 469.0,
+        "revenue": 1429766810735.0
+      },
+      {
+        "stockCode": "191420",
+        "corpName": "테고사이언스",
+        "roe": 197.6,
+        "revenue": 5940717263.0
+      },
+      {
+        "stockCode": "352770",
+        "corpName": "셀레스트라",
+        "roe": 170.2,
+        "revenue": 2007745450.0
+      },
+      {
+        "stockCode": "003090",
+        "corpName": "대웅",
+        "roe": 130.2,
+        "revenue": 2068370455244.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "263050",
+        "corpName": "유틸렉스",
+        "revCagr": 444.1,
+        "revenue": 10294911483.0
+      },
+      {
+        "stockCode": "348150",
+        "corpName": "고바이오랩",
+        "revCagr": 139.6,
+        "revenue": 69291602991.0
+      },
+      {
+        "stockCode": "043710",
+        "corpName": "서울리거",
+        "revCagr": 128.4,
+        "revenue": 35668112160.0
+      },
+      {
+        "stockCode": "214450",
+        "corpName": "파마리서치",
+        "revCagr": 121.0,
+        "revenue": 536289118812.0
+      },
+      {
+        "stockCode": "215600",
+        "corpName": "신라젠",
+        "revCagr": 101.0,
+        "revenue": 9225416503.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "216400",
+        "corpName": "인바이츠바이오코아",
+        "debtRatio": 3018.1,
+        "debtGrade": "주의",
+        "roe": -312.7
+      },
+      {
+        "stockCode": "245620",
+        "corpName": "EDGC",
+        "debtRatio": 2025.4,
+        "debtGrade": "고위험",
+        "roe": -7.3
+      },
+      {
+        "stockCode": "080720",
+        "corpName": "한국유니온제약",
+        "debtRatio": 1209.0,
+        "debtGrade": "주의",
+        "roe": -259.9
+      },
+      {
+        "stockCode": "222040",
+        "corpName": "코스맥스엔비티",
+        "debtRatio": 417.8,
+        "debtGrade": "주의",
+        "roe": -4.6
+      },
+      {
+        "stockCode": "049180",
+        "corpName": "셀루메드",
+        "debtRatio": 399.7,
+        "debtGrade": "주의",
+        "roe": -11.2
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "pharma",
+        "toIndustry": "software",
+        "edgeCount": 11,
+        "amount": 12800.0,
+        "fromName": "제약·바이오",
+        "toName": "소프트웨어·IT서비스"
+      },
+      {
+        "fromIndustry": "pharma",
+        "toIndustry": "food",
+        "edgeCount": 28,
+        "amount": 5090.0,
+        "fromName": "제약·바이오",
+        "toName": "식품·음료"
+      },
+      {
+        "fromIndustry": "pharma",
+        "toIndustry": "machinery",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "제약·바이오",
+        "toName": "기계·장비"
+      },
+      {
+        "fromIndustry": "pharma",
+        "toIndustry": "finance",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "제약·바이오",
+        "toName": "금융"
+      },
+      {
+        "fromIndustry": "pharma",
+        "toIndustry": "retail",
+        "edgeCount": 13,
+        "amount": 0.0,
+        "fromName": "제약·바이오",
+        "toName": "유통·소매"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "cosmetics",
+        "toIndustry": "pharma",
+        "edgeCount": 14,
+        "amount": 155679.0,
+        "fromName": "화장품·생활용품",
+        "toName": "제약·바이오"
+      },
+      {
+        "fromIndustry": "food",
+        "toIndustry": "pharma",
+        "edgeCount": 16,
+        "amount": 5015.0,
+        "fromName": "식품·음료",
+        "toName": "제약·바이오"
+      },
+      {
+        "fromIndustry": "retail",
+        "toIndustry": "pharma",
+        "edgeCount": 14,
+        "amount": 4034.0,
+        "fromName": "유통·소매",
+        "toName": "제약·바이오"
+      },
+      {
+        "fromIndustry": "consulting",
+        "toIndustry": "pharma",
+        "edgeCount": 5,
+        "amount": 0.0,
+        "fromName": "전문서비스",
+        "toName": "제약·바이오"
+      },
+      {
+        "fromIndustry": "plastic",
+        "toIndustry": "pharma",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "플라스틱·고무",
+        "toName": "제약·바이오"
+      }
+    ]
+  },
+  "machinery": {
+    "name": "기계·장비",
+    "count": 181,
+    "avgRoe": 3.51,
+    "avgOpMargin": -38.78,
+    "avgCagr": 12.91,
+    "topRoe": [
+      {
+        "stockCode": "412540",
+        "corpName": "제일엠앤에스",
+        "roe": 388.3,
+        "revenue": 151265078664.0
+      },
+      {
+        "stockCode": "034020",
+        "corpName": "두산에너빌리티",
+        "roe": 242.0,
+        "revenue": 17057876000000.0
+      },
+      {
+        "stockCode": "238120",
+        "corpName": "얼라인드",
+        "roe": 114.8,
+        "revenue": 16015916140.0
+      },
+      {
+        "stockCode": "294090",
+        "corpName": "이오플로우",
+        "roe": 101.3,
+        "revenue": 3669588357.0
+      },
+      {
+        "stockCode": "241560",
+        "corpName": "두산밥캣",
+        "roe": 100.0,
+        "revenue": 6181806000.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "217820",
+        "corpName": "원익피앤이",
+        "revCagr": 334.7,
+        "revenue": 390690915662.0
+      },
+      {
+        "stockCode": "300120",
+        "corpName": "라온피플",
+        "revCagr": 242.6,
+        "revenue": 223808325905.0
+      },
+      {
+        "stockCode": "100840",
+        "corpName": "SNT에너지",
+        "revCagr": 149.8,
+        "revenue": 606119987434.0
+      },
+      {
+        "stockCode": "089140",
+        "corpName": "넥스턴앤롤코리아",
+        "revCagr": 120.0,
+        "revenue": 70440930511.0
+      },
+      {
+        "stockCode": "254120",
+        "corpName": "자비스",
+        "revCagr": 117.2,
+        "revenue": 27895397844.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "000680",
+        "corpName": "LS네트웍스",
+        "debtRatio": 814.4,
+        "debtGrade": "고위험",
+        "roe": -0.7
+      },
+      {
+        "stockCode": "300120",
+        "corpName": "라온피플",
+        "debtRatio": 345.8,
+        "debtGrade": "주의",
+        "roe": -72.7
+      },
+      {
+        "stockCode": "348340",
+        "corpName": "뉴로메카",
+        "debtRatio": 340.4,
+        "debtGrade": "주의",
+        "roe": -32.7
+      },
+      {
+        "stockCode": "168360",
+        "corpName": "펨트론",
+        "debtRatio": 333.0,
+        "debtGrade": "주의",
+        "roe": -24.9
+      },
+      {
+        "stockCode": "045520",
+        "corpName": "크린앤사이언스",
+        "debtRatio": 305.2,
+        "debtGrade": "주의",
+        "roe": -17.8
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "machinery",
+        "toIndustry": "aerospace",
+        "edgeCount": 6,
+        "amount": 6519885.0,
+        "fromName": "기계·장비",
+        "toName": "항공·방산"
+      },
+      {
+        "fromIndustry": "machinery",
+        "toIndustry": "electronics",
+        "edgeCount": 24,
+        "amount": 84749.0,
+        "fromName": "기계·장비",
+        "toName": "전자부품"
+      },
+      {
+        "fromIndustry": "machinery",
+        "toIndustry": "semiconductor",
+        "edgeCount": 3,
+        "amount": 38837.0,
+        "fromName": "기계·장비",
+        "toName": "반도체"
+      },
+      {
+        "fromIndustry": "machinery",
+        "toIndustry": "auto",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "기계·장비",
+        "toName": "자동차"
+      },
+      {
+        "fromIndustry": "machinery",
+        "toIndustry": "telecom",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "기계·장비",
+        "toName": "통신장비"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "retail",
+        "toIndustry": "machinery",
+        "edgeCount": 5,
+        "amount": 23684401.0,
+        "fromName": "유통·소매",
+        "toName": "기계·장비"
+      },
+      {
+        "fromIndustry": "software",
+        "toIndustry": "machinery",
+        "edgeCount": 6,
+        "amount": 9569.0,
+        "fromName": "소프트웨어·IT서비스",
+        "toName": "기계·장비"
+      },
+      {
+        "fromIndustry": "medicalDevice",
+        "toIndustry": "machinery",
+        "edgeCount": 5,
+        "amount": 1254.0,
+        "fromName": "의료기기",
+        "toName": "기계·장비"
+      },
+      {
+        "fromIndustry": "battery",
+        "toIndustry": "machinery",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "2차전지",
+        "toName": "기계·장비"
+      },
+      {
+        "fromIndustry": "auto",
+        "toIndustry": "machinery",
+        "edgeCount": 5,
+        "amount": 0.0,
+        "fromName": "자동차",
+        "toName": "기계·장비"
+      }
+    ]
+  },
+  "energy": {
+    "name": "에너지·유틸리티",
+    "count": 34,
+    "avgRoe": -134.63,
+    "avgOpMargin": 8.61,
+    "avgCagr": -5.35,
+    "topRoe": [
+      {
+        "stockCode": "104830",
+        "corpName": "원익머트리얼즈",
+        "roe": 100.0,
+        "revenue": 322467412745.0
+      },
+      {
+        "stockCode": "030530",
+        "corpName": "원익홀딩스",
+        "roe": 37.8,
+        "revenue": 622991604240.0
+      },
+      {
+        "stockCode": "0001A0",
+        "corpName": "덕양에너젠",
+        "roe": 10.6,
+        "revenue": 143195229364.0
+      },
+      {
+        "stockCode": "130660",
+        "corpName": "한전산업",
+        "roe": 10.2,
+        "revenue": 394548141840.0
+      },
+      {
+        "stockCode": "389260",
+        "corpName": "대명에너지",
+        "roe": 8.6,
+        "revenue": 130971472403.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "112610",
+        "corpName": "씨에스윈드",
+        "revCagr": 107.6,
+        "revenue": 2931648581449.0
+      },
+      {
+        "stockCode": "015760",
+        "corpName": "한국전력공사",
+        "revCagr": 80.9,
+        "revenue": 97429346000000.0
+      },
+      {
+        "stockCode": "043220",
+        "corpName": "티에스넥스젠",
+        "revCagr": 36.1,
+        "revenue": 14537599112.0
+      },
+      {
+        "stockCode": "071320",
+        "corpName": "지역난방공사",
+        "revCagr": 30.4,
+        "revenue": 3998187000000.0
+      },
+      {
+        "stockCode": "009450",
+        "corpName": "경동나비엔",
+        "revCagr": 13.7,
+        "revenue": 1502239729157.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "023150",
+        "corpName": "MH에탄올",
+        "debtRatio": 380.3,
+        "debtGrade": "안전",
+        "roe": -4.4
+      },
+      {
+        "stockCode": "005090",
+        "corpName": "SGC에너지",
+        "debtRatio": 302.6,
+        "debtGrade": "주의",
+        "roe": -0.7
+      },
+      {
+        "stockCode": "003480",
+        "corpName": "한진중공업홀딩스",
+        "debtRatio": 301.2,
+        "debtGrade": "주의",
+        "roe": -0.2
+      },
+      {
+        "stockCode": "071320",
+        "corpName": "지역난방공사",
+        "debtRatio": 248.5,
+        "debtGrade": "주의",
+        "roe": -1.0
+      },
+      {
+        "stockCode": "095910",
+        "corpName": "에스에너지",
+        "debtRatio": 232.7,
+        "debtGrade": "고위험",
+        "roe": -25.6
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "energy",
+        "toIndustry": "buildingMaterials",
+        "edgeCount": 2,
+        "amount": 3304658.0,
+        "fromName": "에너지·유틸리티",
+        "toName": "시멘트·요업"
+      },
+      {
+        "fromIndustry": "energy",
+        "toIndustry": "electronics",
+        "edgeCount": 10,
+        "amount": 0.0,
+        "fromName": "에너지·유틸리티",
+        "toName": "전자부품"
+      },
+      {
+        "fromIndustry": "energy",
+        "toIndustry": "consulting",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "에너지·유틸리티",
+        "toName": "전문서비스"
+      },
+      {
+        "fromIndustry": "energy",
+        "toIndustry": "finance",
+        "edgeCount": 8,
+        "amount": 0.0,
+        "fromName": "에너지·유틸리티",
+        "toName": "금융"
+      },
+      {
+        "fromIndustry": "energy",
+        "toIndustry": "construction",
+        "edgeCount": 10,
+        "amount": 0.0,
+        "fromName": "에너지·유틸리티",
+        "toName": "건설"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "energy",
+        "edgeCount": 6,
+        "amount": 0.0,
+        "fromName": "화학",
+        "toName": "에너지·유틸리티"
+      },
+      {
+        "fromIndustry": "construction",
+        "toIndustry": "energy",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "건설",
+        "toName": "에너지·유틸리티"
+      },
+      {
+        "fromIndustry": "textile",
+        "toIndustry": "energy",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "섬유·의류",
+        "toName": "에너지·유틸리티"
+      },
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "energy",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "전자부품",
+        "toName": "에너지·유틸리티"
+      },
+      {
+        "fromIndustry": "machinery",
+        "toIndustry": "energy",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "기계·장비",
+        "toName": "에너지·유틸리티"
+      }
+    ]
+  },
+  "construction": {
+    "name": "건설",
+    "count": 105,
+    "avgRoe": 10.81,
+    "avgOpMargin": 0.71,
+    "avgCagr": 1.38,
+    "topRoe": [
+      {
+        "stockCode": "028260",
+        "corpName": "삼성물산",
+        "roe": 533.1,
+        "revenue": 40742240967149.0
+      },
+      {
+        "stockCode": "009410",
+        "corpName": "태영건설",
+        "roe": 101.2,
+        "revenue": 2174483568714.0
+      },
+      {
+        "stockCode": "023410",
+        "corpName": "유진기업",
+        "roe": 90.1,
+        "revenue": 1332687769915.0
+      },
+      {
+        "stockCode": "001470",
+        "corpName": "삼부토건",
+        "roe": 71.5,
+        "revenue": 110992936772.0
+      },
+      {
+        "stockCode": "002410",
+        "corpName": "범양건영",
+        "roe": 24.8,
+        "revenue": 71843235941.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "002460",
+        "corpName": "HS화성",
+        "revCagr": 74.4,
+        "revenue": 659478953752.0
+      },
+      {
+        "stockCode": "183190",
+        "corpName": "아세아시멘트",
+        "revCagr": 73.2,
+        "revenue": 1022789744000.0
+      },
+      {
+        "stockCode": "344820",
+        "corpName": "케이씨씨글라스",
+        "revCagr": 71.2,
+        "revenue": 1900606191952.0
+      },
+      {
+        "stockCode": "300720",
+        "corpName": "한일시멘트",
+        "revCagr": 71.1,
+        "revenue": 1423859619115.0
+      },
+      {
+        "stockCode": "186230",
+        "corpName": "그린플러스",
+        "revCagr": 69.2,
+        "revenue": 105715000362.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "044180",
+        "corpName": "KD",
+        "debtRatio": 779.3,
+        "debtGrade": "고위험",
+        "roe": -5.7
+      },
+      {
+        "stockCode": "003070",
+        "corpName": "코오롱글로벌",
+        "debtRatio": 342.3,
+        "debtGrade": "주의",
+        "roe": -3.6
+      },
+      {
+        "stockCode": "097230",
+        "corpName": "HJ중공업",
+        "debtRatio": 290.0,
+        "debtGrade": "고위험",
+        "roe": -1.0
+      },
+      {
+        "stockCode": "016250",
+        "corpName": "SGC E&C",
+        "debtRatio": 252.1,
+        "debtGrade": "주의",
+        "roe": -2.1
+      },
+      {
+        "stockCode": "047040",
+        "corpName": "대우건설",
+        "debtRatio": 225.3,
+        "debtGrade": "고위험",
+        "roe": -1.0
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "construction",
+        "toIndustry": "finance",
+        "edgeCount": 8,
+        "amount": 151194.0,
+        "fromName": "건설",
+        "toName": "금융"
+      },
+      {
+        "fromIndustry": "construction",
+        "toIndustry": "realestate",
+        "edgeCount": 8,
+        "amount": 9921.0,
+        "fromName": "건설",
+        "toName": "부동산"
+      },
+      {
+        "fromIndustry": "construction",
+        "toIndustry": "aerospace",
+        "edgeCount": 9,
+        "amount": 0.0,
+        "fromName": "건설",
+        "toName": "항공·방산"
+      },
+      {
+        "fromIndustry": "construction",
+        "toIndustry": "chemical",
+        "edgeCount": 6,
+        "amount": 0.0,
+        "fromName": "건설",
+        "toName": "화학"
+      },
+      {
+        "fromIndustry": "construction",
+        "toIndustry": "retail",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "건설",
+        "toName": "유통·소매"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "construction",
+        "edgeCount": 15,
+        "amount": 1589710.0,
+        "fromName": "화학",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "buildingMaterials",
+        "toIndustry": "construction",
+        "edgeCount": 14,
+        "amount": 850138.0,
+        "fromName": "시멘트·요업",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "construction",
+        "edgeCount": 57,
+        "amount": 749844.0,
+        "fromName": "철강·금속",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "paper",
+        "toIndustry": "construction",
+        "edgeCount": 17,
+        "amount": 75677.0,
+        "fromName": "제지·목재",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "shipbuilding",
+        "toIndustry": "construction",
+        "edgeCount": 9,
+        "amount": 40401.0,
+        "fromName": "조선·해운",
+        "toName": "건설"
+      }
+    ]
+  },
+  "finance": {
+    "name": "금융",
+    "count": 107,
+    "avgRoe": 9.96,
+    "avgOpMargin": 25.9,
+    "avgCagr": 13.86,
+    "topRoe": [
+      {
+        "stockCode": "006040",
+        "corpName": "동원산업",
+        "roe": 591.4,
+        "revenue": 9583673896991.0
+      },
+      {
+        "stockCode": "383800",
+        "corpName": "LX홀딩스",
+        "roe": 61.9,
+        "revenue": 0
+      },
+      {
+        "stockCode": "211050",
+        "corpName": "인카금융서비스",
+        "roe": 35.5,
+        "revenue": 1021768500000.0
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "roe": 19.8,
+        "revenue": 0
+      },
+      {
+        "stockCode": "046440",
+        "corpName": "KG모빌리언스",
+        "roe": 19.3,
+        "revenue": 233770778965.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "086980",
+        "corpName": "쇼박스",
+        "revCagr": 122.8,
+        "revenue": 62748042504.0
+      },
+      {
+        "stockCode": "211050",
+        "corpName": "인카금융서비스",
+        "revCagr": 114.7,
+        "revenue": 1021768500000.0
+      },
+      {
+        "stockCode": "025770",
+        "corpName": "한국정보통신",
+        "revCagr": 78.7,
+        "revenue": 24856921000.0
+      },
+      {
+        "stockCode": "012320",
+        "corpName": "경동인베스트",
+        "revCagr": 68.7,
+        "revenue": 276162998109.0
+      },
+      {
+        "stockCode": "204620",
+        "corpName": "글로벌텍스프리",
+        "revCagr": 65.5,
+        "revenue": 154056520360.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "006840",
+        "corpName": "AK홀딩스",
+        "debtRatio": 397.3,
+        "debtGrade": "고위험",
+        "roe": -20.7
+      },
+      {
+        "stockCode": "002020",
+        "corpName": "코오롱",
+        "debtRatio": 203.9,
+        "debtGrade": "고위험",
+        "roe": -4.2
+      },
+      {
+        "stockCode": "084690",
+        "corpName": "대상홀딩스",
+        "debtRatio": 182.8,
+        "debtGrade": "주의",
+        "roe": -17.8
+      },
+      {
+        "stockCode": "199480",
+        "corpName": "뱅크웨어글로벌",
+        "debtRatio": 181.0,
+        "debtGrade": "주의",
+        "roe": -0.2
+      },
+      {
+        "stockCode": "064260",
+        "corpName": "다날",
+        "debtRatio": 168.8,
+        "debtGrade": "주의",
+        "roe": -6.3
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "finance",
+        "toIndustry": "food",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "금융",
+        "toName": "식품·음료"
+      },
+      {
+        "fromIndustry": "finance",
+        "toIndustry": "machinery",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "금융",
+        "toName": "기계·장비"
+      },
+      {
+        "fromIndustry": "finance",
+        "toIndustry": "pharma",
+        "edgeCount": 8,
+        "amount": 0.0,
+        "fromName": "금융",
+        "toName": "제약·바이오"
+      },
+      {
+        "fromIndustry": "finance",
+        "toIndustry": "telecom",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "금융",
+        "toName": "통신장비"
+      },
+      {
+        "fromIndustry": "finance",
+        "toIndustry": "chemical",
+        "edgeCount": 8,
+        "amount": 0.0,
+        "fromName": "금융",
+        "toName": "화학"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "finance",
+        "edgeCount": 31,
+        "amount": 323086.0,
+        "fromName": "화학",
+        "toName": "금융"
+      },
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "finance",
+        "edgeCount": 7,
+        "amount": 197352.0,
+        "fromName": "철강·금속",
+        "toName": "금융"
+      },
+      {
+        "fromIndustry": "construction",
+        "toIndustry": "finance",
+        "edgeCount": 8,
+        "amount": 151194.0,
+        "fromName": "건설",
+        "toName": "금융"
+      },
+      {
+        "fromIndustry": "shipbuilding",
+        "toIndustry": "finance",
+        "edgeCount": 3,
+        "amount": 40401.0,
+        "fromName": "조선·해운",
+        "toName": "금융"
+      },
+      {
+        "fromIndustry": "cosmetics",
+        "toIndustry": "finance",
+        "edgeCount": 2,
+        "amount": 11039.0,
+        "fromName": "화장품·생활용품",
+        "toName": "금융"
+      }
+    ]
+  },
+  "auto": {
+    "name": "자동차",
+    "count": 82,
+    "avgRoe": -6.04,
+    "avgOpMargin": 0.19,
+    "avgCagr": 0.25,
+    "topRoe": [
+      {
+        "stockCode": "016740",
+        "corpName": "두올",
+        "roe": 102.7,
+        "revenue": 796139348935.0
+      },
+      {
+        "stockCode": "004250",
+        "corpName": "엔피씨",
+        "roe": 30.4,
+        "revenue": 450319620231.0
+      },
+      {
+        "stockCode": "265560",
+        "corpName": "영화테크",
+        "roe": 24.0,
+        "revenue": 108613630588.0
+      },
+      {
+        "stockCode": "077970",
+        "corpName": "STX엔진",
+        "roe": 20.1,
+        "revenue": 789341914687.0
+      },
+      {
+        "stockCode": "090150",
+        "corpName": "아이윈",
+        "roe": 19.4,
+        "revenue": 115909884130.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "265560",
+        "corpName": "영화테크",
+        "revCagr": 131.0,
+        "revenue": 108613630588.0
+      },
+      {
+        "stockCode": "088290",
+        "corpName": "이원컴포텍",
+        "revCagr": 84.1,
+        "revenue": 56577030456.0
+      },
+      {
+        "stockCode": "145210",
+        "corpName": "다이나믹디자인",
+        "revCagr": 78.6,
+        "revenue": 80189664538.0
+      },
+      {
+        "stockCode": "002230",
+        "corpName": "피에스텍",
+        "revCagr": 77.8,
+        "revenue": 97159784624.0
+      },
+      {
+        "stockCode": "025440",
+        "corpName": "DH오토웨어",
+        "revCagr": 76.8,
+        "revenue": 494366222632.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "143210",
+        "corpName": "핸즈코퍼레이션",
+        "debtRatio": 410.5,
+        "debtGrade": "고위험",
+        "roe": -60.6
+      },
+      {
+        "stockCode": "025440",
+        "corpName": "DH오토웨어",
+        "debtRatio": 396.3,
+        "debtGrade": "주의",
+        "roe": -44.4
+      },
+      {
+        "stockCode": "012200",
+        "corpName": "계양전기",
+        "debtRatio": 358.1,
+        "debtGrade": "주의",
+        "roe": -74.3
+      },
+      {
+        "stockCode": "067170",
+        "corpName": "오텍",
+        "debtRatio": 349.7,
+        "debtGrade": "주의",
+        "roe": -1.2
+      },
+      {
+        "stockCode": "308170",
+        "corpName": "씨티알모빌리티",
+        "debtRatio": 283.6,
+        "debtGrade": "주의",
+        "roe": -3.7
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "auto",
+        "toIndustry": "electronics",
+        "edgeCount": 31,
+        "amount": 0.0,
+        "fromName": "자동차",
+        "toName": "전자부품"
+      },
+      {
+        "fromIndustry": "auto",
+        "toIndustry": "machinery",
+        "edgeCount": 5,
+        "amount": 0.0,
+        "fromName": "자동차",
+        "toName": "기계·장비"
+      },
+      {
+        "fromIndustry": "auto",
+        "toIndustry": "retail",
+        "edgeCount": 11,
+        "amount": 0.0,
+        "fromName": "자동차",
+        "toName": "유통·소매"
+      },
+      {
+        "fromIndustry": "auto",
+        "toIndustry": "finance",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "자동차",
+        "toName": "금융"
+      },
+      {
+        "fromIndustry": "auto",
+        "toIndustry": "construction",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "자동차",
+        "toName": "건설"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "auto",
+        "edgeCount": 11,
+        "amount": 13184533.0,
+        "fromName": "전자부품",
+        "toName": "자동차"
+      },
+      {
+        "fromIndustry": "logistics",
+        "toIndustry": "auto",
+        "edgeCount": 1,
+        "amount": 42690.0,
+        "fromName": "물류·운송",
+        "toName": "자동차"
+      },
+      {
+        "fromIndustry": "machinery",
+        "toIndustry": "auto",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "기계·장비",
+        "toName": "자동차"
+      },
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "auto",
+        "edgeCount": 12,
+        "amount": 0.0,
+        "fromName": "화학",
+        "toName": "자동차"
+      },
+      {
+        "fromIndustry": "textile",
+        "toIndustry": "auto",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "섬유·의류",
+        "toName": "자동차"
+      }
+    ]
+  },
+  "telecom": {
+    "name": "통신장비",
+    "count": 99,
+    "avgRoe": 20.13,
+    "avgOpMargin": -19.28,
+    "avgCagr": -2.64,
+    "topRoe": [
+      {
+        "stockCode": "368600",
+        "corpName": "아이씨에이치",
+        "roe": 474.7,
+        "revenue": 46852015447.0
+      },
+      {
+        "stockCode": "192410",
+        "corpName": "오늘이엔엠",
+        "roe": 426.3,
+        "revenue": 16693992539.0
+      },
+      {
+        "stockCode": "072130",
+        "corpName": "유엔젤",
+        "roe": 404.7,
+        "revenue": 61566608489.0
+      },
+      {
+        "stockCode": "005110",
+        "corpName": "한창",
+        "roe": 311.2,
+        "revenue": 8044626288.0
+      },
+      {
+        "stockCode": "189300",
+        "corpName": "인텔리안테크",
+        "roe": 222.2,
+        "revenue": 319628351040.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "109070",
+        "corpName": "주성코퍼레이션",
+        "revCagr": 115.6,
+        "revenue": 85403171510.0
+      },
+      {
+        "stockCode": "049480",
+        "corpName": "오픈베이스",
+        "revCagr": 109.4,
+        "revenue": 233127039094.0
+      },
+      {
+        "stockCode": "175140",
+        "corpName": "휴먼테크놀로지",
+        "revCagr": 106.2,
+        "revenue": 55491024215.0
+      },
+      {
+        "stockCode": "058850",
+        "corpName": "KTcs",
+        "revCagr": 67.1,
+        "revenue": 1042716672450.0
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "revCagr": 63.4,
+        "revenue": 28244161000000.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "012860",
+        "corpName": "모베이스전자",
+        "debtRatio": 216.2,
+        "debtGrade": "주의",
+        "roe": -0.5
+      },
+      {
+        "stockCode": "088800",
+        "corpName": "에이스테크",
+        "debtRatio": 199.3,
+        "debtGrade": "고위험",
+        "roe": -4.9
+      },
+      {
+        "stockCode": "340360",
+        "corpName": "다보링크",
+        "debtRatio": 168.4,
+        "debtGrade": "주의",
+        "roe": -33.0
+      },
+      {
+        "stockCode": "072770",
+        "corpName": "멤레이비티",
+        "debtRatio": 163.3,
+        "debtGrade": "고위험",
+        "roe": -3.7
+      },
+      {
+        "stockCode": "091440",
+        "corpName": "한울소재과학",
+        "debtRatio": 157.3,
+        "debtGrade": "주의",
+        "roe": -108.1
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "telecom",
+        "toIndustry": "electronics",
+        "edgeCount": 9,
+        "amount": 1701.0,
+        "fromName": "통신장비",
+        "toName": "전자부품"
+      },
+      {
+        "fromIndustry": "telecom",
+        "toIndustry": "aerospace",
+        "edgeCount": 10,
+        "amount": 0.0,
+        "fromName": "통신장비",
+        "toName": "항공·방산"
+      },
+      {
+        "fromIndustry": "telecom",
+        "toIndustry": "realestate",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "통신장비",
+        "toName": "부동산"
+      },
+      {
+        "fromIndustry": "telecom",
+        "toIndustry": "finance",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "통신장비",
+        "toName": "금융"
+      },
+      {
+        "fromIndustry": "telecom",
+        "toIndustry": "chemical",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "통신장비",
+        "toName": "화학"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "software",
+        "toIndustry": "telecom",
+        "edgeCount": 6,
+        "amount": 9569.0,
+        "fromName": "소프트웨어·IT서비스",
+        "toName": "통신장비"
+      },
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "telecom",
+        "edgeCount": 10,
+        "amount": 0.0,
+        "fromName": "화학",
+        "toName": "통신장비"
+      },
+      {
+        "fromIndustry": "media",
+        "toIndustry": "telecom",
+        "edgeCount": 6,
+        "amount": 0.0,
+        "fromName": "미디어·엔터",
+        "toName": "통신장비"
+      },
+      {
+        "fromIndustry": "machinery",
+        "toIndustry": "telecom",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "기계·장비",
+        "toName": "통신장비"
+      },
+      {
+        "fromIndustry": "semiconductor",
+        "toIndustry": "telecom",
+        "edgeCount": 10,
+        "amount": 0.0,
+        "fromName": "반도체",
+        "toName": "통신장비"
+      }
+    ]
+  },
+  "aerospace": {
+    "name": "항공·방산",
+    "count": 29,
+    "avgRoe": -32.97,
+    "avgOpMargin": -190.27,
+    "avgCagr": 28.72,
+    "topRoe": [
+      {
+        "stockCode": "020560",
+        "corpName": "아시아나항공",
+        "roe": 89.5,
+        "revenue": 7266849939986.0
+      },
+      {
+        "stockCode": "082740",
+        "corpName": "한화엔진",
+        "roe": 31.2,
+        "revenue": 1371057336146.0
+      },
+      {
+        "stockCode": "079550",
+        "corpName": "LIG넥스원",
+        "roe": 16.8,
+        "revenue": 4306936127418.0
+      },
+      {
+        "stockCode": "047810",
+        "corpName": "한국항공우주",
+        "roe": 11.0,
+        "revenue": 3696379351601.0
+      },
+      {
+        "stockCode": "005430",
+        "corpName": "한국공항",
+        "roe": 10.7,
+        "revenue": 663192785932.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "089590",
+        "corpName": "제주항공",
+        "revCagr": 100.6,
+        "revenue": 1579940872409.0
+      },
+      {
+        "stockCode": "272210",
+        "corpName": "한화시스템",
+        "revCagr": 99.8,
+        "revenue": 3664150568020.0
+      },
+      {
+        "stockCode": "091810",
+        "corpName": "티웨이항공",
+        "revCagr": 96.1,
+        "revenue": 1798180813715.0
+      },
+      {
+        "stockCode": "082740",
+        "corpName": "한화엔진",
+        "revCagr": 94.5,
+        "revenue": 1371057336146.0
+      },
+      {
+        "stockCode": "012450",
+        "corpName": "한화에어로스페이스",
+        "revCagr": 66.1,
+        "revenue": 26702901249000.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "091810",
+        "corpName": "티웨이항공",
+        "debtRatio": 3498.6,
+        "debtGrade": "고위험",
+        "roe": -650.1
+      },
+      {
+        "stockCode": "089590",
+        "corpName": "제주항공",
+        "debtRatio": 713.7,
+        "debtGrade": "주의",
+        "roe": -11.3
+      },
+      {
+        "stockCode": "452260",
+        "corpName": "한화갤러리아",
+        "debtRatio": 144.6,
+        "debtGrade": "주의",
+        "roe": -74.4
+      },
+      {
+        "stockCode": "258610",
+        "corpName": "케일럼",
+        "debtRatio": 121.5,
+        "debtGrade": "안전",
+        "roe": -2.0
+      },
+      {
+        "stockCode": "462350",
+        "corpName": "이노스페이스",
+        "debtRatio": 98.4,
+        "debtGrade": "주의",
+        "roe": -232.2
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "aerospace",
+        "toIndustry": "retail",
+        "edgeCount": 5,
+        "amount": 6116.0,
+        "fromName": "항공·방산",
+        "toName": "유통·소매"
+      },
+      {
+        "fromIndustry": "aerospace",
+        "toIndustry": "steel",
+        "edgeCount": 1,
+        "amount": 6116.0,
+        "fromName": "항공·방산",
+        "toName": "철강·금속"
+      },
+      {
+        "fromIndustry": "aerospace",
+        "toIndustry": "software",
+        "edgeCount": 5,
+        "amount": 0.0,
+        "fromName": "항공·방산",
+        "toName": "소프트웨어·IT서비스"
+      },
+      {
+        "fromIndustry": "aerospace",
+        "toIndustry": "construction",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "항공·방산",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "aerospace",
+        "toIndustry": "chemical",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "항공·방산",
+        "toName": "화학"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "aerospace",
+        "edgeCount": 6,
+        "amount": 13039770.0,
+        "fromName": "철강·금속",
+        "toName": "항공·방산"
+      },
+      {
+        "fromIndustry": "shipbuilding",
+        "toIndustry": "aerospace",
+        "edgeCount": 7,
+        "amount": 6519885.0,
+        "fromName": "조선·해운",
+        "toName": "항공·방산"
+      },
+      {
+        "fromIndustry": "machinery",
+        "toIndustry": "aerospace",
+        "edgeCount": 6,
+        "amount": 6519885.0,
+        "fromName": "기계·장비",
+        "toName": "항공·방산"
+      },
+      {
+        "fromIndustry": "construction",
+        "toIndustry": "aerospace",
+        "edgeCount": 9,
+        "amount": 0.0,
+        "fromName": "건설",
+        "toName": "항공·방산"
+      },
+      {
+        "fromIndustry": "food",
+        "toIndustry": "aerospace",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "식품·음료",
+        "toName": "항공·방산"
+      }
+    ]
+  },
+  "chemical": {
+    "name": "화학",
+    "count": 131,
+    "avgRoe": -6.9,
+    "avgOpMargin": -5.31,
+    "avgCagr": 12.5,
+    "topRoe": [
+      {
+        "stockCode": "247540",
+        "corpName": "에코프로비엠",
+        "roe": 141.7,
+        "revenue": 2531576384113.0
+      },
+      {
+        "stockCode": "083450",
+        "corpName": "GST",
+        "roe": 101.0,
+        "revenue": 347158632861.0
+      },
+      {
+        "stockCode": "489460",
+        "corpName": "바이오비쥬",
+        "roe": 100.0,
+        "revenue": 28490907891.0
+      },
+      {
+        "stockCode": "005360",
+        "corpName": "모나미",
+        "roe": 92.8,
+        "revenue": 131024331487.0
+      },
+      {
+        "stockCode": "298000",
+        "corpName": "효성화학",
+        "roe": 22.4,
+        "revenue": 2340718244068.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "246960",
+        "corpName": "SCL사이언스",
+        "revCagr": 497.0,
+        "revenue": 22010565275.0
+      },
+      {
+        "stockCode": "353810",
+        "corpName": "이지바이오",
+        "revCagr": 131.3,
+        "revenue": 476938919229.0
+      },
+      {
+        "stockCode": "307180",
+        "corpName": "아이엘",
+        "revCagr": 108.2,
+        "revenue": 102864055822.0
+      },
+      {
+        "stockCode": "038110",
+        "corpName": "에코플라스틱",
+        "revCagr": 88.4,
+        "revenue": 2562025593000.0
+      },
+      {
+        "stockCode": "092730",
+        "corpName": "네오팜",
+        "revCagr": 83.3,
+        "revenue": 132184096288.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "365340",
+        "corpName": "성일하이텍",
+        "debtRatio": 272.9,
+        "debtGrade": "주의",
+        "roe": -27.0
+      },
+      {
+        "stockCode": "044450",
+        "corpName": "KSS해운",
+        "debtRatio": 255.3,
+        "debtGrade": "고위험",
+        "roe": -1.1
+      },
+      {
+        "stockCode": "246960",
+        "corpName": "SCL사이언스",
+        "debtRatio": 213.6,
+        "debtGrade": "주의",
+        "roe": -0.5
+      },
+      {
+        "stockCode": "010950",
+        "corpName": "S-Oil",
+        "debtRatio": 198.8,
+        "debtGrade": "주의",
+        "roe": -0.5
+      },
+      {
+        "stockCode": "009830",
+        "corpName": "한화솔루션",
+        "debtRatio": 196.3,
+        "debtGrade": "고위험",
+        "roe": -0.3
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "construction",
+        "edgeCount": 15,
+        "amount": 1589710.0,
+        "fromName": "화학",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "finance",
+        "edgeCount": 31,
+        "amount": 323086.0,
+        "fromName": "화학",
+        "toName": "금융"
+      },
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "software",
+        "edgeCount": 12,
+        "amount": 167893.0,
+        "fromName": "화학",
+        "toName": "소프트웨어·IT서비스"
+      },
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "textile",
+        "edgeCount": 11,
+        "amount": 119157.0,
+        "fromName": "화학",
+        "toName": "섬유·의류"
+      },
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "electronics",
+        "edgeCount": 42,
+        "amount": 93312.0,
+        "fromName": "화학",
+        "toName": "전자부품"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "chemical",
+        "edgeCount": 15,
+        "amount": 3034469.0,
+        "fromName": "전자부품",
+        "toName": "화학"
+      },
+      {
+        "fromIndustry": "battery",
+        "toIndustry": "chemical",
+        "edgeCount": 2,
+        "amount": 3034180.0,
+        "fromName": "2차전지",
+        "toName": "화학"
+      },
+      {
+        "fromIndustry": "software",
+        "toIndustry": "chemical",
+        "edgeCount": 16,
+        "amount": 77685.0,
+        "fromName": "소프트웨어·IT서비스",
+        "toName": "화학"
+      },
+      {
+        "fromIndustry": "medicalDevice",
+        "toIndustry": "chemical",
+        "edgeCount": 2,
+        "amount": 64240.0,
+        "fromName": "의료기기",
+        "toName": "화학"
+      },
+      {
+        "fromIndustry": "cosmetics",
+        "toIndustry": "chemical",
+        "edgeCount": 15,
+        "amount": 11039.0,
+        "fromName": "화장품·생활용품",
+        "toName": "화학"
+      }
+    ]
+  },
+  "buildingMaterials": {
+    "name": "시멘트·요업",
+    "count": 13,
+    "avgRoe": 0.26,
+    "avgOpMargin": 2.4,
+    "avgCagr": 2.8,
+    "topRoe": [
+      {
+        "stockCode": "010040",
+        "corpName": "한국내화",
+        "roe": 5.7,
+        "revenue": 406341175254.0
+      },
+      {
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "roe": 3.4,
+        "revenue": 202400732520.0
+      },
+      {
+        "stockCode": "003300",
+        "corpName": "한일홀딩스",
+        "roe": 2.2,
+        "revenue": 1930489160379.0
+      },
+      {
+        "stockCode": "255220",
+        "corpName": "SG",
+        "roe": 1.6,
+        "revenue": 102246199563.0
+      },
+      {
+        "stockCode": "075970",
+        "corpName": "동국알앤에스",
+        "roe": 1.0,
+        "revenue": 110734618130.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "010040",
+        "corpName": "한국내화",
+        "revCagr": 61.4,
+        "revenue": 406341175254.0
+      },
+      {
+        "stockCode": "255220",
+        "corpName": "SG",
+        "revCagr": 4.4,
+        "revenue": 102246199563.0
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "revCagr": 1.0,
+        "revenue": 827752427000.0
+      },
+      {
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "revCagr": -2.6,
+        "revenue": 202400732520.0
+      },
+      {
+        "stockCode": "006570",
+        "corpName": "대림통상",
+        "revCagr": -10.1,
+        "revenue": 1673885856.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "006570",
+        "corpName": "대림통상",
+        "debtRatio": 208.0,
+        "debtGrade": "주의",
+        "roe": -10.6
+      },
+      {
+        "stockCode": "462520",
+        "corpName": "조선내화",
+        "debtRatio": 131.5,
+        "debtGrade": "주의",
+        "roe": -0.9
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "debtRatio": 96.5,
+        "debtGrade": "주의",
+        "roe": -0.3
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "buildingMaterials",
+        "toIndustry": "construction",
+        "edgeCount": 14,
+        "amount": 850138.0,
+        "fromName": "시멘트·요업",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "buildingMaterials",
+        "toIndustry": "steel",
+        "edgeCount": 2,
+        "amount": 11327.0,
+        "fromName": "시멘트·요업",
+        "toName": "철강·금속"
+      },
+      {
+        "fromIndustry": "buildingMaterials",
+        "toIndustry": "finance",
+        "edgeCount": 1,
+        "amount": 7476.0,
+        "fromName": "시멘트·요업",
+        "toName": "금융"
+      },
+      {
+        "fromIndustry": "buildingMaterials",
+        "toIndustry": "realestate",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "시멘트·요업",
+        "toName": "부동산"
+      },
+      {
+        "fromIndustry": "buildingMaterials",
+        "toIndustry": "semiconductor",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "시멘트·요업",
+        "toName": "반도체"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "energy",
+        "toIndustry": "buildingMaterials",
+        "edgeCount": 2,
+        "amount": 3304658.0,
+        "fromName": "에너지·유틸리티",
+        "toName": "시멘트·요업"
+      },
+      {
+        "fromIndustry": "food",
+        "toIndustry": "buildingMaterials",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "식품·음료",
+        "toName": "시멘트·요업"
+      },
+      {
+        "fromIndustry": "environment",
+        "toIndustry": "buildingMaterials",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "환경",
+        "toName": "시멘트·요업"
+      },
+      {
+        "fromIndustry": "finance",
+        "toIndustry": "buildingMaterials",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "금융",
+        "toName": "시멘트·요업"
+      },
+      {
+        "fromIndustry": "construction",
+        "toIndustry": "buildingMaterials",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "건설",
+        "toName": "시멘트·요업"
+      }
+    ]
+  },
+  "electronics": {
+    "name": "전자부품",
+    "count": 349,
+    "avgRoe": 10.88,
+    "avgOpMargin": -1207.93,
+    "avgCagr": 5.15,
+    "topRoe": [
+      {
+        "stockCode": "266170",
+        "corpName": "레드우즈",
+        "roe": 3066.9,
+        "revenue": 215008.0
+      },
+      {
+        "stockCode": "034220",
+        "corpName": "LG디스플레이",
+        "roe": 398.9,
+        "revenue": 25810082000000.0
+      },
+      {
+        "stockCode": "083500",
+        "corpName": "에프엔에스테크",
+        "roe": 310.9,
+        "revenue": 73657803682.0
+      },
+      {
+        "stockCode": "038460",
+        "corpName": "바이오스마트",
+        "roe": 281.2,
+        "revenue": 482775592982.0
+      },
+      {
+        "stockCode": "248070",
+        "corpName": "솔루엠",
+        "roe": 249.5,
+        "revenue": 1700246425329.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "256940",
+        "corpName": "킵스파마",
+        "revCagr": 224.9,
+        "revenue": 170146866389.0
+      },
+      {
+        "stockCode": "036090",
+        "corpName": "위지트",
+        "revCagr": 132.5,
+        "revenue": 483026164741.0
+      },
+      {
+        "stockCode": "059090",
+        "corpName": "미코",
+        "revCagr": 107.8,
+        "revenue": 977036793661.0
+      },
+      {
+        "stockCode": "183300",
+        "corpName": "코미코",
+        "revCagr": 103.3,
+        "revenue": 604110117086.0
+      },
+      {
+        "stockCode": "010400",
+        "corpName": "우진아이엔에스",
+        "revCagr": 91.9,
+        "revenue": 164457886988.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "066900",
+        "corpName": "디에이피",
+        "debtRatio": 1340.6,
+        "debtGrade": "주의",
+        "roe": -12.2
+      },
+      {
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "debtRatio": 631.7,
+        "debtGrade": "주의",
+        "roe": -227.4
+      },
+      {
+        "stockCode": "139990",
+        "corpName": "아주스틸",
+        "debtRatio": 562.1,
+        "debtGrade": "고위험",
+        "roe": -12.5
+      },
+      {
+        "stockCode": "115530",
+        "corpName": "씨엔플러스",
+        "debtRatio": 507.9,
+        "debtGrade": "주의",
+        "roe": -36.1
+      },
+      {
+        "stockCode": "355690",
+        "corpName": "에이텀",
+        "debtRatio": 424.5,
+        "debtGrade": "주의",
+        "roe": -59.9
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "auto",
+        "edgeCount": 11,
+        "amount": 13184533.0,
+        "fromName": "전자부품",
+        "toName": "자동차"
+      },
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "chemical",
+        "edgeCount": 15,
+        "amount": 3034469.0,
+        "fromName": "전자부품",
+        "toName": "화학"
+      },
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "semiconductor",
+        "edgeCount": 34,
+        "amount": 176550.0,
+        "fromName": "전자부품",
+        "toName": "반도체"
+      },
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "construction",
+        "edgeCount": 19,
+        "amount": 0.0,
+        "fromName": "전자부품",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "software",
+        "edgeCount": 16,
+        "amount": 0.0,
+        "fromName": "전자부품",
+        "toName": "소프트웨어·IT서비스"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "semiconductor",
+        "toIndustry": "electronics",
+        "edgeCount": 55,
+        "amount": 1293843.0,
+        "fromName": "반도체",
+        "toName": "전자부품"
+      },
+      {
+        "fromIndustry": "medicalDevice",
+        "toIndustry": "electronics",
+        "edgeCount": 7,
+        "amount": 444680.0,
+        "fromName": "의료기기",
+        "toName": "전자부품"
+      },
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "electronics",
+        "edgeCount": 42,
+        "amount": 93312.0,
+        "fromName": "화학",
+        "toName": "전자부품"
+      },
+      {
+        "fromIndustry": "electrical",
+        "toIndustry": "electronics",
+        "edgeCount": 7,
+        "amount": 90128.0,
+        "fromName": "전기장비",
+        "toName": "전자부품"
+      },
+      {
+        "fromIndustry": "machinery",
+        "toIndustry": "electronics",
+        "edgeCount": 24,
+        "amount": 84749.0,
+        "fromName": "기계·장비",
+        "toName": "전자부품"
+      }
+    ]
+  },
+  "steel": {
+    "name": "철강·금속",
+    "count": 80,
+    "avgRoe": 1692.73,
+    "avgOpMargin": 3.89,
+    "avgCagr": -4.41,
+    "topRoe": [
+      {
+        "stockCode": "012160",
+        "corpName": "영흥",
+        "roe": 90253.6,
+        "revenue": 433484558559.0
+      },
+      {
+        "stockCode": "010240",
+        "corpName": "흥국",
+        "roe": 800.4,
+        "revenue": 137023822812.0
+      },
+      {
+        "stockCode": "047050",
+        "corpName": "포스코인터내셔널",
+        "roe": 318.8,
+        "revenue": 32373603908000.0
+      },
+      {
+        "stockCode": "162300",
+        "corpName": "신스틸",
+        "roe": 164.3,
+        "revenue": 352171696187.0
+      },
+      {
+        "stockCode": "128660",
+        "corpName": "피제이메탈",
+        "roe": 70.0,
+        "revenue": 348957303218.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "007530",
+        "corpName": "와이엠",
+        "revCagr": 70.6,
+        "revenue": 177146007940.0
+      },
+      {
+        "stockCode": "008470",
+        "corpName": "부스타",
+        "revCagr": 67.5,
+        "revenue": 120761096176.0
+      },
+      {
+        "stockCode": "109860",
+        "corpName": "동일금속",
+        "revCagr": 56.1,
+        "revenue": 91706521874.0
+      },
+      {
+        "stockCode": "014620",
+        "corpName": "성광벤드",
+        "revCagr": 55.6,
+        "revenue": 245669879092.0
+      },
+      {
+        "stockCode": "012800",
+        "corpName": "대창",
+        "revCagr": 54.1,
+        "revenue": 1470237029200.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "021040",
+        "corpName": "대호특수강",
+        "debtRatio": 341.0,
+        "debtGrade": "고위험",
+        "roe": -1.5
+      },
+      {
+        "stockCode": "026910",
+        "corpName": "광진실업",
+        "debtRatio": 333.5,
+        "debtGrade": "주의",
+        "roe": -7.4
+      },
+      {
+        "stockCode": "007530",
+        "corpName": "와이엠",
+        "debtRatio": 174.8,
+        "debtGrade": "주의",
+        "roe": -0.8
+      },
+      {
+        "stockCode": "0004V0",
+        "corpName": "엔비알모션",
+        "debtRatio": 150.9,
+        "debtGrade": "주의",
+        "roe": -0.9
+      },
+      {
+        "stockCode": "037760",
+        "corpName": "쎄니트",
+        "debtRatio": 128.3,
+        "debtGrade": "주의",
+        "roe": -2.3
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "aerospace",
+        "edgeCount": 6,
+        "amount": 13039770.0,
+        "fromName": "철강·금속",
+        "toName": "항공·방산"
+      },
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "construction",
+        "edgeCount": 57,
+        "amount": 749844.0,
+        "fromName": "철강·금속",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "finance",
+        "edgeCount": 7,
+        "amount": 197352.0,
+        "fromName": "철강·금속",
+        "toName": "금융"
+      },
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "retail",
+        "edgeCount": 11,
+        "amount": 138794.0,
+        "fromName": "철강·금속",
+        "toName": "유통·소매"
+      },
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "semiconductor",
+        "edgeCount": 5,
+        "amount": 103962.0,
+        "fromName": "철강·금속",
+        "toName": "반도체"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "buildingMaterials",
+        "toIndustry": "steel",
+        "edgeCount": 2,
+        "amount": 11327.0,
+        "fromName": "시멘트·요업",
+        "toName": "철강·금속"
+      },
+      {
+        "fromIndustry": "aerospace",
+        "toIndustry": "steel",
+        "edgeCount": 1,
+        "amount": 6116.0,
+        "fromName": "항공·방산",
+        "toName": "철강·금속"
+      },
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "steel",
+        "edgeCount": 9,
+        "amount": 0.0,
+        "fromName": "전자부품",
+        "toName": "철강·금속"
+      },
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "steel",
+        "edgeCount": 5,
+        "amount": 0.0,
+        "fromName": "화학",
+        "toName": "철강·금속"
+      },
+      {
+        "fromIndustry": "logistics",
+        "toIndustry": "steel",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "물류·운송",
+        "toName": "철강·금속"
+      }
+    ]
+  },
+  "textile": {
+    "name": "섬유·의류",
+    "count": 64,
+    "avgRoe": -0.22,
+    "avgOpMargin": 2.87,
+    "avgCagr": -4.45,
+    "topRoe": [
+      {
+        "stockCode": "111770",
+        "corpName": "영원무역",
+        "roe": 195.7,
+        "revenue": 4063584122639.0
+      },
+      {
+        "stockCode": "321550",
+        "corpName": "티움바이오",
+        "roe": 73.6,
+        "revenue": 12288796652.0
+      },
+      {
+        "stockCode": "009970",
+        "corpName": "영원무역홀딩스",
+        "roe": 37.1,
+        "revenue": 4895010142962.0
+      },
+      {
+        "stockCode": "383220",
+        "corpName": "F&F",
+        "roe": 21.3,
+        "revenue": 1933995926896.0
+      },
+      {
+        "stockCode": "194370",
+        "corpName": "제이에스코퍼레이션",
+        "roe": 15.6,
+        "revenue": 1288232609221.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "093050",
+        "corpName": "LF",
+        "revCagr": 53.1,
+        "revenue": 1882430252411.0
+      },
+      {
+        "stockCode": "023530",
+        "corpName": "롯데쇼핑",
+        "revCagr": 52.1,
+        "revenue": 13738354725833.0
+      },
+      {
+        "stockCode": "111770",
+        "corpName": "영원무역",
+        "revCagr": 51.8,
+        "revenue": 4063584122639.0
+      },
+      {
+        "stockCode": "005800",
+        "corpName": "신영와코루",
+        "revCagr": 48.0,
+        "revenue": 185154553424.0
+      },
+      {
+        "stockCode": "111110",
+        "corpName": "호전실업",
+        "revCagr": 44.5,
+        "revenue": 520877825230.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "478560",
+        "corpName": "블랙야크아이앤씨",
+        "debtRatio": 273.2,
+        "debtGrade": "주의",
+        "roe": -5.9
+      },
+      {
+        "stockCode": "010170",
+        "corpName": "대한광통신",
+        "debtRatio": 224.3,
+        "debtGrade": "고위험",
+        "roe": -1.6
+      },
+      {
+        "stockCode": "079980",
+        "corpName": "휴비스",
+        "debtRatio": 217.7,
+        "debtGrade": "고위험",
+        "roe": -1.3
+      },
+      {
+        "stockCode": "011300",
+        "corpName": "성안머티리얼스",
+        "debtRatio": 207.5,
+        "debtGrade": "주의",
+        "roe": -5.2
+      },
+      {
+        "stockCode": "241590",
+        "corpName": "화승엔터프라이즈",
+        "debtRatio": 176.8,
+        "debtGrade": "주의",
+        "roe": -0.9
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "textile",
+        "toIndustry": "auto",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "섬유·의류",
+        "toName": "자동차"
+      },
+      {
+        "fromIndustry": "textile",
+        "toIndustry": "telecom",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "섬유·의류",
+        "toName": "통신장비"
+      },
+      {
+        "fromIndustry": "textile",
+        "toIndustry": "chemical",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "섬유·의류",
+        "toName": "화학"
+      },
+      {
+        "fromIndustry": "textile",
+        "toIndustry": "retail",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "섬유·의류",
+        "toName": "유통·소매"
+      },
+      {
+        "fromIndustry": "textile",
+        "toIndustry": "finance",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "섬유·의류",
+        "toName": "금융"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "textile",
+        "edgeCount": 11,
+        "amount": 119157.0,
+        "fromName": "화학",
+        "toName": "섬유·의류"
+      },
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "textile",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "철강·금속",
+        "toName": "섬유·의류"
+      },
+      {
+        "fromIndustry": "finance",
+        "toIndustry": "textile",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "금융",
+        "toName": "섬유·의류"
+      },
+      {
+        "fromIndustry": "retail",
+        "toIndustry": "textile",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "유통·소매",
+        "toName": "섬유·의류"
+      },
+      {
+        "fromIndustry": "energy",
+        "toIndustry": "textile",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "에너지·유틸리티",
+        "toName": "섬유·의류"
+      }
+    ]
+  },
+  "realestate": {
+    "name": "부동산",
+    "count": 78,
+    "avgRoe": -4.16,
+    "avgOpMargin": 0.38,
+    "avgCagr": 7.25,
+    "topRoe": [
+      {
+        "stockCode": "208640",
+        "corpName": "썸에이지",
+        "roe": 43.6,
+        "revenue": 6018579018.0
+      },
+      {
+        "stockCode": "092130",
+        "corpName": "이크레더블",
+        "roe": 31.7,
+        "revenue": 50019110190.0
+      },
+      {
+        "stockCode": "013700",
+        "corpName": "까뮤이앤씨",
+        "roe": 17.8,
+        "revenue": 297453436886.0
+      },
+      {
+        "stockCode": "012510",
+        "corpName": "더존비즈온",
+        "roe": 16.3,
+        "revenue": 446299245964.0
+      },
+      {
+        "stockCode": "035890",
+        "corpName": "서희건설",
+        "roe": 12.0,
+        "revenue": 1100130344137.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "032350",
+        "corpName": "롯데관광개발",
+        "revCagr": 138.4,
+        "revenue": 653447659142.0
+      },
+      {
+        "stockCode": "039130",
+        "corpName": "하나투어",
+        "revCagr": 98.4,
+        "revenue": 586902971424.0
+      },
+      {
+        "stockCode": "242040",
+        "corpName": "나무기술",
+        "revCagr": 80.7,
+        "revenue": 102273238233.0
+      },
+      {
+        "stockCode": "002990",
+        "corpName": "금호건설",
+        "revCagr": 54.3,
+        "revenue": 2018488470870.0
+      },
+      {
+        "stockCode": "007810",
+        "corpName": "코리아써키트",
+        "revCagr": 51.5,
+        "revenue": 1509725133078.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "027740",
+        "corpName": "마니커",
+        "debtRatio": 279.6,
+        "debtGrade": "관찰",
+        "roe": -9.8
+      },
+      {
+        "stockCode": "354200",
+        "corpName": "엔젠바이오",
+        "debtRatio": 220.2,
+        "debtGrade": "주의",
+        "roe": -33.9
+      },
+      {
+        "stockCode": "006060",
+        "corpName": "화승인더스트리",
+        "debtRatio": 199.8,
+        "debtGrade": "관찰",
+        "roe": -1.4
+      },
+      {
+        "stockCode": "002390",
+        "corpName": "한독",
+        "debtRatio": 193.9,
+        "debtGrade": "주의",
+        "roe": -2.8
+      },
+      {
+        "stockCode": "095720",
+        "corpName": "웅진씽크빅",
+        "debtRatio": 170.2,
+        "debtGrade": "관찰",
+        "roe": -8.7
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "realestate",
+        "toIndustry": "electronics",
+        "edgeCount": 6,
+        "amount": 2655.0,
+        "fromName": "부동산",
+        "toName": "전자부품"
+      },
+      {
+        "fromIndustry": "realestate",
+        "toIndustry": "medicalDevice",
+        "edgeCount": 3,
+        "amount": 123.0,
+        "fromName": "부동산",
+        "toName": "의료기기"
+      },
+      {
+        "fromIndustry": "realestate",
+        "toIndustry": "food",
+        "edgeCount": 5,
+        "amount": 0.0,
+        "fromName": "부동산",
+        "toName": "식품·음료"
+      },
+      {
+        "fromIndustry": "realestate",
+        "toIndustry": "semiconductor",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "부동산",
+        "toName": "반도체"
+      },
+      {
+        "fromIndustry": "realestate",
+        "toIndustry": "retail",
+        "edgeCount": 6,
+        "amount": 0.0,
+        "fromName": "부동산",
+        "toName": "유통·소매"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "paper",
+        "toIndustry": "realestate",
+        "edgeCount": 10,
+        "amount": 89555.0,
+        "fromName": "제지·목재",
+        "toName": "부동산"
+      },
+      {
+        "fromIndustry": "construction",
+        "toIndustry": "realestate",
+        "edgeCount": 8,
+        "amount": 9921.0,
+        "fromName": "건설",
+        "toName": "부동산"
+      },
+      {
+        "fromIndustry": "education",
+        "toIndustry": "realestate",
+        "edgeCount": 1,
+        "amount": 6825.0,
+        "fromName": "교육",
+        "toName": "부동산"
+      },
+      {
+        "fromIndustry": "food",
+        "toIndustry": "realestate",
+        "edgeCount": 6,
+        "amount": 2717.0,
+        "fromName": "식품·음료",
+        "toName": "부동산"
+      },
+      {
+        "fromIndustry": "logistics",
+        "toIndustry": "realestate",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "물류·운송",
+        "toName": "부동산"
+      }
+    ]
+  },
+  "semiconductor": {
+    "name": "반도체",
+    "count": 125,
+    "avgRoe": -2.51,
+    "avgOpMargin": 3.57,
+    "avgCagr": 9.13,
+    "topRoe": [
+      {
+        "stockCode": "241770",
+        "corpName": "메카로",
+        "roe": 310.6,
+        "revenue": 94613747133.0
+      },
+      {
+        "stockCode": "086390",
+        "corpName": "유니테스트",
+        "roe": 135.8,
+        "revenue": 110195025305.0
+      },
+      {
+        "stockCode": "003280",
+        "corpName": "흥아해운",
+        "roe": 113.5,
+        "revenue": 180812754057.0
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "roe": 68.5,
+        "revenue": 333605938000000.0
+      },
+      {
+        "stockCode": "272110",
+        "corpName": "케이엔제이",
+        "roe": 32.4,
+        "revenue": 84444745007.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "123840",
+        "corpName": "뉴온",
+        "revCagr": 229.2,
+        "revenue": 48163918636.0
+      },
+      {
+        "stockCode": "900260",
+        "corpName": "로스웰",
+        "revCagr": 185.0,
+        "revenue": 1969978518.0
+      },
+      {
+        "stockCode": "036170",
+        "corpName": "에이치엠넥스",
+        "revCagr": 114.6,
+        "revenue": 31707375183.0
+      },
+      {
+        "stockCode": "101490",
+        "corpName": "에스앤에스텍",
+        "revCagr": 99.2,
+        "revenue": 243733252593.0
+      },
+      {
+        "stockCode": "067310",
+        "corpName": "하나마이크론",
+        "revCagr": 85.0,
+        "revenue": 1534418874072.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "068240",
+        "corpName": "다원시스",
+        "debtRatio": 474.5,
+        "debtGrade": "주의",
+        "roe": -9.4
+      },
+      {
+        "stockCode": "317330",
+        "corpName": "덕산테코피아",
+        "debtRatio": 282.2,
+        "debtGrade": "주의",
+        "roe": -9.6
+      },
+      {
+        "stockCode": "171090",
+        "corpName": "선익시스템",
+        "debtRatio": 223.1,
+        "debtGrade": "안전",
+        "roe": -2.4
+      },
+      {
+        "stockCode": "445090",
+        "corpName": "에이직랜드",
+        "debtRatio": 215.2,
+        "debtGrade": "주의",
+        "roe": -11.1
+      },
+      {
+        "stockCode": "092600",
+        "corpName": "앤씨앤",
+        "debtRatio": 206.1,
+        "debtGrade": "주의",
+        "roe": -65.5
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "semiconductor",
+        "toIndustry": "electronics",
+        "edgeCount": 55,
+        "amount": 1293843.0,
+        "fromName": "반도체",
+        "toName": "전자부품"
+      },
+      {
+        "fromIndustry": "semiconductor",
+        "toIndustry": "telecom",
+        "edgeCount": 10,
+        "amount": 0.0,
+        "fromName": "반도체",
+        "toName": "통신장비"
+      },
+      {
+        "fromIndustry": "semiconductor",
+        "toIndustry": "retail",
+        "edgeCount": 13,
+        "amount": 0.0,
+        "fromName": "반도체",
+        "toName": "유통·소매"
+      },
+      {
+        "fromIndustry": "semiconductor",
+        "toIndustry": "consulting",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "반도체",
+        "toName": "전문서비스"
+      },
+      {
+        "fromIndustry": "semiconductor",
+        "toIndustry": "machinery",
+        "edgeCount": 10,
+        "amount": 0.0,
+        "fromName": "반도체",
+        "toName": "기계·장비"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "semiconductor",
+        "edgeCount": 34,
+        "amount": 176550.0,
+        "fromName": "전자부품",
+        "toName": "반도체"
+      },
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "semiconductor",
+        "edgeCount": 5,
+        "amount": 103962.0,
+        "fromName": "철강·금속",
+        "toName": "반도체"
+      },
+      {
+        "fromIndustry": "cosmetics",
+        "toIndustry": "semiconductor",
+        "edgeCount": 3,
+        "amount": 48052.0,
+        "fromName": "화장품·생활용품",
+        "toName": "반도체"
+      },
+      {
+        "fromIndustry": "machinery",
+        "toIndustry": "semiconductor",
+        "edgeCount": 3,
+        "amount": 38837.0,
+        "fromName": "기계·장비",
+        "toName": "반도체"
+      },
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "semiconductor",
+        "edgeCount": 7,
+        "amount": 4094.0,
+        "fromName": "화학",
+        "toName": "반도체"
+      }
+    ]
+  },
+  "software": {
+    "name": "소프트웨어·IT서비스",
+    "count": 233,
+    "avgRoe": -43.14,
+    "avgOpMargin": -45.8,
+    "avgCagr": 17.03,
+    "topRoe": [
+      {
+        "stockCode": "032620",
+        "corpName": "GC메디아이",
+        "roe": 1969.2,
+        "revenue": 197696072009.0
+      },
+      {
+        "stockCode": "276040",
+        "corpName": "스코넥",
+        "roe": 1011.5,
+        "revenue": 0
+      },
+      {
+        "stockCode": "340810",
+        "corpName": "시선AI",
+        "roe": 445.0,
+        "revenue": 13970253305.0
+      },
+      {
+        "stockCode": "100090",
+        "corpName": "SK오션플랜트",
+        "roe": 335.1,
+        "revenue": 965388430763.0
+      },
+      {
+        "stockCode": "376300",
+        "corpName": "디어유",
+        "roe": 159.1,
+        "revenue": 83834878201.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "377030",
+        "corpName": "비트맥스",
+        "revCagr": 328.9,
+        "revenue": 27214600481.0
+      },
+      {
+        "stockCode": "376930",
+        "corpName": "노을",
+        "revCagr": 235.0,
+        "revenue": 5121885655.0
+      },
+      {
+        "stockCode": "328130",
+        "corpName": "루닛",
+        "revCagr": 221.5,
+        "revenue": 83129295404.0
+      },
+      {
+        "stockCode": "205500",
+        "corpName": "넥써쓰",
+        "revCagr": 194.9,
+        "revenue": 36722406111.0
+      },
+      {
+        "stockCode": "054920",
+        "corpName": "한컴위드",
+        "revCagr": 164.2,
+        "revenue": 771217330234.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "009310",
+        "corpName": "참엔지니어링",
+        "debtRatio": 1154.4,
+        "debtGrade": "주의",
+        "roe": -21.7
+      },
+      {
+        "stockCode": "376900",
+        "corpName": "로킷헬스케어",
+        "debtRatio": 790.6,
+        "debtGrade": "주의",
+        "roe": -11.6
+      },
+      {
+        "stockCode": "232830",
+        "corpName": "아이티센피엔에스",
+        "debtRatio": 681.2,
+        "debtGrade": "주의",
+        "roe": -47.7
+      },
+      {
+        "stockCode": "377030",
+        "corpName": "비트맥스",
+        "debtRatio": 403.3,
+        "debtGrade": "고위험",
+        "roe": -323.5
+      },
+      {
+        "stockCode": "417860",
+        "corpName": "오브젠",
+        "debtRatio": 396.8,
+        "debtGrade": "주의",
+        "roe": -29.3
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "software",
+        "toIndustry": "chemical",
+        "edgeCount": 16,
+        "amount": 77685.0,
+        "fromName": "소프트웨어·IT서비스",
+        "toName": "화학"
+      },
+      {
+        "fromIndustry": "software",
+        "toIndustry": "telecom",
+        "edgeCount": 6,
+        "amount": 9569.0,
+        "fromName": "소프트웨어·IT서비스",
+        "toName": "통신장비"
+      },
+      {
+        "fromIndustry": "software",
+        "toIndustry": "machinery",
+        "edgeCount": 6,
+        "amount": 9569.0,
+        "fromName": "소프트웨어·IT서비스",
+        "toName": "기계·장비"
+      },
+      {
+        "fromIndustry": "software",
+        "toIndustry": "food",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "소프트웨어·IT서비스",
+        "toName": "식품·음료"
+      },
+      {
+        "fromIndustry": "software",
+        "toIndustry": "finance",
+        "edgeCount": 8,
+        "amount": 0.0,
+        "fromName": "소프트웨어·IT서비스",
+        "toName": "금융"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "software",
+        "edgeCount": 12,
+        "amount": 167893.0,
+        "fromName": "화학",
+        "toName": "소프트웨어·IT서비스"
+      },
+      {
+        "fromIndustry": "pharma",
+        "toIndustry": "software",
+        "edgeCount": 11,
+        "amount": 12800.0,
+        "fromName": "제약·바이오",
+        "toName": "소프트웨어·IT서비스"
+      },
+      {
+        "fromIndustry": "aerospace",
+        "toIndustry": "software",
+        "edgeCount": 5,
+        "amount": 0.0,
+        "fromName": "항공·방산",
+        "toName": "소프트웨어·IT서비스"
+      },
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "software",
+        "edgeCount": 16,
+        "amount": 0.0,
+        "fromName": "전자부품",
+        "toName": "소프트웨어·IT서비스"
+      },
+      {
+        "fromIndustry": "energy",
+        "toIndustry": "software",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "에너지·유틸리티",
+        "toName": "소프트웨어·IT서비스"
+      }
+    ]
+  },
+  "electrical": {
+    "name": "전기장비",
+    "count": 40,
+    "avgRoe": -0.01,
+    "avgOpMargin": -14.85,
+    "avgCagr": 20.01,
+    "topRoe": [
+      {
+        "stockCode": "011690",
+        "corpName": "와이투솔루션",
+        "roe": 98.3,
+        "revenue": 165064566493.0
+      },
+      {
+        "stockCode": "007610",
+        "corpName": "선도전기",
+        "roe": 26.9,
+        "revenue": 38170718483.0
+      },
+      {
+        "stockCode": "015860",
+        "corpName": "일진홀딩스",
+        "roe": 18.5,
+        "revenue": 2282724142096.0
+      },
+      {
+        "stockCode": "065710",
+        "corpName": "서호전기",
+        "roe": 8.9,
+        "revenue": 116625518085.0
+      },
+      {
+        "stockCode": "062040",
+        "corpName": "산일전기",
+        "roe": 7.4,
+        "revenue": 501946220880.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "262260",
+        "corpName": "에이프로",
+        "revCagr": 117.2,
+        "revenue": 147079619081.0
+      },
+      {
+        "stockCode": "103590",
+        "corpName": "일진전기",
+        "revCagr": 88.2,
+        "revenue": 2044552052000.0
+      },
+      {
+        "stockCode": "001440",
+        "corpName": "대한전선",
+        "revCagr": 83.4,
+        "revenue": 3636018215712.0
+      },
+      {
+        "stockCode": "015860",
+        "corpName": "일진홀딩스",
+        "revCagr": 81.0,
+        "revenue": 2282724142096.0
+      },
+      {
+        "stockCode": "011690",
+        "corpName": "와이투솔루션",
+        "revCagr": 59.3,
+        "revenue": 165064566493.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "262260",
+        "corpName": "에이프로",
+        "debtRatio": 446.1,
+        "debtGrade": "주의",
+        "roe": -14.7
+      },
+      {
+        "stockCode": "001210",
+        "corpName": "금호전기",
+        "debtRatio": 190.5,
+        "debtGrade": "고위험",
+        "roe": -2.8
+      },
+      {
+        "stockCode": "054220",
+        "corpName": "비츠로시스",
+        "debtRatio": 158.4,
+        "debtGrade": "주의",
+        "roe": -0.1
+      },
+      {
+        "stockCode": "032820",
+        "corpName": "우리기술",
+        "debtRatio": 157.8,
+        "debtGrade": "주의",
+        "roe": -3.0
+      },
+      {
+        "stockCode": "321370",
+        "corpName": "센서뷰",
+        "debtRatio": 142.4,
+        "debtGrade": "주의",
+        "roe": -90.9
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "electrical",
+        "toIndustry": "electronics",
+        "edgeCount": 7,
+        "amount": 90128.0,
+        "fromName": "전기장비",
+        "toName": "전자부품"
+      },
+      {
+        "fromIndustry": "electrical",
+        "toIndustry": "construction",
+        "edgeCount": 14,
+        "amount": 13679.0,
+        "fromName": "전기장비",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "electrical",
+        "toIndustry": "pharma",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "전기장비",
+        "toName": "제약·바이오"
+      },
+      {
+        "fromIndustry": "electrical",
+        "toIndustry": "realestate",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "전기장비",
+        "toName": "부동산"
+      },
+      {
+        "fromIndustry": "electrical",
+        "toIndustry": "food",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "전기장비",
+        "toName": "식품·음료"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "machinery",
+        "toIndustry": "electrical",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "기계·장비",
+        "toName": "전기장비"
+      },
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "electrical",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "화학",
+        "toName": "전기장비"
+      },
+      {
+        "fromIndustry": "auto",
+        "toIndustry": "electrical",
+        "edgeCount": 7,
+        "amount": 0.0,
+        "fromName": "자동차",
+        "toName": "전기장비"
+      },
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "electrical",
+        "edgeCount": 8,
+        "amount": 0.0,
+        "fromName": "전자부품",
+        "toName": "전기장비"
+      },
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "electrical",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "철강·금속",
+        "toName": "전기장비"
+      }
+    ]
+  },
+  "medicalDevice": {
+    "name": "의료기기",
+    "count": 57,
+    "avgRoe": -4.23,
+    "avgOpMargin": -13.4,
+    "avgCagr": 9.72,
+    "topRoe": [
+      {
+        "stockCode": "043150",
+        "corpName": "바텍",
+        "roe": 81.5,
+        "revenue": 426416122877.0
+      },
+      {
+        "stockCode": "0011A0",
+        "corpName": "액스비스",
+        "roe": 17.8,
+        "revenue": 56573055392.0
+      },
+      {
+        "stockCode": "240550",
+        "corpName": "동방메디컬",
+        "roe": 10.0,
+        "revenue": 113536899863.0
+      },
+      {
+        "stockCode": "092790",
+        "corpName": "넥스틸",
+        "roe": 7.7,
+        "revenue": 550992457557.0
+      },
+      {
+        "stockCode": "336570",
+        "corpName": "원텍",
+        "roe": 6.9,
+        "revenue": 156838102870.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "317690",
+        "corpName": "퀀타매트릭스",
+        "revCagr": 114.1,
+        "revenue": 3688305345.0
+      },
+      {
+        "stockCode": "412350",
+        "corpName": "레이저쎌",
+        "revCagr": 110.3,
+        "revenue": 4684448307.0
+      },
+      {
+        "stockCode": "372910",
+        "corpName": "한컴라이프케어",
+        "revCagr": 82.8,
+        "revenue": 92088469654.0
+      },
+      {
+        "stockCode": "258830",
+        "corpName": "세종메디칼",
+        "revCagr": 65.8,
+        "revenue": 18535097964.0
+      },
+      {
+        "stockCode": "206560",
+        "corpName": "덱스터",
+        "revCagr": 58.7,
+        "revenue": 55416993715.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "261200",
+        "corpName": "덴티스",
+        "debtRatio": 281.8,
+        "debtGrade": "주의",
+        "roe": -12.7
+      },
+      {
+        "stockCode": "405000",
+        "corpName": "플라즈맵",
+        "debtRatio": 186.5,
+        "debtGrade": "주의",
+        "roe": -9.6
+      },
+      {
+        "stockCode": "081180",
+        "corpName": "쎄크",
+        "debtRatio": 178.2,
+        "debtGrade": "고위험",
+        "roe": -7.1
+      },
+      {
+        "stockCode": "214680",
+        "corpName": "디알텍",
+        "debtRatio": 171.8,
+        "debtGrade": "주의",
+        "roe": -35.2
+      },
+      {
+        "stockCode": "206560",
+        "corpName": "덱스터",
+        "debtRatio": 150.6,
+        "debtGrade": "주의",
+        "roe": -16.0
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "medicalDevice",
+        "toIndustry": "electronics",
+        "edgeCount": 7,
+        "amount": 444680.0,
+        "fromName": "의료기기",
+        "toName": "전자부품"
+      },
+      {
+        "fromIndustry": "medicalDevice",
+        "toIndustry": "chemical",
+        "edgeCount": 2,
+        "amount": 64240.0,
+        "fromName": "의료기기",
+        "toName": "화학"
+      },
+      {
+        "fromIndustry": "medicalDevice",
+        "toIndustry": "machinery",
+        "edgeCount": 5,
+        "amount": 1254.0,
+        "fromName": "의료기기",
+        "toName": "기계·장비"
+      },
+      {
+        "fromIndustry": "medicalDevice",
+        "toIndustry": "retail",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "의료기기",
+        "toName": "유통·소매"
+      },
+      {
+        "fromIndustry": "medicalDevice",
+        "toIndustry": "construction",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "의료기기",
+        "toName": "건설"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "retail",
+        "toIndustry": "medicalDevice",
+        "edgeCount": 4,
+        "amount": 434.0,
+        "fromName": "유통·소매",
+        "toName": "의료기기"
+      },
+      {
+        "fromIndustry": "realestate",
+        "toIndustry": "medicalDevice",
+        "edgeCount": 3,
+        "amount": 123.0,
+        "fromName": "부동산",
+        "toName": "의료기기"
+      },
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "medicalDevice",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "철강·금속",
+        "toName": "의료기기"
+      },
+      {
+        "fromIndustry": "media",
+        "toIndustry": "medicalDevice",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "미디어·엔터",
+        "toName": "의료기기"
+      },
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "medicalDevice",
+        "edgeCount": 10,
+        "amount": 0.0,
+        "fromName": "전자부품",
+        "toName": "의료기기"
+      }
+    ]
+  },
+  "environment": {
+    "name": "환경",
+    "count": 7,
+    "avgRoe": 1.65,
+    "avgOpMargin": 9.77,
+    "avgCagr": 16.4,
+    "topRoe": [
+      {
+        "stockCode": "001390",
+        "corpName": "KG케미칼",
+        "roe": 7.4,
+        "revenue": 9101646921664.0
+      },
+      {
+        "stockCode": "014580",
+        "corpName": "태경비케이",
+        "roe": 2.9,
+        "revenue": 385942613685.0
+      },
+      {
+        "stockCode": "151860",
+        "corpName": "KG에코솔루션",
+        "roe": 1.6,
+        "revenue": 7577196875286.0
+      },
+      {
+        "stockCode": "066980",
+        "corpName": "한성크린텍",
+        "roe": 0.9,
+        "revenue": 199851392139.0
+      },
+      {
+        "stockCode": "060150",
+        "corpName": "인선이엔티",
+        "roe": -0.4,
+        "revenue": 187154811840.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "151860",
+        "corpName": "KG에코솔루션",
+        "revCagr": 96.4,
+        "revenue": 7577196875286.0
+      },
+      {
+        "stockCode": "001390",
+        "corpName": "KG케미칼",
+        "revCagr": 21.7,
+        "revenue": 9101646921664.0
+      },
+      {
+        "stockCode": "014580",
+        "corpName": "태경비케이",
+        "revCagr": 4.7,
+        "revenue": 385942613685.0
+      },
+      {
+        "stockCode": "037370",
+        "corpName": "EG",
+        "revCagr": -0.1,
+        "revenue": 62750627943.0
+      },
+      {
+        "stockCode": "060150",
+        "corpName": "인선이엔티",
+        "revCagr": -8.7,
+        "revenue": 187154811840.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "037370",
+        "corpName": "EG",
+        "debtRatio": 532.7,
+        "debtGrade": "주의",
+        "roe": -2.5
+      },
+      {
+        "stockCode": "060150",
+        "corpName": "인선이엔티",
+        "debtRatio": 55.8,
+        "debtGrade": "안전",
+        "roe": -0.4
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "environment",
+        "toIndustry": "construction",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "환경",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "environment",
+        "toIndustry": "buildingMaterials",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "환경",
+        "toName": "시멘트·요업"
+      },
+      {
+        "fromIndustry": "environment",
+        "toIndustry": "food",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "환경",
+        "toName": "식품·음료"
+      },
+      {
+        "fromIndustry": "environment",
+        "toIndustry": "chemical",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "환경",
+        "toName": "화학"
+      },
+      {
+        "fromIndustry": "environment",
+        "toIndustry": "media",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "환경",
+        "toName": "미디어·엔터"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "environment",
+        "edgeCount": 7,
+        "amount": 0.0,
+        "fromName": "화학",
+        "toName": "환경"
+      },
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "environment",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "전자부품",
+        "toName": "환경"
+      },
+      {
+        "fromIndustry": "shipbuilding",
+        "toIndustry": "environment",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "조선·해운",
+        "toName": "환경"
+      },
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "environment",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "철강·금속",
+        "toName": "환경"
+      },
+      {
+        "fromIndustry": "retail",
+        "toIndustry": "environment",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "유통·소매",
+        "toName": "환경"
+      }
+    ]
+  },
+  "cosmetics": {
+    "name": "화장품·생활용품",
+    "count": 53,
+    "avgRoe": -37.95,
+    "avgOpMargin": -5.92,
+    "avgCagr": 21.67,
+    "topRoe": [
+      {
+        "stockCode": "219550",
+        "corpName": "디와이디",
+        "roe": 93.6,
+        "revenue": 44903125580.0
+      },
+      {
+        "stockCode": "257720",
+        "corpName": "실리콘투",
+        "roe": 40.3,
+        "revenue": 1116287364104.0
+      },
+      {
+        "stockCode": "278470",
+        "corpName": "에이피알",
+        "roe": 21.6,
+        "revenue": 1527344973381.0
+      },
+      {
+        "stockCode": "114840",
+        "corpName": "아이패밀리에스씨",
+        "roe": 21.5,
+        "revenue": 224096054183.0
+      },
+      {
+        "stockCode": "257990",
+        "corpName": "나우코스",
+        "roe": 18.0,
+        "revenue": 69544503906.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "257720",
+        "corpName": "실리콘투",
+        "revCagr": 210.6,
+        "revenue": 1116287364104.0
+      },
+      {
+        "stockCode": "219550",
+        "corpName": "디와이디",
+        "revCagr": 136.7,
+        "revenue": 44903125580.0
+      },
+      {
+        "stockCode": "192820",
+        "corpName": "코스맥스",
+        "revCagr": 82.2,
+        "revenue": 2398757972848.0
+      },
+      {
+        "stockCode": "175250",
+        "corpName": "아이큐어",
+        "revCagr": 80.8,
+        "revenue": 83384563119.0
+      },
+      {
+        "stockCode": "260930",
+        "corpName": "씨티케이",
+        "revCagr": 72.5,
+        "revenue": 89230284535.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "317860",
+        "corpName": "노드메이슨",
+        "debtRatio": 932.4,
+        "debtGrade": "주의",
+        "roe": -183.4
+      },
+      {
+        "stockCode": "227610",
+        "corpName": "아우딘퓨쳐스",
+        "debtRatio": 188.0,
+        "debtGrade": "주의",
+        "roe": -1.8
+      },
+      {
+        "stockCode": "406820",
+        "corpName": "뷰티스킨",
+        "debtRatio": 168.8,
+        "debtGrade": "주의",
+        "roe": -0.8
+      },
+      {
+        "stockCode": "175250",
+        "corpName": "아이큐어",
+        "debtRatio": 138.3,
+        "debtGrade": "주의",
+        "roe": -7.8
+      },
+      {
+        "stockCode": "083660",
+        "corpName": "CSA 코스믹",
+        "debtRatio": 134.4,
+        "debtGrade": "주의",
+        "roe": -7.5
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "cosmetics",
+        "toIndustry": "pharma",
+        "edgeCount": 14,
+        "amount": 155679.0,
+        "fromName": "화장품·생활용품",
+        "toName": "제약·바이오"
+      },
+      {
+        "fromIndustry": "cosmetics",
+        "toIndustry": "semiconductor",
+        "edgeCount": 3,
+        "amount": 48052.0,
+        "fromName": "화장품·생활용품",
+        "toName": "반도체"
+      },
+      {
+        "fromIndustry": "cosmetics",
+        "toIndustry": "food",
+        "edgeCount": 7,
+        "amount": 35080.0,
+        "fromName": "화장품·생활용품",
+        "toName": "식품·음료"
+      },
+      {
+        "fromIndustry": "cosmetics",
+        "toIndustry": "finance",
+        "edgeCount": 2,
+        "amount": 11039.0,
+        "fromName": "화장품·생활용품",
+        "toName": "금융"
+      },
+      {
+        "fromIndustry": "cosmetics",
+        "toIndustry": "chemical",
+        "edgeCount": 15,
+        "amount": 11039.0,
+        "fromName": "화장품·생활용품",
+        "toName": "화학"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "semiconductor",
+        "toIndustry": "cosmetics",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "반도체",
+        "toName": "화장품·생활용품"
+      },
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "cosmetics",
+        "edgeCount": 9,
+        "amount": 0.0,
+        "fromName": "화학",
+        "toName": "화장품·생활용품"
+      },
+      {
+        "fromIndustry": "media",
+        "toIndustry": "cosmetics",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "미디어·엔터",
+        "toName": "화장품·생활용품"
+      },
+      {
+        "fromIndustry": "energy",
+        "toIndustry": "cosmetics",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "에너지·유틸리티",
+        "toName": "화장품·생활용품"
+      },
+      {
+        "fromIndustry": "construction",
+        "toIndustry": "cosmetics",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "건설",
+        "toName": "화장품·생활용품"
+      }
+    ]
+  },
+  "paper": {
+    "name": "제지·목재",
+    "count": 37,
+    "avgRoe": -4.96,
+    "avgOpMargin": 2.02,
+    "avgCagr": -3.33,
+    "topRoe": [
+      {
+        "stockCode": "026960",
+        "corpName": "동서",
+        "roe": 8.5,
+        "revenue": 532878500925.0
+      },
+      {
+        "stockCode": "003800",
+        "corpName": "에이스침대",
+        "roe": 7.7,
+        "revenue": 317267060878.0
+      },
+      {
+        "stockCode": "016800",
+        "corpName": "퍼시스",
+        "roe": 6.1,
+        "revenue": 358199545192.0
+      },
+      {
+        "stockCode": "008730",
+        "corpName": "율촌화학",
+        "roe": 3.0,
+        "revenue": 485382903935.0
+      },
+      {
+        "stockCode": "025750",
+        "corpName": "한솔홈데코",
+        "roe": 2.1,
+        "revenue": 279816559220.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "002870",
+        "corpName": "신풍",
+        "revCagr": 72.8,
+        "revenue": 24228056503.0
+      },
+      {
+        "stockCode": "025750",
+        "corpName": "한솔홈데코",
+        "revCagr": 57.4,
+        "revenue": 279816559220.0
+      },
+      {
+        "stockCode": "026960",
+        "corpName": "동서",
+        "revCagr": 56.0,
+        "revenue": 532878500925.0
+      },
+      {
+        "stockCode": "009580",
+        "corpName": "무림P&P",
+        "revCagr": 49.1,
+        "revenue": 731620027887.0
+      },
+      {
+        "stockCode": "078130",
+        "corpName": "국일제지",
+        "revCagr": 34.3,
+        "revenue": 67784821286.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "009200",
+        "corpName": "무림페이퍼",
+        "debtRatio": 260.6,
+        "debtGrade": "고위험",
+        "roe": -3.2
+      },
+      {
+        "stockCode": "004540",
+        "corpName": "깨끗한나라",
+        "debtRatio": 233.2,
+        "debtGrade": "고위험",
+        "roe": -4.3
+      },
+      {
+        "stockCode": "011090",
+        "corpName": "에넥스",
+        "debtRatio": 215.4,
+        "debtGrade": "주의",
+        "roe": -3.4
+      },
+      {
+        "stockCode": "009580",
+        "corpName": "무림P&P",
+        "debtRatio": 191.9,
+        "debtGrade": "고위험",
+        "roe": -1.4
+      },
+      {
+        "stockCode": "213500",
+        "corpName": "한솔제지",
+        "debtRatio": 190.9,
+        "debtGrade": "고위험",
+        "roe": -102.4
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "paper",
+        "toIndustry": "realestate",
+        "edgeCount": 10,
+        "amount": 89555.0,
+        "fromName": "제지·목재",
+        "toName": "부동산"
+      },
+      {
+        "fromIndustry": "paper",
+        "toIndustry": "construction",
+        "edgeCount": 17,
+        "amount": 75677.0,
+        "fromName": "제지·목재",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "paper",
+        "toIndustry": "food",
+        "edgeCount": 15,
+        "amount": 0.0,
+        "fromName": "제지·목재",
+        "toName": "식품·음료"
+      },
+      {
+        "fromIndustry": "paper",
+        "toIndustry": "electronics",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "제지·목재",
+        "toName": "전자부품"
+      },
+      {
+        "fromIndustry": "paper",
+        "toIndustry": "consulting",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "제지·목재",
+        "toName": "전문서비스"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "paper",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "화학",
+        "toName": "제지·목재"
+      },
+      {
+        "fromIndustry": "consulting",
+        "toIndustry": "paper",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "전문서비스",
+        "toName": "제지·목재"
+      },
+      {
+        "fromIndustry": "plastic",
+        "toIndustry": "paper",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "플라스틱·고무",
+        "toName": "제지·목재"
+      },
+      {
+        "fromIndustry": "finance",
+        "toIndustry": "paper",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "금융",
+        "toName": "제지·목재"
+      },
+      {
+        "fromIndustry": "energy",
+        "toIndustry": "paper",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "에너지·유틸리티",
+        "toName": "제지·목재"
+      }
+    ]
+  },
+  "logistics": {
+    "name": "물류·운송",
+    "count": 21,
+    "avgRoe": 9.08,
+    "avgOpMargin": 7.87,
+    "avgCagr": -0.4,
+    "topRoe": [
+      {
+        "stockCode": "004140",
+        "corpName": "동방",
+        "roe": 149.6,
+        "revenue": 915552774078.0
+      },
+      {
+        "stockCode": "052300",
+        "corpName": "오션인더블유",
+        "roe": 13.9,
+        "revenue": 7570133241.0
+      },
+      {
+        "stockCode": "038390",
+        "corpName": "레드캡투어",
+        "roe": 11.9,
+        "revenue": 365552937696.0
+      },
+      {
+        "stockCode": "009070",
+        "corpName": "케이씨티시",
+        "roe": 7.6,
+        "revenue": 986704713638.0
+      },
+      {
+        "stockCode": "003490",
+        "corpName": "대한항공",
+        "roe": 4.9,
+        "revenue": 25225542379502.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "004140",
+        "corpName": "동방",
+        "revCagr": 71.9,
+        "revenue": 915552774078.0
+      },
+      {
+        "stockCode": "129260",
+        "corpName": "인터지스",
+        "revCagr": 54.7,
+        "revenue": 708978717129.0
+      },
+      {
+        "stockCode": "003490",
+        "corpName": "대한항공",
+        "revCagr": 21.4,
+        "revenue": 25225542379502.0
+      },
+      {
+        "stockCode": "009070",
+        "corpName": "케이씨티시",
+        "revCagr": 6.0,
+        "revenue": 986704713638.0
+      },
+      {
+        "stockCode": "104620",
+        "corpName": "노랑풍선",
+        "revCagr": 4.4,
+        "revenue": 119704117734.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "014130",
+        "corpName": "한익스프레스",
+        "debtRatio": 340.6,
+        "debtGrade": "주의",
+        "roe": -17.1
+      },
+      {
+        "stockCode": "465770",
+        "corpName": "STX그린로지스",
+        "debtRatio": 214.6,
+        "debtGrade": "주의",
+        "roe": -24.1
+      },
+      {
+        "stockCode": "080160",
+        "corpName": "모두투어",
+        "debtRatio": 184.8,
+        "debtGrade": "안전",
+        "roe": -1.6
+      },
+      {
+        "stockCode": "124560",
+        "corpName": "태웅로직스",
+        "debtRatio": 119.5,
+        "debtGrade": "주의",
+        "roe": -0.5
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "logistics",
+        "toIndustry": "auto",
+        "edgeCount": 1,
+        "amount": 42690.0,
+        "fromName": "물류·운송",
+        "toName": "자동차"
+      },
+      {
+        "fromIndustry": "logistics",
+        "toIndustry": "realestate",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "물류·운송",
+        "toName": "부동산"
+      },
+      {
+        "fromIndustry": "logistics",
+        "toIndustry": "telecom",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "물류·운송",
+        "toName": "통신장비"
+      },
+      {
+        "fromIndustry": "logistics",
+        "toIndustry": "construction",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "물류·운송",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "logistics",
+        "toIndustry": "aerospace",
+        "edgeCount": 5,
+        "amount": 0.0,
+        "fromName": "물류·운송",
+        "toName": "항공·방산"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "aerospace",
+        "toIndustry": "logistics",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "항공·방산",
+        "toName": "물류·운송"
+      },
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "logistics",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "전자부품",
+        "toName": "물류·운송"
+      },
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "logistics",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "화학",
+        "toName": "물류·운송"
+      },
+      {
+        "fromIndustry": "media",
+        "toIndustry": "logistics",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "미디어·엔터",
+        "toName": "물류·운송"
+      },
+      {
+        "fromIndustry": "food",
+        "toIndustry": "logistics",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "식품·음료",
+        "toName": "물류·운송"
+      }
+    ]
+  },
+  "plastic": {
+    "name": "플라스틱·고무",
+    "count": 31,
+    "avgRoe": 0.98,
+    "avgOpMargin": 6.31,
+    "avgCagr": 5.75,
+    "topRoe": [
+      {
+        "stockCode": "014820",
+        "corpName": "동원시스템즈",
+        "roe": 6.4,
+        "revenue": 1372874325188.0
+      },
+      {
+        "stockCode": "013520",
+        "corpName": "화승코퍼레이션",
+        "roe": 6.1,
+        "revenue": 1639776710595.0
+      },
+      {
+        "stockCode": "238090",
+        "corpName": "앤디포스",
+        "roe": 5.7,
+        "revenue": 50413982329.0
+      },
+      {
+        "stockCode": "005720",
+        "corpName": "넥센",
+        "roe": 4.8,
+        "revenue": 3586518022664.0
+      },
+      {
+        "stockCode": "052420",
+        "corpName": "오성첨단소재",
+        "roe": 4.4,
+        "revenue": 165707403024.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "021650",
+        "corpName": "한국큐빅",
+        "revCagr": 74.9,
+        "revenue": 227225841275.0
+      },
+      {
+        "stockCode": "238090",
+        "corpName": "앤디포스",
+        "revCagr": 57.4,
+        "revenue": 50413982329.0
+      },
+      {
+        "stockCode": "052900",
+        "corpName": "KX하이텍",
+        "revCagr": 49.4,
+        "revenue": 126276082558.0
+      },
+      {
+        "stockCode": "052420",
+        "corpName": "오성첨단소재",
+        "revCagr": 34.0,
+        "revenue": 165707403024.0
+      },
+      {
+        "stockCode": "018290",
+        "corpName": "브이티",
+        "revCagr": 24.4,
+        "revenue": 437183656431.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "250930",
+        "corpName": "예선테크",
+        "debtRatio": 262.0,
+        "debtGrade": "주의",
+        "roe": -4.9
+      },
+      {
+        "stockCode": "378850",
+        "corpName": "화승알앤에이",
+        "debtRatio": 196.6,
+        "debtGrade": "고위험",
+        "roe": -1.7
+      },
+      {
+        "stockCode": "091970",
+        "corpName": "나노캠텍",
+        "debtRatio": 194.4,
+        "debtGrade": "관찰",
+        "roe": -5.5
+      },
+      {
+        "stockCode": "105330",
+        "corpName": "케이엔더블유",
+        "debtRatio": 114.5,
+        "debtGrade": "주의",
+        "roe": -4.7
+      },
+      {
+        "stockCode": "354320",
+        "corpName": "알멕",
+        "debtRatio": 113.0,
+        "debtGrade": "고위험",
+        "roe": -0.1
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "plastic",
+        "toIndustry": "pharma",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "플라스틱·고무",
+        "toName": "제약·바이오"
+      },
+      {
+        "fromIndustry": "plastic",
+        "toIndustry": "machinery",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "플라스틱·고무",
+        "toName": "기계·장비"
+      },
+      {
+        "fromIndustry": "plastic",
+        "toIndustry": "construction",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "플라스틱·고무",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "plastic",
+        "toIndustry": "aerospace",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "플라스틱·고무",
+        "toName": "항공·방산"
+      },
+      {
+        "fromIndustry": "plastic",
+        "toIndustry": "finance",
+        "edgeCount": 6,
+        "amount": 0.0,
+        "fromName": "플라스틱·고무",
+        "toName": "금융"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "plastic",
+        "edgeCount": 23,
+        "amount": 754.0,
+        "fromName": "화학",
+        "toName": "플라스틱·고무"
+      },
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "plastic",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "철강·금속",
+        "toName": "플라스틱·고무"
+      },
+      {
+        "fromIndustry": "finance",
+        "toIndustry": "plastic",
+        "edgeCount": 7,
+        "amount": 0.0,
+        "fromName": "금융",
+        "toName": "플라스틱·고무"
+      },
+      {
+        "fromIndustry": "software",
+        "toIndustry": "plastic",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "소프트웨어·IT서비스",
+        "toName": "플라스틱·고무"
+      },
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "plastic",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "전자부품",
+        "toName": "플라스틱·고무"
+      }
+    ]
+  },
+  "shipbuilding": {
+    "name": "조선·해운",
+    "count": 24,
+    "avgRoe": 11.66,
+    "avgOpMargin": 13.73,
+    "avgCagr": 12.24,
+    "topRoe": [
+      {
+        "stockCode": "377460",
+        "corpName": "위니아에이드",
+        "roe": 99.9,
+        "revenue": 91649492825.0
+      },
+      {
+        "stockCode": "267260",
+        "corpName": "HD현대일렉트릭",
+        "roe": 41.0,
+        "revenue": 4079497658529.0
+      },
+      {
+        "stockCode": "443060",
+        "corpName": "HD현대마린솔루션",
+        "roe": 34.5,
+        "revenue": 1982700659426.0
+      },
+      {
+        "stockCode": "439260",
+        "corpName": "대한조선",
+        "roe": 22.8,
+        "revenue": 1228128117609.0
+      },
+      {
+        "stockCode": "010140",
+        "corpName": "삼성중공업",
+        "roe": 13.6,
+        "revenue": 10650010702818.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "054180",
+        "corpName": "메디콕스",
+        "revCagr": 83.0,
+        "revenue": 28160961888.0
+      },
+      {
+        "stockCode": "005880",
+        "corpName": "대한해운",
+        "revCagr": 54.0,
+        "revenue": 1276968118509.0
+      },
+      {
+        "stockCode": "042660",
+        "corpName": "한화오션",
+        "revCagr": 38.5,
+        "revenue": 12783512278323.0
+      },
+      {
+        "stockCode": "329180",
+        "corpName": "HD현대중공업",
+        "revCagr": 27.5,
+        "revenue": 17580633257000.0
+      },
+      {
+        "stockCode": "010140",
+        "corpName": "삼성중공업",
+        "revCagr": 24.2,
+        "revenue": 10650010702818.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "133820",
+        "corpName": "화인베스틸",
+        "debtRatio": 253.4,
+        "debtGrade": "주의",
+        "roe": -6.5
+      },
+      {
+        "stockCode": "054180",
+        "corpName": "메디콕스",
+        "debtRatio": 48.6,
+        "debtGrade": "주의",
+        "roe": -3.7
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "shipbuilding",
+        "toIndustry": "aerospace",
+        "edgeCount": 7,
+        "amount": 6519885.0,
+        "fromName": "조선·해운",
+        "toName": "항공·방산"
+      },
+      {
+        "fromIndustry": "shipbuilding",
+        "toIndustry": "finance",
+        "edgeCount": 3,
+        "amount": 40401.0,
+        "fromName": "조선·해운",
+        "toName": "금융"
+      },
+      {
+        "fromIndustry": "shipbuilding",
+        "toIndustry": "construction",
+        "edgeCount": 9,
+        "amount": 40401.0,
+        "fromName": "조선·해운",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "shipbuilding",
+        "toIndustry": "auto",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "조선·해운",
+        "toName": "자동차"
+      },
+      {
+        "fromIndustry": "shipbuilding",
+        "toIndustry": "telecom",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "조선·해운",
+        "toName": "통신장비"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "shipbuilding",
+        "edgeCount": 22,
+        "amount": 0.0,
+        "fromName": "철강·금속",
+        "toName": "조선·해운"
+      },
+      {
+        "fromIndustry": "consulting",
+        "toIndustry": "shipbuilding",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "전문서비스",
+        "toName": "조선·해운"
+      },
+      {
+        "fromIndustry": "auto",
+        "toIndustry": "shipbuilding",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "자동차",
+        "toName": "조선·해운"
+      },
+      {
+        "fromIndustry": "finance",
+        "toIndustry": "shipbuilding",
+        "edgeCount": 5,
+        "amount": 0.0,
+        "fromName": "금융",
+        "toName": "조선·해운"
+      },
+      {
+        "fromIndustry": "construction",
+        "toIndustry": "shipbuilding",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "건설",
+        "toName": "조선·해운"
+      }
+    ]
+  },
+  "battery": {
+    "name": "2차전지",
+    "count": 16,
+    "avgRoe": -4.55,
+    "avgOpMargin": -6.42,
+    "avgCagr": 1.51,
+    "topRoe": [
+      {
+        "stockCode": "082920",
+        "corpName": "비츠로셀",
+        "roe": 17.2,
+        "revenue": 243082541135.0
+      },
+      {
+        "stockCode": "078600",
+        "corpName": "대주전자재료",
+        "roe": 8.1,
+        "revenue": 254613180231.0
+      },
+      {
+        "stockCode": "007340",
+        "corpName": "DN오토모티브",
+        "roe": 2.7,
+        "revenue": 3675704255000.0
+      },
+      {
+        "stockCode": "126340",
+        "corpName": "비나텍",
+        "roe": 2.7,
+        "revenue": 82228905359.0
+      },
+      {
+        "stockCode": "004490",
+        "corpName": "세방전지",
+        "roe": 1.6,
+        "revenue": 2118737292932.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "066970",
+        "corpName": "엘앤에프",
+        "revCagr": 20.1,
+        "revenue": 2154938965103.0
+      },
+      {
+        "stockCode": "082920",
+        "corpName": "비츠로셀",
+        "revCagr": 18.4,
+        "revenue": 243082541135.0
+      },
+      {
+        "stockCode": "004490",
+        "corpName": "세방전지",
+        "revCagr": 15.8,
+        "revenue": 2118737292932.0
+      },
+      {
+        "stockCode": "007340",
+        "corpName": "DN오토모티브",
+        "revCagr": 13.3,
+        "revenue": 3675704255000.0
+      },
+      {
+        "stockCode": "078600",
+        "corpName": "대주전자재료",
+        "revCagr": 10.4,
+        "revenue": 254613180231.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "066970",
+        "corpName": "엘앤에프",
+        "debtRatio": 384.1,
+        "debtGrade": "주의",
+        "roe": -17.5
+      },
+      {
+        "stockCode": "107640",
+        "corpName": "한중엔시에스",
+        "debtRatio": 152.9,
+        "debtGrade": "고위험",
+        "roe": -1.2
+      },
+      {
+        "stockCode": "348370",
+        "corpName": "엔켐",
+        "debtRatio": 117.0,
+        "debtGrade": "고위험",
+        "roe": -4.3
+      },
+      {
+        "stockCode": "393890",
+        "corpName": "더블유씨피",
+        "debtRatio": 111.1,
+        "debtGrade": "주의",
+        "roe": -18.1
+      },
+      {
+        "stockCode": "278990",
+        "corpName": "EMB",
+        "debtRatio": 108.6,
+        "debtGrade": "주의",
+        "roe": -39.4
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "battery",
+        "toIndustry": "chemical",
+        "edgeCount": 2,
+        "amount": 3034180.0,
+        "fromName": "2차전지",
+        "toName": "화학"
+      },
+      {
+        "fromIndustry": "battery",
+        "toIndustry": "machinery",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "2차전지",
+        "toName": "기계·장비"
+      },
+      {
+        "fromIndustry": "battery",
+        "toIndustry": "pharma",
+        "edgeCount": 3,
+        "amount": 0.0,
+        "fromName": "2차전지",
+        "toName": "제약·바이오"
+      },
+      {
+        "fromIndustry": "battery",
+        "toIndustry": "construction",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "2차전지",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "battery",
+        "toIndustry": "retail",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "2차전지",
+        "toName": "유통·소매"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "battery",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "철강·금속",
+        "toName": "2차전지"
+      },
+      {
+        "fromIndustry": "plastic",
+        "toIndustry": "battery",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "플라스틱·고무",
+        "toName": "2차전지"
+      },
+      {
+        "fromIndustry": "finance",
+        "toIndustry": "battery",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "금융",
+        "toName": "2차전지"
+      },
+      {
+        "fromIndustry": "software",
+        "toIndustry": "battery",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "소프트웨어·IT서비스",
+        "toName": "2차전지"
+      },
+      {
+        "fromIndustry": "realestate",
+        "toIndustry": "battery",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "부동산",
+        "toName": "2차전지"
+      }
+    ]
+  },
+  "leisure": {
+    "name": "레저·서비스",
+    "count": 12,
+    "avgRoe": 2.72,
+    "avgOpMargin": 6.85,
+    "avgCagr": 25.61,
+    "topRoe": [
+      {
+        "stockCode": "065150",
+        "corpName": "대산F&B",
+        "roe": 22.8,
+        "revenue": 110864610083.0
+      },
+      {
+        "stockCode": "114090",
+        "corpName": "GKL",
+        "roe": 3.5,
+        "revenue": 422947217924.0
+      },
+      {
+        "stockCode": "215000",
+        "corpName": "골프존",
+        "roe": 2.1,
+        "revenue": 483261063779.0
+      },
+      {
+        "stockCode": "035250",
+        "corpName": "강원랜드",
+        "roe": 2.0,
+        "revenue": 1476727048701.0
+      },
+      {
+        "stockCode": "034230",
+        "corpName": "파라다이스",
+        "roe": 1.5,
+        "revenue": 1149867026461.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "034230",
+        "corpName": "파라다이스",
+        "revCagr": 121.9,
+        "revenue": 1149867026461.0
+      },
+      {
+        "stockCode": "114090",
+        "corpName": "GKL",
+        "revCagr": 106.4,
+        "revenue": 422947217924.0
+      },
+      {
+        "stockCode": "035250",
+        "corpName": "강원랜드",
+        "revCagr": 86.7,
+        "revenue": 1476727048701.0
+      },
+      {
+        "stockCode": "110790",
+        "corpName": "크리스에프앤씨",
+        "revCagr": 37.1,
+        "revenue": 311944979108.0
+      },
+      {
+        "stockCode": "006730",
+        "corpName": "서부T&D",
+        "revCagr": 10.9,
+        "revenue": 248329962530.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "008770",
+        "corpName": "호텔신라",
+        "debtRatio": 199.1,
+        "debtGrade": "주의",
+        "roe": -0.5
+      },
+      {
+        "stockCode": "006730",
+        "corpName": "서부T&D",
+        "debtRatio": 134.7,
+        "debtGrade": "고위험",
+        "roe": -0.3
+      },
+      {
+        "stockCode": "365900",
+        "corpName": "브이씨",
+        "debtRatio": 133.6,
+        "debtGrade": "주의",
+        "roe": -3.9
+      },
+      {
+        "stockCode": "110790",
+        "corpName": "크리스에프앤씨",
+        "debtRatio": 102.2,
+        "debtGrade": "주의",
+        "roe": -1.1
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "leisure",
+        "toIndustry": "construction",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "레저·서비스",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "leisure",
+        "toIndustry": "machinery",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "레저·서비스",
+        "toName": "기계·장비"
+      },
+      {
+        "fromIndustry": "leisure",
+        "toIndustry": "shipbuilding",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "레저·서비스",
+        "toName": "조선·해운"
+      },
+      {
+        "fromIndustry": "leisure",
+        "toIndustry": "electronics",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "레저·서비스",
+        "toName": "전자부품"
+      },
+      {
+        "fromIndustry": "leisure",
+        "toIndustry": "consulting",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "레저·서비스",
+        "toName": "전문서비스"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "plastic",
+        "toIndustry": "leisure",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "플라스틱·고무",
+        "toName": "레저·서비스"
+      },
+      {
+        "fromIndustry": "finance",
+        "toIndustry": "leisure",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "금융",
+        "toName": "레저·서비스"
+      },
+      {
+        "fromIndustry": "realestate",
+        "toIndustry": "leisure",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "부동산",
+        "toName": "레저·서비스"
+      },
+      {
+        "fromIndustry": "construction",
+        "toIndustry": "leisure",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "건설",
+        "toName": "레저·서비스"
+      },
+      {
+        "fromIndustry": "telecom",
+        "toIndustry": "leisure",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "통신장비",
+        "toName": "레저·서비스"
+      }
+    ]
+  },
+  "media": {
+    "name": "미디어·엔터",
+    "count": 70,
+    "avgRoe": -0.62,
+    "avgOpMargin": -7.87,
+    "avgCagr": -3.31,
+    "topRoe": [
+      {
+        "stockCode": "078860",
+        "corpName": "스테이지원엔터",
+        "roe": 102.8,
+        "revenue": 12227719936.0
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "roe": 77.7,
+        "revenue": 1174934814159.0
+      },
+      {
+        "stockCode": "419530",
+        "corpName": "SAMG엔터",
+        "roe": 47.2,
+        "revenue": 141251628528.0
+      },
+      {
+        "stockCode": "035900",
+        "corpName": "JYP Ent.",
+        "roe": 25.9,
+        "revenue": 821854634614.0
+      },
+      {
+        "stockCode": "458350",
+        "corpName": "에스팀",
+        "roe": 13.5,
+        "revenue": 35151802281.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "037270",
+        "corpName": "YG PLUS",
+        "revCagr": 97.9,
+        "revenue": 236047405109.0
+      },
+      {
+        "stockCode": "063440",
+        "corpName": "SM Life Design",
+        "revCagr": 90.5,
+        "revenue": 53324973138.0
+      },
+      {
+        "stockCode": "020120",
+        "corpName": "키다리스튜디오",
+        "revCagr": 73.2,
+        "revenue": 217475159813.0
+      },
+      {
+        "stockCode": "230360",
+        "corpName": "에코마케팅",
+        "revCagr": 67.7,
+        "revenue": 448812711590.0
+      },
+      {
+        "stockCode": "042000",
+        "corpName": "카페24",
+        "revCagr": 65.2,
+        "revenue": 314764225560.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "046070",
+        "corpName": "코다코",
+        "debtRatio": 1753.9,
+        "debtGrade": "주의",
+        "roe": -30.7
+      },
+      {
+        "stockCode": "036420",
+        "corpName": "콘텐트리중앙",
+        "debtRatio": 345.5,
+        "debtGrade": "고위험",
+        "roe": -79.8
+      },
+      {
+        "stockCode": "173940",
+        "corpName": "에프엔씨엔터",
+        "debtRatio": 330.7,
+        "debtGrade": "관찰",
+        "roe": -15.4
+      },
+      {
+        "stockCode": "273060",
+        "corpName": "와이즈버즈",
+        "debtRatio": 280.1,
+        "debtGrade": "주의",
+        "roe": -3.3
+      },
+      {
+        "stockCode": "322780",
+        "corpName": "코퍼스코리아",
+        "debtRatio": 175.8,
+        "debtGrade": "주의",
+        "roe": -4.6
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "media",
+        "toIndustry": "telecom",
+        "edgeCount": 6,
+        "amount": 0.0,
+        "fromName": "미디어·엔터",
+        "toName": "통신장비"
+      },
+      {
+        "fromIndustry": "media",
+        "toIndustry": "machinery",
+        "edgeCount": 8,
+        "amount": 0.0,
+        "fromName": "미디어·엔터",
+        "toName": "기계·장비"
+      },
+      {
+        "fromIndustry": "media",
+        "toIndustry": "chemical",
+        "edgeCount": 7,
+        "amount": 0.0,
+        "fromName": "미디어·엔터",
+        "toName": "화학"
+      },
+      {
+        "fromIndustry": "media",
+        "toIndustry": "retail",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "미디어·엔터",
+        "toName": "유통·소매"
+      },
+      {
+        "fromIndustry": "media",
+        "toIndustry": "aerospace",
+        "edgeCount": 4,
+        "amount": 0.0,
+        "fromName": "미디어·엔터",
+        "toName": "항공·방산"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "media",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "전자부품",
+        "toName": "미디어·엔터"
+      },
+      {
+        "fromIndustry": "retail",
+        "toIndustry": "media",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "유통·소매",
+        "toName": "미디어·엔터"
+      },
+      {
+        "fromIndustry": "environment",
+        "toIndustry": "media",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "환경",
+        "toName": "미디어·엔터"
+      },
+      {
+        "fromIndustry": "semiconductor",
+        "toIndustry": "media",
+        "edgeCount": 5,
+        "amount": 0.0,
+        "fromName": "반도체",
+        "toName": "미디어·엔터"
+      },
+      {
+        "fromIndustry": "shipbuilding",
+        "toIndustry": "media",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "조선·해운",
+        "toName": "미디어·엔터"
+      }
+    ]
+  },
+  "agriculture": {
+    "name": "농축수산",
+    "count": 5,
+    "avgRoe": -2.18,
+    "avgOpMargin": 2.26,
+    "avgCagr": 2.73,
+    "topRoe": [
+      {
+        "stockCode": "030720",
+        "corpName": "동원수산",
+        "roe": 5.1,
+        "revenue": 172592224421.0
+      },
+      {
+        "stockCode": "054050",
+        "corpName": "농우바이오",
+        "roe": 4.4,
+        "revenue": 158789058609.0
+      },
+      {
+        "stockCode": "475460",
+        "corpName": "미트박스",
+        "roe": -1.1,
+        "revenue": 135593979851.0
+      },
+      {
+        "stockCode": "154030",
+        "corpName": "아시아종묘",
+        "roe": -5.7,
+        "revenue": 3516111982.0
+      },
+      {
+        "stockCode": "014710",
+        "corpName": "사조씨푸드",
+        "roe": -13.6,
+        "revenue": 238019779764.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "030720",
+        "corpName": "동원수산",
+        "revCagr": 6.7,
+        "revenue": 172592224421.0
+      },
+      {
+        "stockCode": "054050",
+        "corpName": "농우바이오",
+        "revCagr": 6.0,
+        "revenue": 158789058609.0
+      },
+      {
+        "stockCode": "154030",
+        "corpName": "아시아종묘",
+        "revCagr": -4.5,
+        "revenue": 3516111982.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "475460",
+        "corpName": "미트박스",
+        "debtRatio": 161.9,
+        "debtGrade": "관찰",
+        "roe": -1.1
+      },
+      {
+        "stockCode": "014710",
+        "corpName": "사조씨푸드",
+        "debtRatio": 73.1,
+        "debtGrade": "안전",
+        "roe": -13.6
+      },
+      {
+        "stockCode": "154030",
+        "corpName": "아시아종묘",
+        "debtRatio": 72.2,
+        "debtGrade": "주의",
+        "roe": -5.7
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "agriculture",
+        "toIndustry": "food",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "농축수산",
+        "toName": "식품·음료"
+      },
+      {
+        "fromIndustry": "agriculture",
+        "toIndustry": "realestate",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "농축수산",
+        "toName": "부동산"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "realestate",
+        "toIndustry": "agriculture",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "부동산",
+        "toName": "농축수산"
+      },
+      {
+        "fromIndustry": "food",
+        "toIndustry": "agriculture",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "식품·음료",
+        "toName": "농축수산"
+      },
+      {
+        "fromIndustry": "finance",
+        "toIndustry": "agriculture",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "금융",
+        "toName": "농축수산"
+      }
+    ]
+  },
+  "education": {
+    "name": "교육",
+    "count": 15,
+    "avgRoe": 8.36,
+    "avgOpMargin": 33.25,
+    "avgCagr": -3.41,
+    "topRoe": [
+      {
+        "stockCode": "067280",
+        "corpName": "멀티캠퍼스",
+        "roe": 63.3,
+        "revenue": 330827395521.0
+      },
+      {
+        "stockCode": "339950",
+        "corpName": "아이비김영",
+        "roe": 37.4,
+        "revenue": 119488397139.0
+      },
+      {
+        "stockCode": "068930",
+        "corpName": "디지털대성",
+        "roe": 17.9,
+        "revenue": 253821898980.0
+      },
+      {
+        "stockCode": "215200",
+        "corpName": "메가스터디교육",
+        "roe": 8.7,
+        "revenue": 884944540620.0
+      },
+      {
+        "stockCode": "096240",
+        "corpName": "크레버스",
+        "roe": 8.6,
+        "revenue": 220916898961.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "215200",
+        "corpName": "메가스터디교육",
+        "revCagr": 64.9,
+        "revenue": 884944540620.0
+      },
+      {
+        "stockCode": "339950",
+        "corpName": "아이비김영",
+        "revCagr": 31.6,
+        "revenue": 119488397139.0
+      },
+      {
+        "stockCode": "096240",
+        "corpName": "크레버스",
+        "revCagr": -1.2,
+        "revenue": 220916898961.0
+      },
+      {
+        "stockCode": "019680",
+        "corpName": "대교",
+        "revCagr": -1.6,
+        "revenue": 650004579114.0
+      },
+      {
+        "stockCode": "040420",
+        "corpName": "정상제이엘에스",
+        "revCagr": -2.4,
+        "revenue": 103051215889.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "230980",
+        "corpName": "비유테크놀러지",
+        "debtRatio": 1337.3,
+        "debtGrade": "관찰",
+        "roe": -40.2
+      },
+      {
+        "stockCode": "019680",
+        "corpName": "대교",
+        "debtRatio": 97.7,
+        "debtGrade": "주의",
+        "roe": -0.6
+      },
+      {
+        "stockCode": "373160",
+        "corpName": "데이원컴퍼니",
+        "debtRatio": 80.7,
+        "debtGrade": "안전",
+        "roe": -2.7
+      },
+      {
+        "stockCode": "133750",
+        "corpName": "메가엠디",
+        "debtRatio": 35.4,
+        "debtGrade": "안전",
+        "roe": -0.3
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "education",
+        "toIndustry": "realestate",
+        "edgeCount": 1,
+        "amount": 6825.0,
+        "fromName": "교육",
+        "toName": "부동산"
+      },
+      {
+        "fromIndustry": "education",
+        "toIndustry": "media",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "교육",
+        "toName": "미디어·엔터"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "semiconductor",
+        "toIndustry": "education",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "반도체",
+        "toName": "교육"
+      },
+      {
+        "fromIndustry": "realestate",
+        "toIndustry": "education",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "부동산",
+        "toName": "교육"
+      },
+      {
+        "fromIndustry": "chemical",
+        "toIndustry": "education",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "화학",
+        "toName": "교육"
+      },
+      {
+        "fromIndustry": "media",
+        "toIndustry": "education",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "미디어·엔터",
+        "toName": "교육"
+      }
+    ]
+  },
+  "misc": {
+    "name": "기타",
+    "count": 6,
+    "avgRoe": -4.57,
+    "avgOpMargin": 4.9,
+    "avgCagr": 19.93,
+    "topRoe": [
+      {
+        "stockCode": "285490",
+        "corpName": "노바텍",
+        "roe": 10.8,
+        "revenue": 55589851496.0
+      },
+      {
+        "stockCode": "284740",
+        "corpName": "쿠쿠홈시스",
+        "roe": 2.0,
+        "revenue": 1121342626136.0
+      },
+      {
+        "stockCode": "373200",
+        "corpName": "엑스플러스",
+        "roe": -26.5,
+        "revenue": 10076623856.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "373200",
+        "corpName": "엑스플러스",
+        "revCagr": 73.1,
+        "revenue": 10076623856.0
+      },
+      {
+        "stockCode": "284740",
+        "corpName": "쿠쿠홈시스",
+        "revCagr": 6.1,
+        "revenue": 1121342626136.0
+      },
+      {
+        "stockCode": "285490",
+        "corpName": "노바텍",
+        "revCagr": -19.4,
+        "revenue": 55589851496.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "373200",
+        "corpName": "엑스플러스",
+        "debtRatio": 223.7,
+        "debtGrade": "주의",
+        "roe": -26.5
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "misc",
+        "toIndustry": "paper",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "기타",
+        "toName": "제지·목재"
+      },
+      {
+        "fromIndustry": "misc",
+        "toIndustry": "retail",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "기타",
+        "toName": "유통·소매"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "misc",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "전자부품",
+        "toName": "기타"
+      }
+    ]
+  },
+  "railroad": {
+    "name": "철도",
+    "count": 6,
+    "avgRoe": 9.98,
+    "avgOpMargin": 7.78,
+    "avgCagr": 9.83,
+    "topRoe": [
+      {
+        "stockCode": "064350",
+        "corpName": "현대로템",
+        "roe": 35.9,
+        "revenue": 5839031553000.0
+      },
+      {
+        "stockCode": "045390",
+        "corpName": "대아티아이",
+        "roe": 14.8,
+        "revenue": 153189348670.0
+      },
+      {
+        "stockCode": "088390",
+        "corpName": "이녹스",
+        "roe": 1.6,
+        "revenue": 59112838075.0
+      },
+      {
+        "stockCode": "271940",
+        "corpName": "일진하이솔루스",
+        "roe": -0.6,
+        "revenue": 81586396146.0
+      },
+      {
+        "stockCode": "123750",
+        "corpName": "알톤",
+        "roe": -1.8,
+        "revenue": 32159264764.0
+      }
+    ],
+    "topGrowth": [
+      {
+        "stockCode": "123750",
+        "corpName": "알톤",
+        "revCagr": 33.6,
+        "revenue": 32159264764.0
+      },
+      {
+        "stockCode": "064350",
+        "corpName": "현대로템",
+        "revCagr": 27.3,
+        "revenue": 5839031553000.0
+      },
+      {
+        "stockCode": "045390",
+        "corpName": "대아티아이",
+        "revCagr": 15.7,
+        "revenue": 153189348670.0
+      },
+      {
+        "stockCode": "088390",
+        "corpName": "이녹스",
+        "revCagr": -37.3,
+        "revenue": 59112838075.0
+      }
+    ],
+    "riskFlags": [
+      {
+        "stockCode": "123750",
+        "corpName": "알톤",
+        "debtRatio": 63.9,
+        "debtGrade": "주의",
+        "roe": -1.8
+      },
+      {
+        "stockCode": "271940",
+        "corpName": "일진하이솔루스",
+        "debtRatio": 10.4,
+        "debtGrade": "주의",
+        "roe": -0.6
+      }
+    ],
+    "supplyTo": [
+      {
+        "fromIndustry": "railroad",
+        "toIndustry": "construction",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "철도",
+        "toName": "건설"
+      },
+      {
+        "fromIndustry": "railroad",
+        "toIndustry": "auto",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "철도",
+        "toName": "자동차"
+      },
+      {
+        "fromIndustry": "railroad",
+        "toIndustry": "electrical",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "철도",
+        "toName": "전기장비"
+      },
+      {
+        "fromIndustry": "railroad",
+        "toIndustry": "shipbuilding",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "철도",
+        "toName": "조선·해운"
+      },
+      {
+        "fromIndustry": "railroad",
+        "toIndustry": "electronics",
+        "edgeCount": 5,
+        "amount": 0.0,
+        "fromName": "철도",
+        "toName": "전자부품"
+      }
+    ],
+    "supplyFrom": [
+      {
+        "fromIndustry": "steel",
+        "toIndustry": "railroad",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "철강·금속",
+        "toName": "철도"
+      },
+      {
+        "fromIndustry": "electronics",
+        "toIndustry": "railroad",
+        "edgeCount": 2,
+        "amount": 0.0,
+        "fromName": "전자부품",
+        "toName": "철도"
+      },
+      {
+        "fromIndustry": "auto",
+        "toIndustry": "railroad",
+        "edgeCount": 1,
+        "amount": 0.0,
+        "fromName": "자동차",
+        "toName": "철도"
+      }
+    ]
+  }
+}
