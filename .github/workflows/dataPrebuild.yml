@@ -12,8 +12,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: data-prebuild
-  cancel-in-progress: true
+  group: hf-dataset-push
+  cancel-in-progress: false
 
 permissions:
   contents: write

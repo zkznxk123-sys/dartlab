@@ -32,7 +32,7 @@ on:
         options: [all, finance, report, docs]
 
 concurrency:
-  group: data-pipeline
+  group: hf-dataset-push
   cancel-in-progress: false
 
 permissions:

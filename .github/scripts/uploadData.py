@@ -41,6 +41,31 @@ def _changedFiles(localDir: Path) -> list[Path] | None:
     return [localDir / name for name in names if (localDir / name).exists()]
 
 
+# HF sliding-window rate limit 은 짧은 시간에 같은 dataset repo 로 다수 commit 이 들어오면
+# 429 를 반환한다. 지수 백오프로 429/503/504 만 재시도하고, 그 외 예외는 즉시 raise.
+_RETRYABLE_STATUS = {429, 503, 504}
+_BACKOFF_SECONDS = (30, 60, 120, 240)
+_BATCH_INTERVAL_SECONDS = 10
+
+
+def _commitWithBackoff(api, **kwargs):
+    """api.create_commit 을 429/503/504 지수 백오프로 감싼다."""
+    from huggingface_hub.errors import HfHubHTTPError
+
+    attempts = len(_BACKOFF_SECONDS) + 1
+    for attempt in range(attempts):
+        try:
+            return api.create_commit(**kwargs)
+        except HfHubHTTPError as exc:
+            status = getattr(getattr(exc, "response", None), "status_code", None)
+            if status not in _RETRYABLE_STATUS or attempt == attempts - 1:
+                raise
+            wait = _BACKOFF_SECONDS[attempt]
+            print(f"[uploadData] HF {status} — {wait}s 후 재시도 ({attempt + 1}/{attempts - 1})")
+            time.sleep(wait)
+    raise RuntimeError("unreachable")
+
+
 def _uploadHf(category: str) -> None:
     """HuggingFace에 변경 파일만 업로드 (fallback: 전체 폴더)."""
     token = os.environ.get("HF_TOKEN", "")
@@ -78,13 +103,16 @@ def _uploadHf(category: str) -> None:
             ]
             batchNum = i // batchSize + 1
             totalBatches = (len(changed) + batchSize - 1) // batchSize
-            api.create_commit(
+            _commitWithBackoff(
+                api,
                 repo_id=HF_REPO,
                 repo_type="dataset",
                 operations=operations,
                 commit_message=f"sync {category}: {len(batch)} files ({batchNum}/{totalBatches})",
             )
             print(f"[uploadData] HF batch {batchNum}/{totalBatches} 완료")
+            if batchNum < totalBatches:
+                time.sleep(_BATCH_INTERVAL_SECONDS)
         print("[uploadData] HuggingFace 증분 업로드 완료")
         return
 

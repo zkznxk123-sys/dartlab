@@ -45,9 +45,10 @@ on:
 permissions:
   contents: write
 
-# 동시 실행 방지 — 이전 실행이 진행 중이면 대기 (cancel하지 않음)
+# 같은 HF dataset repo (eddmpython/dartlab-data) 에 push 하는 모든 워크플로우는
+# 공용 concurrency group 으로 직렬화 — HF sliding-window 429 구조적 차단.
 concurrency:
-  group: data-sync
+  group: hf-dataset-push
   cancel-in-progress: false
 
 jobs:

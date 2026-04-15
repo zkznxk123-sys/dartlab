@@ -28,7 +28,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: edgar-data-sync
+  group: hf-dataset-push
   cancel-in-progress: false
 
 jobs:
