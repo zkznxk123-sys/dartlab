@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { brand } from '$lib/brand';
 	import {
 		forceSimulation,
 		forceManyBody,
@@ -123,9 +124,38 @@
 			});
 	}
 
+	let builtSignature = '';
+	function dataSignature(): string {
+		// 데이터 실제 변화 감지 (배열 참조가 아니라 내용 기준)
+		const indIds = industries
+			.map((i) => i.id)
+			.sort()
+			.join(',');
+		const flowIds = flows
+			.map((f) => `${f.fromIndustry}>${f.toIndustry}:${f.edgeCount}`)
+			.sort()
+			.join(',');
+		return `${industries.length}|${indIds}|${flows.length}|${flowIds}`;
+	}
+
 	onMount(() => {
 		build();
-		const ro = new ResizeObserver(() => build());
+		builtSignature = dataSignature();
+		const ro = new ResizeObserver(() => {
+			if (!container) return;
+			const rect = container.getBoundingClientRect();
+			// 크기만 바뀐 경우 포스 중심만 재설정 (시뮬레이션 재시작 안 함)
+			if (Math.abs(rect.width - w) > 4 || Math.abs(rect.height - h) > 4) {
+				w = rect.width;
+				h = rect.height;
+				simulation
+					?.force('center', forceCenter(w / 2, h / 2).strength(0.02))
+					.force('x', forceX(w / 2).strength(0.025))
+					.force('y', forceY(h / 2).strength(0.035))
+					.alpha(0.3)
+					.restart();
+			}
+		});
 		if (container) ro.observe(container);
 		return () => {
 			ro.disconnect();
@@ -138,8 +168,13 @@
 	});
 
 	$effect(() => {
-		// rebuild on data change
-		if (industries && flows && container) build();
+		// 프롭 배열이 매 렌더마다 새 참조라도 내용이 같으면 재빌드 안 함
+		if (!container) return;
+		const sig = dataSignature();
+		if (sig !== builtSignature) {
+			build();
+			builtSignature = sig;
+		}
 	});
 
 	function formatRev(amountEok: number): string {
@@ -280,6 +315,42 @@
 		</g>
 	</svg>
 
+	<!-- 우상단 클러스터: GitHub + BMC -->
+	<div class="top-right-cluster">
+		<a
+			class="tr-btn github"
+			href={brand.repo}
+			target="_blank"
+			rel="noopener"
+			title="GitHub 저장소"
+			aria-label="GitHub"
+		>
+			<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+				<path
+					fill="currentColor"
+					d="M12 .5C5.73.5.66 5.57.66 11.84c0 5.02 3.26 9.28 7.78 10.78.57.1.78-.25.78-.55v-1.92c-3.17.69-3.84-1.53-3.84-1.53-.52-1.31-1.27-1.66-1.27-1.66-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.72-1.52-2.53-.29-5.2-1.27-5.2-5.64 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.14 1.17a10.9 10.9 0 0 1 5.72 0c2.18-1.48 3.14-1.17 3.14-1.17.62 1.59.23 2.76.11 3.05.74.8 1.18 1.82 1.18 3.07 0 4.38-2.68 5.35-5.22 5.63.41.35.77 1.04.77 2.1v3.11c0 .3.2.66.79.55 4.52-1.5 7.77-5.76 7.77-10.78C23.34 5.57 18.27.5 12 .5Z"
+				/>
+			</svg>
+		</a>
+		<a
+			class="tr-btn bmc"
+			href={brand.coffee}
+			target="_blank"
+			rel="noopener"
+			title="Buy Me A Coffee"
+			aria-label="Buy Me A Coffee"
+		>
+			<img
+				src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+				alt=""
+				width="88"
+				height="26"
+				loading="lazy"
+				decoding="async"
+			/>
+		</a>
+	</div>
+
 	<!-- 범례 -->
 	<div class="legend">
 		<div class="legend-item">
@@ -343,6 +414,44 @@
 		pointer-events: none;
 		user-select: none;
 	}
+	.top-right-cluster {
+		position: absolute;
+		top: 16px;
+		right: 16px;
+		display: flex;
+		gap: 8px;
+		align-items: center;
+		z-index: 5;
+	}
+	.tr-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(15, 18, 25, 0.85);
+		border: 1px solid #1e2433;
+		border-radius: 6px;
+		color: #cbd5e1;
+		text-decoration: none;
+		backdrop-filter: blur(8px);
+		transition: background 0.15s, border-color 0.15s, color 0.15s;
+	}
+	.tr-btn:hover {
+		background: rgba(30, 36, 51, 0.95);
+		border-color: #334155;
+		color: #f1f5f9;
+	}
+	.tr-btn.github {
+		width: 30px;
+		height: 30px;
+	}
+	.tr-btn.bmc {
+		padding: 2px 6px;
+		height: 30px;
+	}
+	.tr-btn.bmc img {
+		display: block;
+	}
+
 	.legend {
 		position: absolute;
 		left: 16px;
