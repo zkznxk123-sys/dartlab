@@ -595,6 +595,16 @@ def _fetchBeta(stockCode: str, currency: str = "KRW") -> float | None:
 # ══════════════════════════════════════
 
 
+def _resolveCountryFromCurrency(currency: str) -> str:
+    """currency → ISO2 fallback. riskPremiums.resolveCountryCode 재사용."""
+    try:
+        from dartlab.core.finance.riskPremiums import resolveCountryCode
+
+        return resolveCountryCode(currency=currency)
+    except ImportError:
+        return "KR"
+
+
 def compute_company_wacc(
     series: dict,
     sector_params=None,
@@ -604,20 +614,79 @@ def compute_company_wacc(
     market_cap: float | None = None,
     currency: str = "KRW",
     beta_override: float | None = None,
+    country: str | None = None,
+    country_risk_premium: float | None = None,
+    implied_erp: bool = False,
+    bottom_up_beta: bool = False,
 ) -> tuple[float, dict[str, float]]:
     """회사 고유 WACC 계산 (Damodaran CAPM 기반).
 
-    Ke = Rf + beta * (ERP + CRP)
+    Ke = Rf + beta * (matureMarketERP + countryRiskPremium)
     WACC = E/(D+E) * Ke + D/(D+E) * Kd * (1-t)
+
+    Parameters
+    ----------
+    country : ISO2 국가코드 (KR/US/JP/...). 지정 시 Damodaran 테이블로 rf/erp 자동.
+              None 이면 기존 `getMarketParams(currency)` 경로 (backward compat).
+    country_risk_premium : 국가 리스크 프리미엄 (%) 명시 override. None 이면 자동.
+    implied_erp : True 면 Damodaran Gordon 역산 (시장 내재). 실패 시 historical fallback.
+    bottom_up_beta : True 면 섹터 peer unlever/relever (Hamada). 실패 시 기본 beta.
     """
     from dartlab.industry.compat import getMarketParams
 
-    mkt = getMarketParams(currency)
-    rf = risk_free_rate if risk_free_rate is not None else mkt.riskFreeRate
-    erp = market_premium if market_premium is not None else mkt.totalErp
+    damodaran = None
+    if country or country_risk_premium is not None or implied_erp:
+        if implied_erp:
+            from dartlab.core.finance.impliedERP import calcImpliedERP
 
-    # beta: 1순위 외부 주입(수익률 회귀), 2순위 섹터 파라미터, 3순위 1.0
+            damodaran = calcImpliedERP(country=country or _resolveCountryFromCurrency(currency))
+        else:
+            from dartlab.core.finance.riskPremiums import loadDamodaranERP
+
+            damodaran = loadDamodaranERP(countryCode=country, currency=currency)
+
+    mkt = getMarketParams(currency)
+    if risk_free_rate is not None:
+        rf = risk_free_rate
+    elif damodaran is not None:
+        rf = damodaran["riskFreeRate"]
+    else:
+        rf = mkt.riskFreeRate
+
+    if market_premium is not None:
+        erp = market_premium
+    elif damodaran is not None:
+        base_erp = damodaran["matureMarketERP"]
+        crp = country_risk_premium if country_risk_premium is not None else damodaran["countryRiskPremium"]
+        erp = base_erp + crp
+    else:
+        erp = mkt.totalErp
+
+    # beta: 1순위 외부 주입, 2순위 bottom-up peer Hamada, 3순위 섹터 파라미터, 4순위 1.0
     beta = beta_override
+    if beta is None and bottom_up_beta:
+        try:
+            from dartlab.core.finance.bottomUpBeta import calcBottomUpBeta
+
+            stb_bu = getLatest(series, "BS", "shortterm_borrowings") or 0
+            ltb_bu = getLatest(series, "BS", "longterm_borrowings") or 0
+            bonds_bu = getLatest(series, "BS", "debentures") or 0
+            debt_bu = stb_bu + ltb_bu + bonds_bu
+            equity_bu = getLatest(series, "BS", "total_stockholders_equity") or getLatest(
+                series, "BS", "owners_of_parent_equity"
+            )
+            de_bu = (debt_bu / equity_bu) if (equity_bu and equity_bu > 0) else 0.3
+            sector_name = sector_params.name if sector_params and hasattr(sector_params, "name") else "Unknown"
+            bu_result = calcBottomUpBeta(
+                sector=sector_name,
+                debtToEquity=de_bu,
+                taxRate=0.22,
+                country=country or _resolveCountryFromCurrency(currency),
+            )
+            if bu_result.get("leveredBeta"):
+                beta = bu_result["leveredBeta"]
+        except (ImportError, AttributeError, ValueError, TypeError):
+            pass
     if beta is None:
         if sector_params and hasattr(sector_params, "beta") and sector_params.beta:
             beta = sector_params.beta
@@ -688,6 +757,11 @@ def compute_company_wacc(
         "total_debt": total_debt,
         "equity_value": equity_value,
     }
+    if damodaran is not None:
+        details["countryCode"] = damodaran["countryCode"]
+        details["countryRiskPremium"] = damodaran["countryRiskPremium"]
+        details["matureMarketERP"] = damodaran["matureMarketERP"]
+        details["erpSource"] = damodaran["source"]
     return wacc, details
 
 

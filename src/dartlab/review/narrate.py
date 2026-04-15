@@ -886,6 +886,21 @@ def narrateDFV(data: dict) -> str | None:
     parts.append(f"투자 의견 **{opinion}**, 신뢰도 **{confidence}**.")
     parts.append(f"Primary 모델: **{primary.upper()}**.")
 
+    # Damodaran 생애주기 × 템플릿
+    phase = data.get("lifeCyclePhase")
+    template = data.get("companyType")
+    if phase:
+        try:
+            from dartlab.review.templates import LIFECYCLE_PHASES
+
+            phase_label = LIFECYCLE_PHASES.get(phase, {}).get("label", phase)
+        except ImportError:
+            phase_label = phase
+        if template:
+            parts.append(f"단계: **{template} × 생애주기 {phase_label}**.")
+        else:
+            parts.append(f"생애주기: **{phase_label}**.")
+
     # 삼각검증 결과
     tri = data.get("triangulation", {})
     checks = tri.get("checks", [])
@@ -904,9 +919,104 @@ def narrateDFV(data: dict) -> str | None:
     if sc:
         parts.append(f"시나리오: Bull {sc.get('bull', 0):,} / Bear {sc.get('bear', 0):,}.")
 
+    # Survival 가중 (Dark Side)
+    surv = data.get("survival")
+    if surv and surv.get("pSurvival") is not None:
+        p = surv["pSurvival"]
+        if p < 0.95:
+            liq = surv.get("liquidationValue")
+            liq_str = f" (청산가치 {liq:,.0f}원)" if liq else ""
+            parts.append(f"생존가중 p={p:.2f} 적용{liq_str}.")
+
     # DDM floor
     floor = data.get("dividendFloor")
     if floor:
         parts.append(f"배당 하한 {floor['value']:,}원.")
 
+    # Consistency flags (Damodaran 정합성 검증)
+    flags = data.get("consistencyFlags") or []
+    critical = [f for f in flags if f.get("severity") == "critical"]
+    warns = [f for f in flags if f.get("severity") == "warn"]
+    if critical:
+        msgs = "; ".join(f["message"] for f in critical[:2])
+        parts.append(f"⚠ 정합성 위반: {msgs}.")
+    elif warns:
+        parts.append(f"정합성 경고 {len(warns)}건 — 가정 재검토.")
+
     return " ".join(parts)
+
+
+def narrateLifeCycle(data: dict | None) -> str | None:
+    """calcLifeCycle 결과 → 자연어."""
+    if not data or not data.get("phase"):
+        return None
+    try:
+        from dartlab.review.templates import LIFECYCLE_PHASES
+
+        meta = LIFECYCLE_PHASES.get(data["phase"], {})
+    except ImportError:
+        meta = {}
+    label = meta.get("label", data["phase"])
+    confidence = data.get("phaseConfidence", 0)
+    signals = data.get("signals") or {}
+    cagr = signals.get("revenueCAGR")
+    spread = signals.get("roicWACCSpread")
+    payout = signals.get("dividendPayout")
+    parts = [f"생애주기 **{label}** (신뢰도 {confidence:.0%})."]
+    if meta.get("description"):
+        parts.append(meta["description"])
+    extras = []
+    if cagr is not None:
+        extras.append(f"매출 CAGR {cagr:.1f}%")
+    if spread is not None:
+        extras.append(f"ROIC-WACC {spread:+.1f}%p")
+    if payout is not None:
+        extras.append(f"배당성향 {payout:.0f}%")
+    if extras:
+        parts.append(f"지표: {', '.join(extras)}.")
+    inflection = data.get("inflection") or {}
+    if inflection.get("towards"):
+        try:
+            target_label = LIFECYCLE_PHASES.get(inflection["towards"], {}).get("label", inflection["towards"])
+        except Exception:
+            target_label = inflection["towards"]
+        parts.append(f"전환 신호: {target_label} 방향 (score {inflection.get('score', 0):.2f}).")
+    if meta.get("valuationHint"):
+        parts.append(f"권고 모델: {meta['valuationHint']}.")
+    return " ".join(parts)
+
+
+def narrateValuationSins(data: dict | None) -> str | None:
+    """calcValuationSins 결과 → 자연어 (정합성 경고 요약)."""
+    if not data:
+        return None
+    flags = data.get("flags") or []
+    if not flags:
+        return "밸류에이션 정합성 — 위반 규칙 없음 (Damodaran 원칙 통과)."
+    severity = data.get("severity", "info")
+    critical = [f for f in flags if f.get("severity") == "critical"]
+    warns = [f for f in flags if f.get("severity") == "warn"]
+    info = [f for f in flags if f.get("severity") == "info"]
+    parts = [f"밸류에이션 검증 (전체 {severity}):"]
+    for f in critical:
+        parts.append(f"🔴 {f.get('reason')}")
+    for f in warns:
+        parts.append(f"🟡 {f.get('reason')}")
+    if info and not (critical or warns):
+        for f in info[:2]:
+            parts.append(f"ℹ {f.get('reason')}")
+    return " ".join(parts)
+
+
+def narrateStoryPrecedents(data: dict | None) -> str | None:
+    """calcStoryPrecedents 결과 → 자연어 (Possible Test)."""
+    if not data:
+        return None
+    count = data.get("count", 0)
+    confidence = data.get("confidence", "low")
+    if count == 0:
+        return "유사 경로 선례 없음 — 새 서사. Damodaran 'Possible Test' 통과 실패."
+    precedents = data.get("precedents") or []
+    sample = [p.get("name") or p.get("stockCode") for p in precedents[:3] if p.get("name") or p.get("stockCode")]
+    tail = f" (대표: {', '.join(sample)})" if sample else ""
+    return f"유사 경로를 걸은 기업 {count}건 발견 (신뢰도 {confidence}){tail}."

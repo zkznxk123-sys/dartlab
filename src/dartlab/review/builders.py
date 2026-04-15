@@ -23,11 +23,14 @@ from dartlab.review.narrate import (
     narrateDistress,
     narrateGrowth,
     narrateLeverage,
+    narrateLifeCycle,
     narrateMargin,
     narrateROIC,
+    narrateStoryPrecedents,
     narrateStrategy,
     narrateTechnicalVerdict,
     narrateValuation,
+    narrateValuationSins,
 )
 from dartlab.review.utils import unifyTableScale
 
@@ -5296,3 +5299,163 @@ def valuationBandBlock(data: dict) -> list:
         ),
         MetricBlock(metrics),
     ]
+
+
+# ── Damodaran 흡수 블록들 ──
+
+
+def lifeCycleStageBlock(data: dict) -> list:
+    """calcLifeCycle 결과 → HeadingBlock + TextBlock + MetricBlock.
+
+    Damodaran Corporate Life Cycle 단계 표시 + 핵심 지표 + 권고 모델.
+    """
+    if not data or not data.get("phase"):
+        return []
+
+    narration = narrateLifeCycle(data)
+    signals = data.get("signals") or {}
+    inflection = data.get("inflection") or {}
+
+    metrics: list[tuple[str, str]] = []
+    if signals.get("revenueCAGR") is not None:
+        metrics.append(("매출 CAGR", f"{signals['revenueCAGR']:.1f}%"))
+    if signals.get("roicWACCSpread") is not None:
+        metrics.append(("ROIC - WACC", f"{signals['roicWACCSpread']:+.1f}%p"))
+    if signals.get("fcfPositiveStreak") is not None:
+        metrics.append(("FCF 양수 연속", f"{signals['fcfPositiveStreak']}기"))
+    if signals.get("dividendPayout") is not None:
+        metrics.append(("배당성향", f"{signals['dividendPayout']:.0f}%"))
+    if signals.get("marginDirection"):
+        metrics.append(("마진 방향", signals["marginDirection"]))
+    metrics.append(("신뢰도", f"{data.get('phaseConfidence', 0):.0%}"))
+    if inflection.get("towards"):
+        metrics.append(("전환 신호", f"{inflection['towards']} (score {inflection.get('score', 0):.2f})"))
+    metrics.append(("권고 모델", data.get("modelHint", "dcf")))
+
+    blocks = [
+        HeadingBlock(
+            _meta("lifeCycleStage").label,
+            level=2,
+            helper="Damodaran Corporate Life Cycle (2024) — storyTemplate 과 직교 축",
+        ),
+    ]
+    if narration:
+        blocks.append(TextBlock(narration, indent="h2"))
+    if metrics:
+        blocks.append(MetricBlock(metrics))
+    return blocks
+
+
+def valuationSinsBlock(data: dict) -> list:
+    """calcValuationSins 결과 → HeadingBlock + TextBlock + FlagBlock.
+
+    Damodaran 7 Sins + CF Consistency 규칙 위반 표시.
+    """
+    if not data:
+        return []
+
+    narration = narrateValuationSins(data)
+    flags = data.get("flags") or []
+
+    blocks = [
+        HeadingBlock(
+            _meta("valuationSins").label,
+            level=2,
+            helper="Damodaran 밸류에이션 정합성 규칙 검증 (Probable Test)",
+        ),
+    ]
+    if narration:
+        blocks.append(TextBlock(narration, indent="h2"))
+
+    if flags:
+        flag_items: list[tuple[str, str]] = []
+        for f in flags:
+            severity = f.get("severity", "info")
+            key = f.get("key", "")
+            reason = f.get("reason", "")
+            flag_items.append((severity, f"[{key}] {reason}"))
+        blocks.append(FlagBlock(flag_items))
+
+    return blocks
+
+
+def plausibilityBandBlock(data: dict) -> list:
+    """calcPlausibilityBand → HeadingBlock + TextBlock + MetricBlock.
+
+    섹터 피어 분포 대비 현재 forecast 위치 (Plausible Test).
+    """
+    if not data:
+        return []
+
+    peer_stats = data.get("peerStats") or {}
+    band = data.get("band", "unknown")
+    growth_pct = data.get("growthPercentile")
+    margin_pct = data.get("marginPercentile")
+
+    if growth_pct is None and margin_pct is None:
+        return []
+
+    text_parts = [f"피어 분포 대비 위치: **{band}**."]
+    if growth_pct is not None:
+        text_parts.append(f"매출 성장률 상위 {100 - growth_pct:.0f}%.")
+    if margin_pct is not None:
+        text_parts.append(f"영업마진 상위 {100 - margin_pct:.0f}%.")
+
+    metrics: list[tuple[str, str]] = []
+    if peer_stats.get("growthMedian") is not None:
+        metrics.append(("피어 성장률 중앙값", f"{peer_stats['growthMedian']:.1f}%"))
+    if peer_stats.get("growthP75") is not None:
+        metrics.append(("피어 성장률 상위 25%", f"{peer_stats['growthP75']:.1f}%"))
+    if peer_stats.get("growthP95") is not None:
+        metrics.append(("피어 성장률 상위 5%", f"{peer_stats['growthP95']:.1f}%"))
+    if peer_stats.get("marginMedian") is not None:
+        metrics.append(("피어 영업마진 중앙값", f"{peer_stats['marginMedian']:.1f}%"))
+    if peer_stats.get("marginP75") is not None:
+        metrics.append(("피어 영업마진 상위 25%", f"{peer_stats['marginP75']:.1f}%"))
+    if peer_stats.get("count") is not None:
+        metrics.append(("피어 수", f"{peer_stats['count']}개사"))
+
+    return [
+        HeadingBlock(
+            _meta("plausibilityBand").label,
+            level=2,
+            helper="Damodaran Plausible Test — 피어 분포 percentile",
+        ),
+        TextBlock(" ".join(text_parts), indent="h2"),
+        MetricBlock(metrics) if metrics else TextBlock("피어 데이터 부족", style="dim", indent="h2"),
+    ]
+
+
+def storyPrecedentsBlock(data: dict) -> list:
+    """calcStoryPrecedents → HeadingBlock + TextBlock + TableBlock.
+
+    유사 경로 기업 선례 (Possible Test).
+    """
+    if not data:
+        return []
+
+    narration = narrateStoryPrecedents(data)
+    precedents = data.get("precedents") or []
+
+    blocks = [
+        HeadingBlock(
+            _meta("storyPrecedents").label,
+            level=2,
+            helper="Damodaran Possible Test — 같은 phase 기업 + 블로그 경험",
+        ),
+    ]
+    if narration:
+        blocks.append(TextBlock(narration, indent="h2"))
+
+    if precedents:
+        rows = []
+        for p in precedents[:5]:
+            rows.append({
+                "종목": p.get("name") or p.get("stockCode") or "-",
+                "서사": (p.get("narrative") or "")[:80],
+                "출처": p.get("source") or "-",
+            })
+        if rows:
+            blocks.append(TableBlock("", pl.DataFrame(rows)))
+
+    return blocks

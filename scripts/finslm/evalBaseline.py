@@ -1,7 +1,7 @@
 """Stage C — 베이스 모델 dartlab audit 평가.
 
 각 후보 모델(Gemma 4 / Qwen 3.5)로 financebench_kr 30질문 실행.
-ops/ai.md 원칙: "벤치마크 숫자로 기본 모델을 정하지 않는다. dartlab AI audit으로 결정."
+src/dartlab/ai/README.md 원칙: "벤치마크 숫자로 기본 모델을 정하지 않는다. dartlab AI audit으로 결정."
 
 사전 준비:
     ollama pull gemma4:latest

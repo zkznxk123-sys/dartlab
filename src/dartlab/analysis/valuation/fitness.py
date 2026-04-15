@@ -13,29 +13,58 @@ from __future__ import annotations
 
 from typing import Any
 
-# ── 기업유형별 모델 선택 매트릭스 ──
+# ── 기업유형 × 생애주기 모델 선택 매트릭스 ──
+# key = (template, lifeCyclePhase). fallback: (template, None) → (None, phase) → (None, None)
 
-_MODEL_MATRIX: dict[str | None, dict] = {
-    "프랜차이즈": {"primary": "dcf", "secondary": ["rim", "relative"]},
-    "성장": {"primary": "rim", "secondary": ["relative"]},
-    "사이클": {"primary": "dcf", "secondary": ["relative"]},  # normalized DCF
-    "자본집약": {"primary": "dcf", "secondary": ["relative"]},
-    "현금부자": {"primary": "dcf", "secondary": ["rim"]},
-    "지주": {"primary": "relative", "secondary": ["rim"]},  # NAV/SOTP 대용
-    "턴어라운드": {"primary": "relative", "secondary": []},
-    None: {"primary": "dcf", "secondary": ["rim", "relative"]},  # 기본
+_MODEL_MATRIX: dict[tuple[str | None, str | None], dict] = {
+    # lifeCycle 전용 (template 무관)
+    (None, "earlyGrowth"): {"primary": "relativeSurvival", "secondary": ["dcf2stage"], "survivalAdj": True},
+    (None, "highGrowth"): {"primary": "dcf2stage", "secondary": ["rim", "relative"]},
+    (None, "matureGrowth"): {"primary": "dcf", "secondary": ["rim", "relative"]},
+    (None, "matureStable"): {"primary": "dcf", "secondary": ["rim", "relative"]},
+    (None, "decline"): {"primary": "liquidation", "secondary": ["relative"], "survivalAdj": True},
+    (None, "turnaround"): {"primary": "relative", "secondary": ["dcf2stage"], "survivalAdj": True},
+    # template 전용 (phase 미결정)
+    ("프랜차이즈", None): {"primary": "dcf", "secondary": ["rim", "relative"]},
+    ("성장", None): {"primary": "dcf2stage", "secondary": ["relative"]},
+    ("사이클", None): {"primary": "dcf", "secondary": ["relative"]},
+    ("자본집약", None): {"primary": "dcf", "secondary": ["relative"]},
+    ("현금부자", None): {"primary": "dcf", "secondary": ["rim"]},
+    ("지주", None): {"primary": "relative", "secondary": ["rim"]},
+    ("턴어라운드", None): {"primary": "relative", "secondary": [], "survivalAdj": True},
+    # 교차 (대표적 조합만 명시, 나머지 fallback)
+    ("성장", "highGrowth"): {"primary": "dcf2stage", "secondary": ["rim", "relative"]},
+    ("사이클", "matureStable"): {"primary": "dcf", "secondary": ["relative"]},  # normalized DCF
+    ("현금부자", "matureStable"): {"primary": "dcf", "secondary": ["rim", "ddm"]},
+    ("턴어라운드", "turnaround"): {"primary": "relative", "secondary": ["dcf2stage"], "survivalAdj": True},
+    # 기본
+    (None, None): {"primary": "dcf", "secondary": ["rim", "relative"]},
 }
 
 
-def selectModels(company: Any) -> dict:
-    """기업유형 감지 → primary/secondary 모델 자동 선택.
+def _lookupMatrix(template: str | None, phase: str | None) -> dict:
+    """2-key fallback chain: (t,p) → (None,p) → (t,None) → (None,None)."""
+    for key in ((template, phase), (None, phase), (template, None), (None, None)):
+        if key in _MODEL_MATRIX:
+            return _MODEL_MATRIX[key]
+    return _MODEL_MATRIX[(None, None)]
+
+
+def selectModels(company: Any, *, lifeCyclePhase: str | None = None) -> dict:
+    """기업유형 × 생애주기 감지 → primary/secondary 모델 자동 선택.
+
+    Parameters
+    ----------
+    lifeCyclePhase : 명시 시 calcLifeCycle 호출 생략. AI override 경로.
 
     Returns
     -------
     dict
         companyType : str | None
-        primary : str — "dcf" | "rim" | "ddm" | "relative"
+        lifeCyclePhase : str | None
+        primary : str — "dcf" | "rim" | "ddm" | "relative" | "dcf2stage" | "liquidation" | "relativeSurvival"
         secondary : list[str]
+        survivalAdj : bool — Dark Side 가중치 적용 여부
         ddmRole : str — "primary" | "floor" | "excluded"
     """
     template = None
@@ -46,9 +75,20 @@ def selectModels(company: Any) -> dict:
     except (ImportError, AttributeError):
         pass
 
-    matrix = _MODEL_MATRIX.get(template, _MODEL_MATRIX[None])
+    if lifeCyclePhase is None:
+        try:
+            from dartlab.analysis.financial.lifeCycle import calcLifeCycle
+
+            lc = calcLifeCycle(company)
+            if lc:
+                lifeCyclePhase = lc.get("phase")
+        except (ImportError, AttributeError, ValueError, TypeError):
+            pass
+
+    matrix = _lookupMatrix(template, lifeCyclePhase)
     primary = matrix["primary"]
     secondary = list(matrix["secondary"])
+    survival_adj = bool(matrix.get("survivalAdj", False))
 
     # DDM 역할 판정: 고배당 기업에서만 primary
     ddm_role = "floor"  # 기본: 하한선
@@ -73,8 +113,10 @@ def selectModels(company: Any) -> dict:
 
     return {
         "companyType": template,
+        "lifeCyclePhase": lifeCyclePhase,
         "primary": primary,
         "secondary": secondary,
+        "survivalAdj": survival_adj,
         "ddmRole": ddm_role,
     }
 

@@ -729,6 +729,57 @@ STORY_TEMPLATES: dict[str, dict] = {
 }
 
 
+# ── Damodaran Corporate Life Cycle (2024) — storyTemplate 과 직교하는 축 ──
+# template = "무엇을 하는 회사인가" (사업 특성)
+# lifeCyclePhase = "언제의 회사인가" (시간적 위치)
+# 헤더 라벨: "{template} × 생애주기 {phaseLabel}"
+
+LIFECYCLE_PHASES: dict[str, dict] = {
+    "earlyGrowth": {
+        "label": "초기성장",
+        "description": "아이디어 검증 단계. 매출은 폭발적이나 마진·FCF 음수, 생존 확률이 가치평가의 핵심.",
+        "valuationHint": "Revenue multiple + Survival probability 가중 (Dark Side 방식)",
+        "keyRisk": "모델 검증 실패",
+        "narrateHint": "초기 성장 단계는 매출 확장 속도와 생존 가능성이 전부. 수익성은 후행.",
+    },
+    "highGrowth": {
+        "label": "고성장",
+        "description": "빠른 매출 확대 + 마진 상승 전환. FCF 음수~0 근처, narrative-driven valuation.",
+        "valuationHint": "2-stage DCF — 고성장 n년 → stable 수렴",
+        "keyRisk": "성장 지속 가정 타당성",
+        "narrateHint": "고성장 단계는 매출 CAGR 과 마진 전환 속도가 스토리의 핵심. Terminal 구간 수렴 가정 주의.",
+    },
+    "matureGrowth": {
+        "label": "성숙성장",
+        "description": "중속 성장 + FCF 양전환 + ROIC-WACC 양수. 현금이 돌기 시작하는 단계.",
+        "valuationHint": "FCFF DCF + 상대가치 삼각검증",
+        "keyRisk": "경쟁 심화, 성장 둔화",
+        "narrateHint": "성숙성장 단계는 ROIC vs WACC 스프레드와 재투자율의 균형이 핵심.",
+    },
+    "matureStable": {
+        "label": "성숙안정",
+        "description": "저성장 + 고배당 + ROIC ≈ WACC 수렴. 방어적 사업, 현금 배분 이슈.",
+        "valuationHint": "FCFF DCF + DDM + 상대가치 (삼각검증 견고)",
+        "keyRisk": "혁신 부족, 기술 변화",
+        "narrateHint": "성숙안정 단계는 배당 지속성과 재투자-환원 균형이 가치를 결정.",
+    },
+    "decline": {
+        "label": "쇠퇴",
+        "description": "매출·마진 축소, ROIC < WACC 지속. 청산가치/잔여현금이 의미 있는 단계.",
+        "valuationHint": "Liquidation value + Asset-based",
+        "keyRisk": "파산, 좀비 기업화",
+        "narrateHint": "쇠퇴 단계는 going-concern 가치에 survival 가중치 적용, liquidation 대비 우위 검증.",
+    },
+    "turnaround": {
+        "label": "턴어라운드",
+        "description": "적자→흑자 전환 초기. 성장 재점화 여부에 따라 matureGrowth 진입 가능.",
+        "valuationHint": "상대가치 + 시나리오 DCF (회복/재악화)",
+        "keyRisk": "회복 지속성",
+        "narrateHint": "턴어라운드는 최근 2~3 분기 마진 전환과 부채 상환 능력이 핵심.",
+    },
+}
+
+
 def detectTemplates(company) -> list[str]:
     """기업 재무 데이터에서 해당하는 스토리 템플릿 전부 반환.
 

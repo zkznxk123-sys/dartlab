@@ -933,6 +933,35 @@ class Company:
             return _analysis(axis, sub, company=self, **kwargs)
         return _analysis(axis, company=self, **kwargs)
 
+    def validateStory(self, overrides: dict | None = None) -> dict:
+        """Damodaran 스토리 검증 — Possible / Plausible / Probable.
+
+        Returns:
+            dict {precedents, plausibility, rules, overall}
+        """
+        from dartlab.analysis.financial.storyValidation import (
+            calcPlausibilityBand,
+            calcStoryPrecedents,
+            calcValuationSins,
+        )
+
+        precedents = calcStoryPrecedents(self)
+        plausibility = calcPlausibilityBand(self)
+        rules = calcValuationSins(self)
+
+        order = {"info": 0, "warn": 1, "critical": 2}
+        overall = "info"
+        rule_sev = rules.get("severity", "info") if rules else "info"
+        if order.get(rule_sev, 0) > order.get(overall, 0):
+            overall = rule_sev
+
+        return {
+            "precedents": precedents,
+            "plausibility": plausibility,
+            "rules": rules,
+            "overall": overall,
+        }
+
     @property
     def credit(self):
         """독립 신용평가 — dual access."""

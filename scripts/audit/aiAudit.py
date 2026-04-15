@@ -7,7 +7,7 @@
     uv run python -X utf8 scripts/audit/aiAudit.py --stock 005930
     uv run python -X utf8 scripts/audit/aiAudit.py --provider gemini
 
-규격: ops/ai.md "AI Audit 체계"
+규격: src/dartlab/ai/README.md "AI Audit 체계"
 결과: data/audit/ai/{YYYY-MM-DD}/results.json + report.md
 """
 
@@ -25,7 +25,7 @@ from typing import Any
 
 logging.getLogger().setLevel(logging.ERROR)
 
-# 표준 질문 세트 (ops/ai.md 규격)
+# 표준 질문 세트 (src/dartlab/ai/README.md 규격)
 _STANDARD_SET = [
     ("005930", "삼성전자", "수익성"),
     ("005930", "삼성전자", "현금흐름"),
@@ -76,7 +76,7 @@ def _count_dash_cells(response: str) -> int:
 def _grade(response: str) -> tuple[str, list[str]]:
     """등급 판정 + 이슈 목록.
 
-    P/T/C/V 규격은 ops/ai.md 참조.
+    P/T/C/V 규격은 src/dartlab/ai/README.md 참조.
     """
     issues: list[str] = []
     length = len(response)

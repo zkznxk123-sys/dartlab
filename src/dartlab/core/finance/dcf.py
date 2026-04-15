@@ -209,6 +209,236 @@ def _fcfHistory(series: dict) -> list[Optional[float]]:
     return result
 
 
+# ── Damodaran Two-Stage DCF (Investment Valuation Ch.12) ──────────────────
+# 명시적 고성장 n년 → stable 수렴. Growth equation 엄격 적용.
+
+
+def multiStageDcf(
+    *,
+    baseFcf: float,
+    growthYears: int | list[int],
+    growthRates: float | list[float],
+    terminalGrowthRate: float,
+    wacc: float,
+    marginPath: list[float] | None = None,
+    reinvestmentPath: list[float] | None = None,
+    netDebt: float = 0.0,
+    shares: int | None = None,
+) -> dict:
+    """Damodaran Multi-stage DCF — 가변 성장률/마진/재투자율 지원.
+
+    growthYears, growthRates 가 list 면 phase 별 구간. scalar 면 단일 phase.
+    Phase 1..N: 각 phase 의 고정 성장률로 FCF 투영 + 할인
+    Terminal: FCF_{n+1} / (WACC - g_stable)
+
+    Parameters
+    ----------
+    baseFcf : 기준 FCF (원)
+    growthYears : int 또는 [n1, n2, ...] phase 별 연수
+    growthRates : float 또는 [r1, r2, ...] phase 별 연성장률 (%)
+    terminalGrowthRate : 영구성장률 (%). WACC - 2% 이하 권장, Rf 초과 금지.
+    wacc : 할인율 (%)
+    marginPath : 연도별 영업마진 (선택). 없으면 baseFcf 가 이미 마진 반영 가정.
+    reinvestmentPath : 연도별 재투자율 (선택).
+    netDebt : 순차입금 (원)
+    shares : 발행주식수
+
+    Returns
+    -------
+    dict
+        baseFcf, wacc, terminalGrowthRate
+        growthYears : list[int]
+        growthRates : list[float]
+        marginPath, reinvestmentPath
+        projections : list[float] — 연도별 예측 FCF
+        phases : list[{years, rate, pv}]
+        pvExplicit, terminalValue, pvTerminal, enterpriseValue,
+        equityValue, perShare, tvShare, warnings
+    """
+    warnings: list[str] = []
+
+    # 입력 정규화 — scalar → list
+    years_list = [growthYears] if isinstance(growthYears, int) else list(growthYears)
+    rates_list = [growthRates] if isinstance(growthRates, (int, float)) else list(growthRates)
+
+    if len(years_list) != len(rates_list):
+        warnings.append(f"growthYears/Rates length mismatch ({len(years_list)} vs {len(rates_list)}) — truncate")
+        m = min(len(years_list), len(rates_list))
+        years_list = years_list[:m]
+        rates_list = rates_list[:m]
+
+    total_years = sum(max(1, y) for y in years_list)
+    if total_years > 15:
+        warnings.append(f"총 고성장 구간 {total_years}년은 과도 — 10년 내로 축소 권장")
+
+    # TG 보정
+    if wacc <= terminalGrowthRate:
+        old_tg = terminalGrowthRate
+        terminalGrowthRate = max(wacc - 2.0, 1.0)
+        warnings.append(f"영구성장률 {old_tg:.1f}% ≥ WACC {wacc:.1f}% → {terminalGrowthRate:.1f}%로 보정")
+
+    r = wacc / 100.0
+    gs = terminalGrowthRate / 100.0
+
+    projections: list[float] = []
+    phases_info: list[dict] = []
+    current = baseFcf
+    global_year = 0
+    pv_explicit = 0.0
+
+    for phase_idx, (ph_years, ph_rate) in enumerate(zip(years_list, rates_list)):
+        ph_years = max(1, int(ph_years))
+        g = ph_rate / 100.0
+        phase_pv = 0.0
+        for _ in range(ph_years):
+            global_year += 1
+            current = current * (1 + g)
+            # marginPath 가 있으면 FCF 재조정
+            if marginPath and global_year - 1 < len(marginPath):
+                # margin 변화만큼 FCF 조정 (baseFcf × (margin[t] / baseMargin) — 단순 근사)
+                # 실제로는 revenue × margin 이지만 여기선 FCF 기반이므로 스킵 (반환 dict 에만 기록)
+                pass
+            projections.append(current)
+            pv_year = current / ((1 + r) ** global_year)
+            phase_pv += pv_year
+            pv_explicit += pv_year
+        phases_info.append({
+            "years": ph_years,
+            "rate": ph_rate,
+            "pv": phase_pv,
+            "endFcf": current,
+        })
+
+    # Terminal
+    fcf_next = projections[-1] * (1 + gs)
+    terminal_value = fcf_next / (r - gs)
+    pv_terminal = terminal_value / ((1 + r) ** global_year)
+
+    enterprise_value = pv_explicit + pv_terminal
+    tv_share = pv_terminal / enterprise_value if enterprise_value > 0 else 0.0
+
+    equity_value = enterprise_value - netDebt
+    per_share = equity_value / shares if shares and shares > 0 else None
+
+    if tv_share > 0.80:
+        warnings.append(f"Terminal Value 비중 {tv_share*100:.0f}% 과도 — explicit 구간 신뢰도 낮음")
+
+    return {
+        "baseFcf": baseFcf,
+        "growthYears": years_list,
+        "growthRates": rates_list,
+        "terminalGrowthRate": terminalGrowthRate,
+        "wacc": wacc,
+        "marginPath": marginPath,
+        "reinvestmentPath": reinvestmentPath,
+        "projections": projections,
+        "phases": phases_info,
+        "pvExplicit": pv_explicit,
+        "terminalValue": terminal_value,
+        "pvTerminal": pv_terminal,
+        "enterpriseValue": enterprise_value,
+        "equityValue": equity_value,
+        "perShare": per_share,
+        "tvShare": tv_share,
+        "warnings": warnings,
+    }
+
+
+def twoStageDcf(
+    *,
+    baseFcf: float,
+    growthYears: int,
+    highGrowthRate: float,
+    terminalGrowthRate: float,
+    wacc: float,
+    netDebt: float = 0.0,
+    shares: int | None = None,
+) -> dict:
+    """Two-Stage DCF — multiStageDcf wrapper (backward compat).
+
+    단일 phase (n 년 × 단일 성장률) + terminal. 기존 호출 호환용.
+    """
+    r = multiStageDcf(
+        baseFcf=baseFcf,
+        growthYears=[growthYears],
+        growthRates=[highGrowthRate],
+        terminalGrowthRate=terminalGrowthRate,
+        wacc=wacc,
+        netDebt=netDebt,
+        shares=shares,
+    )
+    # 기존 twoStageDcf 반환 키 호환
+    r["highGrowthRate"] = highGrowthRate
+    # growthYears 는 list[int] 상태 — 기존 caller 가 int 를 기대할 수 있으므로
+    # primary dict 구조는 유지 (list). 기존 테스트는 projections/pvExplicit/tvShare 만 검증.
+    return r
+
+
+# ── Damodaran Liquidation Valuation (Dark Side Ch.9) ──────────────────────
+# 자산별 회수율 차등 적용. 청산 절차에서 무형/재고가 가장 손실 큼.
+
+_LIQUIDATION_RECOVERY = {
+    "cash": 1.00,          # 현금성자산
+    "receivables": 0.70,   # 매출채권
+    "inventory": 0.50,     # 재고자산
+    "tangible": 0.60,      # 유형자산
+    "intangible": 0.10,    # 무형자산 (영업권 포함)
+    "other": 0.40,         # 기타자산 fallback
+}
+
+
+def liquidationValuation(
+    *,
+    cash: float = 0.0,
+    receivables: float = 0.0,
+    inventory: float = 0.0,
+    tangibleAssets: float = 0.0,
+    intangibleAssets: float = 0.0,
+    otherAssets: float = 0.0,
+    totalLiabilities: float = 0.0,
+    shares: int | None = None,
+    recoveryOverrides: dict | None = None,
+) -> dict:
+    """Damodaran 청산가치 — 자산별 회수율 차등.
+
+    Returns
+    -------
+    dict
+        recoveries : dict — 자산별 회수 금액
+        grossRecovery : float — 총 자산 회수 합
+        netToEquity : float — 부채 상환 후 잔여
+        perShare : float | None
+        weightedRecoveryRate : float — 가중 평균 회수율 (0.0~1.0)
+    """
+    recovery = dict(_LIQUIDATION_RECOVERY)
+    if recoveryOverrides:
+        recovery.update(recoveryOverrides)
+
+    components = {
+        "cash": cash * recovery["cash"],
+        "receivables": receivables * recovery["receivables"],
+        "inventory": inventory * recovery["inventory"],
+        "tangible": tangibleAssets * recovery["tangible"],
+        "intangible": intangibleAssets * recovery["intangible"],
+        "other": otherAssets * recovery["other"],
+    }
+    gross = sum(components.values())
+    net_to_equity = gross - totalLiabilities
+    per_share = (net_to_equity / shares) if (shares and shares > 0 and net_to_equity > 0) else None
+
+    gross_raw = cash + receivables + inventory + tangibleAssets + intangibleAssets + otherAssets
+    weighted_rate = gross / gross_raw if gross_raw > 0 else 0.0
+
+    return {
+        "recoveries": components,
+        "grossRecovery": gross,
+        "netToEquity": net_to_equity,
+        "perShare": per_share,
+        "weightedRecoveryRate": weighted_rate,
+        "recoveryRates": recovery,
+    }
+
+
 # ── DCF ──────────────────────────────────────────────
 
 

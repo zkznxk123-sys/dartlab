@@ -86,6 +86,7 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("concentration", "매출 집중도", "수익구조", "HHI 기반 매출 편중도"),
     BlockMeta("revenueQuality", "매출 품질", "수익구조", "영업CF/순이익, 총이익률 추세"),
     BlockMeta("revenueFlags", "수익구조 플래그", "수익구조", "수익 관련 경고/기회 신호"),
+    BlockMeta("storyPrecedents", "유사 경로 선례", "수익구조", "Damodaran Possible Test — 같은 phase 기업 + 블로그 경험"),
     # ── 자금조달 ──
     BlockMeta("fundingSources", "자금 원천 구성", "자금조달", "내부유보/주주자본/금융차입/영업조달 비중"),
     BlockMeta("capitalOverview", "자본 구조 개요", "자금조달", "자기자본/부채 비율과 구성"),
@@ -194,6 +195,8 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("dFV", "dartlab 적정주가", "가치평가", "dFV — 적합도 가중 + 질적 조정 종합 적정가"),
     BlockMeta("methodFitness", "방법론 적합도", "가치평가", "DCF/RIM/DDM/상대가치 적합도 비교"),
     BlockMeta("qualityFactors", "질적 조정 요인", "가치평가", "신용/이익품질/거버넌스/사이클 할인·프리미엄"),
+    BlockMeta("lifeCycleStage", "생애주기 단계", "가치평가", "Damodaran Corporate Life Cycle 단계 + 모델 힌트"),
+    BlockMeta("valuationSins", "밸류에이션 정합성", "가치평가", "Damodaran 7 Sins + CF Consistency 검증"),
     BlockMeta("valuationFlags", "가치평가 플래그", "가치평가", "가치평가 관련 경고/기회 신호"),
     # ── 5-1 지배구조 ──
     BlockMeta("ownershipTrend", "최대주주 지분 추이", "지배구조", "최대주주 지분율 시계열과 주주 구성"),
@@ -220,6 +223,7 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("historicalRatios", "과거 구조 비율", "매출전망", "Pro-Forma 기반 과거 재무 비율"),
     BlockMeta("forecastFlags", "매출전망 플래그", "매출전망", "예측 관련 경고/제한 사항"),
     BlockMeta("calibrationReport", "예측 정확도 검증", "매출전망", "과거 예측의 확률 캘리브레이션 (Brier Score)"),
+    BlockMeta("plausibilityBand", "가정 타당성 대역", "매출전망", "섹터 피어 분포 대비 현재 forecast percentile (Plausible Test)"),
     # ── 시장분석 ──
     BlockMeta("technicalVerdict", "기술적 종합 판단", "시장분석", "강세/중립/약세 판정, RSI, ADX, SMA/BB 위치"),
     BlockMeta("technicalSignals", "매매 신호", "시장분석", "골든크로스/RSI/MACD/볼린저 신호 최근 20일"),

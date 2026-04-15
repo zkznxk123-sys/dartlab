@@ -21,7 +21,7 @@
     >>> df = marketCap("005930")          # 일별 시계열
     >>> snap = marketCapSnapshot("005930") # 최신 한 점
 
-ops/gather.md 4축 외 보조 모듈. analysis(L2) import 금지.
+src/dartlab/gather/README.md 4축 외 보조 모듈. analysis(L2) import 금지.
 """
 
 from __future__ import annotations

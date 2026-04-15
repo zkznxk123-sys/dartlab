@@ -6,8 +6,9 @@ import polars as pl
 
 _STATEMENT_PATTERNS = {
     "BS": r"재무상태표",
-    "PNL": r"손익계산서",
     "CI": r"포괄손익",
+    # PNL 은 '포괄' 이 앞에 없는 '손익계산서' 만 매칭. 순서도 CI 뒤에 두어 이중 방어.
+    "PNL": r"(?<!포괄)손익계산서",
     "SCE": r"자본변동표",
     "CF": r"현금흐름표",
 }

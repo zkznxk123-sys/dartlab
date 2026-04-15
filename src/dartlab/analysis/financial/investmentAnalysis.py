@@ -115,8 +115,12 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
             roicYoy : float | None — ROIC YoY 변화율 (%)
             waccEstimate : float | None — 추정 WACC (%)
             spread : float | None — ROIC - WACC (%p)
+            decomposition : dict | None — Damodaran Excess Return 분해
+                operatingMargin, assetTurnover, taxRetention, roicReconstructed,
+                excessReturnPct, excessReturnAbs, marginContribution,
+                turnoverContribution, dominantDriver
     """
-    isResult = company.select("IS", ["영업이익", "법인세비용", "법인세차감전순이익"])
+    isResult = company.select("IS", ["영업이익", "법인세비용", "법인세차감전순이익", "매출액"])
     bsResult = company.select(
         "BS",
         [
@@ -145,6 +149,7 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     opRow = isData.get("operating_profit", {})
     taxRow = isData.get("income_tax_expense") or isData.get("income_taxes", {})
     ptRow = isData.get("profit_before_tax", {})
+    revRow = isData.get("sales", {})
     eqRow = bsData.get("total_stockholders_equity", {})
     bsData.get("shortterm_borrowings", {})
     bsData.get("longterm_borrowings", {})
@@ -166,6 +171,7 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
         opIncome = _getF(opRow, col)
         taxExpense = _getF(taxRow, col)
         ptIncome = _getF(ptRow, col)
+        revenue = _getF(revRow, col)
 
         # 유효세율
         effectiveTaxRate = abs(taxExpense) / abs(ptIncome) if ptIncome != 0 else 0.25
@@ -194,6 +200,7 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
                 "operatingIncome": opIncome if opIncome != 0 else None,
                 "effectiveTaxRate": round(effectiveTaxRate * 100, 2),
                 "nopat": nopat,
+                "revenue": revenue if revenue != 0 else None,
                 "equity": equity if equity != 0 else None,
                 "totalBorrowing": totalBorrowing if totalBorrowing > 0 else None,
                 "cash": cash if cash != 0 else None,
@@ -216,6 +223,26 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
             h["waccEstimate"] = waccEstimate
             roic = h.get("roic")
             h["spread"] = round(roic - waccEstimate, 2) if roic is not None else None
+
+    # Damodaran Excess Return 분해 주입
+    from dartlab.core.finance.calc import decomposeRoic
+
+    for h in history:
+        op = h.get("operatingIncome")
+        rev = h.get("revenue")
+        ic = h.get("investedCapital")
+        etr = h.get("effectiveTaxRate")
+        if op is None or rev is None or ic is None:
+            h["decomposition"] = None
+            continue
+        decomp = decomposeRoic(
+            operatingIncome=op,
+            revenue=rev,
+            investedCapital=ic,
+            effectiveTaxRate=etr / 100.0 if etr is not None else None,
+            wacc=h.get("waccEstimate"),
+        )
+        h["decomposition"] = decomp
 
     return {"history": history} if history else None
 

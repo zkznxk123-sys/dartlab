@@ -8,7 +8,7 @@ dartlab의 카탈로그성 API들("뭐가 있는지 본다")을 한 함수의 `k
     filings        — 기업별 공시 메타 목록 (DART/EDGAR 자동 분기)
     topics         — 기업별 토픽 목록
 
-상세: ops/listing.md
+상세: src/dartlab/gather/LISTING.md
 """
 
 from __future__ import annotations

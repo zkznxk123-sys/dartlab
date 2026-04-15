@@ -703,6 +703,9 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
         "sensitivity",
         "valuationSynthesis",
         "valuationFlags",
+        "lifeCycleStage",
+        "valuationSins",
+        "dFV",
     }:
         from dartlab.analysis.financial.valuation import (
             calcDcf,
@@ -774,6 +777,34 @@ def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None
                 b["methodFitness"] = methodFitnessBlock(_dfv_data) if _dfv_data else []
             if _need("qualityFactors"):
                 b["qualityFactors"] = qualityFactorsBlock(_dfv_data) if _dfv_data else []
+
+        # Damodaran 흡수 — lifeCycle / valuationSins
+        if _need("lifeCycleStage"):
+            from dartlab.analysis.financial.lifeCycle import calcLifeCycle
+            from dartlab.review.builders import lifeCycleStageBlock
+
+            b["lifeCycleStage"] = _safe(lambda: lifeCycleStageBlock(calcLifeCycle(company, basePeriod=basePeriod)))
+        if _need("valuationSins"):
+            from dartlab.analysis.financial.storyValidation import calcValuationSins
+            from dartlab.review.builders import valuationSinsBlock
+
+            b["valuationSins"] = _safe(lambda: valuationSinsBlock(calcValuationSins(company, basePeriod=basePeriod)))
+
+    # ── Damodaran 흡수 — 수익구조 storyPrecedents ──
+    if keys is None or "storyPrecedents" in keys:
+        from dartlab.analysis.financial.storyValidation import calcStoryPrecedents
+        from dartlab.review.builders import storyPrecedentsBlock
+
+        if _need("storyPrecedents"):
+            b["storyPrecedents"] = _safe(lambda: storyPrecedentsBlock(calcStoryPrecedents(company, basePeriod=basePeriod)))
+
+    # ── Damodaran 흡수 — 매출전망 plausibilityBand ──
+    if keys is None or "plausibilityBand" in keys:
+        from dartlab.analysis.financial.storyValidation import calcPlausibilityBand
+        from dartlab.review.builders import plausibilityBandBlock
+
+        if _need("plausibilityBand"):
+            b["plausibilityBand"] = _safe(lambda: plausibilityBandBlock(calcPlausibilityBand(company, basePeriod=basePeriod)))
 
     # ── 5부: 비재무 심화 ──
     if keys is None or keys & {
