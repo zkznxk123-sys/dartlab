@@ -7,17 +7,47 @@ from dartlab.review.section import Section
 from dartlab.review.templates import TEMPLATE_ORDER, TEMPLATES
 from dartlab.review.utils import isTerminal
 
+# Phase 4 G15a: buildBlocks preset — 전체 호출 113초/7.9GB 회피
+_MINIMAL_KEYS: frozenset[str] = frozenset({
+    "profile", "segmentComposition", "revenueGrowth",
+    "marginTrend", "cashFlowOverview", "cashQuality",
+    "leverageTrend", "assetStructure",
+    "dFV", "lifeCycleStage", "valuationSins",
+})
 
-def buildBlocks(company, keys: set[str] | None = None, *, basePeriod: str | None = None):
+_STANDARD_KEYS: frozenset[str] = _MINIMAL_KEYS | frozenset({
+    "concentration", "growthTrend", "roicTimeline",
+    "distressScore", "valuationSynthesis", "plausibilityBand",
+    # storyPrecedents 제외 (scan 271MB 다운로드 회피 — preset="full" 에서만)
+})
+
+
+def buildBlocks(
+    company,
+    keys: set[str] | None = None,
+    *,
+    basePeriod: str | None = None,
+    preset: str = "standard",
+):
     """블록 사전 -- analysis calc* 결과를 블록으로 변환.
 
-    keys가 지정되면 해당 블록만 빌드한다 (선택적 빌드).
-    keys=None이면 전체 블록을 빌드한다 (기존 동작).
+    keys가 지정되면 해당 블록만 빌드한다 (선택적 빌드, preset 무시).
+    keys=None 이면 preset 에 따라 빌드 범위 결정:
+      - "minimal" (~30초): 6막 골격 블록 ~11개
+      - "standard" (기본, ~60초): minimal + 주요 분석 블록 (storyPrecedents 제외)
+      - "full" (~113초): 전체 블록 (scan 프리빌드 필요 — storyPrecedents 포함)
 
     [최적화] keys=None (전체 빌드) 시 4엔진의 무거운 외부 데이터 calc를
     ThreadPoolExecutor로 미리 워밍업한다. 결과는 BoundedCache(thread-safe)에
     저장되어 이후 순차 빌드가 캐시 hit으로 즉시 완료된다.
     """
+    # Phase 4 G15a: preset → keys 변환 (keys 명시되면 preset 무시)
+    if keys is None:
+        if preset == "minimal":
+            keys = set(_MINIMAL_KEYS)
+        elif preset == "standard":
+            keys = set(_STANDARD_KEYS)
+        # "full" 은 keys=None 유지 (기존 동작)
     # builders와 analysis의 금액 포맷을 company.currency에 맞게 설정 (contextvars — 스레드 안전)
     from dartlab.review.builders import _review_currency
 

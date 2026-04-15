@@ -23,8 +23,12 @@ def calcStoryPrecedents(
     lifeCyclePhase: str | None = None,
     sectorCode: str | None = None,
     limit: int = 5,
+    skipIfScanMissing: bool = True,
 ) -> dict[str, Any]:
     """Possible Test — 유사 경로 기업 수집 (scan + KnowledgeDB insights).
+
+    Phase 4 G15b: skipIfScanMissing=True 기본 — scan 프리빌드 (271MB) 미다운로드 시
+    즉시 skip 반환. AI 대화 첫 호출에서 강제 다운로드로 인한 timeout 방지.
 
     Returns
     -------
@@ -34,6 +38,19 @@ def calcStoryPrecedents(
         confidence : str — "low" | "mid" | "high"
         source : str — 데이터 경로 요약
     """
+    # Phase 4 G15b: scan 프리빌드 없으면 강제 다운로드 회피 — AI timeout 방지
+    if skipIfScanMissing:
+        from pathlib import Path
+        scan_path = Path("data/dart/scan/finance.parquet")
+        if not scan_path.exists():
+            return {
+                "precedents": [],
+                "count": 0,
+                "confidence": "low",
+                "source": "scan_not_downloaded",
+                "hint": "`dartlab.downloadAll('scan')` 로 271MB 프리빌드 다운로드 후 재시도",
+            }
+
     # company 객체에서 기본값 추출
     if company is not None:
         if stockCode is None:

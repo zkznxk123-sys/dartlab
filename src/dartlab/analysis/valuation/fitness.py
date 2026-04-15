@@ -20,8 +20,10 @@ _MODEL_MATRIX: dict[tuple[str | None, str | None], dict] = {
     # lifeCycle 전용 (template 무관)
     (None, "earlyGrowth"): {"primary": "relativeSurvival", "secondary": ["dcf2stage"], "survivalAdj": True},
     (None, "highGrowth"): {"primary": "dcf2stage", "secondary": ["rim", "relative"]},
-    (None, "matureGrowth"): {"primary": "dcf", "secondary": ["rim", "relative"]},
-    (None, "matureStable"): {"primary": "dcf", "secondary": ["rim", "relative"]},
+    # Phase 4 G12: mature 기업은 Damodaran 권고대로 상대가치 primary — DCF 는 사이클 바닥 취약
+    # (CAGR 4% 로 계산된 DCF 보다 peer multiple 이 현실 시가총액 근접)
+    (None, "matureGrowth"): {"primary": "relative", "secondary": ["dcf2stage", "rim"]},
+    (None, "matureStable"): {"primary": "relative", "secondary": ["dcf2stage", "rim", "ddm"]},
     (None, "decline"): {"primary": "liquidation", "secondary": ["relative"], "survivalAdj": True},
     (None, "turnaround"): {"primary": "relative", "secondary": ["dcf2stage"], "survivalAdj": True},
     # template 전용 (phase 미결정)

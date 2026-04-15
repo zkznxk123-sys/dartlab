@@ -33,7 +33,8 @@ def calcQualityWACC(company: Any, base_wacc: float, *, basePeriod: str | None = 
     factors.append(_cycleSpread(company))
 
     total_spread = sum(f["spread"] for f in factors)
-    total_spread = max(-1.5, min(5.5, total_spread))
+    # Phase 4 G12.2: AA 등급 대기업은 시장평균 대비 음수 프리미엄 정당 — 하한 -1.5 → -2.5
+    total_spread = max(-2.5, min(5.5, total_spread))
     adjusted = base_wacc + total_spread
 
     return {

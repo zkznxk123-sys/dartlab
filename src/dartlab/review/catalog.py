@@ -294,9 +294,12 @@ _SECTION_INDEX: dict[str, SectionMeta] = {s.key: s for s in SECTIONS}
 _LABEL_TO_KEY: dict[str, str] = {b.label: b.key for b in _BLOCKS}
 
 
-def _suggest(query: str) -> str:
-    """오타 시 유사 key/label 제안 메시지."""
+def _suggest(query) -> str:
+    """오타 시 유사 key/label 제안 메시지. int/float/list 입력도 방어."""
     from difflib import get_close_matches
+
+    # Phase 4 G14b: int/float 등 비-str 방어 ('int' object is not iterable 버그)
+    query = str(query) if not isinstance(query, str) else query
 
     candidates = list(_INDEX.keys()) + list(_LABEL_TO_KEY.keys())
     matches = get_close_matches(query, candidates, n=3, cutoff=0.4)

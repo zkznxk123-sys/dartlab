@@ -1,0 +1,131 @@
+"""Phase 4 Production 리프트 테스트.
+
+G11 accessor pin / G12 dFV baseline / G13 override chain /
+G14 validateStory + _suggest / G15 buildBlocks preset + scan lazy.
+"""
+
+from __future__ import annotations
+
+import pytest
+
+
+# ── G11 BoundedCache accessor pin ──────────────────────
+
+
+@pytest.mark.unit
+def test_boundedCache_accessor_pinned():
+    """accessor prefix 가 _pinned_prefixes 에 포함."""
+    from dartlab.core.memory import BoundedCache
+
+    cache = BoundedCache()
+    for key in ("_showAccessor", "_selectAccessor", "_reviewAccessor",
+                "_creditAccessor", "_analysisAccessor"):
+        assert cache._is_pinned(key), f"{key} not pinned"
+
+
+# ── G14b BlockMap _suggest int 방어 ────────────────────
+
+
+@pytest.mark.unit
+def test_blockMap_suggest_accepts_non_str():
+    """_suggest 가 int/float/list 등 비-str 입력도 str 반환."""
+    from dartlab.review.catalog import _suggest
+
+    for q in (123, 4.5, ["a"], None):
+        result = _suggest(q)
+        assert isinstance(result, str), f"{q!r} → {type(result).__name__}"
+
+
+# ── G14a validateStory tool overrides description ──────
+
+
+@pytest.mark.integration
+def test_validateStory_tool_schema_has_description():
+    """validateStory tool 의 overrides 에 Damodaran 키 description 노출."""
+    from dartlab.ai.tools import buildTools
+
+    tools = buildTools()
+    vs = next((t for t in tools if t.name == "validateStory"), None)
+    assert vs, "validateStory tool 미노출"
+    desc = vs.parameters.get("properties", {}).get("overrides", {}).get("description", "")
+    for key in ("impliedERP", "bottomUpBeta", "lifeCyclePhase", "pSurvival", "countryCode"):
+        assert key in desc, f"{key} description 누락"
+
+
+# ── G12 dFV baseline 보정 ──────────────────────────────
+
+
+@pytest.mark.integration
+@pytest.mark.requires_data
+def test_dFV_samsung_within_realistic_range():
+    """삼성전자 dFV 140K~230K (현재가 211K 근접, Phase 3 61K → 개선)."""
+    import dartlab
+    from dartlab.analysis.valuation.dFV import calcDFV
+
+    c = dartlab.Company("005930")
+    r = calcDFV(c)
+    dfv = r["dFV"]
+    assert 140_000 < dfv < 230_000, f"dFV {dfv:,} out of realistic range"
+
+
+@pytest.mark.integration
+@pytest.mark.requires_data
+def test_dFV_yangyang_regression_within_3pct():
+    """삼양식품 회귀 — Phase 3 기준 ±3%."""
+    import dartlab
+    from dartlab.analysis.valuation.dFV import calcDFV
+
+    c = dartlab.Company("003230")
+    r = calcDFV(c)
+    dfv = r["dFV"]
+    # Phase 3 기준 1,055,232 ±3%
+    assert 1_020_000 < dfv < 1_090_000, f"regression: {dfv:,}"
+
+
+# ── G13 override chain 전파 ────────────────────────────
+
+
+@pytest.mark.integration
+@pytest.mark.requires_data
+def test_override_chain_country_propagates():
+    """countryCode override 주입 시 dFV 경로 변화 (chain 전파 증거)."""
+    import dartlab
+    from dartlab.analysis.valuation.dFV import calcDFV
+
+    c = dartlab.Company("003230")
+    r_base = calcDFV(c)
+    r_us = calcDFV(c, overrides={"countryCode": "US"})
+    # country 전파 시 dFV 변화 (Rf 차이 반영)
+    assert r_base["dFV"] != r_us["dFV"], "country override 미전파"
+
+
+# ── G15a buildBlocks preset ────────────────────────────
+
+
+@pytest.mark.unit
+def test_buildBlocks_preset_constants_exist():
+    """_MINIMAL_KEYS / _STANDARD_KEYS 정의 + dFV/lifeCycleStage 포함."""
+    from dartlab.review.registry import _MINIMAL_KEYS, _STANDARD_KEYS
+
+    assert "dFV" in _MINIMAL_KEYS
+    assert "lifeCycleStage" in _MINIMAL_KEYS
+    assert "valuationSins" in _MINIMAL_KEYS
+    # standard 는 minimal 상위집합
+    assert _MINIMAL_KEYS <= _STANDARD_KEYS
+
+
+# ── G15b scan lazy ─────────────────────────────────────
+
+
+@pytest.mark.integration
+def test_storyPrecedents_skipIfScanMissing_signature():
+    """calcStoryPrecedents 시그니처에 skipIfScanMissing 파라미터 존재."""
+    import inspect
+
+    from dartlab.analysis.financial.storyValidation import calcStoryPrecedents
+
+    sig = inspect.signature(calcStoryPrecedents)
+    assert "skipIfScanMissing" in sig.parameters
+    # 기본값 True (AI timeout 방지)
+    param = sig.parameters["skipIfScanMissing"]
+    assert param.default is True

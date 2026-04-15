@@ -309,7 +309,7 @@ def _sumWithFallback(snakeData: dict, col: str, separateKeys: tuple, fallbackKey
 
 
 def sumBorrowings(snakeData: dict, col: str) -> float:
-    """차입금 합산 — snakeId 키 dict용."""
+    """차입금 합산 — snakeId 키 dict용. Phase 4 G12.4: K-IFRS 리스부채 포함 (Damodaran IC)."""
     parts = []
     for sid in _BORROWING_KEYS:
         if sid == "borrowings":
@@ -322,6 +322,11 @@ def sumBorrowings(snakeData: dict, col: str) -> float:
         if v is not None:
             parts.append(v)
     for sid in _BOND_KEYS:
+        v = snakeData.get(sid, {}).get(col)
+        if v is not None and v != 0:
+            parts.append(v)
+    # Phase 4 G12.4: 리스부채 추가 — Damodaran IC = Equity + Debt (incl. lease) - Cash
+    for sid in ("lease_liabilities", "operating_lease_obligations", "current_portion_of_finance_leases"):
         v = snakeData.get(sid, {}).get(col)
         if v is not None and v != 0:
             parts.append(v)

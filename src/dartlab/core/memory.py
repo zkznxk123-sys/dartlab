@@ -169,6 +169,14 @@ class BoundedCache:
         # pinned: 이 prefix로 시작하는 키는 evict하지 않음 (외부 API + 무거운 계산 결과 보호)
         # review에서 여러 calc가 공유하는 핵심 캐시. 작은 dict이고 재로드 비용 큼.
         self._pinned_prefixes: tuple[str, ...] = (
+            # Accessor (dualAccess wrapper — 재생성 로직이 없음, 반드시 보호)
+            # Phase 4 G11: 대형 기업 (한국전력 등) 에서 메모리 압박 시
+            # _check_pressure() 가 accessor 까지 삭제 → 다음 select/show 에서 KeyError
+            "_showAccessor",
+            "_selectAccessor",
+            "_reviewAccessor",
+            "_creditAccessor",
+            "_analysisAccessor",
             # 외부 API / 데이터 로드
             "_quant_ohlcv",
             "_quant_benchmark",

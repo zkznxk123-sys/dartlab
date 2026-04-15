@@ -237,7 +237,21 @@ def _collectAllValues(company: Any, basePeriod: str | None) -> dict:
 
 
 def _getBaseWACC(company: Any) -> float:
-    """기본 WACC 추출 (업종 기반)."""
+    """기본 WACC 추출 — Phase 4 G12: CAPM 기반 우선, 섹터 fallback.
+
+    기존은 sectorParams.discountRate (대기업 10% 고정) 만 사용 → 삼성 AA급에 과도.
+    Phase 4: `_estimateWacc` (CAPM + 시총 감쇠 + country) 우선 → 하한 4% 경계 반영.
+    """
+    # 1순위: CAPM 기반 (compute_company_wacc 경유)
+    try:
+        from dartlab.analysis.financial.investmentAnalysis import _estimateWacc
+
+        w = _estimateWacc(company)
+        if w is not None and 3.0 <= w <= 25.0:
+            return float(w)
+    except (ImportError, AttributeError, ValueError, TypeError):
+        pass
+    # 2순위: sectorParams (기존 fallback)
     try:
         from dartlab.core.finance.dcf import _getSectorParams
 
@@ -247,7 +261,7 @@ def _getBaseWACC(company: Any) -> float:
             return params.discountRate
     except (ImportError, AttributeError):
         pass
-    return 10.0  # 기본값
+    return 10.0  # 최종 fallback
 
 
 def _triangulate(primary_key: str, primary_value: float, secondary_keys: list[str], all_methods: dict) -> dict:
@@ -442,15 +456,52 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
     except ImportError:
         return None
 
-    # WACC
+    # WACC — Phase 4 G13: override chain 전파 (impliedERP / bottomUpBeta / countryCode)
     wacc: float | None = None
-    try:
-        roic = calcRoicTimeline(company)
-        if roic and roic.get("history"):
-            wacc = roic["history"][0].get("waccEstimate")
-    except (AttributeError, ValueError, TypeError):
-        pass
-    wacc = applyOverride(wacc or 9.0, "wacc", overrides)
+    forced_wacc = applyOverride(None, "wacc", overrides)
+    implied_flag = applyOverride(False, "impliedERP", overrides)
+    bottom_up_flag = applyOverride(False, "bottomUpBeta", overrides)
+    country_code = applyOverride(None, "countryCode", overrides)
+
+    if forced_wacc is not None:
+        # 사용자/AI 가 WACC 직접 지정 — 최우선
+        wacc = float(forced_wacc)
+    elif implied_flag or bottom_up_flag or country_code:
+        # Phase 3 Damodaran override 경로 — compute_company_wacc 직접 호출로 override 반영
+        try:
+            from dartlab.core.finance.proforma import compute_company_wacc
+
+            # series 추출 — Company finance 접근 (AttributeError fallback)
+            series = None
+            try:
+                series = getattr(company, "_series", None)
+                if series is None and hasattr(company, "_finance"):
+                    series = getattr(company._finance, "series", None)
+            except (AttributeError, ValueError):
+                series = None
+
+            if series:
+                wacc_val, _details = compute_company_wacc(
+                    series,
+                    currency=getattr(company, "currency", "KRW"),
+                    country=country_code,
+                    implied_erp=bool(implied_flag),
+                    bottom_up_beta=bool(bottom_up_flag),
+                )
+                wacc = float(wacc_val)
+        except (ImportError, AttributeError, ValueError, TypeError):
+            wacc = None
+
+    if wacc is None:
+        # 기본 경로 — 기존 _estimateWacc
+        try:
+            roic = calcRoicTimeline(company)
+            if roic and roic.get("history"):
+                wacc = roic["history"][0].get("waccEstimate")
+        except (AttributeError, ValueError, TypeError):
+            pass
+    if wacc is None:
+        wacc = 9.0
 
     # 고성장률: calcGrowthTrend CAGR
     high_g: float | None = None
@@ -465,14 +516,14 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
     # 고성장률 상한 25% (과도 방지)
     high_g = max(-5.0, min(high_g, 25.0))
 
-    # lifeCycle 별 phase 구성 (Damodaran 권고)
+    # lifeCycle 별 phase 구성 (Damodaran 권고) — Phase 4 G12.3: cap/floor 추가
     phase_config: dict[str, tuple[list[int], list[float]]] = {
-        "earlyGrowth": ([5, 3, 2], [high_g, high_g * 0.6, high_g * 0.3]),
-        "highGrowth": ([5, 2], [high_g, high_g * 0.5]),
-        "matureGrowth": ([5], [high_g]),
-        "matureStable": ([3], [max(high_g, 2.0)]),
-        "decline": ([2], [min(high_g, 0.0)]),
-        "turnaround": ([5], [high_g]),
+        "earlyGrowth": ([5, 3, 2], [high_g, high_g * 0.5, high_g * 0.2]),
+        "highGrowth":  ([5, 2],    [high_g, high_g * 0.5]),
+        "matureGrowth":([4],       [min(high_g, 8.0)]),   # cap 8%
+        "matureStable":([3],       [min(high_g, 3.0)]),   # cap 3% (GDP 근접)
+        "decline":     ([2],       [min(high_g, -2.0) if high_g < 0 else min(high_g, 0.0)]),
+        "turnaround":  ([5],       [high_g]),
     }
     years_vec, rates_vec = phase_config.get(life_phase or "", ([5], [high_g]))
 
@@ -487,11 +538,20 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
     margin_path = applyOverride(None, "marginPath", overrides)
     reinvestment_path = applyOverride(None, "reinvestmentPath", overrides)
 
-    # 영구성장률: country Rf - 1% (Damodaran 상한 권고)
+    # 영구성장률 — Phase 4 G12.3: phase 별 Rf 감쇠 매핑
     currency = getattr(company, "currency", None)
     country = applyOverride(None, "countryCode", overrides)
     erp = loadDamodaranERP(countryCode=country, currency=currency)
-    tg_default = max(1.0, erp["riskFreeRate"] - 1.0)
+    rf = erp["riskFreeRate"]
+    tg_by_phase = {
+        "earlyGrowth":  max(2.0, rf - 0.5),
+        "highGrowth":   max(2.0, rf - 1.0),
+        "matureGrowth": max(2.0, rf - 1.5),
+        "matureStable": max(1.5, rf - 2.0),  # GDP 추종 (Damodaran 권고)
+        "decline":      0.5,
+        "turnaround":   max(2.0, rf - 1.0),
+    }
+    tg_default = tg_by_phase.get(life_phase or "", max(1.0, rf - 1.0))
     terminal_g = applyOverride(tg_default, "terminalGrowth", overrides)
 
     # baseFcf: 최근 5개년 중 양수 FCF 의 중앙값 (mid-cycle) — 최근 YTD 편향 회피

@@ -743,7 +743,8 @@ def compute_company_wacc(
         e_weight, d_weight = 1.0, 0.0
 
     wacc = e_weight * ke + d_weight * kd * (1 - tax_rate)
-    wacc = max(5.0, min(wacc, 20.0))
+    # Phase 4 G12.1: 대기업 AA급 현실 (Rf 2.4% + 1.5%p ≈ 4%) 반영 — 하한 5→4
+    wacc = max(4.0, min(wacc, 20.0))
 
     details = {
         "ke": ke,
