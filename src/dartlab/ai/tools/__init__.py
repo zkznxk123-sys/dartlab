@@ -71,33 +71,20 @@ _BLACKLIST: set[str] = {
 def _autoDiscover() -> dict[str, tuple[str, str]]:
     """dartlab.__all__ + Company 공개 method 자동 순회 + 블랙리스트.
 
-    우선순위: Company-bound (_xxxImpl 또는 직접 method) > module-level.
+    우선순위: **module-level (시장 전체) > Company-bound (개별 종목)**.
+    이유: AI tool 은 기본이 "시장 전체 / 종목 비의존" 의미. 같은 이름이 둘 다 있으면
+    module 이 더 범용. 예: `search` = dartlab.search (시장 공시) vs Company.search
+    (이 회사 공시) — AI 는 전자가 기본 유용.
     """
     import dartlab
     from dartlab.providers.dart.company import Company as _C
 
     tools: dict[str, tuple[str, str]] = {}
 
-    # 1. Company-bound — dual-access _xxxImpl 또는 직접 method
-    for attr in dir(_C):
-        if attr.startswith("_") or attr in _BLACKLIST:
-            continue
-        # dual-access property (_xxxImpl 존재) 우선
-        if getattr(_C, f"_{attr}Impl", None) is not None:
-            tools[attr] = ("company", attr)
-            continue
-        # 직접 method (gather, quant 등)
-        obj = getattr(_C, attr, None)
-        if callable(obj) and (inspect.isfunction(obj) or inspect.ismethod(obj)):
-            # Company 인스턴스에서만 의미 있는 method 만 (수업 attribute, dunder 제외)
-            if not isinstance(obj, type):
-                tools[attr] = ("company", attr)
-
-    # 2. Module-level — Company 에 없는 것만 (scan/macro/search 등)
-    # 주의: dartlab.scan/macro/quant 는 _CallableModule (ismodule=True) — 명시적 허용.
+    # 1. Module-level 먼저
     _MODULE_WHITELIST = {"scan", "macro", "quant", "gather", "industry", "topdown"}
     for name in getattr(dartlab, "__all__", []):
-        if name in _BLACKLIST or name.startswith("_") or name in tools:
+        if name in _BLACKLIST or name.startswith("_"):
             continue
         obj = getattr(dartlab, name, None)
         if obj is None or inspect.isclass(obj):
@@ -107,6 +94,20 @@ def _autoDiscover() -> dict[str, tuple[str, str]]:
         if not callable(obj):
             continue
         tools[name] = ("module", name)
+
+    # 2. Company-bound — module 에 없는 것만 (analysis/credit/review/show/... 은 여기서)
+    for attr in dir(_C):
+        if attr.startswith("_") or attr in _BLACKLIST or attr in tools:
+            continue
+        # dual-access property (_xxxImpl 존재) 우선
+        if getattr(_C, f"_{attr}Impl", None) is not None:
+            tools[attr] = ("company", attr)
+            continue
+        # 직접 method (gather, quant 등)
+        obj = getattr(_C, attr, None)
+        if callable(obj) and (inspect.isfunction(obj) or inspect.ismethod(obj)):
+            if not isinstance(obj, type):
+                tools[attr] = ("company", attr)
 
     # 3. searchName → searchCompany (AI 친화적 이름)
     if "searchName" in tools:
@@ -445,16 +446,27 @@ def _paramType(param: inspect.Parameter) -> str:
 # ── Module tool post-processing ───────────────────────────
 
 
-_MODULE_CORE: dict[str, set[str]] = {
-    "scan": {"axis", "target"},
-    "macro": {"axis", "target", "market"},
-    "search": {"query", "corp", "start", "end", "topK", "scope"},
-    "searchName": {"keyword"},
-}
-
-
 def _splitKwargs(target: str, kwargs: dict) -> tuple[dict, dict]:
-    core_keys = _MODULE_CORE.get(target, set())
+    """함수 시그니처 자동 분석으로 허용 파라미터 / 추가 파라미터 분리.
+
+    수동 whitelist 금지 원칙 (CAPABILITIES 자동). pastInsight/sectorInsights
+    포함 모든 module-level tool 에 일관 적용.
+    """
+    import dartlab
+
+    fn = _resolveCallable("module", target)
+    if fn is None:
+        return {}, kwargs
+    try:
+        sig = inspect.signature(fn)
+        core_keys = {
+            n
+            for n, p in sig.parameters.items()
+            if n not in ("self", "cls")
+            and p.kind not in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD)
+        }
+    except (ValueError, TypeError):
+        core_keys = set()
     core = {k: v for k, v in kwargs.items() if k in core_keys and v is not None}
     post = {k: v for k, v in kwargs.items() if k not in core_keys and v is not None}
     return core, post
