@@ -513,6 +513,8 @@ def _buildCategoryBlock(category: str, intent: str, *, hasCompany: bool = False)
         f"- {mandatory}\n"
         "- tool 없이 일반론 답변 금지. 반드시 실측 수치 + 출처(tool 결과) 인용.\n"
         "- assumptions 필드의 [엔진가정] / ⚠ flag 가 나오면 overrides 재호출로 시나리오 비교.\n"
+        "- 가치평가/전망/DCF 질문은 `c.validateStory()` 또는 analysis(가치평가) 의 lifeCycleStage/valuationSins 결과로 "
+        "Damodaran Possible/Plausible/Probable 검증 수행 권장.\n"
         "- 끝에 판단 형식 (방향/강도/확신도/근거 한 줄) 필수."
     )
 
@@ -543,7 +545,7 @@ def runAsk(
     # 추가 LLMConfig overrides (kwargs 로 흡수)
     **kwargs: Any,
 ) -> Generator[AnalysisEvent, None, None]:
-    """AI 분석 이벤트 스트림. AI 가 모든 엔진을 tool 로 자율 호출 (ops/ai.md)."""
+    """AI 분석 이벤트 스트림. AI 가 모든 엔진을 tool 로 자율 호출 (src/dartlab/ai/README.md)."""
     _logFile = None
     try:
         from dartlab import config as _cfg
@@ -644,7 +646,7 @@ def _runAskInner(
 ) -> Generator[AnalysisEvent, None, None]:
     """runAsk() 본체 — tool calling 단일 경로.
 
-    사상 (ops/ai.md): AI 가 모든 엔진을 tool 로 자율 호출. 종목 감지 · 원본 검증 · override 전부 AI 판단.
+    사상 (src/dartlab/ai/README.md): AI 가 모든 엔진을 tool 로 자율 호출. 종목 감지 · 원본 검증 · override 전부 AI 판단.
     사용자 API 에 Company 파라미터 노출 안 함. Pre-grounding · ContextBuilder 떠먹이기 전부 제거.
     """
     config_ = _resolveAnalysisConfig(provider, role, model, api_key, base_url, **kwargs)
@@ -756,10 +758,12 @@ def _runAskInner(
         except (ImportError, OSError, sqlite3.Error):
             pass
 
-        # 자기성장: stockCode 있고 응답이 충분할 때만 인사이트 갱신
+        # 자기성장: stockCode 있고 응답이 충분할 때만 인사이트 갱신 (playbook 경유)
         if stockCode and len("".join(_full_response_parts)) > 500:
             try:
-                _updateInsightFromResponse(stockCode, "".join(_full_response_parts), company)
+                from dartlab.ai.context.playbook import saveInsightFromResponse
+
+                saveInsightFromResponse(stockCode, "".join(_full_response_parts), company)
             except (ImportError, OSError, sqlite3.Error, AttributeError, ValueError):
                 pass
 
@@ -789,62 +793,5 @@ def _runAskInner(
                 pass
 
 
-# ── 자기성장 인사이트 갱신 ────────────────────────────────
-
-# R21-5: regex 광범위화 — audit 응답 패턴이 "강점:", "약점:" 명시 적음.
-# - 명시 키워드 (강점/약점/리스크 등) + 부드러운 표현 (개선/회복/우수/탄탄/감소/취약 등) 추가
-# - 키워드 뒤에 콜론 없어도 그 줄 또는 그 다음 절을 매치
-_STRENGTH_RE = re.compile(
-    r"(?:강점|장점|긍정|양호|우수|탄탄|회복|개선|성장|확대|증가|상승|반등)[:\s은는이가\.]+([^\n]{5,120})",
-)
-_WEAKNESS_RE = re.compile(
-    r"(?:약점|리스크|위험|부정|주의|훼손|악화|하락|감소|취약|부진|침체|압박|우려)[:\s은는이가\.]+([^\n]{5,120})",
-)
-_NARRATIVE_RE = re.compile(r"(?:결론|종합|요약|핵심|핵심 판단)[:\s]*(.+?)(?:\n\n|\Z)", re.DOTALL)
-
-
-def _updateInsightFromResponse(
-    stock_code: str,
-    response_text: str,
-    company: Any | None,
-) -> None:
-    """AI 분석 응답에서 인사이트를 추출하여 KnowledgeDB에 갱신.
-
-    규칙 기반 regex 추출 — LLM 호출 없이 결정론적.
-    """
-    from dartlab.ai.persistence import KnowledgeDB
-
-    # 강점/약점 추출
-    strengths = _STRENGTH_RE.findall(response_text)
-    weaknesses = _WEAKNESS_RE.findall(response_text)
-
-    # 서사 추출
-    narrative = ""
-    match = _NARRATIVE_RE.search(response_text)
-    if match:
-        narrative = match.group(1).strip()[:500]
-
-    # 서사가 없으면 응답 첫 200자를 서사로
-    if not narrative:
-        clean = re.sub(r"```[\s\S]*?```", "", response_text)  # 코드블록 제거
-        clean = re.sub(r"\|.*\|", "", clean)  # 테이블 제거
-        clean = clean.strip()
-        if clean:
-            narrative = clean[:200]
-
-    if not narrative:
-        return
-
-    sector = ""
-    if company is not None:
-        sector = getattr(company, "sector", None) or getattr(company, "sectorName", None) or ""
-
-    db = KnowledgeDB.get()
-    db.save_insight(
-        stock_code=stock_code,
-        narrative=narrative,
-        strengths=strengths[:5],
-        weaknesses=weaknesses[:5],
-        sector=str(sector),
-        source="live",
-    )
+# 자기성장 인사이트 갱신 → context/playbook.py::saveInsightFromResponse 로 이동.
+# curate (bullet) 와 같은 post-response 훅을 한 곳에서 관리.

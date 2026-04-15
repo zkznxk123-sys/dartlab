@@ -218,3 +218,60 @@ def retrieveBullets(
     except (OSError, RuntimeError):
         return []
     return [r[0] for r in rows]
+
+
+# ── 자기성장 인사이트 갱신 (core.py 에서 이동) ─────────────────
+#
+# 사상: AI 응답에서 강점/약점/서사를 regex 로 추출 → KnowledgeDB.insights
+# 갱신. LLM 호출 없이 결정론적. curate() (bullet) 와 같은 post-response 훅.
+
+import re as _re
+
+_STRENGTH_RE = _re.compile(
+    r"(?:강점|장점|긍정|양호|우수|탄탄|회복|개선|성장|확대|증가|상승|반등)[:\s은는이가\.]+([^\n]{5,120})",
+)
+_WEAKNESS_RE = _re.compile(
+    r"(?:약점|리스크|위험|부정|주의|훼손|악화|하락|감소|취약|부진|침체|압박|우려)[:\s은는이가\.]+([^\n]{5,120})",
+)
+_NARRATIVE_RE = _re.compile(r"(?:결론|종합|요약|핵심|핵심 판단)[:\s]*(.+?)(?:\n\n|\Z)", _re.DOTALL)
+
+
+def saveInsightFromResponse(
+    stock_code: str,
+    response_text: str,
+    company: Any | None = None,
+) -> None:
+    """AI 응답에서 인사이트 추출 → KnowledgeDB 저장. curate 와 병렬 훅."""
+    from dartlab.ai.persistence import KnowledgeDB
+
+    strengths = _STRENGTH_RE.findall(response_text)
+    weaknesses = _WEAKNESS_RE.findall(response_text)
+
+    narrative = ""
+    match = _NARRATIVE_RE.search(response_text)
+    if match:
+        narrative = match.group(1).strip()[:500]
+    if not narrative:
+        clean = _re.sub(r"```[\s\S]*?```", "", response_text)
+        clean = _re.sub(r"\|.*\|", "", clean).strip()
+        if clean:
+            narrative = clean[:200]
+    if not narrative:
+        return
+
+    sector = ""
+    if company is not None:
+        sector = getattr(company, "sector", None) or getattr(company, "sectorName", None) or ""
+
+    try:
+        db = KnowledgeDB.get()
+        db.save_insight(
+            stock_code=stock_code,
+            narrative=narrative,
+            strengths=strengths[:5],
+            weaknesses=weaknesses[:5],
+            sector=str(sector),
+            source="live",
+        )
+    except (OSError, RuntimeError):
+        pass
