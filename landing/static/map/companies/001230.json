@@ -1,0 +1,481 @@
+{
+  "ego": {
+    "stockCode": "001230",
+    "corpName": "동국홀딩스",
+    "industry": "steel",
+    "stage": "product",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 19853,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "460850",
+      "corpName": "동국씨엠",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 27687
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 32034
+    },
+    {
+      "stockCode": "129260",
+      "corpName": "인터지스",
+      "industry": "logistics",
+      "stage": "general",
+      "revenue": 7090
+    },
+    {
+      "stockCode": "139990",
+      "corpName": "아주스틸",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 10856
+    },
+    {
+      "stockCode": "011810",
+      "corpName": "STX",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 6413
+    },
+    {
+      "stockCode": "000910",
+      "corpName": "유니온",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 2024
+    },
+    {
+      "stockCode": "049520",
+      "corpName": "유아이엘",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 4123
+    },
+    {
+      "stockCode": "307180",
+      "corpName": "아이엘",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 1029
+    },
+    {
+      "stockCode": "104700",
+      "corpName": "한국철강",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 4866
+    },
+    {
+      "stockCode": "095340",
+      "corpName": "ISC",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 2202
+    },
+    {
+      "stockCode": "001940",
+      "corpName": "KISCO홀딩스",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 8253
+    },
+    {
+      "stockCode": "016880",
+      "corpName": "웅진",
+      "industry": "education",
+      "stage": "general",
+      "revenue": 11507
+    },
+    {
+      "stockCode": "180640",
+      "corpName": "한진칼",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 2984
+    }
+  ],
+  "edges": [
+    {
+      "from": "460850",
+      "to": "001230",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 168969.0,
+      "ratio": null,
+      "product": "냉연강판",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "냉연강판"
+    },
+    {
+      "from": "460860",
+      "to": "001230",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "129260",
+      "to": "001230",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001230",
+      "to": "129260",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "001230",
+      "to": "460860",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001230",
+      "to": "460850",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "001230",
+      "to": "139990",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "001230",
+      "to": "011810",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001230",
+      "to": "000910",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001230",
+      "to": "049520",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001230",
+      "to": "307180",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001230",
+      "to": "104700",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001230",
+      "to": "095340",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001230",
+      "to": "001940",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "129260",
+      "to": "001230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "139990",
+      "to": "001230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "460850",
+      "to": "001230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "460860",
+      "to": "001230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001230",
+      "to": "016880",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "001230",
+      "to": "180640",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 7240296531105.0,
+      "operating_profit": 803015420425.0,
+      "net_profit": 550532050255.0,
+      "total_assets": 6334110919060.0
+    },
+    {
+      "year": "2022",
+      "sales": 8511126283083.0,
+      "operating_profit": 743493091943.0,
+      "net_profit": 425456163404.0,
+      "total_assets": 6451247796882.0
+    },
+    {
+      "year": "2023",
+      "sales": 1841113699327.0,
+      "operating_profit": 60062636095.0,
+      "net_profit": 231577736410.0,
+      "total_assets": 2421648337449.0
+    },
+    {
+      "year": "2024",
+      "sales": 1999426088314.0,
+      "operating_profit": 58003101705.0,
+      "net_profit": 19652546713.0,
+      "total_assets": 2509278276042.0
+    },
+    {
+      "year": "2025",
+      "sales": 1985265094613.0,
+      "operating_profit": 39456572869.0,
+      "net_profit": 16075280676.0,
+      "total_assets": 2693396462019.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 168969.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        2
+      ],
+      [
+        "logistics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "product",
+        2
+      ],
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "460850",
+      "corpName": "동국씨엠",
+      "product": "냉연강판",
+      "amount": 168969.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "129260",
+      "corpName": "인터지스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

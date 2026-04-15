@@ -34,6 +34,19 @@ print(rv)                              # Rich 콘솔
 | 5막 자본배분 | 자산구조, 효율성, 투자효율, 자본배분 | 번 돈을 어떻게 쓰는가 |
 | 6막 전망 | 가치평가, 지배구조, 매출전망 | 앞으로 어떻게 되는가 |
 
+### 비교분석 블록 (피어·산업)
+
+| 블록 | 설명 | 소스 엔진 |
+|------|------|-----------|
+| `peerRanking` | 시장 내 백분위 순위 | scan |
+| `peerPosition` | 전종목 수익성·성장·부채 백분위 | scan |
+| `chainPosition` | **산업 밸류체인 내 위치** — 2,664사 × 34 산업 × 공정·역할·스트림 + 같은 공정 피어 | **industry** |
+| `sectorKpi` | 업종 특수 KPI (건설·반도체·게임·제약) | analysis |
+
+```python
+c.review(only=["chainPosition"])      # 산업 밸류체인 블록만
+```
+
 ## review vs analysis
 
 - **analysis**: 원본 데이터를 dict로 반환 → AI/코드가 직접 해석

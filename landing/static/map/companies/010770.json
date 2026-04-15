@@ -1,0 +1,261 @@
+{
+  "ego": {
+    "stockCode": "010770",
+    "corpName": "평화홀딩스",
+    "industry": "auto",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 8837,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "006910",
+      "corpName": "보성파워텍",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 1475
+    },
+    {
+      "stockCode": "090080",
+      "corpName": "평화산업",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 6261
+    },
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "250060",
+      "corpName": "모비스",
+      "industry": "auto",
+      "stage": "powertrain",
+      "revenue": 51
+    },
+    {
+      "stockCode": "011370",
+      "corpName": "서한",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 6451
+    }
+  ],
+  "edges": [
+    {
+      "from": "006910",
+      "to": "010770",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "010770",
+      "to": "090080",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "010770",
+      "to": "005380",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "010770",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "010770",
+      "to": "012330",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "010770",
+      "to": "250060",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "011370",
+      "to": "010770",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "090080",
+      "to": "010770",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "011370",
+      "to": "010770",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 627732854800.0,
+      "operating_profit": 7598932267.0,
+      "net_profit": -15682644586.0,
+      "total_assets": 518123304203.0
+    },
+    {
+      "year": "2022",
+      "sales": 740231005480.0,
+      "operating_profit": 3604505748.0,
+      "net_profit": -11489512933.0,
+      "total_assets": 558370415231.0
+    },
+    {
+      "year": "2023",
+      "sales": 797052502774.0,
+      "operating_profit": 16770674615.0,
+      "net_profit": 10947214569.0,
+      "total_assets": 560931482078.0
+    },
+    {
+      "year": "2024",
+      "sales": 835189547389.0,
+      "operating_profit": 28811212893.0,
+      "net_profit": 2433710312.0,
+      "total_assets": 533421606621.0
+    },
+    {
+      "year": "2025",
+      "sales": 883676528085.0,
+      "operating_profit": 34882064365.0,
+      "net_profit": 45167740118.0,
+      "total_assets": 558555295274.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

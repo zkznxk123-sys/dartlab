@@ -1,0 +1,256 @@
+{
+  "ego": {
+    "stockCode": "095570",
+    "corpName": "AJ네트웍스",
+    "industry": "construction",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 10701,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "003300",
+      "corpName": "한일홀딩스",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 19305
+    },
+    {
+      "stockCode": "007680",
+      "corpName": "대원",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 1121
+    },
+    {
+      "stockCode": "030610",
+      "corpName": "교보증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 45068
+    },
+    {
+      "stockCode": "017900",
+      "corpName": "광전자",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 1327
+    },
+    {
+      "stockCode": "013570",
+      "corpName": "디와이",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 12448
+    },
+    {
+      "stockCode": "001470",
+      "corpName": "삼부토건",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 1110
+    },
+    {
+      "stockCode": "001520",
+      "corpName": "동양",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 6306
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "095570",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003300",
+      "to": "095570",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "095570",
+      "to": "007680",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "095570",
+      "to": "030610",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "095570",
+      "to": "017900",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "095570",
+      "to": "013570",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "095570",
+      "to": "001470",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "095570",
+      "to": "001520",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1026749457003.0,
+      "operating_profit": 45109542821.0,
+      "net_profit": -54442177.0,
+      "total_assets": 1355044449955.0
+    },
+    {
+      "year": "2022",
+      "sales": 1208367577386.0,
+      "operating_profit": 75447386515.0,
+      "net_profit": 8769534380.0,
+      "total_assets": 1481445371745.0
+    },
+    {
+      "year": "2023",
+      "sales": 1001975993554.0,
+      "operating_profit": 78385856886.0,
+      "net_profit": -52265660.0,
+      "total_assets": 1622157341878.0
+    },
+    {
+      "year": "2024",
+      "sales": 1014156314426.0,
+      "operating_profit": 72790207643.0,
+      "net_profit": 21600800986.0,
+      "total_assets": 1717770434389.0
+    },
+    {
+      "year": "2025",
+      "sales": 1070114469000.0,
+      "operating_profit": 71548375000.0,
+      "net_profit": 28404825000.0,
+      "total_assets": 1778787002000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

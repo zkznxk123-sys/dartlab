@@ -1,0 +1,346 @@
+{
+  "ego": {
+    "stockCode": "004100",
+    "corpName": "태양금속공업",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 6202,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "217320",
+      "corpName": "썬테크",
+      "industry": "electrical",
+      "stage": "motor",
+      "revenue": 0
+    },
+    {
+      "stockCode": "001750",
+      "corpName": "한양증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 9090
+    },
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "250060",
+      "corpName": "모비스",
+      "industry": "auto",
+      "stage": "powertrain",
+      "revenue": 51
+    },
+    {
+      "stockCode": "030610",
+      "corpName": "교보증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 45068
+    },
+    {
+      "stockCode": "001470",
+      "corpName": "삼부토건",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 1110
+    },
+    {
+      "stockCode": "010690",
+      "corpName": "화신",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 19625
+    },
+    {
+      "stockCode": "093380",
+      "corpName": "풍강",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 225
+    }
+  ],
+  "edges": [
+    {
+      "from": "004100",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "004100",
+      "to": "217320",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "004100",
+      "to": "001750",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "004100",
+      "to": "005930",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004100",
+      "to": "005380",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004100",
+      "to": "012330",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004100",
+      "to": "250060",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004100",
+      "to": "030610",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "004100",
+      "to": "001470",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004100",
+      "to": "010690",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004100",
+      "to": "001470",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "004100",
+      "to": "093380",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "093380",
+      "to": "004100",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 1.5%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 463045898125.0,
+      "operating_profit": -750631406.0,
+      "net_profit": -12264951851.0,
+      "total_assets": 447683663342.0
+    },
+    {
+      "year": "2022",
+      "sales": 569502769038.0,
+      "operating_profit": 15873939497.0,
+      "net_profit": -626270674.0,
+      "total_assets": 490987940831.0
+    },
+    {
+      "year": "2023",
+      "sales": 617171604795.0,
+      "operating_profit": 22162989453.0,
+      "net_profit": 72801575.0,
+      "total_assets": 499119799811.0
+    },
+    {
+      "year": "2024",
+      "sales": 620020921700.0,
+      "operating_profit": 16053014687.0,
+      "net_profit": -70129143.0,
+      "total_assets": 528140837268.0
+    },
+    {
+      "year": "2025",
+      "sales": 620169328505.0,
+      "operating_profit": 22418799630.0,
+      "net_profit": 3487713380.0,
+      "total_assets": 609338497429.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "010690",
+      "corpName": "화신",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

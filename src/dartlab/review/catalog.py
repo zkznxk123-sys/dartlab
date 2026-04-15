@@ -265,6 +265,8 @@ _BLOCKS: list[BlockMeta] = [
     ),
     # ── 업종별 KPI (조건부 inject) ─��
     BlockMeta("sectorKpi", "업종 특수 KPI", "종합평가", "업종별 핵심 지표 — 건설/반도체/게임/제약 자동 감지"),
+    # ── 산업 밸류체인 (L2 industry 엔진) ──
+    BlockMeta("chainPosition", "산업 밸류체인 내 위치", "비교분석", "전 상장사 2,665사 중 이 회사가 속한 산업·공정·역할·스트림 + 같은 공정 피어"),
     # ── 개선 시나리오 (How축) ──
     BlockMeta("improvementLevers", "개선 레버 순위", "improvementPlan", "영향도 × 난이도별 개선 경로"),
     BlockMeta("gradeUpgradePath", "신용등급 상향 경로", "improvementPlan", "dCR 한 노치 상향에 필요한 것"),

@@ -1,0 +1,478 @@
+{
+  "ego": {
+    "stockCode": "112040",
+    "corpName": "위메이드",
+    "industry": "software",
+    "stage": "game",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 6140,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "101730",
+      "corpName": "위메이드맥스",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 1488
+    },
+    {
+      "stockCode": "123420",
+      "corpName": "위메이드플레이",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 1253
+    },
+    {
+      "stockCode": "033270",
+      "corpName": "유나이티드",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 2888
+    },
+    {
+      "stockCode": "101390",
+      "corpName": "아이엠",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 918
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 80991
+    },
+    {
+      "stockCode": "462870",
+      "corpName": "시프트업",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 2945
+    },
+    {
+      "stockCode": "069080",
+      "corpName": "웹젠",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 1744
+    },
+    {
+      "stockCode": "293490",
+      "corpName": "카카오게임즈",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 4650
+    },
+    {
+      "stockCode": "121800",
+      "corpName": "비덴트",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 101
+    },
+    {
+      "stockCode": "000370",
+      "corpName": "한화손해보험",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "095660",
+      "corpName": "네오위즈",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 4327
+    },
+    {
+      "stockCode": "331520",
+      "corpName": "밸로프",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 378
+    },
+    {
+      "stockCode": "123890",
+      "corpName": "한국자산신탁",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 2043
+    }
+  ],
+  "edges": [
+    {
+      "from": "005830",
+      "to": "112040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "088350",
+      "to": "112040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "101730",
+      "to": "112040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "112040",
+      "to": "101730",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "112040",
+      "to": "101730",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "112040",
+      "to": "123420",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "112040",
+      "to": "033270",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "101730",
+      "to": "112040",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "112040",
+      "to": "101390",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "112040",
+      "to": "035720",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "112040",
+      "to": "462870",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "112040",
+      "to": "069080",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "112040",
+      "to": "293490",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "121800",
+      "to": "112040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "123420",
+      "to": "112040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000370",
+      "to": "112040",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "095660",
+      "to": "112040",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "112040",
+      "to": "121800",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "112040",
+      "to": "331520",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "123890",
+      "to": "112040",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 334983131724.0,
+      "operating_profit": 97350931326.0,
+      "net_profit": 306690038872.0,
+      "total_assets": 1027300099293.0
+    },
+    {
+      "year": "2022",
+      "sales": 463491566220.0,
+      "operating_profit": -84938285329.0,
+      "net_profit": -185755765680.0,
+      "total_assets": 1429831181230.0
+    },
+    {
+      "year": "2023",
+      "sales": 605252428314.0,
+      "operating_profit": -110440776864.0,
+      "net_profit": -200451082594.0,
+      "total_assets": 1417739361214.0
+    },
+    {
+      "year": "2024",
+      "sales": 711871164004.0,
+      "operating_profit": 7062218897.0,
+      "net_profit": -6794193750.0,
+      "total_assets": 1875682729061.0
+    },
+    {
+      "year": "2025",
+      "sales": 614039504365.0,
+      "operating_profit": 10678082423.0,
+      "net_profit": -27040443605.0,
+      "total_assets": 1745649917765.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "software",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "game",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "101730",
+      "corpName": "위메이드맥스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "101730",
+      "corpName": "위메이드맥스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

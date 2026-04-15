@@ -1,0 +1,298 @@
+{
+  "ego": {
+    "stockCode": "003920",
+    "corpName": "남양유업",
+    "industry": "pharma",
+    "stage": "api",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 9141,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "280360",
+      "corpName": "롯데웰푸드",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 42160
+    },
+    {
+      "stockCode": "052860",
+      "corpName": "아이앤씨",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 369
+    },
+    {
+      "stockCode": "003540",
+      "corpName": "대신증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 50639
+    },
+    {
+      "stockCode": "004700",
+      "corpName": "조광피혁",
+      "industry": "auto",
+      "stage": "body",
+      "revenue": 979
+    },
+    {
+      "stockCode": "145990",
+      "corpName": "삼양사",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 25625
+    },
+    {
+      "stockCode": "023900",
+      "corpName": "풍국주정",
+      "industry": "pharma",
+      "stage": "api",
+      "revenue": 1635
+    },
+    {
+      "stockCode": "268280",
+      "corpName": "미원에스씨",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 5206
+    }
+  ],
+  "edges": [
+    {
+      "from": "280360",
+      "to": "003920",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "003920",
+      "to": "052860",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "003920",
+      "to": "003540",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004700",
+      "to": "003920",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "145990",
+      "to": "003920",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003920",
+      "to": "003540",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    },
+    {
+      "from": "004700",
+      "to": "003920",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "023900",
+      "to": "003920",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "268280",
+      "to": "003920",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "핵심 위험: 매출 하락 -> 마진 압박 -> 현금 악화.\n매출이 -1.1% 감소하며 영업이익률이 5.7%에서 1.1%로 하락했다. 영업현금흐름도 동반 감소하여 수익-현금 순환이 약화되고 있다.",
+    "strengths": [
+      "순현금 상태",
+      "부채비율 15% -- 매우 안정",
+      "부채비율 하위 9% -- 매우 건전",
+      "DCF 안전마진 47% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출 하락 -> 마진 압박 -> 현금 악화",
+      "매출 3기 연속 역성장 (최근 -1.1%)",
+      "영업레버리지(DOL) 20.0 — 매출 변동에 이익 민감"
+    ],
+    "sector": "필수소비재 > 식품,음료,담배",
+    "source": "audit",
+    "createdAt": "1775430966.5527189"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 956084029872.0,
+      "operating_profit": -77853692930.0,
+      "net_profit": -58891078360.0,
+      "total_assets": 937403118931.0
+    },
+    {
+      "year": "2022",
+      "sales": 964660006375.0,
+      "operating_profit": -86806775040.0,
+      "net_profit": 0.0,
+      "total_assets": 902259070497.0
+    },
+    {
+      "year": "2023",
+      "sales": 996763358982.0,
+      "operating_profit": -72354443617.0,
+      "net_profit": 0.0,
+      "total_assets": 790678468255.0
+    },
+    {
+      "year": "2024",
+      "sales": 952794199365.0,
+      "operating_profit": -9807235105.0,
+      "net_profit": 0.0,
+      "total_assets": 724193724088.0
+    },
+    {
+      "year": "2025",
+      "sales": 914148968157.0,
+      "operating_profit": 5173833371.0,
+      "net_profit": 7107959269.0,
+      "total_assets": 1095486409669.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "food",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "280360",
+      "corpName": "롯데웰푸드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

@@ -1,0 +1,190 @@
+{
+  "ego": {
+    "stockCode": "004430",
+    "corpName": "송원산업",
+    "industry": "chemical",
+    "stage": "specialty",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 10392,
+    "confidence": 0.8,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000320",
+      "corpName": "노루홀딩스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 12393
+    },
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 184830
+    },
+    {
+      "stockCode": "082640",
+      "corpName": "동양생명",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "004430",
+      "to": "000320",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "011170",
+      "to": "004430",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "082640",
+      "to": "004430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 998190000000.0,
+      "operating_profit": 105714000000.0,
+      "net_profit": 71209000000.0,
+      "total_assets": 1115649000000.0
+    },
+    {
+      "year": "2022",
+      "sales": 1329509000000.0,
+      "operating_profit": 185116000000.0,
+      "net_profit": 131932000000.0,
+      "total_assets": 1217311000000.0
+    },
+    {
+      "year": "2023",
+      "sales": 1029975000000.0,
+      "operating_profit": 58469000000.0,
+      "net_profit": 34847000000.0,
+      "total_assets": 1089744000000.0
+    },
+    {
+      "year": "2024",
+      "sales": 1070200000000.0,
+      "operating_profit": 62814000000.0,
+      "net_profit": 0.0,
+      "total_assets": 1180193000000.0
+    },
+    {
+      "year": "2025",
+      "sales": 1039162000000.0,
+      "operating_profit": 21845000000.0,
+      "net_profit": 0.0,
+      "total_assets": 1147312000000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "basic",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000320",
+      "corpName": "노루홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

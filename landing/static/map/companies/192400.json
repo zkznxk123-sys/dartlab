@@ -1,0 +1,229 @@
+{
+  "ego": {
+    "stockCode": "192400",
+    "corpName": "쿠쿠홀딩스",
+    "industry": "finance",
+    "stage": "securities",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 9209,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "284740",
+      "corpName": "쿠쿠홈시스",
+      "industry": "misc",
+      "stage": "",
+      "revenue": 11213
+    },
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 875
+    },
+    {
+      "stockCode": "418550",
+      "corpName": "제이오",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 552
+    },
+    {
+      "stockCode": "160550",
+      "corpName": "NEW",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 1427
+    }
+  ],
+  "edges": [
+    {
+      "from": "192400",
+      "to": "284740",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "192400",
+      "to": "099220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "418550",
+      "to": "192400",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "160550",
+      "to": "192400",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "284740",
+      "to": "192400",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 685109273863.0,
+      "operating_profit": 106992031867.0,
+      "net_profit": 144831878510.0,
+      "total_assets": 1070887087754.0
+    },
+    {
+      "year": "2022",
+      "sales": 755648437744.0,
+      "operating_profit": 87879677725.0,
+      "net_profit": 116688836925.0,
+      "total_assets": 1149528707692.0
+    },
+    {
+      "year": "2023",
+      "sales": 772261869749.0,
+      "operating_profit": 86632975985.0,
+      "net_profit": 130122011488.0,
+      "total_assets": 1248108717577.0
+    },
+    {
+      "year": "2024",
+      "sales": 833802336627.0,
+      "operating_profit": 103233744707.0,
+      "net_profit": 0.0,
+      "total_assets": 1369865450719.0
+    },
+    {
+      "year": "2025",
+      "sales": 920929380976.0,
+      "operating_profit": 114008891071.0,
+      "net_profit": 0.0,
+      "total_assets": 1592547535050.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "consulting",
+        1
+      ],
+      [
+        "finance",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        1
+      ],
+      [
+        "securities",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "418550",
+      "corpName": "제이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "160550",
+      "corpName": "NEW",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
+  ]
+}

@@ -1,0 +1,324 @@
+{
+  "ego": {
+    "stockCode": "025860",
+    "corpName": "남해화학",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 16044,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "038500",
+      "corpName": "삼표시멘트",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 6769
+    },
+    {
+      "stockCode": "000370",
+      "corpName": "한화손해보험",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "005940",
+      "corpName": "NH투자증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "006380",
+      "corpName": "카프로",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 246
+    },
+    {
+      "stockCode": "054050",
+      "corpName": "농우바이오",
+      "industry": "agriculture",
+      "stage": "general",
+      "revenue": 1588
+    },
+    {
+      "stockCode": "271560",
+      "corpName": "오리온",
+      "industry": "food",
+      "stage": "processing",
+      "revenue": 33324
+    },
+    {
+      "stockCode": "055490",
+      "corpName": "테이팩스",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 1411
+    },
+    {
+      "stockCode": "002020",
+      "corpName": "코오롱",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 58861
+    },
+    {
+      "stockCode": "069260",
+      "corpName": "티케이지휴켐스",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 11277
+    }
+  ],
+  "edges": [
+    {
+      "from": "025860",
+      "to": "038500",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "000370",
+      "to": "025860",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005940",
+      "to": "025860",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "025860",
+      "to": "006380",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "025860",
+      "to": "054050",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "025860",
+      "to": "271560",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "025860",
+      "to": "005940",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "025860",
+      "to": "055490",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "025860",
+      "to": "002020",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "054050",
+      "to": "025860",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "025860",
+      "to": "069260",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1451884407283.0,
+      "operating_profit": 20481749724.0,
+      "net_profit": 21665836087.0,
+      "total_assets": 719110524869.0
+    },
+    {
+      "year": "2022",
+      "sales": 2169565870526.0,
+      "operating_profit": 62590109179.0,
+      "net_profit": 47109340267.0,
+      "total_assets": 902896419890.0
+    },
+    {
+      "year": "2023",
+      "sales": 1588078324797.0,
+      "operating_profit": 11053225204.0,
+      "net_profit": 10677893332.0,
+      "total_assets": 833548600274.0
+    },
+    {
+      "year": "2024",
+      "sales": 1519109111887.0,
+      "operating_profit": 36263869903.0,
+      "net_profit": 25154725630.0,
+      "total_assets": 773830396996.0
+    },
+    {
+      "year": "2025",
+      "sales": 1604420884203.0,
+      "operating_profit": 43128612586.0,
+      "net_profit": -2227559434.0,
+      "total_assets": 824579888654.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "038500",
+      "corpName": "삼표시멘트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "006380",
+      "corpName": "카프로",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "069260",
+      "corpName": "티케이지휴켐스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

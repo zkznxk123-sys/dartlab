@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "043370",
+    "corpName": "피에이치에이",
+    "industry": "auto",
+    "stage": "oem",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 12007,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "003620",
+      "corpName": "KG모빌리티",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 43036
+    }
+  ],
+  "edges": [
+    {
+      "from": "043370",
+      "to": "003620",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 927613739033.0,
+      "operating_profit": 6584022198.0,
+      "net_profit": 0.0,
+      "total_assets": 957112455957.0
+    },
+    {
+      "year": "2022",
+      "sales": 1024435467138.0,
+      "operating_profit": 22872220991.0,
+      "net_profit": 0.0,
+      "total_assets": 979877043312.0
+    },
+    {
+      "year": "2023",
+      "sales": 1134618152654.0,
+      "operating_profit": 48293293917.0,
+      "net_profit": 0.0,
+      "total_assets": 985337406245.0
+    },
+    {
+      "year": "2024",
+      "sales": 1152879626217.0,
+      "operating_profit": 51478190517.0,
+      "net_profit": 0.0,
+      "total_assets": 1069586456407.0
+    },
+    {
+      "year": "2025",
+      "sales": 1200673221564.0,
+      "operating_profit": 48439190745.0,
+      "net_profit": 0.0,
+      "total_assets": 1138284616470.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

@@ -1,0 +1,363 @@
+{
+  "ego": {
+    "stockCode": "137400",
+    "corpName": "피엔티",
+    "industry": "machinery",
+    "stage": "special",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 7449,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "003470",
+      "corpName": "유안타증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "004830",
+      "corpName": "덕성",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 7
+    },
+    {
+      "stockCode": "005810",
+      "corpName": "풍산홀딩스",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 184
+    },
+    {
+      "stockCode": "006040",
+      "corpName": "동원산업",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 95837
+    },
+    {
+      "stockCode": "011200",
+      "corpName": "HMM",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 108914
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 13729
+    },
+    {
+      "stockCode": "018250",
+      "corpName": "애경산업",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 6545
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "industry": "steel",
+      "stage": "processing",
+      "revenue": 50486
+    },
+    {
+      "stockCode": "257370",
+      "corpName": "피엔티엠에스",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 111
+    },
+    {
+      "stockCode": "270660",
+      "corpName": "에브리봇",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "003470",
+      "to": "137400",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004830",
+      "to": "137400",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "005810",
+      "to": "137400",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "137400",
+      "to": "006040",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "011200",
+      "to": "137400",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "137400",
+      "to": "014820",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "018250",
+      "to": "137400",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "103140",
+      "to": "137400",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "257370",
+      "to": "137400",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "257370",
+      "to": "137400",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "137400",
+      "to": "270660",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "137400",
+      "to": "257370",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 34.8%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 377728397182.0,
+      "operating_profit": 54408331244.0,
+      "net_profit": -758814120.0,
+      "total_assets": 576359315158.0
+    },
+    {
+      "year": "2022",
+      "sales": 417814489256.0,
+      "operating_profit": 77765165313.0,
+      "net_profit": 59671803839.0,
+      "total_assets": 1087892463692.0
+    },
+    {
+      "year": "2023",
+      "sales": 545413968484.0,
+      "operating_profit": 76924220008.0,
+      "net_profit": 69762393941.0,
+      "total_assets": 1601330032912.0
+    },
+    {
+      "year": "2024",
+      "sales": 1035081261981.0,
+      "operating_profit": 163228782523.0,
+      "net_profit": 0.0,
+      "total_assets": 1620271365673.0
+    },
+    {
+      "year": "2025",
+      "sales": 744889433349.0,
+      "operating_profit": 95648148084.0,
+      "net_profit": 69517315337.0,
+      "total_assets": 1718145213481.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "display",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "257370",
+      "corpName": "피엔티엠에스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "006040",
+      "corpName": "동원산업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "270660",
+      "corpName": "에브리봇",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

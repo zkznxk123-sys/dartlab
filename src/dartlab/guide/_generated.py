@@ -359,6 +359,11 @@ CAPABILITIES: dict[str, dict] = {
         "seeAlso": "filings: 현재 보유 공시 목록 확인\ndisclosure: OpenDART 전체 공시 조회",
         "summary": "누락된 최신 공시를 증분 수집."
     },
+    "Company.validateStory": {
+        "capabilities": "calcStoryPrecedents (scan peer + KnowledgeDB insights)\ncalcPlausibilityBand (섹터 피어 분포 percentile)\ncalcValuationSins (정합성 규칙 위반)\noverrides 로 AI 개입 (lifeCyclePhase, terminalGrowth 등)",
+        "kind": "method",
+        "summary": "Damodaran 스토리 검증 — Possible / Plausible / Probable 3 테스트 통합."
+    },
     "Company.view": {
         "aicontext": "시각적 탐색 인터페이스 — 사용자가 브라우저에서 직접 데이터 탐색",
         "capabilities": "로컬 서버 기반 공시 뷰어 실행\n브라우저에서 sections/index 탐색",

@@ -1,0 +1,218 @@
+{
+  "ego": {
+    "stockCode": "211050",
+    "corpName": "인카금융서비스",
+    "industry": "finance",
+    "stage": "insurance",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 10218,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002020",
+      "corpName": "코오롱",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 58861
+    },
+    {
+      "stockCode": "000370",
+      "corpName": "한화손해보험",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "085620",
+      "corpName": "미래에셋생명",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "211050",
+      "to": "002020",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000370",
+      "to": "211050",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 4.4%"
+    },
+    {
+      "from": "001450",
+      "to": "211050",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.9%"
+    },
+    {
+      "from": "005830",
+      "to": "211050",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 4.3%"
+    },
+    {
+      "from": "085620",
+      "to": "211050",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "088350",
+      "to": "211050",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 1.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": null,
+      "operating_profit": 21133565506.0,
+      "net_profit": 16395678689.0,
+      "total_assets": 0.0
+    },
+    {
+      "year": "2022",
+      "sales": null,
+      "operating_profit": 27392045468.0,
+      "net_profit": 0.0,
+      "total_assets": 5137980000.0
+    },
+    {
+      "year": "2023",
+      "sales": null,
+      "operating_profit": 46576295874.0,
+      "net_profit": 0.0,
+      "total_assets": 497329113655.0
+    },
+    {
+      "year": "2024",
+      "sales": 832258694000.0,
+      "operating_profit": 86266641000.0,
+      "net_profit": 0.0,
+      "total_assets": 707431519000.0
+    },
+    {
+      "year": "2025",
+      "sales": 1021768500000.0,
+      "operating_profit": 94843958000.0,
+      "net_profit": 72299965000.0,
+      "total_assets": 1001382010000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
+  ]
+}

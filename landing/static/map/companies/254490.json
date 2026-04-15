@@ -1,0 +1,183 @@
+{
+  "ego": {
+    "stockCode": "254490",
+    "corpName": "미래반도체",
+    "industry": "retail",
+    "stage": "wholesale",
+    "role": "도매",
+    "stream": "midstream",
+    "revenue": 6356,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "190510",
+      "corpName": "나무가",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 4599
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "005930",
+      "to": "254490",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "254490",
+      "to": "190510",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "254490",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2022",
+      "sales": 550152694771.0,
+      "operating_profit": 22102061837.0,
+      "net_profit": 0.0,
+      "total_assets": 114466326184.0
+    },
+    {
+      "year": "2023",
+      "sales": 380510458504.0,
+      "operating_profit": 9406962299.0,
+      "net_profit": 5063785932.0,
+      "total_assets": 149322717459.0
+    },
+    {
+      "year": "2024",
+      "sales": 487630862852.0,
+      "operating_profit": 10234073750.0,
+      "net_profit": 0.0,
+      "total_assets": 133306338548.0
+    },
+    {
+      "year": "2025",
+      "sales": 635582299292.0,
+      "operating_profit": 19075676565.0,
+      "net_profit": 0.0,
+      "total_assets": 187717849204.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "semiconductor",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "fab",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "190510",
+      "corpName": "나무가",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

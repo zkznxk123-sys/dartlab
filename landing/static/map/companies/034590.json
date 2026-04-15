@@ -1,0 +1,186 @@
+{
+  "ego": {
+    "stockCode": "034590",
+    "corpName": "인천도시가스",
+    "industry": "energy",
+    "stage": "distribution",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 9630,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 357273
+    },
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 52755
+    },
+    {
+      "stockCode": "128940",
+      "corpName": "한미약품",
+      "industry": "pharma",
+      "stage": "api",
+      "revenue": 129
+    }
+  ],
+  "edges": [
+    {
+      "from": "036460",
+      "to": "034590",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "034590",
+      "to": "004690",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "034590",
+      "to": "128940",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "034590",
+      "to": "004690",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.7%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 504206280651.0,
+      "operating_profit": 3200366473.0,
+      "net_profit": 3713334737.0,
+      "total_assets": 360580638051.0
+    },
+    {
+      "year": "2022",
+      "sales": 728489447710.0,
+      "operating_profit": 8050415265.0,
+      "net_profit": 12184262611.0,
+      "total_assets": 423143581786.0
+    },
+    {
+      "year": "2023",
+      "sales": 781337052475.0,
+      "operating_profit": 16517707857.0,
+      "net_profit": 17521308130.0,
+      "total_assets": 443887540909.0
+    },
+    {
+      "year": "2025",
+      "sales": 962994363377.0,
+      "operating_profit": 19148972191.0,
+      "net_profit": 19167356858.0,
+      "total_assets": 448496897355.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "energy",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "distribution",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "stage": "generation",
+      "revenue": 974293
+    },
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "stage": "distribution",
+      "revenue": 357273
+    },
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "stage": "distribution",
+      "revenue": 52755
+    },
+    {
+      "stockCode": "071320",
+      "corpName": "지역난방공사",
+      "stage": "generation",
+      "revenue": 39982
+    },
+    {
+      "stockCode": "112610",
+      "corpName": "씨에스윈드",
+      "stage": "generation",
+      "revenue": 29316
+    }
+  ]
+}

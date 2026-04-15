@@ -1,0 +1,504 @@
+{
+  "ego": {
+    "stockCode": "005430",
+    "corpName": "한국공항",
+    "industry": "aerospace",
+    "stage": "airframe",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 6632,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002320",
+      "corpName": "한진",
+      "industry": "logistics",
+      "stage": "general",
+      "revenue": 30649
+    },
+    {
+      "stockCode": "003490",
+      "corpName": "대한항공",
+      "industry": "logistics",
+      "stage": "general",
+      "revenue": 252255
+    },
+    {
+      "stockCode": "272450",
+      "corpName": "진에어",
+      "industry": "aerospace",
+      "stage": "airline",
+      "revenue": 13811
+    },
+    {
+      "stockCode": "180640",
+      "corpName": "한진칼",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 2984
+    },
+    {
+      "stockCode": "038880",
+      "corpName": "아이에이",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 412
+    },
+    {
+      "stockCode": "020560",
+      "corpName": "아시아나항공",
+      "industry": "aerospace",
+      "stage": "airline",
+      "revenue": 72668
+    },
+    {
+      "stockCode": "298690",
+      "corpName": "에어부산",
+      "industry": "aerospace",
+      "stage": "airline",
+      "revenue": 8326
+    },
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 875
+    },
+    {
+      "stockCode": "019660",
+      "corpName": "글로본",
+      "industry": "cosmetics",
+      "stage": "brand",
+      "revenue": 113
+    },
+    {
+      "stockCode": "026890",
+      "corpName": "스틱인베스트먼트",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 912
+    },
+    {
+      "stockCode": "044340",
+      "corpName": "위닉스",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 3695
+    },
+    {
+      "stockCode": "236030",
+      "corpName": "씨알푸드",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 0
+    },
+    {
+      "stockCode": "267850",
+      "corpName": "아시아나IDT",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 1941
+    }
+  ],
+  "edges": [
+    {
+      "from": "002320",
+      "to": "005430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005430",
+      "to": "003490",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "003490",
+      "to": "005430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003490",
+      "to": "005430",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "005430",
+      "to": "272450",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005430",
+      "to": "180640",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005430",
+      "to": "038880",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005430",
+      "to": "003490",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005430",
+      "to": "020560",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005430",
+      "to": "298690",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005430",
+      "to": "002320",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "005430",
+      "to": "099220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "005430",
+      "to": "019660",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "020560",
+      "to": "005430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "026890",
+      "to": "005430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "044340",
+      "to": "005430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "180640",
+      "to": "005430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005430",
+      "to": "180640",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "005430",
+      "to": "236030",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "267850",
+      "to": "005430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "272450",
+      "to": "005430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "298690",
+      "to": "005430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 15882195255.0,
+      "operating_profit": -902546870.0,
+      "net_profit": 3251006197.0,
+      "total_assets": 383887978055.0
+    },
+    {
+      "year": "2022",
+      "sales": 400521081627.0,
+      "operating_profit": 2592551465.0,
+      "net_profit": 5774385828.0,
+      "total_assets": 421095042761.0
+    },
+    {
+      "year": "2023",
+      "sales": 544725137436.0,
+      "operating_profit": 33969013124.0,
+      "net_profit": 31422609309.0,
+      "total_assets": 476851540431.0
+    },
+    {
+      "year": "2024",
+      "sales": 9555118094.0,
+      "operating_profit": 45009646028.0,
+      "net_profit": 0.0,
+      "total_assets": 502537029335.0
+    },
+    {
+      "year": "2025",
+      "sales": 663192785932.0,
+      "operating_profit": 47014830454.0,
+      "net_profit": 40545958975.0,
+      "total_assets": 529463499338.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "logistics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "003490",
+      "corpName": "대한항공",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "003490",
+      "corpName": "대한항공",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "180640",
+      "corpName": "한진칼",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "236030",
+      "corpName": "씨알푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "stage": "airframe",
+      "revenue": 747854
+    },
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "stage": "airframe",
+      "revenue": 267029
+    },
+    {
+      "stockCode": "020560",
+      "corpName": "아시아나항공",
+      "stage": "airline",
+      "revenue": 72668
+    },
+    {
+      "stockCode": "079550",
+      "corpName": "LIG넥스원",
+      "stage": "defense",
+      "revenue": 43069
+    },
+    {
+      "stockCode": "047810",
+      "corpName": "한국항공우주",
+      "stage": "airframe",
+      "revenue": 36964
+    }
+  ]
+}

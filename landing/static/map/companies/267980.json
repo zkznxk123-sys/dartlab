@@ -1,0 +1,500 @@
+{
+  "ego": {
+    "stockCode": "267980",
+    "corpName": "매일유업",
+    "industry": "food",
+    "stage": "processing",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 18435,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "000480",
+      "corpName": "시알홀딩스",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 8278
+    },
+    {
+      "stockCode": "005990",
+      "corpName": "매일홀딩스",
+      "industry": "food",
+      "stage": "processing",
+      "revenue": 21962
+    },
+    {
+      "stockCode": "007540",
+      "corpName": "샘표",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 4090
+    },
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 12332
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "100790",
+      "corpName": "미래에셋벤처투자",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "159580",
+      "corpName": "제로투세븐",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 710
+    },
+    {
+      "stockCode": "270870",
+      "corpName": "뉴트리",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 1011
+    },
+    {
+      "stockCode": "052860",
+      "corpName": "아이앤씨",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 369
+    },
+    {
+      "stockCode": "005940",
+      "corpName": "NH투자증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "323410",
+      "corpName": "카카오뱅크",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "316140",
+      "corpName": "우리금융지주",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "003540",
+      "corpName": "대신증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 50639
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 80991
+    },
+    {
+      "stockCode": "138930",
+      "corpName": "BNK금융지주",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "267980",
+      "to": "139480",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "밀가루, 치즈, 크림, 유지류, 초콜릿 등",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "밀가루, 치즈, 크림, 유지류, 초콜릿 등"
+    },
+    {
+      "from": "000480",
+      "to": "267980",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005990",
+      "to": "267980",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "007540",
+      "to": "267980",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "267980",
+      "to": "031440",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "088350",
+      "to": "267980",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "100790",
+      "to": "267980",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "159580",
+      "to": "267980",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "267980",
+      "to": "159580",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "267980",
+      "to": "005990",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "267980",
+      "to": "270870",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "267980",
+      "to": "159580",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "267980",
+      "to": "052860",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "100790",
+      "to": "267980",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "267980",
+      "to": "005940",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "267980",
+      "to": "323410",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    },
+    {
+      "from": "267980",
+      "to": "316140",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "267980",
+      "to": "035420",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    },
+    {
+      "from": "267980",
+      "to": "003540",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.3%"
+    },
+    {
+      "from": "267980",
+      "to": "035720",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "267980",
+      "to": "138930",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.2%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1551869546714.0,
+      "operating_profit": 87797405868.0,
+      "net_profit": 74245215795.0,
+      "total_assets": 981699184474.0
+    },
+    {
+      "year": "2022",
+      "sales": 1685644029927.0,
+      "operating_profit": 60688076526.0,
+      "net_profit": 14394852570.0,
+      "total_assets": 974748292974.0
+    },
+    {
+      "year": "2023",
+      "sales": 1782979215597.0,
+      "operating_profit": 72229121232.0,
+      "net_profit": 42005232.0,
+      "total_assets": 972801504226.0
+    },
+    {
+      "year": "2024",
+      "sales": 1811435717578.0,
+      "operating_profit": 70336217738.0,
+      "net_profit": 45537723486.0,
+      "total_assets": 1026284198804.0
+    },
+    {
+      "year": "2025",
+      "sales": 1843539281196.0,
+      "operating_profit": 60028565008.0,
+      "net_profit": 56243523857.0,
+      "total_assets": 1065939700183.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "product": "밀가루, 치즈, 크림, 유지류, 초콜릿 등",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "159580",
+      "corpName": "제로투세븐",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

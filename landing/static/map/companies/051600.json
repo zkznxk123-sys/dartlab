@@ -1,0 +1,416 @@
+{
+  "ego": {
+    "stockCode": "051600",
+    "corpName": "한전KPS",
+    "industry": "construction",
+    "stage": "engineering",
+    "role": "서비스",
+    "stream": "upstream",
+    "revenue": 15765,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000370",
+      "corpName": "한화손해보험",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "000480",
+      "corpName": "시알홀딩스",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 8278
+    },
+    {
+      "stockCode": "000810",
+      "corpName": "삼성화재해상보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 974293
+    },
+    {
+      "stockCode": "046120",
+      "corpName": "오르비텍",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 579
+    },
+    {
+      "stockCode": "036190",
+      "corpName": "금화피에스시",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 4234
+    },
+    {
+      "stockCode": "126720",
+      "corpName": "수산인더스트리",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 3377
+    },
+    {
+      "stockCode": "094820",
+      "corpName": "일진파워",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 2520
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "052690",
+      "corpName": "한전기술",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 5188
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "000370",
+      "to": "051600",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000480",
+      "to": "051600",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000810",
+      "to": "051600",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001450",
+      "to": "051600",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005830",
+      "to": "051600",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "051600",
+      "to": "015760",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "015760",
+      "to": "051600",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "051600",
+      "to": "046120",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "051600",
+      "to": "015760",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "051600",
+      "to": "036190",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "051600",
+      "to": "126720",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "051600",
+      "to": "094820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "051600",
+      "to": "034020",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "051600",
+      "to": "052690",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "052690",
+      "to": "051600",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "088350",
+      "to": "051600",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000370",
+      "to": "051600",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1380553428993.0,
+      "operating_profit": 123989281498.0,
+      "net_profit": 0.0,
+      "total_assets": 1426920122047.0
+    },
+    {
+      "year": "2022",
+      "sales": 1429074836456.0,
+      "operating_profit": 130553250828.0,
+      "net_profit": 24830.0,
+      "total_assets": 1562022195345.0
+    },
+    {
+      "year": "2023",
+      "sales": 1533850791494.0,
+      "operating_profit": 199376381248.0,
+      "net_profit": 162677361139.0,
+      "total_assets": 1597333550834.0
+    },
+    {
+      "year": "2024",
+      "sales": 1557085808533.0,
+      "operating_profit": 209498645768.0,
+      "net_profit": 172441205945.0,
+      "total_assets": 1690214811558.0
+    },
+    {
+      "year": "2025",
+      "sales": 1576516811328.0,
+      "operating_profit": 140101841084.0,
+      "net_profit": 124231434985.0,
+      "total_assets": 1703560488139.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "046120",
+      "corpName": "오르비텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

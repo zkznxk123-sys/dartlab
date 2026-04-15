@@ -1,0 +1,386 @@
+{
+  "ego": {
+    "stockCode": "012860",
+    "corpName": "모베이스전자",
+    "industry": "telecom",
+    "stage": "device",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 10441,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "000300",
+      "corpName": "DH오토넥스",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 402
+    },
+    {
+      "stockCode": "007860",
+      "corpName": "서연",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 49161
+    },
+    {
+      "stockCode": "011780",
+      "corpName": "금호석유화학",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 69151
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 13713
+    },
+    {
+      "stockCode": "109610",
+      "corpName": "에스와이",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 5016
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "276040",
+      "corpName": "스코넥",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 0
+    },
+    {
+      "stockCode": "200880",
+      "corpName": "서연이화",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 45052
+    }
+  ],
+  "edges": [
+    {
+      "from": "051910",
+      "to": "012860",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "012860",
+      "to": "000300",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "007860",
+      "to": "012860",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "011780",
+      "to": "012860",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "101330",
+      "to": "012860",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "012860",
+      "to": "101330",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "012860",
+      "to": "109610",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "012860",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "012860",
+      "to": "276040",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "012860",
+      "to": "007860",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "012860",
+      "to": "200880",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "012860",
+      "to": "101330",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "101330",
+      "to": "012860",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 764573073662.0,
+      "operating_profit": 15536065643.0,
+      "net_profit": -3026589932.0,
+      "total_assets": 722487668313.0
+    },
+    {
+      "year": "2022",
+      "sales": 922208635714.0,
+      "operating_profit": 43911657945.0,
+      "net_profit": 8020247142.0,
+      "total_assets": 701375602663.0
+    },
+    {
+      "year": "2023",
+      "sales": 939353137800.0,
+      "operating_profit": 27748942104.0,
+      "net_profit": 7702539489.0,
+      "total_assets": 788647116549.0
+    },
+    {
+      "year": "2024",
+      "sales": 971549079217.0,
+      "operating_profit": 34388852386.0,
+      "net_profit": 0.0,
+      "total_assets": 786637931797.0
+    },
+    {
+      "year": "2025",
+      "sales": 1044088716546.0,
+      "operating_profit": 36789097140.0,
+      "net_profit": 0.0,
+      "total_assets": 774874072694.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        2
+      ],
+      [
+        "telecom",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "polymer",
+        2
+      ],
+      [
+        "service",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "011780",
+      "corpName": "금호석유화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000300",
+      "corpName": "DH오토넥스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

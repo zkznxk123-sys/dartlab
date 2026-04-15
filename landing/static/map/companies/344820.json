@@ -1,0 +1,760 @@
+{
+  "ego": {
+    "stockCode": "344820",
+    "corpName": "케이씨씨글라스",
+    "industry": "construction",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 19006,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "012630",
+      "corpName": "HDC",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 9483
+    },
+    {
+      "stockCode": "294870",
+      "corpName": "IPARK현대산업개발",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 41470
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "009830",
+      "corpName": "한화솔루션",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 133331
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "002380",
+      "corpName": "케이씨씨",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 64838
+    },
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "industry": "shipbuilding",
+      "stage": "shipping",
+      "revenue": 299332
+    },
+    {
+      "stockCode": "021320",
+      "corpName": "KCC건설",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 18334
+    },
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "032830",
+      "corpName": "삼성생명",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "456040",
+      "corpName": "OCI",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 20094
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 7973
+    },
+    {
+      "stockCode": "003620",
+      "corpName": "KG모빌리티",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 43036
+    },
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "460870",
+      "corpName": "에스엠씨지",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 558
+    },
+    {
+      "stockCode": "393890",
+      "corpName": "더블유씨피",
+      "industry": "battery",
+      "stage": "separator",
+      "revenue": 1108
+    },
+    {
+      "stockCode": "403490",
+      "corpName": "우듬지팜",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 637
+    }
+  ],
+  "edges": [
+    {
+      "from": "344820",
+      "to": "012630",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 7476.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "344820",
+      "to": "294870",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 7476.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "051910",
+      "to": "344820",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 794855.0,
+      "ratio": null,
+      "product": "가소제, 우레탄수지, 염화비닐수지, 홈씨씨 및 유통상품 外",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "가소제, 우레탄수지, 염화비닐수지, 홈씨씨 및 유통상품 外"
+    },
+    {
+      "from": "009830",
+      "to": "344820",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 794855.0,
+      "ratio": null,
+      "product": "가소제, 우레탄수지, 염화비닐수지, 홈씨씨 및 유통상품 外",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "가소제, 우레탄수지, 염화비닐수지, 홈씨씨 및 유통상품 外"
+    },
+    {
+      "from": "344820",
+      "to": "000720",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001450",
+      "to": "344820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "002380",
+      "to": "344820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "009540",
+      "to": "344820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "021320",
+      "to": "344820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "344820",
+      "to": "028260",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "032830",
+      "to": "344820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "456040",
+      "to": "344820",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "344820",
+      "to": "029460",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "344820",
+      "to": "002380",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "344820",
+      "to": "003620",
+      "direction": "out",
+      "type": "customer",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "docs",
+      "evidence": "4-2. 사업의 개요 - 판매 조건 및 경로, 판매 전략, 주요 매출처(상세)"
+    },
+    {
+      "from": "344820",
+      "to": "000720",
+      "direction": "out",
+      "type": "customer",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "docs",
+      "evidence": "4-2. 사업의 개요 - 판매 조건 및 경로, 판매 전략, 주요 매출처(상세)"
+    },
+    {
+      "from": "344820",
+      "to": "005380",
+      "direction": "out",
+      "type": "customer",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "docs",
+      "evidence": "4-2. 사업의 개요 - 판매 조건 및 경로, 판매 전략, 주요 매출처(상세)"
+    },
+    {
+      "from": "029460",
+      "to": "344820",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "4-1. 사업의 개요 - 생산설비의 현황(상세)"
+    },
+    {
+      "from": "002380",
+      "to": "344820",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "4-1. 사업의 개요 - 생산설비의 현황(상세)"
+    },
+    {
+      "from": "344820",
+      "to": "028260",
+      "direction": "out",
+      "type": "customer",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "docs",
+      "evidence": "4-2. 사업의 개요 - 판매 조건 및 경로, 판매 전략, 주요 매출처(상세)"
+    },
+    {
+      "from": "344820",
+      "to": "002380",
+      "direction": "out",
+      "type": "customer",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "docs",
+      "evidence": "4-2. 사업의 개요 - 판매 조건 및 경로, 판매 전략, 주요 매출처(상세)"
+    },
+    {
+      "from": "344820",
+      "to": "029460",
+      "direction": "out",
+      "type": "customer",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "docs",
+      "evidence": "4-2. 사업의 개요 - 판매 조건 및 경로, 판매 전략, 주요 매출처(상세)"
+    },
+    {
+      "from": "028260",
+      "to": "344820",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "344820",
+      "to": "012630",
+      "direction": "out",
+      "type": "customer",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "docs",
+      "evidence": "4-2. 사업의 개요 - 판매 조건 및 경로, 판매 전략, 주요 매출처(상세)"
+    },
+    {
+      "from": "344820",
+      "to": "460870",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001450",
+      "to": "344820",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "009540",
+      "to": "344820",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    },
+    {
+      "from": "344820",
+      "to": "003620",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "344820",
+      "to": "393890",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.2%"
+    },
+    {
+      "from": "344820",
+      "to": "403490",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.8%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1175659965172.0,
+      "operating_profit": 160451158221.0,
+      "net_profit": 117224619390.0,
+      "total_assets": 1877935028583.0
+    },
+    {
+      "year": "2022",
+      "sales": 1443680691839.0,
+      "operating_profit": 119220614753.0,
+      "net_profit": 93975996538.0,
+      "total_assets": 2209564785783.0
+    },
+    {
+      "year": "2023",
+      "sales": 1680055646591.0,
+      "operating_profit": 95020315030.0,
+      "net_profit": 0.0,
+      "total_assets": 2223679597409.0
+    },
+    {
+      "year": "2024",
+      "sales": 1903321455409.0,
+      "operating_profit": 57180712038.0,
+      "net_profit": 0.0,
+      "total_assets": 2494298894368.0
+    },
+    {
+      "year": "2025",
+      "sales": 1900606191952.0,
+      "operating_profit": -75207086786.0,
+      "net_profit": -83641716721.0,
+      "total_assets": 2313583865629.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 6,
+    "customerCount": 7,
+    "preciseEdgeCount": 2,
+    "totalSupplyAmount": 1589710.0,
+    "hhi": 5000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 50.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 3,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        3
+      ],
+      [
+        "construction",
+        2
+      ],
+      [
+        "energy",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "polymer",
+        2
+      ],
+      [
+        "specialty",
+        1
+      ],
+      [
+        "distribution",
+        1
+      ],
+      [
+        "material",
+        1
+      ],
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "product": "가소제, 우레탄수지, 염화비닐수지, 홈씨씨 및 유통상품 外",
+      "amount": 794855.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "009830",
+      "corpName": "한화솔루션",
+      "product": "가소제, 우레탄수지, 염화비닐수지, 홈씨씨 및 유통상품 外",
+      "amount": 794855.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "456040",
+      "corpName": "OCI",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002380",
+      "corpName": "케이씨씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "012630",
+      "corpName": "HDC",
+      "product": "",
+      "amount": 7476.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "294870",
+      "corpName": "IPARK현대산업개발",
+      "product": "",
+      "amount": 7476.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "003620",
+      "corpName": "KG모빌리티",
+      "product": "",
+      "amount": null,
+      "type": "customer",
+      "confidence": 0.6
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "customer",
+      "confidence": 0.6
+    },
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "product": "",
+      "amount": null,
+      "type": "customer",
+      "confidence": 0.6
+    },
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "product": "",
+      "amount": null,
+      "type": "customer",
+      "confidence": 0.6
+    },
+    {
+      "stockCode": "002380",
+      "corpName": "케이씨씨",
+      "product": "",
+      "amount": null,
+      "type": "customer",
+      "confidence": 0.6
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "product": "",
+      "amount": null,
+      "type": "customer",
+      "confidence": 0.6
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

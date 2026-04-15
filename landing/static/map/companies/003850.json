@@ -1,0 +1,327 @@
+{
+  "ego": {
+    "stockCode": "003850",
+    "corpName": "보령",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 10174,
+    "confidence": 0.7,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "017250",
+      "corpName": "인터엠",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 129
+    },
+    {
+      "stockCode": "308080",
+      "corpName": "바이젠셀",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 0
+    },
+    {
+      "stockCode": "014100",
+      "corpName": "메디앙스",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 488
+    },
+    {
+      "stockCode": "069510",
+      "corpName": "에스텍",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 4682
+    },
+    {
+      "stockCode": "063160",
+      "corpName": "종근당바이오",
+      "industry": "pharma",
+      "stage": "api",
+      "revenue": 1601
+    },
+    {
+      "stockCode": "185750",
+      "corpName": "종근당",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 16924
+    },
+    {
+      "stockCode": "092300",
+      "corpName": "현우산업",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2374
+    }
+  ],
+  "edges": [
+    {
+      "from": "003850",
+      "to": "017250",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003850",
+      "to": "308080",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003850",
+      "to": "014100",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "069510",
+      "to": "003850",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "063160",
+      "to": "003850",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "185750",
+      "to": "003850",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "014100",
+      "to": "003850",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "308080",
+      "to": "003850",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "092300",
+      "to": "003850",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "순현금 상태",
+    "strengths": [
+      "순현금 상태",
+      "유효세율 변동계수 0.93 — 세금 비용 불안정",
+      "수익-위험 매트릭스: 고수익-저위험 (우량 포지션)",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출 고집중 (HHI 10,000) -- 단일 부문 의존",
+      "이자보상 주의 (2.1배)",
+      "CCC 451일 — 현금 회수 매우 느림"
+    ],
+    "sector": "건강관리 > 제약과바이오",
+    "source": "audit",
+    "createdAt": "1775430966.5527189"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 627279390053.0,
+      "operating_profit": 41448228314.0,
+      "net_profit": 43044274380.0,
+      "total_assets": 828641139449.0
+    },
+    {
+      "year": "2022",
+      "sales": 760475844693.0,
+      "operating_profit": 56602877310.0,
+      "net_profit": 0.0,
+      "total_assets": 892385915179.0
+    },
+    {
+      "year": "2023",
+      "sales": 859625585767.0,
+      "operating_profit": 68267020613.0,
+      "net_profit": null,
+      "total_assets": 915511541054.0
+    },
+    {
+      "year": "2024",
+      "sales": 1017106670442.0,
+      "operating_profit": 70472227261.0,
+      "net_profit": 69635720165.0,
+      "total_assets": 1164086929992.0
+    },
+    {
+      "year": "2025",
+      "sales": 1017427357548.0,
+      "operating_profit": 65066733505.0,
+      "net_profit": 64302934599.0,
+      "total_assets": 1387880345936.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "pharma",
+        2
+      ],
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "set",
+        1
+      ],
+      [
+        "api",
+        1
+      ],
+      [
+        "formulation",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "069510",
+      "corpName": "에스텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "063160",
+      "corpName": "종근당바이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "185750",
+      "corpName": "종근당",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

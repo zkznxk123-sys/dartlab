@@ -1,0 +1,212 @@
+{
+  "ego": {
+    "stockCode": "007700",
+    "corpName": "F&F 홀딩스",
+    "industry": "finance",
+    "stage": "securities",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 19338,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "383220",
+      "corpName": "F&F",
+      "industry": "textile",
+      "stage": "apparel",
+      "revenue": 19340
+    },
+    {
+      "stockCode": "145170",
+      "corpName": "노브랜드",
+      "industry": "textile",
+      "stage": "apparel",
+      "revenue": 6022
+    },
+    {
+      "stockCode": "012630",
+      "corpName": "HDC",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 9483
+    },
+    {
+      "stockCode": "088980",
+      "corpName": "맥쿼리인프라",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "007700",
+      "to": "383220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "145170",
+      "to": "007700",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "007700",
+      "to": "012630",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "007700",
+      "to": "145170",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 4.2%"
+    },
+    {
+      "from": "007700",
+      "to": "088980",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.3%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 727126345365.0,
+      "operating_profit": 223050455460.0,
+      "net_profit": 2017966925649.0,
+      "total_assets": 2912304832499.0
+    },
+    {
+      "year": "2022",
+      "sales": 1816814937477.0,
+      "operating_profit": 486231560356.0,
+      "net_profit": 285362078157.0,
+      "total_assets": 3595118444613.0
+    },
+    {
+      "year": "2023",
+      "sales": 1986296503879.0,
+      "operating_profit": 514391689043.0,
+      "net_profit": 271309196016.0,
+      "total_assets": 3840524557786.0
+    },
+    {
+      "year": "2024",
+      "sales": 1898301562891.0,
+      "operating_profit": 416366707580.0,
+      "net_profit": 106955966802.0,
+      "total_assets": 4033253443201.0
+    },
+    {
+      "year": "2025",
+      "sales": 1933800848582.0,
+      "operating_profit": 434194766171.0,
+      "net_profit": 125724901800.0,
+      "total_assets": 4343643804753.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "textile",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "apparel",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "145170",
+      "corpName": "노브랜드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
+  ]
+}

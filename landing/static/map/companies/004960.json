@@ -1,0 +1,250 @@
+{
+  "ego": {
+    "stockCode": "004960",
+    "corpName": "한신공영",
+    "industry": "construction",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 11492,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 44013
+    },
+    {
+      "stockCode": "090460",
+      "corpName": "비에이치",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 17927
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 32034
+    },
+    {
+      "stockCode": "001470",
+      "corpName": "삼부토건",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 1110
+    },
+    {
+      "stockCode": "079980",
+      "corpName": "휴비스",
+      "industry": "textile",
+      "stage": "fiber",
+      "revenue": 8895
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "004960",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001680",
+      "to": "004960",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004960",
+      "to": "090460",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "460860",
+      "to": "004960",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004960",
+      "to": "001470",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004960",
+      "to": "079980",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004960",
+      "to": "001470",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1311144762227.0,
+      "operating_profit": 44647806717.0,
+      "net_profit": 0.0,
+      "total_assets": 2119949126309.0
+    },
+    {
+      "year": "2022",
+      "sales": 1221553531537.0,
+      "operating_profit": 39442102751.0,
+      "net_profit": 0.0,
+      "total_assets": 2349398105478.0
+    },
+    {
+      "year": "2023",
+      "sales": 1309008523014.0,
+      "operating_profit": 14755273986.0,
+      "net_profit": 23668931441.0,
+      "total_assets": 2468946950023.0
+    },
+    {
+      "year": "2024",
+      "sales": 1490447569221.0,
+      "operating_profit": 37254849485.0,
+      "net_profit": 14764860230.0,
+      "total_assets": 2317873586367.0
+    },
+    {
+      "year": "2025",
+      "sales": 1149191208443.0,
+      "operating_profit": 64521039255.0,
+      "net_profit": null,
+      "total_assets": 2212986466557.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "product",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

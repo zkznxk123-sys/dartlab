@@ -1,0 +1,393 @@
+{
+  "ego": {
+    "stockCode": "035510",
+    "corpName": "신세계I&C",
+    "industry": "retail",
+    "stage": "retail",
+    "role": "소매",
+    "stream": "downstream",
+    "revenue": 6872,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 69295
+    },
+    {
+      "stockCode": "052860",
+      "corpName": "아이앤씨",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 369
+    },
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "037710",
+      "corpName": "광주신세계",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 1842
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    },
+    {
+      "stockCode": "160550",
+      "corpName": "NEW",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 1427
+    },
+    {
+      "stockCode": "031430",
+      "corpName": "신세계인터내셔날",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 11100
+    },
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 12332
+    },
+    {
+      "stockCode": "003160",
+      "corpName": "디아이",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 4323
+    },
+    {
+      "stockCode": "159580",
+      "corpName": "제로투세븐",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 710
+    },
+    {
+      "stockCode": "000910",
+      "corpName": "유니온",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 2024
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "035510",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004170",
+      "to": "035510",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "052860",
+      "to": "035510",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "035510",
+      "to": "004170",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "035510",
+      "to": "139480",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "035510",
+      "to": "037710",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "035510",
+      "to": "041510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "035510",
+      "to": "160550",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "035510",
+      "to": "031430",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "035510",
+      "to": "031440",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "035510",
+      "to": "052860",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "035510",
+      "to": "003160",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "035510",
+      "to": "159580",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "035510",
+      "to": "000910",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 526089047774.0,
+      "operating_profit": 35527094479.0,
+      "net_profit": 39007331343.0,
+      "total_assets": 354134942144.0
+    },
+    {
+      "year": "2022",
+      "sales": 596870394817.0,
+      "operating_profit": 37528514949.0,
+      "net_profit": 83878984062.0,
+      "total_assets": 482934079721.0
+    },
+    {
+      "year": "2023",
+      "sales": 618922936014.0,
+      "operating_profit": 39957882041.0,
+      "net_profit": 30441378559.0,
+      "total_assets": 476561497604.0
+    },
+    {
+      "year": "2024",
+      "sales": 625716262145.0,
+      "operating_profit": 36953168486.0,
+      "net_profit": 0.0,
+      "total_assets": 502933995272.0
+    },
+    {
+      "year": "2025",
+      "sales": 687200163879.0,
+      "operating_profit": 49113030897.0,
+      "net_profit": 28339493283.0,
+      "total_assets": 576387357994.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "retail",
+        1
+      ],
+      [
+        "semiconductor",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "retail",
+        1
+      ],
+      [
+        "design",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "052860",
+      "corpName": "아이앤씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

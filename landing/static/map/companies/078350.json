@@ -1,0 +1,135 @@
+{
+  "ego": {
+    "stockCode": "078350",
+    "corpName": "한양디지텍",
+    "industry": "electronics",
+    "stage": "module",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 6511,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "045100",
+      "corpName": "한양이엔지",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 11182
+    }
+  ],
+  "edges": [
+    {
+      "from": "045100",
+      "to": "078350",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "078350",
+      "to": "045100",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 303399341636.0,
+      "operating_profit": 30015790316.0,
+      "net_profit": 24243410420.0,
+      "total_assets": 168150403251.0
+    },
+    {
+      "year": "2022",
+      "sales": 484769790412.0,
+      "operating_profit": 52822812634.0,
+      "net_profit": 37180356466.0,
+      "total_assets": 233746570701.0
+    },
+    {
+      "year": "2023",
+      "sales": 478837673371.0,
+      "operating_profit": 19096846275.0,
+      "net_profit": 12640873336.0,
+      "total_assets": 250981998454.0
+    },
+    {
+      "year": "2024",
+      "sales": 595167452558.0,
+      "operating_profit": 35043091147.0,
+      "net_profit": 25523293266.0,
+      "total_assets": 276854222429.0
+    },
+    {
+      "year": "2025",
+      "sales": 651051158827.0,
+      "operating_profit": 23871001484.0,
+      "net_profit": 14976315394.0,
+      "total_assets": 297513744344.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

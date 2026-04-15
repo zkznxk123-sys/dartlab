@@ -1,0 +1,252 @@
+{
+  "ego": {
+    "stockCode": "009070",
+    "corpName": "케이씨티시",
+    "industry": "logistics",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 9867,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    },
+    {
+      "stockCode": "232530",
+      "corpName": "이엠티",
+      "industry": "semiconductor",
+      "stage": "materials",
+      "revenue": 0
+    },
+    {
+      "stockCode": "089150",
+      "corpName": "케이씨티",
+      "industry": "software",
+      "stage": "",
+      "revenue": 231
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 7973
+    },
+    {
+      "stockCode": "083550",
+      "corpName": "케이엠",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 1354
+    },
+    {
+      "stockCode": "030960",
+      "corpName": "양지사",
+      "industry": "media",
+      "stage": "",
+      "revenue": 251
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "industry": "food",
+      "stage": "",
+      "revenue": 122847
+    }
+  ],
+  "edges": [
+    {
+      "from": "009070",
+      "to": "041510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "009070",
+      "to": "232530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "009070",
+      "to": "089150",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "009070",
+      "to": "029460",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "009070",
+      "to": "083550",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "030960",
+      "to": "009070",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "009070",
+      "to": "000120",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 694737899435.0,
+      "operating_profit": 29603505899.0,
+      "net_profit": 21324908411.0,
+      "total_assets": 532345388768.0
+    },
+    {
+      "year": "2022",
+      "sales": 920408668737.0,
+      "operating_profit": 37534026539.0,
+      "net_profit": 26289323218.0,
+      "total_assets": 630078626843.0
+    },
+    {
+      "year": "2023",
+      "sales": 823125429680.0,
+      "operating_profit": 36821207555.0,
+      "net_profit": 1759118512.0,
+      "total_assets": 662097622202.0
+    },
+    {
+      "year": "2024",
+      "sales": 882147692479.0,
+      "operating_profit": 38991030847.0,
+      "net_profit": 27633970078.0,
+      "total_assets": 762617949986.0
+    },
+    {
+      "year": "2025",
+      "sales": 986704713638.0,
+      "operating_profit": 38817769669.0,
+      "net_profit": 0.0,
+      "total_assets": 791695946689.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [
+      [
+        "media",
+        1
+      ]
+    ],
+    "topSupplyStages": []
+  },
+  "suppliers": [
+    {
+      "stockCode": "030960",
+      "corpName": "양지사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "086280",
+      "corpName": "현대글로비스",
+      "stage": "general",
+      "revenue": 295664
+    },
+    {
+      "stockCode": "003490",
+      "corpName": "대한항공",
+      "stage": "general",
+      "revenue": 252255
+    },
+    {
+      "stockCode": "028670",
+      "corpName": "팬오션",
+      "stage": "general",
+      "revenue": 54329
+    },
+    {
+      "stockCode": "002320",
+      "corpName": "한진",
+      "stage": "general",
+      "revenue": 30649
+    },
+    {
+      "stockCode": "089860",
+      "corpName": "롯데렌탈",
+      "stage": "",
+      "revenue": 29188
+    }
+  ]
+}

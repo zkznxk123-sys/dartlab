@@ -1,0 +1,255 @@
+{
+  "ego": {
+    "stockCode": "004840",
+    "corpName": "DRB동일",
+    "industry": "plastic",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 8027,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000370",
+      "corpName": "한화손해보험",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "163560",
+      "corpName": "동일고무벨트",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 3646
+    },
+    {
+      "stockCode": "000910",
+      "corpName": "유니온",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 2024
+    },
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "000370",
+      "to": "004840",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001450",
+      "to": "004840",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "163560",
+      "to": "004840",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004840",
+      "to": "163560",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "004840",
+      "to": "000910",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "004840",
+      "to": "031210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "163560",
+      "to": "004840",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "000370",
+      "to": "004840",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 551337199988.0,
+      "operating_profit": 577562481.0,
+      "net_profit": 1257599779.0,
+      "total_assets": 831956562409.0
+    },
+    {
+      "year": "2022",
+      "sales": 661814016477.0,
+      "operating_profit": 12110321241.0,
+      "net_profit": 2002114475.0,
+      "total_assets": 945238494728.0
+    },
+    {
+      "year": "2023",
+      "sales": 737777767832.0,
+      "operating_profit": 35845945523.0,
+      "net_profit": 21854908375.0,
+      "total_assets": 963651592108.0
+    },
+    {
+      "year": "2024",
+      "sales": 752688127961.0,
+      "operating_profit": 21870057763.0,
+      "net_profit": 3740024669.0,
+      "total_assets": 982414184864.0
+    },
+    {
+      "year": "2025",
+      "sales": 802745958892.0,
+      "operating_profit": 24894014874.0,
+      "net_profit": 8989892422.0,
+      "total_assets": 974909860501.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "component",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "163560",
+      "corpName": "동일고무벨트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005720",
+      "corpName": "넥센",
+      "stage": "general",
+      "revenue": 35865
+    },
+    {
+      "stockCode": "002350",
+      "corpName": "넥센타이어",
+      "stage": "general",
+      "revenue": 31896
+    },
+    {
+      "stockCode": "013520",
+      "corpName": "화승코퍼레이션",
+      "stage": "general",
+      "revenue": 16398
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "stage": "general",
+      "revenue": 13729
+    },
+    {
+      "stockCode": "378850",
+      "corpName": "화승알앤에이",
+      "stage": "general",
+      "revenue": 7146
+    }
+  ]
+}

@@ -1,0 +1,241 @@
+{
+  "ego": {
+    "stockCode": "065350",
+    "corpName": "신성델타테크",
+    "industry": "electronics",
+    "stage": "set",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 9454,
+    "confidence": 0.9,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "416180",
+      "corpName": "신성에스티",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 1169
+    },
+    {
+      "stockCode": "004080",
+      "corpName": "신흥",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 685
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 236718
+    },
+    {
+      "stockCode": "308080",
+      "corpName": "바이젠셀",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "416180",
+      "to": "065350",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "065350",
+      "to": "416180",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "065350",
+      "to": "004080",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "373220",
+      "to": "065350",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "065350",
+      "to": "308080",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "416180",
+      "to": "065350",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 737488102514.0,
+      "operating_profit": 43947732045.0,
+      "net_profit": 8174624665.0,
+      "total_assets": 517198673742.0
+    },
+    {
+      "year": "2022",
+      "sales": 793424019846.0,
+      "operating_profit": 32055395246.0,
+      "net_profit": 16927393743.0,
+      "total_assets": 627848217159.0
+    },
+    {
+      "year": "2023",
+      "sales": 833704098779.0,
+      "operating_profit": 29867445100.0,
+      "net_profit": 20060610922.0,
+      "total_assets": 692344676799.0
+    },
+    {
+      "year": "2024",
+      "sales": 909722446409.0,
+      "operating_profit": 27176239810.0,
+      "net_profit": 7449970454.0,
+      "total_assets": 774111976556.0
+    },
+    {
+      "year": "2025",
+      "sales": 945363793218.0,
+      "operating_profit": 27689928290.0,
+      "net_profit": 2491085548.0,
+      "total_assets": 932560259261.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "component",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "416180",
+      "corpName": "신성에스티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

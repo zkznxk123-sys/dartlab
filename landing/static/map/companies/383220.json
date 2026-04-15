@@ -1,0 +1,343 @@
+{
+  "ego": {
+    "stockCode": "383220",
+    "corpName": "F&F",
+    "industry": "textile",
+    "stage": "apparel",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 19340,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000370",
+      "corpName": "한화손해보험",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "005860",
+      "corpName": "한일사료",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 4549
+    },
+    {
+      "stockCode": "007700",
+      "corpName": "F&F 홀딩스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 19338
+    },
+    {
+      "stockCode": "036580",
+      "corpName": "팜스코",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 15541
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "136480",
+      "corpName": "하림",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 14400
+    },
+    {
+      "stockCode": "136490",
+      "corpName": "선진",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 18957
+    },
+    {
+      "stockCode": "210120",
+      "corpName": "캔버스엔",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 40
+    },
+    {
+      "stockCode": "145170",
+      "corpName": "노브랜드",
+      "industry": "textile",
+      "stage": "apparel",
+      "revenue": 6022
+    }
+  ],
+  "edges": [
+    {
+      "from": "000370",
+      "to": "383220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003380",
+      "to": "383220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005860",
+      "to": "383220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "007700",
+      "to": "383220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036580",
+      "to": "383220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "088350",
+      "to": "383220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "136480",
+      "to": "383220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "136490",
+      "to": "383220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "210120",
+      "to": "383220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "145170",
+      "to": "383220",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000370",
+      "to": "383220",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "핵심 위험: 매출 하락 -> 마진 압박 -> 현금 악화.\n매출이 -6.2% 감소하며 영업이익률이 24.7%에서 22.0%로 하락했다. 영업현금흐름도 동반 감소하여 수익-현금 순환이 약화되고 있다.",
+    "strengths": [
+      "내부유보 비중 84% — 자기 힘으로 성장",
+      "순현금 상태",
+      "이자보상 우수 (12배)",
+      "DCF 안전마진 35% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출 하락 -> 마진 압박 -> 현금 악화",
+      "매출 고집중 (HHI 10,000) -- 단일 부문 의존",
+      "CCC 520일 — 현금 회수 매우 느림"
+    ],
+    "sector": "경기관련소비재 > 내구소비재와의류",
+    "source": "audit",
+    "createdAt": "1775430966.5832536"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1089172086930.0,
+      "operating_profit": 322683779494.0,
+      "net_profit": 231925929728.0,
+      "total_assets": 1146494709343.0
+    },
+    {
+      "year": "2022",
+      "sales": 1808894546708.0,
+      "operating_profit": 524882680312.0,
+      "net_profit": 906363869.0,
+      "total_assets": 1570179025400.0
+    },
+    {
+      "year": "2023",
+      "sales": 1978495535892.0,
+      "operating_profit": 551835228989.0,
+      "net_profit": 425073840979.0,
+      "total_assets": 2005097998970.0
+    },
+    {
+      "year": "2024",
+      "sales": 1896009590086.0,
+      "operating_profit": 450737459737.0,
+      "net_profit": 355959818501.0,
+      "total_assets": 2285904738684.0
+    },
+    {
+      "year": "2025",
+      "sales": 1933995926896.0,
+      "operating_profit": 468574150329.0,
+      "net_profit": 400686468976.0,
+      "total_assets": 2651445897849.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "textile",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "apparel",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "145170",
+      "corpName": "노브랜드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

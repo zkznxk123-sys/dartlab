@@ -1,0 +1,151 @@
+{
+  "ego": {
+    "stockCode": "024900",
+    "corpName": "디와이덕양",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 17381,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "033530",
+      "corpName": "SJG세종",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 18969
+    }
+  ],
+  "edges": [
+    {
+      "from": "024900",
+      "to": "096770",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "033530",
+      "to": "024900",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.9%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1348236914736.0,
+      "operating_profit": 6261100580.0,
+      "net_profit": 1602088914.0,
+      "total_assets": 523564265414.0
+    },
+    {
+      "year": "2022",
+      "sales": 1542026244310.0,
+      "operating_profit": 30682700016.0,
+      "net_profit": -4311496544.0,
+      "total_assets": 520217537029.0
+    },
+    {
+      "year": "2023",
+      "sales": 1875890050635.0,
+      "operating_profit": 27728234775.0,
+      "net_profit": 4450283400.0,
+      "total_assets": 573648655244.0
+    },
+    {
+      "year": "2024",
+      "sales": 1883286365934.0,
+      "operating_profit": 8229987776.0,
+      "net_profit": 0.0,
+      "total_assets": 558566600775.0
+    },
+    {
+      "year": "2025",
+      "sales": 1738072339439.0,
+      "operating_profit": 3203809485.0,
+      "net_profit": 1234561157.0,
+      "total_assets": 590839092949.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

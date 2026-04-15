@@ -1,0 +1,988 @@
+{
+  "ego": {
+    "stockCode": "034120",
+    "corpName": "SBS",
+    "industry": "electronics",
+    "stage": "set",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 10085,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000210",
+      "corpName": "DL",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 53267
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "001130",
+      "corpName": "대한제분",
+      "industry": "food",
+      "stage": "processing",
+      "revenue": 13752
+    },
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "001740",
+      "corpName": "SK네트웍스",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 67451
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "007820",
+      "corpName": "에스엠코어",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 1491
+    },
+    {
+      "stockCode": "009410",
+      "corpName": "태영건설",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 21745
+    },
+    {
+      "stockCode": "011790",
+      "corpName": "SKC",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 18400
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "018670",
+      "corpName": "SK가스",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 76763
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "industry": "telecom",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "033530",
+      "corpName": "SJG세종",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 18969
+    },
+    {
+      "stockCode": "033830",
+      "corpName": "티비씨",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 427
+    },
+    {
+      "stockCode": "298040",
+      "corpName": "효성중공업",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 59685
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    },
+    {
+      "stockCode": "363280",
+      "corpName": "티와이홀딩스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 792
+    },
+    {
+      "stockCode": "402340",
+      "corpName": "SK스퀘어",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 14115
+    },
+    {
+      "stockCode": "083550",
+      "corpName": "케이엠",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 1354
+    },
+    {
+      "stockCode": "232530",
+      "corpName": "이엠티",
+      "industry": "semiconductor",
+      "stage": "materials",
+      "revenue": 0
+    },
+    {
+      "stockCode": "101390",
+      "corpName": "아이엠",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 918
+    },
+    {
+      "stockCode": "451220",
+      "corpName": "아이엠티",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 329
+    },
+    {
+      "stockCode": "064820",
+      "corpName": "케이프",
+      "industry": "auto",
+      "stage": "powertrain",
+      "revenue": 5798
+    },
+    {
+      "stockCode": "079980",
+      "corpName": "휴비스",
+      "industry": "textile",
+      "stage": "fiber",
+      "revenue": 8895
+    },
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "058400",
+      "corpName": "KNN",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 685
+    },
+    {
+      "stockCode": "060570",
+      "corpName": "드림어스컴퍼니",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 2250
+    },
+    {
+      "stockCode": "067160",
+      "corpName": "SOOP",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 4666
+    },
+    {
+      "stockCode": "093190",
+      "corpName": "빅솔론",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 1335
+    },
+    {
+      "stockCode": "095340",
+      "corpName": "ISC",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 2202
+    },
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "100090",
+      "corpName": "SK오션플랜트",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 9654
+    },
+    {
+      "stockCode": "210980",
+      "corpName": "SK디앤디",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 4458
+    },
+    {
+      "stockCode": "216050",
+      "corpName": "인크로스",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 505
+    },
+    {
+      "stockCode": "223220",
+      "corpName": "로지스몬",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 0
+    },
+    {
+      "stockCode": "285130",
+      "corpName": "SK케미칼",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 23652
+    },
+    {
+      "stockCode": "302440",
+      "corpName": "SK바이오사이언스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 6514
+    },
+    {
+      "stockCode": "326030",
+      "corpName": "에스케이바이오팜",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 7067
+    },
+    {
+      "stockCode": "361610",
+      "corpName": "SK아이이테크놀로지",
+      "industry": "software",
+      "stage": "",
+      "revenue": 2619
+    },
+    {
+      "stockCode": "475150",
+      "corpName": "SK이터닉스",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 3856
+    },
+    {
+      "stockCode": "000050",
+      "corpName": "경방",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 4125
+    }
+  ],
+  "edges": [
+    {
+      "from": "034120",
+      "to": "000210",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000660",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "001130",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001450",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001740",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "006120",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "007820",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "009410",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "011790",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "017670",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "018670",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "032640",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033530",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "034120",
+      "to": "033830",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "034120",
+      "to": "298040",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "034120",
+      "to": "041510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "034120",
+      "to": "009410",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "034120",
+      "to": "363280",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "034120",
+      "to": "402340",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "034120",
+      "to": "083550",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "034120",
+      "to": "232530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "034120",
+      "to": "101390",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "034120",
+      "to": "451220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "034120",
+      "to": "064820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "034120",
+      "to": "079980",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "034730",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "034120",
+      "to": "058400",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "060570",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "067160",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "093190",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "095340",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "096770",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "100090",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "210980",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "216050",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "223220",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "285130",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "302440",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "326030",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "361610",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "363280",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "034120",
+      "to": "363280",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "402340",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "475150",
+      "to": "034120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "000050",
+      "to": "034120",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "001130",
+      "to": "034120",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.9%"
+    },
+    {
+      "from": "001450",
+      "to": "034120",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1078975236959.0,
+      "operating_profit": 184436850625.0,
+      "net_profit": 136082962623.0,
+      "total_assets": 1462149708150.0
+    },
+    {
+      "year": "2022",
+      "sales": 1173781580894.0,
+      "operating_profit": 185603490383.0,
+      "net_profit": 4019021401.0,
+      "total_assets": 1407888696660.0
+    },
+    {
+      "year": "2023",
+      "sales": 996763613264.0,
+      "operating_profit": 58323294148.0,
+      "net_profit": 46313064912.0,
+      "total_assets": 1346398451632.0
+    },
+    {
+      "year": "2024",
+      "sales": 1046651436608.0,
+      "operating_profit": -19185289826.0,
+      "net_profit": 33778430764.0,
+      "total_assets": 1512366601922.0
+    },
+    {
+      "year": "2025",
+      "sales": 1008457955402.0,
+      "operating_profit": 18151260224.0,
+      "net_profit": 7925077907.0,
+      "total_assets": 2044005089985.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "000210",
+      "corpName": "DL",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "033830",
+      "corpName": "티비씨",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "058400",
+      "corpName": "KNN",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "363280",
+      "corpName": "티와이홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

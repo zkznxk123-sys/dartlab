@@ -1,0 +1,543 @@
+{
+  "ego": {
+    "stockCode": "001130",
+    "corpName": "대한제분",
+    "industry": "food",
+    "stage": "processing",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 13752,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "086790",
+      "corpName": "하나금융지주",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "105560",
+      "corpName": "KB금융",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "353810",
+      "corpName": "이지바이오",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 4769
+    },
+    {
+      "stockCode": "035810",
+      "corpName": "이지홀딩스",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 33889
+    },
+    {
+      "stockCode": "034120",
+      "corpName": "SBS",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 10085
+    },
+    {
+      "stockCode": "004700",
+      "corpName": "조광피혁",
+      "industry": "auto",
+      "stage": "body",
+      "revenue": 979
+    },
+    {
+      "stockCode": "004370",
+      "corpName": "농심",
+      "industry": "food",
+      "stage": "processing",
+      "revenue": 40821
+    },
+    {
+      "stockCode": "004410",
+      "corpName": "서울식품공업",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 686
+    },
+    {
+      "stockCode": "072710",
+      "corpName": "농심홀딩스",
+      "industry": "food",
+      "stage": "processing",
+      "revenue": 8588
+    },
+    {
+      "stockCode": "208140",
+      "corpName": "정다운",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 1609
+    },
+    {
+      "stockCode": "004980",
+      "corpName": "성신양회",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 6580
+    },
+    {
+      "stockCode": "475460",
+      "corpName": "미트박스",
+      "industry": "agriculture",
+      "stage": "general",
+      "revenue": 1356
+    }
+  ],
+  "edges": [
+    {
+      "from": "001130",
+      "to": "017670",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001130",
+      "to": "004990",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001130",
+      "to": "086790",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001130",
+      "to": "105560",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001130",
+      "to": "353810",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001130",
+      "to": "035810",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001130",
+      "to": "034120",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001130",
+      "to": "004700",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001130",
+      "to": "004370",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001130",
+      "to": "004410",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004700",
+      "to": "001130",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "035810",
+      "to": "001130",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001130",
+      "to": "072710",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "208140",
+      "to": "001130",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001130",
+      "to": "017670",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "001130",
+      "to": "034120",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.9%"
+    },
+    {
+      "from": "001130",
+      "to": "004700",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.6%"
+    },
+    {
+      "from": "001130",
+      "to": "353810",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.8%"
+    },
+    {
+      "from": "001130",
+      "to": "004980",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.0%"
+    },
+    {
+      "from": "001130",
+      "to": "086790",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "001130",
+      "to": "004990",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "001130",
+      "to": "475460",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.0%"
+    },
+    {
+      "from": "001130",
+      "to": "035810",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.4%"
+    },
+    {
+      "from": "004700",
+      "to": "001130",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.8%"
+    },
+    {
+      "from": "004980",
+      "to": "001130",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.1%"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "내부유보 비중 95% — 자기 힘으로 성장",
+    "strengths": [
+      "내부유보 비중 95% — 자기 힘으로 성장",
+      "순현금 상태",
+      "DCF 안전마진 66% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "영업이익률 3기 연속 하락 (4.3%)",
+      "영업레버리지(DOL) 3.1 — 매출 변동에 이익 민감",
+      "이익 변동계수 1.15 — 이익 변동성 높음"
+    ],
+    "sector": "필수소비재 > 식품,음료,담배",
+    "source": "audit",
+    "createdAt": "1775430966.5346448"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1111341734130.0,
+      "operating_profit": 24960181509.0,
+      "net_profit": -118842704.0,
+      "total_assets": 1321597380773.0
+    },
+    {
+      "year": "2022",
+      "sales": 1368170051431.0,
+      "operating_profit": 43274283090.0,
+      "net_profit": 41163501482.0,
+      "total_assets": 1318431898542.0
+    },
+    {
+      "year": "2023",
+      "sales": 1441458547512.0,
+      "operating_profit": 54859482247.0,
+      "net_profit": 81242498761.0,
+      "total_assets": 1401353854060.0
+    },
+    {
+      "year": "2024",
+      "sales": 1374735359151.0,
+      "operating_profit": 72306706525.0,
+      "net_profit": 48829120223.0,
+      "total_assets": 1560462376675.0
+    },
+    {
+      "year": "2025",
+      "sales": 1375199649054.0,
+      "operating_profit": 62256836691.0,
+      "net_profit": 0.0,
+      "total_assets": 1534815922172.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "004370",
+      "corpName": "농심",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "004410",
+      "corpName": "서울식품공업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "072710",
+      "corpName": "농심홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

@@ -1,0 +1,194 @@
+{
+  "ego": {
+    "stockCode": "039570",
+    "corpName": "HDC랩스",
+    "industry": "semiconductor",
+    "stage": "design",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 6457,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "012630",
+      "corpName": "HDC",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 9483
+    },
+    {
+      "stockCode": "016880",
+      "corpName": "웅진",
+      "industry": "education",
+      "stage": "general",
+      "revenue": 11507
+    },
+    {
+      "stockCode": "005960",
+      "corpName": "동부건설",
+      "industry": "aerospace",
+      "stage": "airline",
+      "revenue": 17586
+    }
+  ],
+  "edges": [
+    {
+      "from": "039570",
+      "to": "012630",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "012630",
+      "to": "039570",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "039570",
+      "to": "012630",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "039570",
+      "to": "016880",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    },
+    {
+      "from": "039570",
+      "to": "005960",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 274579528254.0,
+      "operating_profit": 9666853635.0,
+      "net_profit": 9090959987.0,
+      "total_assets": 411391673094.0
+    },
+    {
+      "year": "2022",
+      "sales": 610731077048.0,
+      "operating_profit": 12308450303.0,
+      "net_profit": 12430810524.0,
+      "total_assets": 382579391863.0
+    },
+    {
+      "year": "2023",
+      "sales": 606281889297.0,
+      "operating_profit": 10513214237.0,
+      "net_profit": 13163298384.0,
+      "total_assets": 383332487352.0
+    },
+    {
+      "year": "2024",
+      "sales": 628807776981.0,
+      "operating_profit": 6401720348.0,
+      "net_profit": 18975535063.0,
+      "total_assets": 438161253186.0
+    },
+    {
+      "year": "2025",
+      "sales": 645728085876.0,
+      "operating_profit": 10637118275.0,
+      "net_profit": 12262930001.0,
+      "total_assets": 441412758024.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "012630",
+      "corpName": "HDC",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

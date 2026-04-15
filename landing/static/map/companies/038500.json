@@ -1,0 +1,337 @@
+{
+  "ego": {
+    "stockCode": "038500",
+    "corpName": "삼표시멘트",
+    "industry": "construction",
+    "stage": "material",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 6769,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "025860",
+      "corpName": "남해화학",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 16044
+    },
+    {
+      "stockCode": "375500",
+      "corpName": "DL이앤씨",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 74024
+    },
+    {
+      "stockCode": "000210",
+      "corpName": "DL",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 53267
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "001520",
+      "corpName": "동양",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 6306
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 13276
+    },
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "091590",
+      "corpName": "남화토건",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 727
+    }
+  ],
+  "edges": [
+    {
+      "from": "025860",
+      "to": "038500",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "038500",
+      "to": "375500",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 18245.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "038500",
+      "to": "000210",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "038500",
+      "to": "000720",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "038500",
+      "to": "001520",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001520",
+      "to": "038500",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "038500",
+      "to": "015360",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "038500",
+      "to": "031210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "038500",
+      "to": "091590",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 568987710995.0,
+      "operating_profit": 52671399557.0,
+      "net_profit": 20335297394.0,
+      "total_assets": 1412331190231.0
+    },
+    {
+      "year": "2022",
+      "sales": 721115587886.0,
+      "operating_profit": 71098446532.0,
+      "net_profit": 30182787524.0,
+      "total_assets": 1452791372545.0
+    },
+    {
+      "year": "2023",
+      "sales": 823729443914.0,
+      "operating_profit": 84701114941.0,
+      "net_profit": 33819425305.0,
+      "total_assets": 1520485305476.0
+    },
+    {
+      "year": "2024",
+      "sales": 790786523331.0,
+      "operating_profit": 103930124574.0,
+      "net_profit": 66099929851.0,
+      "total_assets": 1485067226446.0
+    },
+    {
+      "year": "2025",
+      "sales": 676926715424.0,
+      "operating_profit": 76583468141.0,
+      "net_profit": 40803560450.0,
+      "total_assets": 1446731199428.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "food",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "025860",
+      "corpName": "남해화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "375500",
+      "corpName": "DL이앤씨",
+      "product": "",
+      "amount": 18245.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000210",
+      "corpName": "DL",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "001520",
+      "corpName": "동양",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "091590",
+      "corpName": "남화토건",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

@@ -1,0 +1,256 @@
+{
+  "ego": {
+    "stockCode": "058850",
+    "corpName": "KTcs",
+    "industry": "telecom",
+    "stage": "service",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 10427,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000480",
+      "corpName": "시알홀딩스",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 8278
+    },
+    {
+      "stockCode": "053210",
+      "corpName": "케이티스카이라이프",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 9842
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "industry": "medicalDevice",
+      "stage": "imaging",
+      "revenue": 3959
+    },
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "237820",
+      "corpName": "플레이디",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 402
+    },
+    {
+      "stockCode": "279570",
+      "corpName": "케이뱅크",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "053350",
+      "corpName": "이니텍",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 328
+    },
+    {
+      "stockCode": "060370",
+      "corpName": "LS마린솔루션",
+      "industry": "machinery",
+      "stage": "",
+      "revenue": 2442
+    }
+  ],
+  "edges": [
+    {
+      "from": "000480",
+      "to": "058850",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "058850",
+      "to": "053210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "058850",
+      "to": "036030",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "058850",
+      "to": "030200",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "058850",
+      "to": "237820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "058850",
+      "to": "279570",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "058850",
+      "to": "053350",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "058850",
+      "to": "060370",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 965721215198.0,
+      "operating_profit": 21037346745.0,
+      "net_profit": 18244147314.0,
+      "total_assets": 416750372360.0
+    },
+    {
+      "year": "2022",
+      "sales": 1029466970045.0,
+      "operating_profit": 24326774606.0,
+      "net_profit": 17086143580.0,
+      "total_assets": 416146080400.0
+    },
+    {
+      "year": "2023",
+      "sales": 1035365640322.0,
+      "operating_profit": 18723573550.0,
+      "net_profit": 15803825827.0,
+      "total_assets": 434900095454.0
+    },
+    {
+      "year": "2024",
+      "sales": 1121341270752.0,
+      "operating_profit": 6971273020.0,
+      "net_profit": 6814393181.0,
+      "total_assets": 435066123285.0
+    },
+    {
+      "year": "2025",
+      "sales": 1042716672450.0,
+      "operating_profit": 29806186634.0,
+      "net_profit": 0.0,
+      "total_assets": 471143023265.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

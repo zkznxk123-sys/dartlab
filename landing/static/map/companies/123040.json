@@ -1,0 +1,173 @@
+{
+  "ego": {
+    "stockCode": "123040",
+    "corpName": "엠에스오토텍",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 17406,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "009900",
+      "corpName": "명신산업",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 16192
+    },
+    {
+      "stockCode": "101390",
+      "corpName": "아이엠",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 918
+    },
+    {
+      "stockCode": "016610",
+      "corpName": "DB증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 19220
+    }
+  ],
+  "edges": [
+    {
+      "from": "009900",
+      "to": "123040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "123040",
+      "to": "009900",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "123040",
+      "to": "101390",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "123040",
+      "to": "016610",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1521785885237.0,
+      "operating_profit": 51281868214.0,
+      "net_profit": -8227158446.0,
+      "total_assets": 1308407847133.0
+    },
+    {
+      "year": "2022",
+      "sales": 2025136904795.0,
+      "operating_profit": 149063010054.0,
+      "net_profit": 69607332223.0,
+      "total_assets": 1542201336524.0
+    },
+    {
+      "year": "2023",
+      "sales": 2081763599500.0,
+      "operating_profit": 174843700115.0,
+      "net_profit": 12048378896.0,
+      "total_assets": 1665141506624.0
+    },
+    {
+      "year": "2024",
+      "sales": 1777518816112.0,
+      "operating_profit": 96301047824.0,
+      "net_profit": 1588439562.0,
+      "total_assets": 1740985128769.0
+    },
+    {
+      "year": "2025",
+      "sales": 1740551641926.0,
+      "operating_profit": 31282863328.0,
+      "net_profit": -108577940616.0,
+      "total_assets": 1696890049682.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

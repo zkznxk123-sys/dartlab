@@ -1,0 +1,316 @@
+{
+  "ego": {
+    "stockCode": "023800",
+    "corpName": "인지컨트롤스",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 7179,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "232530",
+      "corpName": "이엠티",
+      "industry": "semiconductor",
+      "stage": "materials",
+      "revenue": 0
+    },
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 875
+    },
+    {
+      "stockCode": "037330",
+      "corpName": "인지디스플레",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 7218
+    },
+    {
+      "stockCode": "160980",
+      "corpName": "싸이맥스",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 1644
+    },
+    {
+      "stockCode": "044780",
+      "corpName": "에이치케이",
+      "industry": "medicalDevice",
+      "stage": "therapeutic",
+      "revenue": 542
+    },
+    {
+      "stockCode": "083550",
+      "corpName": "케이엠",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 1354
+    },
+    {
+      "stockCode": "198940",
+      "corpName": "한주라이트메탈",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2595
+    },
+    {
+      "stockCode": "217590",
+      "corpName": "티엠씨",
+      "industry": "electrical",
+      "stage": "cable",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "023800",
+      "to": "096770",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 3034180.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "023800",
+      "to": "232530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "023800",
+      "to": "099220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "023800",
+      "to": "037330",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "023800",
+      "to": "160980",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "023800",
+      "to": "044780",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "023800",
+      "to": "083550",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "037330",
+      "to": "023800",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "160980",
+      "to": "023800",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "198940",
+      "to": "023800",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "023800",
+      "to": "217590",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 484855609029.0,
+      "operating_profit": 2018548482.0,
+      "net_profit": 3444287331.0,
+      "total_assets": 543367174652.0
+    },
+    {
+      "year": "2022",
+      "sales": 570020850334.0,
+      "operating_profit": 17050734417.0,
+      "net_profit": 11707604852.0,
+      "total_assets": 606910470329.0
+    },
+    {
+      "year": "2023",
+      "sales": 634018251095.0,
+      "operating_profit": 20925835048.0,
+      "net_profit": 13976894644.0,
+      "total_assets": 649103362179.0
+    },
+    {
+      "year": "2024",
+      "sales": 649271485609.0,
+      "operating_profit": 26396954290.0,
+      "net_profit": -1028411670.0,
+      "total_assets": 685548746564.0
+    },
+    {
+      "year": "2025",
+      "sales": 717902449045.0,
+      "operating_profit": 39636244544.0,
+      "net_profit": 0.0,
+      "total_assets": 650215566414.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "product": "",
+      "amount": 3034180.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "217590",
+      "corpName": "티엠씨",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

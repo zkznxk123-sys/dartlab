@@ -1,0 +1,346 @@
+{
+  "ego": {
+    "stockCode": "037330",
+    "corpName": "인지디스플레",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 7218,
+    "confidence": 0.9,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "023800",
+      "corpName": "인지컨트롤스",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 7179
+    },
+    {
+      "stockCode": "139990",
+      "corpName": "아주스틸",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 10856
+    },
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "industry": "electrical",
+      "stage": "cable",
+      "revenue": 36360
+    },
+    {
+      "stockCode": "000910",
+      "corpName": "유니온",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 2024
+    },
+    {
+      "stockCode": "160980",
+      "corpName": "싸이맥스",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 1644
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "232530",
+      "corpName": "이엠티",
+      "industry": "semiconductor",
+      "stage": "materials",
+      "revenue": 0
+    },
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 875
+    }
+  ],
+  "edges": [
+    {
+      "from": "023800",
+      "to": "037330",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "139990",
+      "to": "037330",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001440",
+      "to": "037330",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000910",
+      "to": "037330",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "037330",
+      "to": "023800",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "037330",
+      "to": "160980",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "037330",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "037330",
+      "to": "232530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "037330",
+      "to": "099220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "160980",
+      "to": "037330",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "037330",
+      "to": "160980",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.8%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 617204053099.0,
+      "operating_profit": 11347945866.0,
+      "net_profit": 3026411788.0,
+      "total_assets": 496154570415.0
+    },
+    {
+      "year": "2022",
+      "sales": 700955627901.0,
+      "operating_profit": 18609241225.0,
+      "net_profit": 3875883654.0,
+      "total_assets": 482525979169.0
+    },
+    {
+      "year": "2023",
+      "sales": 687269080649.0,
+      "operating_profit": 11277861780.0,
+      "net_profit": 1507703983.0,
+      "total_assets": 487997800064.0
+    },
+    {
+      "year": "2024",
+      "sales": 732669239767.0,
+      "operating_profit": 9668073956.0,
+      "net_profit": -2666259916.0,
+      "total_assets": 501040123888.0
+    },
+    {
+      "year": "2025",
+      "sales": 721813553316.0,
+      "operating_profit": 17103063887.0,
+      "net_profit": 0.0,
+      "total_assets": 482177886521.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ],
+      [
+        "electrical",
+        1
+      ],
+      [
+        "buildingMaterials",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "set",
+        1
+      ],
+      [
+        "cable",
+        1
+      ],
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "139990",
+      "corpName": "아주스틸",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "000910",
+      "corpName": "유니온",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

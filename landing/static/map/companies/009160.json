@@ -1,0 +1,262 @@
+{
+  "ego": {
+    "stockCode": "009160",
+    "corpName": "SIMPAC",
+    "industry": "auto",
+    "stage": "oem",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 11790,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001430",
+      "corpName": "세아베스틸지주",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 36516
+    },
+    {
+      "stockCode": "001940",
+      "corpName": "KISCO홀딩스",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 8253
+    },
+    {
+      "stockCode": "307180",
+      "corpName": "아이엘",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 1029
+    },
+    {
+      "stockCode": "457550",
+      "corpName": "우진엔텍",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 448
+    },
+    {
+      "stockCode": "084010",
+      "corpName": "대한제강",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 12471
+    },
+    {
+      "stockCode": "105840",
+      "corpName": "우진",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 1504
+    },
+    {
+      "stockCode": "120110",
+      "corpName": "코오롱인더",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "009160",
+      "to": "001430",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "009160",
+      "to": "001940",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "009160",
+      "to": "307180",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "009160",
+      "to": "457550",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "009160",
+      "to": "084010",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "105840",
+      "to": "009160",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "120110",
+      "to": "009160",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 613012779571.0,
+      "operating_profit": 106401536463.0,
+      "net_profit": 90832862627.0,
+      "total_assets": 903229593071.0
+    },
+    {
+      "year": "2022",
+      "sales": 672228713099.0,
+      "operating_profit": 118946231131.0,
+      "net_profit": 76137343950.0,
+      "total_assets": 965098438859.0
+    },
+    {
+      "year": "2023",
+      "sales": 609449638180.0,
+      "operating_profit": 17502288607.0,
+      "net_profit": -6463853637.0,
+      "total_assets": 1057913469539.0
+    },
+    {
+      "year": "2024",
+      "sales": 785061758000.0,
+      "operating_profit": 24452879000.0,
+      "net_profit": 27454726000.0,
+      "total_assets": 1079604688000.0
+    },
+    {
+      "year": "2025",
+      "sales": 1179040874617.0,
+      "operating_profit": 45956315730.0,
+      "net_profit": 22353244341.0,
+      "total_assets": 1333843317612.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "001430",
+      "corpName": "세아베스틸지주",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "001940",
+      "corpName": "KISCO홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "084010",
+      "corpName": "대한제강",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

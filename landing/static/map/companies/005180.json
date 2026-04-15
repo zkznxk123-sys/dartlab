@@ -1,0 +1,263 @@
+{
+  "ego": {
+    "stockCode": "005180",
+    "corpName": "빙그레",
+    "industry": "food",
+    "stage": "processing",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 14896,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001790",
+      "corpName": "대한제당",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 13563
+    },
+    {
+      "stockCode": "001800",
+      "corpName": "오리온홀딩스",
+      "industry": "food",
+      "stage": "processing",
+      "revenue": 33931
+    },
+    {
+      "stockCode": "264900",
+      "corpName": "크라운제과",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 4448
+    },
+    {
+      "stockCode": "005740",
+      "corpName": "크라운해태홀딩스",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 10699
+    },
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "032830",
+      "corpName": "삼성생명",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "001790",
+      "to": "005180",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005180",
+      "to": "001800",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "005180",
+      "to": "264900",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005180",
+      "to": "005740",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005180",
+      "to": "030200",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "032830",
+      "to": "005180",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005180",
+      "to": "030200",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "005180",
+      "to": "005740",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 7.7%"
+    },
+    {
+      "from": "005180",
+      "to": "264900",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.5%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1147435118625.0,
+      "operating_profit": 26243919355.0,
+      "net_profit": -19327115194.0,
+      "total_assets": 760245280571.0
+    },
+    {
+      "year": "2022",
+      "sales": 1267685822673.0,
+      "operating_profit": 39407655268.0,
+      "net_profit": 25685517208.0,
+      "total_assets": 769266587599.0
+    },
+    {
+      "year": "2023",
+      "sales": 1394316382403.0,
+      "operating_profit": 112245218200.0,
+      "net_profit": 86218494465.0,
+      "total_assets": 890717259861.0
+    },
+    {
+      "year": "2024",
+      "sales": 1463041258105.0,
+      "operating_profit": 131275792188.0,
+      "net_profit": 103226927609.0,
+      "total_assets": 1003074746009.0
+    },
+    {
+      "year": "2025",
+      "sales": 1489587173794.0,
+      "operating_profit": 88357009701.0,
+      "net_profit": 0.0,
+      "total_assets": 1068753458746.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "001800",
+      "corpName": "오리온홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

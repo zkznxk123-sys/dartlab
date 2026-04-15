@@ -1,0 +1,458 @@
+{
+  "ego": {
+    "stockCode": "044820",
+    "corpName": "코스맥스비티아이",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 6452,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "222040",
+      "corpName": "코스맥스엔비티",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 2875
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "236810",
+      "corpName": "엔비티",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 923
+    },
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 875
+    },
+    {
+      "stockCode": "175250",
+      "corpName": "아이큐어",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 834
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "237880",
+      "corpName": "클리오",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 3289
+    },
+    {
+      "stockCode": "270870",
+      "corpName": "뉴트리",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 1011
+    },
+    {
+      "stockCode": "065660",
+      "corpName": "안트로젠",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 75
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "044820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "222040",
+      "to": "044820",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "192820",
+      "to": "044820",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "236810",
+      "to": "044820",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "044820",
+      "to": "222040",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "044820",
+      "to": "099220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "044820",
+      "to": "192820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "044820",
+      "to": "236810",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "044820",
+      "to": "175250",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "044820",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "044820",
+      "to": "031210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "044820",
+      "to": "237880",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "044820",
+      "to": "270870",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "044820",
+      "to": "065660",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "044820",
+      "to": "041510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "192820",
+      "to": "044820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "222040",
+      "to": "044820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "044820",
+      "to": "237880",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.3%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 575998201641.0,
+      "operating_profit": 11921606212.0,
+      "net_profit": 14133653200.0,
+      "total_assets": 954664614459.0
+    },
+    {
+      "year": "2022",
+      "sales": 617403775029.0,
+      "operating_profit": 3400294229.0,
+      "net_profit": 0.0,
+      "total_assets": 936136657462.0
+    },
+    {
+      "year": "2023",
+      "sales": 628597019226.0,
+      "operating_profit": 20249350496.0,
+      "net_profit": -6573996354.0,
+      "total_assets": 878273229175.0
+    },
+    {
+      "year": "2024",
+      "sales": 597630263412.0,
+      "operating_profit": 16794453838.0,
+      "net_profit": -8408097433.0,
+      "total_assets": 953903205812.0
+    },
+    {
+      "year": "2025",
+      "sales": 645205591735.0,
+      "operating_profit": 26984473709.0,
+      "net_profit": -10538426123.0,
+      "total_assets": 1006338658068.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "pharma",
+        1
+      ],
+      [
+        "cosmetics",
+        1
+      ],
+      [
+        "software",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "formulation",
+        1
+      ],
+      [
+        "manufacturing",
+        1
+      ],
+      [
+        "platform",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "222040",
+      "corpName": "코스맥스엔비티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "236810",
+      "corpName": "엔비티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

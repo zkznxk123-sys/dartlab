@@ -263,10 +263,37 @@ def buildEcosystem() -> dict:
     for i, ind_id in enumerate(taxonomy.keys()):
         ind_color[ind_id] = palette[i % len(palette)]
 
+    # 산업별 순위/점유율 사전계산
+    # {industry: {stockCode: (rank, sharePct)}}
+    industryRanks: dict[str, dict[str, tuple[int, float]]] = {}
+    industryRevTotals: dict[str, float] = {}
+    byIndustry: dict[str, list] = {}
+    for n in nodes:
+        byIndustry.setdefault(n.industry, []).append(n)
+    for ind_id, members in byIndustry.items():
+        total = sum(m.revenue or 0 for m in members)
+        industryRevTotals[ind_id] = total
+        ranked = sorted(members, key=lambda x: x.revenue or 0, reverse=True)
+        ranks: dict[str, tuple[int, float]] = {}
+        for i, m in enumerate(ranked, start=1):
+            share = ((m.revenue or 0) / total * 100) if total > 0 else 0.0
+            ranks[m.stockCode] = (i, share)
+        industryRanks[ind_id] = ranks
+
+    # stage key → stageName lookup (taxonomy 기반)
+    def _stageNameOf(industryId: str, stageKey: str) -> str:
+        if not stageKey or industryId not in taxonomy:
+            return ""
+        for s in taxonomy[industryId].stages:
+            if s.key == stageKey:
+                return s.name
+        return stageKey
+
     # 노드 (Cosmograph 포맷)
     nodeList = []
     for n in nodes:
         rev_log = 1.0 if not n.revenue else max(1.0, min(20.0, 1.0 + (n.revenue / 1e11)))  # log-ish
+        rank, share = industryRanks.get(n.industry, {}).get(n.stockCode, (0, 0.0))
         nodeList.append(
             {
                 "id": n.stockCode,
@@ -274,7 +301,15 @@ def buildEcosystem() -> dict:
                 "industry": n.industry,
                 "industryName": taxonomy[n.industry].name if n.industry in taxonomy else n.industry,
                 "stage": n.stage or "",
+                "stageName": _stageNameOf(n.industry, n.stage or ""),
+                "role": n.role or "",
+                "stream": n.stream or "",
+                "confidence": round(n.confidence, 2) if n.confidence else 0.0,
+                "source": n.source or "",
                 "revenue": n.revenue or 0,
+                "industryRank": rank,
+                "industryPeerCount": len(byIndustry.get(n.industry, [])),
+                "marketShare": round(share, 2),
                 "size": rev_log,
                 "color": ind_color.get(n.industry, "#9ca3af"),
             }

@@ -1,0 +1,250 @@
+{
+  "ego": {
+    "stockCode": "257720",
+    "corpName": "실리콘투",
+    "industry": "cosmetics",
+    "stage": "manufacturing",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 11163,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024720",
+      "corpName": "콜마홀딩스",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 6301
+    },
+    {
+      "stockCode": "195940",
+      "corpName": "HK이노엔",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 10632
+    },
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 875
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 69295
+    },
+    {
+      "stockCode": "003650",
+      "corpName": "미창석유공업",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 4055
+    },
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 292830
+    }
+  ],
+  "edges": [
+    {
+      "from": "024720",
+      "to": "257720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "195940",
+      "to": "257720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "257720",
+      "to": "099220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004170",
+      "to": "257720",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "003650",
+      "to": "257720",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "006800",
+      "to": "257720",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "024720",
+      "to": "257720",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.8%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 131001972745.0,
+      "operating_profit": 8758923145.0,
+      "net_profit": 8254206052.0,
+      "total_assets": 97392484285.0
+    },
+    {
+      "year": "2022",
+      "sales": 165272164547.0,
+      "operating_profit": 14239439136.0,
+      "net_profit": 11155656520.0,
+      "total_assets": 129216316028.0
+    },
+    {
+      "year": "2023",
+      "sales": 342860997946.0,
+      "operating_profit": 47809343470.0,
+      "net_profit": 38013204272.0,
+      "total_assets": 215270561079.0
+    },
+    {
+      "year": "2024",
+      "sales": 691522368911.0,
+      "operating_profit": 137575012281.0,
+      "net_profit": 120738196347.0,
+      "total_assets": 457759144111.0
+    },
+    {
+      "year": "2025",
+      "sales": 1116287364104.0,
+      "operating_profit": 205361951857.0,
+      "net_profit": 0.0,
+      "total_assets": 709448340772.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "retail",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "retail",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "stage": "manufacturing",
+      "revenue": 42528
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "278470",
+      "corpName": "에이피알",
+      "stage": "manufacturing",
+      "revenue": 15273
+    },
+    {
+      "stockCode": "241710",
+      "corpName": "코스메카코리아",
+      "stage": "manufacturing",
+      "revenue": 6409
+    }
+  ]
+}

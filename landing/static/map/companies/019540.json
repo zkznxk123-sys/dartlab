@@ -1,0 +1,180 @@
+{
+  "ego": {
+    "stockCode": "019540",
+    "corpName": "일지테크",
+    "industry": "auto",
+    "stage": "body",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 8551,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "101390",
+      "corpName": "아이엠",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 918
+    },
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "018260",
+      "corpName": "삼성에스디에스",
+      "industry": "shipbuilding",
+      "stage": "shipping",
+      "revenue": 139299
+    }
+  ],
+  "edges": [
+    {
+      "from": "019540",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "019540",
+      "to": "101390",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "019540",
+      "to": "031210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "019540",
+      "to": "018260",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 195847448312.0,
+      "operating_profit": -5261187438.0,
+      "net_profit": 0.0,
+      "total_assets": 381384369854.0
+    },
+    {
+      "year": "2022",
+      "sales": 229144511634.0,
+      "operating_profit": 616400443.0,
+      "net_profit": -9094490726.0,
+      "total_assets": 381341131968.0
+    },
+    {
+      "year": "2023",
+      "sales": 628485714969.0,
+      "operating_profit": 35416248406.0,
+      "net_profit": 32300041824.0,
+      "total_assets": 527540769631.0
+    },
+    {
+      "year": "2024",
+      "sales": 757295076969.0,
+      "operating_profit": 24446601603.0,
+      "net_profit": 22508316666.0,
+      "total_assets": 575398148802.0
+    },
+    {
+      "year": "2025",
+      "sales": 855062638987.0,
+      "operating_profit": 48024207512.0,
+      "net_profit": 0.0,
+      "total_assets": 646416055882.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

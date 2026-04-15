@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "123410",
+    "corpName": "코리아에프티",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 7859,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "005830",
+      "to": "123410",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 465656454377.0,
+      "operating_profit": 9492947158.0,
+      "net_profit": -792294300.0,
+      "total_assets": 373473802621.0
+    },
+    {
+      "year": "2022",
+      "sales": 561043636760.0,
+      "operating_profit": 19446713015.0,
+      "net_profit": -1074362588.0,
+      "total_assets": 394101655639.0
+    },
+    {
+      "year": "2023",
+      "sales": 679542505142.0,
+      "operating_profit": 33927539705.0,
+      "net_profit": 30335231231.0,
+      "total_assets": 415160886010.0
+    },
+    {
+      "year": "2024",
+      "sales": 735908384932.0,
+      "operating_profit": 37536275662.0,
+      "net_profit": 273794734.0,
+      "total_assets": 466528114707.0
+    },
+    {
+      "year": "2025",
+      "sales": 785869151550.0,
+      "operating_profit": 45413955880.0,
+      "net_profit": 0.0,
+      "total_assets": 523167416168.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

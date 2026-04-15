@@ -1,0 +1,243 @@
+{
+  "ego": {
+    "stockCode": "005010",
+    "corpName": "휴스틸",
+    "industry": "food",
+    "stage": "distribution",
+    "role": "도매",
+    "stream": "downstream",
+    "revenue": 6125,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "056730",
+      "corpName": "CNT85",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 475
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "377300",
+      "corpName": "카카오페이",
+      "industry": "finance",
+      "stage": "fintech",
+      "revenue": 9584
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 80991
+    },
+    {
+      "stockCode": "196490",
+      "corpName": "디에이테크놀로지",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 333
+    }
+  ],
+  "edges": [
+    {
+      "from": "005010",
+      "to": "056730",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004020",
+      "to": "005010",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "005010",
+      "to": "377300",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005010",
+      "to": "035720",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005010",
+      "to": "196490",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "056730",
+      "to": "005010",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "196490",
+      "to": "005010",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 616505522303.0,
+      "operating_profit": 63214154152.0,
+      "net_profit": 37987133196.0,
+      "total_assets": 951920862198.0
+    },
+    {
+      "year": "2022",
+      "sales": 1030923466708.0,
+      "operating_profit": 289220357862.0,
+      "net_profit": 227154197055.0,
+      "total_assets": 1206373632049.0
+    },
+    {
+      "year": "2023",
+      "sales": 764841700033.0,
+      "operating_profit": 123214733009.0,
+      "net_profit": 72197667977.0,
+      "total_assets": 1325993300470.0
+    },
+    {
+      "year": "2024",
+      "sales": 723068271123.0,
+      "operating_profit": 17080221750.0,
+      "net_profit": 22312045697.0,
+      "total_assets": 1431265670359.0
+    },
+    {
+      "year": "2025",
+      "sales": 612490282785.0,
+      "operating_profit": 3489813746.0,
+      "net_profit": -15032302605.0,
+      "total_assets": 1372404760518.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

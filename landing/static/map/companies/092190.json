@@ -1,0 +1,156 @@
+{
+  "ego": {
+    "stockCode": "092190",
+    "corpName": "서울바이오시스",
+    "industry": "software",
+    "stage": "solution",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 7638,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "046890",
+      "corpName": "서울반도체",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 10135
+    }
+  ],
+  "edges": [
+    {
+      "from": "046890",
+      "to": "092190",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "092190",
+      "to": "046890",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "092190",
+      "to": "046890",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 488676724768.0,
+      "operating_profit": 22269724367.0,
+      "net_profit": 20888475660.0,
+      "total_assets": 775635294214.0
+    },
+    {
+      "year": "2022",
+      "sales": 438791591285.0,
+      "operating_profit": -62117967238.0,
+      "net_profit": -93690297846.0,
+      "total_assets": 755995137277.0
+    },
+    {
+      "year": "2023",
+      "sales": 503960846284.0,
+      "operating_profit": -72949875244.0,
+      "net_profit": -88922175299.0,
+      "total_assets": 733423744990.0
+    },
+    {
+      "year": "2024",
+      "sales": 699232725004.0,
+      "operating_profit": 3487592223.0,
+      "net_profit": 18090606055.0,
+      "total_assets": 795813855619.0
+    },
+    {
+      "year": "2025",
+      "sales": 763809147116.0,
+      "operating_profit": 225831786.0,
+      "net_profit": -15423704562.0,
+      "total_assets": 717773205486.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "046890",
+      "corpName": "서울반도체",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

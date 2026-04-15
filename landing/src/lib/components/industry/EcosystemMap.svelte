@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { brand } from '$lib/brand';
 
 	let cleanupFns: Array<() => void> = [];
 	onDestroy(() => {
@@ -15,6 +16,8 @@
 		revenue: number;
 		size: number;
 		color: string;
+		isIndustry?: boolean;
+		nodeCount?: number;
 	}
 
 	interface LinkDatum {
@@ -26,16 +29,18 @@
 		product: string;
 		confidence: number;
 		source_tag: string;
+		edgeCount?: number;
 	}
 
 	interface Props {
 		nodes: NodeDatum[];
 		links: LinkDatum[];
+		isAtlas?: boolean;
 		onNodeClick?: (node: NodeDatum | null) => void;
 		onNodeHover?: (node: NodeDatum | null) => void;
 	}
 
-	let { nodes, links, onNodeClick, onNodeHover }: Props = $props();
+	let { nodes, links, isAtlas = false, onNodeClick, onNodeHover }: Props = $props();
 
 	let container: HTMLDivElement | null = $state(null);
 	let graph: any = $state(null);
@@ -61,8 +66,16 @@
 		const rendered: typeof companyLabels = [];
 		const sortedByRev = [...nodes].sort((a, b) => (b.revenue || 0) - (a.revenue || 0));
 
-		// 라벨 표시할 회사 수 결정 (줌 아웃 시 top 20, 줌 인 시 전체)
-		const topN = zoom < 2 ? 0 : zoom < 4 ? 30 : zoom < 8 ? 150 : 500;
+		// atlas 뷰 (34개 산업): 모두 항상 라벨 표시. companies/industry: 줌에 따라 top N
+		const topN = isAtlas
+			? nodes.length
+			: zoom < 2
+				? 0
+				: zoom < 4
+					? 30
+					: zoom < 8
+						? 150
+						: 500;
 
 		for (const n of nodes) {
 			const pos = positions[n.id];
@@ -124,20 +137,28 @@
 		graph = new Graph(canvas, {
 			spaceSize: 4096,
 			backgroundColor: '#050811',
-			nodeSize: (n: NodeDatum) => Math.max(3, Math.min(14, n.size * 1.5)),
+			nodeSize: (n: NodeDatum) => {
+				if (n.isIndustry) return Math.max(10, Math.min(40, n.size * 2));
+				return Math.max(3, Math.min(14, n.size * 1.5));
+			},
 			nodeColor: (n: NodeDatum) => n.color,
-			nodeGreyoutOpacity: 0.08,
+			nodeGreyoutOpacity: 0.12,
 			linkColor: (l: LinkDatum) => {
-				if (l.type === 'supplier') return l.amount ? '#fb923c' : '#7c4a1e';
+				if (l.type === 'supplier') return l.amount ? '#fb923c' : '#b76930';
 				if (l.type === 'customer') return '#60a5fa';
 				if (l.type === 'investor') return '#a78bfa';
-				return '#374151'; // affiliate
+				return '#4b5563'; // affiliate
 			},
 			linkWidth: (l: LinkDatum) => {
-				if (!l.amount) return 0.3;
-				return Math.min(0.3 + Math.log10(l.amount + 1) * 0.2, 2);
+				// atlas: edgeCount 기반 굵기 (산업간 supplier flow)
+				if (l.edgeCount) {
+					return Math.max(1.2, Math.min(6, 1 + Math.log2(l.edgeCount + 1) * 0.8));
+				}
+				// companies: amount 기반, 없으면 기본값을 2~3배 두껍게
+				if (!l.amount) return 0.9;
+				return Math.max(1.0, Math.min(4, 0.8 + Math.log10(l.amount + 1) * 0.5));
 			},
-			linkGreyoutOpacity: 0.05,
+			linkGreyoutOpacity: 0.15,
 			linkArrows: false,
 			simulation: {
 				repulsion: 1.0,
@@ -290,8 +311,42 @@
 		</div>
 	{/if}
 
-	<div class="zoom-indicator">
-		줌 {currentZoom.toFixed(1)}×
+	<div class="top-right-cluster">
+		<a
+			class="tr-btn github"
+			href={brand.repo}
+			target="_blank"
+			rel="noopener"
+			title="GitHub 저장소"
+			aria-label="GitHub"
+		>
+			<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+				<path
+					fill="currentColor"
+					d="M12 .5C5.73.5.66 5.57.66 11.84c0 5.02 3.26 9.28 7.78 10.78.57.1.78-.25.78-.55v-1.92c-3.17.69-3.84-1.53-3.84-1.53-.52-1.31-1.27-1.66-1.27-1.66-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.72-1.52-2.53-.29-5.2-1.27-5.2-5.64 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.14 1.17a10.9 10.9 0 0 1 5.72 0c2.18-1.48 3.14-1.17 3.14-1.17.62 1.59.23 2.76.11 3.05.74.8 1.18 1.82 1.18 3.07 0 4.38-2.68 5.35-5.22 5.63.41.35.77 1.04.77 2.1v3.11c0 .3.2.66.79.55 4.52-1.5 7.77-5.76 7.77-10.78C23.34 5.57 18.27.5 12 .5Z"
+				/>
+			</svg>
+		</a>
+		<a
+			class="tr-btn bmc"
+			href={brand.coffee}
+			target="_blank"
+			rel="noopener"
+			title="Buy Me A Coffee"
+			aria-label="Buy Me A Coffee"
+		>
+			<img
+				src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+				alt=""
+				width="88"
+				height="26"
+				loading="lazy"
+				decoding="async"
+			/>
+		</a>
+		<div class="zoom-indicator" title="마우스 휠 / 트랙패드로 확대·축소">
+			화면 배율 {currentZoom.toFixed(1)}×
+		</div>
 	</div>
 </div>
 
@@ -382,17 +437,52 @@
 		color: #fb923c;
 		font-weight: 600;
 	}
-	.zoom-indicator {
+	.top-right-cluster {
 		position: absolute;
 		top: 16px;
 		right: 16px;
-		background: rgba(15, 18, 25, 0.8);
+		display: flex;
+		gap: 8px;
+		align-items: center;
+		z-index: 5;
+	}
+	.tr-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(15, 18, 25, 0.85);
 		border: 1px solid #1e2433;
 		border-radius: 6px;
-		padding: 4px 10px;
+		color: #cbd5e1;
+		text-decoration: none;
+		backdrop-filter: blur(8px);
+		transition: background 0.15s, border-color 0.15s, color 0.15s;
+	}
+	.tr-btn:hover {
+		background: rgba(30, 36, 51, 0.95);
+		border-color: #334155;
+		color: #f1f5f9;
+	}
+	.tr-btn.github {
+		width: 30px;
+		height: 30px;
+	}
+	.tr-btn.bmc {
+		padding: 2px 6px;
+		height: 30px;
+	}
+	.tr-btn.bmc img {
+		display: block;
+	}
+	.zoom-indicator {
+		background: rgba(15, 18, 25, 0.85);
+		border: 1px solid #1e2433;
+		border-radius: 6px;
+		padding: 6px 10px;
 		font-size: 11px;
 		color: #94a3b8;
 		font-family: monospace;
 		backdrop-filter: blur(8px);
+		cursor: help;
 	}
 </style>

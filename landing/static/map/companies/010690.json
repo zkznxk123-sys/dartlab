@@ -1,0 +1,357 @@
+{
+  "ego": {
+    "stockCode": "010690",
+    "corpName": "화신",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 19625,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "250060",
+      "corpName": "모비스",
+      "industry": "auto",
+      "stage": "powertrain",
+      "revenue": 51
+    },
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000430",
+      "corpName": "대원강업",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 15991
+    },
+    {
+      "stockCode": "004100",
+      "corpName": "태양금속공업",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 6202
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "090080",
+      "corpName": "평화산업",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 6261
+    },
+    {
+      "stockCode": "126640",
+      "corpName": "화신정공",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 3789
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "250060",
+      "to": "010690",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "005380",
+      "to": "010690",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000430",
+      "to": "010690",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004100",
+      "to": "010690",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "012330",
+      "to": "010690",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "090080",
+      "to": "010690",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "010690",
+      "to": "126640",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "010690",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "126640",
+      "to": "010690",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "126640",
+      "to": "010690",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 5.8%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 36663229573.0,
+      "operating_profit": 24157220350.0,
+      "net_profit": 24383199323.0,
+      "total_assets": 870753098147.0
+    },
+    {
+      "year": "2022",
+      "sales": 1690271415164.0,
+      "operating_profit": 87362958755.0,
+      "net_profit": 74211911444.0,
+      "total_assets": 1004620994499.0
+    },
+    {
+      "year": "2023",
+      "sales": 44093098758.0,
+      "operating_profit": 83728814908.0,
+      "net_profit": 77268483097.0,
+      "total_assets": 1196813984369.0
+    },
+    {
+      "year": "2024",
+      "sales": 1712315816922.0,
+      "operating_profit": 65310768287.0,
+      "net_profit": -14994882.0,
+      "total_assets": 1321669869758.0
+    },
+    {
+      "year": "2025",
+      "sales": 1962483716837.0,
+      "operating_profit": 102447956813.0,
+      "net_profit": null,
+      "total_assets": 1559099212744.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 6,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "auto",
+        4
+      ],
+      [
+        "electronics",
+        2
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "oem",
+        3
+      ],
+      [
+        "component",
+        2
+      ],
+      [
+        "powertrain",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "250060",
+      "corpName": "모비스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "000430",
+      "corpName": "대원강업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004100",
+      "corpName": "태양금속공업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "090080",
+      "corpName": "평화산업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

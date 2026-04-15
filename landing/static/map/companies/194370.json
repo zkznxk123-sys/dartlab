@@ -1,0 +1,274 @@
+{
+  "ego": {
+    "stockCode": "194370",
+    "corpName": "제이에스코퍼레이션",
+    "industry": "textile",
+    "stage": "apparel",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 12882,
+    "confidence": 0.68,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "004710",
+      "corpName": "한솔테크닉스",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 12524
+    },
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "092220",
+      "corpName": "KEC",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 2296
+    },
+    {
+      "stockCode": "004700",
+      "corpName": "조광피혁",
+      "industry": "auto",
+      "stage": "body",
+      "revenue": 979
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "307930",
+      "corpName": "컴퍼니케이",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "004710",
+      "to": "194370",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005830",
+      "to": "194370",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "092220",
+      "to": "194370",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004700",
+      "to": "194370",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "194370",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "194370",
+      "to": "031210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "194370",
+      "to": "307930",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 987023677957.0,
+      "operating_profit": 60970128693.0,
+      "net_profit": 48293833743.0,
+      "total_assets": 552280907650.0
+    },
+    {
+      "year": "2022",
+      "sales": 975066240993.0,
+      "operating_profit": 81475323113.0,
+      "net_profit": 64584601970.0,
+      "total_assets": 533768141172.0
+    },
+    {
+      "year": "2023",
+      "sales": 862765475437.0,
+      "operating_profit": 84041956668.0,
+      "net_profit": 44326155084.0,
+      "total_assets": 762883957812.0
+    },
+    {
+      "year": "2024",
+      "sales": 1117499247162.0,
+      "operating_profit": 121255985576.0,
+      "net_profit": 0.0,
+      "total_assets": 1830513946593.0
+    },
+    {
+      "year": "2025",
+      "sales": 1288232609221.0,
+      "operating_profit": 140512479061.0,
+      "net_profit": 76550011959.0,
+      "total_assets": 1808974753696.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "semiconductor",
+        1
+      ],
+      [
+        "auto",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "fab",
+        1
+      ],
+      [
+        "body",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "092220",
+      "corpName": "KEC",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004700",
+      "corpName": "조광피혁",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

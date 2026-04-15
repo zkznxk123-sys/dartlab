@@ -1,0 +1,787 @@
+{
+  "ego": {
+    "stockCode": "005950",
+    "corpName": "이수화학",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 16595,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "industry": "electronics",
+      "stage": "",
+      "revenue": 63555
+    },
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "038070",
+      "corpName": "서린바이오",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 771
+    },
+    {
+      "stockCode": "086890",
+      "corpName": "이수앱지스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 567
+    },
+    {
+      "stockCode": "300720",
+      "corpName": "한일시멘트",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 14239
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 184830
+    },
+    {
+      "stockCode": "023410",
+      "corpName": "유진기업",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 13327
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "261520",
+      "corpName": "이지스",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 0
+    },
+    {
+      "stockCode": "007660",
+      "corpName": "이수페타시스",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 10880
+    },
+    {
+      "stockCode": "457190",
+      "corpName": "이수스페셜티케미컬",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 4115
+    },
+    {
+      "stockCode": "038880",
+      "corpName": "아이에이",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 412
+    },
+    {
+      "stockCode": "109610",
+      "corpName": "에스와이",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 5016
+    },
+    {
+      "stockCode": "067370",
+      "corpName": "선바이오",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 137
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "034950",
+      "corpName": "한국기업평가",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 1098
+    },
+    {
+      "stockCode": "003530",
+      "corpName": "한화투자증권",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 30946
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "005690",
+      "corpName": "파미셀",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 1141
+    },
+    {
+      "stockCode": "278990",
+      "corpName": "EMB",
+      "industry": "battery",
+      "stage": "cell",
+      "revenue": 238
+    },
+    {
+      "stockCode": "001750",
+      "corpName": "한양증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 9090
+    },
+    {
+      "stockCode": "134380",
+      "corpName": "미원화학",
+      "industry": "cosmetics",
+      "stage": "raw",
+      "revenue": 2845
+    }
+  ],
+  "edges": [
+    {
+      "from": "005950",
+      "to": "051900",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 2655.0,
+      "ratio": null,
+      "product": "소다회, AOS, 우지, Palm Stearin Oil 등",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "소다회, AOS, 우지, Palm Stearin Oil 등"
+    },
+    {
+      "from": "005830",
+      "to": "005950",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "038070",
+      "to": "005950",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "086890",
+      "to": "005950",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "300720",
+      "to": "005950",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004020",
+      "to": "005950",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "010950",
+      "to": "005950",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "011170",
+      "to": "005950",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "023410",
+      "to": "005950",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "005950",
+      "to": "352820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "005950",
+      "to": "261520",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "005950",
+      "to": "086890",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "005950",
+      "to": "007660",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "005950",
+      "to": "457190",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "005950",
+      "to": "038880",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "005950",
+      "to": "109610",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "005950",
+      "to": "067370",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005950",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    },
+    {
+      "from": "005950",
+      "to": "034950",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    },
+    {
+      "from": "005950",
+      "to": "003530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    },
+    {
+      "from": "005950",
+      "to": "039490",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    },
+    {
+      "from": "005950",
+      "to": "005690",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    },
+    {
+      "from": "005950",
+      "to": "278990",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    },
+    {
+      "from": "005950",
+      "to": "001750",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    },
+    {
+      "from": "007660",
+      "to": "005950",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "086890",
+      "to": "005950",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005950",
+      "to": "134380",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "134380",
+      "to": "005950",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005950",
+      "to": "457190",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "457190",
+      "to": "005950",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "005950",
+      "to": "067370",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 5.2%"
+    },
+    {
+      "from": "005950",
+      "to": "457190",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1703337116038.0,
+      "operating_profit": 82059895812.0,
+      "net_profit": 96522425842.0,
+      "total_assets": 1168938576112.0
+    },
+    {
+      "year": "2022",
+      "sales": 2207647670842.0,
+      "operating_profit": 35990535226.0,
+      "net_profit": 26233638344.0,
+      "total_assets": 1188076573138.0
+    },
+    {
+      "year": "2023",
+      "sales": 1995488453425.0,
+      "operating_profit": -56017930753.0,
+      "net_profit": -28074913226.0,
+      "total_assets": 1093466713681.0
+    },
+    {
+      "year": "2024",
+      "sales": 1916230887000.0,
+      "operating_profit": -51445078000.0,
+      "net_profit": -47419197000.0,
+      "total_assets": 957246232000.0
+    },
+    {
+      "year": "2025",
+      "sales": 1659477477000.0,
+      "operating_profit": 6884026000.0,
+      "net_profit": -9449106000.0,
+      "total_assets": 897707782000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 7,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 5,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "construction",
+        2
+      ],
+      [
+        "chemical",
+        2
+      ],
+      [
+        "retail",
+        1
+      ],
+      [
+        "pharma",
+        1
+      ],
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "material",
+        2
+      ],
+      [
+        "basic",
+        2
+      ],
+      [
+        "retail",
+        1
+      ],
+      [
+        "research",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "038070",
+      "corpName": "서린바이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "086890",
+      "corpName": "이수앱지스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "300720",
+      "corpName": "한일시멘트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "023410",
+      "corpName": "유진기업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "product": "소다회, AOS, 우지, Palm Stearin Oil 등",
+      "amount": 2655.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "134380",
+      "corpName": "미원화학",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "457190",
+      "corpName": "이수스페셜티케미컬",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

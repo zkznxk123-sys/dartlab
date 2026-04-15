@@ -1,0 +1,291 @@
+{
+  "ego": {
+    "stockCode": "021050",
+    "corpName": "서원",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 17136,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005750",
+      "corpName": "대림바스",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 3006
+    },
+    {
+      "stockCode": "012800",
+      "corpName": "대창",
+      "industry": "steel",
+      "stage": "processing",
+      "revenue": 14702
+    },
+    {
+      "stockCode": "043340",
+      "corpName": "에쎈테크",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 579
+    },
+    {
+      "stockCode": "005160",
+      "corpName": "동국산업",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 7278
+    }
+  ],
+  "edges": [
+    {
+      "from": "021050",
+      "to": "005750",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 2717.0,
+      "ratio": null,
+      "product": "황 동 류",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "황 동 류"
+    },
+    {
+      "from": "012800",
+      "to": "021050",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "043340",
+      "to": "021050",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "012800",
+      "to": "021050",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "005160",
+      "to": "021050",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "021050",
+      "to": "043340",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "021050",
+      "to": "012800",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "043340",
+      "to": "021050",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 261636393948.0,
+      "operating_profit": 15126656228.0,
+      "net_profit": 16966480417.0,
+      "total_assets": 293365978377.0
+    },
+    {
+      "year": "2022",
+      "sales": 275679212522.0,
+      "operating_profit": 173336109.0,
+      "net_profit": 276402475.0,
+      "total_assets": 266232857341.0
+    },
+    {
+      "year": "2023",
+      "sales": 233179269197.0,
+      "operating_profit": 452953609.0,
+      "net_profit": -10159276981.0,
+      "total_assets": 246997268553.0
+    },
+    {
+      "year": "2024",
+      "sales": 1229526508990.0,
+      "operating_profit": 27647640318.0,
+      "net_profit": 49493972263.0,
+      "total_assets": 981647961482.0
+    },
+    {
+      "year": "2025",
+      "sales": 1713611354765.0,
+      "operating_profit": 53323111520.0,
+      "net_profit": 5604764152.0,
+      "total_assets": 1079186018040.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "machinery",
+        1
+      ],
+      [
+        "steel",
+        1
+      ],
+      [
+        "retail",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        1
+      ],
+      [
+        "processing",
+        1
+      ],
+      [
+        "wholesale",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "043340",
+      "corpName": "에쎈테크",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "012800",
+      "corpName": "대창",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "005160",
+      "corpName": "동국산업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "005750",
+      "corpName": "대림바스",
+      "product": "황 동 류",
+      "amount": 2717.0,
+      "type": "supplier",
+      "confidence": 0.9
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

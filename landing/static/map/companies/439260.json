@@ -1,0 +1,364 @@
+{
+  "ego": {
+    "stockCode": "439260",
+    "corpName": "대한조선",
+    "industry": "shipbuilding",
+    "stage": "build",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 12281,
+    "confidence": 0.6,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "042660",
+      "corpName": "한화오션",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 127835
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 712594
+    },
+    {
+      "stockCode": "329180",
+      "corpName": "HD현대중공업",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 175806
+    },
+    {
+      "stockCode": "092460",
+      "corpName": "한라IMS",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 1335
+    },
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "082740",
+      "corpName": "한화엔진",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 13711
+    }
+  ],
+  "edges": [
+    {
+      "from": "004020",
+      "to": "439260",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "042660",
+      "to": "439260",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "047050",
+      "to": "439260",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "267250",
+      "to": "439260",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "329180",
+      "to": "439260",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "092460",
+      "to": "439260",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "030200",
+      "to": "439260",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "082740",
+      "to": "439260",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "[개선/높음] 3번 죽은 조선소가 수에즈막스 올인 OPM 24%. 조선업 최고 이익률.",
+    "strengths": [
+      "OPM 0.48%→24%",
+      "Big3도 못한 24% 방산 0%로"
+    ],
+    "weaknesses": [
+      "3번 법정관리",
+      "수에즈막스 편중"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2596827"
+  },
+  "blogPosts": [
+    {
+      "slug": "14-439260-daehan-shipbuilding",
+      "title": "대한조선 (439260) — 3번 죽은 조선소가 OPM 24%를 찍었다",
+      "description": "조선업 평균 OPM 5~10%인데 대한조선만 24%. 방산이 아닌 순수 상선으로. 1987년 해남의 작은 조선소 → 3번 부도 → 2022년 2,000억에 인수 → 2025년 시총 3.3조. 수에즈막스에 올인한 공정 혁신의 재무제표를 추적한다.",
+      "date": "2026-04-11",
+      "grade": "dCR 미산출",
+      "storyTemplate": "턴어라운드 + 성장",
+      "verdict": "3번 죽은 조선소가 수에즈막스 올인 OPM 24%. 조선업 최고 이익률.",
+      "direction": "개선",
+      "confidence": "높음",
+      "archetype": "턴어라운드",
+      "strengths": [
+        "OPM 0.48%→24%",
+        "Big3도 못한 24% 방산 0%로"
+      ],
+      "weaknesses": [
+        "3번 법정관리",
+        "수에즈막스 편중"
+      ],
+      "keyMetrics": {
+        "revenue": 1.23,
+        "opm": 23.95,
+        "roe": 30.0,
+        "fcf": 0.3
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/439260-daehan-shipbuilding.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2025",
+      "sales": 1228128117609.0,
+      "operating_profit": 294102888541.0,
+      "net_profit": 248774797154.0,
+      "total_assets": 1538053375300.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 7,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "shipbuilding",
+        3
+      ],
+      [
+        "steel",
+        2
+      ],
+      [
+        "telecom",
+        1
+      ],
+      [
+        "aerospace",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "build",
+        3
+      ],
+      [
+        "raw",
+        2
+      ],
+      [
+        "service",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "329180",
+      "corpName": "HD현대중공업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "092460",
+      "corpName": "한라IMS",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "082740",
+      "corpName": "한화엔진",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "stage": "build",
+      "revenue": 712594
+    },
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "stage": "shipping",
+      "revenue": 299332
+    },
+    {
+      "stockCode": "329180",
+      "corpName": "HD현대중공업",
+      "stage": "build",
+      "revenue": 175806
+    },
+    {
+      "stockCode": "018260",
+      "corpName": "삼성에스디에스",
+      "stage": "shipping",
+      "revenue": 139299
+    },
+    {
+      "stockCode": "042660",
+      "corpName": "한화오션",
+      "stage": "build",
+      "revenue": 127835
+    }
+  ]
+}

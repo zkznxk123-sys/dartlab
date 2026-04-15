@@ -1,0 +1,529 @@
+{
+  "ego": {
+    "stockCode": "000320",
+    "corpName": "노루홀딩스",
+    "industry": "finance",
+    "stage": "securities",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 12393,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "007690",
+      "corpName": "국도화학",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 13956
+    },
+    {
+      "stockCode": "090350",
+      "corpName": "노루페인트",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 7711
+    },
+    {
+      "stockCode": "004780",
+      "corpName": "대륙제관",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 2455
+    },
+    {
+      "stockCode": "004430",
+      "corpName": "송원산업",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 10392
+    },
+    {
+      "stockCode": "089010",
+      "corpName": "켐트로닉스",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 6375
+    },
+    {
+      "stockCode": "003160",
+      "corpName": "디아이",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 4323
+    },
+    {
+      "stockCode": "110990",
+      "corpName": "디아이티",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 1079
+    },
+    {
+      "stockCode": "298020",
+      "corpName": "효성티앤씨",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 76948
+    },
+    {
+      "stockCode": "456040",
+      "corpName": "OCI",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 20094
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 7973
+    },
+    {
+      "stockCode": "025000",
+      "corpName": "KPX케미칼",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 8084
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "052860",
+      "corpName": "아이앤씨",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 369
+    },
+    {
+      "stockCode": "004910",
+      "corpName": "조광페인트",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 2027
+    },
+    {
+      "stockCode": "002380",
+      "corpName": "케이씨씨",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 64838
+    }
+  ],
+  "edges": [
+    {
+      "from": "007690",
+      "to": "000320",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 165847.0,
+      "ratio": null,
+      "product": "수지",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "수지"
+    },
+    {
+      "from": "090350",
+      "to": "000320",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004780",
+      "to": "000320",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004430",
+      "to": "000320",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "089010",
+      "to": "000320",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000320",
+      "to": "003160",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000320",
+      "to": "090350",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000320",
+      "to": "110990",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "298020",
+      "to": "000320",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000320",
+      "to": "456040",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "029460",
+      "to": "000320",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "025000",
+      "to": "000320",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "051910",
+      "to": "000320",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000320",
+      "to": "052860",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004910",
+      "to": "000320",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "090350",
+      "to": "000320",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "002380",
+      "to": "000320",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 9.9%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 955214023609.0,
+      "operating_profit": 26659685696.0,
+      "net_profit": 10707789673.0,
+      "total_assets": 1055537182156.0
+    },
+    {
+      "year": "2022",
+      "sales": 1037899570197.0,
+      "operating_profit": 29976023937.0,
+      "net_profit": 33390806659.0,
+      "total_assets": 1171989377978.0
+    },
+    {
+      "year": "2023",
+      "sales": 1214616529837.0,
+      "operating_profit": 67435854564.0,
+      "net_profit": 51679439985.0,
+      "total_assets": 1188823571530.0
+    },
+    {
+      "year": "2024",
+      "sales": 1247877697168.0,
+      "operating_profit": 72554697963.0,
+      "net_profit": 82067736372.0,
+      "total_assets": 1214838948245.0
+    },
+    {
+      "year": "2025",
+      "sales": 1239267844107.0,
+      "operating_profit": 64507992759.0,
+      "net_profit": null,
+      "total_assets": 1279356692133.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 9,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 165847.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 3,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        6
+      ],
+      [
+        "energy",
+        2
+      ],
+      [
+        "software",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "specialty",
+        3
+      ],
+      [
+        "distribution",
+        2
+      ],
+      [
+        "basic",
+        2
+      ],
+      [
+        "solution",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "007690",
+      "corpName": "국도화학",
+      "product": "수지",
+      "amount": 165847.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "090350",
+      "corpName": "노루페인트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004780",
+      "corpName": "대륙제관",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004430",
+      "corpName": "송원산업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "089010",
+      "corpName": "켐트로닉스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "298020",
+      "corpName": "효성티앤씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "025000",
+      "corpName": "KPX케미칼",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
+  ]
+}

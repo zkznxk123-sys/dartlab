@@ -1,0 +1,372 @@
+{
+  "ego": {
+    "stockCode": "034230",
+    "corpName": "파라다이스",
+    "industry": "leisure",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 11499,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "001740",
+      "corpName": "SK네트웍스",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 67451
+    },
+    {
+      "stockCode": "011370",
+      "corpName": "서한",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 6451
+    },
+    {
+      "stockCode": "013700",
+      "corpName": "까뮤이앤씨",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 2975
+    },
+    {
+      "stockCode": "033540",
+      "corpName": "파라텍",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 0
+    },
+    {
+      "stockCode": "035250",
+      "corpName": "강원랜드",
+      "industry": "leisure",
+      "stage": "general",
+      "revenue": 14767
+    },
+    {
+      "stockCode": "032350",
+      "corpName": "롯데관광개발",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 6534
+    },
+    {
+      "stockCode": "340570",
+      "corpName": "티앤엘",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 1642
+    },
+    {
+      "stockCode": "096250",
+      "corpName": "와이즈넛",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 347
+    },
+    {
+      "stockCode": "180640",
+      "corpName": "한진칼",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 2984
+    },
+    {
+      "stockCode": "001630",
+      "corpName": "종근당홀딩스",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 9590
+    },
+    {
+      "stockCode": "096690",
+      "corpName": "에이루트",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 506
+    },
+    {
+      "stockCode": "190650",
+      "corpName": "코리아에셋투자증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "034230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001740",
+      "to": "034230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "011370",
+      "to": "034230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "013700",
+      "to": "034230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033540",
+      "to": "034230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "034230",
+      "to": "035250",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "034230",
+      "to": "032350",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "034230",
+      "to": "340570",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "034230",
+      "to": "096250",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "034230",
+      "to": "180640",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001630",
+      "to": "034230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    },
+    {
+      "from": "034230",
+      "to": "035250",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    },
+    {
+      "from": "096690",
+      "to": "034230",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "190650",
+      "to": "034230",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 4429868627.0,
+      "operating_profit": -55245896594.0,
+      "net_profit": -78564040253.0,
+      "total_assets": 3471796250289.0
+    },
+    {
+      "year": "2022",
+      "sales": 587637410933.0,
+      "operating_profit": 10412544286.0,
+      "net_profit": 15811360776.0,
+      "total_assets": 3511523805592.0
+    },
+    {
+      "year": "2023",
+      "sales": 114347399284.0,
+      "operating_profit": 145770072264.0,
+      "net_profit": 17625540869.0,
+      "total_assets": 3618279367040.0
+    },
+    {
+      "year": "2024",
+      "sales": 539287027063.0,
+      "operating_profit": 136055145217.0,
+      "net_profit": 110693395334.0,
+      "total_assets": 3933768381301.0
+    },
+    {
+      "year": "2025",
+      "sales": 1149867026461.0,
+      "operating_profit": 155816230766.0,
+      "net_profit": 50425024465.0,
+      "total_assets": 4080365472520.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "180640",
+      "corpName": "한진칼",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "008770",
+      "corpName": "호텔신라",
+      "stage": "general",
+      "revenue": 40683
+    },
+    {
+      "stockCode": "035250",
+      "corpName": "강원랜드",
+      "stage": "general",
+      "revenue": 14767
+    },
+    {
+      "stockCode": "215000",
+      "corpName": "골프존",
+      "stage": "general",
+      "revenue": 4833
+    },
+    {
+      "stockCode": "114090",
+      "corpName": "GKL",
+      "stage": "general",
+      "revenue": 4229
+    },
+    {
+      "stockCode": "121440",
+      "corpName": "골프존홀딩스",
+      "stage": "general",
+      "revenue": 3543
+    }
+  ]
+}

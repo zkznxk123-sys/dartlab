@@ -1,0 +1,850 @@
+{
+  "ego": {
+    "stockCode": "300720",
+    "corpName": "한일시멘트",
+    "industry": "construction",
+    "stage": "material",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 14239,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "006360",
+      "corpName": "GS건설",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 14404
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "000210",
+      "corpName": "DL",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 53267
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "001520",
+      "corpName": "동양",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 6306
+    },
+    {
+      "stockCode": "002460",
+      "corpName": "HS화성",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 6595
+    },
+    {
+      "stockCode": "003300",
+      "corpName": "한일홀딩스",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 19305
+    },
+    {
+      "stockCode": "003490",
+      "corpName": "대한항공",
+      "industry": "logistics",
+      "stage": "general",
+      "revenue": 252255
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "005950",
+      "corpName": "이수화학",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 16595
+    },
+    {
+      "stockCode": "005960",
+      "corpName": "동부건설",
+      "industry": "aerospace",
+      "stage": "airline",
+      "revenue": 17586
+    },
+    {
+      "stockCode": "006280",
+      "corpName": "녹십자",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 19913
+    },
+    {
+      "stockCode": "007680",
+      "corpName": "대원",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 1121
+    },
+    {
+      "stockCode": "009410",
+      "corpName": "태영건설",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 21745
+    },
+    {
+      "stockCode": "018670",
+      "corpName": "SK가스",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 76763
+    },
+    {
+      "stockCode": "025540",
+      "corpName": "한국단자공업",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 14428
+    },
+    {
+      "stockCode": "037760",
+      "corpName": "쎄니트",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 1270
+    },
+    {
+      "stockCode": "091590",
+      "corpName": "남화토건",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 727
+    },
+    {
+      "stockCode": "097230",
+      "corpName": "HJ중공업",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 19997
+    },
+    {
+      "stockCode": "183190",
+      "corpName": "아세아시멘트",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 10228
+    },
+    {
+      "stockCode": "002240",
+      "corpName": "고려제강",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 18092
+    },
+    {
+      "stockCode": "180640",
+      "corpName": "한진칼",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 2984
+    },
+    {
+      "stockCode": "363280",
+      "corpName": "티와이홀딩스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 792
+    },
+    {
+      "stockCode": "001270",
+      "corpName": "부국증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "317400",
+      "corpName": "자이에스앤디",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 13876
+    },
+    {
+      "stockCode": "375500",
+      "corpName": "DL이앤씨",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 74024
+    }
+  ],
+  "edges": [
+    {
+      "from": "300720",
+      "to": "006360",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 30830.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "300720",
+      "to": "047040",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 279071.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "300720",
+      "to": "000210",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "300720",
+      "to": "000720",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001450",
+      "to": "300720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001520",
+      "to": "300720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "300720",
+      "to": "002460",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "300720",
+      "to": "003300",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "003300",
+      "to": "300720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003490",
+      "to": "300720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005250",
+      "to": "300720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "300720",
+      "to": "005950",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "300720",
+      "to": "005960",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "006280",
+      "to": "300720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "300720",
+      "to": "007680",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "009410",
+      "to": "300720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "018670",
+      "to": "300720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "025540",
+      "to": "300720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "300720",
+      "to": "037760",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "300720",
+      "to": "091590",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "300720",
+      "to": "097230",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "183190",
+      "to": "300720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "300720",
+      "to": "003300",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003300",
+      "to": "300720",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "300720",
+      "to": "002240",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "300720",
+      "to": "180640",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "300720",
+      "to": "003490",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "300720",
+      "to": "009410",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "300720",
+      "to": "363280",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "300720",
+      "to": "001270",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "300720",
+      "to": "317400",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "300720",
+      "to": "375500",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "003490",
+      "to": "300720",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.2%"
+    },
+    {
+      "from": "005250",
+      "to": "300720",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.6%"
+    },
+    {
+      "from": "006280",
+      "to": "300720",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "009410",
+      "to": "300720",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "018670",
+      "to": "300720",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.3%"
+    },
+    {
+      "from": "025540",
+      "to": "300720",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1271853626333.0,
+      "operating_profit": 120397431466.0,
+      "net_profit": 78642216870.0,
+      "total_assets": 2370327907448.0
+    },
+    {
+      "year": "2022",
+      "sales": 1487574712514.0,
+      "operating_profit": 117984446512.0,
+      "net_profit": 8824700438.0,
+      "total_assets": 2460836871897.0
+    },
+    {
+      "year": "2023",
+      "sales": 1799500983414.0,
+      "operating_profit": 246515704341.0,
+      "net_profit": 177712230984.0,
+      "total_assets": 2867925364376.0
+    },
+    {
+      "year": "2024",
+      "sales": 1741671258107.0,
+      "operating_profit": 271389512685.0,
+      "net_profit": 199016257703.0,
+      "total_assets": 2988334569492.0
+    },
+    {
+      "year": "2025",
+      "sales": 1423859619115.0,
+      "operating_profit": 132739217663.0,
+      "net_profit": 81141916163.0,
+      "total_assets": 3034061166095.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "buildingMaterials",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "003300",
+      "corpName": "한일홀딩스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "product": "",
+      "amount": 279071.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "006360",
+      "corpName": "GS건설",
+      "product": "",
+      "amount": 30830.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "000210",
+      "corpName": "DL",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "002460",
+      "corpName": "HS화성",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "003300",
+      "corpName": "한일홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005950",
+      "corpName": "이수화학",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "005960",
+      "corpName": "동부건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "007680",
+      "corpName": "대원",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "037760",
+      "corpName": "쎄니트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

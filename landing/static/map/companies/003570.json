@@ -1,0 +1,325 @@
+{
+  "ego": {
+    "stockCode": "003570",
+    "corpName": "SNT다이내믹스",
+    "industry": "machinery",
+    "stage": "special",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 7120,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "100840",
+      "corpName": "SNT에너지",
+      "industry": "machinery",
+      "stage": "",
+      "revenue": 6061
+    },
+    {
+      "stockCode": "036530",
+      "corpName": "SNT홀딩스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 22357
+    },
+    {
+      "stockCode": "064960",
+      "corpName": "SNT모티브",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 10064
+    },
+    {
+      "stockCode": "034310",
+      "corpName": "NICE",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 32426
+    },
+    {
+      "stockCode": "138930",
+      "corpName": "BNK금융지주",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "033830",
+      "corpName": "티비씨",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 427
+    },
+    {
+      "stockCode": "089790",
+      "corpName": "제이티",
+      "industry": "semiconductor",
+      "stage": "test",
+      "revenue": 384
+    },
+    {
+      "stockCode": "003620",
+      "corpName": "KG모빌리티",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 43036
+    }
+  ],
+  "edges": [
+    {
+      "from": "003570",
+      "to": "100840",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "003570",
+      "to": "036530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "003570",
+      "to": "064960",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "003570",
+      "to": "034310",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "003570",
+      "to": "138930",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003570",
+      "to": "033830",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003570",
+      "to": "089790",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003570",
+      "to": "036530",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "036530",
+      "to": "003570",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "064960",
+      "to": "003570",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "100840",
+      "to": "003570",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "003570",
+      "to": "003620",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "003570",
+      "to": "138930",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.6%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 335954012592.0,
+      "operating_profit": 20587466954.0,
+      "net_profit": 0.0,
+      "total_assets": 879625081379.0
+    },
+    {
+      "year": "2022",
+      "sales": 408024698269.0,
+      "operating_profit": 25764818854.0,
+      "net_profit": 0.0,
+      "total_assets": 930994305130.0
+    },
+    {
+      "year": "2023",
+      "sales": 485954273334.0,
+      "operating_profit": 41595970398.0,
+      "net_profit": 49529807111.0,
+      "total_assets": 1056904317494.0
+    },
+    {
+      "year": "2024",
+      "sales": 614453293151.0,
+      "operating_profit": 110508614595.0,
+      "net_profit": 0.0,
+      "total_assets": 1034086066876.0
+    },
+    {
+      "year": "2025",
+      "sales": 712021619474.0,
+      "operating_profit": 85457001419.0,
+      "net_profit": 0.0,
+      "total_assets": 1228607911035.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "036530",
+      "corpName": "SNT홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

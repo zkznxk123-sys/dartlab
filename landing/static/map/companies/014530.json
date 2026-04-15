@@ -1,0 +1,332 @@
+{
+  "ego": {
+    "stockCode": "014530",
+    "corpName": "극동유화",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 10217,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005720",
+      "corpName": "넥센",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 35865
+    },
+    {
+      "stockCode": "032830",
+      "corpName": "삼성생명",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "009300",
+      "corpName": "삼아제약",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 778
+    },
+    {
+      "stockCode": "136490",
+      "corpName": "선진",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 18957
+    },
+    {
+      "stockCode": "073240",
+      "corpName": "금호타이어",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 47013
+    },
+    {
+      "stockCode": "109080",
+      "corpName": "옵티시스",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 257
+    },
+    {
+      "stockCode": "039010",
+      "corpName": "현대에이치티",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 1533
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "393890",
+      "corpName": "더블유씨피",
+      "industry": "battery",
+      "stage": "separator",
+      "revenue": 1108
+    }
+  ],
+  "edges": [
+    {
+      "from": "005720",
+      "to": "014530",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "014530",
+      "to": "005720",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "014530",
+      "to": "032830",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "014530",
+      "to": "009300",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "014530",
+      "to": "136490",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "014530",
+      "to": "073240",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "014530",
+      "to": "109080",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "039010",
+      "to": "014530",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "161390",
+      "to": "014530",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "014530",
+      "to": "393890",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "014530",
+      "to": "039010",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 1.3%"
+    },
+    {
+      "from": "039010",
+      "to": "014530",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.0%"
+    },
+    {
+      "from": "161390",
+      "to": "014530",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 8.8%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 964831742550.0,
+      "operating_profit": 20485805841.0,
+      "net_profit": 11402756101.0,
+      "total_assets": 321935348473.0
+    },
+    {
+      "year": "2022",
+      "sales": 1242475835454.0,
+      "operating_profit": 30590826516.0,
+      "net_profit": 20430242683.0,
+      "total_assets": 353076046774.0
+    },
+    {
+      "year": "2023",
+      "sales": 1157998807210.0,
+      "operating_profit": 27841803020.0,
+      "net_profit": 329637808.0,
+      "total_assets": 430015236625.0
+    },
+    {
+      "year": "2024",
+      "sales": 1062833512172.0,
+      "operating_profit": 22878631372.0,
+      "net_profit": 9642293305.0,
+      "total_assets": 478555021568.0
+    },
+    {
+      "year": "2025",
+      "sales": 1021727866612.0,
+      "operating_profit": 15446578571.0,
+      "net_profit": 0.0,
+      "total_assets": 504234678749.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "393890",
+      "corpName": "더블유씨피",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

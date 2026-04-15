@@ -1,0 +1,276 @@
+{
+  "ego": {
+    "stockCode": "036420",
+    "corpName": "콘텐트리중앙",
+    "industry": "media",
+    "stage": "content",
+    "role": "서비스",
+    "stream": "upstream",
+    "revenue": 10833,
+    "confidence": 0.8,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "033830",
+      "corpName": "티비씨",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 427
+    },
+    {
+      "stockCode": "089790",
+      "corpName": "제이티",
+      "industry": "semiconductor",
+      "stage": "test",
+      "revenue": 384
+    },
+    {
+      "stockCode": "005850",
+      "corpName": "에스엘",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 52399
+    },
+    {
+      "stockCode": "373160",
+      "corpName": "데이원컴퍼니",
+      "industry": "education",
+      "stage": "general",
+      "revenue": 1239
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 69295
+    },
+    {
+      "stockCode": "241840",
+      "corpName": "에이스토리",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 118
+    },
+    {
+      "stockCode": "081150",
+      "corpName": "티플랙스",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 2092
+    },
+    {
+      "stockCode": "307930",
+      "corpName": "컴퍼니케이",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "036420",
+      "to": "033830",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "036420",
+      "to": "089790",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "036420",
+      "to": "005850",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036420",
+      "to": "373160",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004170",
+      "to": "036420",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "036420",
+      "to": "241840",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036420",
+      "to": "081150",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036420",
+      "to": "307930",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 677129957301.0,
+      "operating_profit": -57365948945.0,
+      "net_profit": 2717965978.0,
+      "total_assets": 2245640002695.0
+    },
+    {
+      "year": "2022",
+      "sales": 852050847599.0,
+      "operating_profit": -71591321151.0,
+      "net_profit": 0.0,
+      "total_assets": 2588133968042.0
+    },
+    {
+      "year": "2023",
+      "sales": 993035799342.0,
+      "operating_profit": -68126882657.0,
+      "net_profit": -171340065923.0,
+      "total_assets": 2453055022945.0
+    },
+    {
+      "year": "2024",
+      "sales": 879462982938.0,
+      "operating_profit": -47378983753.0,
+      "net_profit": null,
+      "total_assets": 2758664473521.0
+    },
+    {
+      "year": "2025",
+      "sales": 1083288419056.0,
+      "operating_profit": 8844995426.0,
+      "net_profit": -93139692457.0,
+      "total_assets": 2490910514038.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "retail",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "retail",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "035760",
+      "corpName": "CJ ENM",
+      "stage": "content",
+      "revenue": 51345
+    },
+    {
+      "stockCode": "030000",
+      "corpName": "제일기획",
+      "stage": "content",
+      "revenue": 45469
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "214320",
+      "corpName": "이노션",
+      "stage": "platform",
+      "revenue": 21460
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ]
+}

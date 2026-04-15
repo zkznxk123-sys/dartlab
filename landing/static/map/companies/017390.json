@@ -1,0 +1,285 @@
+{
+  "ego": {
+    "stockCode": "017390",
+    "corpName": "서울도시가스",
+    "industry": "energy",
+    "stage": "distribution",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 18280,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "016710",
+      "corpName": "대성홀딩스",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 12226
+    },
+    {
+      "stockCode": "117580",
+      "corpName": "대성에너지",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 47
+    },
+    {
+      "stockCode": "160550",
+      "corpName": "NEW",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 1427
+    },
+    {
+      "stockCode": "095340",
+      "corpName": "ISC",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 2202
+    },
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "128820",
+      "corpName": "대성산업",
+      "industry": "retail",
+      "stage": "",
+      "revenue": 15659
+    },
+    {
+      "stockCode": "027830",
+      "corpName": "대성창투",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 93
+    }
+  ],
+  "edges": [
+    {
+      "from": "016710",
+      "to": "017390",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "017390",
+      "to": "117580",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "017390",
+      "to": "016710",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "017390",
+      "to": "160550",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "017390",
+      "to": "095340",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "017390",
+      "to": "030200",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "017390",
+      "to": "128820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "027830",
+      "to": "017390",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "117580",
+      "to": "017390",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "128820",
+      "to": "017390",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "016710",
+      "to": "017390",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 13.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1277844476509.0,
+      "operating_profit": -4941094915.0,
+      "net_profit": 8304658871.0,
+      "total_assets": 1662601876033.0
+    },
+    {
+      "year": "2022",
+      "sales": 1724452004293.0,
+      "operating_profit": 3324640638.0,
+      "net_profit": 17919220491.0,
+      "total_assets": 1871342447045.0
+    },
+    {
+      "year": "2023",
+      "sales": 1717423189672.0,
+      "operating_profit": -3200619585.0,
+      "net_profit": 20527153332.0,
+      "total_assets": 1777219780282.0
+    },
+    {
+      "year": "2024",
+      "sales": 1703788525280.0,
+      "operating_profit": -10285296486.0,
+      "net_profit": 34321611906.0,
+      "total_assets": 1765962363102.0
+    },
+    {
+      "year": "2025",
+      "sales": 1827997485378.0,
+      "operating_profit": 17405786429.0,
+      "net_profit": 0.0,
+      "total_assets": 1797688130206.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "stage": "generation",
+      "revenue": 974293
+    },
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "stage": "distribution",
+      "revenue": 357273
+    },
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "stage": "distribution",
+      "revenue": 52755
+    },
+    {
+      "stockCode": "071320",
+      "corpName": "지역난방공사",
+      "stage": "generation",
+      "revenue": 39982
+    },
+    {
+      "stockCode": "112610",
+      "corpName": "씨에스윈드",
+      "stage": "generation",
+      "revenue": 29316
+    }
+  ]
+}

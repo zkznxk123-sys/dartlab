@@ -1,0 +1,245 @@
+{
+  "ego": {
+    "stockCode": "035250",
+    "corpName": "강원랜드",
+    "industry": "leisure",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 14767,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000370",
+      "corpName": "한화손해보험",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "034230",
+      "corpName": "파라다이스",
+      "industry": "leisure",
+      "stage": "general",
+      "revenue": 11499
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "004060",
+      "corpName": "SG세계물산",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 1323
+    }
+  ],
+  "edges": [
+    {
+      "from": "000370",
+      "to": "035250",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001450",
+      "to": "035250",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "034230",
+      "to": "035250",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "088350",
+      "to": "035250",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000370",
+      "to": "035250",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "004060",
+      "to": "035250",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "034230",
+      "to": "035250",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 매출 성장 + 마진 확대 + FCF 양수 / 비용 절감 + 자산 효율화 + ROE 상승.\n매출이 +5.9% 성장하면서 영업이익률이 11.9%에서 12.4%로 확대되었다. FCF도 양수를 유지하여 질적 성장이 확인된다.",
+    "strengths": [
+      "매출 성장 + 마진 확대 + FCF 양수",
+      "비용 절감 + 자산 효율화 + ROE 상승",
+      "순현금 상태",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**"
+    ],
+    "weaknesses": [
+      "비영업자산 48% — 지주/투자 성격",
+      "CCC -828일 — 마이너스 CCC (선수금/매입채무 우위)",
+      "CAPEX/감가상각 0.4배 — 투자 부족 (자산 노후화 위험)"
+    ],
+    "sector": "경기관련소비재 > 호텔,레스토랑,레저",
+    "source": "audit",
+    "createdAt": "1775430966.570748"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 788432829925.0,
+      "operating_profit": -52695285784.0,
+      "net_profit": -14647334.0,
+      "total_assets": 3827273463677.0
+    },
+    {
+      "year": "2022",
+      "sales": 1270685819109.0,
+      "operating_profit": 217565214200.0,
+      "net_profit": 115617118433.0,
+      "total_assets": 4167752670696.0
+    },
+    {
+      "year": "2023",
+      "sales": 1388572378274.0,
+      "operating_profit": 282263014860.0,
+      "net_profit": 340880761170.0,
+      "total_assets": 4448655838228.0
+    },
+    {
+      "year": "2024",
+      "sales": 1426862781802.0,
+      "operating_profit": 285790454716.0,
+      "net_profit": 456893167585.0,
+      "total_assets": 4700641154570.0
+    },
+    {
+      "year": "2025",
+      "sales": 1476727048701.0,
+      "operating_profit": 235311359166.0,
+      "net_profit": 0.0,
+      "total_assets": 4845197185257.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "008770",
+      "corpName": "호텔신라",
+      "stage": "general",
+      "revenue": 40683
+    },
+    {
+      "stockCode": "034230",
+      "corpName": "파라다이스",
+      "stage": "general",
+      "revenue": 11499
+    },
+    {
+      "stockCode": "215000",
+      "corpName": "골프존",
+      "stage": "general",
+      "revenue": 4833
+    },
+    {
+      "stockCode": "114090",
+      "corpName": "GKL",
+      "stage": "general",
+      "revenue": 4229
+    },
+    {
+      "stockCode": "121440",
+      "corpName": "골프존홀딩스",
+      "stage": "general",
+      "revenue": 3543
+    }
+  ]
+}

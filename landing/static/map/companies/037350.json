@@ -1,0 +1,154 @@
+{
+  "ego": {
+    "stockCode": "037350",
+    "corpName": "성도이엔지",
+    "industry": "semiconductor",
+    "stage": "equipment",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 7434,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "039440",
+      "corpName": "에스티아이",
+      "industry": "machinery",
+      "stage": "",
+      "revenue": 3281
+    },
+    {
+      "stockCode": "000990",
+      "corpName": "DB하이텍",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 13972
+    }
+  ],
+  "edges": [
+    {
+      "from": "037350",
+      "to": "039440",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "037350",
+      "to": "000990",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "039440",
+      "to": "037350",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 555617543445.0,
+      "operating_profit": 16883775550.0,
+      "net_profit": 20321573617.0,
+      "total_assets": 443917258144.0
+    },
+    {
+      "year": "2022",
+      "sales": 705803485232.0,
+      "operating_profit": -4985258685.0,
+      "net_profit": 733160844.0,
+      "total_assets": 501600998338.0
+    },
+    {
+      "year": "2023",
+      "sales": 678599013645.0,
+      "operating_profit": 12314577967.0,
+      "net_profit": 0.0,
+      "total_assets": 645551062822.0
+    },
+    {
+      "year": "2024",
+      "sales": 999611416620.0,
+      "operating_profit": 27296131094.0,
+      "net_profit": 18930357796.0,
+      "total_assets": 666090425493.0
+    },
+    {
+      "year": "2025",
+      "sales": 743406393090.0,
+      "operating_profit": 57697884783.0,
+      "net_profit": null,
+      "total_assets": 601886642163.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

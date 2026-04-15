@@ -1,10 +1,24 @@
 {
-  "totalCompanies": 200,
+  "totalCompanies": 500,
   "rankings": {
     "concentrated": {
       "title": "공급망 집중도 (HHI 높은 기업)",
       "description": "상위 공급사 의존도가 높은 기업. 공급망 리스크 주시.",
       "entries": [
+        {
+          "stockCode": "012630",
+          "corpName": "HDC",
+          "industry": "finance",
+          "revenue": 9483,
+          "hhi": 2668.0,
+          "hhiRisk": "집중",
+          "supplierCount": 20,
+          "customerCount": 0,
+          "preciseEdgeCount": 6,
+          "top1Ratio": 36.6,
+          "top3Ratio": 85.9,
+          "industryDiversity": 10
+        },
         {
           "stockCode": "294870",
           "corpName": "IPARK현대산업개발",
@@ -31,6 +45,20 @@
           "preciseEdgeCount": 5,
           "top1Ratio": 33.1,
           "top3Ratio": 78.4,
+          "industryDiversity": 6
+        },
+        {
+          "stockCode": "002460",
+          "corpName": "HS화성",
+          "industry": "construction",
+          "revenue": 6595,
+          "hhi": 2086.0,
+          "hhiRisk": "중간",
+          "supplierCount": 13,
+          "customerCount": 0,
+          "preciseEdgeCount": 6,
+          "top1Ratio": 30.9,
+          "top3Ratio": 69.2,
           "industryDiversity": 6
         },
         {
@@ -68,6 +96,20 @@
           "industryDiversity": 12
         },
         {
+          "stockCode": "002460",
+          "corpName": "HS화성",
+          "industry": "construction",
+          "revenue": 6595,
+          "hhi": 2086.0,
+          "hhiRisk": "중간",
+          "supplierCount": 13,
+          "customerCount": 0,
+          "preciseEdgeCount": 6,
+          "top1Ratio": 30.9,
+          "top3Ratio": 69.2,
+          "industryDiversity": 6
+        },
+        {
           "stockCode": "375500",
           "corpName": "DL이앤씨",
           "industry": "construction",
@@ -80,6 +122,20 @@
           "top1Ratio": 33.1,
           "top3Ratio": 78.4,
           "industryDiversity": 6
+        },
+        {
+          "stockCode": "012630",
+          "corpName": "HDC",
+          "industry": "finance",
+          "revenue": 9483,
+          "hhi": 2668.0,
+          "hhiRisk": "집중",
+          "supplierCount": 20,
+          "customerCount": 0,
+          "preciseEdgeCount": 6,
+          "top1Ratio": 36.6,
+          "top3Ratio": 85.9,
+          "industryDiversity": 10
         },
         {
           "stockCode": "294870",
@@ -144,6 +200,20 @@
           "industryDiversity": 17
         },
         {
+          "stockCode": "031440",
+          "corpName": "신세계푸드",
+          "industry": "retail",
+          "revenue": 12332,
+          "hhi": 0.0,
+          "hhiRisk": "데이터 부족",
+          "supplierCount": 28,
+          "customerCount": 0,
+          "preciseEdgeCount": 0,
+          "top1Ratio": 0.0,
+          "top3Ratio": 0.0,
+          "industryDiversity": 14
+        },
+        {
           "stockCode": "267250",
           "corpName": "HD현대",
           "industry": "shipbuilding",
@@ -186,6 +256,20 @@
           "industryDiversity": 10
         },
         {
+          "stockCode": "012630",
+          "corpName": "HDC",
+          "industry": "finance",
+          "revenue": 9483,
+          "hhi": 2668.0,
+          "hhiRisk": "집중",
+          "supplierCount": 20,
+          "customerCount": 0,
+          "preciseEdgeCount": 6,
+          "top1Ratio": 36.6,
+          "top3Ratio": 85.9,
+          "industryDiversity": 10
+        },
+        {
           "stockCode": "033780",
           "corpName": "케이티앤지",
           "industry": "food",
@@ -200,45 +284,17 @@
           "industryDiversity": 9
         },
         {
-          "stockCode": "002020",
-          "corpName": "코오롱",
-          "industry": "finance",
-          "revenue": 58861,
-          "hhi": 0.0,
-          "hhiRisk": "데이터 부족",
-          "supplierCount": 17,
+          "stockCode": "091700",
+          "corpName": "파트론",
+          "industry": "electronics",
+          "revenue": 13495,
+          "hhi": 10000.0,
+          "hhiRisk": "집중",
+          "supplierCount": 18,
           "customerCount": 0,
-          "preciseEdgeCount": 0,
-          "top1Ratio": 0.0,
-          "top3Ratio": 0.0,
-          "industryDiversity": 10
-        },
-        {
-          "stockCode": "005440",
-          "corpName": "현대지에프홀딩스",
-          "industry": "realestate",
-          "revenue": 80916,
-          "hhi": 0.0,
-          "hhiRisk": "데이터 부족",
-          "supplierCount": 17,
-          "customerCount": 0,
-          "preciseEdgeCount": 0,
-          "top1Ratio": 0.0,
-          "top3Ratio": 0.0,
-          "industryDiversity": 13
-        },
-        {
-          "stockCode": "000210",
-          "corpName": "DL",
-          "industry": "construction",
-          "revenue": 53267,
-          "hhi": 0.0,
-          "hhiRisk": "데이터 부족",
-          "supplierCount": 16,
-          "customerCount": 0,
-          "preciseEdgeCount": 0,
-          "top1Ratio": 0.0,
-          "top3Ratio": 0.0,
+          "preciseEdgeCount": 1,
+          "top1Ratio": 100.0,
+          "top3Ratio": 100.0,
           "industryDiversity": 8
         }
       ]
@@ -288,6 +344,20 @@
           "top1Ratio": 0.0,
           "top3Ratio": 0.0,
           "industryDiversity": 15
+        },
+        {
+          "stockCode": "031440",
+          "corpName": "신세계푸드",
+          "industry": "retail",
+          "revenue": 12332,
+          "hhi": 0.0,
+          "hhiRisk": "데이터 부족",
+          "supplierCount": 28,
+          "customerCount": 0,
+          "preciseEdgeCount": 0,
+          "top1Ratio": 0.0,
+          "top3Ratio": 0.0,
+          "industryDiversity": 14
         },
         {
           "stockCode": "267250",
@@ -346,46 +416,32 @@
           "industryDiversity": 12
         },
         {
-          "stockCode": "002020",
-          "corpName": "코오롱",
-          "industry": "finance",
-          "revenue": 58861,
+          "stockCode": "097230",
+          "corpName": "HJ중공업",
+          "industry": "construction",
+          "revenue": 19997,
           "hhi": 0.0,
           "hhiRisk": "데이터 부족",
-          "supplierCount": 17,
+          "supplierCount": 16,
           "customerCount": 0,
           "preciseEdgeCount": 0,
           "top1Ratio": 0.0,
           "top3Ratio": 0.0,
-          "industryDiversity": 10
+          "industryDiversity": 12
         },
         {
-          "stockCode": "004990",
-          "corpName": "롯데지주",
-          "industry": "finance",
-          "revenue": 155396,
+          "stockCode": "024720",
+          "corpName": "콜마홀딩스",
+          "industry": "retail",
+          "revenue": 6301,
           "hhi": 0.0,
           "hhiRisk": "데이터 부족",
-          "supplierCount": 20,
+          "supplierCount": 16,
           "customerCount": 0,
           "preciseEdgeCount": 0,
           "top1Ratio": 0.0,
           "top3Ratio": 0.0,
-          "industryDiversity": 10
-        },
-        {
-          "stockCode": "161890",
-          "corpName": "한국콜마",
-          "industry": "cosmetics",
-          "revenue": 27224,
-          "hhi": 0.0,
-          "hhiRisk": "데이터 부족",
-          "supplierCount": 13,
-          "customerCount": 0,
-          "preciseEdgeCount": 0,
-          "top1Ratio": 0.0,
-          "top3Ratio": 0.0,
-          "industryDiversity": 10
+          "industryDiversity": 11
         }
       ]
     },
@@ -393,6 +449,34 @@
       "title": "최대 의존도 위험",
       "description": "단일 공급사에 매출 비중이 크게 치우친 기업.",
       "entries": [
+        {
+          "stockCode": "006360",
+          "corpName": "GS건설",
+          "industry": "construction",
+          "revenue": 14404,
+          "hhi": 6836.0,
+          "hhiRisk": "집중",
+          "supplierCount": 17,
+          "customerCount": 0,
+          "preciseEdgeCount": 3,
+          "top1Ratio": 81.7,
+          "top3Ratio": 100.0,
+          "industryDiversity": 7
+        },
+        {
+          "stockCode": "317400",
+          "corpName": "자이에스앤디",
+          "industry": "construction",
+          "revenue": 13876,
+          "hhi": 3685.0,
+          "hhiRisk": "집중",
+          "supplierCount": 11,
+          "customerCount": 0,
+          "preciseEdgeCount": 3,
+          "top1Ratio": 48.6,
+          "top3Ratio": 100.0,
+          "industryDiversity": 5
+        },
         {
           "stockCode": "000270",
           "corpName": "기아",
@@ -434,6 +518,20 @@
           "top1Ratio": 41.8,
           "top3Ratio": 100.0,
           "industryDiversity": 4
+        },
+        {
+          "stockCode": "012630",
+          "corpName": "HDC",
+          "industry": "finance",
+          "revenue": 9483,
+          "hhi": 2668.0,
+          "hhiRisk": "집중",
+          "supplierCount": 20,
+          "customerCount": 0,
+          "preciseEdgeCount": 6,
+          "top1Ratio": 36.6,
+          "top3Ratio": 85.9,
+          "industryDiversity": 10
         },
         {
           "stockCode": "294870",
@@ -490,34 +588,6 @@
           "top1Ratio": 33.3,
           "top3Ratio": 100.0,
           "industryDiversity": 6
-        },
-        {
-          "stockCode": "375500",
-          "corpName": "DL이앤씨",
-          "industry": "construction",
-          "revenue": 74024,
-          "hhi": 2438.0,
-          "hhiRisk": "중간",
-          "supplierCount": 12,
-          "customerCount": 0,
-          "preciseEdgeCount": 5,
-          "top1Ratio": 33.1,
-          "top3Ratio": 78.4,
-          "industryDiversity": 6
-        },
-        {
-          "stockCode": "012450",
-          "corpName": "한화에어로스페이스",
-          "industry": "aerospace",
-          "revenue": 267029,
-          "hhi": 2000.0,
-          "hhiRisk": "중간",
-          "supplierCount": 21,
-          "customerCount": 0,
-          "preciseEdgeCount": 5,
-          "top1Ratio": 20.0,
-          "top3Ratio": 60.0,
-          "industryDiversity": 12
         }
       ]
     }

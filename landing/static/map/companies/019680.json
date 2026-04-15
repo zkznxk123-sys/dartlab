@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "019680",
+    "corpName": "대교",
+    "industry": "education",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 6500,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 875
+    },
+    {
+      "stockCode": "033830",
+      "corpName": "티비씨",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 427
+    },
+    {
+      "stockCode": "089790",
+      "corpName": "제이티",
+      "industry": "semiconductor",
+      "stage": "test",
+      "revenue": 384
+    }
+  ],
+  "edges": [
+    {
+      "from": "019680",
+      "to": "099220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "019680",
+      "to": "033830",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "019680",
+      "to": "089790",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 638394752559.0,
+      "operating_profit": -28312392021.0,
+      "net_profit": -42448478000.0,
+      "total_assets": 813566532780.0
+    },
+    {
+      "year": "2022",
+      "sales": 683076343749.0,
+      "operating_profit": -49959384890.0,
+      "net_profit": -136174498275.0,
+      "total_assets": 666723788672.0
+    },
+    {
+      "year": "2023",
+      "sales": 659740743270.0,
+      "operating_profit": -27779172712.0,
+      "net_profit": -93843251577.0,
+      "total_assets": 604526705400.0
+    },
+    {
+      "year": "2024",
+      "sales": 663501743801.0,
+      "operating_profit": -1562689521.0,
+      "net_profit": null,
+      "total_assets": 605264594892.0
+    },
+    {
+      "year": "2025",
+      "sales": 650004579114.0,
+      "operating_profit": -3399512029.0,
+      "net_profit": -37197347787.0,
+      "total_assets": 587072064742.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "016880",
+      "corpName": "웅진",
+      "stage": "general",
+      "revenue": 11507
+    },
+    {
+      "stockCode": "215200",
+      "corpName": "메가스터디교육",
+      "stage": "general",
+      "revenue": 8849
+    },
+    {
+      "stockCode": "067280",
+      "corpName": "멀티캠퍼스",
+      "stage": "general",
+      "revenue": 3308
+    },
+    {
+      "stockCode": "068930",
+      "corpName": "디지털대성",
+      "stage": "general",
+      "revenue": 2538
+    },
+    {
+      "stockCode": "096240",
+      "corpName": "크레버스",
+      "stage": "general",
+      "revenue": 2209
+    }
+  ]
+}

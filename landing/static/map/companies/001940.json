@@ -1,0 +1,458 @@
+{
+  "ego": {
+    "stockCode": "001940",
+    "corpName": "KISCO홀딩스",
+    "industry": "steel",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 8253,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "075970",
+      "corpName": "동국알앤에스",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 1107
+    },
+    {
+      "stockCode": "001230",
+      "corpName": "동국홀딩스",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 19853
+    },
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 712594
+    },
+    {
+      "stockCode": "104700",
+      "corpName": "한국철강",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 4866
+    },
+    {
+      "stockCode": "095340",
+      "corpName": "ISC",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 2202
+    },
+    {
+      "stockCode": "021040",
+      "corpName": "대호특수강",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 2774
+    },
+    {
+      "stockCode": "012160",
+      "corpName": "영흥",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 4335
+    },
+    {
+      "stockCode": "009160",
+      "corpName": "SIMPAC",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 11790
+    },
+    {
+      "stockCode": "033920",
+      "corpName": "무학",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 1438
+    },
+    {
+      "stockCode": "007280",
+      "corpName": "한국특강",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 7671
+    }
+  ],
+  "edges": [
+    {
+      "from": "075970",
+      "to": "001940",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 11327.0,
+      "ratio": null,
+      "product": "전극봉 外",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "철강 전극봉 外"
+    },
+    {
+      "from": "001230",
+      "to": "001940",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "267250",
+      "to": "001940",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "104700",
+      "to": "001940",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "095340",
+      "to": "001940",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001940",
+      "to": "021040",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "001940",
+      "to": "012160",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "001940",
+      "to": "104700",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "001940",
+      "to": "095340",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "009160",
+      "to": "001940",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001940",
+      "to": "033920",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "007280",
+      "to": "001940",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "012160",
+      "to": "001940",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "104700",
+      "to": "001940",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "001940",
+      "to": "033920",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.2%"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "순현금 상태",
+    "strengths": [
+      "순현금 상태",
+      "부채비율 하위 5% -- 매우 건전",
+      "DCF 안전마진 66% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출 고집중 (HHI 10,000) -- 단일 부문 의존",
+      "매출 3기 연속 역성장 (최근 -7.1%)",
+      "영업이익률 3기 연속 하락 (-13.2%)"
+    ],
+    "sector": "소재 > 금속과광물",
+    "source": "audit",
+    "createdAt": "1775430966.5406945"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": null,
+      "operating_profit": 200741467324.0,
+      "net_profit": 64656139486.0,
+      "total_assets": 1688093089026.0
+    },
+    {
+      "year": "2022",
+      "sales": null,
+      "operating_profit": 197916716776.0,
+      "net_profit": 79794818523.0,
+      "total_assets": 1735936557627.0
+    },
+    {
+      "year": "2023",
+      "sales": null,
+      "operating_profit": 149275075244.0,
+      "net_profit": 91030869198.0,
+      "total_assets": 1802517204572.0
+    },
+    {
+      "year": "2024",
+      "sales": 1013177626169.0,
+      "operating_profit": -3627526849.0,
+      "net_profit": 12900747232.0,
+      "total_assets": 1710295193370.0
+    },
+    {
+      "year": "2025",
+      "sales": 825260643220.0,
+      "operating_profit": -70747195052.0,
+      "net_profit": 0.0,
+      "total_assets": 1657184856346.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 11327.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 5,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "buildingMaterials",
+        1
+      ],
+      [
+        "shipbuilding",
+        1
+      ],
+      [
+        "construction",
+        1
+      ],
+      [
+        "retail",
+        1
+      ],
+      [
+        "auto",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        1
+      ],
+      [
+        "build",
+        1
+      ],
+      [
+        "material",
+        1
+      ],
+      [
+        "retail",
+        1
+      ],
+      [
+        "oem",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "075970",
+      "corpName": "동국알앤에스",
+      "product": "전극봉 外",
+      "amount": 11327.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "104700",
+      "corpName": "한국철강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "095340",
+      "corpName": "ISC",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "009160",
+      "corpName": "SIMPAC",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

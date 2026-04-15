@@ -1,0 +1,223 @@
+{
+  "ego": {
+    "stockCode": "001750",
+    "corpName": "한양증권",
+    "industry": "finance",
+    "stage": "securities",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 9090,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000490",
+      "corpName": "대동",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 14847
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 7973
+    },
+    {
+      "stockCode": "064820",
+      "corpName": "케이프",
+      "industry": "auto",
+      "stage": "powertrain",
+      "revenue": 5798
+    },
+    {
+      "stockCode": "004100",
+      "corpName": "태양금속공업",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 6202
+    },
+    {
+      "stockCode": "005950",
+      "corpName": "이수화학",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 16595
+    },
+    {
+      "stockCode": "009440",
+      "corpName": "KC그린홀딩스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 858
+    },
+    {
+      "stockCode": "119650",
+      "corpName": "KC코트렐",
+      "industry": "machinery",
+      "stage": "",
+      "revenue": 1929
+    }
+  ],
+  "edges": [
+    {
+      "from": "000490",
+      "to": "001750",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "001750",
+      "to": "029460",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001750",
+      "to": "064820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004100",
+      "to": "001750",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "005950",
+      "to": "001750",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    },
+    {
+      "from": "009440",
+      "to": "001750",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "119650",
+      "to": "001750",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2023",
+      "sales": 999032003491.0,
+      "operating_profit": 46294753862.0,
+      "net_profit": 35104172832.0,
+      "total_assets": 1747822854675.0
+    },
+    {
+      "year": "2024",
+      "sales": 833308862395.0,
+      "operating_profit": 54449191375.0,
+      "net_profit": 38797645588.0,
+      "total_assets": 1731337480778.0
+    },
+    {
+      "year": "2025",
+      "sales": 909022352850.0,
+      "operating_profit": 75310521675.0,
+      "net_profit": 56571163268.0,
+      "total_assets": 1833701283681.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
+  ]
+}

@@ -1,0 +1,268 @@
+{
+  "ego": {
+    "stockCode": "244920",
+    "corpName": "에이플러스에셋",
+    "industry": "finance",
+    "stage": "insurance",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 6825,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "039860",
+      "corpName": "나노엔텍",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 381
+    },
+    {
+      "stockCode": "066700",
+      "corpName": "테라젠이텍스",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2716
+    },
+    {
+      "stockCode": "365900",
+      "corpName": "브이씨",
+      "industry": "leisure",
+      "stage": "general",
+      "revenue": 469
+    },
+    {
+      "stockCode": "003160",
+      "corpName": "디아이",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 4323
+    },
+    {
+      "stockCode": "038880",
+      "corpName": "아이에이",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 412
+    },
+    {
+      "stockCode": "336370",
+      "corpName": "솔루스첨단소재",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 6161
+    },
+    {
+      "stockCode": "000370",
+      "corpName": "한화손해보험",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "039860",
+      "to": "244920",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "066700",
+      "to": "244920",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "244920",
+      "to": "039860",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "244920",
+      "to": "365900",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "244920",
+      "to": "003160",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "244920",
+      "to": "038880",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "336370",
+      "to": "244920",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000370",
+      "to": "244920",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.0%"
+    },
+    {
+      "from": "088350",
+      "to": "244920",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 258020393571.0,
+      "operating_profit": 5736591082.0,
+      "net_profit": 0.0,
+      "total_assets": 285589305274.0
+    },
+    {
+      "year": "2022",
+      "sales": 270723518058.0,
+      "operating_profit": 1355637973.0,
+      "net_profit": 15191230058.0,
+      "total_assets": 345302037105.0
+    },
+    {
+      "year": "2023",
+      "sales": 354607752665.0,
+      "operating_profit": 7648299829.0,
+      "net_profit": 10193271415.0,
+      "total_assets": 372854700755.0
+    },
+    {
+      "year": "2024",
+      "sales": 515785555014.0,
+      "operating_profit": 31550650101.0,
+      "net_profit": 7631223996.0,
+      "total_assets": 479276186298.0
+    },
+    {
+      "year": "2025",
+      "sales": 682466555853.0,
+      "operating_profit": 29314448307.0,
+      "net_profit": 2558451599.0,
+      "total_assets": 515335671522.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
+  ]
+}

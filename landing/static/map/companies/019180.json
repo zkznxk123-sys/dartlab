@@ -1,0 +1,255 @@
+{
+  "ego": {
+    "stockCode": "019180",
+    "corpName": "티에이치엔",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 9891,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "industry": "electrical",
+      "stage": "cable",
+      "revenue": 6245
+    },
+    {
+      "stockCode": "104540",
+      "corpName": "코렌텍",
+      "industry": "medicalDevice",
+      "stage": "therapeutic",
+      "revenue": 1004
+    },
+    {
+      "stockCode": "011210",
+      "corpName": "현대위아",
+      "industry": "auto",
+      "stage": "chassis",
+      "revenue": 84816
+    },
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "093050",
+      "corpName": "LF",
+      "industry": "textile",
+      "stage": "apparel",
+      "revenue": 18824
+    }
+  ],
+  "edges": [
+    {
+      "from": "006340",
+      "to": "019180",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "019180",
+      "to": "104540",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "019180",
+      "to": "011210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "019180",
+      "to": "005380",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "093050",
+      "to": "019180",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "019180",
+      "to": "104540",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 3.0%"
+    },
+    {
+      "from": "019180",
+      "to": "005380",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "019180",
+      "to": "011210",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 402733099165.0,
+      "operating_profit": 19836086525.0,
+      "net_profit": 17188046525.0,
+      "total_assets": 339937205990.0
+    },
+    {
+      "year": "2022",
+      "sales": 469666790784.0,
+      "operating_profit": 1128592573.0,
+      "net_profit": -4757441433.0,
+      "total_assets": 371353957512.0
+    },
+    {
+      "year": "2023",
+      "sales": 586298306002.0,
+      "operating_profit": 43062857026.0,
+      "net_profit": 28423484648.0,
+      "total_assets": 402977300428.0
+    },
+    {
+      "year": "2024",
+      "sales": 651078994161.0,
+      "operating_profit": 30963784763.0,
+      "net_profit": 31843225517.0,
+      "total_assets": 454354334361.0
+    },
+    {
+      "year": "2025",
+      "sales": 989133894654.0,
+      "operating_profit": 70059562137.0,
+      "net_profit": 68663370308.0,
+      "total_assets": 613083846458.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "electrical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "cable",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

@@ -1,0 +1,416 @@
+{
+  "ego": {
+    "stockCode": "058430",
+    "corpName": "포스코스틸리온",
+    "industry": "steel",
+    "stage": "product",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 11254,
+    "confidence": 0.95,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "003670",
+      "corpName": "포스코퓨처엠",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 29387
+    },
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "009520",
+      "corpName": "포스코엠텍",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 3574
+    },
+    {
+      "stockCode": "018500",
+      "corpName": "동원금속",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 1571
+    },
+    {
+      "stockCode": "022100",
+      "corpName": "포스코DX",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 10752
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "038880",
+      "corpName": "아이에이",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 412
+    },
+    {
+      "stockCode": "456040",
+      "corpName": "OCI",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 20094
+    },
+    {
+      "stockCode": "012750",
+      "corpName": "에스원",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 28894
+    },
+    {
+      "stockCode": "122990",
+      "corpName": "와이솔",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 3212
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "217590",
+      "corpName": "티엠씨",
+      "industry": "electrical",
+      "stage": "cable",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "003670",
+      "to": "058430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "058430",
+      "to": "005490",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "005490",
+      "to": "058430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "009520",
+      "to": "058430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "058430",
+      "to": "018500",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "022100",
+      "to": "058430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "047050",
+      "to": "058430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "058430",
+      "to": "047050",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "058430",
+      "to": "038880",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "058430",
+      "to": "456040",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "058430",
+      "to": "012750",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "058430",
+      "to": "003670",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "058430",
+      "to": "009520",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "058430",
+      "to": "122990",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "058430",
+      "to": "041510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "058430",
+      "to": "352820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "058430",
+      "to": "217590",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1347273538725.0,
+      "operating_profit": 143278889763.0,
+      "net_profit": 0.0,
+      "total_assets": 586432923342.0
+    },
+    {
+      "year": "2022",
+      "sales": 1202120738755.0,
+      "operating_profit": 38220208854.0,
+      "net_profit": 22929664936.0,
+      "total_assets": 554542143288.0
+    },
+    {
+      "year": "2023",
+      "sales": 1158539579689.0,
+      "operating_profit": 30632298770.0,
+      "net_profit": 25201798677.0,
+      "total_assets": 552186389117.0
+    },
+    {
+      "year": "2024",
+      "sales": 1209864896429.0,
+      "operating_profit": 51923404660.0,
+      "net_profit": 0.0,
+      "total_assets": 556803723173.0
+    },
+    {
+      "year": "2025",
+      "sales": 1125440499863.0,
+      "operating_profit": 24458675472.0,
+      "net_profit": 0.0,
+      "total_assets": 507324692962.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "018500",
+      "corpName": "동원금속",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

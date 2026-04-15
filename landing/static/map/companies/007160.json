@@ -1,0 +1,417 @@
+{
+  "ego": {
+    "stockCode": "007160",
+    "corpName": "사조산업",
+    "industry": "realestate",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 7062,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "003960",
+      "corpName": "사조대림",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 34998
+    },
+    {
+      "stockCode": "006090",
+      "corpName": "사조오양",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 0
+    },
+    {
+      "stockCode": "008040",
+      "corpName": "사조동아원",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 6743
+    },
+    {
+      "stockCode": "014710",
+      "corpName": "사조씨푸드",
+      "industry": "agriculture",
+      "stage": "general",
+      "revenue": 2380
+    },
+    {
+      "stockCode": "007330",
+      "corpName": "푸른저축은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "028670",
+      "corpName": "팬오션",
+      "industry": "logistics",
+      "stage": "general",
+      "revenue": 54329
+    }
+  ],
+  "edges": [
+    {
+      "from": "007160",
+      "to": "003960",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "003960",
+      "to": "007160",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "006090",
+      "to": "007160",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "006090",
+      "to": "007160",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "008040",
+      "to": "007160",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "014710",
+      "to": "007160",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "007160",
+      "to": "003960",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "007160",
+      "to": "008040",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "007160",
+      "to": "007330",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "007160",
+      "to": "006090",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "007160",
+      "to": "014710",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "007330",
+      "to": "007160",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "008040",
+      "to": "007160",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "007160",
+      "to": "014710",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "014710",
+      "to": "007160",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "028670",
+      "to": "007160",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "003960",
+      "to": "007160",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 590393764176.0,
+      "operating_profit": 49237466179.0,
+      "net_profit": 55325013372.0,
+      "total_assets": 1113856493438.0
+    },
+    {
+      "year": "2022",
+      "sales": 660986318742.0,
+      "operating_profit": 55173554439.0,
+      "net_profit": 80131865013.0,
+      "total_assets": 1166611978191.0
+    },
+    {
+      "year": "2023",
+      "sales": 632240275627.0,
+      "operating_profit": -23912003470.0,
+      "net_profit": 9347260430.0,
+      "total_assets": 1169759640111.0
+    },
+    {
+      "year": "2024",
+      "sales": 635200660442.0,
+      "operating_profit": -9378468076.0,
+      "net_profit": 15292243041.0,
+      "total_assets": 1216795673119.0
+    },
+    {
+      "year": "2025",
+      "sales": 706210125216.0,
+      "operating_profit": 33151862048.0,
+      "net_profit": -42808436080.0,
+      "total_assets": 1253228674215.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "realestate",
+        1
+      ],
+      [
+        "food",
+        1
+      ],
+      [
+        "agriculture",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        2
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "006090",
+      "corpName": "사조오양",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "008040",
+      "corpName": "사조동아원",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "014710",
+      "corpName": "사조씨푸드",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "003960",
+      "corpName": "사조대림",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "014710",
+      "corpName": "사조씨푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "023590",
+      "corpName": "다우기술",
+      "stage": "general",
+      "revenue": 174950
+    },
+    {
+      "stockCode": "005440",
+      "corpName": "현대지에프홀딩스",
+      "stage": "general",
+      "revenue": 80916
+    },
+    {
+      "stockCode": "058650",
+      "corpName": "세아홀딩스",
+      "stage": "general",
+      "revenue": 66111
+    },
+    {
+      "stockCode": "034810",
+      "corpName": "해성산업",
+      "stage": "general",
+      "revenue": 22601
+    },
+    {
+      "stockCode": "002990",
+      "corpName": "금호건설",
+      "stage": "general",
+      "revenue": 20185
+    }
+  ]
+}

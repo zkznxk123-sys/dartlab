@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "016740",
+    "corpName": "두올",
+    "industry": "auto",
+    "stage": "body",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 7961,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "083450",
+      "corpName": "GST",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 3472
+    },
+    {
+      "stockCode": "078590",
+      "corpName": "휴림에이텍",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 644
+    }
+  ],
+  "edges": [
+    {
+      "from": "016740",
+      "to": "083450",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "078590",
+      "to": "016740",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 495632646209.0,
+      "operating_profit": 25296758456.0,
+      "net_profit": 15551865628.0,
+      "total_assets": 424141554671.0
+    },
+    {
+      "year": "2022",
+      "sales": 565996038053.0,
+      "operating_profit": 13299644433.0,
+      "net_profit": 7511336573.0,
+      "total_assets": 462171290214.0
+    },
+    {
+      "year": "2023",
+      "sales": 753135642653.0,
+      "operating_profit": 44088244906.0,
+      "net_profit": 20831932708.0,
+      "total_assets": 477089681561.0
+    },
+    {
+      "year": "2024",
+      "sales": 773258596565.0,
+      "operating_profit": 42917631926.0,
+      "net_profit": 16135278695.0,
+      "total_assets": 514202251500.0
+    },
+    {
+      "year": "2025",
+      "sales": 796139348935.0,
+      "operating_profit": 48595353009.0,
+      "net_profit": 28836074190.0,
+      "total_assets": 549395675901.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

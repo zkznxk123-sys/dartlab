@@ -1,0 +1,298 @@
+{
+  "ego": {
+    "stockCode": "067310",
+    "corpName": "하나마이크론",
+    "industry": "semiconductor",
+    "stage": "packaging",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 15344,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "166090",
+      "corpName": "하나머티리얼즈",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 2735
+    },
+    {
+      "stockCode": "217190",
+      "corpName": "제너셈",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 568
+    },
+    {
+      "stockCode": "192650",
+      "corpName": "드림텍",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 12306
+    },
+    {
+      "stockCode": "297890",
+      "corpName": "HB솔루션",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 628
+    },
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "461030",
+      "corpName": "아이엠비디엑스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 53
+    },
+    {
+      "stockCode": "332570",
+      "corpName": "PS일렉트로닉스",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 1255
+    }
+  ],
+  "edges": [
+    {
+      "from": "166090",
+      "to": "067310",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "067310",
+      "to": "166090",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "067310",
+      "to": "217190",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "166090",
+      "to": "067310",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "067310",
+      "to": "192650",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "067310",
+      "to": "297890",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "031210",
+      "to": "067310",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "067310",
+      "to": "461030",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "332570",
+      "to": "067310",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 669511962324.0,
+      "operating_profit": 104720345406.0,
+      "net_profit": 64268957251.0,
+      "total_assets": 1030393394722.0
+    },
+    {
+      "year": "2022",
+      "sales": 894395892458.0,
+      "operating_profit": 103548271876.0,
+      "net_profit": 58230571627.0,
+      "total_assets": 1409048794959.0
+    },
+    {
+      "year": "2023",
+      "sales": 967971484717.0,
+      "operating_profit": 57904676214.0,
+      "net_profit": -13513955956.0,
+      "total_assets": 1725090131874.0
+    },
+    {
+      "year": "2024",
+      "sales": 1250692575645.0,
+      "operating_profit": 106792878899.0,
+      "net_profit": 0.0,
+      "total_assets": 1944648852618.0
+    },
+    {
+      "year": "2025",
+      "sales": 1534418874072.0,
+      "operating_profit": 127689329155.0,
+      "net_profit": 0.0,
+      "total_assets": 2017838854218.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "semiconductor",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "equipment",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "166090",
+      "corpName": "하나머티리얼즈",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "192650",
+      "corpName": "드림텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "297890",
+      "corpName": "HB솔루션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "000990",
+      "corpName": "DB하이텍",
+      "stage": "fab",
+      "revenue": 13972
+    }
+  ]
+}

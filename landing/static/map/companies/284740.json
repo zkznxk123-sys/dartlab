@@ -1,0 +1,308 @@
+{
+  "ego": {
+    "stockCode": "284740",
+    "corpName": "쿠쿠홈시스",
+    "industry": "misc",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 11213,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 12332
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "192400",
+      "corpName": "쿠쿠홀딩스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 9209
+    },
+    {
+      "stockCode": "352700",
+      "corpName": "씨앤투스",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 672
+    },
+    {
+      "stockCode": "256150",
+      "corpName": "한독크린텍",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 694
+    },
+    {
+      "stockCode": "003650",
+      "corpName": "미창석유공업",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 4055
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "284740",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "284740",
+      "to": "031440",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "088350",
+      "to": "284740",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "284740",
+      "to": "139480",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "192400",
+      "to": "284740",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "284740",
+      "to": "192400",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "352700",
+      "to": "284740",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "256150",
+      "to": "284740",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "003650",
+      "to": "284740",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 893242238382.0,
+      "operating_profit": 178635561823.0,
+      "net_profit": 17058107793.0,
+      "total_assets": 969414332798.0
+    },
+    {
+      "year": "2022",
+      "sales": 938072669980.0,
+      "operating_profit": 119943993497.0,
+      "net_profit": 114753673268.0,
+      "total_assets": 1016960290726.0
+    },
+    {
+      "year": "2023",
+      "sales": 954551724190.0,
+      "operating_profit": 144873008354.0,
+      "net_profit": 9326503180.0,
+      "total_assets": 1138110386834.0
+    },
+    {
+      "year": "2024",
+      "sales": 1057208774499.0,
+      "operating_profit": 164815752780.0,
+      "net_profit": 13715549803.0,
+      "total_assets": 1381577133923.0
+    },
+    {
+      "year": "2025",
+      "sales": 1121342626136.0,
+      "operating_profit": 169362970577.0,
+      "net_profit": 134319541308.0,
+      "total_assets": 1580152868881.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        2
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "set",
+        2
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "352700",
+      "corpName": "씨앤투스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "256150",
+      "corpName": "한독크린텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "026040",
+      "corpName": "제이에스티나",
+      "stage": "",
+      "revenue": 722
+    },
+    {
+      "stockCode": "285490",
+      "corpName": "노바텍",
+      "stage": "",
+      "revenue": 556
+    },
+    {
+      "stockCode": "188260",
+      "corpName": "세니젠",
+      "stage": "",
+      "revenue": 154
+    },
+    {
+      "stockCode": "373200",
+      "corpName": "엑스플러스",
+      "stage": "",
+      "revenue": 101
+    }
+  ]
+}

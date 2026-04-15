@@ -1,0 +1,376 @@
+{
+  "ego": {
+    "stockCode": "009450",
+    "corpName": "경동나비엔",
+    "industry": "energy",
+    "stage": "distribution",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 15022,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "043260",
+      "corpName": "성호전자",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 2316
+    },
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "012320",
+      "corpName": "경동인베스트",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 2762
+    },
+    {
+      "stockCode": "267290",
+      "corpName": "경동도시가스",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 17595
+    },
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "277410",
+      "corpName": "인산가",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 358
+    },
+    {
+      "stockCode": "001630",
+      "corpName": "종근당홀딩스",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 9590
+    }
+  ],
+  "edges": [
+    {
+      "from": "009450",
+      "to": "043260",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "001450",
+      "to": "009450",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "009450",
+      "to": "012320",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "009450",
+      "to": "267290",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "043260",
+      "to": "009450",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "009450",
+      "to": "031210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "012320",
+      "to": "009450",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "267290",
+      "to": "009450",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "009450",
+      "to": "277410",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001630",
+      "to": "009450",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    },
+    {
+      "from": "009450",
+      "to": "267290",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.7%"
+    },
+    {
+      "from": "009450",
+      "to": "012320",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.4%"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "[유지/보통] 연탄회사→미국 온수기 1위. 매총이익률 42%인데 CAPEX 2.5배로 현금 없다.",
+    "strengths": [
+      "매총이익률 42.5%",
+      "북미 점유율 1위"
+    ],
+    "weaknesses": [
+      "CAPEX 2.5배 3년",
+      "FCF 음수 2년"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2584002"
+  },
+  "blogPosts": [
+    {
+      "slug": "13-009450-kyungdong-navien",
+      "title": "경동나비엔 (009450) — 민둥산의 연탄회사가 미국 온수기 시장 절반을 먹었다",
+      "description": "보일러 회사인데 매총이익률 42%. 그런데 현금이 없다. CAPEX가 3년 만에 2.5배, FCF 2년 연속 마이너스. 1951년 연탄에서 시작해 미국 콘덴싱 온수기 1위에 오른 경동나비엔의 재무제표를 추적한다.",
+      "date": "2026-04-10",
+      "grade": "dCR 미산출",
+      "storyTemplate": "성장 + 자본집약",
+      "verdict": "연탄회사→미국 온수기 1위. 매총이익률 42%인데 CAPEX 2.5배로 현금 없다.",
+      "direction": "유지",
+      "confidence": "보통",
+      "archetype": "성장",
+      "strengths": [
+        "매총이익률 42.5%",
+        "북미 점유율 1위"
+      ],
+      "weaknesses": [
+        "CAPEX 2.5배 3년",
+        "FCF 음수 2년"
+      ],
+      "keyMetrics": {
+        "revenue": 1.5,
+        "opm": 9.54,
+        "roe": 0.0,
+        "fcf": -0.06
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/009450-kyungdong-navien.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1102947009588.0,
+      "operating_profit": 64295519089.0,
+      "net_profit": 80657672817.0,
+      "total_assets": 933884528777.0
+    },
+    {
+      "year": "2022",
+      "sales": 1160860788602.0,
+      "operating_profit": 59770841498.0,
+      "net_profit": 53582342499.0,
+      "total_assets": 1018019428372.0
+    },
+    {
+      "year": "2023",
+      "sales": 1204312871752.0,
+      "operating_profit": 105910537855.0,
+      "net_profit": 83148711338.0,
+      "total_assets": 1060557971487.0
+    },
+    {
+      "year": "2024",
+      "sales": 1353879442184.0,
+      "operating_profit": 132576050452.0,
+      "net_profit": 0.0,
+      "total_assets": 1358870104798.0
+    },
+    {
+      "year": "2025",
+      "sales": 1502239729157.0,
+      "operating_profit": 143376893533.0,
+      "net_profit": 0.0,
+      "total_assets": 1522167095867.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "set",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "043260",
+      "corpName": "성호전자",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "043260",
+      "corpName": "성호전자",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "277410",
+      "corpName": "인산가",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "stage": "generation",
+      "revenue": 974293
+    },
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "stage": "distribution",
+      "revenue": 357273
+    },
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "stage": "distribution",
+      "revenue": 52755
+    },
+    {
+      "stockCode": "071320",
+      "corpName": "지역난방공사",
+      "stage": "generation",
+      "revenue": 39982
+    },
+    {
+      "stockCode": "112610",
+      "corpName": "씨에스윈드",
+      "stage": "generation",
+      "revenue": 29316
+    }
+  ]
+}

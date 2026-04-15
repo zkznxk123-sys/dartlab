@@ -24,8 +24,8 @@ c.industry()                                    # 삼성전자의 산업 내 위
 | 레이어 | L2 |
 | 진입점 | `dartlab.industry()`, `c.industry()` |
 | 소비 | core/(docs parquet), scan/(network, finance), gather/(listing) |
-| 생산 | review(산업 블록), ai(산업 분석), 블로그(산업지도 포스트) |
-| 상태 | beta |
+| 생산 | review(chainPosition 블록), ai(산업 분석), 블로그(산업지도 포스트), landing/map |
+| 상태 | stable — review 블록 `chainPosition` 활성 (`c.review(only=['chainPosition'])`) |
 
 ## 핵심 원칙
 

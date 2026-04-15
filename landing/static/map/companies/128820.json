@@ -1,0 +1,383 @@
+{
+  "ego": {
+    "stockCode": "128820",
+    "corpName": "대성산업",
+    "industry": "retail",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 15659,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "009680",
+      "corpName": "모토닉",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2797
+    },
+    {
+      "stockCode": "014620",
+      "corpName": "성광벤드",
+      "industry": "steel",
+      "stage": "processing",
+      "revenue": 2457
+    },
+    {
+      "stockCode": "016710",
+      "corpName": "대성홀딩스",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 12226
+    },
+    {
+      "stockCode": "017390",
+      "corpName": "서울도시가스",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 18280
+    },
+    {
+      "stockCode": "021240",
+      "corpName": "코웨이",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 49636
+    },
+    {
+      "stockCode": "117580",
+      "corpName": "대성에너지",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 47
+    },
+    {
+      "stockCode": "008250",
+      "corpName": "이건산업",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 2973
+    },
+    {
+      "stockCode": "160550",
+      "corpName": "NEW",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 1427
+    },
+    {
+      "stockCode": "033830",
+      "corpName": "티비씨",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 427
+    },
+    {
+      "stockCode": "089790",
+      "corpName": "제이티",
+      "industry": "semiconductor",
+      "stage": "test",
+      "revenue": 384
+    },
+    {
+      "stockCode": "236030",
+      "corpName": "씨알푸드",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "009680",
+      "to": "128820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    },
+    {
+      "from": "128820",
+      "to": "014620",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "016710",
+      "to": "128820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "017390",
+      "to": "128820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "021240",
+      "to": "128820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "117580",
+      "to": "128820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "128820",
+      "to": "017390",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "128820",
+      "to": "008250",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "128820",
+      "to": "016710",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "128820",
+      "to": "117580",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "128820",
+      "to": "160550",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "128820",
+      "to": "033830",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "128820",
+      "to": "089790",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "128820",
+      "to": "236030",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "핵심 위험: 매출 하락 -> 마진 압박 -> 현금 악화.\n매출이 -8.4% 감소하며 영업이익률이 3.0%에서 0.4%로 하락했다. 영업현금흐름도 동반 감소하여 수익-현금 순환이 약화되고 있다.",
+    "strengths": [
+      "내부유보 비중 96% — 자기 힘으로 성장",
+      "순현금 상태",
+      "Piotroski F 재무 건전 (7/9)",
+      "DCF 안전마진 41% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출 하락 -> 마진 압박 -> 현금 악화",
+      "이자보상 심각 (0.6배)",
+      "Altman Z 부실 경계 (1.53)"
+    ],
+    "sector": "경기관련소비재 > 소매(유통)",
+    "source": "audit",
+    "createdAt": "1775430966.576256"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1129133659980.0,
+      "operating_profit": 19343532632.0,
+      "net_profit": -60948783298.0,
+      "total_assets": 1652414612585.0
+    },
+    {
+      "year": "2022",
+      "sales": 1871305784976.0,
+      "operating_profit": 48301486163.0,
+      "net_profit": 2239945649.0,
+      "total_assets": 1824588314611.0
+    },
+    {
+      "year": "2023",
+      "sales": 1608088520653.0,
+      "operating_profit": 29449898866.0,
+      "net_profit": -6326576590.0,
+      "total_assets": 1733306521982.0
+    },
+    {
+      "year": "2024",
+      "sales": 1476772033939.0,
+      "operating_profit": 21781127161.0,
+      "net_profit": 8412371624.0,
+      "total_assets": 1686365340319.0
+    },
+    {
+      "year": "2025",
+      "sales": 1565923441453.0,
+      "operating_profit": 10832731125.0,
+      "net_profit": 0.0,
+      "total_assets": 1739208496541.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "014620",
+      "corpName": "성광벤드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "236030",
+      "corpName": "씨알푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

@@ -1,0 +1,554 @@
+{
+  "ego": {
+    "stockCode": "008490",
+    "corpName": "서흥",
+    "industry": "chemical",
+    "stage": "specialty",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 7223,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "003520",
+      "corpName": "영진약품",
+      "industry": "pharma",
+      "stage": "api",
+      "revenue": 2543
+    },
+    {
+      "stockCode": "004720",
+      "corpName": "팜젠사이언스",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 1731
+    },
+    {
+      "stockCode": "054620",
+      "corpName": "APS",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 849
+    },
+    {
+      "stockCode": "278990",
+      "corpName": "EMB",
+      "industry": "battery",
+      "stage": "cell",
+      "revenue": 238
+    },
+    {
+      "stockCode": "168330",
+      "corpName": "내츄럴엔도텍",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 222
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "064550",
+      "corpName": "바이오니아",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 3301
+    },
+    {
+      "stockCode": "123840",
+      "corpName": "뉴온",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 482
+    },
+    {
+      "stockCode": "293480",
+      "corpName": "하나제약",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 2395
+    },
+    {
+      "stockCode": "317240",
+      "corpName": "TS트릴리온",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 260
+    },
+    {
+      "stockCode": "347700",
+      "corpName": "스피어",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 956
+    },
+    {
+      "stockCode": "000370",
+      "corpName": "한화손해보험",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "023450",
+      "corpName": "동남합성",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 57
+    },
+    {
+      "stockCode": "093640",
+      "corpName": "케이알엠",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 90
+    },
+    {
+      "stockCode": "268280",
+      "corpName": "미원에스씨",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 5206
+    }
+  ],
+  "edges": [
+    {
+      "from": "008490",
+      "to": "003520",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "008490",
+      "to": "004720",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "054620",
+      "to": "008490",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "278990",
+      "to": "008490",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "008490",
+      "to": "168330",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "008490",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "008490",
+      "to": "054620",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "008490",
+      "to": "033780",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "008490",
+      "to": "064550",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "008490",
+      "to": "123840",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "168330",
+      "to": "008490",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "008490",
+      "to": "168330",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "008490",
+      "to": "293480",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "008490",
+      "to": "317240",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "008490",
+      "to": "347700",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000370",
+      "to": "008490",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "023450",
+      "to": "008490",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.6%"
+    },
+    {
+      "from": "093640",
+      "to": "008490",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "268280",
+      "to": "008490",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.2%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 596733152009.0,
+      "operating_profit": 69603625435.0,
+      "net_profit": 0.0,
+      "total_assets": 809954854056.0
+    },
+    {
+      "year": "2022",
+      "sales": 634966079026.0,
+      "operating_profit": 61977343251.0,
+      "net_profit": 40596746960.0,
+      "total_assets": 926418535898.0
+    },
+    {
+      "year": "2023",
+      "sales": 594567151213.0,
+      "operating_profit": 42994972090.0,
+      "net_profit": 8884952964.0,
+      "total_assets": 993737055884.0
+    },
+    {
+      "year": "2024",
+      "sales": 653264494420.0,
+      "operating_profit": 33843445254.0,
+      "net_profit": 0.0,
+      "total_assets": 1017698965497.0
+    },
+    {
+      "year": "2025",
+      "sales": 722308593846.0,
+      "operating_profit": 50206468443.0,
+      "net_profit": 0.0,
+      "total_assets": 1061135569567.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "telecom",
+        1
+      ],
+      [
+        "battery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "service",
+        1
+      ],
+      [
+        "cell",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "054620",
+      "corpName": "APS",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "278990",
+      "corpName": "EMB",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "003520",
+      "corpName": "영진약품",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "004720",
+      "corpName": "팜젠사이언스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "064550",
+      "corpName": "바이오니아",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "123840",
+      "corpName": "뉴온",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "168330",
+      "corpName": "내츄럴엔도텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "293480",
+      "corpName": "하나제약",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "317240",
+      "corpName": "TS트릴리온",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "347700",
+      "corpName": "스피어",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

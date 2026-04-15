@@ -5459,3 +5459,78 @@ def storyPrecedentsBlock(data: dict) -> list:
             blocks.append(TableBlock("", pl.DataFrame(rows)))
 
     return blocks
+
+
+# ── Industry (L2) — 밸류체인 내 위치 ──
+
+
+_STREAM_LABEL = {
+    "upstream": "상류(upstream)",
+    "midstream": "중류(midstream)",
+    "downstream": "하류(downstream)",
+}
+
+
+def chainPositionBlock(data: dict | None) -> list:
+    """calcChainPosition 결과 → 밸류체인 내 위치 블록.
+
+    Parameters
+    ----------
+    data : dict | None
+        calcChainPosition 반환값. industry/industryName/stage/stageName/
+        role/stream/confidence/source/peers 포함.
+
+    Returns
+    -------
+    list
+        HeadingBlock + 서술 TextBlock + peer TableBlock.
+        data 가 None/비어있으면 빈 리스트.
+    """
+    if not data:
+        return []
+
+    industryName = data.get("industryName") or data.get("industry") or "-"
+    stageName = data.get("stageName") or data.get("stage") or "-"
+    role = data.get("role") or ""
+    stream = data.get("stream") or ""
+    confidence = data.get("confidence")
+    source = data.get("source") or ""
+    peers = data.get("peers") or []
+
+    blocks: list = [
+        HeadingBlock(
+            _meta("chainPosition").label,
+            level=2,
+            helper="전 상장사 2,665사 중 이 회사의 산업·공정·역할·스트림",
+        ),
+    ]
+
+    streamLabel = _STREAM_LABEL.get(stream, stream)
+    parts = [f"**{industryName}** 산업의 **{stageName}** 단계"]
+    if role:
+        parts.append(f"{role} 역할")
+    if streamLabel:
+        parts.append(streamLabel)
+    narration = "에 위치한다. ".join([" · ".join(parts)]) + "."
+
+    if confidence is not None:
+        if confidence >= 0.9:
+            narration += f" 매핑 신뢰도 {confidence:.2f} ({source or '자동'})."
+        elif confidence >= 0.6:
+            narration += f" 신뢰도 {confidence:.2f} — 자동 분류 추정."
+        else:
+            narration += f" 신뢰도 {confidence:.2f} — 저신뢰, 재검수 필요."
+    blocks.append(TextBlock(narration))
+
+    if peers:
+        rows = [
+            {
+                "종목코드": p.get("stockCode", "-"),
+                "회사명": p.get("corpName", "-"),
+                "신뢰도": f"{p.get('confidence', 0):.2f}" if p.get("confidence") is not None else "-",
+            }
+            for p in peers[:10]
+        ]
+        blocks.append(TableBlock(f"같은 공정 피어 ({len(peers)}사 중 상위 {len(rows)})", pl.DataFrame(rows)))
+
+    return blocks

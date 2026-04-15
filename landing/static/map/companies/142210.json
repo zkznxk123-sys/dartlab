@@ -1,0 +1,186 @@
+{
+  "ego": {
+    "stockCode": "142210",
+    "corpName": "유니트론텍",
+    "industry": "electronics",
+    "stage": "module",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 7690,
+    "confidence": 0.8,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "066670",
+      "corpName": "디티씨",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 1886
+    },
+    {
+      "stockCode": "211270",
+      "corpName": "AP위성",
+      "industry": "telecom",
+      "stage": "device",
+      "revenue": 478
+    },
+    {
+      "stockCode": "440110",
+      "corpName": "파두",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 924
+    }
+  ],
+  "edges": [
+    {
+      "from": "142210",
+      "to": "066670",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "142210",
+      "to": "211270",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "142210",
+      "to": "440110",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 392042716521.0,
+      "operating_profit": 10065913610.0,
+      "net_profit": 8133965869.0,
+      "total_assets": 200119130819.0
+    },
+    {
+      "year": "2022",
+      "sales": 525048561043.0,
+      "operating_profit": 30871376670.0,
+      "net_profit": 0.0,
+      "total_assets": 257963807359.0
+    },
+    {
+      "year": "2023",
+      "sales": 598093762212.0,
+      "operating_profit": 30923836146.0,
+      "net_profit": 0.0,
+      "total_assets": 248508832060.0
+    },
+    {
+      "year": "2024",
+      "sales": 712288587261.0,
+      "operating_profit": 36127149169.0,
+      "net_profit": 0.0,
+      "total_assets": 311691091332.0
+    },
+    {
+      "year": "2025",
+      "sales": 768974453691.0,
+      "operating_profit": 32268544768.0,
+      "net_profit": 0.0,
+      "total_assets": 339823769537.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "066670",
+      "corpName": "디티씨",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "211270",
+      "corpName": "AP위성",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "440110",
+      "corpName": "파두",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

@@ -576,7 +576,7 @@ us.market                    # "US"
 
 ### Company 메서드/프로퍼티
 
-DartCompany에서 동적 추출 (51개).
+DartCompany에서 동적 추출 (52개).
 
 | 이름 | 종류 | 설명 |
 |------|------|------|
@@ -628,6 +628,7 @@ DartCompany에서 동적 추출 (51개).
 | `topics` | property | topic별 요약 DataFrame -- 전체 데이터 지도. |
 | `trace` | method | topic 데이터의 출처(docs/finance/report)와 선택 근거 추적. |
 | `update` | method | 누락된 최신 공시를 증분 수집. |
+| `validateStory` | method | Damodaran 스토리 검증 — Possible / Plausible / Probable 3 테스트 통합. |
 | `view` | method | 브라우저에서 공시 뷰어를 엽니다. |
 | `watch` | method | 공시 변화 감지 — 중요도 스코어링 기반 변화 요약. |
 | `workforce` | method | 인력/급여 분석 (직원수, 평균급여, 근속연수). |
@@ -1021,6 +1022,12 @@ sources: 3개 source 전체 가용 현황
 "데이터 업데이트" → c.update()로 증분 수집
 **SeeAlso:** filings: 현재 보유 공시 목록 확인
 disclosure: OpenDART 전체 공시 조회
+
+#### Company.validateStory
+**Capabilities:** calcStoryPrecedents (scan peer + KnowledgeDB insights)
+calcPlausibilityBand (섹터 피어 분포 percentile)
+calcValuationSins (정합성 규칙 위반)
+overrides 로 AI 개입 (lifeCyclePhase, terminalGrowth 등)
 
 #### Company.view
 **Capabilities:** 로컬 서버 기반 공시 뷰어 실행

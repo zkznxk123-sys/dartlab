@@ -1,0 +1,228 @@
+{
+  "ego": {
+    "stockCode": "065130",
+    "corpName": "탑엔지니어링",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 7985,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "047310",
+      "corpName": "파워로직스",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 6865
+    },
+    {
+      "stockCode": "360070",
+      "corpName": "탑머티리얼",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 231
+    },
+    {
+      "stockCode": "282880",
+      "corpName": "코윈테크",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 1547
+    },
+    {
+      "stockCode": "480370",
+      "corpName": "씨케이솔루션",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 2910
+    },
+    {
+      "stockCode": "068790",
+      "corpName": "DMS",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 1555
+    }
+  ],
+  "edges": [
+    {
+      "from": "047310",
+      "to": "065130",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "065130",
+      "to": "047310",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "065130",
+      "to": "360070",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "065130",
+      "to": "282880",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "065130",
+      "to": "480370",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "068790",
+      "to": "065130",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 4.6%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1084807143452.0,
+      "operating_profit": -20448923154.0,
+      "net_profit": -25186094723.0,
+      "total_assets": 629496199430.0
+    },
+    {
+      "year": "2022",
+      "sales": 936444840669.0,
+      "operating_profit": -28505023131.0,
+      "net_profit": -42969626728.0,
+      "total_assets": 512615064003.0
+    },
+    {
+      "year": "2023",
+      "sales": 959380436380.0,
+      "operating_profit": 21906235140.0,
+      "net_profit": 22088083412.0,
+      "total_assets": 562051371496.0
+    },
+    {
+      "year": "2024",
+      "sales": 815419033739.0,
+      "operating_profit": -7468707032.0,
+      "net_profit": -1252779800.0,
+      "total_assets": 594806942179.0
+    },
+    {
+      "year": "2025",
+      "sales": 798498300100.0,
+      "operating_profit": -35218756971.0,
+      "net_profit": -45662339345.0,
+      "total_assets": 492123214404.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "282880",
+      "corpName": "코윈테크",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "480370",
+      "corpName": "씨케이솔루션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

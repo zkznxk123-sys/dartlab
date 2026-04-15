@@ -1,0 +1,205 @@
+{
+  "ego": {
+    "stockCode": "009270",
+    "corpName": "신원",
+    "industry": "retail",
+    "stage": "wholesale",
+    "role": "도매",
+    "stream": "midstream",
+    "revenue": 10923,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "160550",
+      "corpName": "NEW",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 1427
+    },
+    {
+      "stockCode": "014580",
+      "corpName": "태경비케이",
+      "industry": "environment",
+      "stage": "general",
+      "revenue": 3859
+    },
+    {
+      "stockCode": "015890",
+      "corpName": "태경산업",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 7771
+    },
+    {
+      "stockCode": "071200",
+      "corpName": "인피니트헬스케어",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 1024
+    }
+  ],
+  "edges": [
+    {
+      "from": "009270",
+      "to": "160550",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "009270",
+      "to": "014580",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "009270",
+      "to": "015890",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "009270",
+      "to": "071200",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 879417586200.0,
+      "operating_profit": 21639200846.0,
+      "net_profit": 12132921629.0,
+      "total_assets": 503617026076.0
+    },
+    {
+      "year": "2022",
+      "sales": 995439504318.0,
+      "operating_profit": 33368554911.0,
+      "net_profit": 18104957282.0,
+      "total_assets": 510124893723.0
+    },
+    {
+      "year": "2023",
+      "sales": 834478141461.0,
+      "operating_profit": 23429995620.0,
+      "net_profit": 5935016102.0,
+      "total_assets": 545009762942.0
+    },
+    {
+      "year": "2024",
+      "sales": 939536833803.0,
+      "operating_profit": 25317728223.0,
+      "net_profit": 0.0,
+      "total_assets": 628902089244.0
+    },
+    {
+      "year": "2025",
+      "sales": 1092254154426.0,
+      "operating_profit": 18778913228.0,
+      "net_profit": -1631250295.0,
+      "total_assets": 642566644960.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "014580",
+      "corpName": "태경비케이",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "015890",
+      "corpName": "태경산업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "071200",
+      "corpName": "인피니트헬스케어",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

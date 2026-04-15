@@ -1,0 +1,296 @@
+{
+  "ego": {
+    "stockCode": "004360",
+    "corpName": "세방",
+    "industry": "logistics",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 12418,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "004490",
+      "corpName": "세방전지",
+      "industry": "battery",
+      "stage": "cell",
+      "revenue": 21187
+    },
+    {
+      "stockCode": "005850",
+      "corpName": "에스엘",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 52399
+    },
+    {
+      "stockCode": "028670",
+      "corpName": "팬오션",
+      "industry": "logistics",
+      "stage": "general",
+      "revenue": 54329
+    },
+    {
+      "stockCode": "066980",
+      "corpName": "한성크린텍",
+      "industry": "environment",
+      "stage": "general",
+      "revenue": 1999
+    },
+    {
+      "stockCode": "040910",
+      "corpName": "아이씨디",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 1970
+    },
+    {
+      "stockCode": "011810",
+      "corpName": "STX",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 6413
+    },
+    {
+      "stockCode": "033340",
+      "corpName": "좋은사람들",
+      "industry": "textile",
+      "stage": "apparel",
+      "revenue": 726
+    },
+    {
+      "stockCode": "003470",
+      "corpName": "유안타증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "004360",
+      "to": "000720",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004360",
+      "to": "004490",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004360",
+      "to": "005850",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "004360",
+      "to": "028670",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004360",
+      "to": "066980",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004360",
+      "to": "040910",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004360",
+      "to": "011810",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004360",
+      "to": "033340",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004360",
+      "to": "003470",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004490",
+      "to": "004360",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1057709412045.0,
+      "operating_profit": 29158209219.0,
+      "net_profit": 52432741076.0,
+      "total_assets": 1245288419938.0
+    },
+    {
+      "year": "2022",
+      "sales": 1290350585813.0,
+      "operating_profit": 45146617926.0,
+      "net_profit": 105390804723.0,
+      "total_assets": 1280973786600.0
+    },
+    {
+      "year": "2023",
+      "sales": 1141950047426.0,
+      "operating_profit": 28656237456.0,
+      "net_profit": 205547237.0,
+      "total_assets": 1345241646591.0
+    },
+    {
+      "year": "2024",
+      "sales": 1373388758110.0,
+      "operating_profit": 24495686269.0,
+      "net_profit": 85471393368.0,
+      "total_assets": 1480281617589.0
+    },
+    {
+      "year": "2025",
+      "sales": 1241786832538.0,
+      "operating_profit": 27300616862.0,
+      "net_profit": -54458366.0,
+      "total_assets": 1495953029989.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "086280",
+      "corpName": "현대글로비스",
+      "stage": "general",
+      "revenue": 295664
+    },
+    {
+      "stockCode": "003490",
+      "corpName": "대한항공",
+      "stage": "general",
+      "revenue": 252255
+    },
+    {
+      "stockCode": "028670",
+      "corpName": "팬오션",
+      "stage": "general",
+      "revenue": 54329
+    },
+    {
+      "stockCode": "002320",
+      "corpName": "한진",
+      "stage": "general",
+      "revenue": 30649
+    },
+    {
+      "stockCode": "089860",
+      "corpName": "롯데렌탈",
+      "stage": "",
+      "revenue": 29188
+    }
+  ]
+}

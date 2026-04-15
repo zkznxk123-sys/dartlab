@@ -55,7 +55,8 @@ dartlab.ask("삼성전자 재무 분석해줘")   # AI 분석가
 | [Gather](gather) | `c.gather()` | External data | price/flow/macro/news |
 | [Analysis](analysis) | `c.analysis()` | Deep analysis | 14-axis financial + forecast |
 | [Credit Rating](credit) | `c.credit()` | Credit rating | dCR 20-grade + 7-axis |
-| [Review](review) | `c.review()` | Report rendering | markdown/HTML/JSON |
+| [Industry](https://github.com/eddmpython/dartlab/blob/master/ops/industry.md) | `c.industry()`, `dartlab.industry()` | Industry atlas | 2,664 companies × 34 industries + supply-chain edges |
+| [Review](review) | `c.review()` | Report rendering | markdown/HTML/JSON + `chainPosition` block |
 | [AI](ai) | `dartlab.ask()` | AI analyst | 6 providers |
 | [Advanced](advanced) | `c.insights` | Grades/rank/sector | insight/rank/quant |
 | [MCP](mcp) | `dartlab mcp` | AI integration | Claude/Cursor |
@@ -72,6 +73,7 @@ dartlab.analysis("그룹", "축")       # 재무분석
 dartlab.gather("축", "005930")       # 외부 데이터
 dartlab.credit("005930")            # 신용평가
 dartlab.quant("005930")             # 기술적 분석
+dartlab.industry("semiconductor")   # 산업 지도 (공정·공급망)
 dartlab.search("유상증자")           # 공시 검색
 dartlab.listing()                   # 상장사 목록
 

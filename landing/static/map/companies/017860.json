@@ -1,0 +1,226 @@
+{
+  "ego": {
+    "stockCode": "017860",
+    "corpName": "DS단석",
+    "industry": "chemical",
+    "stage": "polymer",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 9549,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 974293
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "014190",
+      "corpName": "원익큐브",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 2848
+    },
+    {
+      "stockCode": "035810",
+      "corpName": "이지홀딩스",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 33889
+    },
+    {
+      "stockCode": "183490",
+      "corpName": "엔지켐생명과학",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 678
+    }
+  ],
+  "edges": [
+    {
+      "from": "017860",
+      "to": "015760",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "352820",
+      "to": "017860",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "017860",
+      "to": "352820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "017860",
+      "to": "014190",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "017860",
+      "to": "035810",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "017860",
+      "to": "183490",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2023",
+      "sales": 1070440042557.0,
+      "operating_profit": 76240446307.0,
+      "net_profit": 39161852822.0,
+      "total_assets": 718904136635.0
+    },
+    {
+      "year": "2024",
+      "sales": 961722369625.0,
+      "operating_profit": 12187575770.0,
+      "net_profit": -9159174410.0,
+      "total_assets": 735819053361.0
+    },
+    {
+      "year": "2025",
+      "sales": 954873741956.0,
+      "operating_profit": 7982184722.0,
+      "net_profit": -12074239649.0,
+      "total_assets": 759101921892.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "media",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "content",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

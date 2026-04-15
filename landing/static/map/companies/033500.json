@@ -1,0 +1,321 @@
+{
+  "ego": {
+    "stockCode": "033500",
+    "corpName": "동성화인텍",
+    "industry": "chemical",
+    "stage": "basic",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 7422,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "025000",
+      "corpName": "KPX케미칼",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 8084
+    },
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "039440",
+      "corpName": "에스티아이",
+      "industry": "machinery",
+      "stage": "",
+      "revenue": 3281
+    },
+    {
+      "stockCode": "102260",
+      "corpName": "동성케미컬",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 12116
+    },
+    {
+      "stockCode": "091120",
+      "corpName": "이엠텍",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2051
+    },
+    {
+      "stockCode": "353590",
+      "corpName": "오토앤",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 0
+    },
+    {
+      "stockCode": "001770",
+      "corpName": "SHD",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 1004
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "025000",
+      "to": "033500",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 77685.0,
+      "ratio": null,
+      "product": "PU-System",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "PU-System"
+    },
+    {
+      "from": "005830",
+      "to": "033500",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033500",
+      "to": "039440",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033500",
+      "to": "102260",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033500",
+      "to": "091120",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033500",
+      "to": "353590",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033500",
+      "to": "001770",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033500",
+      "to": "088350",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    },
+    {
+      "from": "033500",
+      "to": "102260",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "102260",
+      "to": "033500",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "353590",
+      "to": "033500",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 365039209420.0,
+      "operating_profit": 30179089426.0,
+      "net_profit": 0.0,
+      "total_assets": 294813152297.0
+    },
+    {
+      "year": "2022",
+      "sales": 434151552353.0,
+      "operating_profit": 15277453449.0,
+      "net_profit": 8421767028.0,
+      "total_assets": 344010440030.0
+    },
+    {
+      "year": "2023",
+      "sales": 531408738039.0,
+      "operating_profit": 37339851391.0,
+      "net_profit": 28746230576.0,
+      "total_assets": 364279612381.0
+    },
+    {
+      "year": "2024",
+      "sales": 597409682162.0,
+      "operating_profit": 53988814630.0,
+      "net_profit": null,
+      "total_assets": 455450977751.0
+    },
+    {
+      "year": "2025",
+      "sales": 742186008411.0,
+      "operating_profit": 72558706089.0,
+      "net_profit": null,
+      "total_assets": 501560927287.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 77685.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "software",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "solution",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "025000",
+      "corpName": "KPX케미칼",
+      "product": "PU-System",
+      "amount": 77685.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "102260",
+      "corpName": "동성케미컬",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

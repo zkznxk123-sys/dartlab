@@ -1,0 +1,192 @@
+{
+  "ego": {
+    "stockCode": "053700",
+    "corpName": "삼보모터스",
+    "industry": "auto",
+    "stage": "oem",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 16846,
+    "confidence": 0.6,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "004270",
+      "corpName": "남성",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 775
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "018500",
+      "corpName": "동원금속",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 1571
+    },
+    {
+      "stockCode": "130740",
+      "corpName": "티피씨글로벌",
+      "industry": "semiconductor",
+      "stage": "test",
+      "revenue": 794
+    }
+  ],
+  "edges": [
+    {
+      "from": "004270",
+      "to": "053700",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "024110",
+      "to": "053700",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "053700",
+      "to": "018500",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "130740",
+      "to": "053700",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "053700",
+      "to": "018500",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1029815041427.0,
+      "operating_profit": 16607755088.0,
+      "net_profit": -636623343.0,
+      "total_assets": 789701419039.0
+    },
+    {
+      "year": "2022",
+      "sales": 1199852985474.0,
+      "operating_profit": 22914068910.0,
+      "net_profit": 0.0,
+      "total_assets": 864519668863.0
+    },
+    {
+      "year": "2023",
+      "sales": 1440557265080.0,
+      "operating_profit": 51648116490.0,
+      "net_profit": -1783.0,
+      "total_assets": 1037465852411.0
+    },
+    {
+      "year": "2024",
+      "sales": 1570625502210.0,
+      "operating_profit": 54271873657.0,
+      "net_profit": 0.0,
+      "total_assets": 1209043218812.0
+    },
+    {
+      "year": "2025",
+      "sales": 1684582152379.0,
+      "operating_profit": 61729555951.0,
+      "net_profit": 0.0,
+      "total_assets": 1337854672855.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

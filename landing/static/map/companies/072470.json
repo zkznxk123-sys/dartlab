@@ -1,0 +1,174 @@
+{
+  "ego": {
+    "stockCode": "072470",
+    "corpName": "우리산업홀딩스",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 7050,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "278990",
+      "corpName": "EMB",
+      "industry": "battery",
+      "stage": "cell",
+      "revenue": 238
+    },
+    {
+      "stockCode": "215360",
+      "corpName": "우리산업",
+      "industry": "medicalDevice",
+      "stage": "imaging",
+      "revenue": 5320
+    }
+  ],
+  "edges": [
+    {
+      "from": "278990",
+      "to": "072470",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "072470",
+      "to": "215360",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "215360",
+      "to": "072470",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 384335568467.0,
+      "operating_profit": -2451690316.0,
+      "net_profit": -325424403.0,
+      "total_assets": 401897114022.0
+    },
+    {
+      "year": "2022",
+      "sales": 495522375288.0,
+      "operating_profit": -19804367631.0,
+      "net_profit": -11892613401.0,
+      "total_assets": 401829575362.0
+    },
+    {
+      "year": "2023",
+      "sales": 575273528400.0,
+      "operating_profit": 21263010301.0,
+      "net_profit": 15174927692.0,
+      "total_assets": 478748647962.0
+    },
+    {
+      "year": "2024",
+      "sales": 645259102794.0,
+      "operating_profit": 15025930892.0,
+      "net_profit": 1328333380.0,
+      "total_assets": 489040138516.0
+    },
+    {
+      "year": "2025",
+      "sales": 705003098505.0,
+      "operating_profit": 34240369035.0,
+      "net_profit": 10991765432.0,
+      "total_assets": 509891987640.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "battery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "cell",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "278990",
+      "corpName": "EMB",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}
