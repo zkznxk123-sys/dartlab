@@ -12,7 +12,7 @@ import time
 from collections import Counter
 from pathlib import Path
 
-from dartlab.ai.runtime.core import analyze
+from dartlab.ai.runtime.core import runAsk
 
 SCENARIOS = [
     {
@@ -65,7 +65,7 @@ def runOne(scenario: dict) -> dict:
     chunks: list[str] = []
     tool_calls: list[tuple[str, dict]] = []
 
-    for ev in analyze(scenario["question"], stockCode=scenario.get("stockCode")):
+    for ev in runAsk(scenario["question"], stockCode=scenario.get("stockCode")):
         if ev.kind == "chunk":
             chunks.append(ev.data["text"])
         elif ev.kind == "tool_call":

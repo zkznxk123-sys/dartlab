@@ -1,4 +1,4 @@
-"""SSE 스트리밍 generator — core.analyze() 이벤트 → SSE 변환.
+"""SSE 스트리밍 generator — core.runAsk() 이벤트 → SSE 변환.
 
 [최우선 UX 원칙] 데이터 투명성 — 절대 제거 금지
 
@@ -31,7 +31,7 @@ from .models import AskRequest
 
 @dataclass
 class AnalysisStreamError(RuntimeError):
-    """core.analyze() error event surfaced to server adapters."""
+    """core.runAsk() error event surfaced to server adapters."""
 
     message: str
     action: str = ""
@@ -39,9 +39,9 @@ class AnalysisStreamError(RuntimeError):
 
 
 async def stream_ask(req: AskRequest):
-    """core.analyze() 이벤트 → SSE 변환.
+    """core.runAsk() 이벤트 → SSE 변환.
 
-    모든 분석 로직은 core.analyze() 에 위임. 종목 resolve 는 AI 가 자율 판단.
+    모든 분석 로직은 core.runAsk() 에 위임. 종목 resolve 는 AI 가 자율 판단.
     """
     kwargs = _build_kwargs(req)
     async for item in stream_analysis(req.question, **kwargs):
@@ -49,19 +49,19 @@ async def stream_ask(req: AskRequest):
 
 
 async def stream_analysis(question: str = "", **kwargs):
-    """core.analyze() → SSE adapter."""
-    from dartlab.ai.runtime.core import analyze
+    """core.runAsk() → SSE adapter."""
+    from dartlab.ai.runtime.core import runAsk
 
-    async for event in _sync_gen_to_async(analyze, question, **kwargs):
+    async for event in _sync_gen_to_async(runAsk, question, **kwargs):
         yield _sse(event.kind, event.data)
 
 
 async def collect_analysis_text(question: str = "", **kwargs) -> str:
-    """core.analyze() 실행 후 chunk 텍스트 수집 (non-stream HTTP endpoint 용)."""
-    from dartlab.ai.runtime.core import analyze
+    """core.runAsk() 실행 후 chunk 텍스트 수집 (non-stream HTTP endpoint 용)."""
+    from dartlab.ai.runtime.core import runAsk
 
     chunks: list[str] = []
-    async for event in _sync_gen_to_async(analyze, question, **kwargs):
+    async for event in _sync_gen_to_async(runAsk, question, **kwargs):
         if event.kind == "chunk":
             chunks.append(event.data.get("text", ""))
         elif event.kind == "error":
@@ -74,7 +74,7 @@ async def collect_analysis_text(question: str = "", **kwargs) -> str:
 
 
 def _build_kwargs(req: AskRequest) -> dict:
-    """AskRequest → core.analyze() kwargs 변환."""
+    """AskRequest → core.runAsk() kwargs 변환."""
     kwargs: dict = {
         "provider": req.provider,
         "role": req.role,

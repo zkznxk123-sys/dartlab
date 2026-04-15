@@ -150,7 +150,7 @@ def _ratio_archetype_override(company: Company | None) -> str | None:
     return mapping.get(industryGroup)
 
 
-def analyze(
+def analyzeFinancial(
     stockCode: str,
     company: Company | None = None,
     *,

@@ -47,8 +47,8 @@ def _emit(obj: dict[str, Any]) -> None:
 
 
 def _handleAsk(msg: dict[str, Any]) -> None:
-    """Process ask message -- stream core.analyze() events as JSON lines."""
-    from dartlab.ai.runtime.core import analyze
+    """Process ask message -- stream core.runAsk() events as JSON lines."""
+    from dartlab.ai.runtime.core import runAsk
 
     reqId = msg.get("id", "")
     question = msg.get("question", "")
@@ -90,7 +90,7 @@ def _handleAsk(msg: dict[str, Any]) -> None:
 
     emittedDone = False
     try:
-        for event in analyze(question, **kwargs):
+        for event in runAsk(question, **kwargs):
             if event.kind == "error" and isinstance(event.data, dict):
                 _emit({"id": reqId, "event": "error", "data": _sanitizeErrorForUi(event.data)})
             else:
@@ -127,7 +127,7 @@ def _handleWarmup(_msg: dict[str, Any]) -> None:
         except (ImportError, OSError, RuntimeError) as exc:
             diag["skipped"].append(f"{name}: {exc.__class__.__name__}")
 
-    _try("core", lambda: __import__("dartlab.ai.runtime.core", fromlist=["analyze"]))
+    _try("core", lambda: __import__("dartlab.ai.runtime.core", fromlist=["runAsk"]))
     _try("providers", lambda: __import__("dartlab.ai.providers", fromlist=["create_provider"]))
     _try("viz_extract", lambda: __import__("dartlab.viz.extract", fromlist=["extract_viz_specs"]))
 

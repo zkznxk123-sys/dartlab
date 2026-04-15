@@ -45,7 +45,7 @@ def main() -> int:
     from dartlab import Company
     from dartlab.ai.context import ContextBuilder
     from dartlab.ai.persistence import KnowledgeDB
-    from dartlab.ai.runtime.core import analyze
+    from dartlab.ai.runtime.core import runAsk
 
     # Company 로드
     print("[1/5] Company('005930') 로드...")
@@ -76,7 +76,7 @@ def main() -> int:
         t0 = time.time()
         full_text = ""
         try:
-            for event in analyze(
+            for event in runAsk(
                 company=c,
                 question=q,
                 provider=provider,

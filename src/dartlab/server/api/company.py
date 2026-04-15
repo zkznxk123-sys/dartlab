@@ -387,7 +387,7 @@ def api_company_insights(code: str):
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
-    from dartlab.analysis.financial.insight.pipeline import analyze as insight_analyze
+    from dartlab.analysis.financial.insight.pipeline import analyzeFinancial as insight_analyze
 
     try:
         result = insight_analyze(company.stockCode, company=company)

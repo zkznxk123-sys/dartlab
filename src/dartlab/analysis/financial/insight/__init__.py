@@ -4,7 +4,7 @@
 
 사용법::
 
-    from dartlab.analysis.financial.insight import analyze
+    from dartlab.analysis.financial.insight import analyzeFinancial as analyze
 
     result = analyze("005930")
     result.grades()        # {'performance': 'A', 'profitability': 'B', ...}
@@ -13,7 +13,10 @@
     result.profile         # "premium"
 """
 
-from dartlab.analysis.financial.insight.pipeline import analyze, analyzeAudit
+from dartlab.analysis.financial.insight.pipeline import analyzeFinancial, analyzeAudit
+
+# 호환 alias — 외부 코드가 analyze 로 import 가능 (점진 마이그레이션)
+analyze = analyzeFinancial
 from dartlab.analysis.financial.insight.types import (
     AnalysisResult,
     Anomaly,
@@ -28,6 +31,7 @@ from dartlab.analysis.financial.insight.types import (
 
 __all__ = [
     "analyze",
+    "analyzeFinancial",
     "analyzeAudit",
     "AnalysisResult",
     "Anomaly",

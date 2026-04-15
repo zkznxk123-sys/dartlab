@@ -520,7 +520,7 @@ def _buildCategoryBlock(category: str, intent: str, *, hasCompany: bool = False)
 # ── 통합 오케스트레이터 ──────────────────────────────────
 
 
-def analyze(
+def runAsk(
     question: str,
     *,
     # LLM 설정
@@ -580,7 +580,7 @@ def analyze(
         done_payload: dict[str, Any] = {}
 
         try:
-            for ev in _analyze_inner(
+            for ev in _runAskInner(
                 question,
                 provider=provider,
                 role=role,
@@ -624,7 +624,7 @@ def analyze(
             _logFile.close()
 
 
-def _analyze_inner(
+def _runAskInner(
     question: str,
     *,
     provider: str | None,
@@ -642,7 +642,7 @@ def _analyze_inner(
     _templateText: str | None = None,
     **kwargs: Any,
 ) -> Generator[AnalysisEvent, None, None]:
-    """analyze() 본체 — tool calling 단일 경로.
+    """runAsk() 본체 — tool calling 단일 경로.
 
     사상 (ops/ai.md): AI 가 모든 엔진을 tool 로 자율 호출. 종목 감지 · 원본 검증 · override 전부 AI 판단.
     사용자 API 에 Company 파라미터 노출 안 함. Pre-grounding · ContextBuilder 떠먹이기 전부 제거.

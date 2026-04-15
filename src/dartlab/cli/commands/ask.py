@@ -72,10 +72,10 @@ def run(args) -> int:
     if args.cont and company is not None:
         session_id, history = _loadHistory(company.stockCode, console)
 
-    # ── analyze() 직접 호출 (이벤트 스트림) ──
-    from dartlab.ai.runtime.core import analyze
+    # ── runAsk() 직접 호출 (이벤트 스트림) ──
+    from dartlab.ai.runtime.core import runAsk
 
-    events = analyze(
+    events = runAsk(
         company,
         question,
         include=args.include,

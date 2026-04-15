@@ -51,13 +51,13 @@ def run_one(company, question: str, *, use_v2: bool) -> dict:
     """단일 질문 실행 → {length, elapsed, error}."""
     os.environ["DARTLAB_CONTEXT_V2"] = "1" if use_v2 else "0"
 
-    from dartlab.ai.runtime.core import analyze
+    from dartlab.ai.runtime.core import runAsk
 
     full = ""
     error = None
     t0 = time.time()
     try:
-        for event in analyze(company=company, question=question, provider=provider, max_turns=2):
+        for event in runAsk(company=company, question=question, provider=provider, max_turns=2):
             if event.kind == "chunk":
                 full += event.data.get("text", "")
             elif event.kind == "error":

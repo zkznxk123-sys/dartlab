@@ -76,7 +76,7 @@ def _make_series() -> tuple[dict, list[str], dict, list[str]]:
 
 def test_analyze_returns_result():
     """mock 데이터로 analyze() 호출 시 AnalysisResult 반환."""
-    from dartlab.analysis.financial.insight import AnalysisResult, analyze
+    from dartlab.analysis.financial.insight import AnalysisResult, analyzeFinancial as analyze
 
     qSeries, qPeriods, aSeries, aYears = _make_series()
     result = analyze(
@@ -93,7 +93,7 @@ def test_analyze_returns_result():
 
 def test_analyze_has_10_grades():
     """10영역 등급이 모두 존재."""
-    from dartlab.analysis.financial.insight import analyze
+    from dartlab.analysis.financial.insight import analyzeFinancial as analyze
 
     qSeries, qPeriods, aSeries, aYears = _make_series()
     result = analyze(
@@ -124,7 +124,7 @@ def test_analyze_has_10_grades():
 
 def test_analyze_has_profile():
     """profile 문자열 존재."""
-    from dartlab.analysis.financial.insight import analyze
+    from dartlab.analysis.financial.insight import analyzeFinancial as analyze
 
     qSeries, qPeriods, aSeries, aYears = _make_series()
     result = analyze(
@@ -140,7 +140,7 @@ def test_analyze_has_profile():
 
 def test_analyze_has_summary():
     """summary 텍스트 존재."""
-    from dartlab.analysis.financial.insight import analyze
+    from dartlab.analysis.financial.insight import analyzeFinancial as analyze
 
     qSeries, qPeriods, aSeries, aYears = _make_series()
     result = analyze(
@@ -173,7 +173,7 @@ def test_analyze_anomalies_list():
 
 def test_analyze_repr():
     """AnalysisResult repr 정상 동작."""
-    from dartlab.analysis.financial.insight import analyze
+    from dartlab.analysis.financial.insight import analyzeFinancial as analyze
 
     qSeries, qPeriods, aSeries, aYears = _make_series()
     result = analyze(
@@ -298,7 +298,7 @@ def test_analyze_with_market_data_5axis():
 
 def test_analyze_market_data_none_backward_compat():
     """marketData=None → 기존 4축과 동일한 점수."""
-    from dartlab.analysis.financial.insight import analyze
+    from dartlab.analysis.financial.insight import analyzeFinancial as analyze
 
     qSeries, qPeriods, aSeries, aYears = _make_series()
 

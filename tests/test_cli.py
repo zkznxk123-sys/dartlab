@@ -72,7 +72,7 @@ def test_ask_proceeds_without_company(capsys):
         patch("dartlab.core.resolve.resolve_from_text", return_value=(None, "bad question")),
         patch("dartlab.cli.commands.ask.configure_dartlab", return_value=MagicMock()),
         patch("dartlab.cli.commands.ask.detect_provider", return_value="openai"),
-        patch("dartlab.ai.runtime.core.analyze", side_effect=_fake_analyze),
+        patch("dartlab.ai.runtime.core.runAsk", side_effect=_fake_analyze),
     ):
         result = main(["ask", "bad", "question"])
 

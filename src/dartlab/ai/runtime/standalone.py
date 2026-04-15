@@ -73,9 +73,9 @@ def ask(
 
             _templateText = get_template(tmpl_name)
 
-    from dartlab.ai.runtime.core import analyze
+    from dartlab.ai.runtime.core import runAsk
 
-    events = analyze(
+    events = runAsk(
         question,
         stockCode=stockCode,
         provider=provider,

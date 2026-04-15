@@ -70,7 +70,7 @@ def calcScorecard(company, *, basePeriod: str | None = None) -> dict | None:
         insights = company._cache[cacheKey]
     else:
         try:
-            from dartlab.analysis.financial.insight.pipeline import analyze
+            from dartlab.analysis.financial.insight.pipeline import analyzeFinancial
 
             insights = analyze(company.stockCode, company=company)
             if hasattr(company, "_cache"):
