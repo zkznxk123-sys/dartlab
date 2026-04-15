@@ -380,7 +380,7 @@ def _buildSystemPromptParts(
     # category 블록 — 질문 범주별 강제력 차별화 (P8)
     if question or category:
         _cat, _intent = _resolveCategoryAndIntent(question, category, intent, hasCompany)
-        block = _buildCategoryBlock(_cat, _intent)
+        block = _buildCategoryBlock(_cat, _intent, hasCompany=hasCompany)
         if block:
             dynamic_parts.append(block)
 
@@ -436,11 +436,7 @@ _INTENT_TO_MANDATORY: dict[str, str] = {
         "분석 유형: 자본배분/배당 · "
         "필수 조합: analysis(axis='자본배분') + show(topic='dividend')."
     ),
-    "act6_outlook": (
-        "분석 유형: 전망/가치평가/매크로 · "
-        "필수 조합: analysis(axis='가치평가') + macro() 또는 gather(axis='macro'). "
-        "assumptions 극단값이면 overrides 재호출로 시나리오 비교."
-    ),
+    # act6_outlook 은 hasCompany 에 따라 분기 — _buildCategoryBlock 에서 직접 처리
     "compare": (
         "분석 유형: 시장 비교/랭킹 · "
         "필수 조합: scan(axis=...) 먼저 → 상위 종목 analysis 심층."
@@ -456,7 +452,31 @@ _INTENT_TO_MANDATORY: dict[str, str] = {
 }
 
 
-def _buildCategoryBlock(category: str, intent: str) -> str:
+def _mandatoryForOutlook(hasCompany: bool) -> str:
+    """act6_outlook — 회사 유무에 따라 조합 분기.
+
+    - 회사 없음 ("최근 경제", "시장 흐름"): 매크로 톱다운. 지표 + 최근 이슈 결합.
+      macro() 실측 수치 → gather("news") 또는 search() 로 최근 이슈 → 지표·이슈 인과.
+    - 회사 있음: 가치평가. analysis("가치평가") + macro() 매크로 민감도.
+    """
+    if hasCompany:
+        return (
+            "분석 유형: 가치평가 (회사 바인딩) · "
+            "필수 조합: analysis(axis='가치평가') + macro() 매크로 민감도. "
+            "assumptions 극단값이면 overrides 재호출로 시나리오 비교."
+        )
+    return (
+        "분석 유형: 매크로 톱다운 (시장/경제/시황) · "
+        "**필수 조합**: macro() + gather(axis='news'). "
+        "순서: ① macro(axis='summary' or '사이클') 로 지표 실측 → "
+        "② gather('news') 또는 search() 로 **최근 이슈/뉴스** 수집 "
+        "(지표만으로 부족, 왜 지금 이런지 맥락 필요) → "
+        "③ 지표 + 이슈 교차로 인과 해석 + 판단. "
+        "수치 있는 지표 나열만으로 끝내지 마라."
+    )
+
+
+def _buildCategoryBlock(category: str, intent: str, *, hasCompany: bool = False) -> str:
     """질문 범주별 시스템 프롬프트 블록.
 
     META: tool 불필요 (CAPABILITIES 참조만)
@@ -483,7 +503,10 @@ def _buildCategoryBlock(category: str, intent: str) -> str:
         )
 
     # FINANCE — intent 맞춤 필수 조합 명시
-    mandatory = _INTENT_TO_MANDATORY.get(intent, _INTENT_TO_MANDATORY["act_all"])
+    if intent == "act6_outlook":
+        mandatory = _mandatoryForOutlook(hasCompany)
+    else:
+        mandatory = _INTENT_TO_MANDATORY.get(intent, _INTENT_TO_MANDATORY["act_all"])
     return (
         "## ⚠️ 질문 범주: 금융 분석 — tool 경유 필수\n\n"
         "**이 질문은 dartlab 엔진 경유 없이 답하면 정체성 훼손 (일반 ChatGPT 답변과 동일).**\n"
