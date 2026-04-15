@@ -2970,8 +2970,17 @@ class Company:
             kwargs["overrides"] = clean
         return creditCompany(self, axis=axis, detail=detail, basePeriod=basePeriod, **kwargs)
 
-    def gather(self, axis: str | None = None, **kwargs):
+    def gather(self, axis: str | None = None, target: str | None = None, **kwargs):
         """외부 시장 데이터 수집 — 4축 (price/flow/macro/news).
+
+        Args:
+            axis: 데이터 축. price/flow/macro/news/sector/insider/peers/ownership.
+            target: 축별 부가 인자.
+                - axis='news' 일 때: 검색어 (예: '한국 경제', '반도체 수출 동향').
+                  시장 레벨 뉴스 조회. 비우면 종목 기반 fallback.
+                - axis='macro' 일 때: 시리즈 이름 또는 시나리오.
+                - axis='sector'/'peers' 일 때: 비교 대상 sector/종목.
+            **kwargs: market, days, start, end 등 축별 옵션.
 
         Capabilities:
             - price: OHLCV 주가 시계열 (KR Naver / US Yahoo)

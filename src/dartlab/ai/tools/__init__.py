@@ -137,10 +137,7 @@ def buildTools() -> list[AITool]:
             )
         )
 
-    # 경험 조회 tool — KnowledgeDB 직접 접근 (Company 불필요)
-    from dartlab.ai.tools._builtin import _builtinTools
-
-    tools.extend(_builtinTools())
+    # pastInsight / sectorInsights 는 dartlab.__all__ 에 노출되어 위 _autoDiscover 가 자동 등록.
 
     # pythonExec — 유일 특수 케이스 (subprocess)
     tools.append(

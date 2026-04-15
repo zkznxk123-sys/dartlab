@@ -6,7 +6,7 @@
 
 ---
 
-## Python API (29개)
+## Python API (31개)
 
 `import dartlab` 후 사용 가능한 공개 API.
 
@@ -37,6 +37,8 @@
 | `codeToName` | function | 종목코드 → 회사명. |
 | `nameToCode` | function | 회사명 → 종목코드. 정확히 일치하는 첫 번째 결과. |
 | `searchName` | function | 종목명/코드로 종목 찾기 (KR + US). |
+| `pastInsight` | function | 특정 회사의 과거 분석 서사 조회. |
+| `sectorInsights` | function | 동종 업계 과거 분석 서사 목록 (교차 학습). |
 | `Review` | class | 분석 리뷰 — 14축 전략분석 결과를 구조화 보고서로 렌더링. |
 | `SelectResult` | class | select() 반환 객체 — DataFrame 위임 + 체이닝. |
 | `ChartResult` | class | chart() 반환 객체 — 시각화 + 렌더링. |

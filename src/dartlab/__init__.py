@@ -868,6 +868,8 @@ if not _IS_PYODIDE:
     sys.modules[__name__].credit = _credit_callable
 
 
+from dartlab.ai.insights import pastInsight, sectorInsights  # noqa: E402
+
 __all__ = [
     "Company",
     "Fred",
@@ -894,6 +896,8 @@ __all__ = [
     "codeToName",
     "nameToCode",
     "searchName",
+    "pastInsight",
+    "sectorInsights",
     "Review",
     "SelectResult",
     "ChartResult",

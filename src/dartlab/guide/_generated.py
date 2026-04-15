@@ -598,6 +598,10 @@ CAPABILITIES: dict[str, dict] = {
         "kind": "function",
         "summary": "회사명 → 종목코드. 정확히 일치하는 첫 번째 결과."
     },
+    "pastInsight": {
+        "kind": "function",
+        "summary": "특정 회사의 과거 분석 서사 조회."
+    },
     "quant": {
         "kind": "function",
         "summary": "종목 레벨 정량분석 엔진 — 30축 7그룹."
@@ -718,6 +722,10 @@ CAPABILITIES: dict[str, dict] = {
     "searchName": {
         "kind": "function",
         "summary": "종목명/코드로 종목 찾기 (KR + US)."
+    },
+    "sectorInsights": {
+        "kind": "function",
+        "summary": "동종 업계 과거 분석 서사 목록 (교차 학습)."
     },
     "setup": {
         "aicontext": "AI 분석 기능 사용 전 provider 설정 상태 확인\n미설정 provider 감지 시 setup() 안내로 연결\n설정 완료 여부를 프로그래밍 방식으로 체크 가능",
