@@ -546,7 +546,14 @@
 									checked={stageFilter.has(s.key)}
 									onchange={() => toggleStage(s.key)}
 								/>
-								<span class="swatch" style="background:{industryStageColors.get(s.key)}"></span>
+								<span
+									class="swatch"
+									style="background:{s.stream === 'upstream'
+										? '#8b5cf6'
+										: s.stream === 'downstream'
+											? '#f97316'
+											: '#f8fafc'}"
+								></span>
 								<span class="name">{s.name}</span>
 								<span class="count">{(s.nodes || []).length}</span>
 							</label>
