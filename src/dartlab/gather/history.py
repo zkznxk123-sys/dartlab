@@ -39,6 +39,12 @@ async def fetch(
     seen: set[str] = set()
     chain = [s for s in chain if not (s in seen or seen.add(s))]  # type: ignore[func-returns-value]
 
+    # client=None이면 자체 생성 (price.py와 동일 패턴)
+    if client is None:
+        from .http import GatherHttpClient
+
+        client = GatherHttpClient()
+
     for source_name in chain:
         if circuit_breaker.is_open(source_name):
             continue

@@ -135,15 +135,38 @@ async def fetch_history(
     market: str = "US",
     **kwargs,
 ) -> list[dict]:
-    """네이버 글로벌 → 일봉 OHLCV 히스토리."""
+    """네이버 글로벌 → OHLCV 히스토리.
+
+    네이버 글로벌 chart API는 periodType별 110개 하드 제한.
+    → 요청 기간에 따라 자동 선택:
+      - 1년 이내: dayCandle (약 110 거래일 = 6개월)
+      - 1~2년: weekCandle (약 110주 = 2년)
+      - 2년 이상: monthCandle (약 110개월 = 9년)
+    start 미지정이면 dayCandle (하위호환).
+    """
     code = await _resolve_reuters_code(stock_code, client)
     if not code:
         return []
 
+    # 요청 기간 길이로 periodType 자동 선택
+    period_type = "dayCandle"
+    if start:
+        try:
+            from datetime import date, datetime as _dt
+
+            start_dt = _dt.strptime(start, "%Y-%m-%d").date()
+            end_dt = _dt.strptime(end, "%Y-%m-%d").date() if end else date.today()
+            span_days = (end_dt - start_dt).days
+            if span_days > 730:
+                period_type = "monthCandle"
+            elif span_days > 365:
+                period_type = "weekCandle"
+        except (ValueError, TypeError):
+            pass
+
     await _throttle()
-    # dayCandle로 최대 데이터 요청
     count = 6000
-    url = f"{_API_BASE}/chart/foreign/item/{code}?periodType=dayCandle&count={count}"
+    url = f"{_API_BASE}/chart/foreign/item/{code}?periodType={period_type}&count={count}"
     try:
         resp = await client.get(url, headers={"Accept": "application/json"})
         data = resp.json()
