@@ -39,6 +39,24 @@ SCENARIOS = [
         "stockCode": "005930",
         "expect": {"macro_used": True, "diversified": True},
     },
+    {
+        "id": "Q5_macro_topdown",
+        "question": "최근 한국 경제 어떤가",
+        "stockCode": None,
+        "expect": {"macro_used": True, "gather_news": True},
+    },
+    {
+        "id": "Q6_out_of_scope",
+        "question": "오늘 서울 날씨 어때",
+        "stockCode": None,
+        "expect": {"tool_count": 0, "refusal": True},
+    },
+    {
+        "id": "Q7_sector_compare",
+        "question": "삼양식품 vs 농심 식품업종 비교 — 과거 분석 참고해서",
+        "stockCode": "003230",
+        "expect": {"experience_used": True, "compare_tool": True},
+    },
 ]
 
 

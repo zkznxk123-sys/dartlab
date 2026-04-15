@@ -105,10 +105,3 @@ def ask(
         answer = _reflect_on_answer(llm, messages, answer)
 
     return answer
-
-
-def analyze_full(question: str, **kwargs: Any) -> list:
-    """모든 이벤트를 리스트로 반환 — 노트북/스크립트 디버깅용."""
-    from dartlab.ai.runtime.core import analyze
-
-    return list(analyze(question, **kwargs))

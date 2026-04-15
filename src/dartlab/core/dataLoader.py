@@ -1152,25 +1152,38 @@ def _pyodideFetchToFS(stockCode: str, category: str, dirPath: str, path: Path) -
 
     buf = None
 
-    # 방법 1: pyodide.http.pyfetch (async → run_sync)
+    # 방법 0: JSPI (pyodide.ffi.run_sync + pyfetch) — Chrome 137+ / Node --experimental-wasm-stack-switching.
+    # async context 여도 동기 wrap 가능하므로 xlwings Lite 등 async 셀에서 Company() 자동 fetch 복원.
     try:
-        import asyncio
-
+        from pyodide.ffi import run_sync  # type: ignore[import-not-found]
         from pyodide.http import pyfetch  # type: ignore[import-not-found]
 
-        async def _fetch():
-            resp = await pyfetch(url)
-            if resp.status != 200:
-                raise RuntimeError(f"HTTP {resp.status}")
-            return await resp.bytes()
-
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            # 이미 async context — coroutine을 직접 await할 수 없으므로 방법 2로
-            raise RuntimeError("event loop running")
-        buf = loop.run_until_complete(_fetch())
+        resp = run_sync(pyfetch(url))
+        if resp.status == 200:
+            buf = bytes(run_sync(resp.bytes()))
     except Exception:
         pass
+
+    # 방법 1: pyodide.http.pyfetch (async → run_until_complete) — 동기 컨텍스트 전용
+    if buf is None:
+        try:
+            import asyncio
+
+            from pyodide.http import pyfetch  # type: ignore[import-not-found]
+
+            async def _fetch():
+                resp = await pyfetch(url)
+                if resp.status != 200:
+                    raise RuntimeError(f"HTTP {resp.status}")
+                return await resp.bytes()
+
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # 이미 async context — coroutine을 직접 await할 수 없으므로 방법 2로
+                raise RuntimeError("event loop running")
+            buf = loop.run_until_complete(_fetch())
+        except Exception:
+            pass
 
     # 방법 2: JS XMLHttpRequest sync + overrideMimeType
     if buf is None:
