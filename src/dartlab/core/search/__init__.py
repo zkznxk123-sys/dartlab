@@ -19,6 +19,9 @@ from __future__ import annotations
 
 import polars as pl
 
+# 공개 scope 상수 — AI tool schema enum + 사용자 문서 단일 출처
+SEARCH_SCOPES: tuple[str, ...] = ("auto", "title", "content", "both")
+
 
 def search(
     query: str,

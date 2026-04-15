@@ -273,7 +273,7 @@ def _buildSchema(obj: Any, name: str, kind: str, caps: dict) -> dict:
             if param.default is inspect.Parameter.empty:
                 required.append(pName)
 
-    # overrides — 4 엔진 공통. AI 가 엔진 계산 가정 직접 조율.
+    # overrides — 4 엔진 공통 + Company method (validateStory). AI 가 엔진 계산 가정 직접 조율.
     if name in ("analysis", "credit", "quant", "macro"):
         try:
             from dartlab.core.overrides import describeOverrides
@@ -281,6 +281,18 @@ def _buildSchema(obj: Any, name: str, kind: str, caps: dict) -> dict:
             props["overrides"] = {
                 "type": "object",
                 "description": describeOverrides(name),
+                "additionalProperties": True,
+            }
+        except ImportError:
+            pass
+    # Phase 4 G14a: validateStory 도 VALUATION_KEYS override 노출 (analysis 경로 재사용)
+    elif name == "validateStory":
+        try:
+            from dartlab.core.overrides import describeOverrides
+
+            props["overrides"] = {
+                "type": "object",
+                "description": describeOverrides("analysis"),
                 "additionalProperties": True,
             }
         except ImportError:
@@ -326,12 +338,22 @@ def _enumFromCapabilities(toolName: str, paramName: str, caps: dict) -> list[str
     # show.topic — 재무제표/주석/docs topic 합집합 (엔진 메타에 모든게 있진 않음)
     if toolName == "show" and paramName == "topic":
         return _showTopics()
-    # show.freq
+    # show.freq — core/show.py 상수 자동
     if toolName == "show" and paramName == "freq":
-        return ["Q", "Y", "YTD"]
-    # search.scope
+        try:
+            from dartlab.core.show import SHOW_FREQS
+
+            return list(SHOW_FREQS)
+        except ImportError:
+            return ["Q", "Y", "YTD"]
+    # search.scope — core/search/__init__.py 상수 자동
     if toolName == "search" and paramName == "scope":
-        return ["title", "content", "auto"]
+        try:
+            from dartlab.core.search import SEARCH_SCOPES
+
+            return list(SEARCH_SCOPES)
+        except ImportError:
+            return ["auto", "title", "content", "both"]
     # analysis.axis — _AXIS_REGISTRY 전체 (financial + forecast + valuation 그룹)
     if toolName == "analysis" and paramName == "axis":
         try:
@@ -348,21 +370,14 @@ def _enumFromCapabilities(toolName: str, paramName: str, caps: dict) -> list[str
             return list(_CREDIT_AXES.keys())
         except (ImportError, AttributeError):
             return _parseAxesFromDocstring("credit")
-    # review.type
+    # review.type — review/reportTypes.REPORT_TYPES 자동
     if toolName == "review" and paramName == "type":
-        return [
-            "full",
-            "executive",
-            "credit",
-            "valuation",
-            "growth",
-            "crisis",
-            "audit",
-            "dividend",
-            "governance",
-            "macro",
-            "thesis",
-        ]
+        try:
+            from dartlab.review.reportTypes import REPORT_TYPES
+
+            return sorted(REPORT_TYPES.keys())
+        except ImportError:
+            return ["full"]
     return []
 
 

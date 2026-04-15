@@ -8,6 +8,10 @@ import unicodedata
 
 import polars as pl
 
+# 공개 freq 상수 — AI tool schema enum + 사용자 문서 단일 출처
+# Q: 분기 기본값 (IS/BS/CF 분기 컬럼), Y: 연간 합산, YTD: 연초누적
+SHOW_FREQS: tuple[str, ...] = ("Q", "Y", "YTD")
+
 _PERIOD_COLUMN_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 
 
