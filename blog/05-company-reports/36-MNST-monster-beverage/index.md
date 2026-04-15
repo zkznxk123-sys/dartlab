@@ -565,16 +565,16 @@ Monster Beverage는 지난 30년 S&P 500 누적 수익률 1위 종목이다. 그
 
 | 기간 | 보고서 | 링크 |
 |------|--------|------|
-| 2019Q1 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
-| 2018Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
-| 2018Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
-| 2018Q1 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
-| 2018 | 10-K | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-K&dateb=&owner=include&count=10) |
-| 2017Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
-| 2017Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
-| 2017Q1 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
-| 2017 | 10-K | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-K&dateb=&owner=include&count=10) |
-| 2016Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
+| 2025Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
+| 2025Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
+| 2025Q1 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
+| 2025 | 10-K | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-K&dateb=&owner=include&count=10) |
+| 2024Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
+| 2024Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
+| 2024Q1 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
+| 2024 | 10-K | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-K&dateb=&owner=include&count=10) |
+| 2023Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
+| 2023Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=MNST&type=10-Q&dateb=&owner=include&count=10) |
 
 > 전체 공시 목록은 dartlab에서 확인:
 > ```python

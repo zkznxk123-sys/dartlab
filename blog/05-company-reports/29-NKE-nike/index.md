@@ -573,16 +573,16 @@ Nike의 턴어라운드는 "세계 1위 탈환"이 아니라 **"적정 성장률
 
 | 기간 | 보고서 | 링크 |
 |------|--------|------|
-| 2026Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=NKE&type=10-Q&dateb=&owner=include&count=10) |
-| 2026Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=NKE&type=10-Q&dateb=&owner=include&count=10) |
 | 2026Q1 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=NKE&type=10-Q&dateb=&owner=include&count=10) |
+| 2025Q4 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=NKE&type=10-Q&dateb=&owner=include&count=10) |
 | 2025Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=NKE&type=10-Q&dateb=&owner=include&count=10) |
-| 2025Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=NKE&type=10-Q&dateb=&owner=include&count=10) |
 | 2025Q1 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=NKE&type=10-Q&dateb=&owner=include&count=10) |
-| 2025 | 10-K | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=NKE&type=10-K&dateb=&owner=include&count=10) |
+| 2024Q4 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=NKE&type=10-Q&dateb=&owner=include&count=10) |
 | 2024Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=NKE&type=10-Q&dateb=&owner=include&count=10) |
-| 2024Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=NKE&type=10-Q&dateb=&owner=include&count=10) |
+| 2025 | 10-K | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=NKE&type=10-K&dateb=&owner=include&count=10) |
 | 2024Q1 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=NKE&type=10-Q&dateb=&owner=include&count=10) |
+| 2023Q4 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=NKE&type=10-Q&dateb=&owner=include&count=10) |
+| 2023Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=NKE&type=10-Q&dateb=&owner=include&count=10) |
 
 > 전체 공시 목록은 dartlab에서 확인:
 > ```python
@@ -607,43 +607,43 @@ Nike의 턴어라운드는 "세계 1위 탈환"이 아니라 **"적정 성장률
 
 ### 손익계산서 (IS) — 단위 $M
 
-<ComboChart data={[{year:"2026",매출액:null,영업이익:null,당기순이익:null},{year:"2025",매출액:null,영업이익:null,당기순이익:null},{year:"2024",매출액:51362,영업이익:null,당기순이익:5700},{year:"2023",매출액:51217,영업이익:null,당기순이익:5070},{year:"2022",매출액:46710,영업이익:null,당기순이익:6046}]} lineKeys={["매출액"]} barKeys={["영업이익","당기순이익"]} lineColors={["#22c55e"]} barColors={["#3b82f6","#f59e0b"]} title="매출(라인) vs 영업이익·당기순이익(막대)" unit="$M" />
+<ComboChart data={[{year:"2026Q1",매출액:11279,영업이익:null,당기순이익:520},{year:"2025Q4",매출액:12427,영업이익:null,당기순이익:792},{year:"2025Q3",매출액:11720,영업이익:null,당기순이익:727},{year:"2025Q2",매출액:11097,영업이익:null,당기순이익:211},{year:"2025Q1",매출액:11269,영업이익:null,당기순이익:794}]} lineKeys={["매출액"]} barKeys={["영업이익","당기순이익"]} lineColors={["#22c55e"]} barColors={["#3b82f6","#f59e0b"]} title="매출(라인) vs 영업이익·당기순이익(막대)" unit="$M" />
 
-| 항목 | 2026 | 2025 | 2024 | 2023 | 2022 |
+| 항목 | 2026Q1 | 2025Q4 | 2025Q3 | 2025Q2 | 2025Q1 |
 |---|---:|---:|---:|---:|---:|
-| 매출액 | — | — | 51,362 | 51,217 | 46,710 |
-| 매출원가 | — | — | 28,475 | 28,925 | 25,231 |
-| 매출총이익 | — | — | 22,887 | 22,292 | 21,479 |
-| 판매비와관리비 | — | — | 16,576 | 16,377 | 14,804 |
+| 매출액 | 11,279 | 12,427 | 11,720 | 11,097 | 11,269 |
+| 매출원가 | 6,749 | 7,382 | 6,777 | 6,628 | 6,594 |
+| 매출총이익 | 4,530 | 5,045 | 4,943 | 4,469 | 4,675 |
+| 판매비와관리비 | 2,887 | 2,766 | 2,828 | 2,895 | 2,799 |
 | 영업이익 | — | — | — | — | — |
 | 금융수익 | — | — | — | — | — |
 | 금융비용 | — | — | — | — | — |
-| 당기순이익 | — | — | 5,700 | 5,070 | 6,046 |
+| 당기순이익 | 520 | 792 | 727 | 211 | 794 |
 
 ### 재무상태표 (BS) — 단위 $M
 
-<StackBar data={[{year:"2026",segments:[{label:"부채",value:0,color:"#ef4444"},{label:"자본",value:14085,color:"#22c55e"}]},{year:"2025",segments:[{label:"부채",value:0,color:"#ef4444"},{label:"자본",value:14004,color:"#22c55e"}]},{year:"2024",segments:[{label:"부채",value:0,color:"#ef4444"},{label:"자본",value:12767,color:"#22c55e"}]},{year:"2023",segments:[{label:"부채",value:0,color:"#ef4444"},{label:"자본",value:8055,color:"#22c55e"}]},{year:"2022",segments:[{label:"부채",value:0,color:"#ef4444"},{label:"자본",value:9040,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="$M" />
+<StackBar data={[{year:"2026Q1",segments:[{label:"부채",value:0,color:"#ef4444"},{label:"자본",value:14090,color:"#22c55e"}]},{year:"2025Q4",segments:[{label:"부채",value:0,color:"#ef4444"},{label:"자본",value:13468,color:"#22c55e"}]},{year:"2025Q3",segments:[{label:"부채",value:0,color:"#ef4444"},{label:"자본",value:13468,color:"#22c55e"}]},{year:"2025Q2",segments:[{label:"부채",value:0,color:"#ef4444"},{label:"자본",value:14004,color:"#22c55e"}]},{year:"2025Q1",segments:[{label:"부채",value:0,color:"#ef4444"},{label:"자본",value:14226,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="$M" />
 
-| 항목 | 2026 | 2025 | 2024 | 2023 | 2022 |
+| 항목 | 2026Q1 | 2025Q4 | 2025Q3 | 2025Q2 | 2025Q1 |
 |---|---:|---:|---:|---:|---:|
-| 자산총계 | 37,787 | 38,110 | 37,531 | 40,321 | 37,740 |
-| 유동자산 | 24,015 | 25,382 | 25,202 | 28,213 | 26,291 |
-| 비유동자산 | — | 7,540 | 8,004 | — | — |
+| 자산총계 | 37,064 | 37,787 | 37,334 | 38,110 | 37,793 |
+| 유동자산 | 23,184 | 24,015 | 23,898 | 25,382 | 24,609 |
+| 비유동자산 | — | — | — | 7,540 | — |
 | 부채총계 | — | — | — | — | — |
-| 유동부채 | 11,640 | 10,593 | 9,256 | 10,730 | 9,674 |
+| 유동부채 | 10,838 | 11,640 | 10,911 | 10,593 | 11,223 |
 | 비유동부채 | — | — | — | — | — |
-| 자본총계 | 14,085 | 14,004 | 12,767 | 8,055 | 9,040 |
+| 자본총계 | 14,090 | 13,468 | 13,468 | 14,004 | 14,226 |
 
 ### 현금흐름표 (CF) — 단위 $M
 
-<ComboChart data={[{year:"2026",영업CF:0,투자CF:0,재무CF:0},{year:"2025",영업CF:0,투자CF:0,재무CF:0},{year:"2024",영업CF:7429,투자CF:894,재무CF:0},{year:"2023",영업CF:5841,투자CF:564,재무CF:0},{year:"2022",영업CF:5188,투자CF:-1524,재무CF:0}]} barKeys={["영업CF","투자CF","재무CF"]} barColors={["#22c55e","#ef4444","#3b82f6"]} title="영업·투자·재무 현금흐름" unit="$M" />
+<ComboChart data={[{year:"2026Q1",영업CF:430,투자CF:-168,재무CF:-601},{year:"2025Q4",영업CF:579,투자CF:-49,재무CF:-579},{year:"2025Q3",영업CF:222,투자CF:-59,재무CF:-598},{year:"2025Q2",영업CF:463,투자CF:14,재무CF:-1644},{year:"2025Q1",영업CF:1792,투자CF:-49,재무CF:-1106}]} barKeys={["영업CF","투자CF","재무CF"]} barColors={["#22c55e","#ef4444","#3b82f6"]} title="영업·투자·재무 현금흐름" unit="$M" />
 
-| 항목 | 2026 | 2025 | 2024 | 2023 | 2022 |
+| 항목 | 2026Q1 | 2025Q4 | 2025Q3 | 2025Q2 | 2025Q1 |
 |---|---:|---:|---:|---:|---:|
-| 영업활동현금흐름 | — | — | 7,429 | 5,841 | 5,188 |
-| 투자활동현금흐름 | — | — | 894 | 564 | -1,524 |
-| 재무활동현금흐름 | — | — | — | — | — |
+| 영업활동현금흐름 | 430 | 579 | 222 | 463 | 1,792 |
+| 투자활동현금흐름 | -168 | -49 | -59 | 14 | -49 |
+| 재무활동현금흐름 | -601 | -579 | -598 | -1,644 | -1,106 |
 
-*최종 갱신: 2026-04-13 | dartlab 실측 (DART 공시 기준)*
+*최종 갱신: 2026-04-15 | dartlab 실측 (DART 공시 기준)*
 
 <!-- AUTO:END -->

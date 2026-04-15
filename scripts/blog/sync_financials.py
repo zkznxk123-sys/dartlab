@@ -91,6 +91,177 @@ def build_table(rows: list[tuple[str, list[str]]], years: list[str], title: str)
     return "\n".join(lines)
 
 
+def _calendarLabel(end_date) -> str:
+    """period_end date → calendar year+quarter label ("2025Q4")."""
+    if end_date is None:
+        return ""
+    y = end_date.year
+    m = end_date.month
+    if m <= 3:
+        q = 1
+    elif m <= 6:
+        q = 2
+    elif m <= 9:
+        q = 3
+    else:
+        q = 4
+    return f"{y}Q{q}"
+
+
+def _detectFiscalYearEndMonth(cik: str) -> int | None:
+    """회사의 **현재** FY 결산 월 (1-12). 찾을 수 없으면 None.
+
+    fp="FY" 중 가장 최근 3년 end date 의 월을 대상으로 최빈값.
+    회계연도 전환(UA 2024 Dec→Mar) 을 만나도 최근이 이김.
+    """
+    try:
+        import polars as pl
+        from collections import Counter
+
+        from dartlab.providers.edgar.report import edgarFinancePath
+    except ImportError:
+        return None
+
+    path = edgarFinancePath(cik)
+    if not path.exists():
+        return None
+
+    df = (
+        pl.scan_parquet(path)
+        .filter(pl.col("fp") == "FY")
+        .filter(pl.col("end").is_not_null())
+        .select("fy", "end")
+        .collect()
+    )
+    if df.is_empty():
+        return None
+
+    # 가장 최근 3 회계연도의 end date 만
+    max_fy = df["fy"].max()
+    if max_fy is None:
+        return None
+    recent = df.filter(pl.col("fy") >= max_fy - 2)
+    months = [d.month for d in recent["end"].to_list() if d is not None]
+    if not months:
+        return None
+    return Counter(months).most_common(1)[0][0]
+
+
+def _buildFiscalToCalendarMap(cik: str) -> dict[str, str]:
+    """EDGAR 종목의 fiscal 레이블 → 캘린더 레이블 매핑.
+
+    회계연도가 12월 결산이 아닌 기업(UAA 3월·AAPL 9월 등) 은 분기 라벨이
+    fiscal 기준이라 독자에게 혼동을 준다 (UA FY26 Q3 = 실제 CY25 Q4).
+    FY 결산 월을 감지해서 fiscal label → calendar label 을 deterministic 도출.
+
+    12월 결산: fiscal == calendar → 빈 map (변경 없음).
+    3월 결산 (UAA): Q3 = 10~12월 → CY 전년도 Q4.
+    9월 결산 (AAPL): Q3 = 4~6월 → CY 당해 Q2.
+
+    Returns:
+        {"2026Q3": "2025Q4", ...}. fiscal == calendar 엔트리 제외.
+    """
+    fy_end_month = _detectFiscalYearEndMonth(cik)
+    if fy_end_month is None or fy_end_month == 12:
+        return {}  # 12월 결산 or 감지 실패 — remap 없음
+
+    try:
+        import polars as pl
+
+        from dartlab.providers.edgar.report import edgarFinancePath
+    except ImportError:
+        return {}
+
+    path = edgarFinancePath(cik)
+    if not path.exists():
+        return {}
+
+    df = (
+        pl.scan_parquet(path)
+        .filter(pl.col("fp").is_in(["Q1", "Q2", "Q3", "FY"]))
+        .select("fy", "fp")
+        .unique()
+        .collect()
+    )
+    if df.is_empty():
+        return {}
+
+    # Q_n 의 종료월 = (fy_end_month + 3n) % 12 (0 → 12).
+    # Q_n 의 연도 오프셋 = (fy_end_month + 3n) > 12 이면 당해, else 전년도.
+    # 더 직관적: FY X 종료 = (X, fy_end_month, 말일)
+    #   FY X Q_n 종료 = FY X 종료 - 3 * (4 - n) 개월 전
+    from datetime import date
+
+    def _quarterEndCalendar(fy: int, qnum: int) -> tuple[int, int]:
+        """fy의 fiscal quarter qnum 이 끝나는 (캘린더 연도, 캘린더 분기)."""
+        # FY 종료 (예: UAA FY2026 = 2026-03-31)
+        total_months_from_fy_start = 3 * qnum  # Q1=3, Q2=6, Q3=9, Q4=12
+        # FY 시작 = FY 종료 - 11개월 (첫 달 포함이므로)
+        # Q_n 종료 = FY 시작 + (3n - 1) 달 마지막 날 = FY 종료 - (12 - 3n) 달
+        months_back_from_fy_end = 12 - 3 * qnum
+        end_month = fy_end_month - months_back_from_fy_end
+        end_year = fy
+        while end_month <= 0:
+            end_month += 12
+            end_year -= 1
+        while end_month > 12:
+            end_month -= 12
+            end_year += 1
+        # 캘린더 분기 (Q1: 1~3, Q2: 4~6, Q3: 7~9, Q4: 10~12)
+        cal_q = (end_month - 1) // 3 + 1
+        return end_year, cal_q
+
+    result: dict[str, str] = {}
+    for row in df.iter_rows(named=True):
+        fy = row.get("fy")
+        fp = row.get("fp")
+        if fy is None or fp is None:
+            continue
+        if fp == "FY":
+            fiscal_label = f"{fy}"
+            # FY 종료일의 캘린더 연도
+            cal_label = f"{fy if fy_end_month >= 6 else fy - 1}"
+            # 실제로는 fiscal year X 는 X 연도 어느 시점 종료. 일반적으로 end year.
+            cal_label = f"{fy}"  # 단순화: 레이블 그대로 (연간 aggregate)
+        else:
+            qnum = int(fp[1])
+            fiscal_label = f"{fy}{fp}"
+            cy, cq = _quarterEndCalendar(fy, qnum)
+            cal_label = f"{cy}Q{cq}"
+        if cal_label and cal_label != fiscal_label:
+            result[fiscal_label] = cal_label
+
+    # Q4 synth 보완: pivot._computeQ4 가 "{fy}Q4" 로 합성.
+    fy_list = df.filter(pl.col("fp") == "FY").select("fy").unique().to_series().to_list()
+    for fy in fy_list:
+        if fy is None:
+            continue
+        q4_fiscal = f"{fy}Q4"
+        if q4_fiscal in result:
+            continue
+        cy, cq = _quarterEndCalendar(int(fy), 4)
+        q4_cal = f"{cy}Q{cq}"
+        if q4_cal and q4_cal != q4_fiscal:
+            result[q4_fiscal] = q4_cal
+
+    return result
+
+
+def _remapColumnsToCalendar(years: list[str], fiscal_to_cal: dict[str, str]) -> list[str]:
+    """column 라벨 remap + 중복 제거 (가장 최근 먼저)."""
+    if not fiscal_to_cal:
+        return years
+    seen = set()
+    out = []
+    for col in years:
+        new = fiscal_to_cal.get(col, col)
+        if new in seen:
+            continue
+        seen.add(new)
+        out.append(new)
+    return out
+
+
 def extract_data(stock_code: str) -> dict | None:
     """dartlab으로 데이터 추출. Company 1개만 로드 후 해제."""
     import dartlab
@@ -105,22 +276,31 @@ def extract_data(stock_code: str) -> dict | None:
     result = {"stockCode": stock_code, "corpName": getattr(c, "corpName", stock_code), "isEdgar": is_edgar}
     freq_kw = {} if is_edgar else {"freq": "Y"}
 
+    # 비-12월 결산 EDGAR 기업(UAA 3월·AAPL 9월 등)은 fiscal 라벨이 혼동 유발.
+    # fiscal label → calendar label 매핑을 미리 만들어 표 헤더를 캘린더로 통일.
+    fiscal_to_cal: dict[str, str] = {}
+    if is_edgar:
+        cik = getattr(c, "cik", None)
+        if cik:
+            fiscal_to_cal = _buildFiscalToCalendarMap(cik)
+
     # --- IS ---
     try:
         df = c.select("IS", IS_ITEMS, **freq_kw)
-        years = [col for col in df.columns if col not in ("항목", "snakeId")][:5]
+        fiscal_years = [col for col in df.columns if col not in ("항목", "snakeId")][:5]
+        display_years = _remapColumnsToCalendar(fiscal_years, fiscal_to_cal)
         rows = []
         for item in IS_ITEMS:
             filtered = df.filter(df["항목"] == item)
             if len(filtered) == 0:
-                rows.append((item, ["—"] * len(years)))
+                rows.append((item, ["—"] * len(fiscal_years)))
             else:
                 vals = []
-                for y in years:
+                for y in fiscal_years:
                     v = filtered[y][0] if y in filtered.columns else None
                     vals.append(fmt_억(v, is_edgar))
                 rows.append((item, vals))
-        result["IS"] = {"years": years, "rows": rows}
+        result["IS"] = {"years": display_years, "rows": rows}
     except Exception as e:
         print(f"  [WARN] IS 추출 실패: {e}")
         result["IS"] = None
@@ -128,19 +308,20 @@ def extract_data(stock_code: str) -> dict | None:
     # --- BS ---
     try:
         df = c.select("BS", BS_ITEMS, **freq_kw)
-        years = [col for col in df.columns if col not in ("항목", "snakeId")][:5]
+        fiscal_years = [col for col in df.columns if col not in ("항목", "snakeId")][:5]
+        display_years = _remapColumnsToCalendar(fiscal_years, fiscal_to_cal)
         rows = []
         for item in BS_ITEMS:
             filtered = df.filter(df["항목"] == item)
             if len(filtered) == 0:
-                rows.append((item, ["—"] * len(years)))
+                rows.append((item, ["—"] * len(fiscal_years)))
             else:
                 vals = []
-                for y in years:
+                for y in fiscal_years:
                     v = filtered[y][0] if y in filtered.columns else None
                     vals.append(fmt_억(v, is_edgar))
                 rows.append((item, vals))
-        result["BS"] = {"years": years, "rows": rows}
+        result["BS"] = {"years": display_years, "rows": rows}
     except Exception as e:
         print(f"  [WARN] BS 추출 실패: {e}")
         result["BS"] = None
@@ -148,19 +329,20 @@ def extract_data(stock_code: str) -> dict | None:
     # --- CF ---
     try:
         df = c.select("CF", CF_ITEMS, **freq_kw)
-        years = [col for col in df.columns if col not in ("항목", "snakeId")][:5]
+        fiscal_years = [col for col in df.columns if col not in ("항목", "snakeId")][:5]
+        display_years = _remapColumnsToCalendar(fiscal_years, fiscal_to_cal)
         rows = []
         for item in CF_ITEMS:
             filtered = df.filter(df["항목"] == item)
             if len(filtered) == 0:
-                rows.append((item, ["—"] * len(years)))
+                rows.append((item, ["—"] * len(fiscal_years)))
             else:
                 vals = []
-                for y in years:
+                for y in fiscal_years:
                     v = filtered[y][0] if y in filtered.columns else None
                     vals.append(fmt_억(v, is_edgar))
                 rows.append((item, vals))
-        result["CF"] = {"years": years, "rows": rows}
+        result["CF"] = {"years": display_years, "rows": rows}
     except Exception as e:
         print(f"  [WARN] CF 추출 실패: {e}")
         result["CF"] = None
@@ -208,9 +390,12 @@ def extract_data(stock_code: str) -> dict | None:
                         if acc_dash
                         else ""
                     )
+                    fiscal_pk = row.get("period_key", "")
+                    # 회계연도 ≠ 12월 결산 기업은 period_key 도 캘린더로 remap
+                    display_pk = fiscal_to_cal.get(fiscal_pk, fiscal_pk)
                     filings.append(
                         {
-                            "year": row.get("period_key", ""),
+                            "year": display_pk,
                             "reportType": row.get("form_type", ""),
                             "url": sec_url,
                             "linkText": "SEC에서 보기",
