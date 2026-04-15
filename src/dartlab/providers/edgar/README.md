@@ -95,6 +95,28 @@ SEC companyfacts는 FY 행에 `CY2025`, Q2 standalone 행에 `CY2025Q2` 같은 f
 downstream `_selectFlowDirect`의 `duration_days` 필터가 이미 standalone/YTD를 구분하므로
 frame 필터는 불필요하고 오히려 유해함.
 
+### period 캘린더 앵커링 (2026-04-16 도입)
+
+`core/finance/period.py::buildFiscalToCalendarMap` SSOT — pivot 후 column rename
+(`{fy}-{fp}` → `{calYear}-{calQ}`) 으로 비-12월 결산 EDGAR 종목을 캘린더 기준으로 통일.
+DART(Dec 결산 99%) 는 identity, EDGAR 의 비-Dec 결산만 실제 변환.
+
+| 회사 | FY 결산 | fiscal 라벨 | 캘린더 라벨 (Capital IQ end-month) |
+|---|---|---|---|
+| MNST/INTC/CPNG/OKLO | Dec | `2025-Q4` | `2025-Q4` (변화 없음) |
+| UAA | Mar | `2026-Q3` (FY26 Q3) | `2025-Q4` (end Dec 2025) |
+| AAPL | Sep | `2026-Q1` (FY26 Q1) | `2025-Q4` (end Dec 2025) |
+| NKE | May | `2026-Q3` (FY26 Q3) | `2026-Q1` (end Feb 2026, 비-aligned) |
+
+**규칙**:
+- end-month 매핑 (Capital IQ): Feb-Apr→Q1, May-Jul→Q2, Aug-Oct→Q3, Nov-Dec-Jan→Q4
+- pivot 내부 (`_selectStandalone`/`_pivotTimeseries`/`_computeQ4`) 는 fiscal 라벨로 동작
+- `_buildTimeseriesFromFacts` 끝에서 한 번 rename (downstream 무영향)
+- noise 필터: FY rows duration ≥ 300일, end month + year offset 정확 매칭, ±45일 윈도우 (52-week 달력 수용)
+
+**근본**: 4 비교 가능성 (회사간 비교) — DART `2025Q4` ↔ EDGAR `2025Q4` 동일 키로 cross-company join 가능.
+이전엔 fiscal label 그대로라 UA `2026Q3` 와 Samsung `2025Q4` 가 같은 시점인데 다른 컬럼.
+
 ## 구조적 한계 (SEC 데이터 없음 — 허용된 None)
 
 analysis 일부 축에서 DART report 전용 서브키가 None:

@@ -26,7 +26,12 @@ from typing import Optional
 import polars as pl
 
 from dartlab.core.finance.ordering import sortSeries
-from dartlab.core.finance.period import extractYear, formatPeriod, parsePeriod
+from dartlab.core.finance.period import (
+    buildFiscalToCalendarMap,
+    extractYear,
+    formatPeriod,
+    parsePeriod,
+)
 from dartlab.providers.edgar.finance.mapper import EdgarMapper
 
 
@@ -66,6 +71,13 @@ def _buildTimeseriesFromFacts(
 ) -> tuple[dict[str, dict[str, list[Optional[float]]]], list[str]]:
     stmtDfs = _splitStmtFacts(df)
 
+    # period 라벨 = end_date 기반 캘린더 앵커링 (Capital IQ 규칙).
+    # `core/finance/period.py::buildFiscalToCalendarMap` SSOT 적용.
+    # 12월 결산 기업(MNST/INTC/CPNG/OKLO 등) 은 identity — 효과 없음.
+    # 비-12월 결산(UAA 3월·NKE 5월·AAPL 9월) 은 fy/fp → end-month CY 매핑.
+    # 4 비교 가능성 (회사간 비교) 의 근본 — DART(Dec) ↔ EDGAR cross-company join 가능.
+    fiscalToCal = buildFiscalToCalendarMap(df)
+
     series: dict[str, dict[str, dict[str, float]]] = {"BS": {}, "IS": {}, "CF": {}, "CI": {}}
     sidSource: dict[str, dict[str, dict[str, str]]] = {"BS": {}, "IS": {}, "CF": {}, "CI": {}}
     allPeriods: set[str] = set()
@@ -77,6 +89,11 @@ def _buildTimeseriesFromFacts(
 
         pivoted = _pivotTimeseries(selected)
         pivoted = _computeQ4(pivoted, stmt)
+        # post-pivot column rename: fiscal → calendar
+        if fiscalToCal:
+            renameMap = {c: fiscalToCal[c] for c in pivoted.columns if c in fiscalToCal}
+            if renameMap:
+                pivoted = pivoted.rename(renameMap)
 
         periodCols = [c for c in pivoted.columns if c != "tag"]
 

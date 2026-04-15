@@ -335,6 +335,13 @@ CI sentinel `tests/test_imports.py` 가 강제.
 3. **시장 내 비교** (macro, gather) — 경제 사이클과 기업의 관계
 4. **시장 간 비교** (macro, gather) — KR/US 매크로 교차
 
+### period 라벨 = 캘린더 기준 (Capital IQ end-month 규칙)
+- 모든 quarterly period 컬럼은 `{calYear}Q{calQ}` — `end_date` 의 캘린더 분기로 통일
+- 12월 결산 (DART 99% / EDGAR Dec): fiscal == calendar identity
+- 비-12월 결산 (UAA 3월·NKE 5월·AAPL 9월): fy/fp → end-month CY 자동 매핑
+- SSOT: `core/finance/period.py::buildFiscalToCalendarMap` (`providers/edgar/finance/pivot.py` 에서 호출)
+- 근거: cross-company join 가능성 (`UA 2025Q4` ↔ `Samsung 2025Q4` 동일 시점 데이터)
+
 ### 회사는 스토리가 있다
 분석은 숫자 나열이 아니라 **6막 인과 구조의 스토리텔링**이다 (review 사상).
 analysis = 도구, review = 사람의 보고서, AI = 적극적 분석가.
