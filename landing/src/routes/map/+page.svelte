@@ -1,6 +1,7 @@
 <script lang="ts">
 	import EcosystemMap from '$lib/components/industry/EcosystemMap.svelte';
 	import IndustryAtlas from '$lib/components/industry/IndustryAtlas.svelte';
+	import IndustryDrilldown from '$lib/components/industry/IndustryDrilldown.svelte';
 	import type { PageData } from './$types';
 	import { base } from '$app/paths';
 
@@ -664,6 +665,13 @@
 				}))}
 				flows={data.atlas.flows}
 				onSelect={(ind: any) => enterIndustry(ind.id)}
+			/>
+		{:else if viewMode === 'industry'}
+			<IndustryDrilldown
+				nodes={industryNodes}
+				links={industryLinks.map((l: any) => ({ ...l }))}
+				stages={industryDetail?.stages || []}
+				onNodeClick={handleNodeClick}
 			/>
 		{:else}
 			<EcosystemMap

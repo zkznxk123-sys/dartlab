@@ -1,0 +1,546 @@
+<script lang="ts">
+	import { onMount, onDestroy } from 'svelte';
+	import { brand } from '$lib/brand';
+	import {
+		forceSimulation,
+		forceManyBody,
+		forceCollide,
+		forceCenter,
+		forceLink,
+		forceX,
+		forceY
+	} from 'd3-force';
+
+	interface CompanyNode {
+		id: string;
+		label: string;
+		stage: string;
+		stageName?: string;
+		role?: string;
+		stream?: string;
+		revenue: number;
+		size: number;
+		color: string;
+		roe?: number | null;
+		opMargin?: number | null;
+		debtRatio?: number | null;
+		[k: string]: any;
+	}
+
+	interface CompanyEdge {
+		source: string;
+		target: string;
+		type: string;
+		amount: number | null;
+		ratio: number | null;
+		product?: string;
+		confidence?: number;
+		[k: string]: any;
+	}
+
+	interface Stage {
+		key: string;
+		name: string;
+		role?: string;
+		stream?: string;
+	}
+
+	interface Props {
+		nodes: CompanyNode[];
+		links: CompanyEdge[];
+		stages?: Stage[];
+		onNodeClick?: (n: CompanyNode | null) => void;
+	}
+
+	let { nodes, links, stages = [], onNodeClick }: Props = $props();
+
+	let container: HTMLDivElement | null = $state(null);
+	let w = $state(1200);
+	let h = $state(800);
+	let simNodes: any[] = $state([]);
+	let simLinks: any[] = $state([]);
+	let hovered: string | null = $state(null);
+	let selectedId: string | null = $state(null);
+	let zoom = $state(1);
+	let panX = $state(0);
+	let panY = $state(0);
+	let isDragging = $state(false);
+	let lastMouse = { x: 0, y: 0 };
+	let simulation: any = null;
+	let builtSig = '';
+
+	function nodeRadius(n: CompanyNode): number {
+		// 매출(원 단위) → 4~22px
+		const eok = (n.revenue || 0) / 1e8;
+		return Math.max(4, Math.min(22, 3 + Math.log2(Math.max(1, eok / 100) + 1)));
+	}
+
+	function edgeWidth(e: any): number {
+		if (e.amount) return Math.max(1.4, Math.min(5, 0.8 + Math.log10(e.amount + 1) * 0.6));
+		return 1.4;
+	}
+
+	function dataSig(): string {
+		return `${nodes.length}|${links.length}|${nodes
+			.map((n) => n.id)
+			.slice(0, 5)
+			.join(',')}`;
+	}
+
+	function build() {
+		if (!container || nodes.length === 0) {
+			simNodes = [];
+			simLinks = [];
+			return;
+		}
+		const rect = container.getBoundingClientRect();
+		w = rect.width || 1200;
+		h = rect.height || 800;
+
+		// stage별 그룹 중심점 (cluster force 대용)
+		const stageKeys = [...new Set(nodes.map((n) => n.stage))];
+		const cols = Math.ceil(Math.sqrt(stageKeys.length));
+		const stageCenters = new Map<string, { x: number; y: number }>();
+		stageKeys.forEach((k, i) => {
+			const col = i % cols;
+			const row = Math.floor(i / cols);
+			stageCenters.set(k, {
+				x: (w * (col + 0.5)) / cols,
+				y: (h * (row + 0.5)) / Math.ceil(stageKeys.length / cols)
+			});
+		});
+
+		simNodes = nodes.map((n) => {
+			const c = stageCenters.get(n.stage) || { x: w / 2, y: h / 2 };
+			return {
+				...n,
+				r: nodeRadius(n),
+				x: c.x + (Math.random() - 0.5) * 80,
+				y: c.y + (Math.random() - 0.5) * 80
+			};
+		});
+
+		const byId = new Map(simNodes.map((n: any) => [n.id, n]));
+		simLinks = links
+			.filter((l) => byId.has(l.source) && byId.has(l.target))
+			.map((l) => ({ ...l }));
+
+		simulation?.stop();
+		simulation = forceSimulation(simNodes)
+			.force(
+				'charge',
+				forceManyBody<any>()
+					.strength((d: any) => -d.r * 8)
+					.distanceMax(220)
+			)
+			.force(
+				'collide',
+				forceCollide<any>()
+					.radius((d: any) => d.r + 3)
+					.strength(0.95)
+					.iterations(3)
+			)
+			.force(
+				'x',
+				forceX<any>((d: any) => stageCenters.get(d.stage)?.x ?? w / 2).strength(0.18)
+			)
+			.force(
+				'y',
+				forceY<any>((d: any) => stageCenters.get(d.stage)?.y ?? h / 2).strength(0.22)
+			)
+			.force('center', forceCenter(w / 2, h / 2).strength(0.01))
+			.force(
+				'link',
+				forceLink<any, any>(simLinks)
+					.id((d: any) => d.id)
+					.distance((l: any) => 30 + (l.amount ? 5 : 15))
+					.strength(0.04)
+			)
+			.alphaDecay(0.025)
+			.on('tick', () => {
+				simNodes = [...simNodes];
+				simLinks = [...simLinks];
+			});
+	}
+
+	onMount(() => {
+		build();
+		builtSig = dataSig();
+		const ro = new ResizeObserver(() => {
+			if (!container) return;
+			const rect = container.getBoundingClientRect();
+			if (Math.abs(rect.width - w) > 4 || Math.abs(rect.height - h) > 4) {
+				w = rect.width;
+				h = rect.height;
+				simulation?.alpha(0.3).restart();
+			}
+		});
+		if (container) ro.observe(container);
+		return () => {
+			ro.disconnect();
+			simulation?.stop();
+		};
+	});
+
+	onDestroy(() => simulation?.stop());
+
+	$effect(() => {
+		if (!container) return;
+		const sig = dataSig();
+		if (sig !== builtSig) {
+			build();
+			builtSig = sig;
+		}
+	});
+
+	function isConnected(nodeId: string): boolean {
+		if (!hovered) return true;
+		if (nodeId === hovered) return true;
+		return simLinks.some(
+			(l: any) =>
+				(l.source.id === hovered && l.target.id === nodeId) ||
+				(l.target.id === hovered && l.source.id === nodeId)
+		);
+	}
+
+	function edgeConnected(l: any): boolean {
+		if (!hovered) return true;
+		return l.source.id === hovered || l.target.id === hovered;
+	}
+
+	function handleClick(n: any) {
+		selectedId = n.id;
+		onNodeClick?.(n);
+	}
+
+	function onWheel(e: WheelEvent) {
+		e.preventDefault();
+		const delta = e.deltaY > 0 ? 0.9 : 1.1;
+		const newZoom = Math.max(0.3, Math.min(5, zoom * delta));
+		// 마우스 위치 기준 줌
+		const rect = container!.getBoundingClientRect();
+		const mx = e.clientX - rect.left;
+		const my = e.clientY - rect.top;
+		panX = mx - (mx - panX) * (newZoom / zoom);
+		panY = my - (my - panY) * (newZoom / zoom);
+		zoom = newZoom;
+	}
+
+	function onMouseDown(e: MouseEvent) {
+		if ((e.target as Element).closest('.node')) return;
+		isDragging = true;
+		lastMouse = { x: e.clientX, y: e.clientY };
+	}
+
+	function onMouseMove(e: MouseEvent) {
+		if (!isDragging) return;
+		panX += e.clientX - lastMouse.x;
+		panY += e.clientY - lastMouse.y;
+		lastMouse = { x: e.clientX, y: e.clientY };
+	}
+
+	function onMouseUp() {
+		isDragging = false;
+	}
+
+	function resetView() {
+		zoom = 1;
+		panX = 0;
+		panY = 0;
+	}
+</script>
+
+<svelte:window onmousemove={onMouseMove} onmouseup={onMouseUp} />
+
+<div
+	bind:this={container}
+	class="drilldown-container"
+	onwheel={onWheel}
+	onmousedown={onMouseDown}
+	role="application"
+	aria-label="산업 내부 지도"
+>
+	<svg width={w} height={h}>
+		<defs>
+			<filter id="dd-glow" x="-50%" y="-50%" width="200%" height="200%">
+				<feGaussianBlur stdDeviation="1.5" result="blur" />
+				<feMerge>
+					<feMergeNode in="blur" />
+					<feMergeNode in="SourceGraphic" />
+				</feMerge>
+			</filter>
+		</defs>
+
+		<g transform="translate({panX},{panY}) scale({zoom})">
+			<!-- 엣지 -->
+			<g class="edges">
+				{#each simLinks as l, i (i)}
+					{@const sx = l.source.x ?? 0}
+					{@const sy = l.source.y ?? 0}
+					{@const tx = l.target.x ?? 0}
+					{@const ty = l.target.y ?? 0}
+					<line
+						x1={sx}
+						y1={sy}
+						x2={tx}
+						y2={ty}
+						stroke={l.amount ? '#fbbf24' : '#fb923c'}
+						stroke-width={edgeWidth(l)}
+						stroke-linecap="round"
+						opacity={edgeConnected(l) ? (hovered ? 0.95 : 0.55) : 0.08}
+					/>
+				{/each}
+			</g>
+
+			<!-- 노드 -->
+			<g class="nodes">
+				{#each simNodes as n (n.id)}
+					{@const stroke = n.stream === 'upstream'
+						? '#8b5cf6'
+						: n.stream === 'downstream'
+							? '#f97316'
+							: '#f8fafc'}
+					<g
+						class="node"
+						class:dim={!isConnected(n.id)}
+						class:selected={selectedId === n.id}
+						transform="translate({n.x ?? 0},{n.y ?? 0})"
+						onmouseenter={() => (hovered = n.id)}
+						onmouseleave={() => (hovered = null)}
+						onclick={() => handleClick(n)}
+						role="button"
+						tabindex="0"
+						onkeydown={(e: KeyboardEvent) => e.key === 'Enter' && handleClick(n)}
+					>
+						{#if selectedId === n.id || hovered === n.id}
+							<circle
+								r={n.r + 4}
+								fill="none"
+								stroke={n.color}
+								stroke-width="2"
+								opacity="0.9"
+							/>
+						{/if}
+						<circle
+							r={n.r}
+							fill={n.color}
+							fill-opacity={hovered === n.id ? 1 : 0.88}
+							{stroke}
+							stroke-width={1.2}
+						/>
+						{#if n.r > 9 || hovered === n.id || selectedId === n.id}
+							<text
+								class="node-label"
+								text-anchor="middle"
+								dominant-baseline="central"
+								y={n.r + 10}
+								font-size={Math.max(9, Math.min(11, n.r * 0.6))}
+							>
+								{n.label}
+							</text>
+						{/if}
+					</g>
+				{/each}
+			</g>
+		</g>
+	</svg>
+
+	<!-- 우상단 클러스터 -->
+	<div class="top-right-cluster">
+		<a
+			class="tr-btn github"
+			href={brand.repo}
+			target="_blank"
+			rel="noopener"
+			title="GitHub 저장소"
+			aria-label="GitHub"
+		>
+			<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+				<path
+					fill="currentColor"
+					d="M12 .5C5.73.5.66 5.57.66 11.84c0 5.02 3.26 9.28 7.78 10.78.57.1.78-.25.78-.55v-1.92c-3.17.69-3.84-1.53-3.84-1.53-.52-1.31-1.27-1.66-1.27-1.66-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.72-1.52-2.53-.29-5.2-1.27-5.2-5.64 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.14 1.17a10.9 10.9 0 0 1 5.72 0c2.18-1.48 3.14-1.17 3.14-1.17.62 1.59.23 2.76.11 3.05.74.8 1.18 1.82 1.18 3.07 0 4.38-2.68 5.35-5.22 5.63.41.35.77 1.04.77 2.1v3.11c0 .3.2.66.79.55 4.52-1.5 7.77-5.76 7.77-10.78C23.34 5.57 18.27.5 12 .5Z"
+				/>
+			</svg>
+		</a>
+		<a
+			class="tr-btn bmc"
+			href={brand.coffee}
+			target="_blank"
+			rel="noopener"
+			title="Buy Me A Coffee"
+			aria-label="Buy Me A Coffee"
+		>
+			<img
+				src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+				alt=""
+				width="88"
+				height="26"
+				loading="lazy"
+				decoding="async"
+			/>
+		</a>
+		<button class="tr-btn zoom" onclick={resetView} title="화면 초기화">
+			화면 배율 {zoom.toFixed(1)}× ⟳
+		</button>
+	</div>
+
+	<!-- 범례: stream stroke -->
+	<div class="legend">
+		<div class="legend-item">
+			<span class="legend-stroke up"></span>
+			<span>upstream (상류)</span>
+		</div>
+		<div class="legend-item">
+			<span class="legend-stroke mid"></span>
+			<span>midstream (중류)</span>
+		</div>
+		<div class="legend-item">
+			<span class="legend-stroke down"></span>
+			<span>downstream (하류)</span>
+		</div>
+		<div class="legend-note">테두리 = 위치 / 채움 = 색상 기준 / 크기 = 매출</div>
+	</div>
+
+	{#if simNodes.length === 0}
+		<div class="empty">표시할 회사가 없습니다 — 좌측 공정 필터를 확인하세요.</div>
+	{/if}
+</div>
+
+<style>
+	.drilldown-container {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		background: radial-gradient(
+				ellipse at center,
+				rgba(30, 41, 59, 0.25) 0%,
+				transparent 70%
+			),
+			#050811;
+		overflow: hidden;
+		cursor: grab;
+	}
+	.drilldown-container:active {
+		cursor: grabbing;
+	}
+	svg {
+		display: block;
+	}
+	.node {
+		cursor: pointer;
+		transition: opacity 0.15s;
+	}
+	.node.dim {
+		opacity: 0.18;
+	}
+	.node:hover circle {
+		filter: brightness(1.15);
+	}
+	.node-label {
+		font-family: 'Pretendard Variable', sans-serif;
+		font-weight: 500;
+		fill: #f1f5f9;
+		paint-order: stroke fill;
+		stroke: rgba(5, 8, 17, 0.9);
+		stroke-width: 2.5px;
+		stroke-linejoin: round;
+		pointer-events: none;
+		user-select: none;
+	}
+
+	.top-right-cluster {
+		position: absolute;
+		top: 16px;
+		right: 16px;
+		display: flex;
+		gap: 8px;
+		align-items: center;
+		z-index: 5;
+	}
+	.tr-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(15, 18, 25, 0.85);
+		border: 1px solid #1e2433;
+		border-radius: 6px;
+		color: #cbd5e1;
+		text-decoration: none;
+		backdrop-filter: blur(8px);
+		font-size: 11px;
+		font-family: monospace;
+		cursor: pointer;
+	}
+	.tr-btn:hover {
+		background: rgba(30, 36, 51, 0.95);
+		border-color: #334155;
+		color: #f1f5f9;
+	}
+	.tr-btn.github {
+		width: 30px;
+		height: 30px;
+	}
+	.tr-btn.bmc {
+		padding: 2px 6px;
+		height: 30px;
+	}
+	.tr-btn.zoom {
+		padding: 6px 10px;
+		height: 30px;
+	}
+	.tr-btn.bmc img {
+		display: block;
+	}
+
+	.legend {
+		position: absolute;
+		left: 16px;
+		bottom: 16px;
+		background: rgba(15, 18, 25, 0.85);
+		border: 1px solid #1e2433;
+		border-radius: 8px;
+		padding: 10px 12px;
+		font-size: 11px;
+		color: #cbd5e1;
+		backdrop-filter: blur(8px);
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	.legend-item {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+	.legend-stroke {
+		display: inline-block;
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+		background: #050811;
+	}
+	.legend-stroke.up {
+		border: 2px solid #8b5cf6;
+	}
+	.legend-stroke.mid {
+		border: 2px solid #f8fafc;
+	}
+	.legend-stroke.down {
+		border: 2px solid #f97316;
+	}
+	.legend-note {
+		margin-top: 4px;
+		color: #64748b;
+		font-size: 10px;
+	}
+	.empty {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #64748b;
+		font-size: 13px;
+		pointer-events: none;
+	}
+</style>
