@@ -34,9 +34,9 @@
 				<p class="text-sm text-dl-text-dim mb-8">One line of Python gives you what used to take days of PDF reading.</p>
 
 				<div class="flex flex-wrap items-center justify-center gap-4">
-					<Button href="#install">Install</Button>
+					<Button href={brand.desktop}>Windows 런처 →</Button>
+					<Button variant="secondary" href="#install">pip install</Button>
 					<Button variant="secondary" href="{base}/docs/">Documentation →</Button>
-					<Button variant="secondary" href={brand.spaces}>Live Demo →</Button>
 				</div>
 			</div>
 		</div>

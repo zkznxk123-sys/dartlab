@@ -21,7 +21,7 @@
 		<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 stagger">
 			{#each stats as stat, i}
 				<div class="group relative text-center px-4 py-6 rounded-lg border border-dl-border/50 bg-dl-bg-card/30 hover:border-dl-primary/30 hover:bg-dl-bg-card/60 transition-all duration-300">
-					<div class="text-3xl md:text-4xl font-black bg-gradient-to-b from-dl-primary to-dl-accent bg-clip-text text-transparent mb-1 tabular-nums">
+					<div class="text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-black bg-gradient-to-b from-dl-primary to-dl-accent bg-clip-text text-transparent mb-1 tabular-nums whitespace-nowrap">
 						{stat.value}
 					</div>
 					<div class="text-xs font-semibold text-dl-text mb-1">{stat.label}</div>

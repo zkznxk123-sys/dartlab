@@ -50,18 +50,16 @@
 		</div>
 
 		<div class="flex flex-wrap items-center justify-center gap-3 mb-4">
-			<Button href={brand.colab}>Try in Colab — 0 setup</Button>
+			<Button href={brand.desktop}>
+				<Download class="w-4 h-4 inline mr-1" /> Windows 런처 — 0 setup
+			</Button>
 			<Button variant="secondary" href="#install">pip install dartlab</Button>
 			<Button variant="secondary" href="{base}/docs/">Docs</Button>
 		</div>
 		<div class="flex flex-wrap items-center justify-center gap-4 mb-16 text-xs text-dl-text-dim">
-			<a href={brand.desktop} class="hover:text-dl-text transition-colors inline-flex items-center gap-1">
-				<Download class="w-3 h-3" /> Windows
-			</a>
+			<a href={brand.colab} class="hover:text-dl-text transition-colors">Colab</a>
 			<span>·</span>
 			<a href={brand.molab} class="hover:text-dl-text transition-colors">Molab</a>
-			<span>·</span>
-			<a href={brand.spaces} class="hover:text-dl-text transition-colors">Live demo</a>
 		</div>
 
 		<div class="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto">

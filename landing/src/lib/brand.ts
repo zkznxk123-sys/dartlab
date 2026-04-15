@@ -10,7 +10,6 @@ export const brand = {
 	pypi: 'https://pypi.org/project/dartlab/',
 	coffee: 'https://buymeacoffee.com/eddmpython',
 	desktop: 'https://github.com/eddmpython/dartlab-desktop/releases/latest/download/DartLab.exe',
-	spaces: 'https://huggingface.co/spaces/eddmpython/dartlab',
 	colab: 'https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_company.ipynb',
 	molab: 'https://molab.marimo.io/github/eddmpython/dartlab/blob/master/notebooks/marimo/01_company.py',
 	author: 'eddmpython',
