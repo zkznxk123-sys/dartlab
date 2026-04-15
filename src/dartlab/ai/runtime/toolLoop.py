@@ -25,8 +25,14 @@ def streamWithTools(
     messages: list[dict],
     *,
     maxRounds: int = _MAX_ROUNDS_DEFAULT,
+    category: str = "finance",
 ) -> Generator[str | AnalysisEvent, None, None]:
     """Tool calling 루프.
+
+    Args:
+        category: "meta" / "finance" / "out_of_scope"
+            - finance: tool 최소 1회 필수. 첫 라운드에 tool 0회면 자동 재질문.
+            - meta / out_of_scope: tool 호출 자유 (0회 허용).
 
     제너레이터 출력:
         - AnalysisEvent("tool_call", {...})
@@ -34,7 +40,7 @@ def streamWithTools(
         - str: 최종 LLM 답변 텍스트 (자유 청크)
 
     종료 조건:
-        1. LLM 이 tool_calls 없이 답변을 내면 yield 후 종료
+        1. LLM 이 tool_calls 없이 답변을 내면 yield 후 종료 (FINANCE 는 첫 라운드 재질문 1회 뒤)
         2. maxRounds 소진
         3. 같은 tool_call 반복 → 강제 stop
     """
@@ -50,13 +56,23 @@ def streamWithTools(
     from dartlab.ai.types import ToolResponse
 
     seenCalls: dict[str, int] = {}
+    retriggered = False  # FINANCE 가드 1회 제한
 
     for roundIdx in range(maxRounds):
         resp: ToolResponse | None = None
         streamedText = False
+
+        # category → tool_choice 매핑 (첫 라운드만 강제, 이후 auto)
+        tool_choice = _resolveToolChoice(category, roundIdx)
+
         try:
             # stream_with_tools: text delta → str 실시간 yield, 라운드 종료 → ToolResponse
-            for item in llm.stream_with_tools(messages, tools):
+            try:
+                stream = llm.stream_with_tools(messages, tools, tool_choice=tool_choice)
+            except TypeError:
+                # tool_choice 미지원 provider — 인자 없이 재시도
+                stream = llm.stream_with_tools(messages, tools)
+            for item in stream:
                 if isinstance(item, ToolResponse):
                     resp = item
                 elif isinstance(item, str):
@@ -89,7 +105,34 @@ def streamWithTools(
 
         # 종료: tool_calls 없음 → 최종 답변
         if not resp.tool_calls:
-            # streamedText=True 면 이미 delta 로 흘렀음. False 면 (fallback provider) 전체 yield.
+            # FINANCE 범주 + 첫 라운드 + tool 0회 → dartlab 정체성 훼손 → 1회 재질문
+            if category == "finance" and roundIdx == 0 and not retriggered:
+                retriggered = True
+                yield AnalysisEvent(
+                    "error",
+                    {
+                        "error": "[VIOLATION] 금융 분석 질문인데 dartlab tool 경유 없이 답변 시도 — 재호출 강제.",
+                        "action": "tool_zero_retrigger",
+                    },
+                )
+                messages.append(
+                    {
+                        "role": "user",
+                        "content": (
+                            "[시스템 알림] 위 답변은 dartlab 엔진을 경유하지 않아 무효입니다. "
+                            "일반 ChatGPT 답변으로는 받아들일 수 없습니다.\n\n"
+                            "반드시 다음 도구 중 적절한 것을 최소 1회 이상 호출한 뒤 "
+                            "실측 수치 + 근거와 함께 재답변하세요:\n"
+                            "- 기업 분석: analysis / credit / show / gather\n"
+                            "- 매크로/시황: macro / gather(axis='macro')\n"
+                            "- 시장 비교: scan / searchCompany\n"
+                            "- 공시: search / gather(axis='news')\n"
+                            "- 경험: pastInsight / sectorInsights"
+                        ),
+                    }
+                )
+                continue  # 다음 라운드로
+            # META/OUT_OF_SCOPE 이거나 이미 재질문 1회 한 뒤 → 그대로 종료
             if not streamedText and resp.answer:
                 yield resp.answer
             return
@@ -160,6 +203,20 @@ def streamWithTools(
         yield from llm.stream(messages)
     except Exception as e:  # noqa: BLE001
         yield f"\n\n[응답 생성 실패: {type(e).__name__}: {e}]"
+
+
+def _resolveToolChoice(category: str, roundIdx: int) -> str | None:
+    """category + round → tool_choice 매핑.
+
+    - finance 첫 라운드: "any" (tool 호출 강제) — API 레벨 방어선
+    - out_of_scope: "none" (tool 호출 금지)
+    - meta / 나머지: None/"auto" (자율)
+    """
+    if category == "finance" and roundIdx == 0:
+        return "any"
+    if category == "out_of_scope":
+        return "none"
+    return None
 
 
 def _hashArgs(args: dict) -> str:

@@ -205,8 +205,26 @@ class TestToolLoop:
         from dartlab.ai.runtime.toolLoop import streamWithTools
 
         llm = _MockProvider([{"answer": "바로 답변", "tool_calls": [], "finish_reason": "stop"}])
-        out = list(streamWithTools(llm, [{"role": "user", "content": "q"}]))
+        # META 범주 — tool 0회 응답 허용 (FINANCE 면 P8 가드가 재질문)
+        out = list(streamWithTools(llm, [{"role": "user", "content": "q"}], category="meta"))
         assert any(isinstance(item, str) and "바로 답변" in item for item in out)
+
+    def test_finance_tool_zero_triggers_retry(self):
+        """P8 가드 — FINANCE 범주에서 tool 0회면 재질문 1회 후 두 번째 라운드 응답 사용."""
+        from dartlab.ai.runtime.toolLoop import streamWithTools
+
+        # 라운드1: tool 0회 답변 (가드 발동) → 라운드2: tool 0회 답변 (즉시 종료)
+        llm = _MockProvider(
+            [
+                {"answer": "첫 시도 일반론", "tool_calls": [], "finish_reason": "stop"},
+                {"answer": "재시도 답변", "tool_calls": [], "finish_reason": "stop"},
+            ]
+        )
+        out = list(streamWithTools(llm, [{"role": "user", "content": "q"}], category="finance"))
+        # VIOLATION 이벤트 있어야 함
+        assert any(getattr(ev, "kind", None) == "error" and "VIOLATION" in str(ev.data) for ev in out)
+        # 재시도 응답이 최종 yield
+        assert any(isinstance(item, str) and "재시도 답변" in item for item in out)
 
     def test_rejects_provider_without_tools(self):
         from dartlab.ai.runtime.toolLoop import streamWithTools
@@ -229,5 +247,6 @@ class TestToolLoop:
         from dartlab.ai.runtime.toolLoop import streamWithTools
 
         llm = _MockProvider([{"answer": "짧은 답", "tool_calls": [], "finish_reason": "stop"}])
-        out = list(streamWithTools(llm, [{"role": "user", "content": "q"}]))
+        # META 범주 — tool 0회 허용 (FINANCE 면 재질문 가드 발동)
+        out = list(streamWithTools(llm, [{"role": "user", "content": "q"}], category="meta"))
         assert any(isinstance(item, str) and "짧은 답" in item for item in out)

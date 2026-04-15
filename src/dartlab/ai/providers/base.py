@@ -63,8 +63,15 @@ class BaseProvider(ABC):
         self,
         messages: list[dict],
         tools: list[dict],
+        *,
+        tool_choice: str | None = None,
     ) -> ToolResponse:
-        """도구 사용 가능한 completion. 미지원 provider는 fallback."""
+        """도구 사용 가능한 completion. 미지원 provider는 fallback.
+
+        Args:
+            tool_choice: "auto" (기본, LLM 자율) / "any" (반드시 tool 호출) / "none"
+                미지원 provider 는 무시.
+        """
         response = self.complete(messages)
         return ToolResponse(
             answer=response.answer,
@@ -78,8 +85,16 @@ class BaseProvider(ABC):
         self,
         messages: list[dict],
         tools: list[dict],
+        *,
+        tool_choice: str | None = None,
     ) -> Generator:
         """Tool calling + 실시간 스트리밍 동시 지원.
+
+        Args:
+            tool_choice: "auto" / "any" / "none" — provider 별 매핑
+                - openai/oauth-codex: "any" → "required"
+                - anthropic: "any" → {"type": "any"}
+                - gemini: "any" → ANY mode
 
         yield 규약:
             - str (text delta) — LLM 이 생성한 텍스트 chunk. 즉시 yield.
@@ -89,7 +104,7 @@ class BaseProvider(ABC):
         Fallback: 미구현 provider 는 complete_with_tools 를 1회 호출 후
         최종 ToolResponse 만 yield (스트리밍 안 됨, 기존 동작).
         """
-        resp = self.complete_with_tools(messages, tools)
+        resp = self.complete_with_tools(messages, tools, tool_choice=tool_choice)
         yield resp
 
     def format_tool_result(self, tool_call_id: str, result: str) -> dict:

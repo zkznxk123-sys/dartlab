@@ -329,6 +329,9 @@ def _buildCapabilitiesReference() -> str:
 def _buildSystemPromptParts(
     config_: Any,
     *,
+    question: str | None = None,
+    category: str | None = None,
+    intent: str | None = None,
     market: str = "KR",
     hasCompany: bool = False,
     stockCode: str | None = None,
@@ -340,10 +343,15 @@ def _buildSystemPromptParts(
     Claude Code의 SYSTEM_PROMPT_DYNAMIC_BOUNDARY 패턴 흡수:
     정적 부분은 캐시 가능(cache_control), 동적 부분은 매 요청 변동.
 
+    Args:
+        question: 사용자 질문 (category/intent 미지정 시 자동 분류)
+        category: "meta" / "finance" / "out_of_scope" (외부 계산 가능)
+        intent: act1_business / act2_profit / ... (외부 계산 가능)
+
     Returns:
         (static_part, dynamic_part)
         - static_part: _SYSTEM_PROMPT + env_block 치환 결과 (세션 내 동일, 캐시 대상)
-        - dynamic_part: EDGAR 보충 + 사용자 템플릿 (요청마다 변동 가능)
+        - dynamic_part: category 블록 + EDGAR 보충 + CAPABILITIES + 사용자 템플릿
     """
     custom = getattr(config_, "system_prompt", None)
     if custom:
@@ -366,8 +374,16 @@ def _buildSystemPromptParts(
     # 정적: _SYSTEM_PROMPT + env_block 치환 결과 (~694줄, 세션 내 동일)
     static_part = _SYSTEM_PROMPT.replace("{env_block}", env_block)
 
-    # 동적: EDGAR 보충 + CAPABILITIES 레퍼런스 + 사용자 템플릿
+    # 동적: category 블록 (최상단) + EDGAR 보충 + CAPABILITIES 레퍼런스 + 사용자 템플릿
     dynamic_parts: list[str] = []
+
+    # category 블록 — 질문 범주별 강제력 차별화 (P8)
+    if question or category:
+        _cat, _intent = _resolveCategoryAndIntent(question, category, intent, hasCompany)
+        block = _buildCategoryBlock(_cat, _intent)
+        if block:
+            dynamic_parts.append(block)
+
     if market == "US":
         dynamic_parts.append(_EDGAR_SUPPLEMENT)
     # CAPABILITIES에서 전체 API 가이드 자동 주입
@@ -378,6 +394,104 @@ def _buildSystemPromptParts(
         dynamic_parts.append(f"\n## 사용자 분석 템플릿 (이 지시를 반드시 따르라)\n\n{templateText}")
 
     return static_part, "\n".join(dynamic_parts)
+
+
+def _resolveCategoryAndIntent(
+    question: str | None,
+    category: str | None,
+    intent: str | None,
+    hasCompany: bool,
+) -> tuple[str, str]:
+    """category + intent 자동 분류 (인자로 지정된 값이 우선)."""
+    from dartlab.ai.context.intent import classifyCategory, classifyIntent
+
+    if not category and question:
+        category = classifyCategory(question).value
+    if not intent and question:
+        intent = classifyIntent(question, hasCompany=hasCompany).intent.value
+    return category or "finance", intent or "act_all"
+
+
+# ── 범주별 프롬프트 블록 (P8 신설) ───────────────────────────
+
+_INTENT_TO_MANDATORY: dict[str, str] = {
+    "act1_business": (
+        "분석 유형: 사업이해 · "
+        "필수 조합: analysis(axis='수익구조') + analysis(axis='성장성')"
+        " + 필요 시 gather(axis='news')."
+    ),
+    "act2_profit": (
+        "분석 유형: 수익성 · "
+        "필수 조합: analysis(axis='수익성') + analysis(axis='비용구조')."
+    ),
+    "act3_cash": (
+        "분석 유형: 현금흐름/이익품질 · "
+        "필수 조합: analysis(axis='현금흐름') + analysis(axis='이익품질') + 필요 시 show(topic='CF')."
+    ),
+    "act4_stability": (
+        "분석 유형: 안정성/신용 · "
+        "필수 조합: credit() + analysis(axis='안정성'). 시나리오 질문이면 credit(overrides={...})."
+    ),
+    "act5_capital": (
+        "분석 유형: 자본배분/배당 · "
+        "필수 조합: analysis(axis='자본배분') + show(topic='dividend')."
+    ),
+    "act6_outlook": (
+        "분석 유형: 전망/가치평가/매크로 · "
+        "필수 조합: analysis(axis='가치평가') + macro() 또는 gather(axis='macro'). "
+        "assumptions 극단값이면 overrides 재호출로 시나리오 비교."
+    ),
+    "compare": (
+        "분석 유형: 시장 비교/랭킹 · "
+        "필수 조합: scan(axis=...) 먼저 → 상위 종목 analysis 심층."
+    ),
+    "act_all": (
+        "분석 유형: 종합 · "
+        "필수 조합: 6막 순서 (수익구조 → 수익성 → 현금흐름 → 안정성 → 자본배분 → 전망). 최소 4개 축."
+    ),
+    "concept": (
+        "분석 유형: 개념/사용법 · "
+        "필수 조합: 없음 (CAPABILITIES 참조)."
+    ),
+}
+
+
+def _buildCategoryBlock(category: str, intent: str) -> str:
+    """질문 범주별 시스템 프롬프트 블록.
+
+    META: tool 불필요 (CAPABILITIES 참조만)
+    FINANCE: tool 최소 1회 필수 (intent 맞춤 조합)
+    OUT_OF_SCOPE: 범위 밖 거절 + 예시 제시
+    """
+    if category == "out_of_scope":
+        return (
+            "## ⚠️ 질문 범주: dartlab 금융 분석 영역 밖\n\n"
+            "이 질문은 dartlab 의 전문 영역이 아니다. 다음을 지켜라:\n"
+            "1. 짧게(2~3문장) 답하되, 첫 문장에서 **'이것은 dartlab 전문 영역이 아닙니다'** 명시\n"
+            "2. tool 호출 금지 (analysis/credit/macro 등)\n"
+            "3. 끝에 dartlab 이 도와줄 수 있는 금융 질문 예시 3개 제시\n"
+            "4. 장황 금지, 판단 형식 생략"
+        )
+
+    if category == "meta":
+        return (
+            "## 질문 범주: dartlab 자체 안내 (meta)\n\n"
+            "CAPABILITIES 레퍼런스 + 이 시스템 프롬프트 정보만으로 답하라:\n"
+            "- tool 호출 불필요 (실측 수치가 필요한 질문이 아님)\n"
+            "- 사용 가능 기능 요약 + 짧은 코드 예시 1~2줄\n"
+            "- 장황 금지, 판단 형식 생략"
+        )
+
+    # FINANCE — intent 맞춤 필수 조합 명시
+    mandatory = _INTENT_TO_MANDATORY.get(intent, _INTENT_TO_MANDATORY["act_all"])
+    return (
+        "## ⚠️ 질문 범주: 금융 분석 — tool 경유 필수\n\n"
+        "**이 질문은 dartlab 엔진 경유 없이 답하면 정체성 훼손 (일반 ChatGPT 답변과 동일).**\n"
+        f"- {mandatory}\n"
+        "- tool 없이 일반론 답변 금지. 반드시 실측 수치 + 출처(tool 결과) 인용.\n"
+        "- assumptions 필드의 [엔진가정] / ⚠ flag 가 나오면 overrides 재호출로 시나리오 비교.\n"
+        "- 끝에 판단 형식 (방향/강도/확신도/근거 한 줄) 필수."
+    )
 
 
 # ── 통합 오케스트레이터 ──────────────────────────────────
@@ -544,8 +658,17 @@ def _analyze_inner(
 
         _templateText = get_template(_templateName)
 
+    # category + intent 산출 — 시스템 프롬프트와 toolLoop 가드 모두에 전달
+    from dartlab.ai.context.intent import classifyCategory, classifyIntent
+
+    category = classifyCategory(question, stockCode=stockCode).value
+    intent = classifyIntent(question, hasCompany=company is not None).intent.value
+
     static_prompt, dynamic_prompt = _buildSystemPromptParts(
         config_,
+        question=question,
+        category=category,
+        intent=intent,
         market=company_market,
         hasCompany=company is not None,
         stockCode=stockCode,
@@ -584,7 +707,7 @@ def _analyze_inner(
     # legacy exec 루프 대체 — 스키마 enum 으로 KeyError 구조적 제거.
     from dartlab.ai.runtime.toolLoop import streamWithTools
 
-    for item in streamWithTools(llm, messages):
+    for item in streamWithTools(llm, messages, category=category):
         if isinstance(item, AnalysisEvent):
             yield item
         else:

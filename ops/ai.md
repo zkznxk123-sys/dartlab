@@ -130,6 +130,18 @@ AI 가 analysis(axis="가치평가") 호출
 - description/문서에 뭘 하는지로 설명
 - 메모리 + ops + README + 블로그 + 시스템 프롬프트 **전부** 적용
 
+### P8. Tool Zero 응답 금지 (FINANCE 범주) ⭐
+- 질문 범주를 **META / FINANCE / OUT_OF_SCOPE** 3분류 ([ai/context/intent.py::classifyCategory](../src/dartlab/ai/context/intent.py)).
+  - **META** (dartlab 자체 안내 — "뭐야", "어떻게 써"): tool 불필요, CAPABILITIES + 시스템 프롬프트로 답
+  - **FINANCE** (기업/시장/매크로/공시/가치/신용 — 애매 금융 주변 포함): **tool 최소 1회 필수**
+  - **OUT_OF_SCOPE** (날씨/일반 코딩/사담): 짧게 답 + "dartlab 전문 영역 아님" 명시 + 금융 질문 예시 3개 제시 후 종료. tool 호출 금지
+- **FINANCE 범주 tool 0회 응답 = dartlab 정체성 훼손**. 일반 ChatGPT 와 동일 → 경유 강제.
+- 3중 방어선:
+  1. **시스템 프롬프트 블록** (core.py::`_buildCategoryBlock`) — intent 맞춤 필수 tool 조합 명시
+  2. **`tool_choice="any"` API 레벨 강제** (toolLoop.py::`_resolveToolChoice`) — FINANCE 첫 라운드
+  3. **런타임 가드** (toolLoop.py::`streamWithTools`) — tool 0회면 "[VIOLATION] ... 재호출" 자동 재질문 1회
+- P4 (강제 하한 금지) 와 충돌 없음 — "n회 하한" 이 아니라 "tool zero 금지". FINANCE 내 tool 수는 여전히 AI 자율 (1~10회).
+
 ## 7. 경험 자산화 순환
 
 dartlab AI 는 매 대화가 독립이 아니라 **집단 지성**을 축적한다. 사람(블로그) 과 AI(응답) 가
@@ -258,11 +270,12 @@ uv run python -X utf8 scripts/audit/aiAudit.py --provider gemini
 ## 13. 관련 코드
 
 - [src/dartlab/ai/runtime/standalone.py](../src/dartlab/ai/runtime/standalone.py) — `dartlab.ask` 진입점
-- [src/dartlab/ai/runtime/core.py](../src/dartlab/ai/runtime/core.py) — 시스템 프롬프트 + analyze 이벤트 생성
-- [src/dartlab/ai/runtime/toolLoop.py](../src/dartlab/ai/runtime/toolLoop.py) — streamWithTools 루프
+- [src/dartlab/ai/runtime/core.py](../src/dartlab/ai/runtime/core.py) — 시스템 프롬프트 + category 블록 + analyze 이벤트 생성
+- [src/dartlab/ai/runtime/toolLoop.py](../src/dartlab/ai/runtime/toolLoop.py) — streamWithTools 루프 + P8 가드 + tool_choice 매핑
+- [src/dartlab/ai/context/intent.py](../src/dartlab/ai/context/intent.py) — `classifyCategory` (META/FINANCE/OUT_OF_SCOPE) + `classifyIntent` (6막/compare/concept)
 - [src/dartlab/ai/tools/__init__.py](../src/dartlab/ai/tools/__init__.py) — `_autoDiscover` + schema
 - [src/dartlab/ai/tools/_builtin.py](../src/dartlab/ai/tools/_builtin.py) — pastInsight/sectorInsights
-- [src/dartlab/core/overrides.py](../src/dartlab/core/overrides.py) — override 키 정의 단일 진실의 원천
-- [src/dartlab/ai/context/aiview.py](../src/dartlab/ai/context/aiview.py) — autoEnrich (tool_result enrichment)
+- [src/dartlab/core/overrides.py](../src/dartlab/core/overrides.py) — override 키 정의 + `detectExtremeFlags` 자가 의심
+- [src/dartlab/ai/context/aiview.py](../src/dartlab/ai/context/aiview.py) — autoEnrich (tool_result enrichment + [엔진가정] 줄 주입)
 - [src/dartlab/ai/persistence/knowledge_db.py](../src/dartlab/ai/persistence/knowledge_db.py) — KnowledgeDB (insights/bullets/executions)
-- [src/dartlab/ai/providers/](../src/dartlab/ai/providers/) — provider 구현 (oauth_codex SSE streaming 등)
+- [src/dartlab/ai/providers/](../src/dartlab/ai/providers/) — provider 구현 (`tool_choice` "any"/"none" 매핑 포함)
