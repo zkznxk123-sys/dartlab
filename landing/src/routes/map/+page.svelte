@@ -1,5 +1,6 @@
 <script lang="ts">
 	import EcosystemMap from '$lib/components/industry/EcosystemMap.svelte';
+	import IndustryAtlas from '$lib/components/industry/IndustryAtlas.svelte';
 	import type { PageData } from './$types';
 	import { base } from '$app/paths';
 
@@ -14,6 +15,87 @@
 	let drillIndustry: string | null = $state(null);
 	let industryDetail: any = $state(null);
 	let industryLoading = $state(false);
+
+	// ── 색상 기준 ──
+	// industry: 산업 팔레트 / roe / opMargin / debtRatio / revCagr / revenue
+	type ColorMetric = 'industry' | 'roe' | 'opMargin' | 'debtRatio' | 'revCagr' | 'revenue';
+	let colorMetric: ColorMetric = $state('roe');
+
+	const GRAY = '#475569';
+	// 재무 스코어 팔레트 (저→고)
+	function _lerp(c1: [number, number, number], c2: [number, number, number], t: number): string {
+		const r = Math.round(c1[0] + (c2[0] - c1[0]) * t);
+		const g = Math.round(c1[1] + (c2[1] - c1[1]) * t);
+		const b = Math.round(c1[2] + (c2[2] - c1[2]) * t);
+		return `rgb(${r},${g},${b})`;
+	}
+	function _scale(v: number, stops: Array<[number, [number, number, number]]>): string {
+		if (v <= stops[0][0]) return `rgb(${stops[0][1].join(',')})`;
+		const last = stops[stops.length - 1];
+		if (v >= last[0]) return `rgb(${last[1].join(',')})`;
+		for (let i = 0; i < stops.length - 1; i++) {
+			const [a, ca] = stops[i];
+			const [b, cb] = stops[i + 1];
+			if (v >= a && v <= b) return _lerp(ca, cb, (v - a) / (b - a));
+		}
+		return GRAY;
+	}
+
+	function colorFor(n: any, metric: ColorMetric): string {
+		if (metric === 'industry' || n.isIndustry) return n.color;
+		const v = n[metric];
+		if (v === null || v === undefined || Number.isNaN(v)) return GRAY;
+		if (metric === 'roe') {
+			return _scale(v, [
+				[-10, [239, 68, 68]],
+				[0, [245, 158, 11]],
+				[10, [132, 204, 22]],
+				[20, [16, 185, 129]]
+			]);
+		}
+		if (metric === 'opMargin') {
+			return _scale(v, [
+				[-5, [239, 68, 68]],
+				[0, [245, 158, 11]],
+				[10, [132, 204, 22]],
+				[20, [16, 185, 129]]
+			]);
+		}
+		if (metric === 'debtRatio') {
+			// 역방향 (낮을수록 좋음)
+			return _scale(v, [
+				[50, [16, 185, 129]],
+				[100, [132, 204, 22]],
+				[200, [245, 158, 11]],
+				[400, [239, 68, 68]]
+			]);
+		}
+		if (metric === 'revCagr') {
+			return _scale(v, [
+				[-10, [239, 68, 68]],
+				[0, [245, 158, 11]],
+				[15, [132, 204, 22]],
+				[30, [16, 185, 129]]
+			]);
+		}
+		if (metric === 'revenue') {
+			// 매출 (원단위) 로그 스케일 파란계열
+			const eok = v / 1e8;
+			const t = Math.max(0, Math.min(1, Math.log10(Math.max(1, eok)) / 6));
+			return _scale(t, [
+				[0, [30, 58, 138]],
+				[0.5, [59, 130, 246]],
+				[1, [147, 197, 253]]
+			]);
+		}
+		return GRAY;
+	}
+
+	const STREAM_STROKE: Record<string, string> = {
+		upstream: '#8b5cf6',
+		midstream: '#f8fafc',
+		downstream: '#f97316'
+	};
 
 	let allNodes = $derived(data.ecosystem.nodes);
 	let allLinks = $derived(data.ecosystem.links);
@@ -41,7 +123,11 @@
 	let mapRef: any = $state(null);
 
 	// ── companies 뷰 데이터 ──
-	let filteredNodes = $derived(allNodes.filter((n: any) => enabledIndustries.has(n.industry)));
+	let filteredNodes = $derived(
+		allNodes
+			.filter((n: any) => enabledIndustries.has(n.industry))
+			.map((n: any) => ({ ...n, color: colorFor(n, colorMetric) }))
+	);
 
 	let filteredLinks = $derived(
 		allLinks.filter((l: any) => {
@@ -101,47 +187,38 @@
 		}
 	});
 
-	const STAGE_PALETTE = [
-		'#0ea5e9',
-		'#f97316',
-		'#10b981',
-		'#8b5cf6',
-		'#ec4899',
-		'#eab308',
-		'#06b6d4',
-		'#14b8a6'
-	];
-
-	let industryStageColors = $derived.by(() => {
-		if (!industryDetail) return new Map<string, string>();
-		const m = new Map<string, string>();
-		(industryDetail.stages || []).forEach((s: any, i: number) => {
-			m.set(s.key, STAGE_PALETTE[i % STAGE_PALETTE.length]);
-		});
-		return m;
-	});
-
 	let industryNodes = $derived.by(() => {
 		if (!industryDetail) return [];
 		const out: any[] = [];
 		for (const s of industryDetail.stages || []) {
 			if (!stageFilter.has(s.key)) continue;
 			for (const n of s.nodes || []) {
-				out.push({
+				// industries/*.json 의 revenue 는 "억" 단위 (원 단위로 변환)
+				const revWon = (n.revenue || 0) * 1e8;
+				const base: any = {
 					id: n.stockCode,
 					label: n.corpName,
 					industry: industryDetail.industryId,
 					industryName: industryDetail.name,
 					stage: n.stage,
 					stageName: s.name,
-					role: s.role,
-					stream: s.stream,
+					role: n.role || s.role,
+					stream: n.stream || s.stream,
 					confidence: n.confidence,
 					source: n.source,
-					revenue: (n.revenue || 0) * 1e8,
-					size: Math.max(4, Math.min(20, 3 + Math.log2((n.revenue || 0) / 100 + 1))),
-					color: industryStageColors.get(n.stage) || '#9ca3af'
-				});
+					revenue: revWon,
+					// scan 지표
+					roe: n.roe,
+					opMargin: n.opMargin,
+					debtRatio: n.debtRatio,
+					revCagr: n.revCagr,
+					profGrade: n.profGrade,
+					debtGrade: n.debtGrade,
+					growthGrade: n.growthGrade,
+					size: Math.max(4, Math.min(20, 3 + Math.log2((n.revenue || 0) / 100 + 1)))
+				};
+				base.color = colorFor(base, colorMetric);
+				out.push(base);
 			}
 		}
 		return out;
@@ -333,6 +410,41 @@
 				<a href="{base}/insights">인사이트 랭킹</a>
 				<a href="{base}/compare">기업 비교</a>
 			</div>
+		</div>
+
+		<!-- 색상 기준 셀렉터 -->
+		<div class="section color-switch">
+			<h3>색상 기준</h3>
+			<select class="metric-select" bind:value={colorMetric}>
+				<option value="industry">산업 팔레트</option>
+				<option value="roe">ROE (자기자본수익률)</option>
+				<option value="opMargin">영업이익률</option>
+				<option value="debtRatio">부채비율</option>
+				<option value="revCagr">매출 CAGR</option>
+				<option value="revenue">매출 규모</option>
+			</select>
+			{#if colorMetric !== 'industry'}
+				<div class="color-legend">
+					{#if colorMetric === 'debtRatio'}
+						<span class="lg-swatch" style="background:#10b981"></span>
+						<span class="lg-label">낮음(건전)</span>
+						<span class="lg-swatch" style="background:#f59e0b"></span>
+						<span class="lg-swatch" style="background:#ef4444"></span>
+						<span class="lg-label">높음(위험)</span>
+					{:else if colorMetric === 'revenue'}
+						<span class="lg-swatch" style="background:#1e3a8a"></span>
+						<span class="lg-swatch" style="background:#3b82f6"></span>
+						<span class="lg-swatch" style="background:#93c5fd"></span>
+						<span class="lg-label">소 → 대</span>
+					{:else}
+						<span class="lg-swatch" style="background:#ef4444"></span>
+						<span class="lg-swatch" style="background:#f59e0b"></span>
+						<span class="lg-swatch" style="background:#84cc16"></span>
+						<span class="lg-swatch" style="background:#10b981"></span>
+						<span class="lg-label">저 → 고</span>
+					{/if}
+				</div>
+			{/if}
 		</div>
 
 		<!-- 관점(view) 셀렉터 -->
@@ -544,13 +656,24 @@
 		{#if viewMode === 'industry' && industryLoading}
 			<div class="loading-overlay">산업 데이터 로드 중…</div>
 		{/if}
-		<EcosystemMap
-			bind:this={mapRef}
-			nodes={activeNodes}
-			links={activeLinks}
-			isAtlas={viewMode === 'atlas'}
-			onNodeClick={handleNodeClick}
-		/>
+		{#if viewMode === 'atlas'}
+			<IndustryAtlas
+				industries={data.atlas.industries.map((ind: any) => ({
+					...ind,
+					color: indColorMap.get(ind.id) || '#9ca3af'
+				}))}
+				flows={data.atlas.flows}
+				onSelect={(ind: any) => enterIndustry(ind.id)}
+			/>
+		{:else}
+			<EcosystemMap
+				bind:this={mapRef}
+				nodes={activeNodes}
+				links={activeLinks}
+				isAtlas={false}
+				onNodeClick={handleNodeClick}
+			/>
+		{/if}
 	</main>
 
 	<!-- 오른쪽 상세 -->
@@ -666,6 +789,52 @@
 						</div>
 					{/if}
 
+					<!-- scan 재무 지표 -->
+					{#if selectedNode.roe !== null && selectedNode.roe !== undefined}
+						<div class="meta-row scan">
+							<span class="meta-k">ROE</span>
+							<span class="meta-v" style:color={colorFor({ roe: selectedNode.roe }, 'roe')}>
+								{selectedNode.roe.toFixed(1)}%
+								{#if selectedNode.profGrade}<span class="grade">· {selectedNode.profGrade}</span>{/if}
+							</span>
+						</div>
+					{/if}
+					{#if selectedNode.opMargin !== null && selectedNode.opMargin !== undefined}
+						<div class="meta-row scan">
+							<span class="meta-k">영업이익률</span>
+							<span
+								class="meta-v"
+								style:color={colorFor({ opMargin: selectedNode.opMargin }, 'opMargin')}
+							>
+								{selectedNode.opMargin.toFixed(1)}%
+							</span>
+						</div>
+					{/if}
+					{#if selectedNode.debtRatio !== null && selectedNode.debtRatio !== undefined}
+						<div class="meta-row scan">
+							<span class="meta-k">부채비율</span>
+							<span
+								class="meta-v"
+								style:color={colorFor({ debtRatio: selectedNode.debtRatio }, 'debtRatio')}
+							>
+								{selectedNode.debtRatio.toFixed(0)}%
+								{#if selectedNode.debtGrade}<span class="grade">· {selectedNode.debtGrade}</span>{/if}
+							</span>
+						</div>
+					{/if}
+					{#if selectedNode.revCagr !== null && selectedNode.revCagr !== undefined}
+						<div class="meta-row scan">
+							<span class="meta-k">매출 CAGR</span>
+							<span
+								class="meta-v"
+								style:color={colorFor({ revCagr: selectedNode.revCagr }, 'revCagr')}
+							>
+								{selectedNode.revCagr.toFixed(1)}%
+								{#if selectedNode.growthGrade}<span class="grade">· {selectedNode.growthGrade}</span>{/if}
+							</span>
+						</div>
+					{/if}
+
 					{#if selectedRelations.suppliers.length > 0}
 						<div class="section">
 							<h3>
@@ -726,7 +895,7 @@
 	.map-page {
 		display: grid;
 		grid-template-columns: 280px 1fr;
-		height: calc(100vh - 64px);
+		height: 100dvh;
 		background: #050811;
 		color: #f1f5f9;
 	}
@@ -807,6 +976,56 @@
 	}
 	.info-tip:hover {
 		color: #94a3b8;
+	}
+
+	/* 색상 기준 셀렉터 */
+	.color-switch {
+		background: rgba(52, 211, 153, 0.04);
+		border-radius: 8px;
+		padding: 10px 12px;
+		margin-top: 16px;
+		border: 1px solid rgba(52, 211, 153, 0.15);
+	}
+	.metric-select {
+		width: 100%;
+		padding: 6px 10px;
+		background: #050811;
+		border: 1px solid #1e2433;
+		border-radius: 6px;
+		color: #f1f5f9;
+		font-size: 12px;
+		cursor: pointer;
+	}
+	.metric-select:focus {
+		outline: none;
+		border-color: #34d399;
+	}
+	.color-legend {
+		display: flex;
+		align-items: center;
+		gap: 3px;
+		margin-top: 8px;
+		font-size: 10px;
+		color: #64748b;
+	}
+	.lg-swatch {
+		width: 14px;
+		height: 8px;
+		border-radius: 2px;
+		display: inline-block;
+	}
+	.lg-label {
+		color: #94a3b8;
+		margin: 0 4px;
+	}
+	.meta-row.scan .meta-v {
+		font-weight: 600;
+	}
+	.meta-row .grade {
+		color: #64748b;
+		font-weight: 400;
+		font-size: 11px;
+		margin-left: 4px;
 	}
 
 	/* 관점 셀렉터 */
@@ -1059,10 +1278,10 @@
 
 	.detail {
 		position: fixed;
-		top: 64px;
+		top: 0;
 		right: 0;
 		width: 360px;
-		height: calc(100vh - 64px);
+		height: 100dvh;
 		background: #0f1219;
 		border-left: 1px solid #1e2433;
 		padding: 16px;

@@ -84,13 +84,15 @@ def buildAtlas() -> dict:
     }
 
 
-def buildIndustryDetail(industryId: str) -> dict:
+def buildIndustryDetail(industryId: str, scanMetrics: dict[str, dict] | None = None) -> dict:
     """L2: 산업 내부 공정 + 노드 + 엣지."""
     nodes = loadNodes()
     edges = loadEdges()
     ind_def = getIndustry(industryId)
     if not ind_def:
         return {}
+    if scanMetrics is None:
+        scanMetrics = {}
 
     members = [n for n in nodes if n.industry == industryId]
     memberCodes = {n.stockCode for n in members}
@@ -98,14 +100,24 @@ def buildIndustryDetail(industryId: str) -> dict:
     # 공정별 그룹화, 매출 정렬
     stages: dict[str, list[dict]] = defaultdict(list)
     for n in sorted(members, key=lambda x: x.revenue or 0, reverse=True):
+        m = scanMetrics.get(n.stockCode, {})
         stages[n.stage or "unclassified"].append(
             {
                 "stockCode": n.stockCode,
                 "corpName": n.corpName,
                 "stage": n.stage,
+                "role": n.role,
+                "stream": n.stream,
                 "revenue": round((n.revenue or 0) / 1e8),  # 억
                 "confidence": n.confidence,
                 "source": n.source,
+                "roe": _roundOrNone(m.get("roe")),
+                "opMargin": _roundOrNone(m.get("opMargin")),
+                "debtRatio": _roundOrNone(m.get("debtRatio")),
+                "revCagr": _roundOrNone(m.get("revCagr")),
+                "profGrade": m.get("profGrade") or "",
+                "debtGrade": m.get("debtGrade") or "",
+                "growthGrade": m.get("growthGrade") or "",
             }
         )
 
@@ -213,14 +225,75 @@ def buildCompanyEgograph(stockCode: str) -> dict:
     }
 
 
-def buildEcosystem() -> dict:
+def _loadScanMetrics() -> dict[str, dict]:
+    """scan 엔진에서 전 종목 재무 지표를 한 번 로드하여 stockCode→dict 매핑 반환.
+
+    Returns
+    -------
+    dict[str, dict]
+        stockCode → {"roe": float|None, "opMargin": float|None,
+                     "debtRatio": float|None, "icr": float|None,
+                     "revCagr": float|None, "profGrade": str,
+                     "debtGrade": str, "growthGrade": str}
+    """
+    from dartlab.scan import debt, growth, profitability
+
+    metrics: dict[str, dict] = {}
+
+    try:
+        pdf = profitability()
+        for r in pdf.iter_rows(named=True):
+            code = r["종목코드"]
+            metrics.setdefault(code, {})
+            metrics[code]["roe"] = r.get("ROE")
+            metrics[code]["opMargin"] = r.get("영업이익률")
+            metrics[code]["profGrade"] = r.get("등급") or ""
+    except Exception as e:
+        print(f"  ⚠ profitability 로드 실패: {e}")
+
+    try:
+        ddf = debt()
+        for r in ddf.iter_rows(named=True):
+            code = r["종목코드"]
+            metrics.setdefault(code, {})
+            metrics[code]["debtRatio"] = r.get("부채비율")
+            metrics[code]["icr"] = r.get("ICR")
+            metrics[code]["debtGrade"] = r.get("위험등급") or ""
+    except Exception as e:
+        print(f"  ⚠ debt 로드 실패: {e}")
+
+    try:
+        gdf = growth()
+        for r in gdf.iter_rows(named=True):
+            code = r["종목코드"]
+            metrics.setdefault(code, {})
+            metrics[code]["revCagr"] = r.get("매출CAGR")
+            metrics[code]["growthGrade"] = r.get("등급") or ""
+    except Exception as e:
+        print(f"  ⚠ growth 로드 실패: {e}")
+
+    return metrics
+
+
+def _roundOrNone(v, digits: int = 1):
+    if v is None:
+        return None
+    try:
+        return round(float(v), digits)
+    except (TypeError, ValueError):
+        return None
+
+
+def buildEcosystem(scanMetrics: dict[str, dict] | None = None) -> dict:
     """전체 생태계 한 파일 — Cosmograph용 (nodes + links).
 
-    2,664 노드 + 18,418 엣지를 flat 배열로. 산업별 색상 포함.
+    2,664 노드 + 18,418 엣지를 flat 배열로. 산업별 색상 + scan 재무 지표 포함.
     """
     nodes = loadNodes()
     edges = loadEdges()
     taxonomy = loadTaxonomy()
+    if scanMetrics is None:
+        scanMetrics = _loadScanMetrics()
 
     # 산업별 색상 팔레트 (34개)
     palette = [
@@ -294,6 +367,7 @@ def buildEcosystem() -> dict:
     for n in nodes:
         rev_log = 1.0 if not n.revenue else max(1.0, min(20.0, 1.0 + (n.revenue / 1e11)))  # log-ish
         rank, share = industryRanks.get(n.industry, {}).get(n.stockCode, (0, 0.0))
+        m = scanMetrics.get(n.stockCode, {})
         nodeList.append(
             {
                 "id": n.stockCode,
@@ -310,6 +384,15 @@ def buildEcosystem() -> dict:
                 "industryRank": rank,
                 "industryPeerCount": len(byIndustry.get(n.industry, [])),
                 "marketShare": round(share, 2),
+                # scan 엔진 재무 지표 (색상/정렬 기준)
+                "roe": _roundOrNone(m.get("roe")),
+                "opMargin": _roundOrNone(m.get("opMargin")),
+                "debtRatio": _roundOrNone(m.get("debtRatio")),
+                "icr": _roundOrNone(m.get("icr")),
+                "revCagr": _roundOrNone(m.get("revCagr")),
+                "profGrade": m.get("profGrade") or "",
+                "debtGrade": m.get("debtGrade") or "",
+                "growthGrade": m.get("growthGrade") or "",
                 "size": rev_log,
                 "color": ind_color.get(n.industry, "#9ca3af"),
             }
@@ -378,9 +461,14 @@ def main() -> None:
     _ensureDir(OUT_DIR / "industries")
     _ensureDir(OUT_DIR / "companies")
 
+    # scan 재무 지표 — 한 번만 로드 후 전 파일 공유
+    print("[Scan] 재무 지표 로드 중 (profitability + debt + growth)...")
+    scanMetrics = _loadScanMetrics()
+    print(f"  - scan 커버: {len(scanMetrics)}종목")
+
     # 생태계 (Cosmograph용)
     print("[Ecosystem] ecosystem.json 생성...")
-    eco = buildEcosystem()
+    eco = buildEcosystem(scanMetrics)
     (OUT_DIR / "ecosystem.json").write_text(json.dumps(eco, ensure_ascii=False), encoding="utf-8")
     print(f"  - {len(eco['nodes'])} 노드, {len(eco['links'])} 엣지, {len(eco['industries'])} 산업")
 
@@ -394,7 +482,7 @@ def main() -> None:
     print("[L2] 산업 상세...")
     taxonomy = loadTaxonomy()
     for ind_id in taxonomy:
-        detail = buildIndustryDetail(ind_id)
+        detail = buildIndustryDetail(ind_id, scanMetrics)
         (OUT_DIR / "industries" / f"{ind_id}.json").write_text(
             json.dumps(detail, ensure_ascii=False, indent=2), encoding="utf-8"
         )

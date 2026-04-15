@@ -144,22 +144,26 @@
 			nodeColor: (n: NodeDatum) => n.color,
 			nodeGreyoutOpacity: 0.12,
 			linkColor: (l: LinkDatum) => {
-				if (l.type === 'supplier') return l.amount ? '#fb923c' : '#b76930';
+				if (l.type === 'supplier') return l.amount ? '#fbbf24' : '#f97316';
 				if (l.type === 'customer') return '#60a5fa';
 				if (l.type === 'investor') return '#a78bfa';
-				return '#4b5563'; // affiliate
+				return '#6b7280'; // affiliate
 			},
 			linkWidth: (l: LinkDatum) => {
 				// atlas: edgeCount 기반 굵기 (산업간 supplier flow)
 				if (l.edgeCount) {
-					return Math.max(1.2, Math.min(6, 1 + Math.log2(l.edgeCount + 1) * 0.8));
+					return Math.max(2.5, Math.min(9, 1.2 + Math.log2(l.edgeCount + 1) * 1.3));
 				}
-				// companies: amount 기반, 없으면 기본값을 2~3배 두껍게
-				if (!l.amount) return 0.9;
-				return Math.max(1.0, Math.min(4, 0.8 + Math.log10(l.amount + 1) * 0.5));
+				// companies: amount 기반, 없으면 2.0 최소치
+				if (!l.amount) return 2.0;
+				return Math.max(1.8, Math.min(7, 1.5 + Math.log10(l.amount + 1) * 0.8));
 			},
-			linkGreyoutOpacity: 0.15,
+			linkGreyoutOpacity: 0.25,
 			linkArrows: false,
+			linkVisibilityDistanceRange: [300, 2000],
+			linkVisibilityMinTransparency: 0.75,
+			curvedLinks: true,
+			curvedLinkSegments: 16,
 			simulation: {
 				repulsion: 1.0,
 				gravity: 0.15,

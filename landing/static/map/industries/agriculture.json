@@ -14,41 +14,86 @@
           "stockCode": "014710",
           "corpName": "사조씨푸드",
           "stage": "general",
+          "role": "제조",
+          "stream": "upstream",
           "revenue": 2380,
           "confidence": 1.0,
-          "source": "docs"
+          "source": "docs",
+          "roe": -13.6,
+          "opMargin": 17.6,
+          "debtRatio": 73.1,
+          "revCagr": null,
+          "profGrade": "양호",
+          "debtGrade": "안전",
+          "growthGrade": ""
         },
         {
           "stockCode": "030720",
           "corpName": "동원수산",
           "stage": "general",
+          "role": "제조",
+          "stream": "upstream",
           "revenue": 1726,
           "confidence": 0.7,
-          "source": "product"
+          "source": "product",
+          "roe": 5.1,
+          "opMargin": 4.2,
+          "debtRatio": 139.1,
+          "revCagr": 6.7,
+          "profGrade": "보통",
+          "debtGrade": "관찰",
+          "growthGrade": "정체"
         },
         {
           "stockCode": "054050",
           "corpName": "농우바이오",
           "stage": "general",
+          "role": "제조",
+          "stream": "upstream",
           "revenue": 1588,
           "confidence": 1.0,
-          "source": "docs"
+          "source": "docs",
+          "roe": 4.4,
+          "opMargin": 17.4,
+          "debtRatio": 26.8,
+          "revCagr": 6.0,
+          "profGrade": "양호",
+          "debtGrade": "관찰",
+          "growthGrade": "정체"
         },
         {
           "stockCode": "475460",
           "corpName": "미트박스",
           "stage": "general",
+          "role": "제조",
+          "stream": "upstream",
           "revenue": 1356,
           "confidence": 0.7,
-          "source": "product"
+          "source": "product",
+          "roe": -1.1,
+          "opMargin": 0.2,
+          "debtRatio": 161.9,
+          "revCagr": null,
+          "profGrade": "저수익",
+          "debtGrade": "관찰",
+          "growthGrade": ""
         },
         {
           "stockCode": "154030",
           "corpName": "아시아종묘",
           "stage": "general",
+          "role": "제조",
+          "stream": "upstream",
           "revenue": 35,
           "confidence": 1.0,
-          "source": "docs"
+          "source": "docs",
+          "roe": -5.7,
+          "opMargin": -28.1,
+          "debtRatio": 72.2,
+          "revCagr": -4.5,
+          "profGrade": "적자",
+          "debtGrade": "주의",
+          "growthGrade": "역성장"
         }
       ]
     }

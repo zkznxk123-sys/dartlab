@@ -14,33 +14,69 @@
           "stockCode": "064350",
           "corpName": "현대로템",
           "stage": "general",
+          "role": "제조",
+          "stream": "midstream",
           "revenue": 58390,
           "confidence": 1.0,
-          "source": "docs"
+          "source": "docs",
+          "roe": 35.9,
+          "opMargin": 12.5,
+          "debtRatio": 206.4,
+          "revCagr": 27.3,
+          "profGrade": "우수",
+          "debtGrade": "주의",
+          "growthGrade": "고성장"
         },
         {
           "stockCode": "045390",
           "corpName": "대아티아이",
           "stage": "general",
+          "role": "제조",
+          "stream": "midstream",
           "revenue": 1532,
           "confidence": 1.0,
-          "source": "product"
+          "source": "product",
+          "roe": 14.8,
+          "opMargin": 25.0,
+          "debtRatio": 118.4,
+          "revCagr": 15.7,
+          "profGrade": "우수",
+          "debtGrade": "관찰",
+          "growthGrade": "고성장"
         },
         {
           "stockCode": "271940",
           "corpName": "일진하이솔루스",
           "stage": "general",
+          "role": "제조",
+          "stream": "midstream",
           "revenue": 816,
           "confidence": 1.0,
-          "source": "docs"
+          "source": "docs",
+          "roe": -0.6,
+          "opMargin": -13.7,
+          "debtRatio": 10.4,
+          "revCagr": null,
+          "profGrade": "적자",
+          "debtGrade": "주의",
+          "growthGrade": ""
         },
         {
           "stockCode": "115500",
           "corpName": "케이씨에스",
           "stage": "general",
+          "role": "제조",
+          "stream": "midstream",
           "revenue": 249,
           "confidence": 0.7,
-          "source": "product"
+          "source": "product",
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
+          "revCagr": null,
+          "profGrade": "",
+          "debtGrade": "",
+          "growthGrade": ""
         }
       ]
     }
@@ -50,17 +86,35 @@
       "stockCode": "088390",
       "corpName": "이녹스",
       "stage": "",
+      "role": "",
+      "stream": "",
       "revenue": 591,
       "confidence": 0.7,
-      "source": "kindlist"
+      "source": "kindlist",
+      "roe": 1.6,
+      "opMargin": 14.4,
+      "debtRatio": 53.0,
+      "revCagr": -37.3,
+      "profGrade": "양호",
+      "debtGrade": "관찰",
+      "growthGrade": "급감"
     },
     {
       "stockCode": "123750",
       "corpName": "알톤",
       "stage": "",
+      "role": "",
+      "stream": "",
       "revenue": 322,
       "confidence": 0.7,
-      "source": "kindlist"
+      "source": "kindlist",
+      "roe": -1.8,
+      "opMargin": 0.7,
+      "debtRatio": 63.9,
+      "revCagr": 33.6,
+      "profGrade": "저수익",
+      "debtGrade": "주의",
+      "growthGrade": "고성장"
     }
   ],
   "edges": [
