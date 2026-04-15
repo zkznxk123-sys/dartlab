@@ -114,7 +114,7 @@ dartlab의 GitHub Actions는 secret이 아니다. `.github/workflows/` 아래에
 
 ## 점검 — 사용자는 어떻게 확인하는가
 
-dartlab은 데이터 수집을 침묵하지 않는다. 긴 작업이 시작되면 반드시 알린다. `ops/guide.md`에 정의된 `guide.emit` 이벤트 중 "항상 보여주는" 카테고리가 있다.
+dartlab은 데이터 수집을 침묵하지 않는다. 긴 작업이 시작되면 반드시 알린다. `src/dartlab/guide/README.md`에 정의된 `guide.emit` 이벤트 중 "항상 보여주는" 카테고리가 있다.
 
 - `download:start` / `download:done_short` — 단일 parquet 다운로드
 - `download_all:*` — 카테고리 전체 다운로드

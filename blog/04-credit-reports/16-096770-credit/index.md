@@ -6,7 +6,7 @@ category: credit-reports
 thumbnail: /avatar-chart.png
 ---
 
-> ⚠️ **면책**: 본 보고서는 dartlab dCR v4.0 방법론에 따라 공시 데이터만으로 작성되었습니다. 제도권 신용등급과 다를 수 있으며, 투자 권유가 아닙니다. [방법론](https://github.com/eddmpython/dartlab/blob/master/ops/credit.md)
+> ⚠️ **면책**: 본 보고서는 dartlab dCR v4.0 방법론에 따라 공시 데이터만으로 작성되었습니다. 제도권 신용등급과 다를 수 있으며, 투자 권유가 아닙니다. [방법론](https://github.com/eddmpython/dartlab/blob/master/src/dartlab/analysis/CREDIT.md)
 
 > **dCR-AA** | 최우량 (notch 조정) | 2026-04-05 | 방법론 v4.0
 
@@ -318,5 +318,5 @@ dartlab dCR 등급이 외부 신평사 등급과 다를 수 있는 이유:
 ## 14. 방법론 참조
 
 - dartlab 독립 신용분석(dCR) v4.0
-- 방법론 상세: [ops/credit.md](https://github.com/eddmpython/dartlab/blob/master/ops/credit.md)
+- 방법론 상세: [src/dartlab/analysis/CREDIT.md](https://github.com/eddmpython/dartlab/blob/master/src/dartlab/analysis/CREDIT.md)
 - 발행일: 2026-04-05
