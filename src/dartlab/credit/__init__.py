@@ -21,7 +21,7 @@
     c.review("신용분석")                     # 신용분석 전문 보고서
     c.review("신용분석").toMarkdown()         # 마크다운 출력
 
-ops/credit.md 참조.
+src/dartlab/analysis/CREDIT.md 참조.
 """
 
 from __future__ import annotations
@@ -243,56 +243,15 @@ def creditCompany(
     if axis_filter is not None:
         result = _filterAxis(result, axis_filter)
 
-    # assumptions 투명화 — AI 가 credit 엔진이 쓴 지표값을 인지 → override 재호출
+    # assumptions 투명화 — 4 엔진 공통 utility (core/overrides.py)
     if isinstance(result, dict):
-        result["assumptions"] = _buildCreditAssumptions(result, overrides)
+        from dartlab.core.overrides import buildAssumptions
+
+        assumptions = buildAssumptions(result, engine="credit", overrides=overrides)
+        if assumptions:
+            result["assumptions"] = assumptions
 
     return result
-
-
-def _buildCreditAssumptions(result: dict, overrides: dict | None) -> dict:
-    """credit 결과에서 엔진이 쓴 값을 표준 키로 노출.
-
-    AI 가 "이 등급이 어떤 지표로 나왔나" 즉시 인지 → 시나리오 override 판단.
-    """
-    a: dict = {}
-    # 최상위 등급/점수
-    if "grade" in result:
-        a["grade"] = result["grade"]
-    if "score" in result:
-        a["score"] = result["score"]
-    if "sector" in result:
-        a["sector"] = result["sector"]
-
-    # axis 단위 결과면 metrics 에서 지표값 추출
-    metrics = result.get("metrics") or {}
-    if isinstance(metrics, dict):
-        for stdKey, candidates in (
-            ("debtRatio", ("debtRatio", "debtToEquity", "leverage")),
-            ("interestCoverage", ("interestCoverage", "icr")),
-            ("currentRatio", ("currentRatio",)),
-            ("quickRatio", ("quickRatio",)),
-            ("ocfToDebt", ("ocfToDebt",)),
-            ("fcfToDebt", ("fcfToDebt",)),
-        ):
-            for c in candidates:
-                m = metrics.get(c)
-                if isinstance(m, dict) and "value" in m:
-                    a[stdKey] = m["value"]
-                    break
-                if isinstance(m, (int, float)):
-                    a[stdKey] = m
-                    break
-    a["_overridden"] = sorted(overrides.keys()) if overrides else []
-
-    # 엔진 자가 의심 — 극단값 감지 → 구체 재호출 권고
-    from dartlab.core.overrides import detectExtremeFlags
-
-    flags = detectExtremeFlags(a)
-    if flags:
-        a["_flags"] = flags
-
-    return a
 
 
 def axes() -> dict[str, str]:

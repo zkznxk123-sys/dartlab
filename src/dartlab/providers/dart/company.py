@@ -301,6 +301,10 @@ class Company:
         corpName = None if sys.platform == "emscripten" else codeToName(self.stockCode)
         if corpName:
             self.corpName = corpName
+        elif sys.platform == "emscripten":
+            # pyodide: docs 선행 fetch 회피 — 사용자가 요청한 카테고리만 lazy fetch.
+            # 진짜 corpName 이 필요하면 show/select 가 나중에 docs 를 가져옴.
+            self.corpName = self.stockCode
         elif self._hasDocs:
             df = loadData(self.stockCode, category="docs", columns=["corp_name"])
             self.corpName = extractCorpName(df)
@@ -2909,6 +2913,59 @@ class Company:
             return _analysis(axis, sub, company=self, **kwargs)
         return _analysis(axis, company=self, **kwargs)
 
+    def validateStory(self, overrides: dict | None = None) -> dict:
+        """Damodaran 스토리 검증 — Possible / Plausible / Probable 3 테스트 통합.
+
+        *Narrative and Numbers* (2017) 의 핵심: 밸류에이션의 타당성은
+        (1) 과거 유사 사례, (2) 피어 분포 내 위치, (3) 수학·경제 첫 원칙
+        3 층의 검증을 통과해야 한다.
+
+        Capabilities:
+            - calcStoryPrecedents (scan peer + KnowledgeDB insights)
+            - calcPlausibilityBand (섹터 피어 분포 percentile)
+            - calcValuationSins (정합성 규칙 위반)
+            - overrides 로 AI 개입 (lifeCyclePhase, terminalGrowth 등)
+
+        Args:
+            overrides: 검증 기준 조율 (VALUATION_KEYS).
+
+        Returns:
+            dict
+                precedents : dict — Possible Test 결과
+                plausibility : dict — Plausible Test 결과
+                rules : dict — Probable Test 결과
+                overall : str — "info" | "warn" | "critical"
+
+        Example::
+
+            c = Company("005930")
+            r = c.validateStory()
+            for f in r["rules"]["flags"]:
+                print(f['severity'], f['reason'])
+        """
+        from dartlab.analysis.financial.storyValidation import (
+            calcPlausibilityBand,
+            calcStoryPrecedents,
+            calcValuationSins,
+        )
+
+        precedents = calcStoryPrecedents(self)
+        plausibility = calcPlausibilityBand(self)
+        rules = calcValuationSins(self)
+
+        order = {"info": 0, "warn": 1, "critical": 2}
+        overall = "info"
+        rule_sev = rules.get("severity", "info") if rules else "info"
+        if order.get(rule_sev, 0) > order.get(overall, 0):
+            overall = rule_sev
+
+        return {
+            "precedents": precedents,
+            "plausibility": plausibility,
+            "rules": rules,
+            "overall": overall,
+        }
+
     @property
     def credit(self):
         """독립 신용평가 — dual access.
@@ -3686,7 +3743,19 @@ class Company:
             return
         from dartlab.providers.dart.finance.pivot import buildTimeseries
 
-        ts = buildTimeseries(self.stockCode)
+        try:
+            ts = buildTimeseries(self.stockCode)
+        except Exception as e:
+            # finance parquet 로딩/파싱 실패 → 이유 노출 후 docs fallback 허용.
+            # silent 실패 시 show("IS") 가 docs 기반으로 잘못된 결과 반환하는 사례 방지.
+            import warnings
+
+            warnings.warn(
+                f"finance parquet 로딩 실패 ({self.stockCode}): {type(e).__name__}: {e}. "
+                f"docs fallback 으로 전환됩니다 — 수치 정합성이 떨어질 수 있습니다.",
+                stacklevel=2,
+            )
+            ts = None
         if ts is not None:
             self._cache["_finance_q_CFS"] = ts
         else:
@@ -4528,14 +4597,15 @@ class Company:
         if metric is None:
             return q()  # 가이드 DataFrame
         result = q(metric, self.stockCode, **merged)
-        # assumptions 투명화 — window 등 엔진이 쓴 파라미터값 노출
+        # assumptions 투명화 — 4 엔진 공통 utility
         if isinstance(result, dict):
-            a: dict = {}
-            for k in ("window", "threshold", "period", "benchmark"):
-                if k in merged:
-                    a[k] = merged[k]
-            a["_overridden"] = sorted(clean.keys()) if clean else []
-            result.setdefault("assumptions", a)
+            from dartlab.core.overrides import buildAssumptions
+
+            # quant 는 override 로 넘어온 값만 assumptions 에 반영 (내부 계산 alias 희소)
+            enriched = {**result, **{k: v for k, v in merged.items() if k in ("window", "threshold", "period", "benchmark")}}
+            assumptions = buildAssumptions(enriched, engine="quant", overrides=clean)
+            if assumptions:
+                result.setdefault("assumptions", assumptions)
         return result
 
     def industry(self) -> dict | None:

@@ -411,6 +411,36 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
             _CalcEntry(
                 "calcValuationFlags", "dartlab.analysis.financial.valuation", "valuationFlags", "가치평가 플래그"
             ),
+            _CalcEntry(
+                "calcLifeCycle",
+                "dartlab.analysis.financial.lifeCycle",
+                "lifeCycle",
+                "Damodaran 생애주기 단계 판별 (earlyGrowth/highGrowth/matureGrowth/matureStable/decline/turnaround)",
+            ),
+            _CalcEntry(
+                "calcCashFlowConsistency",
+                "dartlab.analysis.valuation.consistency",
+                "cashFlowConsistency",
+                "Damodaran CF 정합성 검증 (g vs reinvest, TV weight, tax)",
+            ),
+            _CalcEntry(
+                "calcStoryPrecedents",
+                "dartlab.analysis.financial.storyValidation",
+                "storyPrecedents",
+                "Possible Test — 과거 유사 기업 사례",
+            ),
+            _CalcEntry(
+                "calcPlausibilityBand",
+                "dartlab.analysis.financial.storyValidation",
+                "plausibilityBand",
+                "Plausible Test — 섹터 피어 분포 대비 위치",
+            ),
+            _CalcEntry(
+                "calcValuationSins",
+                "dartlab.analysis.financial.storyValidation",
+                "valuationSins",
+                "Probable Test — 밸류에이션 정합성 규칙 검증",
+            ),
         ),
     ),
     # ── 5부: 비재무 심화 ──
@@ -804,87 +834,8 @@ def _acceptsOverrides(fn) -> bool:
 # 각 calc 결과에 흩어진 discountRate/baseWacc/assumedMargin 등을 표준 키로 모아
 # `results["assumptions"]` 에 주입. autoEnrich 가 이걸 _summary 에 반영.
 
-# 각 calc 결과 dict 의 alias → 표준 override 키 매핑
-_ASSUMPTION_ALIASES: dict[str, str] = {
-    # VALUATION
-    "discountRate": "wacc",
-    "baseWacc": "wacc",
-    "assumedWacc": "wacc",
-    "terminalGrowth": "terminalGrowth",
-    "baseTerminalGrowth": "terminalGrowth",
-    "growthRateInitial": "growthRates",
-    # FORECAST
-    "baseRevenue": "baseRevenue",
-    "projectedGrowth": "growthRates",
-    "projectedOpm": "opm",
-    "assumedMargin": "opm",
-    "opm": "opm",
-    "capexRatio": "capexRatio",
-    "depreciationRatio": "depreciationRatio",
-    "nwcRatio": "nwcRatio",
-    "taxRate": "taxRate",
-    # CREDIT
-    "debtRatio": "debtRatio",
-    "interestCoverage": "interestCoverage",
-    "currentRatio": "currentRatio",
-    "quickRatio": "quickRatio",
-}
-
-
-def _aggregateAssumptions(results: dict, overrides: dict | None) -> dict:
-    """calc 결과에서 엔진이 쓴 가정값을 표준 override 키로 수집.
-
-    AI 가 tool_result 를 보고 "wacc=18% 는 과도" 판단할 수 있게 만드는 게 목적.
-    """
-    collected: dict = {}
-    for blockKey, block in results.items():
-        if not isinstance(block, dict):
-            continue
-        for rawKey, stdKey in _ASSUMPTION_ALIASES.items():
-            if rawKey in block and stdKey not in collected:
-                val = block[rawKey]
-                # 숫자/문자열만 (리스트는 growthRates 예외)
-                if val is None:
-                    continue
-                if isinstance(val, (int, float, str)) or (stdKey == "growthRates" and isinstance(val, (list, tuple))):
-                    collected[stdKey] = val
-
-    # primaryModel 추론 — valuationSynthesis 에 companyType 이 있으면 그게 주 모델 힌트
-    synth = results.get("valuationSynthesis")
-    if isinstance(synth, dict):
-        weights = synth.get("modelWeights")
-        if isinstance(weights, dict) and weights:
-            # 가중치 최대 모델
-            top = max(weights.items(), key=lambda kv: kv[1] if isinstance(kv[1], (int, float)) else 0)
-            if isinstance(top[1], (int, float)) and top[1] > 0:
-                collected["primaryModel"] = top[0]
-
-    # Kd (타인자본비용) — priceTarget.waccDetails 에서 추출 (DCF 내부 가정 노출)
-    pt = results.get("priceTarget")
-    if isinstance(pt, dict):
-        wd = pt.get("waccDetails")
-        if isinstance(wd, dict):
-            if isinstance(wd.get("kd"), (int, float)):
-                collected["kd"] = wd["kd"]
-            if isinstance(wd.get("ke"), (int, float)):
-                collected["ke"] = wd["ke"]
-            if isinstance(wd.get("beta"), (int, float)):
-                collected["beta"] = wd["beta"]
-
-    # override 적용 여부 명시
-    collected["_overridden"] = sorted(overrides.keys()) if overrides else []
-
-    # 엔진 자가 의심 — 극단값 감지 → 구체 재호출 권고
-    from dartlab.core.overrides import detectExtremeFlags
-
-    flags = detectExtremeFlags(collected)
-    if flags:
-        collected["_flags"] = flags
-
-    # 아무것도 안 잡히면 빈 dict 반환 (상위에서 생략 판단)
-    if len(collected) == 1 and collected["_overridden"] == []:
-        return {}
-    return collected
+# _aggregateAssumptions → core/overrides.buildAssumptions 로 이전 (4 엔진 공통).
+# 엔진별 특수 추출은 core/overrides._extractAnalysisSpecific.
 
 
 # ── Group Accessor ──
@@ -1125,9 +1076,10 @@ class Analysis:
             ):
                 results[calc.blockKey] = None
 
-        # 엔진 투명성 — AI 가 조율 판단하려면 엔진이 쓴 가정값을 알아야 한다.
-        # 흩어진 discountRate/baseWacc/terminalGrowth 등을 표준 키로 통합.
-        assumptions = _aggregateAssumptions(results, overrides)
+        # 엔진 투명성 — 4 엔진 공통 utility (core/overrides.py)
+        from dartlab.core.overrides import buildAssumptions
+
+        assumptions = buildAssumptions(results, engine="analysis", overrides=overrides)
         if assumptions:
             results["assumptions"] = assumptions
         return results

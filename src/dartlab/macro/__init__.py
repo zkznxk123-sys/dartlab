@@ -298,23 +298,13 @@ class Macro:
             else:
                 result = fn(market=market, **kwargs)
 
-        # assumptions 투명화 — phase/cyclePhase 등 엔진 판단값 노출
+        # assumptions 투명화 — 4 엔진 공통 utility (phase → cyclePhase alias 자동)
         if isinstance(result, dict):
-            a: dict = {}
-            if "phase" in result:
-                a["cyclePhase"] = result["phase"]
-            if "confidence" in result:
-                a["confidence"] = result["confidence"]
-            a["_overridden"] = sorted(clean.keys()) if clean else []
+            from dartlab.core.overrides import buildAssumptions
 
-            # 엔진 자가 의심 — 사이클 수축기면 스트레스 비교 권고
-            from dartlab.core.overrides import detectExtremeFlags
-
-            flags_ = detectExtremeFlags(a)
-            if flags_:
-                a["_flags"] = flags_
-
-            result["assumptions"] = a
+            assumptions = buildAssumptions(result, engine="macro", overrides=clean)
+            if assumptions:
+                result["assumptions"] = assumptions
         return result
 
     def _guide(self) -> pl.DataFrame:

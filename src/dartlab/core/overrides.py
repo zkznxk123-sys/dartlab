@@ -21,15 +21,36 @@ FORECAST_KEYS = {
     "depreciationRatio",  # float — 감가상각/매출
     "nwcRatio",  # float — 운전자본/매출
     "taxRate",  # float — 유효세율
+    "marginPath",  # list[float] — 연도별 영업마진 (%) — Phase 3 multi-stage
+    "reinvestmentPath",  # list[float] — 연도별 재투자율 (%) — Phase 3 multi-stage
 }
 
 VALUATION_KEYS = {
     "wacc",  # float — WACC (%). None이면 CAPM 자동
-    "terminalGrowth",  # float — 영구성장률 (%). None이면 업종 기본
-    "primaryModel",  # str — "dcf"/"rim"/"ddm"/"relative". None이면 자동 선택
+    "terminalGrowth",  # float — 영구성장률 (%). None이면 업종/생애주기 기본
+    "primaryModel",  # str — "dcf"/"rim"/"ddm"/"relative"/"dcf2stage"/"liquidation"/"relativeSurvival"
     "riskFreeRate",  # float — 무위험수익률 (%)
     "equityRiskPremium",  # float — 시장 리스크 프리미엄 (%)
     "beta",  # float — beta 계수
+    # ── Damodaran 흡수 (Phase 1+2) ──
+    "countryCode",  # str — ISO2 (KR/US/JP/...). currency 에서 자동 추론
+    "countryRiskPremium",  # float — 국가 리스크 프리미엄 (%). Damodaran 테이블 override
+    "lifeCyclePhase",  # str — "earlyGrowth"/"highGrowth"/"matureGrowth"/"matureStable"/"decline"/"turnaround"
+    "pSurvival",  # float — 0.0~1.0. Dark Side of Valuation going-concern 가중치
+    "liquidationValue",  # float — 명시적 청산가치 (원). None 이면 자본×(1-discount)
+    "liquidationDiscount",  # float — 0.0~0.7. book equity 대비 청산 할인
+    # ── Damodaran Phase 3 ──
+    "impliedERP",  # bool — True 면 Gordon 역산 ERP 사용 (시장 내재). 실패 시 fallback.
+    "bottomUpBeta",  # bool — True 면 섹터 peer unlever/relever Hamada 적용.
+    "optimalROIC",  # float — Control Value 계산용 최적 ROIC (%)
+    "synergyType",  # str — "cost"/"revenue"/"financial" (M&A 시나리오)
+    "controlScenario",  # str — "statusQuo"/"restructured"/"merged" (M&A 시나리오)
+}
+
+# Phase 3 FORECAST 확장 (가변 마진/재투자율)
+_PHASE3_FORECAST_KEYS = {
+    "marginPath",  # list[float] — 연도별 영업마진 (%)
+    "reinvestmentPath",  # list[float] — 연도별 재투자율 (%)
 }
 
 ANALYSIS_KEYS = {
@@ -71,6 +92,180 @@ ENGINE_KEYS: dict[str, set[str]] = {
 }
 
 ALL_KEYS = FORECAST_KEYS | VALUATION_KEYS | ANALYSIS_KEYS | CREDIT_KEYS | QUANT_KEYS | MACRO_KEYS
+
+
+# ── Assumption 수집 (4 엔진 공통) ─────────────────────────
+#
+# AI 가 tool_result 에서 "엔진이 어떤 가정을 썼나" 즉시 인지 → override 재호출.
+# 각 calc 결과의 알려진 alias 를 표준 키 (ALL_KEYS) 로 정규화.
+
+_ASSUMPTION_ALIASES: dict[str, str] = {
+    # VALUATION (discountRate/baseWacc/... → wacc)
+    "discountRate": "wacc",
+    "baseWacc": "wacc",
+    "assumedWacc": "wacc",
+    "terminalGrowth": "terminalGrowth",
+    "baseTerminalGrowth": "terminalGrowth",
+    "growthRateInitial": "growthRates",
+    # FORECAST
+    "baseRevenue": "baseRevenue",
+    "projectedGrowth": "growthRates",
+    "projectedOpm": "opm",
+    "assumedMargin": "opm",
+    "opm": "opm",
+    "capexRatio": "capexRatio",
+    "depreciationRatio": "depreciationRatio",
+    "nwcRatio": "nwcRatio",
+    "taxRate": "taxRate",
+    # CREDIT
+    "debtRatio": "debtRatio",
+    "interestCoverage": "interestCoverage",
+    "currentRatio": "currentRatio",
+    "quickRatio": "quickRatio",
+    "ocfToDebt": "ocfToDebt",
+    "fcfToDebt": "fcfToDebt",
+    # Damodaran Phase 1/2/3 (이름 = 표준 키 그대로)
+    "countryCode": "countryCode",
+    "countryRiskPremium": "countryRiskPremium",
+    "lifeCyclePhase": "lifeCyclePhase",
+    "pSurvival": "pSurvival",
+    "liquidationValue": "liquidationValue",
+    "liquidationDiscount": "liquidationDiscount",
+    "impliedERP": "impliedERP",
+    "historicalERP": "historicalERP",
+    "bottomUpBeta": "bottomUpBeta",
+    "peerCount": "peerCount",
+    "optimalROIC": "optimalROIC",
+    "synergyType": "synergyType",
+    "controlScenario": "controlScenario",
+    "controlPremium": "controlPremium",
+    "synergy": "synergy",
+    "standaloneValue": "standaloneValue",
+    "revenueCAGR": "revenueCAGR",
+    # MACRO (phase → cyclePhase)
+    "phase": "cyclePhase",
+    "confidence": "confidence",
+    # QUANT (kwargs 에 넘어온 값 자체)
+    "window": "window",
+    "threshold": "threshold",
+    "period": "period",
+    "benchmark": "benchmark",
+}
+
+
+def buildAssumptions(
+    results: Any,
+    *,
+    engine: str = "analysis",
+    overrides: dict | None = None,
+) -> dict:
+    """엔진 결과에서 가정값을 표준 override 키로 수집. 4 엔진 공통.
+
+    Args:
+        results: analysis dict[blockKey → calc dict] · credit dict · macro dict · quant dict
+        engine: analysis / credit / macro / quant (엔진별 특수 추출 분기)
+        overrides: 이번 호출에 적용된 override (있으면 _overridden 에 명시)
+
+    Returns:
+        표준 키 dict + `_overridden` + `_flags` (detectExtremeFlags).
+        빈 결과면 {} 반환.
+    """
+    collected: dict = {}
+    container = results if isinstance(results, dict) else {}
+
+    # 1. alias 평탄 수집 — analysis 는 nested blockKey, credit/macro 는 top-level
+    # analysis: {"dcfValuation": {"discountRate": 10.4, ...}, ...}
+    # credit: {"grade": "AA-", "metrics": {...}}
+    # macro: {"phase": "recovery", "confidence": "high"}
+    _scanForAliases(container, collected)
+    for block in container.values():
+        _scanForAliases(block, collected)
+
+    # 2. 엔진별 특수 추출
+    if engine == "analysis":
+        _extractAnalysisSpecific(container, collected)
+    elif engine == "credit":
+        _extractCreditSpecific(container, collected)
+    # macro/quant 는 alias 수집만으로 충분
+
+    # 3. override 적용 표시
+    collected["_overridden"] = sorted(overrides.keys()) if overrides else []
+
+    # 4. flag 자가 의심
+    flags = detectExtremeFlags(collected)
+    if flags:
+        collected["_flags"] = flags
+
+    # 비어있으면 생략 (표준 키 0개 + flag 0)
+    if len(collected) == 1 and collected["_overridden"] == [] and "_flags" not in collected:
+        return {}
+    return collected
+
+
+def _scanForAliases(block: Any, collected: dict) -> None:
+    """dict 에서 _ASSUMPTION_ALIASES 매칭 평탄 수집. 이미 있는 키는 skip (선점)."""
+    if not isinstance(block, dict):
+        return
+    for rawKey, stdKey in _ASSUMPTION_ALIASES.items():
+        if rawKey not in block or stdKey in collected:
+            continue
+        val = block[rawKey]
+        if val is None:
+            continue
+        # 숫자/문자열/bool 기본, list 는 성장률/경로 키만
+        if isinstance(val, (int, float, str, bool)):
+            collected[stdKey] = val
+        elif isinstance(val, (list, tuple)) and stdKey in ("growthRates", "marginPath", "reinvestmentPath"):
+            collected[stdKey] = list(val)
+
+
+def _extractAnalysisSpecific(results: dict, collected: dict) -> None:
+    # primaryModel 추론 — valuationSynthesis.modelWeights 최대
+    synth = results.get("valuationSynthesis")
+    if isinstance(synth, dict):
+        weights = synth.get("modelWeights")
+        if isinstance(weights, dict) and weights:
+            top = max(weights.items(), key=lambda kv: kv[1] if isinstance(kv[1], (int, float)) else 0)
+            if isinstance(top[1], (int, float)) and top[1] > 0:
+                collected.setdefault("primaryModel", top[0])
+    # Kd/Ke/Beta — priceTarget.waccDetails (DCF 내부 가정)
+    pt = results.get("priceTarget")
+    if isinstance(pt, dict):
+        wd = pt.get("waccDetails")
+        if isinstance(wd, dict):
+            for k in ("kd", "ke", "beta"):
+                v = wd.get(k)
+                if isinstance(v, (int, float)):
+                    collected.setdefault(k, v)
+
+
+def _extractCreditSpecific(result: dict, collected: dict) -> None:
+    # 최상위 등급/점수
+    for k in ("grade", "score", "sector"):
+        if k in result and k not in collected:
+            collected[k] = result[k]
+    # axis 결과면 metrics 에서 표준 키 추출
+    metrics = result.get("metrics") or {}
+    if not isinstance(metrics, dict):
+        return
+    for stdKey, candidates in (
+        ("debtRatio", ("debtRatio", "debtToEquity", "leverage")),
+        ("interestCoverage", ("interestCoverage", "icr")),
+        ("currentRatio", ("currentRatio",)),
+        ("quickRatio", ("quickRatio",)),
+        ("ocfToDebt", ("ocfToDebt",)),
+        ("fcfToDebt", ("fcfToDebt",)),
+    ):
+        if stdKey in collected:
+            continue
+        for c in candidates:
+            m = metrics.get(c)
+            if isinstance(m, dict) and "value" in m:
+                collected[stdKey] = m["value"]
+                break
+            if isinstance(m, (int, float)):
+                collected[stdKey] = m
+                break
 
 
 def validateOverrides(overrides: dict | None, engine: str | None = None) -> dict:
@@ -184,6 +379,79 @@ def detectExtremeFlags(assumptions: dict | None) -> list[dict]:
             "reason": f"매크로 사이클 {phase} — 스트레스 시나리오 비교 권장",
             "suggestedRetry": {"cyclePhase": "contraction"},
         })
+
+    # ── 생애주기 ↔ 성장 지표 모순 검사 (Damodaran Corporate Life Cycle) ──
+    lc_phase = assumptions.get("lifeCyclePhase")
+    cagr = assumptions.get("revenueCAGR")
+    if lc_phase == "decline" and isinstance(cagr, (int, float)) and cagr > 15.0:
+        flags.append({
+            "flag": "lifecycle_conflict",
+            "reason": f"생애주기 decline 판정인데 매출 CAGR {cagr:.1f}% — turnaround 재진입 가능성",
+            "suggestedRetry": {"lifeCyclePhase": "turnaround"},
+        })
+    elif lc_phase == "matureStable" and isinstance(cagr, (int, float)) and cagr > 20.0:
+        flags.append({
+            "flag": "lifecycle_conflict",
+            "reason": f"matureStable 판정인데 CAGR {cagr:.1f}% — highGrowth 재평가",
+            "suggestedRetry": {"lifeCyclePhase": "highGrowth"},
+        })
+    elif lc_phase in ("earlyGrowth", "highGrowth") and isinstance(cagr, (int, float)) and cagr < 0:
+        flags.append({
+            "flag": "lifecycle_conflict",
+            "reason": f"{lc_phase} 판정인데 CAGR {cagr:.1f}% — 구조조정 가능성",
+            "suggestedRetry": {"lifeCyclePhase": "turnaround"},
+        })
+
+    # pSurvival 하한 검증 — AI 가 자의적으로 0.1 등 극단값 주입 방지
+    p_surv = assumptions.get("pSurvival")
+    if isinstance(p_surv, (int, float)):
+        if p_surv < 0.30:
+            flags.append({
+                "flag": "survival_extreme_low",
+                "reason": f"pSurvival {p_surv:.2f} 는 사실상 청산 가정 — liquidation 모델 직접 선택 권장",
+                "suggestedRetry": {"primaryModel": "liquidation"},
+            })
+        elif p_surv > 1.0:
+            flags.append({
+                "flag": "survival_invalid",
+                "reason": f"pSurvival {p_surv:.2f} > 1 (확률 범위 초과)",
+                "suggestedRetry": {"pSurvival": 0.99},
+            })
+
+    # ── Phase 3 규칙 ──
+    # Implied ERP 가 historical 과 ±3%p 초과 이탈
+    implied = assumptions.get("impliedERP")
+    historical = assumptions.get("historicalERP")
+    if isinstance(implied, (int, float)) and isinstance(historical, (int, float)):
+        if abs(implied - historical) > 3.0:
+            flags.append({
+                "flag": "implied_far_from_historical",
+                "reason": f"Implied ERP {implied:.1f}% vs historical {historical:.1f}% — 시장 과열/공포 가능성",
+                "suggestedRetry": {"impliedERP": False},
+            })
+
+    # Bottom-up beta peer 부족
+    peer_count = assumptions.get("peerCount")
+    if isinstance(peer_count, int) and peer_count < 5:
+        flags.append({
+            "flag": "peer_count_low",
+            "reason": f"Bottom-up beta peer {peer_count}개 — 섹터 기본값 사용 권장",
+            "suggestedRetry": {"bottomUpBeta": False},
+        })
+
+    # Control + Synergy 이중계산 위험
+    control_premium = assumptions.get("controlPremium")
+    synergy = assumptions.get("synergy")
+    standalone = assumptions.get("standaloneValue")
+    if (isinstance(control_premium, (int, float)) and isinstance(synergy, (int, float))
+            and isinstance(standalone, (int, float)) and standalone > 0):
+        total_extra = control_premium + synergy
+        if total_extra > standalone * 0.5:
+            flags.append({
+                "flag": "control_synergy_double_count",
+                "reason": f"Control premium + Synergy = {total_extra:,.0f} 이 standalone × 50% 초과 — 이중계산 의심",
+                "suggestedRetry": {"synergyType": "cost"},  # 최소 시너지로 축소
+            })
 
     return flags
 
