@@ -251,19 +251,38 @@
 	);
 
 	// ── 뷰 전환 ──
+	let loadError = $state<string | null>(null);
+
 	async function enterIndustry(industryId: string) {
+		console.log('[map] enterIndustry', industryId);
 		industryLoading = true;
 		drillIndustry = industryId;
 		viewMode = 'industry';
 		selectedNode = null;
+		loadError = null;
+		const url = `${base}/map/industries/${industryId}.json`;
 		try {
-			const res = await fetch(`${base}/map/industries/${industryId}.json`);
-			if (!res.ok) throw new Error('industry 데이터 없음');
+			const res = await fetch(url);
+			console.log('[map] fetch', url, 'status', res.status);
+			if (!res.ok) {
+				loadError = `HTTP ${res.status} — ${url}`;
+				industryDetail = null;
+				return;
+			}
 			industryDetail = await res.json();
-		} catch (e) {
+			console.log(
+				'[map] industryDetail loaded',
+				industryDetail?.industryId,
+				'stages',
+				industryDetail?.stages?.length
+			);
+		} catch (e: any) {
+			console.error('[map] fetch failed', e);
+			loadError = e?.message || String(e);
 			industryDetail = null;
 		} finally {
 			industryLoading = false;
+			console.log('[map] industryLoading=false');
 		}
 	}
 
@@ -654,9 +673,26 @@
 
 	<!-- 메인 지도 -->
 	<main class="map-main">
-		{#if viewMode === 'industry' && industryLoading}
-			<div class="loading-overlay">산업 데이터 로드 중…</div>
+		{#if viewMode === 'industry' && industryLoading && !industryDetail}
+			<div class="loading-overlay">
+				<div>
+					<div>산업 데이터 로드 중…</div>
+					{#if loadError}
+						<div class="err">{loadError}</div>
+					{/if}
+				</div>
+			</div>
 		{/if}
+		{#if viewMode === 'industry' && loadError && !industryDetail}
+			<div class="loading-overlay error-overlay">
+				<div>
+					<div>⚠ 산업 데이터 로드 실패</div>
+					<div class="err">{loadError}</div>
+					<button class="retry" onclick={exitToAtlas}>← atlas 로 돌아가기</button>
+				</div>
+			</div>
+		{/if}
+
 		{#if viewMode === 'atlas'}
 			<IndustryAtlas
 				industries={data.atlas.industries.map((ind: any) => ({
@@ -666,14 +702,14 @@
 				flows={data.atlas.flows}
 				onSelect={(ind: any) => enterIndustry(ind.id)}
 			/>
-		{:else if viewMode === 'industry'}
+		{:else if viewMode === 'industry' && industryDetail}
 			<IndustryDrilldown
 				nodes={industryNodes}
 				links={industryLinks.map((l: any) => ({ ...l }))}
 				stages={industryDetail?.stages || []}
 				onNodeClick={handleNodeClick}
 			/>
-		{:else}
+		{:else if viewMode === 'companies'}
 			<EcosystemMap
 				bind:this={mapRef}
 				nodes={activeNodes}
@@ -1282,6 +1318,30 @@
 		font-size: 14px;
 		z-index: 10;
 		backdrop-filter: blur(2px);
+		text-align: center;
+	}
+	.loading-overlay .err {
+		margin-top: 8px;
+		color: #f87171;
+		font-size: 12px;
+		font-family: monospace;
+		max-width: 600px;
+	}
+	.loading-overlay.error-overlay {
+		background: rgba(127, 29, 29, 0.4);
+	}
+	.loading-overlay .retry {
+		margin-top: 16px;
+		padding: 6px 12px;
+		background: rgba(96, 165, 250, 0.15);
+		color: #60a5fa;
+		border: 1px solid rgba(96, 165, 250, 0.4);
+		border-radius: 6px;
+		cursor: pointer;
+		font-size: 12px;
+	}
+	.loading-overlay .retry:hover {
+		background: rgba(96, 165, 250, 0.3);
 	}
 
 	.detail {
