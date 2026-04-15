@@ -11,6 +11,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.13] - 2026-04-15
+
+### Added
+
+- **P8 Tool Zero 응답 금지**: 질문을 META / FINANCE / OUT_OF_SCOPE 3범주로 분류. FINANCE 는 tool 최소 1회 필수 (시스템 프롬프트 + `tool_choice="any"` + 런타임 가드 3중 방어). META 는 즉답, OUT_OF_SCOPE 는 "범위 밖" 명시 후 거절. dartlab 엔진 경유 없이 일반 ChatGPT 답변 생산 불가.
+- **매크로 톱다운 intent 분기**: "최근 경제 어때" 같은 시장 레벨 질문에서 `macro() + gather(axis='news')` 조합 강제.
+- **`pastInsight` / `sectorInsights` 공개 API**: `dartlab.__all__` 노출 → AI tool 자동 등록 + 사용자 직접 호출 가능.
+- **provider `tool_choice` 파라미터**: FINANCE 첫 라운드에 "any" 강제.
+
+### Changed
+
+- **`analyze` → `runAsk`**, **`insight.pipeline.analyze` → `analyzeFinancial`**: 이름 실체 일치.
+- **AI tool 자동 등록 우선순위**: module > Company (같은 이름 시 module 이 시장 전체 의미).
+- **`_splitKwargs` 자동 시그니처**: 기존 수동 `_MODULE_CORE` whitelist 제거.
+- **`Company.gather` 시그니처에 `target` 명시**: AI 가 매크로 뉴스 검색어 전달 가능.
+
+### Removed
+
+- `ai/superfeature/` 전체 (480줄 dead code)
+- `ai/runtime/standalone.py::analyze_full` (사용처 0)
+- `ai/tools/_builtin.py` (수동 AITool 생성 → 자동등록으로 대체)
+- `review/presets.py` (deprecated re-export shim)
+- `core/engines_DEV.md` (dev 문서가 src 안에 있던 것)
+
+### Fixed
+
+- AI 가 매크로 질문에서 tool 0회 일반론 답변하던 사고 (P8 3중 방어선으로 구조적 불가).
+- `Company.gather` target 파라미터 schema 누락 (시그니처 명시로 해결).
+- `_builtin.py` 경로가 `_MODULE_CORE` 밖이라 라이브 호출 시 stockCode 누락 (자동 시그니처로 근본 해결).
+
 ## [0.9.12] - 2026-04-15
 
 ### Added

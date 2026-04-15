@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.13] - 2026-04-15
+
+### Added
+
+- **P8 Tool Zero 응답 금지** (`ai/context/intent.py::classifyCategory`): 질문을 META / FINANCE / OUT_OF_SCOPE 3범주로 분류. FINANCE 범주는 tool 최소 1회 호출 필수 (시스템 프롬프트 블록 + `tool_choice="any"` 첫 라운드 API 강제 + 런타임 가드 3중 방어). META 는 tool 불필요 (CAPABILITIES 로 즉답), OUT_OF_SCOPE 는 "dartlab 전문 영역 아님" 명시 + 금융 질문 예시 제시 후 종료. dartlab 엔진 경유 없이 일반 ChatGPT 답변 생산 불가.
+- **매크로 톱다운 intent 분기** (`ai/runtime/core.py::_mandatoryForOutlook`): "최근 경제 어때" 같은 시장 레벨 질문에서 `macro() + gather(axis='news')` 조합 강제. 수치 + 최근 이슈 교차 인과 해석. 이전 `act_all` 로 잘못 분류되어 일반론 답변되던 문제 해결.
+- **`pastInsight(stockCode)` / `sectorInsights(sector)` 공개 API**: `dartlab.__all__` 에 노출 → AI tool 자동 등록 경로 (`_autoDiscover`) 진입. 사용자도 `dartlab.pastInsight("005930")` 직접 호출 가능.
+- **`ai/context/intent.py::Category` enum**: META / FINANCE / OUT_OF_SCOPE 상위 범주. 기존 8 intent (act1~6 / compare / concept) 와 병렬.
+- **provider `tool_choice` 파라미터**: `BaseProvider.complete_with_tools/stream_with_tools` 에 `tool_choice: str | None` 추가. "any"/"none"/"auto" 매핑. FINANCE 첫 라운드에만 "any" 강제 후 auto 로 환원.
+
+### Changed
+
+- **`ai/runtime/core.py::analyze` → `runAsk`** / `_analyze_inner` → `_runAskInner`. 구 "떠먹이기 시대" 이름 제거. `dartlab.ask()` 진입점 단일 (P1) 을 내부 이름으로도 선언.
+- **`analysis/financial/insight/pipeline.py::analyze` → `analyzeFinancial`**: AI 엔진 `runAsk` 와 이름 충돌 해소. 인사이트 엔진 코어 함수 의미 명확화. `analyze` 는 호환 alias 로 1 릴리즈 유지.
+- **AI tool 자동 등록 우선순위**: module-level > Company-bound (이전 반대). 같은 이름 존재 시 `dartlab.search` (시장 전체) 가 `Company.search` (이 회사 공시) 보다 AI tool 로 유용. Company-bound 는 module 에 없는 것만 등록.
+- **`_splitKwargs` 자동 시그니처 추출**: 기존 `_MODULE_CORE` 수동 whitelist (scan/macro/search/searchName) 제거. `inspect.signature(fn)` 으로 자동 추출 → pastInsight/sectorInsights 포함 모든 module-level tool 일관 처리.
+- **`Company.gather` 시그니처 `target: str | None = None` 명시**: 이전 `**kwargs` 에 숨어 tool schema 누락. AI 가 `gather(axis='news', target='한국 경제')` 로 시장 레벨 뉴스 검색 가능해짐.
+- **ops/ai.md P8 섹션 신설**: 3범주 분류 + 3중 방어선 단일 출처.
+
+### Removed
+
+- **`ai/superfeature/`** 폴더 전체 (480줄, 4파일) — `getSuperMaster` 호출 0건 (내부 순환만). 완전 dead code.
+- **`ai/runtime/standalone.py::analyze_full`**: `list(analyze(...))` 래퍼, 사용처 0.
+- **`ai/tools/_builtin.py`**: pastInsight/sectorInsights 수동 AITool 생성 파일. `_autoDiscover` 자동 경로로 일원화.
+- **`review/presets.py`**: `reportTypes.py` 로 통합된 deprecated re-export shim, import 0건.
+- **`core/engines_DEV.md`**: dev 문서가 src 안에 있던 것.
+- **`ai/runtime/standalone.py` 에서 `from dartlab.ai.runtime.core import analyze`** 등 낡은 import 15곳 갱신 (CLI, stdio, server/streaming, scripts/audit, scripts/eval).
+
+### Fixed
+
+- **AI 가 매크로 질문에서 tool 0회 일반론 답변**: v0.9.12 에서 "최근 경제 어때" 질문에 `macro()` 호출 없이 학습 지식으로 답한 사고 — P8 3중 방어선으로 구조적 불가능화. `dartlab.ask("최근 경제")` 재현 테스트: tool 3회 (macro summary + gather news × 2), CLI/M2/기준금리/공포탐욕/uncertainty 실측 수치 기반 답변 확인.
+- **`Company.gather` `target` 파라미터 AI schema 누락**: `**kwargs` 에 숨어 AI 가 시장 레벨 뉴스 검색 인자 못 넣음. 시그니처 명시로 해결.
+- **`_builtin.py` 가 `_MODULE_CORE` 경로 밖이라 라이브 호출 시 stockCode 누락**: `_splitKwargs` 자동 시그니처로 근본 해결.
+
 ## [0.9.12] - 2026-04-15
 
 ### Added
