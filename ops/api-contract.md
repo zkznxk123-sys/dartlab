@@ -350,7 +350,36 @@ source 우선순위: **finance > report > docs** (숫자 → 정형 → 서술)
 
 ---
 
-## 12. ops/ 가 source of truth
+## 12. EDGAR 수집 경로 — dartlab=벌크, 사용자 API=선택 [최우선]
+
+> ⛔ **dartlab 자체는 SEC 벌크가 primary 소스.** 자동 CI·프리빌드·HF 배포는 전부 벌크(`companyfacts.zip` + 분기 `{Y}q{Q}.zip`) 파이프라인을 쓴다. 상세: `ops/edgar.md`.
+
+### 경로 분리
+
+| 경로 | 트리거 | 소스 | 용도 |
+|------|--------|------|------|
+| **자동 파이프라인 (벌크)** | edgarSync.yml cron + workflow_run | `Archives/edgar/daily-index/xbrl/companyfacts.zip` + `files/dera/data/financial-statement-data-sets/{Y}q{Q}.zip` | HF 배포, scan 프리빌드, 전 종목 커버 |
+| **사용자 선택 (API)** | `c.finance.refreshFromApi()` 명시 호출 | `data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json` | 공시 당일 최신 분기 즉시 반영 원할 때만 |
+
+### 금지
+
+- 자동 파이프라인 어디서도 `data.sec.gov/api/xbrl/companyfacts` 엔드포인트를 호출하지 않는다.
+- `_collectEdgarFinance` 같은 per-ticker API 수집 함수는 **사용자 경로**(`refreshFromApi`)에서만 노출.
+- `num.tsv`는 받지 않는다 — `companyfacts.zip`이 같은 값의 더 신선한 번들이라 중복.
+
+### 검증 방법
+
+```bash
+# CI 워크플로우가 API 엔드포인트 호출하는지 확인 (0건이어야 함)
+grep -rn "data.sec.gov/api/xbrl" .github/ scripts/ src/dartlab/core/ src/dartlab/providers/edgar/bulk/
+
+# 자동 파이프라인 함수에서 companyfacts API 호출 안 하는지
+grep -n "companyfacts/CIK" src/dartlab/providers/edgar/bulk/
+```
+
+---
+
+## 13. ops/ 가 source of truth
 
 - 코드 ↔ ops/ 충돌 시 코드 기준으로 ops 갱신
 - `ops/api-contract.md` (이 문서) 가 모든 API 규칙의 진입점

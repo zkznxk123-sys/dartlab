@@ -4,7 +4,7 @@ export const brand = {
 	taglineEn: 'One stock code. Full company story.',
 	description: '종목코드 하나로 DART·EDGAR 공시를 읽고 비교한다. 2,700+ 한국 기업, 970+ 미국 기업, Python 한 줄.',
 	descriptionEn: 'One stock code → structured Korean DART & US SEC EDGAR filings. 2,700+ KR, 970+ US companies, one line of Python.',
-	version: '0.9.11',
+	version: '0.9.13',
 	url: 'https://eddmpython.github.io/dartlab/',
 	repo: 'https://github.com/eddmpython/dartlab',
 	pypi: 'https://pypi.org/project/dartlab/',
