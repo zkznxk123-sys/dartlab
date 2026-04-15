@@ -885,7 +885,11 @@ def _htmlToText(html: str) -> str:
     for tag in soup(["script", "style", "meta", "link", "header", "footer", "nav"]):
         tag.decompose()
     for tag in soup.find_all(style=True):
-        style = str(tag.get("style") or "").lower()
+        # bs4 edge case: find_all이 attrs=None인 노드를 반환할 수 있음
+        attrs = getattr(tag, "attrs", None)
+        if not attrs:
+            continue
+        style = str(attrs.get("style") or "").lower()
         if "display:none" in style or "visibility:hidden" in style:
             tag.decompose()
     for tag in soup.find_all(re.compile(r"^(ix:header|ix:hidden|ix:references|ix:resources|xbrli:|dei:|link:)")):
