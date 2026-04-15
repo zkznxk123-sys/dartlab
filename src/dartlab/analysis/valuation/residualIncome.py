@@ -240,7 +240,7 @@ def _estimateCoe(
     CoE = Rf + beta * (ERP + CRP)
     beta 미지정 시 1.0 기본, ROE 기반 가감.
     """
-    from dartlab.industry.compat import getMarketParams
+    from dartlab.industry import getMarketParams
 
     mkt = getMarketParams(currency)
     b = beta if beta is not None else 1.0

@@ -13,7 +13,7 @@ KIS/KR/NICE + Moody's/S&P 공개 방법론을 종합하여
 
 from __future__ import annotations
 
-from dartlab.industry.compat import IndustryGroup, Sector
+from dartlab.industry import IndustryGroup, Sector
 
 # ── 등급 구간 정의 ──
 #

@@ -3,7 +3,7 @@
 이 모듈은 하위 호환용 shim이다. 실제 구현은 dartlab.industry.compat.
 """
 
-from dartlab.industry.compat import (
+from dartlab.industry import (
     MARKET_KR,
     MARKET_PARAMS,
     MARKET_US,

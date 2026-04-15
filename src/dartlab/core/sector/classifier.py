@@ -5,7 +5,7 @@
 그대로 사용할 수 있도록 인터페이스를 유지한다.
 """
 
-from dartlab.industry.compat import (
+from dartlab.industry import (
     IndustryGroup,
     Sector,
     _byValue,

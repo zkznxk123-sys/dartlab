@@ -3908,7 +3908,7 @@ class Company:
         cacheKey = "_sector"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        from dartlab.industry.compat import classify
+        from dartlab.industry import classify
 
         kindDf = getKindList()
         row = kindDf.filter(pl.col("종목코드") == self.stockCode)
@@ -3953,7 +3953,7 @@ class Company:
         cacheKey = "_sectorParams"
         if cacheKey in self._cache:
             return self._cache[cacheKey]
-        from dartlab.industry.compat import getParams
+        from dartlab.industry import getParams
 
         result = getParams(self.sector)
         self._cache[cacheKey] = result

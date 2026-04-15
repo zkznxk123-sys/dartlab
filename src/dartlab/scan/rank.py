@@ -80,7 +80,7 @@ def buildSnapshot(*, verbose: bool = True) -> dict[str, RankInfo]:
     """
     from dartlab.core.finance.ratios import calcRatios
     from dartlab.gather.listing import getKindList
-    from dartlab.industry.compat import classify
+    from dartlab.industry import classify
     from dartlab.providers.dart.finance.pivot import buildAnnual
 
     kindDf = getKindList()

@@ -196,7 +196,7 @@ def calcCreditFlags(company, *, basePeriod: str | None = None) -> dict | None:
     try:
         si = getattr(company, "sector", None)
         if si:
-            from dartlab.industry.compat import Sector
+            from dartlab.industry import Sector
 
             isFinancial = si.sector == Sector.FINANCIALS
     except (AttributeError, ImportError):

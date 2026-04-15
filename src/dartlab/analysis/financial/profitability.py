@@ -30,7 +30,7 @@ def _isFinancialSector(company) -> bool:
     try:
         sector = getattr(company, "sector", None)
         if sector is not None:
-            from dartlab.industry.compat import Sector
+            from dartlab.industry import Sector
 
             if sector.sector == Sector.FINANCIALS:
                 return True

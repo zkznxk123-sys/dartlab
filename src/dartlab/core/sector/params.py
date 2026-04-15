@@ -3,7 +3,7 @@
 하위 호환용 shim. 실제 구현은 dartlab.industry.compat.
 """
 
-from dartlab.industry.compat import (
+from dartlab.industry import (
     IndustryGroup,
     Sector,
     SectorParams,

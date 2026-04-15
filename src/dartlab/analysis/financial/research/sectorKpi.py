@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 
 from dartlab.analysis.financial.research.types import SectorKpi, SectorKpis
-from dartlab.industry.compat import Sector
+from dartlab.industry import Sector
 
 _log = logging.getLogger(__name__)
 

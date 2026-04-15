@@ -30,7 +30,7 @@ from dartlab.core.finance.scenario import (
     SectorElasticity,
     getElasticity,
 )
-from dartlab.industry.compat import SectorParams
+from dartlab.industry import SectorParams
 
 # ══════════════════════════════════════
 # Layer 3: 기업 시뮬레이션
