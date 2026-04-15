@@ -52,7 +52,8 @@ UTC 20:00  dataPipeline.yml ──── audit 전용 (수집 안 함, Issue 알
 | stemIndex | dart/stemIndex | Ngram+Synonym 역인덱스 | 로컬 전용 |
 | aiKnowledge | ai/knowledge | AI 분석 지식 (인사이트/스킬/에러패턴) | push/pull |
 | edgarDocs | edgar/docs | SEC EDGAR 공시 문서 (10-K/10-Q) | edgarSync, edgar-collect |
-| edgar | edgar/finance | SEC EDGAR 재무 (XBRL companyfacts) | edgarSync, edgar-collect |
+| edgar | edgar/finance | SEC EDGAR 재무 (**companyfacts.zip 벌크 파생**) | edgarSync (벌크) |
+| edgarMeta | edgar/meta | EDGAR 분기 벌크 메타 (sub/pre/tag) | edgarSync (분기) |
 | edgarScan | edgar/scan | EDGAR 전종목 scan 프리빌드 | edgar-collect --scan |
 | edinetDocs | edinet/docs | EDINET 공시 (일본) | 로컬 전용 |
 | edinet | edinet/finance | EDINET 재무 (일본) | 로컬 전용 |
@@ -89,16 +90,24 @@ UTC 20:00  dataPipeline.yml ──── audit 전용 (수집 안 함, Issue 알
 - **EDGAR 출력**: edgar/scan/finance.parquet
 - **타임아웃**: 120분
 
-### edgarSync.yml — EDGAR 통합 수집
+### edgarSync.yml — EDGAR 통합 수집 (벌크 기반)
 
-- **스케줄**: 일요일 UTC 03:00 (KST 12:00)
-- **수동 실행**: tier/categories/mode/limit 파라미터 지원
-- **흐름**: `dartlab collect --tier {tier} -c {categories}` → EDGAR scan prebuild → `deployEdgarToHF()` → HF 업로드
-- **배치 엔진**: `AsyncEdgarClient` (httpx 비동기, 0.12s throttle, 3 워커, 세마포어 8)
-- **증분**: 기존 파일이 있고 7일 이내면 스킵 (finance), 파일 존재 시 스킵 (docs)
-- **유니버스**: `loadEdgarTargetUniverse(tier)` — all=7,549 / nasdaq=4,248 / nyse=3,273 / sp500=500
+> ⛔ **dartlab EDGAR finance = SEC 벌크.** `data.sec.gov/api/xbrl/companyfacts` API는 사용자가 명시적으로 요청할 때(`c.finance.refreshFromApi()`)만 호출되는 **선택 경로**다. 자동 CI/프리빌드/HF 배포는 전부 벌크를 쓴다. 상세: `ops/edgar.md`.
+
+- **스케줄**: 매일 UTC 04:30 (companyfacts.zip 갱신 04:25 직후) + 일요일 전체 정산
+- **finance (daily 벌크)**:
+  - `downloadCompanyfactsBulk()` — `Archives/edgar/daily-index/xbrl/companyfacts.zip` (1.37GB)
+  - `convertBulkToParquets()` — 16,601개 {cik}.parquet 일괄 생성
+- **meta (분기 벌크)**:
+  - `discoverLatestQuarter()` — SEC에 새 `{Y}q{Q}.zip` 있나 체크
+  - `downloadQuarterlyDataset(Y, Q)` + `convertQuarterlyToParquets()` — sub/pre/tag parquet
+  - `num.tsv는 받지 않음` (companyfacts.zip이 원본)
+- **docs (submissions API 경로)**: 10-K/10-Q HTML fetch는 벌크 개념 없음, 기존 경로 유지
+- **scan 프리빌드**: `buildEdgarFinance(sinceYear=2021)` → `edgar/scan/finance.parquet`
+- **HF 업로드**: `deployEdgarToHF(["finance", "meta", "scan", "docs"])` — 카테고리별 `upload_folder` 단일 커밋
+- **유니버스**: `loadEdgarTargetUniverse(tier)` — all=7,557 / nasdaq=4,256 / nyse=3,273 / sp500=500
 - **타임아웃**: 180분
-- **캐시**: `dartlab-edgar-finance`, `dartlab-edgar-docs` (run_id 없이 덮어쓰기)
+- **캐시**: `dartlab-edgar-bulk`, `dartlab-edgar-docs` (run_id 없이 덮어쓰기)
 
 ### kindlist.yml — KRX 종목 리스트 + DART 전체 법인 목록
 
@@ -160,11 +169,23 @@ UTC 20:00  dataPipeline.yml ──── audit 전용 (수집 안 함, Issue 알
 - `_collectDocsDirect()`: dataSyncDaily docs 전용 경로
 
 ### EDGAR
-- `AsyncEdgarClient`: httpx 비동기, 0.12s throttle, `asyncio.Semaphore(8)` 전체 동시 요청 제한
+
+**finance (벌크 primary):**
+- `bulk/companyfactsBulk.py::downloadCompanyfactsBulk()` — daily 1.37GB zip (ETag TTL 24h)
+- `bulk/companyfactsBulk.py::convertBulkToParquets()` — {cik}.parquet 일괄 변환
+- `bulk/datasetBulk.py::downloadQuarterlyDataset()` — 분기 zip (sub/pre/tag만, num.tsv 제외)
+- `bulk/datasetBulk.py::convertQuarterlyToParquets()` — `edgar/meta/{sub|pre|tag}/{Y}Q{Q}.parquet`
+
+**docs (submissions API):**
+- `AsyncEdgarClient`: httpx 비동기, 0.12s throttle, `asyncio.Semaphore(8)`
 - `batchCollectEdgar()` / `batchCollectEdgarAll()`: 워커 3개, Queue 기반 ticker 분배, Rich Live progress
-- `_collectEdgarFinance()`: SEC companyfacts API → XBRL facts parquet (증분: 7일 이내 파일 스킵)
 - `_collectEdgarDocs()`: SEC submissions API → 10-K/10-Q HTML fetch → sections parquet (증분: 파일 존재 스킵)
-- `deployEdgarToHF()`: 수집 데이터 → HuggingFace 업로드 (100파일/청크)
+
+**HF 배포:**
+- `deployEdgarToHF()`: `upload_folder` 단일 커밋 (카테고리별 `finance/meta/scan/docs`)
+
+**사용자 선택 경로 (자동 CI에 없음):**
+- `company.py::refreshFromApi()` — companyfacts API per-ticker 호출, 최신성 즉시 반영 원할 때만
 
 ## 3-Layer Freshness
 

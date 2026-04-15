@@ -615,16 +615,52 @@ def _deaccumulateCF(
 
 
 def _findMissingQuarters(tagDf: pl.DataFrame, result: pl.DataFrame) -> pl.DataFrame:
-    allPeriods = tagDf.select("tag", "period").unique()
+    """Q1~Q3 중 기대되지만 result 에 없는 period 탐색.
+
+    Q1 이 raw 에도 없는 YTD-전용 기업(Google 등) 대응:
+    동일 (tag, fy) 에 Q2/Q3/FY 중 하나라도 있으면 Q1/Q2/Q3 모두 기대한다.
+    """
+    # raw 에 포함된 (tag, period) 조합
+    rawPeriods = tagDf.select("tag", "period").unique()
+
+    # (tag, fy) 단위로 Q2/Q3/FY 존재 여부 기반 기대 집합 생성
+    tagFy = tagDf.select("tag", "fy").unique()
+    # Q2/Q3/FY 중 하나라도 있는 (tag, fy) 만 기대 대상
+    seenFp = tagDf.filter(pl.col("fp").is_in(["Q2", "Q3", "FY"])).select("tag", "fy").unique()
+    expected = tagFy.join(seenFp, on=["tag", "fy"], how="semi")
+    expectedPeriods = pl.concat(
+        [
+            expected.with_columns(
+                (pl.col("fy").cast(pl.Utf8) + pl.lit(f"-{q}")).alias("period")
+            ).select("tag", "period")
+            for q in ("Q1", "Q2", "Q3")
+        ]
+    ).unique()
+
+    allPeriods = pl.concat([rawPeriods, expectedPeriods]).unique()
     existingPeriods = result.select("tag", "period").unique()
     missing = allPeriods.join(existingPeriods, on=["tag", "period"], how="anti")
-    return missing.filter(pl.col("period").str.contains("Q[23]"))
+    return missing.filter(pl.col("period").str.contains("Q[123]"))
 
 
 def _ytdDeaccumulate(tagDf: pl.DataFrame, missingPeriods: pl.DataFrame) -> pl.DataFrame:
+    """YTD(누적) 데이터로 standalone 분기값 역산.
+
+    Q1 누락 + Q2/Q3 standalone + Q3_YTD 보유 경우 (Google 같은 YTD-전용 보고 기업):
+        Q1 = Q3_YTD - Q2_standalone - Q3_standalone
+    Q1 누락 + Q2 standalone + Q2_YTD 경우:
+        Q1 = Q2_YTD - Q2_standalone
+    Q2 누락 + Q1 standalone + Q2_YTD 경우 (기존):
+        Q2 = Q2_YTD - Q1_standalone
+    Q3 누락 + Q2_YTD + Q3_YTD 경우 (기존):
+        Q3 = Q3_YTD - Q2_YTD
+    """
     tagDf = _computeDurationDays(tagDf) if "duration_days" not in tagDf.columns else tagDf
 
     ytdRows = tagDf.filter(pl.col("duration_days").is_not_null() & (pl.col("duration_days") > 100))
+    standaloneRows = tagDf.filter(
+        pl.col("duration_days").is_not_null() & (pl.col("duration_days") <= 100)
+    )
 
     revTags = EdgarMapper.getTagsForSnakeIds(["sales", "revenue"])
     rows = []
@@ -632,20 +668,53 @@ def _ytdDeaccumulate(tagDf: pl.DataFrame, missingPeriods: pl.DataFrame) -> pl.Da
         tag, period = mpRow["tag"], mpRow["period"]
         fy = extractYear(period)
         fp = period.split("-")[1]
+        fyInt = int(fy)
 
-        candidates = ytdRows.filter((pl.col("tag") == tag) & (pl.col("fy") == int(fy)) & (pl.col("fp") == fp)).sort(
-            ["end", "filed"], descending=[True, True]
-        )
+        def _firstVal(df: pl.DataFrame) -> float | None:
+            if df.height == 0:
+                return None
+            return df.sort(["end", "filed"], descending=[True, True]).row(0, named=True)["val"]
 
-        if candidates.height == 0:
+        if fp == "Q1":
+            # 우선 Q2_YTD - Q2_standalone
+            q2Ytd = _firstVal(
+                ytdRows.filter((pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q2"))
+            )
+            q2Stand = _firstVal(
+                standaloneRows.filter((pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q2"))
+            )
+            standalone: float | None = None
+            if q2Ytd is not None and q2Stand is not None:
+                standalone = q2Ytd - q2Stand
+            else:
+                # fallback: Q3_YTD - Q2_standalone - Q3_standalone (GOOGL 케이스)
+                q3Ytd = _firstVal(
+                    ytdRows.filter((pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q3"))
+                )
+                q3Stand = _firstVal(
+                    standaloneRows.filter(
+                        (pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q3")
+                    )
+                )
+                if q3Ytd is not None and q2Stand is not None and q3Stand is not None:
+                    standalone = q3Ytd - q2Stand - q3Stand
+            if standalone is not None:
+                if standalone < 0 and tag in revTags:
+                    continue
+                rows.append({"tag": tag, "period": period, "val": standalone})
             continue
 
+        candidates = ytdRows.filter(
+            (pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == fp)
+        ).sort(["end", "filed"], descending=[True, True])
+        if candidates.height == 0:
+            continue
         ytdVal = candidates.row(0, named=True)["val"]
 
         if fp == "Q2":
-            q1Rows = tagDf.filter((pl.col("tag") == tag) & (pl.col("fy") == int(fy)) & (pl.col("fp") == "Q1")).sort(
-                "filed", descending=True
-            )
+            q1Rows = tagDf.filter(
+                (pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q1")
+            ).sort("filed", descending=True)
             if q1Rows.height > 0:
                 q1Val = q1Rows.row(0, named=True)["val"]
                 if q1Val is not None and ytdVal is not None:
@@ -656,7 +725,7 @@ def _ytdDeaccumulate(tagDf: pl.DataFrame, missingPeriods: pl.DataFrame) -> pl.Da
 
         elif fp == "Q3":
             q2YtdRows = ytdRows.filter(
-                (pl.col("tag") == tag) & (pl.col("fy") == int(fy)) & (pl.col("fp") == "Q2")
+                (pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q2")
             ).sort(["end", "filed"], descending=[True, True])
             if q2YtdRows.height > 0:
                 q2YtdVal = q2YtdRows.row(0, named=True)["val"]

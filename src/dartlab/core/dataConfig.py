@@ -38,7 +38,12 @@ DATA_RELEASES: dict[str, dict] = {
     },
     "edgar": {
         "dir": "edgar/finance",
-        "label": "SEC EDGAR 재무 데이터",
+        "label": "SEC EDGAR 재무 데이터 (companyfacts.zip 벌크 파생)",
+        "public": True,
+    },
+    "edgarMeta": {
+        "dir": "edgar/meta",
+        "label": "SEC EDGAR 분기 벌크 메타 (sub/pre/tag)",
         "public": True,
     },
     # ── 내부용 (brand.ts 동기화 불필요) ──

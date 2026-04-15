@@ -1071,6 +1071,63 @@ class Company:
         """
         return self._docs.filings()
 
+    def refreshFromApi(self) -> int:
+        """[사용자 선택 경로] SEC companyfacts API로 로컬 finance parquet 갱신.
+
+        Capabilities:
+            - SEC companyfacts per-ticker API 호출
+            - 로컬 ``data/edgar/finance/{cik}.parquet`` 덮어쓰기
+            - 캐시 무효화 → 다음 show/analysis 호출부터 새 데이터 사용
+
+        Policy:
+            dartlab 자체 파이프라인은 **SEC 벌크** (``companyfacts.zip`` daily
+            + 분기 ``financial-statement-data-sets``) 를 primary 소스로 사용한다.
+            이 메서드는 **자동 파이프라인·프리빌드·HF 배포가 사용하지 않는다** —
+            사용자가 공시 당일 최신 분기를 즉시 반영하고 싶을 때만 명시적으로 호출.
+            상세: ``ops/edgar.md`` 및 ``ops/api-contract.md`` "EDGAR 수집 경로".
+
+        Requires:
+            인터넷 연결 (data.sec.gov). User-Agent 헤더.
+
+        AIContext:
+            - 자동 호출 금지. 사용자가 "API로 새로고침" 같은 명시적 의도일 때만.
+
+        Guide:
+            - "최신 실적 반영해줘" → c.refreshFromApi()
+            - "SEC에서 직접 다시 받아줘" → c.refreshFromApi()
+
+        SeeAlso:
+            - filings: 현재 보유 공시 목록 확인
+
+        Returns:
+            저장된 parquet 행 수. 실패 시 0.
+
+        Example::
+
+            c = Company("AAPL")
+            c.refreshFromApi()  # SEC API로 즉시 최신화
+        """
+        import polars as _pl
+
+        from dartlab.providers.edgar.openapi.client import EdgarClient
+        from dartlab.providers.edgar.openapi.saver import saveFinance
+
+        cik = str(self.cik).zfill(10)
+        client = EdgarClient()
+        try:
+            path = saveFinance(cik, client=client)
+        except (OSError, ValueError, RuntimeError):
+            return 0
+
+        for key in list(self._cache.keys()):
+            if key.startswith("_finance_") or key in ("_ratios", "_ratioSeries"):
+                self._cache.pop(key, None)
+
+        try:
+            return _pl.read_parquet(path).height
+        except (OSError, _pl.exceptions.PolarsError):
+            return 0
+
     def disclosure(
         self,
         start: str | None = None,
