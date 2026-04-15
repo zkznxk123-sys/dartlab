@@ -53,9 +53,12 @@ def _getRatios(company):
 def _selectDocsRevenue(
     company, *, basePeriod: str | None = None
 ) -> tuple[dict[str, dict[str, float]], list[str]] | None:
-    """productService/salesOrder에서 부문별 매출 시계열을 추출.
+    """productService/salesOrder 토픽에서 부문별 매출 시계열을 추출.
 
-    fallback 체인: productService → salesOrder → EDGAR XBRL segments.
+    DART 전용 경로. EDGAR(US) 는 SEC companyfacts API 가 XBRL segment
+    dimension(axis/member) 을 제공하지 않아 segment 분해 불가 — None 반환.
+    (EDGAR segment 지원은 10-K 본문 파싱 별도 파이프라인 필요.)
+
     반환: ({부문명: {period: 매출액}}, annualCols) 또는 None.
     """
     for topic in ("productService", "salesOrder"):
@@ -69,104 +72,7 @@ def _selectDocsRevenue(
         if parsed is not None:
             return parsed
 
-    # EDGAR fallback: XBRL segment revenue 태그
-    edgarResult = _selectEdgarSegmentRevenue(company, basePeriod=basePeriod)
-    if edgarResult is not None:
-        return edgarResult
-
     return None
-
-
-def _selectEdgarSegmentRevenue(
-    company, *, basePeriod: str | None = None
-) -> tuple[dict[str, dict[str, float]], list[str]] | None:
-    """EDGAR XBRL segment revenue 태그에서 부문별 매출 추출.
-
-    SEC XBRL에서 segment 관련 revenue 태그를 직접 읽어서
-    DART productService와 동일한 형태로 반환.
-    """
-    market = getattr(company, "market", "KR")
-    if market != "US":
-        return None
-
-    cik = getattr(company, "cik", None)
-    if not cik:
-        return None
-
-    try:
-        import polars as pl
-
-        from dartlab.providers.edgar.report import edgarFinancePath
-
-        path = edgarFinancePath(cik)
-        if not path.exists():
-            return None
-
-        # segment revenue 관련 태그 검색
-        df = (
-            pl.scan_parquet(path)
-            .filter(
-                pl.col("tag").str.contains(
-                    "(?i)RevenueFromContractWithCustomer|SegmentReportingInformationRevenue|"
-                    "SalesRevenueNet|RevenueFromExternalCustomers"
-                )
-                & pl.col("form").is_in(["10-K", "20-F"])
-                & pl.col("unit").str.contains("(?i)USD")
-            )
-            .select("tag", "label", "fy", "val", "filed")
-            .collect()
-        )
-
-        if df.is_empty():
-            return None
-
-        # 연도별 최신값 (filed 기준)
-        df = df.sort("filed", descending=True).unique(subset=["tag", "fy"], keep="first")
-
-        # segment가 있으면 label에 segment 이름이 다를 것
-        # 같은 tag가 여러 번 나오면 segment 분할된 것
-        tagCounts = df.group_by("fy", "tag").agg(pl.count()).filter(pl.col("count") > 1)
-        hasSegments = tagCounts.height > 0
-
-        if not hasSegments:
-            return None
-
-        # label 기반으로 segment 이름 추출
-        years = sorted(df["fy"].unique().drop_nulls().to_list(), reverse=True)
-        yearCols = [str(y) for y in years[:_MAX_YEARS]]
-        if not yearCols:
-            return None
-
-        segData: dict[str, dict[str, float]] = {}
-        latestFy = years[0]
-        latestRows = df.filter(pl.col("fy") == latestFy)
-
-        for row in latestRows.iter_rows(named=True):
-            label = str(row.get("label") or row.get("tag") or "")
-            val = row.get("val")
-            if val is None or val <= 0:
-                continue
-            # label을 segment 이름으로 사용
-            segName = label.split(",")[0].strip()[:30]
-            if not segName:
-                continue
-            if segName not in segData:
-                segData[segName] = {}
-            segData[segName][str(latestFy)] = val
-
-        # 다른 연도도 채우기
-        for segName in segData:
-            for y in years[1:_MAX_YEARS]:
-                yRows = df.filter((pl.col("fy") == y) & pl.col("label").str.contains(segName.split(" ")[0]))
-                if yRows.height > 0:
-                    segData[segName][str(y)] = yRows["val"][0]
-
-        if not segData or len(segData) < 2:
-            return None
-
-        return segData, yearCols
-    except (ImportError, OSError, ValueError, KeyError):
-        return None
 
 
 def _parseDocsRevenueResult(

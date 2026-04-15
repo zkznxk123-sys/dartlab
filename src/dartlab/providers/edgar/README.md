@@ -78,13 +78,14 @@ analysis 일부 축에서 DART report 전용 서브키가 None:
 
 | 축 | None 키 | 원인 | SEC 대안 | 상태 |
 |---|---|---|---|---|
-| 수익구조 | segmentComposition | DART docs `productService` 전용 | **XBRL segment revenue fallback 동작** (`revenue.py:80-169`) | ✅ 해결 |
+| 수익구조 | segmentComposition | DART docs `productService` 전용 | **SEC companyfacts API가 XBRL segment axis(dimension/member) 를 제공하지 않음.** 이전 XBRL fallback 시도(`_selectEdgarSegmentRevenue`) 는 기간 재공시를 segment 로 오판하는 구조적 문제로 2026-04-15 제거. 실제 segment 복원은 10-K 본문 파싱 또는 raw XBRL instance 파이프라인 필요 | ⚠ 한계 인정 |
 | 비용구조 | rawMaterialBreakdown | DART report `rawMaterial` API 전용 | SEC에 구조화 데이터 없음 | ⚠ 한계 인정 |
 | 자본배분 | treasuryStockStatus | DART report `treasuryStock` 상세 API 전용 | **XBRL `purchase_of_treasury_stock` fallback 추가** | ✅ 해결 |
 | 투자효율 | investmentInOther | DART report `investedCompany` API 전용 | SEC에 구조화 데이터 없음 | ⚠ 한계 인정 |
 
-**4건 중 2건 해결** (segmentComposition XBRL + treasuryStockStatus XBRL). 나머지 2건은 SEC 구조적 한계.
+**4건 중 1건 해결** (treasuryStockStatus XBRL). 나머지 3건은 SEC 구조적 한계.
 DART report는 OpenDART API가 구조화 테이블을 직접 제공하지만, SEC에는 동등한 구조화 API가 없다.
+segmentComposition 복원은 별도 프로젝트 — 후보 경로: 10-K Item 1/16 텍스트 블록 파싱, SEC `frames` API + dimension, 또는 외부 소스(FMP segment API 등).
 
 ## 테스트
 
