@@ -20,6 +20,10 @@
 	const parquetUrl = $derived(
 		`https://huggingface.co/datasets/${brand.hfRepo}/resolve/main/${entry.dir}/${code}.parquet`
 	);
+	// HF 파일 블롭 페이지 — 브라우저에서 parquet을 테이블 뷰로 preview
+	const blobUrl = $derived(
+		`https://huggingface.co/datasets/${brand.hfRepo}/blob/main/${entry.dir}/${code}.parquet`
+	);
 	const datasetUrl = `https://huggingface.co/datasets/${brand.hfRepo}`;
 	const parquetText = $derived(label ?? `원본 parquet · ${entry.label}`);
 </script>
@@ -42,14 +46,37 @@ c.select(&quot;IS&quot;, [&quot;매출액&quot;, &quot;영업이익&quot;])  # �
 		</a>
 	</div>
 {:else}
-	<a class="dl-hf-link" href={parquetUrl} target="_blank" rel="noopener noreferrer">
-		<span class="dl-hf-emoji" aria-hidden="true">🤗</span>
-		<span class="dl-hf-text">{parquetText}</span>
-		<span class="dl-hf-code">{code}.parquet</span>
-	</a>
+	<div class="dl-hf-group">
+		<div class="dl-hf-row">
+			<a class="dl-hf-link dl-hf-primary" href={parquetUrl} target="_blank" rel="noopener noreferrer">
+				<span class="dl-hf-emoji" aria-hidden="true">🤗</span>
+				<span class="dl-hf-text">{parquetText}</span>
+				<span class="dl-hf-code">{code}.parquet</span>
+			</a>
+			<a class="dl-hf-link dl-hf-secondary" href={blobUrl} target="_blank" rel="noopener noreferrer">
+				<span aria-hidden="true">📊</span>
+				<span>브라우저 테이블로 보기 (CSV 복사 가능)</span>
+			</a>
+		</div>
+		<p class="dl-hf-hint">
+			💡 Excel 365: File → Get Data → From File → From Parquet 로 바로 열립니다. Python: <code
+				>pl.read_parquet(url)</code
+			> · DuckDB: <code>SELECT * FROM read_parquet('url')</code>
+		</p>
+	</div>
 {/if}
 
 <style>
+	.dl-hf-group {
+		display: block;
+		margin: 0.75rem 0;
+	}
+	.dl-hf-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-bottom: 0.4rem;
+	}
 	.dl-hf-link {
 		display: inline-flex;
 		align-items: center;
@@ -67,6 +94,10 @@ c.select(&quot;IS&quot;, [&quot;매출액&quot;, &quot;영업이익&quot;])  # �
 		border-color: var(--primary, #ea4647);
 		background: var(--bg-card-hover, #1a1f2b);
 	}
+	.dl-hf-secondary {
+		font-size: 0.82rem;
+		color: var(--text-muted, #94a3b8);
+	}
 	.dl-hf-emoji {
 		font-size: 1rem;
 	}
@@ -74,6 +105,20 @@ c.select(&quot;IS&quot;, [&quot;매출액&quot;, &quot;영업이익&quot;])  # �
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 		font-size: 0.78rem;
 		color: var(--text-muted, #94a3b8);
+	}
+	.dl-hf-hint {
+		margin: 0;
+		color: var(--text-muted, #94a3b8);
+		font-size: 0.78rem;
+		line-height: 1.55;
+	}
+	.dl-hf-hint code {
+		padding: 0.1rem 0.35rem;
+		border-radius: 0.25rem;
+		background: var(--bg-card-hover, #1a1f2b);
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 0.75rem;
+		color: var(--text, #f1f5f9);
 	}
 	.dl-hf-card {
 		display: block;
