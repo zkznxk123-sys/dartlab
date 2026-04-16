@@ -57,7 +57,7 @@ dartlab.macro("종합")                               # 전체 종합
 ```python
 import dartlab
 
-# 1. 무인자 → 가이드 DataFrame (act | actLabel | axis | label | description)
+# 1. 무인자 → 가이드 DataFrame (axis | label | description)
 print(dartlab.macro())
 
 # 2. 축별 분석

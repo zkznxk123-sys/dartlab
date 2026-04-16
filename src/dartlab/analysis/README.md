@@ -31,12 +31,12 @@ c.analysis("수익성")                       # 단축형 (그룹 자동 추론)
 Company → Analysis → Review → AI 순서로 계층이 쌓인다.
 analysis 품질이 올라가면 review와 AI 품질이 동시에 올라간다.
 
-## 호출 계약 (4엔진 통일 패턴)
+## 호출 계약 (5엔진 통일 패턴)
 
 ```python
 c = dartlab.Company("005930")
 
-# 1. 무인자 → 가이드 DataFrame (axis | label | description | example | partId | items)
+# 1. 무인자 → 가이드 DataFrame (axis | label | description | example | group | items)
 print(c.analysis())
 
 # 2. 그룹 + 축 (full 형태)
@@ -50,7 +50,7 @@ c.analysis("성장성")    # → financial 자동
 c.analysis("가치평가")  # → valuation 자동
 ```
 
-다른 분석 엔진(macro/quant/credit/scan)도 동일 패턴: 무인자 → 가이드, "축이름" → 분석.
+다른 분석 엔진(macro/quant/credit/scan/industry)도 동일 패턴: 무인자 → 가이드, "축이름" → 분석.
 
 ## 엔진 독립 규칙
 
