@@ -5,59 +5,126 @@
 		selector?: string;
 		title: string;
 		body: string;
-		fallback?: { x: number; y: number; w: number; h: number };
+		// "해보세요" 데모 액션 — 있으면 버튼으로 노출
+		demo?: { label: string; run: () => void | Promise<void> };
 	}
 
 	interface Props {
 		open: boolean;
 		onClose: () => void;
+		// 부모의 상태에 접근 — 데모 액션용 (bind:)
+		colorMetric: string;
+		viewMode: string;
+		enterIndustryAction: (id: string) => void | Promise<void>;
 	}
 
-	let { open, onClose }: Props = $props();
+	let {
+		open,
+		onClose,
+		colorMetric = $bindable(),
+		viewMode = $bindable(),
+		enterIndustryAction
+	}: Props = $props();
+
+	let stepIdx = $state(0);
+	let highlight = $state<{ x: number; y: number; w: number; h: number } | null>(null);
 
 	const STEPS: Step[] = [
 		{
 			title: 'dartlab 산업지도에 오신 걸 환영합니다',
 			body:
-				'한국 상장사 2,664사 × 34개 산업 × 18,418 공급망 엣지를 한 화면에서 탐색합니다. 7단계 간단 투어를 시작할까요?'
+				'이 투어는 "뭘 클릭하면 뭐가 나오는지" 를 직접 보여드립니다. ←→ 화살표 키 또는 아래 버튼으로 진행하세요.'
 		},
 		{
 			selector: '.brand-bar',
-			title: '좌측 상단: 브랜드 바',
+			title: '1. 좌측 상단 — 브랜드 바',
 			body:
-				'아바타 = 홈으로 돌아가기 / GitHub = 소스 / Buy Me A Coffee = 후원 / ? = 이 화면 가이드 / ▶ = 이 튜토리얼 재실행.'
+				'아바타 = 홈 / GitHub = 소스 / 노란 버튼 = 후원 / ? = 이 투어 재시작. 간단히 "빠른 링크 모음"입니다.'
 		},
 		{
 			selector: '.color-switch',
-			title: '색상 기준',
+			title: '2. 색상 기준 — 가장 중요',
 			body:
-				'노드 색상을 바꿔보세요. ROE·영업이익률·부채비율·성장률 중 하나를 선택하면 전체 지도가 빨→초 그라디언트로 재색상됩니다. "어느 산업이 지금 우량한가" 한눈에 답합니다.'
+				'이 셀렉터가 지도의 모든 색을 바꿉니다. 예) ROE로 바꾸면 우량(초록) / 부진(빨강) 회사가 즉시 드러납니다. 아래 "ROE로 바꿔보기" 를 눌러 직접 확인.',
+			demo: {
+				label: '▶ ROE로 바꿔보기',
+				run: () => {
+					colorMetric = 'roe';
+				}
+			}
+		},
+		{
+			selector: '.color-switch',
+			title: '2-1. 다른 기준으로',
+			body:
+				'매출 CAGR(성장률) — 고성장 회사가 초록. 부채비율 — 위험도 직관적 표시. 원하는 관점으로 지도 전체가 재색상됩니다.',
+			demo: {
+				label: '▶ 매출 CAGR로 바꾸기',
+				run: () => {
+					colorMetric = 'revCagr';
+				}
+			}
 		},
 		{
 			selector: '.view-switch',
-			title: '관점 3종',
+			title: '3. 관점 3종',
 			body:
-				'산업 지도(34개 버블) ↔ 전 회사(2,664사 그래프) ↔ 산업 내부(드릴다운). 산업 버블을 클릭하면 자동으로 내부 뷰로 진입합니다.'
+				'산업 지도 = 34개 버블 (기본). 전 회사 = 2,664사 한눈에. 산업 내부 = 특정 산업 드릴다운. 지금 "전 회사" 뷰로 옮겨볼까요?',
+			demo: {
+				label: '▶ 전 회사 뷰로 이동',
+				run: () => {
+					viewMode = 'companies';
+				}
+			}
 		},
 		{
-			title: '회사 카드',
-			body:
-				'회사 노드 클릭 시 우측 패널이 열리며 6 섹션으로 구성됩니다: 재무 요약 / 5년 추이 / scan 스코어 + 산업 내 분위 / 공급망 HHI / 핵심 거래 Top 5 / AI 분석 + 블로그 포스트.'
+			selector: '.view-switch',
+			title: '3-1. 산업 지도로 복귀',
+			body: '버블이 많아 복잡하죠? 다시 기본 산업 지도로 돌아갑니다.',
+			demo: {
+				label: '▶ 산업 지도로 복귀',
+				run: () => {
+					viewMode = 'atlas';
+				}
+			}
 		},
 		{
-			title: '비교',
+			title: '4. 산업 버블 클릭 = 내부 보기',
 			body:
-				'첫 회사 선택 후 "+ 비교에 추가" → 다음 회사 클릭하면 우측 패널이 2분할로 확장됩니다. 공통 공급사/고객사, 재무 차이를 나란히 봅니다.'
+				'아래 버튼을 누르면 반도체 산업 내부로 들어가서 공정별로 회사가 클러스터링됩니다. 회사들 사이의 공급망 엣지도 함께 보입니다.',
+			demo: {
+				label: '▶ 반도체 산업 내부 보기',
+				run: async () => {
+					await enterIndustryAction('semiconductor');
+				}
+			}
 		},
 		{
-			title: '외부 진입 / 공유',
+			title: '5. 회사 클릭 = 우측 카드 펼침',
 			body:
-				'URL 에 ?focus=005930 을 붙이면 그 회사 카드가 자동 펼쳐집니다. ?compare=005930,000660 으로 비교 링크 공유 가능. 블로그 본문에서 자유롭게 임베드하세요.'
+				'맵에서 회사 노드를 클릭하면 우측 패널이 회사 카드로 열립니다. 6 섹션: 재무 요약 / 5년 추이 / ROE·margin 점수 / 공급망 HHI / 핵심 거래 Top 5 / AI 분석 + 블로그 포스트.'
+		},
+		{
+			title: '6. 비교 — "+ 비교에 추가"',
+			body:
+				'한 회사 선택 후 카드 하단 "+ 비교에 추가" 버튼 → 다음 회사 클릭하면 우측 패널이 2분할 됩니다. 재무/공급망/AI 분석을 나란히 봅니다.'
+		},
+		{
+			title: '7. 블로그 심층 분석',
+			body:
+				'블로그 포스트가 있는 회사는 카드 맨 위에 파란 배너로 강조됩니다. verdict + "읽으러 가기 →" 클릭하면 해당 분석 글로 이동. 현재 39사 커버, 점차 확장.'
+		},
+		{
+			title: '8. 공유 / 직접 진입',
+			body:
+				'URL 에 ?focus=005930 붙이면 삼성전자 카드 자동 펼침. ?compare=005930,000660 이면 비교 모드 진입. 블로그 본문/SNS 에 바로 임베드하세요.'
+		},
+		{
+			title: '끝 — 이제 직접 탐험해보세요',
+			body:
+				'? 버튼으로 언제든 이 투어 재시작 가능. 잘못된 산업 분류가 보이면 회사 카드의 "🐛 분류 신고" 로 GitHub Issue 제출.'
 		}
 	];
-
-	let stepIdx = $state(0);
-	let highlight = $state<{ x: number; y: number; w: number; h: number } | null>(null);
 
 	function position() {
 		const step = STEPS[stepIdx];
@@ -67,7 +134,7 @@
 		}
 		const el = document.querySelector(step.selector);
 		if (!el) {
-			highlight = step.fallback || null;
+			highlight = null;
 			return;
 		}
 		const r = (el as HTMLElement).getBoundingClientRect();
@@ -75,11 +142,9 @@
 	}
 
 	$effect(() => {
-		// open 또는 stepIdx 변경 시 리포지셔닝
 		if (open) {
-			// 다음 프레임에 위치 잡기
+			void stepIdx;
 			requestAnimationFrame(() => {
-				void stepIdx;
 				position();
 			});
 		}
@@ -116,6 +181,15 @@
 		finish();
 	}
 
+	async function runDemo() {
+		const d = STEPS[stepIdx].demo;
+		if (!d) return;
+		await d.run();
+		// 상태 변화가 렌더에 반영될 시간
+		await new Promise((r) => setTimeout(r, 200));
+		position();
+	}
+
 	function handleKey(e: KeyboardEvent) {
 		if (!open) return;
 		if (e.key === 'Escape') skip();
@@ -123,27 +197,25 @@
 		else if (e.key === 'ArrowLeft') prev();
 	}
 
-	// 팝오버 위치 계산 (하이라이트 주변 or 중앙)
 	let popStyle = $derived.by(() => {
 		if (!highlight) {
 			return 'top:50%;left:50%;transform:translate(-50%,-50%);';
 		}
 		const vw = typeof window !== 'undefined' ? window.innerWidth : 1200;
 		const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
-		const pw = 360;
-		// 하이라이트 오른쪽에 배치, 공간 부족하면 아래
+		const pw = 380;
 		if (highlight.x + highlight.w + pw + 24 < vw) {
-			return `top:${Math.min(vh - 220, Math.max(16, highlight.y))}px;left:${highlight.x + highlight.w + 16}px;`;
+			return `top:${Math.min(vh - 260, Math.max(16, highlight.y))}px;left:${highlight.x + highlight.w + 16}px;`;
 		}
-		return `top:${Math.min(vh - 220, highlight.y + highlight.h + 16)}px;left:${Math.max(16, Math.min(highlight.x, vw - pw - 16))}px;`;
+		const leftPos = Math.max(16, Math.min(highlight.x, vw - pw - 16));
+		return `top:${Math.min(vh - 260, highlight.y + highlight.h + 16)}px;left:${leftPos}px;`;
 	});
 </script>
 
 <svelte:window onkeydown={handleKey} />
 
 {#if open}
-	<div class="tour-root" role="dialog" aria-modal="true" aria-label="튜토리얼">
-		<!-- backdrop with hole -->
+	<div class="tour-root" role="dialog" aria-modal="true" aria-label="가이드 투어">
 		<svg class="mask-svg" xmlns="http://www.w3.org/2000/svg">
 			<defs>
 				<mask id="tour-mask">
@@ -160,7 +232,7 @@
 					{/if}
 				</mask>
 			</defs>
-			<rect width="100%" height="100%" fill="rgba(5,8,17,0.75)" mask="url(#tour-mask)" />
+			<rect width="100%" height="100%" fill="rgba(5,8,17,0.78)" mask="url(#tour-mask)" />
 			{#if highlight}
 				<rect
 					x={highlight.x}
@@ -170,7 +242,7 @@
 					rx="10"
 					fill="none"
 					stroke="#60a5fa"
-					stroke-width="2"
+					stroke-width="2.5"
 				/>
 			{/if}
 		</svg>
@@ -179,6 +251,13 @@
 			<div class="step-idx">{stepIdx + 1} / {STEPS.length}</div>
 			<h3>{STEPS[stepIdx].title}</h3>
 			<p>{STEPS[stepIdx].body}</p>
+
+			{#if STEPS[stepIdx].demo}
+				<button class="demo-btn" onclick={runDemo}>
+					{STEPS[stepIdx].demo!.label}
+				</button>
+			{/if}
+
 			<div class="actions">
 				<button class="skip" onclick={skip}>건너뛰기</button>
 				<div class="nav">
@@ -191,6 +270,10 @@
 						<button class="primary" onclick={finish}>완료</button>
 					{/if}
 				</div>
+			</div>
+
+			<div class="progress">
+				<div class="progress-fill" style:width="{((stepIdx + 1) / STEPS.length) * 100}%"></div>
 			</div>
 		</div>
 	</div>
@@ -212,11 +295,11 @@
 	}
 	.popover {
 		position: absolute;
-		width: 360px;
+		width: 380px;
 		background: #0f1219;
 		border: 1px solid #334155;
 		border-radius: 10px;
-		padding: 16px 18px;
+		padding: 16px 18px 12px;
 		color: #f1f5f9;
 		box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
 		pointer-events: auto;
@@ -236,6 +319,24 @@
 		font-size: 12px;
 		color: #cbd5e1;
 		line-height: 1.7;
+	}
+	.demo-btn {
+		margin-top: 12px;
+		width: 100%;
+		padding: 10px 14px;
+		background: linear-gradient(135deg, rgba(96, 165, 250, 0.2), rgba(52, 211, 153, 0.15));
+		border: 1px solid rgba(96, 165, 250, 0.5);
+		border-radius: 6px;
+		color: #93c5fd;
+		font-size: 12px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.demo-btn:hover {
+		background: linear-gradient(135deg, rgba(96, 165, 250, 0.35), rgba(52, 211, 153, 0.25));
+		color: #f1f5f9;
+		border-color: #60a5fa;
 	}
 	.actions {
 		margin-top: 14px;
@@ -276,5 +377,17 @@
 	.actions .nav {
 		display: flex;
 		gap: 6px;
+	}
+	.progress {
+		margin-top: 10px;
+		height: 3px;
+		background: #1e2433;
+		border-radius: 2px;
+		overflow: hidden;
+	}
+	.progress-fill {
+		height: 100%;
+		background: linear-gradient(90deg, #60a5fa, #34d399);
+		transition: width 0.3s;
 	}
 </style>

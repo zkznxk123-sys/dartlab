@@ -3,7 +3,6 @@
 	import IndustryAtlas from '$lib/components/industry/IndustryAtlas.svelte';
 	import IndustryDrilldown from '$lib/components/industry/IndustryDrilldown.svelte';
 	import CompanyCard from '$lib/components/industry/CompanyCard.svelte';
-	import GuidePanel from '$lib/components/industry/GuidePanel.svelte';
 	import TutorialTour from '$lib/components/industry/TutorialTour.svelte';
 	import { brand } from '$lib/brand';
 	import { onMount } from 'svelte';
@@ -12,7 +11,6 @@
 	import { base } from '$app/paths';
 
 	let { data }: { data: PageData } = $props();
-	let guideOpen = $state(false);
 	let tourOpen = $state(false);
 
 	// ── 뷰 모드 ──
@@ -484,12 +482,12 @@
 <div class="map-page">
 	<!-- 왼쪽 사이드바 -->
 	<aside class="sidebar">
-		<!-- 브랜드 바: 아바타 → GitHub → BMC → 도움말 -->
+		<!-- 브랜드 바: 아바타 → GitHub → Coffee → 도움말 (단색 라인 아이콘 일관) -->
 		<div class="brand-bar">
 			<a class="brand-btn avatar" href="{base}/" title="dartlab 홈으로" aria-label="홈">
 				<picture>
 					<source srcset="{base}/avatar.webp" type="image/webp" />
-					<img src="{base}/avatar.png" alt="dartlab" width="22" height="22" />
+					<img src="{base}/avatar.png" alt="dartlab" width="16" height="16" />
 				</picture>
 			</a>
 			<a
@@ -500,62 +498,36 @@
 				title="GitHub 저장소"
 				aria-label="GitHub"
 			>
-				<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-					<path
-						fill="currentColor"
-						d="M12 .5C5.73.5.66 5.57.66 11.84c0 5.02 3.26 9.28 7.78 10.78.57.1.78-.25.78-.55v-1.92c-3.17.69-3.84-1.53-3.84-1.53-.52-1.31-1.27-1.66-1.27-1.66-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.72-1.52-2.53-.29-5.2-1.27-5.2-5.64 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.14 1.17a10.9 10.9 0 0 1 5.72 0c2.18-1.48 3.14-1.17 3.14-1.17.62 1.59.23 2.76.11 3.05.74.8 1.18 1.82 1.18 3.07 0 4.38-2.68 5.35-5.22 5.63.41.35.77 1.04.77 2.1v3.11c0 .3.2.66.79.55 4.52-1.5 7.77-5.76 7.77-10.78C23.34 5.57 18.27.5 12 .5Z"
-					/>
+				<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12 12 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" />
 				</svg>
 			</a>
 			<a
-				class="brand-btn bmc"
+				class="brand-btn"
 				href={brand.coffee}
 				target="_blank"
 				rel="noopener"
-				title="Buy Me A Coffee"
+				title="Buy Me A Coffee — 후원"
 				aria-label="Buy Me A Coffee"
 			>
-				<img
-					src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
-					alt=""
-					width="72"
-					height="22"
-					loading="lazy"
-					decoding="async"
-				/>
+				<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+					<path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+					<line x1="6" y1="2" x2="6" y2="4" />
+					<line x1="10" y1="2" x2="10" y2="4" />
+					<line x1="14" y1="2" x2="14" y2="4" />
+				</svg>
 			</a>
 			<button
 				class="brand-btn help"
-				onclick={() => (guideOpen = true)}
-				title="지도 보는 법 · 색상 · 분석 팁"
-				aria-label="도움말"
-			>
-				<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-					<path
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01M22 12A10 10 0 1 1 2 12a10 10 0 0 1 20 0Z"
-					/>
-				</svg>
-			</button>
-			<button
-				class="brand-btn help tour-btn"
 				onclick={() => (tourOpen = true)}
-				title="튜토리얼 시작"
-				aria-label="튜토리얼"
+				title="가이드 투어 — 뭘 보고 어떻게 쓰는지 화면 안내"
+				aria-label="가이드 투어"
 			>
-				<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-					<path
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						d="M5 3l14 9-14 9V3z"
-					/>
+				<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<circle cx="12" cy="12" r="10" />
+					<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+					<line x1="12" y1="17" x2="12.01" y2="17" />
 				</svg>
 			</button>
 		</div>
@@ -961,8 +933,13 @@
 	{/if}
 </div>
 
-<GuidePanel open={guideOpen} onClose={() => (guideOpen = false)} />
-<TutorialTour open={tourOpen} onClose={() => (tourOpen = false)} />
+<TutorialTour
+	open={tourOpen}
+	onClose={() => (tourOpen = false)}
+	bind:colorMetric
+	bind:viewMode
+	enterIndustryAction={enterIndustry}
+/>
 
 <style>
 	.map-page {
@@ -983,10 +960,10 @@
 		color: #f1f5f9;
 	}
 
-	/* 브랜드 바: 아바타 / GitHub / BMC / 도움말 / 튜토리얼 */
+	/* 브랜드 바: 모든 버튼 동일 크기/스타일 단색 라인 아이콘 */
 	.brand-bar {
 		display: flex;
-		gap: 6px;
+		gap: 4px;
 		align-items: center;
 		padding-bottom: 12px;
 		border-bottom: 1px solid #1e2433;
@@ -996,15 +973,15 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 30px;
-		height: 30px;
-		background: rgba(5, 8, 17, 0.85);
-		border: 1px solid #1e2433;
+		width: 28px;
+		height: 28px;
+		background: transparent;
+		border: 1px solid transparent;
 		border-radius: 6px;
-		color: #cbd5e1;
+		color: #94a3b8;
 		text-decoration: none;
 		cursor: pointer;
-		transition: background 0.15s, border-color 0.15s, color 0.15s;
+		transition: background 0.12s, border-color 0.12s, color 0.12s;
 		padding: 0;
 	}
 	.brand-btn:hover {
@@ -1013,7 +990,6 @@
 		color: #f1f5f9;
 	}
 	.brand-btn.avatar {
-		border-color: #334155;
 		padding: 3px;
 		overflow: hidden;
 	}
@@ -1023,18 +999,8 @@
 		height: 100%;
 		object-fit: cover;
 	}
-	.brand-btn.bmc {
-		width: auto;
-		padding: 3px 6px;
-	}
-	.brand-btn.bmc img {
-		display: block;
-	}
 	.brand-btn.help {
 		margin-left: auto;
-	}
-	.brand-btn.tour-btn {
-		margin-left: 0;
 	}
 
 	.header h1 {
