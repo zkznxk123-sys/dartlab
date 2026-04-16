@@ -2,6 +2,7 @@
 	import { base } from '$app/paths';
 	import { brand } from '$lib/brand';
 	import Sparkline from './Sparkline.svelte';
+	import FreshnessBadge from './FreshnessBadge.svelte';
 
 	interface Props {
 		// ecosystem.json 노드 (기본 정보 + scan 지표 4종)
@@ -9,6 +10,10 @@
 		// companies/{code}.json (있으면 풍부한 데이터, 없으면 null)
 		detail: any | null;
 		loading?: boolean;
+		// industryStats.json[node.industry] — 업종 분포 통계
+		industryStat?: any | null;
+		// meta.json.dataAsOf — 신선도 표시
+		dataAsOf?: Record<string, string | null | undefined> | null;
 		// 비교에 추가 콜백
 		onAddCompare?: (stockCode: string) => void;
 		// 닫기
@@ -16,7 +21,16 @@
 		compareDisabled?: boolean;
 	}
 
-	let { node, detail, loading = false, onAddCompare, onClose, compareDisabled = false }: Props = $props();
+	let {
+		node,
+		detail,
+		loading = false,
+		industryStat = null,
+		dataAsOf = null,
+		onAddCompare,
+		onClose,
+		compareDisabled = false
+	}: Props = $props();
 
 	let aiExpanded = $state(false);
 
@@ -82,6 +96,54 @@
 		return '#ef4444';
 	}
 
+	// ── 업종 정규화 ──
+	// industryStat.distribution[metric] = {n, p10, p25, median, p75, p90, mean, std}
+	// 반환: 백분위(0~100), z-score, 색상 — 표본 작으면 null
+	function normalize(
+		value: number | null | undefined,
+		metric: 'roe' | 'opMargin' | 'debtRatio' | 'revCagr'
+	): { percentile: number; zScore: number; color: string; n: number } | null {
+		if (value === null || value === undefined || isNaN(value)) return null;
+		const dist = industryStat?.distribution?.[metric];
+		if (!dist || dist.n < 3) return null;
+
+		// 선형 보간 백분위 계산
+		const quantiles = [
+			{ q: 10, v: dist.p10 },
+			{ q: 25, v: dist.p25 },
+			{ q: 50, v: dist.median },
+			{ q: 75, v: dist.p75 },
+			{ q: 90, v: dist.p90 }
+		];
+		let percentile: number;
+		if (value <= quantiles[0].v) percentile = 10 * (value / (quantiles[0].v || 1));
+		else if (value >= quantiles[4].v) percentile = 90 + 10 * Math.min(1, (value - quantiles[4].v) / Math.abs(quantiles[4].v - quantiles[2].v || 1));
+		else {
+			percentile = 90;
+			for (let i = 0; i < quantiles.length - 1; i++) {
+				if (value >= quantiles[i].v && value <= quantiles[i + 1].v) {
+					const span = quantiles[i + 1].v - quantiles[i].v || 1;
+					percentile = quantiles[i].q + (value - quantiles[i].v) / span * (quantiles[i + 1].q - quantiles[i].q);
+					break;
+				}
+			}
+		}
+		percentile = Math.max(0, Math.min(100, percentile));
+
+		const zScore = dist.std > 0 ? (value - dist.mean) / dist.std : 0;
+
+		// 역방향(debtRatio) 고려 — 낮을수록 좋음
+		const invert = metric === 'debtRatio';
+		const goodness = invert ? 100 - percentile : percentile;
+		let color: string;
+		if (goodness >= 80) color = '#10b981';
+		else if (goodness >= 50) color = '#84cc16';
+		else if (goodness >= 20) color = '#f59e0b';
+		else color = '#ef4444';
+
+		return { percentile, zScore, color, n: dist.n };
+	}
+
 	function hhiBucket(hhi: number | null | undefined): { label: string; color: string; pct: number } {
 		if (hhi === null || hhi === undefined) return { label: '-', color: '#64748b', pct: 0 };
 		// HHI 0~10000. 1500 미만 분산, 2500+ 집중
@@ -106,7 +168,12 @@
 
 	<!-- 1. Header -->
 	<div class="head">
-		<h2>{node.label}</h2>
+		<div class="head-title-row">
+			<h2>{node.label}</h2>
+			{#if dataAsOf}
+				<FreshnessBadge {dataAsOf} variant="dot" />
+			{/if}
+		</div>
 		<p class="code">{node.id}</p>
 		<div class="badges">
 			<span class="badge industry" style:background="{node.color}20" style:color={node.color}>
@@ -206,41 +273,42 @@
 				{/if}
 			</h3>
 			<div class="scan-grid">
-				{#if node.roe !== null && node.roe !== undefined}
-					<div class="scan-row">
-						<span class="scan-k">ROE</span>
-						<span class="scan-v" style:color={colorByMetric(node.roe, 'roe')}>
-							{pct(node.roe)}
-						</span>
-						{#if node.profGrade}<span class="scan-grade">{node.profGrade}</span>{/if}
-					</div>
-				{/if}
-				{#if node.opMargin !== null && node.opMargin !== undefined}
-					<div class="scan-row">
-						<span class="scan-k">영업이익률</span>
-						<span class="scan-v" style:color={colorByMetric(node.opMargin, 'op')}>
-							{pct(node.opMargin)}
-						</span>
-					</div>
-				{/if}
-				{#if node.debtRatio !== null && node.debtRatio !== undefined}
-					<div class="scan-row">
-						<span class="scan-k">부채비율</span>
-						<span class="scan-v" style:color={colorByMetric(node.debtRatio, 'debt')}>
-							{pct(node.debtRatio, 0)}
-						</span>
-						{#if node.debtGrade}<span class="scan-grade">{node.debtGrade}</span>{/if}
-					</div>
-				{/if}
-				{#if node.revCagr !== null && node.revCagr !== undefined}
-					<div class="scan-row">
-						<span class="scan-k">매출 CAGR</span>
-						<span class="scan-v" style:color={colorByMetric(node.revCagr, 'cagr')}>
-							{pct(node.revCagr)}
-						</span>
-						{#if node.growthGrade}<span class="scan-grade">{node.growthGrade}</span>{/if}
-					</div>
-				{/if}
+				{#each [
+					{ key: 'roe', metric: 'roe', label: 'ROE', val: node.roe, grade: node.profGrade, fmt: (v: number) => pct(v) },
+					{ key: 'op', metric: 'opMargin', label: '영업이익률', val: node.opMargin, grade: '', fmt: (v: number) => pct(v) },
+					{ key: 'debt', metric: 'debtRatio', label: '부채비율', val: node.debtRatio, grade: node.debtGrade, fmt: (v: number) => pct(v, 0) },
+					{ key: 'cagr', metric: 'revCagr', label: '매출 CAGR', val: node.revCagr, grade: node.growthGrade, fmt: (v: number) => pct(v) }
+				] as row (row.key)}
+					{#if row.val !== null && row.val !== undefined}
+						{@const norm = normalize(row.val, row.metric as any)}
+						<div class="scan-row">
+							<div class="scan-line1">
+								<span class="scan-k">{row.label}</span>
+								<span
+									class="scan-v"
+									style:color={norm?.color || colorByMetric(row.val, row.key as any)}
+								>
+									{row.fmt(row.val)}
+								</span>
+								{#if row.grade}<span class="scan-grade">{row.grade}</span>{/if}
+								{#if norm}
+									<span class="scan-pct" title={`업종 n=${norm.n} · z=${norm.zScore.toFixed(2)}σ`}>
+										상위 {(100 - norm.percentile).toFixed(0)}%
+									</span>
+								{/if}
+							</div>
+							{#if norm}
+								<div class="scan-gauge" title={`업종 percentile ${norm.percentile.toFixed(0)}`}>
+									<div
+										class="scan-gauge-fill"
+										style:width="{row.metric === 'debtRatio' ? 100 - norm.percentile : norm.percentile}%"
+										style:background={norm.color}
+									></div>
+								</div>
+							{/if}
+						</div>
+					{/if}
+				{/each}
 			</div>
 			{#if node.industryRank}
 				<div class="rank-line">
@@ -393,6 +461,16 @@
 			🐛 분류 신고
 		</a>
 	</div>
+
+	<!-- Disclaimer footer -->
+	<div class="disclaimer">
+		dartlab 은 공시·재무 데이터를 시각화합니다. 투자 자문 아님. 투자 결정은
+		<a href="https://dart.fss.or.kr/" target="_blank" rel="noopener">DART 원본</a>
+		과 증권사 리포트와 함께 내리세요.
+		{#if dataAsOf?.dart || dataAsOf?.finance}
+			<span class="src">· 데이터 최대 3h 지연</span>
+		{/if}
+	</div>
 </div>
 
 <style>
@@ -419,6 +497,12 @@
 		color: #f1f5f9;
 	}
 
+	.head-title-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+	}
 	.head h2 {
 		margin: 0;
 		font-size: 20px;
@@ -525,14 +609,20 @@
 		gap: 4px;
 	}
 	.scan-row {
-		display: grid;
-		grid-template-columns: 90px 70px 1fr;
-		align-items: center;
-		padding: 5px 8px;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		padding: 6px 8px;
 		background: #050811;
 		border: 1px solid #1e2433;
 		border-radius: 4px;
 		font-size: 12px;
+	}
+	.scan-line1 {
+		display: grid;
+		grid-template-columns: 80px auto 1fr auto;
+		align-items: center;
+		gap: 8px;
 	}
 	.scan-k {
 		color: #94a3b8;
@@ -544,6 +634,23 @@
 	.scan-grade {
 		color: #64748b;
 		font-size: 11px;
+	}
+	.scan-pct {
+		font-size: 10px;
+		color: #64748b;
+		font-family: monospace;
+		text-align: right;
+		cursor: help;
+	}
+	.scan-gauge {
+		height: 4px;
+		background: #1e2433;
+		border-radius: 2px;
+		overflow: hidden;
+	}
+	.scan-gauge-fill {
+		height: 100%;
+		transition: width 0.3s;
 	}
 	.rank-line {
 		margin-top: 8px;
@@ -847,5 +954,23 @@
 	.action.ghost:hover {
 		color: #f1f5f9;
 		border-color: #334155;
+	}
+	.disclaimer {
+		margin-top: 16px;
+		padding-top: 12px;
+		border-top: 1px dashed #1e2433;
+		font-size: 10px;
+		line-height: 1.5;
+		color: #475569;
+	}
+	.disclaimer a {
+		color: #60a5fa;
+		text-decoration: none;
+	}
+	.disclaimer a:hover {
+		text-decoration: underline;
+	}
+	.disclaimer .src {
+		color: #64748b;
 	}
 </style>

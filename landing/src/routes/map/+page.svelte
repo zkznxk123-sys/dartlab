@@ -4,6 +4,7 @@
 	import IndustryDrilldown from '$lib/components/industry/IndustryDrilldown.svelte';
 	import CompanyCard from '$lib/components/industry/CompanyCard.svelte';
 	import TutorialTour from '$lib/components/industry/TutorialTour.svelte';
+	import FreshnessBadge from '$lib/components/industry/FreshnessBadge.svelte';
 	import { brand } from '$lib/brand';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
@@ -550,6 +551,13 @@
 			</button>
 		</div>
 
+		<!-- 데이터 신선도 배지 -->
+		{#if data.meta?.dataAsOf}
+			<div class="freshness-row">
+				<FreshnessBadge dataAsOf={data.meta.dataAsOf} variant="compact" />
+			</div>
+		{/if}
+
 		<div class="header">
 			<h1>산업 생태계</h1>
 			{#if viewMode === 'atlas'}
@@ -883,7 +891,6 @@
 			<IndustryDrilldown
 				nodes={industryNodes}
 				links={industryLinks.map((l: any) => ({ ...l }))}
-				stages={industryDetail?.stages || []}
 				onNodeClick={handleNodeClick}
 			/>
 		{:else if viewMode === 'companies'}
@@ -906,6 +913,8 @@
 					node={selectedNode}
 					detail={selectedDetail}
 					loading={selectedDetailLoading}
+					industryStat={data.industryStats?.[selectedNode.industry]}
+					dataAsOf={data.meta?.dataAsOf}
 					compareDisabled={comparing}
 					onAddCompare={addToCompare}
 					onClose={() => handleNodeClick(null)}
@@ -917,6 +926,8 @@
 						node={compareB}
 						detail={compareBDetail}
 						loading={false}
+						industryStat={data.industryStats?.[compareB.industry]}
+						dataAsOf={data.meta?.dataAsOf}
 						compareDisabled={true}
 						onClose={clearCompare}
 					/>
@@ -1022,6 +1033,12 @@
 	}
 	.brand-btn.help {
 		margin-left: auto;
+	}
+	.freshness-row {
+		padding-bottom: 12px;
+		margin-bottom: 12px;
+		border-bottom: 1px solid #1e2433;
+		overflow-x: auto;
 	}
 
 	.header h1 {
