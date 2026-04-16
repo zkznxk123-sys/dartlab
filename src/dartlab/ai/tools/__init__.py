@@ -259,8 +259,10 @@ def _buildSchema(obj: Any, name: str, kind: str, caps: dict) -> dict:
         sig = None
 
     if sig is not None:
+        # Phase 16 E1: module kind 의 stockCode 는 skip 하면 안 됨 (company 만 상단 자동 추가).
+        _SKIP_NAMES = {"self", "cls"} | ({"stockCode"} if kind == "company" else set())
         for pName, param in sig.parameters.items():
-            if pName in ("self", "cls", "stockCode") or param.kind in (
+            if pName in _SKIP_NAMES or param.kind in (
                 inspect.Parameter.VAR_POSITIONAL,
                 inspect.Parameter.VAR_KEYWORD,
             ):
@@ -346,6 +348,14 @@ def _enumFromCapabilities(toolName: str, paramName: str, caps: dict) -> list[str
             return list(SHOW_FREQS)
         except ImportError:
             return ["Q", "Y", "YTD"]
+    # show.scope — core/show.py 상수 자동 (Phase 16 E2)
+    if toolName == "show" and paramName == "scope":
+        try:
+            from dartlab.core.show import SHOW_SCOPES
+
+            return list(SHOW_SCOPES)
+        except ImportError:
+            return ["consolidated", "separate"]
     # search.scope — core/search/__init__.py 상수 자동
     if toolName == "search" and paramName == "scope":
         try:

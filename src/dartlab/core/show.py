@@ -12,6 +12,9 @@ import polars as pl
 # Q: 분기 기본값 (IS/BS/CF 분기 컬럼), Y: 연간 합산, YTD: 연초누적
 SHOW_FREQS: tuple[str, ...] = ("Q", "Y", "YTD")
 
+# 공개 scope 상수 — Phase 16 E2: AI 가 scope 와 freq 혼동 (예: scope='annual') 차단.
+SHOW_SCOPES: tuple[str, ...] = ("consolidated", "separate")
+
 _PERIOD_COLUMN_RE = re.compile(r"^\d{4}(Q[1-4])?$")
 
 

@@ -300,7 +300,7 @@ def calcPlausibilityBand(
                     cur = snap.filter(pl.col("bsns_year") == years[0])
                     rev_nms = ["매출액", "수익(매출액)", "영업수익"]
                     op_nms = ["영업이익", "영업이익(손실)"]
-                    stockcodes = cur["stockCode"].unique().to_list()
+                    stockcodes = [s for s in cur["stockCode"].unique().to_list() if s is not None]
                     for sc in stockcodes[:500]:  # 샘플 500 (메모리 + 속도)
                         stock = cur.filter(pl.col("stockCode") == sc)
                         if stock.is_empty():
