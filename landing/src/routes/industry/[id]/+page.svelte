@@ -1,11 +1,20 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { base } from '$app/paths';
+	import FreshnessBadge from '$lib/components/industry/FreshnessBadge.svelte';
 
 	let { data }: { data: PageData } = $props();
 	let ind = $derived(data.data);
 	let stages = $derived(ind.stages || []);
 	let edges = $derived(ind.edges || []);
+	let stats = $derived((data as any).stats);
+	let indMovers = $derived((data as any).movers || {});
+	let meta = $derived((data as any).meta);
+
+	// Movers 총 건수 (이 산업)
+	let indMoversTotal = $derived(
+		(Object.values(indMovers) as any[]).reduce((s, arr: any) => s + (arr?.length || 0), 0)
+	);
 
 	function formatRev(v: number): string {
 		if (v >= 10000) return `${(v / 10000).toFixed(1)}조원`;
@@ -37,10 +46,6 @@
 			.slice(0, 20)
 	);
 
-	// 평균 매출
-	let avgRev = $derived(
-		ind.nodeCount > 0 ? Math.round(ind.totalRevenue / ind.nodeCount) : 0
-	);
 </script>
 
 <svelte:head>
@@ -59,7 +64,12 @@
 	</nav>
 
 	<header class="head">
-		<h1>{ind.name}</h1>
+		<div class="head-top">
+			<h1>{ind.name}</h1>
+			{#if meta?.dataAsOf}
+				<FreshnessBadge dataAsOf={meta.dataAsOf} variant="compact" />
+			{/if}
+		</div>
 		<div class="stats">
 			<div class="stat">
 				<div class="label">기업 수</div>
@@ -69,16 +79,143 @@
 				<div class="label">총 매출</div>
 				<div class="value">{formatRev(ind.totalRevenue)}</div>
 			</div>
-			<div class="stat">
-				<div class="label">평균 매출</div>
-				<div class="value">{formatRev(avgRev)}</div>
-			</div>
+			{#if stats?.avgRoe !== null && stats?.avgRoe !== undefined}
+				<div class="stat">
+					<div class="label">평균 ROE</div>
+					<div class="value" class:pos={stats.avgRoe > 0} class:neg={stats.avgRoe < 0}>
+						{stats.avgRoe}%
+					</div>
+				</div>
+			{/if}
+			{#if stats?.avgOpMargin !== null && stats?.avgOpMargin !== undefined}
+				<div class="stat">
+					<div class="label">평균 영업이익률</div>
+					<div class="value" class:pos={stats.avgOpMargin > 0} class:neg={stats.avgOpMargin < 0}>
+						{stats.avgOpMargin}%
+					</div>
+				</div>
+			{/if}
+			{#if stats?.avgCagr !== null && stats?.avgCagr !== undefined}
+				<div class="stat">
+					<div class="label">평균 CAGR 3Y</div>
+					<div class="value" class:pos={stats.avgCagr > 0} class:neg={stats.avgCagr < 0}>
+						{stats.avgCagr}%
+					</div>
+				</div>
+			{/if}
 			<div class="stat">
 				<div class="label">공급망 엣지</div>
 				<div class="value">{edges.length}건</div>
 			</div>
 		</div>
+		{#if indMoversTotal > 0}
+			<a class="movers-pill" href="{base}/changes">
+				⚡ 이 산업 이번 회계연도 급변 <strong>{indMoversTotal}건</strong> · 상세 보기 →
+			</a>
+		{/if}
 	</header>
+
+	<!-- Top 3 / 최고 성장 / 위험 신호 -->
+	{#if stats && (stats.topRoe?.length || stats.topGrowth?.length || stats.riskFlags?.length)}
+		<section class="sec rankings">
+			<h2>산업 내 Top 랭킹</h2>
+			<div class="rank-grid">
+				{#if stats.topRoe?.length}
+					<div class="rank-card">
+						<div class="rank-head">
+							<span class="rank-icon">🏆</span>
+							<span class="rank-title">최고 수익성 (ROE)</span>
+						</div>
+						<ul>
+							{#each stats.topRoe.slice(0, 5) as r, i (r.stockCode)}
+								<li>
+									<span class="rank-n">{i + 1}</span>
+									<a href="{base}/map?focus={r.stockCode}" class="rank-name">{r.corpName}</a>
+									<span class="rank-val pos">{r.roe}%</span>
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
+				{#if stats.topGrowth?.length}
+					<div class="rank-card">
+						<div class="rank-head">
+							<span class="rank-icon">📈</span>
+							<span class="rank-title">최대 성장 (매출 CAGR)</span>
+						</div>
+						<ul>
+							{#each stats.topGrowth.slice(0, 5) as r, i (r.stockCode)}
+								<li>
+									<span class="rank-n">{i + 1}</span>
+									<a href="{base}/map?focus={r.stockCode}" class="rank-name">{r.corpName}</a>
+									<span class="rank-val pos">+{r.revCagr}%</span>
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
+				{#if stats.riskFlags?.length}
+					<div class="rank-card risk">
+						<div class="rank-head">
+							<span class="rank-icon">⚠</span>
+							<span class="rank-title">위험 신호</span>
+						</div>
+						<ul>
+							{#each stats.riskFlags.slice(0, 5) as r, i (r.stockCode)}
+								<li>
+									<span class="rank-n">{i + 1}</span>
+									<a href="{base}/map?focus={r.stockCode}" class="rank-name">{r.corpName}</a>
+									<span class="rank-val neg">
+										{r.roe !== null ? `ROE ${r.roe}%` : ''}
+										{#if r.debtGrade}· {r.debtGrade}{/if}
+									</span>
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
+			</div>
+		</section>
+	{/if}
+
+	<!-- 공급 흐름: 이 산업이 공급하는/받는 산업 Top 5 -->
+	{#if stats && (stats.supplyTo?.length || stats.supplyFrom?.length)}
+		<section class="sec flows-section">
+			<h2>산업 간 공급 흐름</h2>
+			<div class="flow-grid">
+				{#if stats.supplyTo?.length}
+					<div class="flow-col">
+						<h3>이 산업이 공급하는 곳</h3>
+						<ul>
+							{#each stats.supplyTo as f (f.toIndustry)}
+								<li>
+									<a href="{base}/industry/{f.toIndustry}" class="flow-link">
+										{f.toName} <span class="flow-arrow">↗</span>
+									</a>
+									<span class="flow-stat">{f.edgeCount}건 · {formatAmount(f.amount)}</span>
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
+				{#if stats.supplyFrom?.length}
+					<div class="flow-col">
+						<h3>이 산업이 공급 받는 곳</h3>
+						<ul>
+							{#each stats.supplyFrom as f (f.fromIndustry)}
+								<li>
+									<a href="{base}/industry/{f.fromIndustry}" class="flow-link">
+										↖ {f.fromName}
+									</a>
+									<span class="flow-stat">{f.edgeCount}건 · {formatAmount(f.amount)}</span>
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
+			</div>
+		</section>
+	{/if}
 
 	<!-- 공정 흐름 -->
 	{#if stages.length > 0}
@@ -221,9 +358,18 @@
 		font-weight: 600;
 	}
 
+	.head-top {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 16px;
+		flex-wrap: wrap;
+		margin-bottom: 16px;
+	}
+
 	.stats {
 		display: grid;
-		grid-template-columns: repeat(4, 1fr);
+		grid-template-columns: repeat(6, minmax(0, 1fr));
 		gap: 12px;
 		padding: 16px;
 		background: #0f1219;
@@ -236,13 +382,169 @@
 		margin-bottom: 4px;
 	}
 	.stat .value {
-		font-size: 20px;
+		font-size: 18px;
 		font-weight: 600;
+		color: #f1f5f9;
+		font-family: monospace;
+	}
+	.stat .value.pos {
+		color: #34d399;
+	}
+	.stat .value.neg {
+		color: #f87171;
+	}
+
+	.movers-pill {
+		display: inline-block;
+		margin-top: 12px;
+		padding: 8px 14px;
+		background: rgba(251, 191, 36, 0.08);
+		border: 1px solid rgba(251, 191, 36, 0.35);
+		border-radius: 999px;
+		color: #fbbf24;
+		text-decoration: none;
+		font-size: 12px;
+	}
+	.movers-pill:hover {
+		background: rgba(251, 191, 36, 0.15);
+	}
+	.movers-pill strong {
 		color: #f1f5f9;
 	}
 
 	.sec {
 		margin-top: 28px;
+	}
+
+	/* Top 랭킹 */
+	.rank-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 12px;
+	}
+	.rank-card {
+		padding: 14px 16px;
+		background: #0f1219;
+		border: 1px solid #1e2433;
+		border-radius: 8px;
+	}
+	.rank-card.risk {
+		border-color: rgba(239, 68, 68, 0.3);
+	}
+	.rank-head {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin-bottom: 10px;
+	}
+	.rank-icon {
+		font-size: 18px;
+	}
+	.rank-title {
+		font-size: 13px;
+		font-weight: 600;
+		color: #f1f5f9;
+	}
+	.rank-card ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	.rank-card li {
+		display: grid;
+		grid-template-columns: 20px 1fr auto;
+		gap: 8px;
+		align-items: center;
+		padding: 5px 0;
+		border-bottom: 1px dashed #1e2433;
+		font-size: 12px;
+	}
+	.rank-card li:last-child {
+		border-bottom: none;
+	}
+	.rank-n {
+		color: #64748b;
+		font-family: monospace;
+		font-size: 11px;
+	}
+	.rank-name {
+		color: #cbd5e1;
+		text-decoration: none;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.rank-name:hover {
+		color: #60a5fa;
+	}
+	.rank-val {
+		font-family: monospace;
+		font-weight: 600;
+	}
+	.rank-val.pos {
+		color: #34d399;
+	}
+	.rank-val.neg {
+		color: #f87171;
+	}
+
+	/* 공급 흐름 */
+	.flows-section .flow-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 12px;
+	}
+	.flow-col {
+		padding: 14px 16px;
+		background: #0f1219;
+		border: 1px solid #1e2433;
+		border-radius: 8px;
+	}
+	.flow-col h3 {
+		margin: 0 0 10px;
+		font-size: 12px;
+		color: #94a3b8;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+	.flow-col ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	.flow-col li {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 6px 0;
+		border-bottom: 1px dashed #1e2433;
+	}
+	.flow-col li:last-child {
+		border-bottom: none;
+	}
+	.flow-link {
+		color: #60a5fa;
+		text-decoration: none;
+		font-size: 13px;
+	}
+	.flow-link:hover {
+		text-decoration: underline;
+	}
+	.flow-arrow {
+		color: #94a3b8;
+		font-size: 11px;
+	}
+	.flow-stat {
+		color: #94a3b8;
+		font-size: 11px;
+		font-family: monospace;
+	}
+
+	@media (max-width: 900px) {
+		.rank-grid,
+		.flows-section .flow-grid {
+			grid-template-columns: 1fr;
+		}
 	}
 
 	/* 공정 흐름 */
