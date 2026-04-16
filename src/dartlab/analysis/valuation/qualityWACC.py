@@ -47,9 +47,7 @@ def calcQualityWACC(company: Any, base_wacc: float, *, basePeriod: str | None = 
 
 def _creditSpread(company: Any, basePeriod: str | None) -> dict:
     try:
-        from dartlab.credit.calcs import calcCreditScore
-
-        data = calcCreditScore(company, basePeriod=basePeriod)
+        data = company.credit("등급") if hasattr(company, "credit") else None
         if not data:
             return {"name": "신용등급", "spread": 0.0, "reason": "등급 없음"}
         score = data.get("score", 50)
@@ -99,9 +97,7 @@ def _earningsQualitySpread(company: Any, basePeriod: str | None) -> dict:
 
 def _cycleSpread(company: Any) -> dict:
     try:
-        from dartlab.macro.crisis import calcCyclicalAction
-
-        data = calcCyclicalAction(market=getattr(company, "market", "KR"))
+        data = company.macro("위기") if hasattr(company, "macro") else None
         if not data:
             return {"name": "사이클", "spread": 0.0, "reason": "판정 불가"}
         phase = data.get("cyclePhase", "")

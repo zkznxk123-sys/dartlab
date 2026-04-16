@@ -63,7 +63,7 @@ def calcDFV(
     # SOTP upside 절대값 100% 초과 시 데이터 신뢰도 낮음 → 일반 dispatch 로 fallback
     try:
         from dartlab.analysis.valuation.sotp import calcHoldingDFV
-        from dartlab.review.templates import _checkHolding
+        from dartlab.core.finance.companyType import _checkHolding
 
         if _checkHolding(company):
             sotp_result = calcHoldingDFV(company, basePeriod=basePeriod, overrides=ov)

@@ -123,11 +123,5 @@ def test_no_l2_cross_imports():
                             # top-level 만 금지 — 부모 노드 추적은 비용 큼.
                             # 일단 모두 기록 후 건수만 확인.
                             forbidden_pairs.append((src_engine, other, str(py.relative_to(root)), node.lineno))
-    # baseline (Phase 8 시작 시점): qualityWACC.py 2건 — 후속 정리 대상.
-    # 새 cross-import 추가 시 즉시 감지되도록 baseline 만 허용.
-    BASELINE = {
-        ("analysis", "credit", "analysis\\valuation\\qualityWACC.py", 50),
-        ("analysis", "macro", "analysis\\valuation\\qualityWACC.py", 102),
-    }
-    new_violations = [p for p in forbidden_pairs if p not in BASELINE]
-    assert not new_violations, f"새 L2 cross-import 발견: {new_violations}"
+    # Phase 9 A2: baseline 0건 달성. 새 cross-import 즉시 감지.
+    assert not forbidden_pairs, f"L2 cross-import 발견: {forbidden_pairs}"
