@@ -34,7 +34,6 @@
 | [data.md](data.md) | HF 데이터셋, 수집 파이프라인, 카테고리 |
 | [mappers.md](mappers.md) | 매퍼 통합 — 계정/topic/alias/flow/notes |
 | [pyodide.md](pyodide.md) | 브라우저/Excel WASM *(alpha)* |
-| [industry.md](industry.md) | 산업 매퍼엔진 |
 | [channel.md](channel.md) | 외부 공유 (DevTunnels) |
 | [spaces.md](spaces.md) | HF Spaces — API + MCP |
 | [vscode.md](vscode.md) | VSCode 확장 |

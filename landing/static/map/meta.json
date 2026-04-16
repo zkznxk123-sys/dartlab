@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "buildId": "20260416-082335",
+  "buildTime": "2026-04-16T08:23:35Z",
+  "commitSha": "60670305",
+  "dataAsOf": {
+    "dart": "2026-04-10T13:46:23Z",
+    "finance": "2026-04-15T21:28:10Z",
+    "reviews": "2026-04-16T07:35:05Z",
+    "taxonomy": "2026-04-13T11:46:11Z"
+  },
+  "sizes": {
+    "ecosystem.json": 4136411,
+    "atlas.json": 28815,
+    "insights.json": 17580,
+    "industryStats.json": 183254,
+    "search-index.json": 306478,
+    "companies/": 22557177
+  },
+  "counts": {}
+}
