@@ -1807,8 +1807,8 @@ def _generateMcpToolsPy() -> str:
             f"14축 재무 심층 분석. 축: {', '.join(analysisAxes)}",
             {
                 "stockCode": "_STOCK",
-                "axis": {"type": "string", "description": "그룹명 또는 축명"},
-                "sub": {"type": "string", "description": "그룹 내 하위 축"},
+                "axis": {"type": "string", "enum": analysisAxes + ["financial", "valuation", "forecast"], "description": "축명 (단축형) 또는 그룹명"},
+                "sub": {"type": "string", "description": "그룹 내 하위 축 (예: financial→수익성, valuation→가치평가)"},
             },
             ["stockCode"],
         )
@@ -1865,8 +1865,12 @@ def _generateMcpToolsPy() -> str:
     tools.append(
         _tool(
             "companyReview",
-            f"정리된 종합 보고서. 섹션: {', '.join(reviewSections)}",
-            {"stockCode": "_STOCK", "section": {"type": "string", "description": "특정 섹션만"}},
+            f"정리된 종합 보고서 (11 reportType). 섹션: {', '.join(reviewSections)}",
+            {
+                "stockCode": "_STOCK",
+                "section": {"type": "string", "enum": reviewSections, "description": "특정 섹션만 (생략 시 전체 보고서)"},
+                "type": {"type": "string", "enum": ["full", "executive", "credit", "valuation", "growth", "crisis", "audit", "dividend", "governance", "macro", "thesis"], "description": "reportType (생략 시 full)"},
+            },
             ["stockCode"],
             "ai",
         )
@@ -1875,7 +1879,10 @@ def _generateMcpToolsPy() -> str:
         _tool(
             "companyCredit",
             "독립 신용등급 분석 (7축). 채무상환, 자본구조, 유동성, 현금흐름, 사업안정성, 재무신뢰성, 공시리스크.",
-            {"stockCode": "_STOCK", "axis": {"type": "string", "description": "축명 (생략 시 종합)"}},
+            {
+                "stockCode": "_STOCK",
+                "axis": {"type": "string", "enum": ["등급", "채무상환", "자본구조", "유동성", "현금흐름", "사업안정성", "재무신뢰성", "공시리스크", "grade", "repayment", "leverage", "liquidity", "cashflow", "business", "reliability", "disclosure"], "description": "축명 (생략 시 종합 등급)"},
+            },
             ["stockCode"],
         )
     )
