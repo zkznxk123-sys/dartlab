@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { brand } from '$lib/brand';
 	import {
 		forceSimulation,
 		forceManyBody,
@@ -38,21 +37,13 @@
 		[k: string]: any;
 	}
 
-	interface Stage {
-		key: string;
-		name: string;
-		role?: string;
-		stream?: string;
-	}
-
 	interface Props {
 		nodes: CompanyNode[];
 		links: CompanyEdge[];
-		stages?: Stage[];
 		onNodeClick?: (n: CompanyNode | null) => void;
 	}
 
-	let { nodes, links, stages = [], onNodeClick }: Props = $props();
+	let { nodes, links, onNodeClick }: Props = $props();
 
 	let container: HTMLDivElement | null = $state(null);
 	let w = $state(1200);
@@ -252,6 +243,7 @@
 
 <svelte:window onmousemove={onMouseMove} onmouseup={onMouseUp} />
 
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
 	bind:this={container}
 	class="drilldown-container"
@@ -345,44 +337,10 @@
 		</g>
 	</svg>
 
-	<!-- 우상단 클러스터 -->
-	<div class="top-right-cluster">
-		<a
-			class="tr-btn github"
-			href={brand.repo}
-			target="_blank"
-			rel="noopener"
-			title="GitHub 저장소"
-			aria-label="GitHub"
-		>
-			<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-				<path
-					fill="currentColor"
-					d="M12 .5C5.73.5.66 5.57.66 11.84c0 5.02 3.26 9.28 7.78 10.78.57.1.78-.25.78-.55v-1.92c-3.17.69-3.84-1.53-3.84-1.53-.52-1.31-1.27-1.66-1.27-1.66-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.72-1.52-2.53-.29-5.2-1.27-5.2-5.64 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.14 1.17a10.9 10.9 0 0 1 5.72 0c2.18-1.48 3.14-1.17 3.14-1.17.62 1.59.23 2.76.11 3.05.74.8 1.18 1.82 1.18 3.07 0 4.38-2.68 5.35-5.22 5.63.41.35.77 1.04.77 2.1v3.11c0 .3.2.66.79.55 4.52-1.5 7.77-5.76 7.77-10.78C23.34 5.57 18.27.5 12 .5Z"
-				/>
-			</svg>
-		</a>
-		<a
-			class="tr-btn bmc"
-			href={brand.coffee}
-			target="_blank"
-			rel="noopener"
-			title="Buy Me A Coffee"
-			aria-label="Buy Me A Coffee"
-		>
-			<img
-				src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
-				alt=""
-				width="88"
-				height="26"
-				loading="lazy"
-				decoding="async"
-			/>
-		</a>
-		<button class="tr-btn zoom" onclick={resetView} title="화면 초기화">
-			화면 배율 {zoom.toFixed(1)}× ⟳
-		</button>
-	</div>
+	<!-- 우상단: 화면 배율/초기화만 (브랜드 버튼은 좌측 사이드바에) -->
+	<button class="zoom-btn" onclick={resetView} title="화면 초기화 (더블클릭으로 reset)">
+		{zoom.toFixed(1)}× ⟳
+	</button>
 
 	<!-- 범례: stream stroke -->
 	<div class="legend">
@@ -448,48 +406,26 @@
 		user-select: none;
 	}
 
-	.top-right-cluster {
+	.zoom-btn {
 		position: absolute;
 		top: 16px;
 		right: 16px;
-		display: flex;
-		gap: 8px;
-		align-items: center;
-		z-index: 5;
-	}
-	.tr-btn {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
 		background: rgba(15, 18, 25, 0.85);
 		border: 1px solid #1e2433;
 		border-radius: 6px;
 		color: #cbd5e1;
-		text-decoration: none;
-		backdrop-filter: blur(8px);
 		font-size: 11px;
 		font-family: monospace;
+		padding: 6px 10px;
+		height: 30px;
 		cursor: pointer;
+		backdrop-filter: blur(8px);
+		z-index: 4;
 	}
-	.tr-btn:hover {
+	.zoom-btn:hover {
 		background: rgba(30, 36, 51, 0.95);
 		border-color: #334155;
 		color: #f1f5f9;
-	}
-	.tr-btn.github {
-		width: 30px;
-		height: 30px;
-	}
-	.tr-btn.bmc {
-		padding: 2px 6px;
-		height: 30px;
-	}
-	.tr-btn.zoom {
-		padding: 6px 10px;
-		height: 30px;
-	}
-	.tr-btn.bmc img {
-		display: block;
 	}
 
 	.legend {

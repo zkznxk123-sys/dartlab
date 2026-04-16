@@ -3,12 +3,17 @@
 	import IndustryAtlas from '$lib/components/industry/IndustryAtlas.svelte';
 	import IndustryDrilldown from '$lib/components/industry/IndustryDrilldown.svelte';
 	import CompanyCard from '$lib/components/industry/CompanyCard.svelte';
+	import GuidePanel from '$lib/components/industry/GuidePanel.svelte';
+	import TutorialTour from '$lib/components/industry/TutorialTour.svelte';
+	import { brand } from '$lib/brand';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import type { PageData } from './$types';
 	import { base } from '$app/paths';
 
 	let { data }: { data: PageData } = $props();
+	let guideOpen = $state(false);
+	let tourOpen = $state(false);
 
 	// ── 뷰 모드 ──
 	// atlas: 34개 산업 노드 + 산업간 supplier flow (default)
@@ -94,12 +99,6 @@
 		}
 		return GRAY;
 	}
-
-	const STREAM_STROKE: Record<string, string> = {
-		upstream: '#8b5cf6',
-		midstream: '#f8fafc',
-		downstream: '#f97316'
-	};
 
 	let allNodes = $derived(data.ecosystem.nodes);
 	let allLinks = $derived(data.ecosystem.links);
@@ -394,28 +393,17 @@
 			if (b) addToCompare(b);
 		}
 		urlHandled = true;
-	});
 
-	// ── 선택 회사의 공급/고객 관계 (companies/industry 뷰 공통) ──
-	let selectedRelations = $derived.by(() => {
-		if (!selectedNode || selectedNode.isIndustry) return { suppliers: [], customers: [] };
-		const id = selectedNode.id;
-		const pool = viewMode === 'industry' ? industryNodes : allNodes;
-		const linkPool = viewMode === 'industry' ? industryLinks : allLinks;
-		const nodeById = new Map(pool.map((n: any) => [n.id, n]));
-		const suppliers: any[] = [];
-		const customers: any[] = [];
-		for (const l of linkPool) {
-			if (l.target === id && l.type === 'supplier') {
-				const from = nodeById.get(l.source);
-				if (from) suppliers.push({ ...l, partner: from });
+		// 첫 방문 튜토리얼 자동 시작
+		try {
+			if (!localStorage.getItem('dartlab.map.tour.done') && !focus && !cmp) {
+				setTimeout(() => {
+					tourOpen = true;
+				}, 800);
 			}
-			if (l.source === id && (l.type === 'customer' || l.type === 'supplier')) {
-				const to = nodeById.get(l.target);
-				if (to) customers.push({ ...l, partner: to });
-			}
+		} catch {
+			/* noop */
 		}
-		return { suppliers, customers };
 	});
 
 	// ── 필터 통계 (companies 뷰) ──
@@ -496,6 +484,82 @@
 <div class="map-page">
 	<!-- 왼쪽 사이드바 -->
 	<aside class="sidebar">
+		<!-- 브랜드 바: 아바타 → GitHub → BMC → 도움말 -->
+		<div class="brand-bar">
+			<a class="brand-btn avatar" href="{base}/" title="dartlab 홈으로" aria-label="홈">
+				<picture>
+					<source srcset="{base}/avatar.webp" type="image/webp" />
+					<img src="{base}/avatar.png" alt="dartlab" width="22" height="22" />
+				</picture>
+			</a>
+			<a
+				class="brand-btn"
+				href={brand.repo}
+				target="_blank"
+				rel="noopener"
+				title="GitHub 저장소"
+				aria-label="GitHub"
+			>
+				<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+					<path
+						fill="currentColor"
+						d="M12 .5C5.73.5.66 5.57.66 11.84c0 5.02 3.26 9.28 7.78 10.78.57.1.78-.25.78-.55v-1.92c-3.17.69-3.84-1.53-3.84-1.53-.52-1.31-1.27-1.66-1.27-1.66-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.72-1.52-2.53-.29-5.2-1.27-5.2-5.64 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.14 1.17a10.9 10.9 0 0 1 5.72 0c2.18-1.48 3.14-1.17 3.14-1.17.62 1.59.23 2.76.11 3.05.74.8 1.18 1.82 1.18 3.07 0 4.38-2.68 5.35-5.22 5.63.41.35.77 1.04.77 2.1v3.11c0 .3.2.66.79.55 4.52-1.5 7.77-5.76 7.77-10.78C23.34 5.57 18.27.5 12 .5Z"
+					/>
+				</svg>
+			</a>
+			<a
+				class="brand-btn bmc"
+				href={brand.coffee}
+				target="_blank"
+				rel="noopener"
+				title="Buy Me A Coffee"
+				aria-label="Buy Me A Coffee"
+			>
+				<img
+					src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+					alt=""
+					width="72"
+					height="22"
+					loading="lazy"
+					decoding="async"
+				/>
+			</a>
+			<button
+				class="brand-btn help"
+				onclick={() => (guideOpen = true)}
+				title="지도 보는 법 · 색상 · 분석 팁"
+				aria-label="도움말"
+			>
+				<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+					<path
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01M22 12A10 10 0 1 1 2 12a10 10 0 0 1 20 0Z"
+					/>
+				</svg>
+			</button>
+			<button
+				class="brand-btn help tour-btn"
+				onclick={() => (tourOpen = true)}
+				title="튜토리얼 시작"
+				aria-label="튜토리얼"
+			>
+				<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+					<path
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M5 3l14 9-14 9V3z"
+					/>
+				</svg>
+			</button>
+		</div>
+
 		<div class="header">
 			<h1>산업 생태계</h1>
 			{#if viewMode === 'atlas'}
@@ -510,10 +574,6 @@
 					{filteredNodes.length.toLocaleString()}사 · {filteredLinks.length.toLocaleString()}관계
 				</p>
 			{/if}
-			<div class="nav-links">
-				<a href="{base}/insights">인사이트 랭킹</a>
-				<a href="{base}/compare">기업 비교</a>
-			</div>
 		</div>
 
 		<!-- 색상 기준 셀렉터 -->
@@ -560,16 +620,43 @@
 					class:active={viewMode === 'atlas'}
 					onclick={() => switchView('atlas')}
 				>
-					🗺️ 산업지도
-					<span class="hint">34개 산업 + 공급 플로우</span>
+					<span class="tab-icon">
+						<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="9" />
+							<circle cx="12" cy="12" r="4" />
+							<circle cx="12" cy="3" r="1.5" fill="currentColor" />
+							<circle cx="21" cy="12" r="1.5" fill="currentColor" />
+							<circle cx="12" cy="21" r="1.5" fill="currentColor" />
+							<circle cx="3" cy="12" r="1.5" fill="currentColor" />
+						</svg>
+					</span>
+					<span class="tab-body">
+						<span class="tab-title">산업 지도</span>
+						<span class="hint">34개 산업 + 공급 플로우</span>
+					</span>
 				</button>
 				<button
 					class="view-tab"
 					class:active={viewMode === 'companies'}
 					onclick={() => switchView('companies')}
 				>
-					🏢 전 회사
-					<span class="hint">2,664사 전체 그래프</span>
+					<span class="tab-icon">
+						<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="5" cy="5" r="2" />
+							<circle cx="12" cy="5" r="2" />
+							<circle cx="19" cy="5" r="2" />
+							<circle cx="5" cy="12" r="2" />
+							<circle cx="12" cy="12" r="2" />
+							<circle cx="19" cy="12" r="2" />
+							<circle cx="5" cy="19" r="2" />
+							<circle cx="12" cy="19" r="2" />
+							<circle cx="19" cy="19" r="2" />
+						</svg>
+					</span>
+					<span class="tab-body">
+						<span class="tab-title">전 회사</span>
+						<span class="hint">2,664사 전체 그래프</span>
+					</span>
 				</button>
 				<button
 					class="view-tab"
@@ -577,11 +664,20 @@
 					disabled={!drillIndustry}
 					onclick={() => drillIndustry && enterIndustry(drillIndustry)}
 				>
-					🔍 산업 내부
-					<span class="hint">
-						{drillIndustry
-							? `${industryDetail?.name || drillIndustry} 드릴다운`
-							: '산업 클릭하여 진입'}
+					<span class="tab-icon">
+						<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="11" cy="11" r="7" />
+							<path d="M21 21l-4.3-4.3" />
+							<path d="M11 8v6M8 11h6" />
+						</svg>
+					</span>
+					<span class="tab-body">
+						<span class="tab-title">산업 내부</span>
+						<span class="hint">
+							{drillIndustry
+								? `${industryDetail?.name || drillIndustry} 드릴다운`
+								: '산업 클릭하여 진입'}
+						</span>
 					</span>
 				</button>
 			</div>
@@ -865,6 +961,9 @@
 	{/if}
 </div>
 
+<GuidePanel open={guideOpen} onClose={() => (guideOpen = false)} />
+<TutorialTour open={tourOpen} onClose={() => (tourOpen = false)} />
+
 <style>
 	.map-page {
 		display: grid;
@@ -884,21 +983,58 @@
 		color: #f1f5f9;
 	}
 
-	.nav-links {
+	/* 브랜드 바: 아바타 / GitHub / BMC / 도움말 / 튜토리얼 */
+	.brand-bar {
 		display: flex;
-		gap: 8px;
-		margin-top: 8px;
+		gap: 6px;
+		align-items: center;
+		padding-bottom: 12px;
+		border-bottom: 1px solid #1e2433;
+		margin-bottom: 12px;
 	}
-	.nav-links a {
-		font-size: 11px;
-		color: #60a5fa;
+	.brand-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 30px;
+		height: 30px;
+		background: rgba(5, 8, 17, 0.85);
+		border: 1px solid #1e2433;
+		border-radius: 6px;
+		color: #cbd5e1;
 		text-decoration: none;
-		padding: 3px 8px;
-		background: rgba(96, 165, 250, 0.1);
-		border-radius: 4px;
+		cursor: pointer;
+		transition: background 0.15s, border-color 0.15s, color 0.15s;
+		padding: 0;
 	}
-	.nav-links a:hover {
-		background: rgba(96, 165, 250, 0.25);
+	.brand-btn:hover {
+		background: #1e2433;
+		border-color: #334155;
+		color: #f1f5f9;
+	}
+	.brand-btn.avatar {
+		border-color: #334155;
+		padding: 3px;
+		overflow: hidden;
+	}
+	.brand-btn.avatar img {
+		border-radius: 50%;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	.brand-btn.bmc {
+		width: auto;
+		padding: 3px 6px;
+	}
+	.brand-btn.bmc img {
+		display: block;
+	}
+	.brand-btn.help {
+		margin-left: auto;
+	}
+	.brand-btn.tour-btn {
+		margin-left: 0;
 	}
 
 	.header h1 {
@@ -1015,8 +1151,35 @@
 		text-align: left;
 		font-size: 13px;
 		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 10px;
+	}
+	.view-tab .tab-icon {
+		width: 26px;
+		height: 26px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		background: #1e2433;
+		border-radius: 6px;
+		flex-shrink: 0;
+	}
+	.view-tab.active .tab-icon {
+		background: rgba(96, 165, 250, 0.25);
+		color: #60a5fa;
+	}
+	.view-tab .tab-body {
+		display: flex;
 		flex-direction: column;
-		gap: 2px;
+		gap: 1px;
+		min-width: 0;
+	}
+	.view-tab .tab-title {
+		font-weight: 500;
+	}
+	.view-tab.active .tab-title {
+		font-weight: 600;
 	}
 	.view-tab:hover:not(:disabled) {
 		background: rgba(96, 165, 250, 0.08);
@@ -1026,7 +1189,6 @@
 		background: rgba(96, 165, 250, 0.18);
 		border-color: rgba(96, 165, 250, 0.45);
 		color: #f1f5f9;
-		font-weight: 600;
 	}
 	.view-tab:disabled {
 		color: #475569;

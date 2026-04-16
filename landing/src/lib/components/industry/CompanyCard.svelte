@@ -124,6 +124,26 @@
 		<div class="loading">상세 데이터 로드 중…</div>
 	{/if}
 
+	<!-- 블로그 포스트 (있으면 맨 위에 강조) -->
+	{#if blogPosts.length > 0}
+		<div class="blog-banner">
+			<div class="banner-title">📝 이 회사 심층 분석 글</div>
+			{#each blogPosts.slice(0, 2) as post}
+				<a class="blog-card featured" href="{base}/blog/{post.slug}" target="_blank" rel="noopener">
+					<div class="blog-title">{post.title}</div>
+					{#if post.verdict}
+						<div class="blog-verdict">{post.verdict}</div>
+					{/if}
+					<div class="blog-meta">
+						{#if post.direction}<span class="blog-tag">{post.direction}</span>{/if}
+						{#if post.archetype}<span class="blog-tag">{post.archetype}</span>{/if}
+						<span class="blog-cta">읽으러 가기 →</span>
+					</div>
+				</a>
+			{/each}
+		</div>
+	{/if}
+
 	<!-- 2. 재무 한눈에 -->
 	{#if latest}
 		<div class="section">
@@ -345,10 +365,11 @@
 		</div>
 	{/if}
 
-	{#if blogPosts.length > 0}
+	<!-- 추가 블로그 포스트 (2개 초과 시) -->
+	{#if blogPosts.length > 2}
 		<div class="section">
-			<h3>심층 분석 글</h3>
-			{#each blogPosts as post}
+			<h3>다른 분석 글 ({blogPosts.length - 2})</h3>
+			{#each blogPosts.slice(2) as post}
 				<a class="blog-card" href="{base}/blog/{post.slug}" target="_blank" rel="noopener">
 					<div class="blog-title">{post.title}</div>
 					{#if post.verdict}
@@ -713,6 +734,21 @@
 		padding: 4px 0;
 	}
 
+	.blog-banner {
+		margin-top: 12px;
+		padding: 10px 12px;
+		background: linear-gradient(135deg, rgba(96, 165, 250, 0.12), rgba(52, 211, 153, 0.08));
+		border: 1px solid rgba(96, 165, 250, 0.3);
+		border-radius: 8px;
+	}
+	.banner-title {
+		font-size: 11px;
+		color: #60a5fa;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+		margin-bottom: 8px;
+	}
 	.blog-card {
 		display: block;
 		text-decoration: none;
@@ -721,10 +757,24 @@
 		border-radius: 6px;
 		padding: 10px 12px;
 		margin-bottom: 6px;
-		transition: border-color 0.15s;
+		transition: border-color 0.15s, background 0.15s;
 	}
 	.blog-card:hover {
 		border-color: #60a5fa;
+		background: #0b1120;
+	}
+	.blog-card.featured {
+		border-color: rgba(96, 165, 250, 0.4);
+	}
+	.blog-card.featured:hover {
+		border-color: #60a5fa;
+		box-shadow: 0 0 0 1px #60a5fa;
+	}
+	.blog-cta {
+		color: #60a5fa;
+		font-weight: 600;
+		font-size: 10px;
+		margin-left: auto;
 	}
 	.blog-title {
 		font-size: 13px;
