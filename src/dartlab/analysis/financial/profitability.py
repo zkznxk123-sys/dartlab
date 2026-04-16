@@ -6,6 +6,9 @@ select()로 IS/BS 원본 계정을 가져와서
 
 from __future__ import annotations
 
+from dartlab.core.finance.safe import get as _get
+_getF = _getF2 = _getF3 = _getF4 = _get
+
 from typing import Any
 
 from dartlab.analysis.financial._helpers import MAX_RATIO_YEARS, annualColsFromPeriods, sumBorrowings, toDictBySnakeId
@@ -493,11 +496,6 @@ def calcProfitabilityFlags(company, *, basePeriod: str | None = None) -> list[st
 # ── Penman RNOA + FLEV/SPREAD 분해 ──
 
 
-def _get(row: dict, col: str) -> float:
-    v = row.get(col)
-    return v if v is not None else 0
-
-
 @memoized_calc
 def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict | None:
     """Penman 분해 -- ROE가 영업력인지 레버리지인지 분리.
@@ -581,9 +579,6 @@ def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict |
     if len(yCols) < 2:
         return None
 
-    def _getF(row: dict, col: str) -> float:
-        v = row.get(col)
-        return v if v is not None else 0
 
     history = []
     for col in yCols:
@@ -728,9 +723,6 @@ def calcRoicTree(company, *, basePeriod: str | None = None) -> dict | None:
     if not yCols:
         return None
 
-    def _getF(row: dict, col: str) -> float:
-        v = row.get(col)
-        return v if v is not None else 0
 
     history = []
     for col in yCols:

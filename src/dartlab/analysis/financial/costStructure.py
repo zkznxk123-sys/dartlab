@@ -5,6 +5,9 @@
 
 from __future__ import annotations
 
+from dartlab.core.finance.safe import get as _get
+_getF = _getF2 = _getF3 = _getF4 = _get
+
 from typing import Any
 
 from dartlab.analysis.financial._helpers import annualColsFromPeriods, sumCostOfSales, sumSGA, toDictBySnakeId
@@ -14,11 +17,6 @@ _MAX_YEARS = 8
 
 
 # ── 유틸 ──
-
-
-def _get(row: dict, col: str) -> float:
-    v = row.get(col) if row else None
-    return v if v is not None else 0
 
 
 from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
@@ -122,9 +120,6 @@ def calcOperatingLeverage(company, *, basePeriod: str | None = None) -> dict | N
     if not yCols:
         return None
 
-    def _getF2(row: dict, col: str) -> float:
-        v = row.get(col)
-        return v if v is not None else 0
 
     history = []
     for i, col in enumerate(yCols):
@@ -199,9 +194,6 @@ def calcBreakevenEstimate(company, *, basePeriod: str | None = None) -> dict | N
     if not yCols:
         return None
 
-    def _getF3(row: dict, col: str) -> float:
-        v = row.get(col)
-        return v if v is not None else 0
 
     history = []
     for col in yCols:

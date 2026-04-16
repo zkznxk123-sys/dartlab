@@ -12,6 +12,9 @@ forecast 엔진(점 추정)과 달리, 방향성과 신뢰도에 집중한다.
 
 from __future__ import annotations
 
+from dartlab.core.finance.safe import get as _get
+_getF = _getF2 = _getF3 = _getF4 = _get
+
 import logging
 import math
 
@@ -41,11 +44,6 @@ _COMMODITY_SECTORS = set(_sensitivity.get("commodity", []))
 
 
 # ── 공통 헬퍼 ──
-
-
-def _get(row: dict, col: str) -> float:
-    v = row.get(col) if row else None
-    return v if v is not None else 0
 
 
 from dartlab.analysis.financial._constants import (

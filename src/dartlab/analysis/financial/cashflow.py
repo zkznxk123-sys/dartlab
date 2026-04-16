@@ -6,6 +6,9 @@ CF 3구간(영업/투자/재무) + FCF + 이익의 현금 뒷받침 + CF 패턴.
 
 from __future__ import annotations
 
+from dartlab.core.finance.safe import get as _get
+_getF = _getF2 = _getF3 = _getF4 = _get
+
 from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
@@ -13,12 +16,6 @@ _MAX_YEARS = 8
 
 
 # ── 유틸 ──
-
-
-def _get(row: dict, col: str) -> float:
-    """dict에서 안전하게 값 꺼내기 (None -> 0)."""
-    v = row.get(col) if row else None
-    return v if v is not None else 0
 
 
 # ── CF 패턴 분류 ──
@@ -98,9 +95,6 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
     if not yCols:
         return None
 
-    def _getF(row: dict, col: str) -> float:
-        v = row.get(col)
-        return v if v is not None else 0
 
     history = []
     for col in yCols:
@@ -185,9 +179,6 @@ def calcCashQuality(company, *, basePeriod: str | None = None) -> dict | None:
     if not yCols:
         return None
 
-    def _getF2(row: dict, col: str) -> float:
-        v = row.get(col)
-        return v if v is not None else 0
 
     history = []
     for col in yCols:
@@ -328,9 +319,6 @@ def calcOcfDecomposition(company, *, basePeriod: str | None = None) -> dict | No
     if len(yCols) < 2:
         return None
 
-    def _getF3(row: dict, col: str) -> float:
-        v = row.get(col)
-        return v if v is not None else 0
 
     history = []
     for i in range(len(yCols) - 1):

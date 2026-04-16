@@ -5,15 +5,13 @@
 
 from __future__ import annotations
 
+from dartlab.core.finance.safe import get as _get
+_getF = _getF2 = _getF3 = _getF4 = _get
+
 from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
 _MAX_YEARS = 8
-
-
-def _get(row: dict, col: str) -> float:
-    v = row.get(col) if row else None
-    return v if v is not None else 0
 
 
 from dartlab.core.finance.calc import safePct as _pct  # noqa: E402

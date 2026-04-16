@@ -5,6 +5,9 @@
 
 from __future__ import annotations
 
+from dartlab.core.finance.safe import get as _get
+_getF = _getF2 = _getF3 = _getF4 = _get
+
 from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDictBySnakeId
 from dartlab.analysis.financial._memoize import memoized_calc
 
@@ -12,11 +15,6 @@ _MAX_YEARS = 8
 
 
 # ── 유틸 ──
-
-
-def _get(row: dict, col: str) -> float:
-    v = row.get(col) if row else None
-    return v if v is not None else 0
 
 
 def _getFirst(data: dict, keys: list[str], col: str) -> float:
@@ -70,9 +68,6 @@ def calcIsCfDivergence(company, *, basePeriod: str | None = None) -> dict | None
     if not yCols:
         return None
 
-    def _getF(row: dict, col: str) -> float:
-        v = row.get(col)
-        return v if v is not None else 0
 
     history = []
     for col in yCols:
@@ -154,9 +149,6 @@ def calcIsBsDivergence(company, *, basePeriod: str | None = None) -> dict | None
     if not yCols:
         return None
 
-    def _getF2(row: dict, col: str) -> float:
-        v = row.get(col)
-        return v if v is not None else 0
 
     history = []
     for i, col in enumerate(yCols):
@@ -405,9 +397,6 @@ def calcArticulationCheck(company, *, basePeriod: str | None = None) -> dict | N
     if len(yCols) < 2:
         return None
 
-    def _getF3(row: dict, col: str) -> float:
-        v = row.get(col)
-        return v if v is not None else 0
 
     history = []
     for i in range(len(yCols) - 1):
