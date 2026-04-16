@@ -38,7 +38,7 @@ def _parse_frontmatter(text: str) -> dict:
 
 
 def _parse_ai_block(text: str) -> dict | None:
-    """frontmatter에서 ai: 블록을 추출."""
+    """frontmatter에서 ai: 블록을 추출. archetype + keyMetrics 풀 필드 (Phase 14 B1)."""
     parts = text.split("---", 2)
     if len(parts) < 3:
         return None
@@ -49,11 +49,30 @@ def _parse_ai_block(text: str) -> dict | None:
 
     ai_section = fm[fm.index("ai:") :]
     result: dict = {}
+    in_metrics = False
 
     for line in ai_section.split("\n"):
+        raw = line.rstrip()
         line = line.strip()
         if not line or line == "ai:":
             continue
+
+        # keyMetrics 블록 파싱
+        if line == "keyMetrics:":
+            in_metrics = True
+            result["keyMetrics"] = {}
+            continue
+        if in_metrics:
+            if raw.startswith("    ") or raw.startswith("\t"):
+                m = re.match(r'^(\w+):\s*(.+)$', line)
+                if m:
+                    key, val = m.group(1), m.group(2).strip()
+                    try:
+                        result["keyMetrics"][key] = float(val)
+                    except ValueError:
+                        result["keyMetrics"][key] = val
+                continue
+            in_metrics = False
 
         # verdict, direction 등 단순 키
         m = re.match(r'^(\w+):\s*"?(.+?)"?\s*$', line)
@@ -117,8 +136,24 @@ def sync() -> int:
         verdict = ai.get("verdict", "")
         direction = ai.get("direction", "")
         confidence = ai.get("confidence", "")
+        archetype = ai.get("archetype", "")
+        key_metrics = ai.get("keyMetrics") or {}
 
-        narrative = f"[{direction}/{confidence}] {verdict}"
+        # Phase 14 B1: archetype + keyMetrics 를 narrative 에 병합 (스키마 변경 없이)
+        prefix_parts = [direction, confidence]
+        if archetype:
+            prefix_parts.append(archetype)
+        prefix = "/".join([p for p in prefix_parts if p])
+
+        metrics_parts = []
+        for key in ("revenue", "opm", "roe", "fcf"):
+            v = key_metrics.get(key)
+            if isinstance(v, (int, float)):
+                unit = "%" if key in ("opm", "roe") else "조"
+                metrics_parts.append(f"{key}={v:.1f}{unit}")
+        metrics_str = f" [{' '.join(metrics_parts)}]" if metrics_parts else ""
+
+        narrative = f"[{prefix}]{metrics_str} {verdict}"
         strengths = ai.get("strengths", [])
         weaknesses = ai.get("weaknesses", [])
 
