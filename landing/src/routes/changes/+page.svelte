@@ -142,7 +142,7 @@
 								</div>
 							</td>
 							<td>
-								<a href="{base}/map/industry/{e.industry}" class="ind">{e.industryName}</a>
+								<a href="{base}/map?industry={e.industry}" class="ind">{e.industryName}</a>
 							</td>
 							<td class="num">{e.roe !== null && e.roe !== undefined ? `${e.roe}%` : '-'}</td>
 							<td class="num" style:color={e.roeDelta > 0 ? '#34d399' : e.roeDelta < 0 ? '#f87171' : '#64748b'}>
