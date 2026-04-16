@@ -1088,6 +1088,26 @@ class Analysis:
         assumptions = buildAssumptions(results, engine="analysis", overrides=overrides)
         if assumptions:
             results["assumptions"] = assumptions
+
+        # Phase 15 B2: dataAsOf 자동 주입 — 각 calc history 의 최신 period + 호출 시각
+        try:
+            from dartlab.core.finance.period import resolveLatestPeriod
+
+            periods_pool: set[str] = set()
+            for block in results.values():
+                if isinstance(block, dict) and isinstance(block.get("history"), list):
+                    for row in block["history"]:
+                        if isinstance(row, dict) and row.get("period"):
+                            periods_pool.add(row["period"])
+            latest = resolveLatestPeriod(list(periods_pool)) if periods_pool else None
+            if latest or basePeriod:
+                import datetime as _dt
+                results["dataAsOf"] = {
+                    "latestPeriod": latest or basePeriod,
+                    "retrievedAt": _dt.datetime.now().date().isoformat(),
+                }
+        except (ImportError, AttributeError, KeyError, TypeError):
+            pass
         return results
 
     def __getattr__(self, name):

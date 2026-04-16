@@ -362,3 +362,42 @@ def buildFiscalToCalendarMap(rawFacts) -> dict[str, str]:
             result[q4Fiscal] = q4Cal
 
     return result
+
+
+# ─── Phase 15 B1: 최신 기간 자동 감지 ────────────────────────────
+
+
+def resolveLatestPeriod(periods: list[str] | set[str] | None) -> str | None:
+    """기간 컬럼 중 최신을 자동 결정.
+
+    - 분기 우선: "2025Q4" > "2025Q3" > "2024" (연간은 분기 뒤)
+    - 연간 있으면: "2024" > "2023"
+    - 둘 다 섞이면 분기 최신 선호 (공시 최신성 기준)
+
+    Args:
+        periods: 기간 컬럼 iterable (예: isParsed[1])
+
+    Returns:
+        가장 최신 기간 문자열. 없으면 None.
+    """
+    if not periods:
+        return None
+    pool = [p for p in periods if p and isinstance(p, str)]
+    if not pool:
+        return None
+
+    def _sortKey(p: str) -> tuple:
+        # YYYYQN: (year, quarter, is_quarter)
+        # YYYY: (year, 0, False) — 분기 뒤
+        if "Q" in p:
+            year = p[:4]
+            q = p[5:] if "-" in p else p[p.index("Q") + 1 :]
+            try:
+                return (int(year), int(q), 1)
+            except ValueError:
+                return (0, 0, 0)
+        if len(p) == 4 and p.isdigit():
+            return (int(p), 0, 0)
+        return (0, 0, 0)
+
+    return max(pool, key=_sortKey)
