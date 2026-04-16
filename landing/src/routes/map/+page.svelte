@@ -217,6 +217,81 @@
 		if (codes) window.location.href = `${base}/compare?codes=${codes}`;
 	}
 
+	// ── 플로팅 카드 (띄우기 윈도우) ──
+	interface FloatCard {
+		id: string;
+		node: any;
+		detail: any | null;
+		x: number;
+		y: number;
+		w: number;
+		h: number;
+		z: number;
+	}
+	let floatingCards: FloatCard[] = $state([]);
+	let floatingZTop = $state(100);
+
+	async function detachCard(stockCode: string) {
+		// 이미 띄워져 있으면 포커스만
+		const existing = floatingCards.find((c) => c.id === stockCode);
+		if (existing) {
+			focusFloating(stockCode);
+			return;
+		}
+		const node = nodeFinderById(stockCode);
+		if (!node) return;
+		let detail: any = null;
+		try {
+			const r = await fetch(`${base}/map/companies/${stockCode}.json`);
+			detail = r.ok ? await r.json() : null;
+		} catch {
+			detail = null;
+		}
+		// 초기 배치: 화면 중앙 기준 계단식 오프셋
+		const offset = floatingCards.length * 36;
+		const vw = typeof window !== 'undefined' ? window.innerWidth : 1400;
+		const vh = typeof window !== 'undefined' ? window.innerHeight : 900;
+		const w = 420;
+		const h = Math.min(720, vh - 100);
+		const x = Math.max(40, Math.min(vw - w - 40, vw * 0.3 + offset));
+		const y = Math.max(40, 80 + offset);
+		floatingZTop += 1;
+		floatingCards = [...floatingCards, { id: stockCode, node, detail, x, y, w, h, z: floatingZTop }];
+
+		// 기존 패널에서 이 회사가 선택되어 있었다면 닫기 (중복 방지)
+		if (selectedNode?.id === stockCode) {
+			selectedNode = null;
+			selectedDetail = null;
+			selectedDetailCode = null;
+		}
+	}
+
+	function closeFloating(stockCode: string) {
+		floatingCards = floatingCards.filter((c) => c.id !== stockCode);
+	}
+
+	function focusFloating(stockCode: string) {
+		floatingZTop += 1;
+		floatingCards = floatingCards.map((c) =>
+			c.id === stockCode ? { ...c, z: floatingZTop } : c
+		);
+	}
+
+	function moveFloating(stockCode: string, x: number, y: number) {
+		const idx = floatingCards.findIndex((c) => c.id === stockCode);
+		if (idx >= 0) {
+			floatingCards[idx].x = x;
+			floatingCards[idx].y = y;
+		}
+	}
+	function resizeFloating(stockCode: string, w: number, h: number) {
+		const idx = floatingCards.findIndex((c) => c.id === stockCode);
+		if (idx >= 0) {
+			floatingCards[idx].w = w;
+			floatingCards[idx].h = h;
+		}
+	}
+
 	// ── 투어용 데모 헬퍼 ──
 	async function demoSelectCompany(stockCode: string) {
 		const n = nodeFinderById(stockCode);
@@ -985,6 +1060,7 @@
 					dataAsOf={data.meta?.dataAsOf}
 					compareDisabled={comparing}
 					onAddCompare={addToCompare}
+					onDetach={detachCard}
 					onClose={() => handleNodeClick(null)}
 				/>
 			</div>
@@ -997,6 +1073,7 @@
 						industryStat={data.industryStats?.[compareB.industry]}
 						dataAsOf={data.meta?.dataAsOf}
 						compareDisabled={true}
+						onDetach={detachCard}
 						onClose={clearCompare}
 					/>
 				</div>
@@ -1037,6 +1114,35 @@
 	onClear={clearCompareAll}
 	onOpenFull={openCompareFull}
 />
+
+<!-- 플로팅 카드 윈도우 (desktop only) -->
+{#each floatingCards as fc (fc.id)}
+	<FloatingCard
+		id={fc.id}
+		title={fc.node?.label || ''}
+		subtitle={fc.node?.industryName || ''}
+		bind:x={fc.x}
+		bind:y={fc.y}
+		bind:w={fc.w}
+		bind:h={fc.h}
+		z={fc.z}
+		onClose={() => closeFloating(fc.id)}
+		onFocus={() => focusFloating(fc.id)}
+		onMove={(x, y) => moveFloating(fc.id, x, y)}
+		onResize={(w, h) => resizeFloating(fc.id, w, h)}
+	>
+		<CompanyCard
+			node={fc.node}
+			detail={fc.detail}
+			loading={false}
+			industryStat={data.industryStats?.[fc.node?.industry]}
+			dataAsOf={data.meta?.dataAsOf}
+			compareDisabled={true}
+			detached={true}
+			onClose={() => closeFloating(fc.id)}
+		/>
+	</FloatingCard>
+{/each}
 
 <TutorialTour
 	open={tourOpen}
