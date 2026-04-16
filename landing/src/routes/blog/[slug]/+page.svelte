@@ -30,10 +30,7 @@
 					.replace(/[^a-z0-9가-힣]+/g, '-')
 					.replace(/(^-|-$)/g, '');
 			}
-			// 간결한 TOC 텍스트: "제1막: 제목 — 부제" → "1막: 제목"
-			let text = (h.textContent ?? '').trim();
-			const dashIdx = text.indexOf(' — ');
-			if (dashIdx > 0 && text.length > 30) text = text.substring(0, dashIdx);
+			const text = (h.textContent ?? '').trim();
 			items.push({
 				id: h.id,
 				text,
@@ -436,6 +433,7 @@
 								class:h3={item.level === 3}
 								class:active={activeId === item.id}
 								onclick={() => scrollToHeading(item.id)}
+								title={item.text}
 							>
 								{item.text}
 							</button>
