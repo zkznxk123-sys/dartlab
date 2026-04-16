@@ -6,6 +6,7 @@
 	import TutorialTour from '$lib/components/industry/TutorialTour.svelte';
 	import FreshnessBadge from '$lib/components/industry/FreshnessBadge.svelte';
 	import CompareTray from '$lib/components/industry/CompareTray.svelte';
+	import FloatingCard from '$lib/components/industry/FloatingCard.svelte';
 	import { brand } from '$lib/brand';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
@@ -1586,7 +1587,7 @@
 		position: fixed;
 		top: 0;
 		right: 0;
-		width: 380px;
+		width: 440px;
 		height: 100dvh;
 		background: #0f1219;
 		border-left: 1px solid #1e2433;
@@ -1597,7 +1598,7 @@
 		z-index: 6;
 	}
 	.detail-panel.wide {
-		width: 760px;
+		width: 880px;
 		grid-template-columns: 1fr 1fr;
 	}
 	.card-slot {

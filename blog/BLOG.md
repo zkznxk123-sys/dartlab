@@ -516,6 +516,33 @@ scan "OI YoY +400%", "OPM 7.3%" 같은 급등·고마진은 **별도(OFS) 기준
 - 검증표에 "📅 dartlab 실측 YYYY-MM-DD"
 - 큰 분기 변동 후 핵심 후킹 한 번 더 검증
 
+### Playground — 근거 코드 즉석 실행 (선택)
+
+검증표 행을 독자가 브라우저에서 즉석 실행 가능한 근거로 제공할 수 있다. 본문에 `<Playground>` 컴포넌트를 삽입.
+
+```markdown
+<script>
+import Playground from '$lib/components/blog/Playground.svelte';
+</script>
+
+<Playground
+  label="IS-9year"
+  stockCode="005930"
+  code={`print(c.show("IS", annual=True, last=9))`}
+/>
+```
+
+**규칙**:
+- `label` = 검증표 행 키와 1:1 매칭 (동일 문자열). 한 글 안에서 유일
+- `stockCode` = frontmatter `stockCode` 와 일치. 다른 종목이면 명시
+- 코드는 **독립 실행 가능** — 앞 Playground 에서 정의한 변수 의존 금지. `c` 는 스토어가 자동 생성하므로 바로 사용 가능
+- 설명용 스니펫(개념 코드, CLI, 설치 명령)은 `python` / `bash` 코드펜스로 유지. Playground 는 "이 숫자 진짜야?" 검증 가치가 있는 근거에만 사용
+- 브라우저 Pyodide 실행 — 최초 1회 8~12초, 같은 글 내 다음 Playground 는 즉시 실행
+
+**쓰지 않는 경우**:
+- `gather` / `scan` / `collect` 등 Pyodide 미지원 엔진 호출이 포함된 코드
+- `dartlab.ask(...)` — 독자가 API 키를 직접 입력해야 하므로 블로그 근거로 부적절. `/playground` 전용 페이지에서만 노출
+
 ---
 
 ## 6. 자산 정책 — SVG / 이미지 / 파일명

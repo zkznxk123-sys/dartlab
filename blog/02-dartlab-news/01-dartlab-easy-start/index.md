@@ -17,6 +17,7 @@ keywords:
 
 <script>
 import YouTube from '$lib/components/YouTube.svelte';
+import Playground from '$lib/components/blog/Playground.svelte';
 </script>
 
 <YouTube id="rPOqtmTZxEA" shorts title="dartlab uv 설치 안내" />
@@ -227,6 +228,12 @@ print(c.ratios)  # 수익성, 안정성, 성장성 등 50개 비율
 
 ROE(자기자본이익률), 부채비율, 영업이익률 같은 투자 지표가 자동으로 계산된다. [자세히 보기 →](/blog/dartlab-easy-start)
 
+<Playground
+  label="samsung-ratios"
+  stockCode="005930"
+  code={`print(c.ratios)`}
+/>
+
 ### 공시 변화 감지
 
 ```python
@@ -237,6 +244,12 @@ print(c.diff())  # "지난 분기 대비 뭐가 바뀌었지?"
 ```
 
 사업보고서에서 전 분기 대비 바뀐 부분만 뽑아준다.
+
+<Playground
+  label="samsung-IS"
+  stockCode="005930"
+  code={`print(c.show("IS"))`}
+/>
 
 ### 미국 기업도 같은 방식
 

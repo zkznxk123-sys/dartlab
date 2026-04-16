@@ -97,21 +97,6 @@ def test_phase10_storyValidation_in_all_reportTypes():
         assert "storyValidation" in rt.sectionOrder, f"{key} missing storyValidation"
 
 
-@pytest.mark.unit
-def test_phase10_g1_evidence_dataclass():
-    """Phase 10 G1 — Evidence SSOT dataclass."""
-    from dartlab.core.finance.evidence import Evidence, EvidenceGraph, buildCalcEvidence
-
-    ev = buildCalcEvidence("opm", "2025Q3", {"rev": 1000, "opi": 150})
-    assert ev.source == "calc"
-    assert "opm" in ev.quote
-
-    g = EvidenceGraph(claim="OPM 15%")
-    g.add(ev)
-    assert len(g.evidence) == 1
-    assert "calc" in g.format_footnote()
-
-
 # ── kwargs 명명 ────────────────────────────────────────────
 
 

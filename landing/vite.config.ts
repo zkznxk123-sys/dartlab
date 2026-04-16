@@ -6,6 +6,7 @@ import fs from 'fs';
 
 const docsDir = path.resolve(__dirname, '..', 'docs');
 const blogDir = path.resolve(__dirname, '..', 'blog');
+const pyodideDir = path.resolve(__dirname, '..', 'pyodide');
 
 function contentType(filePath: string): string {
 	const ext = path.extname(filePath).toLowerCase();
@@ -70,7 +71,8 @@ export default defineConfig({
 		fs: {
 			allow: [
 				docsDir,
-				blogDir
+				blogDir,
+				pyodideDir
 			]
 		}
 	}

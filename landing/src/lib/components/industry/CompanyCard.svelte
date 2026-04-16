@@ -18,7 +18,11 @@
 		onAddCompare?: (stockCode: string) => void;
 		// 닫기
 		onClose?: () => void;
+		// "띄우기" — 플로팅 윈도우로 detach
+		onDetach?: (stockCode: string) => void;
 		compareDisabled?: boolean;
+		// 플로팅 모드에선 "띄우기" 버튼 숨김
+		detached?: boolean;
 	}
 
 	let {
@@ -29,7 +33,9 @@
 		dataAsOf = null,
 		onAddCompare,
 		onClose,
-		compareDisabled = false
+		onDetach,
+		compareDisabled = false,
+		detached = false
 	}: Props = $props();
 
 	let aiExpanded = $state(false);
@@ -549,6 +555,11 @@
 		<button class="action primary" disabled={compareDisabled} onclick={() => onAddCompare?.(node.id)}>
 			+ 비교에 추가
 		</button>
+		{#if onDetach && !detached}
+			<button class="action ghost detach-btn" onclick={() => onDetach?.(node.id)} title="카드를 떠있는 윈도우로 분리">
+				🗔 띄우기
+			</button>
+		{/if}
 		<a class="action ghost" href={issueUrl()} target="_blank" rel="noopener">
 			🐛 분류 신고
 		</a>

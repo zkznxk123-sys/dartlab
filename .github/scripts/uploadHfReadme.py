@@ -127,47 +127,24 @@ XBRL-based financial data from DART OpenAPI (`fnlttSinglAcntAll`).
 
 **28 API types:** dividend, employee, executive, majorHolder, treasuryStock, capitalChange, auditOpinion, stockTotal, outsideDirector, corporateBond, and more.
 
-## Usage
+## Learn More
 
 <img align="right" src="https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main/assets/avatar-analyze.png" width="120">
 
-### With DartLab (recommended)
+DartLab auto-downloads from this dataset — one stock code gives you the full company map. Start with the intro below.
 
-```bash
-pip install dartlab
-```
+<div align="center">
 
-```python
-import dartlab
+<a href="https://www.youtube.com/shorts/97lYLWMWzvA"><img src="https://img.youtube.com/vi/97lYLWMWzvA/maxresdefault.jpg" alt="DartLab 30s Demo" width="320"></a>
 
-c = dartlab.Company("005930")   # Samsung Electronics
-c.sections                      # full company map (topic x period)
-c.BS                            # balance sheet
-c.ratios                        # financial ratios
-c.show("businessOverview")      # narrative text
+<sub>▶ <a href="https://www.youtube.com/shorts/97lYLWMWzvA">DartLab 30s Demo</a></sub>
 
-# US companies work the same way
-us = dartlab.Company("AAPL")
-us.BS
-us.ratios
-```
+</div>
 
-DartLab auto-downloads from this dataset. No manual download needed.
-
-### Direct download
-
-```python
-import polars as pl
-
-# Single file
-url = "https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main/dart/finance/005930.parquet"
-df = pl.read_parquet(url)
-```
-
-```bash
-# wget
-wget https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main/dart/finance/005930.parquet
-```
+- **GitHub** — [github.com/eddmpython/dartlab](https://github.com/eddmpython/dartlab)
+- **Intro blog** — [DartLab 시작하기 / Getting started](https://eddmpython.github.io/dartlab/blog/dartlab-easy-start)
+- **Docs** — [eddmpython.github.io/dartlab](https://eddmpython.github.io/dartlab/)
+- **YouTube** — [@eddmpython](https://www.youtube.com/@eddmpython)
 
 <img align="right" src="https://huggingface.co/datasets/eddmpython/dartlab-data/resolve/main/assets/avatar-discover.png" width="120">
 
@@ -202,6 +179,6 @@ api.upload_file(
     repo_type="dataset",
     path_or_fileobj=README.encode("utf-8"),
     path_in_repo="README.md",
-    commit_message="fix center alignment with HTML tags",
+    commit_message="replace code examples with intro blog + demo video + GitHub links",
 )
 print("README.md 업로드 완료")
