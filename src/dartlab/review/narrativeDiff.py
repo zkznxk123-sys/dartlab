@@ -15,13 +15,14 @@ from typing import Any
 
 _CLAIM_NEUTRAL_OVERRIDES: dict[str, dict] = {
     # 주요 claim 별 "이 서술이 없다면" 에 해당하는 중립 override
-    "매출성장": {"highGrowthRate": 3.0},           # 성장 → 평균
-    "마진확장": {"operatingMargin": None},          # 마진 → 현재 유지 (확장 없음)
-    "자본효율": {"roic": None},                    # ROIC 프리미엄 → 중립
-    "사이클호전": {"terminalGrowthRate": 2.0},
-    "경쟁우위지속": {"wacc": 10.0},                # 프리미엄 없는 WACC
-    "턴어라운드성공": {"operatingMargin": 5.0},     # 보수적 마진
-    "부채감축": {"terminalGrowthRate": 2.0},
+    # dFV override 키: terminalGrowth / growthRates (list) / wacc / marginPath (list) / pSurvival
+    "매출성장": {"growthRates": [3.0, 2.0, 2.0]},
+    "사이클호전": {"terminalGrowth": 2.0},
+    "경쟁우위지속": {"wacc": 10.0},
+    "부채감축": {"terminalGrowth": 2.0},
+    "낮은WACC": {"wacc": 12.0},                # 높은 WACC 로 중립화
+    "높은터미널성장": {"terminalGrowth": 1.5},  # 터미널 낮춤
+    "생존확률": {"pSurvival": 0.5},             # 중립 생존 확률
 }
 
 

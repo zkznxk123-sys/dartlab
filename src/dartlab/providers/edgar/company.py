@@ -662,6 +662,28 @@ class Company:
         from dartlab.macro import Macro
         return Macro()(axis, target, market="US", overrides=overrides, **kwargs)
 
+    # ── Phase 10 H2: review 2차 가공 직접 노출 ──
+
+    def causalWeights(self) -> list[dict]:
+        """6막 인과 가중치 (Phase 9 B2)."""
+        from dartlab.review.narrative import buildCausalWeights
+        return buildCausalWeights(self, {})
+
+    def valuationImpact(self) -> dict:
+        """인과 체인 → DCF override 힌트 (Phase 9 B3)."""
+        from dartlab.review.narrative import buildCausalWeights, buildValuationImpact
+        return buildValuationImpact(buildCausalWeights(self, {}))
+
+    def storyTree(self, *, basePeriod: str | None = None) -> dict:
+        """3 trajectory DCF (Phase 10 G2)."""
+        from dartlab.review.storyTree import buildStoryTree
+        return buildStoryTree(self, basePeriod=basePeriod)
+
+    def narrativeDiff(self, *, claims: list[str] | None = None) -> list[dict]:
+        """claim 제거 시 dFV 변화 (Phase 10 G3)."""
+        from dartlab.review.narrativeDiff import computeImpact
+        return computeImpact(self, claims=claims)
+
     def view(self, *, port: int = 8400) -> None:
         """브라우저에서 공시 뷰어를 열어 sections/index를 시각화.
 

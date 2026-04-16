@@ -4629,6 +4629,53 @@ class Company:
         from dartlab.macro import Macro
         return Macro()(axis, target, market="KR", overrides=overrides, **kwargs)
 
+    # ── Phase 10 H2: review 2차 가공 직접 노출 (AI tool 자동 수집 대상) ──
+
+    def causalWeights(self) -> list[dict]:
+        """6막 인과 가중치 (Phase 9 B2).
+
+        수익구조→수익성→현금흐름→자금조달→자산배치→가치평가 전환 정량화.
+
+        Returns:
+            list[dict] — from_act/to_act/metric_from/metric_to/
+                         delta_from/delta_to/weight/direction
+        """
+        from dartlab.review.narrative import buildCausalWeights
+        return buildCausalWeights(self, {})
+
+    def valuationImpact(self) -> dict:
+        """인과 체인에서 DCF override 힌트 도출 (Phase 9 B3).
+
+        Returns:
+            dict — terminalGrowthAdj/waccAdj/narrative/overrides
+        """
+        from dartlab.review.narrative import buildCausalWeights, buildValuationImpact
+        chains = buildCausalWeights(self, {})
+        return buildValuationImpact(chains)
+
+    def storyTree(self, *, basePeriod: str | None = None) -> dict:
+        """possible/plausible/probable 3 trajectory DCF (Phase 10 G2).
+
+        Damodaran "Narrative and Numbers" 3P 프레임워크.
+
+        Returns:
+            dict — possible/plausible/probable 각 {dFV, narrative, overrides, label}
+                   + summary {min, max, spread, spreadPct, mean}
+        """
+        from dartlab.review.storyTree import buildStoryTree
+        return buildStoryTree(self, basePeriod=basePeriod)
+
+    def narrativeDiff(self, *, claims: list[str] | None = None) -> list[dict]:
+        """claim 제거 시 dFV 변화 히트맵 (Phase 10 G3).
+
+        ICLR 2026 Thought Anchors 기반.
+
+        Returns:
+            list[dict] — claim/dFV_neutral/delta_abs/delta_pct/contribution
+        """
+        from dartlab.review.narrativeDiff import computeImpact
+        return computeImpact(self, claims=claims)
+
     def industry(self) -> dict | None:
         """이 회사의 밸류체인 산업 내 위치를 분석한다.
 
