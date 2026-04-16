@@ -174,6 +174,24 @@
 		compareBDetail = null;
 	}
 
+	// ── 투어용 데모 헬퍼 ──
+	async function demoSelectCompany(stockCode: string) {
+		const n = nodeFinderById(stockCode);
+		if (!n) return;
+		selectedNode = n;
+		await loadCompanyDetail(stockCode);
+	}
+	async function demoAddCompare(stockCode: string) {
+		await addToCompare(stockCode);
+	}
+	function demoClearSelection() {
+		selectedNode = null;
+		selectedDetail = null;
+		selectedDetailCode = null;
+		compareB = null;
+		compareBDetail = null;
+	}
+
 	// ── companies 뷰 데이터 ──
 	let filteredNodes = $derived(
 		allNodes
@@ -939,6 +957,9 @@
 	bind:colorMetric
 	bind:viewMode
 	enterIndustryAction={enterIndustry}
+	selectCompanyAction={demoSelectCompany}
+	addCompareAction={demoAddCompare}
+	clearSelectionAction={demoClearSelection}
 />
 
 <style>
