@@ -425,40 +425,7 @@ cr = c.credit("등급")
 
 ---
 
-## 부록: 재무제표 5년
-
-### 손익계산서 ($B, 1년치 합산)
-
-| 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
-|---|---:|---:|---:|---:|---:|
-| 매출액 | **94.83** | 97.69 | 96.77 | 81.46 | 53.82 |
-| 매출원가 | 77.73 | 80.24 | 79.11 | 60.61 | 40.22 |
-| 매출총이익 | 17.09 | 17.45 | 17.66 | 20.85 | 13.61 |
-| 영업이익 | 4.36 | 7.08 | 8.89 | **13.66** | 6.52 |
-| 당기순이익 | 3.85 | 7.15 | 14.97 | 12.59 | 5.64 |
-
-### 재무상태표 ($B, Q4 스냅샷)
-
-| 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
-|---|---:|---:|---:|---:|---:|
-| 자산총계 | **137.8** | 106.6 | 82.3 | 62.1 | 52.2 |
-| 부채총계 | 54.9 | 43.0 | 36.4 | 30.6 | 28.4 |
-| 자본총계 | **82.9** | 31.3 | 23.5 | 8.0 | 6.4 |
-| 현금 | 16.5 | 16.3 | 17.6 | 19.4 | 6.3 |
-| 총차입금 | 8.2 | 6.4 | 4.5 | 3.7 | 5.3 |
-
-### 현금흐름표 ($B, 1년치 합산)
-
-| 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
-|---|---:|---:|---:|---:|---:|
-| 영업활동현금흐름 | 14.75 | 14.92 | 13.26 | 14.72 | 11.50 |
-| CAPEX | 8.53 | 11.34 | 8.90 | 7.16 | 6.48 |
-| 잉여현금흐름(FCF) | **6.22** | 3.58 | 4.36 | 7.56 | 5.02 |
-| 배당금 | 0 | 0 | 0 | 0 | 0 |
-
----
-
-### 검증표
+## 검증표
 
 | 본문 수치 | dartlab 호출 | 결과 |
 |---|---|---|
@@ -487,3 +454,87 @@ cr = c.credit("등급")
 | 매출채권 33%p 빠른 성장 | `c.analysis("financial","종합평가")["summaryFlags"]` | 실측 플래그 |
 | 감가상각 $6.6B | 외부: Tesla 10-K 2025 | SEC 공시 |
 | Musk 성과보수 $29B | 외부: Tesla Proxy 2025 | SEC DEF 14A |
+
+---
+
+<!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
+
+
+## 공시 / Filings
+
+| 기간 | 보고서 | 링크 |
+|------|--------|------|
+| 2025Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
+| 2025Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
+| 2025Q1 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
+| 2025 | 10-K | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-K&dateb=&owner=include&count=10) |
+| 2024Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
+| 2024Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
+| 2024Q1 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
+| 2024 | 10-K | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-K&dateb=&owner=include&count=10) |
+| 2023Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
+| 2023Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TSLA&type=10-Q&dateb=&owner=include&count=10) |
+
+> 전체 공시 목록은 dartlab에서 확인:
+> ```python
+> import dartlab
+> c = dartlab.Company("TSLA")
+> c.filings()
+> ```
+
+## 재무제표 — 최근 5개년
+
+> 아래는 최근 5개년 요약입니다. 전체 기간·분기별 데이터는 dartlab에서 직접 확인할 수 있습니다:
+> ```python
+> import dartlab
+> c = dartlab.Company("TSLA")
+> c.show("IS")              # 손익계산서 (분기)
+> c.show("IS", freq="Y")    # 손익계산서 (연간)
+> c.show("BS")              # 재무상태표
+> c.show("CF")              # 현금흐름표
+> c.show("SCE")             # 자본변동표
+> c.show("ratios")          # 재무비율
+> ```
+
+### 손익계산서 (IS) — 단위 $M
+
+<ComboChart data={[{year:"2025Q4",매출액:24901,영업이익:1409,당기순이익:840},{year:"2025Q3",매출액:28095,영업이익:1624,당기순이익:1373},{year:"2025Q2",매출액:22496,영업이익:923,당기순이익:1172},{year:"2025Q1",매출액:19335,영업이익:399,당기순이익:409},{year:"2024Q4",매출액:25707,영업이익:1583,당기순이익:2314}]} lineKeys={["매출액"]} barKeys={["영업이익","당기순이익"]} lineColors={["#22c55e"]} barColors={["#3b82f6","#f59e0b"]} title="매출(라인) vs 영업이익·당기순이익(막대)" unit="$M" />
+
+| 항목 | 2025Q4 | 2025Q3 | 2025Q2 | 2025Q1 | 2024Q4 |
+|---|---:|---:|---:|---:|---:|
+| 매출액 | 24,901 | 28,095 | 22,496 | 19,335 | 25,707 |
+| 매출원가 | 19,892 | 23,041 | 18,618 | 16,182 | 21,528 |
+| 매출총이익 | 5,009 | 5,054 | 3,878 | 3,153 | 4,179 |
+| 판매비와관리비 | 1,655 | 1,562 | 1,366 | 1,251 | 1,313 |
+| 영업이익 | 1,409 | 1,624 | 923 | 399 | 1,583 |
+| 금융수익 | — | — | — | — | — |
+| 금융비용 | — | — | — | — | — |
+| 당기순이익 | 840 | 1,373 | 1,172 | 409 | 2,314 |
+
+### 재무상태표 (BS) — 단위 $M
+
+<StackBar data={[{year:"2025Q4",segments:[{label:"부채",value:54941,color:"#ef4444"},{label:"자본",value:82865,color:"#22c55e"}]},{year:"2025Q3",segments:[{label:"부채",value:53019,color:"#ef4444"},{label:"자본",value:80716,color:"#22c55e"}]},{year:"2025Q2",segments:[{label:"부채",value:50495,color:"#ef4444"},{label:"자본",value:75417,color:"#22c55e"}]},{year:"2025Q1",segments:[{label:"부채",value:49693,color:"#ef4444"},{label:"자본",value:75418,color:"#22c55e"}]},{year:"2024Q4",segments:[{label:"부채",value:43009,color:"#ef4444"},{label:"자본",value:31257,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="$M" />
+
+| 항목 | 2025Q4 | 2025Q3 | 2025Q2 | 2025Q1 | 2024Q4 |
+|---|---:|---:|---:|---:|---:|
+| 자산총계 | 137,806 | 133,735 | 128,567 | 125,111 | 106,618 |
+| 유동자산 | 68,642 | 64,653 | 61,133 | 59,389 | 49,616 |
+| 비유동자산 | 45,247 | 44,080 | 43,362 | 41,943 | 34,954 |
+| 부채총계 | 54,941 | 53,019 | 50,495 | 49,693 | 43,009 |
+| 유동부채 | 31,714 | 31,290 | 30,008 | 29,753 | 28,748 |
+| 비유동부채 | — | — | — | — | — |
+| 자본총계 | 82,865 | 80,716 | 75,417 | 75,418 | 31,257 |
+
+### 현금흐름표 (CF) — 단위 $M
+
+<ComboChart data={[{year:"2025Q4",영업CF:3813,투자CF:0,재무CF:710},{year:"2025Q3",영업CF:6238,투자CF:-4355,재무CF:983},{year:"2025Q2",영업CF:2540,투자CF:-2944,재무CF:-222},{year:"2025Q1",영업CF:2156,투자CF:-1651,재무CF:-332},{year:"2024Q4",영업CF:4814,투자CF:0,재무CF:985}]} barKeys={["영업CF","투자CF","재무CF"]} barColors={["#22c55e","#ef4444","#3b82f6"]} title="영업·투자·재무 현금흐름" unit="$M" />
+
+| 항목 | 2025Q4 | 2025Q3 | 2025Q2 | 2025Q1 | 2024Q4 |
+|---|---:|---:|---:|---:|---:|
+| 영업활동현금흐름 | 3,813 | 6,238 | 2,540 | 2,156 | 4,814 |
+| 투자활동현금흐름 | — | -4,355 | -2,944 | -1,651 | — |
+| 재무활동현금흐름 | 710 | 983 | -222 | -332 | 985 |
+
+*최종 갱신: 2026-04-16 | dartlab 실측 (DART 공시 기준)*
+
+<!-- AUTO:END -->

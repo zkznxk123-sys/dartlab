@@ -609,38 +609,7 @@ c.select("CF", ["영업활동현금흐름"])
 
 ---
 
-## 부록: 재무제표 5년
-
-### 손익계산서 ($M, 1년치 합산)
-
-| 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
-|---|---:|---:|---:|---:|---:|
-| 매출액 | **130.0** | 43.1 | 22.0 | 11.1 | 0.2 |
-| 매출원가 | ~38 | ~11 | ~6 | ~3 | 0 |
-| 매출총이익 | ~92 | ~32 | ~16 | ~8 | 0 |
-| 영업이익 | **-633.7** | -232.5 | -157.8 | -85.7 | -14.8 |
-| 당기순이익 | **-510.4** | -141.9 | -157.8 | +14.3 | -32.1 |
-
-### 재무상태표 ($M, Q4 스냅샷)
-
-| 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
-|---|---:|---:|---:|---:|---:|
-| 자산총계 | **6,570** | 554 | 598 | 642 | 61 |
-| 부채총계 | 2,757 | 69 | 30 | 51 | 7 |
-| 자본총계 | 3,814 | 568 | 485 | 54 | 591 |
-| 현금 | 1,031 | 36 | 44 | 399 | 36 |
-
-### 현금흐름표 ($M, 1년치 합산)
-
-| 항목 | 2025 | 2024 | 2023 | 2022 | 2021 |
-|---|---:|---:|---:|---:|---:|
-| 영업활동현금흐름 | **-283.2** | -105.7 | -78.8 | -44.7 | -26.5 |
-| CAPEX | 비공개 | ~15 | ~12 | ~10 | ~3 |
-| 잉여현금흐름(추정) | **-345** | ~-120 | ~-90 | ~-55 | ~-30 |
-
----
-
-### 검증표
+## 검증표
 
 | 본문 수치 | dartlab 호출 | 결과 |
 |---|---|---|
@@ -682,3 +651,87 @@ c.select("CF", ["영업활동현금흐름"])
 | IBM Quantum Roadmap 2025 | 외부: IBM 공식 | 발표 |
 | DOE $625M QIS Research | 외부: DOE 2025-11 | 정부 발표 |
 | K-양자산업 연합 34개 기관 | 외부: 전자신문 2025-11-05 | 언론 |
+
+---
+
+<!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
+
+
+## 공시 / Filings
+
+| 기간 | 보고서 | 링크 |
+|------|--------|------|
+| 2025Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=IONQ&type=10-Q&dateb=&owner=include&count=10) |
+| 2025Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=IONQ&type=10-Q&dateb=&owner=include&count=10) |
+| 2025Q1 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=IONQ&type=10-Q&dateb=&owner=include&count=10) |
+| 2025 | 10-K | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=IONQ&type=10-K&dateb=&owner=include&count=10) |
+| 2024Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=IONQ&type=10-Q&dateb=&owner=include&count=10) |
+| 2024Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=IONQ&type=10-Q&dateb=&owner=include&count=10) |
+| 2024Q1 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=IONQ&type=10-Q&dateb=&owner=include&count=10) |
+| 2024 | 10-K | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=IONQ&type=10-K&dateb=&owner=include&count=10) |
+| 2023Q3 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=IONQ&type=10-Q&dateb=&owner=include&count=10) |
+| 2023Q2 | 10-Q | [SEC에서 보기](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=IONQ&type=10-Q&dateb=&owner=include&count=10) |
+
+> 전체 공시 목록은 dartlab에서 확인:
+> ```python
+> import dartlab
+> c = dartlab.Company("IONQ")
+> c.filings()
+> ```
+
+## 재무제표 — 최근 5개년
+
+> 아래는 최근 5개년 요약입니다. 전체 기간·분기별 데이터는 dartlab에서 직접 확인할 수 있습니다:
+> ```python
+> import dartlab
+> c = dartlab.Company("IONQ")
+> c.show("IS")              # 손익계산서 (분기)
+> c.show("IS", freq="Y")    # 손익계산서 (연간)
+> c.show("BS")              # 재무상태표
+> c.show("CF")              # 현금흐름표
+> c.show("SCE")             # 자본변동표
+> c.show("ratios")          # 재무비율
+> ```
+
+### 손익계산서 (IS) — 단위 $M
+
+<ComboChart data={[{year:"2025Q4",매출액:62,영업이익:-229,당기순이익:754},{year:"2025Q3",매출액:40,영업이익:-169,당기순이익:-1055},{year:"2025Q2",매출액:21,영업이익:-161,당기순이익:-177},{year:"2025Q1",매출액:8,영업이익:-76,당기순이익:-32},{year:"2024Q4",매출액:12,영업이익:-78,당기순이익:null}]} lineKeys={["매출액"]} barKeys={["영업이익","당기순이익"]} lineColors={["#22c55e"]} barColors={["#3b82f6","#f59e0b"]} title="매출(라인) vs 영업이익·당기순이익(막대)" unit="$M" />
+
+| 항목 | 2025Q4 | 2025Q3 | 2025Q2 | 2025Q1 | 2024Q4 |
+|---|---:|---:|---:|---:|---:|
+| 매출액 | 62 | 40 | 21 | 8 | 12 |
+| 매출원가 | — | — | — | — | — |
+| 매출총이익 | — | — | — | — | — |
+| 판매비와관리비 | 20 | 14 | 11 | 9 | 9 |
+| 영업이익 | -229 | -169 | -161 | -76 | -78 |
+| 금융수익 | — | — | — | — | — |
+| 금융비용 | — | — | — | — | — |
+| 당기순이익 | 754 | -1,055 | -177 | -32 | — |
+
+### 재무상태표 (BS) — 단위 $M
+
+<StackBar data={[{year:"2025Q4",segments:[{label:"부채",value:2757,color:"#ef4444"},{label:"자본",value:3814,color:"#22c55e"}]},{year:"2025Q3",segments:[{label:"부채",value:2032,color:"#ef4444"},{label:"자본",value:2288,color:"#22c55e"}]},{year:"2025Q2",segments:[{label:"부채",value:168,color:"#ef4444"},{label:"자본",value:765,color:"#22c55e"}]},{year:"2025Q1",segments:[{label:"부채",value:85,color:"#ef4444"},{label:"자본",value:765,color:"#22c55e"}]},{year:"2024Q4",segments:[{label:"부채",value:69,color:"#ef4444"},{label:"자본",value:568,color:"#22c55e"}]}]} title="부채 vs 자본 구조" unit="$M" />
+
+| 항목 | 2025Q4 | 2025Q3 | 2025Q2 | 2025Q1 | 2024Q4 |
+|---|---:|---:|---:|---:|---:|
+| 자산총계 | 6,570 | 4,319 | 1,347 | 850 | 554 |
+| 유동자산 | 2,586 | 1,215 | 626 | 637 | 390 |
+| 비유동자산 | 143 | — | — | — | 42 |
+| 부채총계 | 2,757 | 2,032 | 168 | 85 | 69 |
+| 유동부채 | 167 | 139 | 81 | 48 | 37 |
+| 비유동부채 | — | — | — | — | — |
+| 자본총계 | 3,814 | 2,288 | 765 | 765 | 568 |
+
+### 현금흐름표 (CF) — 단위 $M
+
+<ComboChart data={[{year:"2025Q4",영업CF:-75,투자CF:0,재무CF:1981},{year:"2025Q3",영업CF:-123,투자CF:-673,재무CF:1005},{year:"2025Q2",영업CF:-53,투자CF:29,재무CF:4},{year:"2025Q1",영업CF:-33,투자CF:-230,재무CF:369},{year:"2024Q4",영업CF:-39,투자CF:24,재무CF:39}]} barKeys={["영업CF","투자CF","재무CF"]} barColors={["#22c55e","#ef4444","#3b82f6"]} title="영업·투자·재무 현금흐름" unit="$M" />
+
+| 항목 | 2025Q4 | 2025Q3 | 2025Q2 | 2025Q1 | 2024Q4 |
+|---|---:|---:|---:|---:|---:|
+| 영업활동현금흐름 | -75 | -123 | -53 | -33 | -39 |
+| 투자활동현금흐름 | — | -673 | 29 | -230 | 24 |
+| 재무활동현금흐름 | 1,981 | 1,005 | 4 | 369 | 39 |
+
+*최종 갱신: 2026-04-16 | dartlab 실측 (DART 공시 기준)*
+
+<!-- AUTO:END -->
