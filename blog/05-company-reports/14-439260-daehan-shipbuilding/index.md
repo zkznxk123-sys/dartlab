@@ -20,7 +20,7 @@ tags:
   - 전자공시
 thumbnail: /avatar-chart.png
 ogImage: /thumbnails/439260-daehan-shipbuilding.webp
-youtubeId: ""
+youtubeId: "WzBUtnbe_x0"
 ai:
   verdict: "3번 죽은 조선소가 수에즈막스 올인 OPM 24%. 조선업 최고 이익률."
   direction: 개선
@@ -37,10 +37,13 @@ ai:
 ---
 
 <script>
+import YouTube from '$lib/components/YouTube.svelte';
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
 import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 </script>
+
+<YouTube id="WzBUtnbe_x0" title="대한조선 — 3번 죽은 조선소가 OPM 24%를 찍었다" />
 
 > **턴어라운드 + 성장** | 제조 > 조선 | 2026-04-11 dartlab 실측
 > 같은 시리즈: [SK하이닉스](/blog/000660-skhynix) · [삼양식품](/blog/003230-samyang-foods) · [두산에너빌리티](/blog/034020-doosan-enerbility) · [알테오젠](/blog/196170-alteogen) · [HMM](/blog/011200-hmm) · [셀트리온](/blog/068270-celltrion) · [한화에어로스페이스](/blog/012450-hanwha-aerospace) · [HD현대일렉트릭](/blog/267260-hd-hyundai-electric) · [고려아연](/blog/010130-korea-zinc) · [에이피알](/blog/278470-apr) · [크래프톤](/blog/259960-krafton) · [달바글로벌](/blog/483650-dalba-global) · [경동나비엔](/blog/009450-kyungdong-navien) · [기업이야기 시리즈 전체](/blog/series/company-reports)

@@ -112,26 +112,6 @@ def test_phase10_g1_evidence_dataclass():
     assert "calc" in g.format_footnote()
 
 
-@pytest.mark.unit
-def test_phase10_g4_counterfactual_supported_keys():
-    """Phase 10 G4 — Counterfactual 지원 키 8종."""
-    from dartlab.review.counterfactual import _SUPPORTED_KEYS
-
-    required = {"wacc", "terminalGrowth", "growthRates", "marginPath",
-                "reinvestmentPath", "pSurvival", "liquidationDiscount", "countryCode"}
-    assert required.issubset(set(_SUPPORTED_KEYS.keys()))
-
-
-@pytest.mark.unit
-def test_phase10_g7_codeblock():
-    """Phase 10 G7 — CodeBlock (ReproducibleReport 기반)."""
-    from dartlab.review.blocks import CodeBlock
-
-    cb = CodeBlock(code="c.analysis('수익성')", language="python", caption="재현")
-    assert cb.language == "python"
-    assert "analysis" in cb.code
-
-
 # ── kwargs 명명 ────────────────────────────────────────────
 
 

@@ -17,6 +17,7 @@ import argparse
 import json
 import sys
 from collections import defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -501,6 +502,40 @@ def buildIndustryStats(scanMetrics: dict[str, dict]) -> dict:
         cleaned = [v for v in vs if v is not None]
         return round(sum(cleaned) / len(cleaned), 2) if cleaned else None
 
+    def _distribution(vs: list) -> dict | None:
+        """분포 통계 — p10/p25/median/p75/p90/mean/std/n.
+
+        표본 < 3 이면 None 반환 (의미 없는 분포).
+        """
+        cleaned = sorted(v for v in vs if v is not None)
+        n = len(cleaned)
+        if n < 3:
+            return None
+
+        def _quantile(q: float) -> float:
+            """linear interpolation quantile."""
+            if n == 1:
+                return cleaned[0]
+            pos = q * (n - 1)
+            lo = int(pos)
+            hi = min(lo + 1, n - 1)
+            frac = pos - lo
+            return cleaned[lo] * (1 - frac) + cleaned[hi] * frac
+
+        mean = sum(cleaned) / n
+        variance = sum((v - mean) ** 2 for v in cleaned) / n
+        std = variance ** 0.5
+        return {
+            "n": n,
+            "p10": round(_quantile(0.10), 2),
+            "p25": round(_quantile(0.25), 2),
+            "median": round(_quantile(0.50), 2),
+            "p75": round(_quantile(0.75), 2),
+            "p90": round(_quantile(0.90), 2),
+            "mean": round(mean, 2),
+            "std": round(std, 2),
+        }
+
     def _industryNameOf(iid: str) -> str:
         return taxonomy[iid].name if iid in taxonomy else iid
 
@@ -539,9 +574,18 @@ def buildIndustryStats(scanMetrics: dict[str, dict]) -> dict:
             key=lambda x: x["amount"], reverse=True
         )[:5]
 
+        # 분포 통계 (업종 정규화용)
+        distribution = {
+            "roe": _distribution([m["roe"] for m in members]),
+            "opMargin": _distribution([m["opMargin"] for m in members]),
+            "debtRatio": _distribution([m["debtRatio"] for m in members]),
+            "revCagr": _distribution([m["revCagr"] for m in members]),
+        }
+
         out[indId] = {
             "name": _industryNameOf(indId),
             "count": len(members),
+            "distribution": distribution,
             "avgRoe": avgRoe,
             "avgOpMargin": avgOp,
             "avgCagr": avgCagr,
@@ -691,7 +735,90 @@ def main() -> None:
     except subprocess.CalledProcessError as e:
         print(f"  ⚠ 인사이트 랭킹 생성 실패: {e.stderr}")
 
+    # 메타데이터: 빌드 시각 + 데이터 소스별 최신성
+    print("[메타] meta.json")
+    meta = _buildMeta()
+    (OUT_DIR / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"  - buildId={meta['buildId']}, dart={meta['dataAsOf'].get('dart','?')}")
+
     print(f"\n완료: {OUT_DIR}")
+
+
+def _buildMeta() -> dict:
+    """meta.json — 빌드·데이터 신선도.
+
+    각 소스(dart / finance / scan / reviews)의 최근 갱신 시각을 포함.
+    프런트는 이 값으로 우상단 배지("DART 3h · Finance 2Q25 · Reviews 1d")를 표시.
+    """
+    import os
+
+    def _mtime_iso(path: Path) -> str | None:
+        if not path.exists():
+            return None
+        ts = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
+        return ts.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    def _latest_mtime(dir_path: Path, pattern: str = "*") -> str | None:
+        if not dir_path.exists():
+            return None
+        files = list(dir_path.rglob(pattern))
+        if not files:
+            return None
+        latest = max(f.stat().st_mtime for f in files if f.is_file())
+        return datetime.fromtimestamp(latest, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    data_dir = ROOT / "data" / "dart"
+    blog_dir = ROOT / "blog" / "05-company-reports"
+
+    # finance parquet 가장 최근 갱신
+    finance_mtime = _latest_mtime(data_dir / "scan", "*.parquet")
+    # docs parquet (공시 원문)
+    docs_mtime = _latest_mtime(data_dir / "docs", "*.parquet")
+    # 블로그 분석글 최근 갱신
+    reviews_mtime = _latest_mtime(blog_dir, "index.md")
+    # taxonomy/nodes (산업 분류)
+    taxonomy_mtime = _mtime_iso(ROOT / "src/dartlab/industry/taxonomy.json")
+
+    # git sha (있으면)
+    commit_sha = None
+    try:
+        import subprocess
+
+        r = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True, text=True, cwd=ROOT, timeout=5,
+        )
+        if r.returncode == 0:
+            commit_sha = r.stdout.strip()
+    except Exception:
+        pass
+
+    # 산출물 크기
+    sizes = {}
+    for name in ["ecosystem.json", "atlas.json", "insights.json", "industryStats.json", "search-index.json"]:
+        p = OUT_DIR / name
+        if p.exists():
+            sizes[name] = p.stat().st_size
+    companies_dir = OUT_DIR / "companies"
+    if companies_dir.exists():
+        sizes["companies/"] = sum(f.stat().st_size for f in companies_dir.iterdir() if f.is_file())
+
+    return {
+        "schemaVersion": 1,
+        "buildId": datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S"),
+        "buildTime": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "commitSha": commit_sha,
+        "dataAsOf": {
+            "dart": docs_mtime,
+            "finance": finance_mtime,
+            "reviews": reviews_mtime,
+            "taxonomy": taxonomy_mtime,
+        },
+        "sizes": sizes,
+        "counts": {
+            # industryStats 등 이미 산출된 파일 라인 카운트는 프런트에서 fetch 시 확인
+        },
+    }
 
 
 if __name__ == "__main__":

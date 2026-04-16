@@ -26,11 +26,6 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/blog/category/corporate-analysis</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
     <loc>https://eddmpython.github.io/dartlab/blog/category/credit-reports</loc>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -97,11 +92,6 @@
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/series/dartlab-news</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.72</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/blog/series/corporate-analysis</loc>
     <changefreq>weekly</changefreq>
     <priority>0.72</priority>
   </url>
@@ -514,6 +504,24 @@
     <lastmod>2026-03-19</lastmod>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/revenue-structure-how-to-read</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-03-26</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/asset-structure-how-to-read</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-03-27</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/cashflow-how-to-read</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-03-27</lastmod>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/blog/dartlab-easy-start</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -554,24 +562,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <lastmod>2026-04-14</lastmod>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/blog/revenue-structure-how-to-read</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <lastmod>2026-03-26</lastmod>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/blog/asset-structure-how-to-read</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <lastmod>2026-03-27</lastmod>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/blog/cashflow-how-to-read</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <lastmod>2026-03-27</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/005930-samsung</loc>
@@ -884,6 +874,24 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <lastmod>2026-04-15</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/META-meta-platforms</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-04-16</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/TSLA-tesla</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-04-16</lastmod>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/blog/352820-hybe</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-04-16</lastmod>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/blog/04-kr</loc>

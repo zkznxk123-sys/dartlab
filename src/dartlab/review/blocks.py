@@ -93,18 +93,4 @@ class ChartBlock:
     emphasized: bool = False
 
 
-@dataclass
-class CodeBlock:
-    """재현 가능 Python 코드 블록 (Phase 10 G7 ReproducibleReport).
-
-    블록이 보여준 숫자/표를 재현하는 코드.
-    Bloomberg ASKB BQL 공개 대응 — 모든 숫자에 재현 경로 보장.
-    """
-
-    code: str
-    language: str = "python"
-    caption: str = ""  # "위 표를 재현하는 코드"
-    emphasized: bool = False
-
-
-Block = TextBlock | HeadingBlock | TableBlock | FlagBlock | MetricBlock | ChartBlock | CodeBlock
+Block = TextBlock | HeadingBlock | TableBlock | FlagBlock | MetricBlock | ChartBlock

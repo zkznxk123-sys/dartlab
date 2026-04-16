@@ -62,6 +62,7 @@ stockCode: "000660"
 corpName: "SK하이닉스"
 storyTemplate: "장기 사이클"
 grade: "dCR-AA"
+youtubeId: "x9z7646-QbY"  # 유튜브 영상 있으면 ID만 (없으면 "")
 
 # AI 경험 블록 (company-reports 필수, 기타 선택)
 ai:
@@ -548,6 +549,29 @@ scan "OI YoY +400%", "OPM 7.3%" 같은 급등·고마진은 **별도(OFS) 기준
 ### 리라이트 우선
 
 - XML 파서 오류 / 텍스트 노드 ≤3 / 모든 글 같은 박스 템플릿 / 첫 SVG 가 글의 질문 설명 못 함 / 본문과 역할 겹침
+
+### 유튜브 영상 임베딩 (회사분석보고서만)
+
+회사 글에 대응 영상이 있으면 **본문 최상단**(frontmatter 바로 아래, metadata 인용 블록 앞)에 `<YouTube>` 컴포넌트로 삽입.
+
+1. **frontmatter**: `youtubeId: "WzBUtnbe_x0"` — `https://youtu.be/{ID}` 의 ID 부분만
+2. **script import**: `import YouTube from '$lib/components/YouTube.svelte';`
+3. **본문 배치**: `---` 구분자 + `<script>` 블록 다음, `> **{storyTemplate}** | ...` 메타 인용 앞
+
+```mdsvex
+<script>
+import YouTube from '$lib/components/YouTube.svelte';
+...
+</script>
+
+<YouTube id="WzBUtnbe_x0" title="{회사명} — {핵심 후킹}" />
+
+> **{storyTemplate}** | {업종} | {date} dartlab 실측
+```
+
+- `title` = 블로그 제목과 동일 한 줄
+- 영상 없는 글은 `youtubeId: ""` 유지, `<YouTube>` 삽입 생략
+- 레퍼런스: [SK하이닉스](blog/05-company-reports/01-000660-skhynix/index.md)
 
 ### 썸네일 (og:image) — 회사분석보고서만
 
