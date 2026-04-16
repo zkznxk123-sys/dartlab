@@ -54,9 +54,9 @@ def computeImpact(
     except ImportError:
         return []
 
-    # baseline
+    # baseline — primary=dcf2stage 강제 (override 반영 기준)
     if baseline is None:
-        base = calcDFV(company)
+        base = calcDFV(company, overrides={"primaryModel": "dcf2stage"})
         if not base or not base.get("dFV"):
             return []
         baseline = base["dFV"]
@@ -70,7 +70,8 @@ def computeImpact(
         if not ov:
             continue
         try:
-            neutral = calcDFV(company, overrides=ov)
+            ov_with_primary = {**ov, "primaryModel": "dcf2stage"}
+            neutral = calcDFV(company, overrides=ov_with_primary)
             neutral_dfv = neutral["dFV"] if neutral and neutral.get("dFV") else None
         except (AttributeError, ValueError, TypeError, KeyError):
             neutral_dfv = None
