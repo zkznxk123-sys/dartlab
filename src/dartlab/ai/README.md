@@ -44,9 +44,9 @@ dartlab.ask(question, *, stockCode?)
 
 | 원천 | 접근 경로 | 특징 |
 |---|---|---|
-| **CAPABILITIES** (엔진 tool) | `show` · `analysis` · `scan` · `macro` · `credit` · `quant` · `gather` · `review` · `search` · `searchCompany` · `pythonExec` | 엔진은 AI 근육. 자동 등록 |
-| **블로그 / 과거 경험** | `pastInsight(stockCode)` · `sectorInsights(sector)` tool | KnowledgeDB `insights(source="blog")` + AI 축적. 떠먹이기 아님 — AI 자율 조회 |
-| **웹 / 뉴스** | `gather("news", ...)` · DART `search` · `pythonExec` 내 webSearch | 실시간 정보 보강 |
+| **CAPABILITIES** (엔진 tool) | `show` · `analysis` · `scan` · `macro` · `credit` · `quant` · `gather` · `review` · `search` · `searchCompany` · `pythonExec` · `causalWeights` · `valuationImpact` · `storyTree` · `narrativeDiff` · `industry` | 엔진은 AI 근육. docstring→generateSpec.py→_generated.py 자동 등록. axis enum 자동 주입 (추측 금지). |
+| **블로그 / 과거 경험** | `pastInsight(stockCode)` · `sectorInsights(sector)` tool | KnowledgeDB `insights(source="blog")` 40건 — narrative 에 `[direction/confidence/archetype] [revenue/opm/roe/fcf]` 병합 (Phase 14 B1). AI 자율 조회, 떠먹이기 금지. |
+| **웹 / 뉴스** | `gather("news", ...)` · DART `search`(공시 본문) · `searchCompany`(티커/회사명, KR+US 통합, `인텔→Intel` alias) · `pythonExec` 내 webSearch | 실시간 정보 보강 |
 
 ## 4. 4축 사상
 

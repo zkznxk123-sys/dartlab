@@ -191,6 +191,50 @@
 		<div class="loading">상세 데이터 로드 중…</div>
 	{/if}
 
+	<!-- T1: 3초 요약 (headline) -->
+	<div class="t1-summary">
+		{#if aiInsight?.verdict || blogPosts[0]?.verdict}
+			<div class="t1-verdict">
+				{aiInsight?.verdict || blogPosts[0]?.verdict}
+			</div>
+		{:else if aiInsight?.strengths?.[0]}
+			<div class="t1-verdict">
+				💪 {aiInsight.strengths[0]}
+			</div>
+		{/if}
+		<div class="t1-grid">
+			{#if node.revenue}
+				<div class="t1-cell">
+					<div class="t1-k">매출</div>
+					<div class="t1-v">{fmtKor(node.revenue)}</div>
+					{#if node.revenueYoyPct !== null && node.revenueYoyPct !== undefined}
+						<div class="t1-d" style:color={node.revenueYoyPct > 0 ? '#34d399' : '#f87171'}>
+							YoY {node.revenueYoyPct > 0 ? '+' : ''}{node.revenueYoyPct.toFixed(1)}%
+						</div>
+					{/if}
+				</div>
+			{/if}
+			{#if node.roe !== null && node.roe !== undefined}
+				<div class="t1-cell">
+					<div class="t1-k">ROE</div>
+					<div class="t1-v" style:color={colorByMetric(node.roe, 'roe')}>{pct(node.roe)}</div>
+					{#if node.roeDelta !== null && node.roeDelta !== undefined}
+						<div class="t1-d" style:color={node.roeDelta > 0 ? '#34d399' : '#f87171'}>
+							YoY {node.roeDelta > 0 ? '+' : ''}{node.roeDelta}%p
+						</div>
+					{/if}
+				</div>
+			{/if}
+			{#if node.industryRank}
+				<div class="t1-cell">
+					<div class="t1-k">산업 내</div>
+					<div class="t1-v">{node.industryRank}위</div>
+					<div class="t1-d">/ {node.industryPeerCount}사</div>
+				</div>
+			{/if}
+		</div>
+	</div>
+
 	<!-- 블로그 포스트 (있으면 맨 위에 강조) -->
 	{#if blogPosts.length > 0}
 		<div class="blog-banner">
@@ -573,6 +617,49 @@
 		color: #64748b;
 		font-size: 12px;
 		text-align: center;
+	}
+
+	/* T1: 3초 요약 */
+	.t1-summary {
+		margin-top: 12px;
+		padding: 12px 14px;
+		background: linear-gradient(135deg, rgba(96, 165, 250, 0.08), rgba(52, 211, 153, 0.04));
+		border: 1px solid rgba(96, 165, 250, 0.2);
+		border-radius: 8px;
+	}
+	.t1-verdict {
+		font-size: 13px;
+		line-height: 1.5;
+		color: #f1f5f9;
+		padding: 6px 0;
+		margin-bottom: 8px;
+		border-bottom: 1px dashed rgba(96, 165, 250, 0.2);
+		font-weight: 500;
+	}
+	.t1-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 8px;
+	}
+	.t1-cell {
+		text-align: center;
+	}
+	.t1-k {
+		font-size: 10px;
+		color: #94a3b8;
+		margin-bottom: 2px;
+	}
+	.t1-v {
+		font-size: 16px;
+		font-weight: 700;
+		color: #f1f5f9;
+		font-family: monospace;
+	}
+	.t1-d {
+		font-size: 10px;
+		color: #64748b;
+		font-family: monospace;
+		margin-top: 2px;
 	}
 
 	.section {

@@ -911,4 +911,38 @@
     <priority>0.8</priority>
     <lastmod>2026-04-05</lastmod>
   </url>
+  <!-- 산업지도 + 변화감지 + 비교 + 스크리너 -->
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/map</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/changes</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/compare</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/map/screen</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- 주요 산업 페이지 (Top 12) -->
+  <url><loc>https://eddmpython.github.io/dartlab/industry/electronics</loc><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://eddmpython.github.io/dartlab/industry/pharma</loc><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://eddmpython.github.io/dartlab/industry/software</loc><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://eddmpython.github.io/dartlab/industry/machinery</loc><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://eddmpython.github.io/dartlab/industry/food</loc><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://eddmpython.github.io/dartlab/industry/chemical</loc><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://eddmpython.github.io/dartlab/industry/semiconductor</loc><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://eddmpython.github.io/dartlab/industry/retail</loc><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://eddmpython.github.io/dartlab/industry/finance</loc><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://eddmpython.github.io/dartlab/industry/construction</loc><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://eddmpython.github.io/dartlab/industry/telecom</loc><changefreq>weekly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://eddmpython.github.io/dartlab/industry/auto</loc><changefreq>weekly</changefreq><priority>0.75</priority></url>
 </urlset>
