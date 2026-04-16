@@ -5,6 +5,7 @@
 	import CompanyCard from '$lib/components/industry/CompanyCard.svelte';
 	import TutorialTour from '$lib/components/industry/TutorialTour.svelte';
 	import FreshnessBadge from '$lib/components/industry/FreshnessBadge.svelte';
+	import CompareTray from '$lib/components/industry/CompareTray.svelte';
 	import { brand } from '$lib/brand';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
@@ -150,26 +151,54 @@
 		}
 	}
 
-	// ── 비교 슬롯 ──
+	// ── 비교 슬롯 (최대 4사) ──
+	// 맵 우측 패널의 2-way 미니 비교는 compareB 1개만 사용 (레거시)
+	// 본격 비교는 compareSet + CompareTray → /compare?codes= 로
+	const COMPARE_MAX = 4;
+	let compareSet: any[] = $state([]); // [{node, detail}]
 	let compareB: any = $state(null);
 	let compareBDetail: any = $state(null);
 	let comparing = $derived(!!compareB);
 
 	async function addToCompare(stockCode: string) {
-		// 첫 번째 슬롯 = 현재 selectedNode. 다음 클릭하는 회사가 두 번째 슬롯
-		// 여기선 단순화: 첫 번째 = 현재 카드, 두 번째 = "+비교에 추가" 클릭한 회사를 펜딩으로 두고
-		// 다음 노드 클릭 시 두 번째에 set
-		// 더 직관적으로: 클릭한 회사를 직접 비교 슬롯 B 로
-		if (!selectedNode || selectedNode.id === stockCode) return;
-		compareB = nodeFinderById(stockCode);
-		if (compareB) {
-			try {
-				const r = await fetch(`${base}/map/companies/${stockCode}.json`);
-				compareBDetail = r.ok ? await r.json() : null;
-			} catch {
-				compareBDetail = null;
+		if (!stockCode) return;
+		const already = compareSet.find((x: any) => x.node?.id === stockCode);
+		if (already) return;
+		if (compareSet.length >= COMPARE_MAX) return; // 최대 4사
+
+		const node = nodeFinderById(stockCode);
+		if (!node) return;
+		let detail: any = null;
+		try {
+			const r = await fetch(`${base}/map/companies/${stockCode}.json`);
+			detail = r.ok ? await r.json() : null;
+		} catch {
+			detail = null;
+		}
+		compareSet = [...compareSet, { node, detail }];
+
+		// 레거시 2-way: compareB 는 compareSet 의 두 번째 회사
+		if (compareSet.length >= 2 && selectedNode) {
+			const other = compareSet.find((x: any) => x.node?.id !== selectedNode.id);
+			if (other) {
+				compareB = other.node;
+				compareBDetail = other.detail;
 			}
 		}
+	}
+
+	function removeFromCompare(stockCode: string) {
+		compareSet = compareSet.filter((x: any) => x.node?.id !== stockCode);
+		if (compareB?.id === stockCode) {
+			compareB = null;
+			compareBDetail = null;
+		}
+	}
+
+	function clearCompareAll() {
+		compareSet = [];
+		compareB = null;
+		compareBDetail = null;
 	}
 
 	function nodeFinderById(stockCode: string): any {
@@ -180,6 +209,11 @@
 	function clearCompare() {
 		compareB = null;
 		compareBDetail = null;
+	}
+
+	function openCompareFull() {
+		const codes = compareSet.map((x: any) => x.node?.id).filter(Boolean).join(',');
+		if (codes) window.location.href = `${base}/compare?codes=${codes}`;
 	}
 
 	// ── 투어용 데모 헬퍼 ──
@@ -980,6 +1014,14 @@
 		</aside>
 	{/if}
 </div>
+
+<CompareTray
+	items={compareSet}
+	maxItems={COMPARE_MAX}
+	onRemove={removeFromCompare}
+	onClear={clearCompareAll}
+	onOpenFull={openCompareFull}
+/>
 
 <TutorialTour
 	open={tourOpen}
