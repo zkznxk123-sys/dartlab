@@ -64,8 +64,7 @@ def buildStoryTree(company: Any, *, basePeriod: str | None = None) -> dict:
     for traj_key, ov in _TRAJECTORY_OVERRIDES.items():
         # _label/_narrative 는 override 아니므로 분리
         overrides = {k: v for k, v in ov.items() if not k.startswith("_") and v is not None}
-        # DCF 경로 강제 — primary 가 relative 면 override 무효이므로 dcf2stage 로 전환
-        overrides.setdefault("primaryModel", "dcf2stage")
+        # Phase 12 A3: primary 전환은 dFV._selectPrimaryWithOverrides 가 자동 처리
         try:
             result = calcDFV(company, basePeriod=basePeriod, overrides=overrides)
             if result and result.get("dFV"):

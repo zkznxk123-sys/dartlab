@@ -54,9 +54,9 @@ def computeImpact(
     except ImportError:
         return []
 
-    # baseline — primary=dcf2stage 강제 (override 반영 기준)
+    # baseline — Phase 12: Smart Primary Selector 가 자동 처리
     if baseline is None:
-        base = calcDFV(company, overrides={"primaryModel": "dcf2stage"})
+        base = calcDFV(company)
         if not base or not base.get("dFV"):
             return []
         baseline = base["dFV"]
@@ -70,8 +70,7 @@ def computeImpact(
         if not ov:
             continue
         try:
-            ov_with_primary = {**ov, "primaryModel": "dcf2stage"}
-            neutral = calcDFV(company, overrides=ov_with_primary)
+            neutral = calcDFV(company, overrides=ov)
             neutral_dfv = neutral["dFV"] if neutral and neutral.get("dFV") else None
         except (AttributeError, ValueError, TypeError, KeyError):
             neutral_dfv = None

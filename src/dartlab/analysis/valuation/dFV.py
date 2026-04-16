@@ -14,6 +14,55 @@ from __future__ import annotations
 from typing import Any
 
 
+# Phase 12 A1: Smart Primary Selector — override 감응성 매트릭스.
+# override 가 들어올 때 primary 가 무감각 모델이면 감응 모델로 자동 전환.
+_MODEL_SENSITIVITY: dict[str, set[str]] = {
+    "dcf": {"wacc", "terminalGrowth", "growthRates", "countryCode"},
+    "dcf2stage": {
+        "wacc", "terminalGrowth", "growthRates",
+        "marginPath", "reinvestmentPath", "countryCode",
+    },
+    "ddm": {"terminalGrowth"},
+    "rim": {"wacc", "countryCode"},
+    "relative": set(),           # PER/PBR — override 무감각
+    "relativeSurvival": set(),
+    "liquidation": {"liquidationValue", "liquidationDiscount"},
+}
+
+_SELECTOR_IGNORE = {"primaryModel", "lifeCyclePhase", "companyType",
+                    "pSurvival", "impliedERP", "bottomUpBeta"}
+
+
+def _selectPrimaryWithOverrides(
+    selected: str,
+    all_methods: dict,
+    overrides: dict,
+) -> tuple[str, str | None]:
+    """override 가 실제 영향 주는 primary 자동 선택.
+
+    Returns
+    -------
+    (primary_key, reason) — reason not None 이면 자동 전환됨.
+    """
+    if not overrides:
+        return selected, None
+    ov_keys = {k for k in overrides if k not in _SELECTOR_IGNORE and not k.startswith("_")}
+    if not ov_keys:
+        return selected, None
+
+    sensitivities = _MODEL_SENSITIVITY.get(selected, set())
+    if sensitivities & ov_keys:
+        return selected, None  # 현재 primary 이미 감응
+
+    # 감응 대안 모델 중 값 있는 것 선택
+    for cand in ("dcf2stage", "dcf", "rim", "ddm"):
+        if cand in all_methods and all_methods[cand] and all_methods[cand] > 0:
+            cand_sens = _MODEL_SENSITIVITY.get(cand, set())
+            if cand_sens & ov_keys:
+                return cand, f"{selected}→{cand} (override {sorted(ov_keys)} 반영)"
+    return selected, None
+
+
 def calcDFV(
     company: Any,
     *,
@@ -102,6 +151,9 @@ def calcDFV(
         all_methods["relativeSurvival"] = all_methods["relative"]
     if not all_methods:
         return None
+
+    # Phase 12 A1: Smart Primary Selector — override 가 있고 현재 primary 가 무감각이면 자동 전환
+    primary_key, _primary_switch_reason = _selectPrimaryWithOverrides(primary_key, all_methods, ov)
 
     # 3. Quality-Adjusted WACC
     base_wacc = _getBaseWACC(company)
@@ -261,6 +313,9 @@ def calcDFV(
             "pSurvival", "liquidationValue", "liquidationDiscount",
             "countryCode", "countryRiskPremium",
         )}
+    # Phase 12 A1: 투명성 — primary 자동 전환 기록
+    if _primary_switch_reason:
+        out.setdefault("overrideApplied", {})["primaryAutoSwitch"] = _primary_switch_reason
     return out
 
 

@@ -57,14 +57,12 @@ def runCounterfactual(
             "supported": list(_SUPPORTED_KEYS.keys()),
         }
 
-    # primary=dcf2stage 강제 (override 반영 보장)
-    primary_ov = {"primaryModel": "dcf2stage"}
-    base = calcDFV(company, basePeriod=basePeriod, overrides=primary_ov)
+    # Phase 12 A3: Smart Primary Selector 가 override 감응 모델 자동 선택
+    base = calcDFV(company, basePeriod=basePeriod)
     if not base or not base.get("dFV"):
         return {"error": "baseline dFV 계산 실패"}
 
-    scenario_ov = {**primary_ov, **overrides}
-    scenario = calcDFV(company, basePeriod=basePeriod, overrides=scenario_ov)
+    scenario = calcDFV(company, basePeriod=basePeriod, overrides=overrides)
     if not scenario or not scenario.get("dFV"):
         return {"error": "scenario dFV 계산 실패", "overrides": overrides}
 
@@ -119,14 +117,14 @@ def runSensitivityGrid(
     except ImportError:
         return []
 
-    base = calcDFV(company, basePeriod=basePeriod, overrides={"primaryModel": "dcf2stage"})
+    base = calcDFV(company, basePeriod=basePeriod)
     if not base or not base.get("dFV"):
         return []
     base_dfv = base["dFV"]
 
     grid = []
     for v in values:
-        result = calcDFV(company, basePeriod=basePeriod, overrides={key: v, "primaryModel": "dcf2stage"})
+        result = calcDFV(company, basePeriod=basePeriod, overrides={key: v})
         if result and result.get("dFV"):
             dfv = result["dFV"]
             delta_pct = (dfv - base_dfv) / base_dfv * 100 if base_dfv else 0
