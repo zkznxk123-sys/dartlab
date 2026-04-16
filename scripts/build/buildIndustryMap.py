@@ -285,16 +285,21 @@ def _roundOrNone(v, digits: int = 1):
         return None
 
 
-def buildEcosystem(scanMetrics: dict[str, dict] | None = None) -> dict:
+def buildEcosystem(
+    scanMetrics: dict[str, dict] | None = None,
+    yoyDeltas: dict[str, dict] | None = None,
+) -> dict:
     """전체 생태계 한 파일 — Cosmograph용 (nodes + links).
 
-    2,664 노드 + 18,418 엣지를 flat 배열로. 산업별 색상 + scan 재무 지표 포함.
+    2,664 노드 + 18,418 엣지를 flat 배열로. 산업별 색상 + scan 재무 지표 + YoY delta 포함.
     """
     nodes = loadNodes()
     edges = loadEdges()
     taxonomy = loadTaxonomy()
     if scanMetrics is None:
         scanMetrics = _loadScanMetrics()
+    if yoyDeltas is None:
+        yoyDeltas = {}
 
     # 산업별 색상 팔레트 (34개)
     palette = [
@@ -369,6 +374,7 @@ def buildEcosystem(scanMetrics: dict[str, dict] | None = None) -> dict:
         rev_log = 1.0 if not n.revenue else max(1.0, min(20.0, 1.0 + (n.revenue / 1e11)))  # log-ish
         rank, share = industryRanks.get(n.industry, {}).get(n.stockCode, (0, 0.0))
         m = scanMetrics.get(n.stockCode, {})
+        d = yoyDeltas.get(n.stockCode, {})
         nodeList.append(
             {
                 "id": n.stockCode,
@@ -394,6 +400,12 @@ def buildEcosystem(scanMetrics: dict[str, dict] | None = None) -> dict:
                 "profGrade": m.get("profGrade") or "",
                 "debtGrade": m.get("debtGrade") or "",
                 "growthGrade": m.get("growthGrade") or "",
+                # YoY delta (전년 대비 변화)
+                "roeDelta": d.get("roeDelta"),
+                "opMarginDelta": d.get("opMarginDelta"),
+                "debtRatioDelta": d.get("debtRatioDelta"),
+                "revenueYoyPct": d.get("revenueYoyPct"),
+                "deltaYear": d.get("asOfYear"),
                 "size": rev_log,
                 "color": ind_color.get(n.industry, "#9ca3af"),
             }
@@ -650,9 +662,16 @@ def main() -> None:
     scanMetrics = _loadScanMetrics()
     print(f"  - scan 커버: {len(scanMetrics)}종목")
 
+    # YoY delta 사전 계산 (전년 대비 변화)
+    print("[Delta] YoY 재무 변화 계산 중...")
+    from dartlab.industry.build.delta import computeYoyDelta
+
+    yoyDeltas = computeYoyDelta()
+    print(f"  - YoY delta 커버: {len(yoyDeltas)}종목")
+
     # 생태계 (Cosmograph용)
     print("[Ecosystem] ecosystem.json 생성...")
-    eco = buildEcosystem(scanMetrics)
+    eco = buildEcosystem(scanMetrics, yoyDeltas)
     (OUT_DIR / "ecosystem.json").write_text(json.dumps(eco, ensure_ascii=False), encoding="utf-8")
     print(f"  - {len(eco['nodes'])} 노드, {len(eco['links'])} 엣지, {len(eco['industries'])} 산업")
 

@@ -10,9 +10,11 @@
 		series: Series[];
 		width?: number;
 		height?: number;
+		// "5년 추이 · 2021~2025" 같은 캡션
+		periodLabel?: string;
 	}
 
-	let { labels, series, width = 280, height = 80 }: Props = $props();
+	let { labels, series, width = 280, height = 80, periodLabel = '' }: Props = $props();
 
 	const PAD = { l: 4, r: 4, t: 8, b: 14 };
 
@@ -101,6 +103,10 @@
 			</div>
 		{/each}
 	</div>
+
+	{#if periodLabel}
+		<div class="period">{periodLabel}</div>
+	{/if}
 </div>
 
 <style>
@@ -139,5 +145,11 @@
 	.leg-val {
 		font-weight: 600;
 		font-family: monospace;
+	}
+	.period {
+		font-size: 10px;
+		color: #64748b;
+		font-family: monospace;
+		margin-top: 2px;
 	}
 </style>

@@ -249,6 +249,7 @@
 					{ label: '영업이익', color: '#34d399', values: opSeries },
 					{ label: '순이익', color: '#fbbf24', values: netSeries }
 				]}
+				periodLabel={`${financials[0]?.year ?? ''}~${financials[financials.length - 1]?.year ?? ''} 연도말 기준 · 출처 DART`}
 			/>
 		</div>
 	{:else if !loading}
@@ -274,13 +275,15 @@
 			</h3>
 			<div class="scan-grid">
 				{#each [
-					{ key: 'roe', metric: 'roe', label: 'ROE', val: node.roe, grade: node.profGrade, fmt: (v: number) => pct(v) },
-					{ key: 'op', metric: 'opMargin', label: '영업이익률', val: node.opMargin, grade: '', fmt: (v: number) => pct(v) },
-					{ key: 'debt', metric: 'debtRatio', label: '부채비율', val: node.debtRatio, grade: node.debtGrade, fmt: (v: number) => pct(v, 0) },
-					{ key: 'cagr', metric: 'revCagr', label: '매출 CAGR', val: node.revCagr, grade: node.growthGrade, fmt: (v: number) => pct(v) }
+					{ key: 'roe', metric: 'roe', label: 'ROE', val: node.roe, grade: node.profGrade, delta: node.roeDelta, deltaUnit: '%p', invertDelta: false, fmt: (v: number) => pct(v) },
+					{ key: 'op', metric: 'opMargin', label: '영업이익률', val: node.opMargin, grade: '', delta: node.opMarginDelta, deltaUnit: '%p', invertDelta: false, fmt: (v: number) => pct(v) },
+					{ key: 'debt', metric: 'debtRatio', label: '부채비율', val: node.debtRatio, grade: node.debtGrade, delta: node.debtRatioDelta, deltaUnit: '%p', invertDelta: true, fmt: (v: number) => pct(v, 0) },
+					{ key: 'cagr', metric: 'revCagr', label: '매출 CAGR', val: node.revCagr, grade: node.growthGrade, delta: null, deltaUnit: '', invertDelta: false, fmt: (v: number) => pct(v) }
 				] as row (row.key)}
 					{#if row.val !== null && row.val !== undefined}
 						{@const norm = normalize(row.val, row.metric as any)}
+						{@const dExtreme = row.delta !== null && row.delta !== undefined && Math.abs(row.delta) > 50}
+						{@const dGood = row.delta !== null && row.delta !== undefined && (row.invertDelta ? row.delta < 0 : row.delta > 0)}
 						<div class="scan-row">
 							<div class="scan-line1">
 								<span class="scan-k">{row.label}</span>
@@ -290,6 +293,16 @@
 								>
 									{row.fmt(row.val)}
 								</span>
+								{#if row.delta !== null && row.delta !== undefined}
+									<span
+										class="scan-delta {dExtreme ? 'extreme' : dGood ? 'good' : 'bad'}"
+										title={dExtreme
+											? `전년 대비 ${row.delta > 0 ? '+' : ''}${row.delta}${row.deltaUnit} — 극단적 변화, 1회성/재분류 가능성 확인`
+											: `전년 대비 ${row.delta > 0 ? '+' : ''}${row.delta}${row.deltaUnit}`}
+									>
+										{dExtreme ? '⚠ ' : dGood ? '▲ ' : '▼ '}{row.delta > 0 ? '+' : ''}{row.delta}{row.deltaUnit}
+									</span>
+								{/if}
 								{#if row.grade}<span class="scan-grade">{row.grade}</span>{/if}
 								{#if norm}
 									<span class="scan-pct" title={`업종 n=${norm.n} · z=${norm.zScore.toFixed(2)}σ`}>
@@ -309,6 +322,22 @@
 						</div>
 					{/if}
 				{/each}
+				{#if node.revenueYoyPct !== null && node.revenueYoyPct !== undefined}
+					<div class="scan-row">
+						<div class="scan-line1">
+							<span class="scan-k">매출 YoY</span>
+							<span
+								class="scan-v"
+								style:color={node.revenueYoyPct > 0 ? '#10b981' : '#ef4444'}
+							>
+								{node.revenueYoyPct > 0 ? '+' : ''}{node.revenueYoyPct.toFixed(1)}%
+							</span>
+							<span class="scan-grade">
+								{#if node.deltaYear}{node.deltaYear - 1}→{node.deltaYear}{/if}
+							</span>
+						</div>
+					</div>
+				{/if}
 			</div>
 			{#if node.industryRank}
 				<div class="rank-line">
@@ -641,6 +670,26 @@
 		font-family: monospace;
 		text-align: right;
 		cursor: help;
+	}
+	.scan-delta {
+		font-size: 10px;
+		font-family: monospace;
+		font-weight: 600;
+		padding: 1px 6px;
+		border-radius: 3px;
+		cursor: help;
+	}
+	.scan-delta.good {
+		background: rgba(52, 211, 153, 0.12);
+		color: #34d399;
+	}
+	.scan-delta.bad {
+		background: rgba(239, 68, 68, 0.12);
+		color: #f87171;
+	}
+	.scan-delta.extreme {
+		background: rgba(251, 191, 36, 0.15);
+		color: #fbbf24;
 	}
 	.scan-gauge {
 		height: 4px;
