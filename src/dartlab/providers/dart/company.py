@@ -1913,17 +1913,15 @@ class Company:
 
     @property
     def show(self):
-        """topic 의 데이터를 반환 — 사용자 단일 진입점 (api-contract dual access).
+        """원본 데이터 단일 진입점 — 재무제표(BS/IS/CF/CIS)/주석/공시 DataFrame. analysis 결과 검증용.
 
-        Call form 과 attribute form 둘 다 지원 (pandas 관용):
-
-            c.show("IS")               # call form
-            c.show.IS()                # attribute form (callable)
-            c.show.IS(freq="Y")        # attribute form + kwargs
-            c.show("IS", freq="Y")     # call form + kwargs
-
-        실제 동작은 ``_showImpl`` 에 있고, 이 property 는 ``CallableAccessor`` 로
-        wrap 한다. 시그니처는 ``_showImpl`` 의 docstring 참조.
+        Guide:
+            - "손익계산서" → c.show("IS")
+            - "재무상태" → c.show("BS")
+            - "현금흐름" → c.show("CF")
+            - "사업 개요" → c.show("businessOverview")
+            - "주요 제품" → c.show("mainProduct")
+            - "차입금" → c.show("borrowings")
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2746,12 +2744,13 @@ class Company:
 
     @property
     def review(self):
-        """재무제표 구조화 보고서 — dual access.
+        """5엔진 결과 조립 보고서 — 11 reportType × 7 template. 느림(60~80초). dual access.
 
-            c.review()                  # 전체
-            c.review("수익성")           # call form
-            c.review.수익성              # attr form (callable)
-            c.review(preset="audit")    # preset
+        Guide:
+            - "보고서" → c.review()
+            - "신용 보고서" → c.review(type="credit")
+            - "수익성 블록만" → c.review("수익성")
+            - "사이클 관점" → c.review(type="full", template="사이클")
 
         실제 동작은 ``_reviewImpl`` 참조.
         """
@@ -2845,12 +2844,13 @@ class Company:
 
     @property
     def analysis(self):
-        """재무제표 완전 분석 — dual access (api-contract).
+        """재무제표 완전 분석 — 14축, 6막 인과 구조. dual access (api-contract).
 
-            c.analysis()                              # 가이드
-            c.analysis("financial", "수익성")          # call form
-            c.analysis.financial("수익성")             # attr form
-            c.analysis.수익성                          # attr (반환 callable)
+        Guide:
+            - "분석해줘" → c.analysis() (가이드 반환)
+            - "수익성" → c.analysis("financial", "수익성")
+            - "가치평가" → c.analysis("valuation", "가치평가")
+            - "override 재계산" → c.analysis("가치평가", overrides={"wacc": 9.0})
 
         실제 동작은 ``_analysisImpl`` 참조.
         """
@@ -2968,12 +2968,13 @@ class Company:
 
     @property
     def credit(self):
-        """독립 신용평가 — dual access.
+        """dartlab 독립 신용평가 (dCR-AAA~D). 7축 — 채무상환/자본구조/유동성/현금흐름/사업안정성/재무신뢰성/공시리스크.
 
-            c.credit()                  # 등급 종합
-            c.credit("채무상환")          # call form
-            c.credit.채무상환             # attr form (callable)
-            c.credit(detail=True)        # 상세
+        Guide:
+            - "신용등급" → c.credit("등급")
+            - "채무 감당되나" → c.credit("채무상환")
+            - "전체 평가" → c.credit(detail=True)
+            - "속성 접근" → c.credit.유동성()
 
         실제 동작은 ``_creditImpl`` 참조.
         """
@@ -4563,11 +4564,13 @@ class Company:
 
     @property
     def quant(self):
-        """주가 기술적 분석 — dual access (Phase 8 A3, 4엔진 통일).
+        """주가 기술적 분석 (30축). 기술지표/팩터/감성/최적화. dual access.
 
-            c.quant()                   # 가이드
-            c.quant("모멘텀")            # call form
-            c.quant.momentum()          # attr form
+        Guide:
+            - "차트 판단" → c.quant("판단")
+            - "모멘텀" → c.quant("모멘텀")
+            - "지표 DF" → c.quant("지표")
+            - "베타" → c.quant("베타")
 
         실제 동작은 ``_quantImpl`` 참조.
         """
@@ -4612,19 +4615,13 @@ class Company:
         return result
 
     def macro(self, axis=None, target=None, *, overrides: dict | None = None, **kwargs):
-        """시장 매크로 분석 — 회사 컨텍스트에서 자국 시장으로 자동 위임 (Phase 8 A2).
+        """시장 매크로 (6막 인과 — 사이클/재고/기업/정책/유동성/심리/시나리오). KR 자동 위임.
 
-        c.macro() / c.macro("사이클") 형태로 호출. 4엔진 통일 패턴.
-        내부적으로 dartlab.macro(axis, target, market="KR", ...) 위임.
-
-        Args:
-            axis: 분석 축. None이면 6막 가이드.
-            target: 시나리오/타겟 (시나리오 축 등에 사용).
-            overrides: 매크로 시나리오 override.
-
-        Returns:
-            axis=None → 6막 가이드 DataFrame
-            그 외 → 분석 dict
+        Guide:
+            - "매크로" → c.macro()
+            - "경기 사이클" → c.macro("사이클")
+            - "위기 진단" → c.macro("위기")
+            - "2008 시나리오" → c.macro("시나리오", "2008 금융위기")
         """
         from dartlab.macro import Macro
         return Macro()(axis, target, market="KR", overrides=overrides, **kwargs)
@@ -4632,19 +4629,24 @@ class Company:
     # ── Phase 10 H2: review 2차 가공 직접 노출 (AI tool 자동 수집 대상) ──
 
     def causalWeights(self) -> list[dict]:
-        """6막 인과 가중치 (Phase 9 B2).
+        """6막 인과 가중치 — 수익구조→수익성→현금흐름→자금조달→자산배치→가치평가 amplify/dampen/neutral.
 
-        수익구조→수익성→현금흐름→자금조달→자산배치→가치평가 전환 정량화.
+        Guide:
+            - "인과 체인" → c.causalWeights()
+            - "어느 막이 약해" → 결과의 direction='dampen' 필터
 
         Returns:
-            list[dict] — from_act/to_act/metric_from/metric_to/
-                         delta_from/delta_to/weight/direction
+            list[dict] — from_act/to_act/metric_from/metric_to/delta_from/delta_to/weight/direction
         """
         from dartlab.review.narrative import buildCausalWeights
         return buildCausalWeights(self, {})
 
     def valuationImpact(self) -> dict:
-        """인과 체인에서 DCF override 힌트 도출 (Phase 9 B3).
+        """인과 체인에서 DCF override 힌트 — narrative → 숫자 피드백.
+
+        Guide:
+            - "WACC 조정 어떻게" → c.valuationImpact()['waccAdj']
+            - "override 근거" → c.valuationImpact()['narrative']
 
         Returns:
             dict — terminalGrowthAdj/waccAdj/narrative/overrides
@@ -4654,21 +4656,24 @@ class Company:
         return buildValuationImpact(chains)
 
     def storyTree(self, *, basePeriod: str | None = None) -> dict:
-        """possible/plausible/probable 3 trajectory DCF (Phase 10 G2).
+        """Damodaran 3P — possible(낙관)/plausible(중도)/probable(보수) 3 DCF + 민감도.
 
-        Damodaran "Narrative and Numbers" 3P 프레임워크.
+        Guide:
+            - "3 시나리오 가치" → c.storyTree()
+            - "서사 민감도" → c.storyTree()['summary']['spreadPct']
 
         Returns:
-            dict — possible/plausible/probable 각 {dFV, narrative, overrides, label}
-                   + summary {min, max, spread, spreadPct, mean}
+            dict — possible/plausible/probable + summary {min/max/spread/spreadPct/mean}
         """
         from dartlab.review.storyTree import buildStoryTree
         return buildStoryTree(self, basePeriod=basePeriod)
 
     def narrativeDiff(self, *, claims: list[str] | None = None) -> list[dict]:
-        """claim 제거 시 dFV 변화 히트맵 (Phase 10 G3).
+        """각 claim 제거 시 dFV 변화 — Thought Anchors 기반 정량 기여도.
 
-        ICLR 2026 Thought Anchors 기반.
+        Guide:
+            - "가치 기여도" → c.narrativeDiff()
+            - "낮은WACC 기여 몇%" → 결과 필터 claim='낮은WACC'
 
         Returns:
             list[dict] — claim/dFV_neutral/delta_abs/delta_pct/contribution

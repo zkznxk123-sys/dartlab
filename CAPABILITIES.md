@@ -580,15 +580,15 @@ DartCompany에서 동적 추출 (57개).
 
 | 이름 | 종류 | 설명 |
 |------|------|------|
-| `analysis` | property | 재무제표 완전 분석 — dual access (api-contract). |
+| `analysis` | property | 재무제표 완전 분석 — 14축, 6막 인과 구조. dual access (api-contract). |
 | `ask` | method | LLM에게 이 기업에 대해 질문. |
 | `audit` | method | 감사 리스크 종합 분석. |
 | `canHandle` | method | DART 종목코드(6자) 또는 한글 회사명이면 처리 가능. |
 | `capital` | method | 주주환원 분석 (배당, 자사주, 총환원율). |
-| `causalWeights` | method | 6막 인과 가중치 (Phase 9 B2). |
+| `causalWeights` | method | 6막 인과 가중치 — 수익구조→수익성→현금흐름→자금조달→자산배치→가치평가 amplify/dampen/neutral. |
 | `codeName` | method | 종목코드 → 회사명 변환. |
 | `contextSlices` | property | LLM 투입용 context slice DataFrame. |
-| `credit` | property | 독립 신용평가 — dual access. |
+| `credit` | property | dartlab 독립 신용평가 (dCR-AAA~D). 7축 — 채무상환/자본구조/유동성/현금흐름/사업안정성/재무신뢰성/공시리스크. |
 | `currency` | property | 통화 코드 (DART 제공자는 항상 KRW). |
 | `debt` | method | 부채 구조 분석 (차입금, 부채비율, 만기 구조). |
 | `diff` | method | 기간간 텍스트 변경 비교. |
@@ -603,13 +603,13 @@ DartCompany에서 동적 추출 (57개).
 | `keywordTrend` | method | 공시 텍스트 키워드 빈도 추이 (topic x period x keyword). |
 | `listing` | method | KRX 전체 상장법인 목록 (KIND 기준). |
 | `liveFilings` | method | OpenDART 기준 실시간 공시 목록 조회. |
-| `macro` | method | 시장 매크로 분석 — 회사 컨텍스트에서 자국 시장으로 자동 위임 (Phase 8 A2). |
+| `macro` | method | 시장 매크로 (6막 인과 — 사이클/재고/기업/정책/유동성/심리/시나리오). KR 자동 위임. |
 | `market` | property | 시장 코드 (DART 제공자는 항상 KR). |
-| `narrativeDiff` | method | claim 제거 시 dFV 변화 히트맵 (Phase 10 G3). |
+| `narrativeDiff` | method | 각 claim 제거 시 dFV 변화 — Thought Anchors 기반 정량 기여도. |
 | `network` | method | 관계 네트워크 (지분출자 + 그룹 계열사 지도). |
 | `news` | method | 최근 뉴스 수집. |
 | `priority` | method | 낮을수록 먼저 시도. DART=10 (기본 provider). |
-| `quant` | property | 주가 기술적 분석 — dual access (Phase 8 A3, 4엔진 통일). |
+| `quant` | property | 주가 기술적 분석 (30축). 기술지표/팩터/감성/최적화. dual access. |
 | `rank` | property | 전체 시장 + 섹터 내 규모 순위 (매출/자산/성장률). |
 | `rawDocs` | property | 공시 문서 원본 parquet 전체 (가공 전). |
 | `rawFinance` | property | 재무제표 원본 parquet 전체 (가공 전). |
@@ -617,28 +617,36 @@ DartCompany에서 동적 추출 (57개).
 | `readFiling` | method | 접수번호 또는 liveFilings row로 공시 원문을 읽는다. |
 | `resolve` | method | 종목코드 또는 회사명 → 종목코드 변환. |
 | `retrievalBlocks` | property | 원문 markdown 보존 retrieval block DataFrame. |
-| `review` | property | 재무제표 구조화 보고서 — dual access. |
+| `review` | property | 5엔진 결과 조립 보고서 — 11 reportType × 7 template. 느림(60~80초). dual access. |
 | `search` | method | 회사명 부분 검색 (KIND 목록 기준). |
 | `sections` | property | sections — docs + finance + report 통합 지도. |
 | `sector` | property | WICS 투자 섹터 분류 (KIND 업종 + 키워드 기반). |
 | `sectorParams` | property | 현재 종목의 섹터별 밸류에이션 파라미터. |
 | `select` | property | show() 결과에서 행/열 필터 — dual access. |
-| `show` | property | topic 의 데이터를 반환 — 사용자 단일 진입점 (api-contract dual access). |
+| `show` | property | 원본 데이터 단일 진입점 — 재무제표(BS/IS/CF/CIS)/주석/공시 DataFrame. analysis 결과 검증용. |
 | `sources` | property | docs/finance/report 3개 source의 가용 현황 요약. |
 | `status` | method | 로컬에 보유한 전체 종목 인덱스. |
-| `storyTree` | method | possible/plausible/probable 3 trajectory DCF (Phase 10 G2). |
+| `storyTree` | method | Damodaran 3P — possible(낙관)/plausible(중도)/probable(보수) 3 DCF + 민감도. |
 | `table` | method | subtopic wide 셀의 markdown table을 구조화 DataFrame으로 파싱. |
 | `topicSummaries` | method | 토픽별 요약 dict — AI가 경로 탐색에 사용. |
 | `topics` | property | topic별 요약 DataFrame -- 전체 데이터 지도. |
 | `trace` | method | topic 데이터의 출처(docs/finance/report)와 선택 근거 추적. |
 | `update` | method | 누락된 최신 공시를 증분 수집. |
 | `validateStory` | method | Damodaran 스토리 검증 — Possible / Plausible / Probable 3 테스트 통합. |
-| `valuationImpact` | method | 인과 체인에서 DCF override 힌트 도출 (Phase 9 B3). |
+| `valuationImpact` | method | 인과 체인에서 DCF override 힌트 — narrative → 숫자 피드백. |
 | `view` | method | 브라우저에서 공시 뷰어를 엽니다. |
 | `watch` | method | 공시 변화 감지 — 중요도 스코어링 기반 변화 요약. |
 | `workforce` | method | 인력/급여 분석 (직원수, 평균급여, 근속연수). |
 
 ### Company 메서드 상세
+
+#### Company.analysis
+**Guide:** "분석해줘" → c.analysis() (가이드 반환)
+"수익성" → c.analysis("financial", "수익성")
+"가치평가" → c.analysis("valuation", "가치평가")
+"override 재계산" → c.analysis("가치평가", overrides={"wacc": 9.0})
+
+실제 동작은 ``_analysisImpl`` 참조.
 
 #### Company.ask
 **Capabilities:** 엔진 계산 결과를 컨텍스트로 조립하여 LLM에 전달
@@ -686,6 +694,10 @@ review: 재무정합성 섹션에서 감사 결과 활용
 sceMatrix: 자본변동표 (배당/자사주가 자본에 미치는 영향)
 debt: 부채 구조 (자본 정책의 다른 면)
 
+#### Company.causalWeights
+**Guide:** "인과 체인" → c.causalWeights()
+"어느 막이 약해" → 결과의 direction='dampen' 필터
+
 #### Company.contextSlices
 **Capabilities:** retrievalBlocks를 LLM 컨텍스트 윈도우에 맞게 슬라이싱
 토큰 예산 내에서 최대한 많은 관련 정보를 담는 압축 포맷
@@ -697,6 +709,14 @@ LLM이 소비하는 최종 형태의 컨텍스트
 "AI가 보는 데이터" → c.contextSlices
 **SeeAlso:** retrievalBlocks: 슬라이싱 전 전체 retrieval 블록
 ask: contextSlices를 내부적으로 소비하는 AI 질문 인터페이스
+
+#### Company.credit
+**Guide:** "신용등급" → c.credit("등급")
+"채무 감당되나" → c.credit("채무상환")
+"전체 평가" → c.credit(detail=True)
+"속성 접근" → c.credit.유동성()
+
+실제 동작은 ``_creditImpl`` 참조.
 
 #### Company.debt
 **Capabilities:** 총차입금 + 순차입금 규모
@@ -830,6 +850,16 @@ readFiling()과 조합하여 최신 공시 원문 분석
 readFiling: 공시 원문 텍스트 읽기
 watch: 공시 변화 중요도 스코어링
 
+#### Company.macro
+**Guide:** "매크로" → c.macro()
+"경기 사이클" → c.macro("사이클")
+"위기 진단" → c.macro("위기")
+"2008 시나리오" → c.macro("시나리오", "2008 금융위기")
+
+#### Company.narrativeDiff
+**Guide:** "가치 기여도" → c.narrativeDiff()
+"낮은WACC 기여 몇%" → 결과 필터 claim='낮은WACC'
+
 #### Company.network
 **Capabilities:** 그룹 계열사 목록 (members)
 출자/피출자 연결 + 지분율 (edges)
@@ -857,6 +887,14 @@ ask()/chat()에서 정성적 시장 맥락 보충
 "이번 주 뉴스" → c.news(days=7)
 **SeeAlso:** liveFilings: 최신 공시 (뉴스가 아닌 공식 공시)
 gather: 뉴스 포함 4축 외부 데이터 수집
+
+#### Company.quant
+**Guide:** "차트 판단" → c.quant("판단")
+"모멘텀" → c.quant("모멘텀")
+"지표 DF" → c.quant("지표")
+"베타" → c.quant("베타")
+
+실제 동작은 ``_quantImpl`` 참조.
 
 #### Company.rank
 **Capabilities:** 전체 시장 내 매출/자산 순위
@@ -928,6 +966,14 @@ retrieval 기반 컨텍스트 주입의 원천 데이터
 **SeeAlso:** contextSlices: retrievalBlocks를 LLM 윈도우에 맞게 슬라이싱한 결과
 sections: 구조화된 데이터 지도 (retrievalBlocks의 원본)
 
+#### Company.review
+**Guide:** "보고서" → c.review()
+"신용 보고서" → c.review(type="credit")
+"수익성 블록만" → c.review("수익성")
+"사이클 관점" → c.review(type="full", template="사이클")
+
+실제 동작은 ``_reviewImpl`` 참조.
+
 #### Company.sections
 **Capabilities:** topic × period 수평화 통합 DataFrame
 docs/finance/report 3-source 병합
@@ -965,6 +1011,14 @@ insights: 섹터 기준 등급 평가
 **SeeAlso:** sector: 섹터 분류 정보 (sectorParams의 기반)
 valuation: 밸류에이션 (sectorParams를 내부적으로 소비)
 
+#### Company.show
+**Guide:** "손익계산서" → c.show("IS")
+"재무상태" → c.show("BS")
+"현금흐름" → c.show("CF")
+"사업 개요" → c.show("businessOverview")
+"주요 제품" → c.show("mainProduct")
+"차입금" → c.show("borrowings")
+
 #### Company.sources
 **Capabilities:** 3개 데이터 source(docs, finance, report) 존재 여부/규모 한눈에 확인
 각 source의 row/col 수와 shape 문자열 제공
@@ -979,6 +1033,10 @@ trace: 특정 topic의 출처 추적
 #### Company.status
 **Capabilities:** 로컬 데이터 현황 (종목별 docs/finance/report 보유 여부)
 최종 업데이트 일시
+
+#### Company.storyTree
+**Guide:** "3 시나리오 가치" → c.storyTree()
+"서사 민감도" → c.storyTree()['summary']['spreadPct']
 
 #### Company.table
 **Capabilities:** docs 원문의 markdown table을 Polars DataFrame으로 변환
@@ -1033,6 +1091,10 @@ disclosure: OpenDART 전체 공시 조회
 calcPlausibilityBand (섹터 피어 분포 percentile)
 calcValuationSins (정합성 규칙 위반)
 overrides 로 AI 개입 (lifeCyclePhase, terminalGrowth 등)
+
+#### Company.valuationImpact
+**Guide:** "WACC 조정 어떻게" → c.valuationImpact()['waccAdj']
+"override 근거" → c.valuationImpact()['narrative']
 
 #### Company.view
 **Capabilities:** 로컬 서버 기반 공시 뷰어 실행

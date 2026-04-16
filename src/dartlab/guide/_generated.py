@@ -18,8 +18,9 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "종목코드/회사명/ticker → 적절한 Company 인스턴스 생성."
     },
     "Company.analysis": {
+        "guide": "\"분석해줘\" → c.analysis() (가이드 반환)\n\"수익성\" → c.analysis(\"financial\", \"수익성\")\n\"가치평가\" → c.analysis(\"valuation\", \"가치평가\")\n\"override 재계산\" → c.analysis(\"가치평가\", overrides={\"wacc\": 9.0})\n\n실제 동작은 ``_analysisImpl`` 참조.",
         "kind": "property",
-        "summary": "재무제표 완전 분석 — dual access (api-contract)."
+        "summary": "재무제표 완전 분석 — 14축, 6막 인과 구조. dual access (api-contract)."
     },
     "Company.ask": {
         "aicontext": "AI가 분석 전 과정을 주도. dartlab 엔진(analysis, scan, gather 등)을\n도구로 호출하여 데이터 수집, 계산, 판단, 해석을 수행.",
@@ -53,8 +54,9 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "주주환원 분석 (배당, 자사주, 총환원율)."
     },
     "Company.causalWeights": {
+        "guide": "\"인과 체인\" → c.causalWeights()\n\"어느 막이 약해\" → 결과의 direction='dampen' 필터",
         "kind": "method",
-        "summary": "6막 인과 가중치 (Phase 9 B2)."
+        "summary": "6막 인과 가중치 — 수익구조→수익성→현금흐름→자금조달→자산배치→가치평가 amplify/dampen/neutral."
     },
     "Company.codeName": {
         "kind": "method",
@@ -70,8 +72,9 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "LLM 투입용 context slice DataFrame."
     },
     "Company.credit": {
+        "guide": "\"신용등급\" → c.credit(\"등급\")\n\"채무 감당되나\" → c.credit(\"채무상환\")\n\"전체 평가\" → c.credit(detail=True)\n\"속성 접근\" → c.credit.유동성()\n\n실제 동작은 ``_creditImpl`` 참조.",
         "kind": "property",
-        "summary": "독립 신용평가 — dual access."
+        "summary": "dartlab 독립 신용평가 (dCR-AAA~D). 7축 — 채무상환/자본구조/유동성/현금흐름/사업안정성/재무신뢰성/공시리스크."
     },
     "Company.currency": {
         "kind": "property",
@@ -178,8 +181,9 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "OpenDART 기준 실시간 공시 목록 조회."
     },
     "Company.macro": {
+        "guide": "\"매크로\" → c.macro()\n\"경기 사이클\" → c.macro(\"사이클\")\n\"위기 진단\" → c.macro(\"위기\")\n\"2008 시나리오\" → c.macro(\"시나리오\", \"2008 금융위기\")",
         "kind": "method",
-        "summary": "시장 매크로 분석 — 회사 컨텍스트에서 자국 시장으로 자동 위임 (Phase 8 A2)."
+        "summary": "시장 매크로 (6막 인과 — 사이클/재고/기업/정책/유동성/심리/시나리오). KR 자동 위임."
     },
     "Company.market": {
         "kind": "property",
@@ -187,8 +191,9 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "시장 코드 (DART 제공자는 항상 KR)."
     },
     "Company.narrativeDiff": {
+        "guide": "\"가치 기여도\" → c.narrativeDiff()\n\"낮은WACC 기여 몇%\" → 결과 필터 claim='낮은WACC'",
         "kind": "method",
-        "summary": "claim 제거 시 dFV 변화 히트맵 (Phase 10 G3)."
+        "summary": "각 claim 제거 시 dFV 변화 — Thought Anchors 기반 정량 기여도."
     },
     "Company.network": {
         "aicontext": "그룹 계열사/출자 구조 파악 — 지배구조 분석의 기초 데이터\n순환출자 탐지로 거버넌스 리스크 감지",
@@ -213,8 +218,9 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "낮을수록 먼저 시도. DART=10 (기본 provider)."
     },
     "Company.quant": {
+        "guide": "\"차트 판단\" → c.quant(\"판단\")\n\"모멘텀\" → c.quant(\"모멘텀\")\n\"지표 DF\" → c.quant(\"지표\")\n\"베타\" → c.quant(\"베타\")\n\n실제 동작은 ``_quantImpl`` 참조.",
         "kind": "property",
-        "summary": "주가 기술적 분석 — dual access (Phase 8 A3, 4엔진 통일)."
+        "summary": "주가 기술적 분석 (30축). 기술지표/팩터/감성/최적화. dual access."
     },
     "Company.rank": {
         "aicontext": "시장/섹터 내 상대 위치 파악 — 피어 비교 분석의 기초\nsizeClass로 대형/중형/소형주 분류",
@@ -275,8 +281,9 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "원문 markdown 보존 retrieval block DataFrame."
     },
     "Company.review": {
+        "guide": "\"보고서\" → c.review()\n\"신용 보고서\" → c.review(type=\"credit\")\n\"수익성 블록만\" → c.review(\"수익성\")\n\"사이클 관점\" → c.review(type=\"full\", template=\"사이클\")\n\n실제 동작은 ``_reviewImpl`` 참조.",
         "kind": "property",
-        "summary": "재무제표 구조화 보고서 — dual access."
+        "summary": "5엔진 결과 조립 보고서 — 11 reportType × 7 template. 느림(60~80초). dual access."
     },
     "Company.search": {
         "kind": "method",
@@ -314,8 +321,9 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "show() 결과에서 행/열 필터 — dual access."
     },
     "Company.show": {
+        "guide": "\"손익계산서\" → c.show(\"IS\")\n\"재무상태\" → c.show(\"BS\")\n\"현금흐름\" → c.show(\"CF\")\n\"사업 개요\" → c.show(\"businessOverview\")\n\"주요 제품\" → c.show(\"mainProduct\")\n\"차입금\" → c.show(\"borrowings\")",
         "kind": "property",
-        "summary": "topic 의 데이터를 반환 — 사용자 단일 진입점 (api-contract dual access)."
+        "summary": "원본 데이터 단일 진입점 — 재무제표(BS/IS/CF/CIS)/주석/공시 DataFrame. analysis 결과 검증용."
     },
     "Company.sources": {
         "aicontext": "데이터 가용성 사전 점검 — 분석 가능 범위 판단의 기초",
@@ -332,8 +340,9 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "로컬에 보유한 전체 종목 인덱스."
     },
     "Company.storyTree": {
+        "guide": "\"3 시나리오 가치\" → c.storyTree()\n\"서사 민감도\" → c.storyTree()['summary']['spreadPct']",
         "kind": "method",
-        "summary": "possible/plausible/probable 3 trajectory DCF (Phase 10 G2)."
+        "summary": "Damodaran 3P — possible(낙관)/plausible(중도)/probable(보수) 3 DCF + 민감도."
     },
     "Company.table": {
         "aicontext": "docs 원문 테이블을 구조화하여 정량 분석에 활용\nnumeric=True로 금액 문자열을 수치화하면 계산 가능",
@@ -381,8 +390,9 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "Damodaran 스토리 검증 — Possible / Plausible / Probable 3 테스트 통합."
     },
     "Company.valuationImpact": {
+        "guide": "\"WACC 조정 어떻게\" → c.valuationImpact()['waccAdj']\n\"override 근거\" → c.valuationImpact()['narrative']",
         "kind": "method",
-        "summary": "인과 체인에서 DCF override 힌트 도출 (Phase 9 B3)."
+        "summary": "인과 체인에서 DCF override 힌트 — narrative → 숫자 피드백."
     },
     "Company.view": {
         "aicontext": "시각적 탐색 인터페이스 — 사용자가 브라우저에서 직접 데이터 탐색",
