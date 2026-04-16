@@ -720,6 +720,10 @@
 					</span>
 				</button>
 			</div>
+			<div class="external-links">
+				<a class="ext-link" href="{base}/map/screen">🔍 조건 검색 (스크리너)</a>
+				<a class="ext-link" href="{base}/changes">⚡ 변화 감지</a>
+			</div>
 		</div>
 
 		<!-- 검색 -->
@@ -1263,6 +1267,26 @@
 		font-size: 10px;
 		color: #64748b;
 		font-weight: 400;
+	}
+
+	.external-links {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		margin-top: 10px;
+		padding-top: 10px;
+		border-top: 1px solid rgba(96, 165, 250, 0.15);
+	}
+	.ext-link {
+		padding: 6px 10px;
+		font-size: 12px;
+		color: #94a3b8;
+		text-decoration: none;
+		border-radius: 4px;
+	}
+	.ext-link:hover {
+		background: rgba(96, 165, 250, 0.08);
+		color: #f1f5f9;
 	}
 
 	.controls button {
