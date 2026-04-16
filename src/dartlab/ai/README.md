@@ -48,6 +48,21 @@ dartlab.ask(question, *, stockCode?)
 | **블로그 / 과거 경험** | `pastInsight(stockCode)` · `sectorInsights(sector)` tool | KnowledgeDB `insights(source="blog")` 40건 — narrative 에 `[direction/confidence/archetype] [revenue/opm/roe/fcf]` 병합 (Phase 14 B1). AI 자율 조회, 떠먹이기 금지. |
 | **웹 / 뉴스** | `gather("news", ...)` · DART `search`(공시 본문) · `searchCompany`(티커/회사명, KR+US 통합, `인텔→Intel` alias) · `pythonExec` 내 webSearch | 실시간 정보 보강 |
 
+### 데이터 신선도 매트릭스 (Phase 15 B3)
+
+| 데이터 | TTL / 갱신 주기 | 현황 |
+|---|---|---|
+| DART 공시 | 당일 | 자동 동기화 |
+| DART 재무 (분기/연간) | Q+45일 | 11.6M 행, 2,745 종목 |
+| EDGAR companyfacts | 24h ETag (daily ~04:25 UTC) | 16,601 종목 |
+| 주가 (KR) | 5분 | Naver/Yahoo/FMP fallback |
+| 주가 (US) | 15분 | Yahoo/FMP |
+| 뉴스 | 30분 | Google News RSS |
+| 거시 (ECOS/FRED) | 6h | Parquet 캐시 |
+
+**AI 는 `tool_result.dataAsOf = {latestPeriod, retrievedAt}` 으로 데이터 신선도 즉시 인지** (Phase 15 B2).
+"실시간" 착각 방지 — latest period 가 `2025Q4` 인지 `2024` 인지 명시.
+
 ## 4. 4축 사상
 
 | 축 | 재정의 | 코드 |

@@ -175,6 +175,9 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
         "core": ["period", "revenue", "operatingMargin", "netMargin", "grossMargin"],
         "note": "수익성 응답 시 operatingMargin/netMargin/grossMargin 컬럼을 표에 반드시 포함",
     }
+    # Phase 15 C1: _showKey 힌트 — AI 가 자율적으로 `show("IS")` 재검증 호출 가능
+    result["_showKey"] = "IS"
+    result["_showFields"] = ["매출액", "영업이익", "당기순이익"]
     return result
 
 
