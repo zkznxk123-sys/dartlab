@@ -48,6 +48,32 @@ def calcDFV(
 
     ov = overrides or {}
 
+    # G21 (Phase 6): 금융업 자동 분기 — Bank Excess Return 우선 (Damodaran Ch.21)
+    try:
+        from dartlab.analysis.valuation.bankDFV import calcBankDFV, isFinancialCompany
+
+        if isFinancialCompany(company):
+            bank_result = calcBankDFV(company, basePeriod=basePeriod, overrides=ov)
+            if bank_result and bank_result.get("dFV"):
+                return bank_result
+    except (ImportError, AttributeError, ValueError, TypeError):
+        pass
+
+    # G22 (Phase 6): 지주사 자동 분기 — SOTP NAV 우선 (Damodaran Ch.16)
+    # SOTP upside 절대값 100% 초과 시 데이터 신뢰도 낮음 → 일반 dispatch 로 fallback
+    try:
+        from dartlab.analysis.valuation.sotp import calcHoldingDFV
+        from dartlab.review.templates import _checkHolding
+
+        if _checkHolding(company):
+            sotp_result = calcHoldingDFV(company, basePeriod=basePeriod, overrides=ov)
+            if sotp_result and sotp_result.get("dFV"):
+                up = sotp_result.get("upside")
+                if up is None or abs(up) <= 100:
+                    return sotp_result
+    except (ImportError, AttributeError, ValueError, TypeError):
+        pass
+
     # 1. 기업유형 × 생애주기 → primary/secondary 선택
     from dartlab.analysis.valuation.fitness import selectModels
 
@@ -103,6 +129,27 @@ def calcDFV(
 
     if primary_value is None or primary_value <= 0:
         return None
+
+    # G23 (Phase 6): primary=relative 가 현재가 ±150% 이탈 시 secondary fallback
+    # Damodaran Ch.10: 산업 multiple 일시 과열/저평가 → 단일 모델 의존 위험 회피
+    if primary_key in ("relative", "relativeSurvival"):
+        try:
+            _cp_check = _getCurrentPrice(company)
+            if _cp_check and _cp_check > 0:
+                ratio = primary_value / _cp_check
+                if ratio > 2.5 or ratio < 0.4:
+                    # 과대/과소 의심 → secondary 후보 중 현재가 근접한 모델로 교체
+                    sec_candidates: list[tuple[str, float, float]] = []
+                    for sk in secondary_keys:
+                        sv = all_methods.get(sk)
+                        if sv and sv > 0:
+                            sr = sv / _cp_check
+                            sec_candidates.append((sk, sv, abs(sr - 1.0)))
+                    if sec_candidates:
+                        sec_candidates.sort(key=lambda x: x[2])
+                        primary_key, primary_value, _ = sec_candidates[0]
+        except (AttributeError, ValueError, TypeError, ZeroDivisionError):
+            pass
 
     # 5. Bull/Base/Bear 시나리오 (WACC ±1%p 효과 근사)
     # WACC 1%p 변화 ≈ 적정가 ±10~15% (경험칙)
@@ -516,10 +563,10 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
     # 고성장률 상한 25% (과도 방지)
     high_g = max(-5.0, min(high_g, 25.0))
 
-    # lifeCycle 별 phase 구성 (Damodaran 권고) — Phase 4 G12.3: cap/floor 추가
+    # lifeCycle 별 phase 구성 (Damodaran 권고) — Phase 5 G17: highGrowth 10년 확장 (Ch.12)
     phase_config: dict[str, tuple[list[int], list[float]]] = {
         "earlyGrowth": ([5, 3, 2], [high_g, high_g * 0.5, high_g * 0.2]),
-        "highGrowth":  ([5, 2],    [high_g, high_g * 0.5]),
+        "highGrowth":  ([5, 3, 2], [high_g, high_g * 0.7, high_g * 0.4]),  # 7→10년
         "matureGrowth":([4],       [min(high_g, 8.0)]),   # cap 8%
         "matureStable":([3],       [min(high_g, 3.0)]),   # cap 3% (GDP 근접)
         "decline":     ([2],       [min(high_g, -2.0) if high_g < 0 else min(high_g, 0.0)]),
@@ -579,6 +626,47 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
 
     if not base_fcf or base_fcf <= 0:
         return None
+
+    # Phase 5 G16: Normalized Earnings (Damodaran Ch.22)
+    # 사이클/회복/적자 이력 기업은 mid-cycle FCF 중앙값 대신 Normalized FCF 사용
+    try:
+        from dartlab.core.finance.normalized import calcNormalizedFcf, needsNormalized
+
+        # ROIC history 추출 (적자 이력 판별용)
+        roic_history_data: list[dict] = []
+        try:
+            _roic_for_norm = calcRoicTimeline(company)
+            if _roic_for_norm and _roic_for_norm.get("history"):
+                roic_history_data = _roic_for_norm["history"]
+        except (AttributeError, ValueError, TypeError):
+            pass
+
+        if needsNormalized(life_phase, roic_history_data):
+            # 매출/마진 시계열 추출 (최신 먼저)
+            rev_history: list[float] = []
+            margin_history: list[float] = []
+            try:
+                is_rev = company.select("IS", ["매출액", "영업이익"])
+                is_parsed = toDictBySnakeId(is_rev)
+                if is_parsed:
+                    is_data, is_periods = is_parsed
+                    rev_row = is_data.get("sales") or {}
+                    op_row = is_data.get("operating_profit") or {}
+                    annual_ys = [p for p in is_periods if p.isdigit() and len(p) == 4][:5]
+                    for y in annual_ys:
+                        rv = rev_row.get(y)
+                        op = op_row.get(y)
+                        if rv and isinstance(rv, (int, float)) and rv > 0:
+                            rev_history.append(float(rv))
+                            margin_history.append(float(op) / float(rv) if op else 0.0)
+            except (AttributeError, KeyError, TypeError, ValueError):
+                pass
+
+            norm = calcNormalizedFcf(rev_history, margin_history)
+            if norm["method"] != "skip" and norm["normalizedFcf"]:
+                base_fcf = norm["normalizedFcf"]  # 사이클 중립 FCF 로 교체
+    except (ImportError, AttributeError, ValueError, TypeError):
+        pass
 
     # 순차입금 + 발행주식수 (shares 는 calcDcf 결과 역산)
     try:

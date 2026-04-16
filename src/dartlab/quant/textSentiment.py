@@ -12,7 +12,7 @@ from dartlab.quant._helpers import load_docs_for_stock, resolve_market
 log = logging.getLogger(__name__)
 
 
-def analyze_sentiment(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
+def calcSentiment(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     """공시 텍스트 감성 스코어링."""
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}

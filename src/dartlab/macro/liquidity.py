@@ -35,7 +35,7 @@ def _fetch_liquidity_data(market: str, as_of: str | None = None) -> dict[str, fl
     return {k: v for k, v in data.items() if v is not None}
 
 
-def analyze_liquidity(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
+def calcLiquidity(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """유동성 환경 종합 분석."""
     data = _fetch_liquidity_data(market, as_of=as_of)
     if overrides:

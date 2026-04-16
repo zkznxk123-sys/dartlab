@@ -388,7 +388,7 @@ def detectChartPatterns(
 # ══════════════════════════════════════
 
 
-def analyze_chartPatterns(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
+def calcChartPatterns(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     """quant 축 진입점 — 거시 차트 패턴 자동 탐지.
 
     Args:

@@ -99,7 +99,7 @@ def _zscore(value: float, all_values: list[float]) -> float:
     return float(max(-3, min(3, z)))
 
 
-def analyze_value(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
+def calcValue(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     """Value/yield 신호 — book-based 횡단면 z-score.
 
     ⚠️ PBR/PER/PSR 미산출 — 시가총액 데이터 부재. earningsToBook(=ROE),

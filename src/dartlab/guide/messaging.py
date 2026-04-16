@@ -45,6 +45,16 @@ _SIMPLE: dict[str, str] = {
     # EDGAR
     "edgar:fallback": "사전 수집 데이터에 없음 \u2192 SEC EDGAR API에서 직접 수집 중... (최초 1회, 수 분 소요)",
     "edgar:sec_download": "{cik} (SEC EDGAR 재무 데이터) 로컬에 없음 \u2192 SEC API에서 다운로드 중...",
+    # ── EDGAR 벌크 (primary 경로) ──
+    # dartlab 은 SEC companyfacts.zip 을 사용자 PC 에 자동 다운로드 \u2192 {cik}.parquet 으로 변환.
+    # HF 미러링 없음 (SEC 벌크가 원본).
+    "edgar:bulk_download_start": "[dartlab] SEC EDGAR 재무 데이터 전체 다운로드 중 (~1.37GB, 최초 1회 5~15분) \u2014 companyfacts.zip",
+    "edgar:bulk_download_done": "\u2713 companyfacts.zip 다운로드 완료 ({sizeMB:.0f}MB, {elapsedSec:.0f}s)",
+    "edgar:bulk_convert_start": "[dartlab] companyfacts.zip \u2192 종목별 parquet 변환 중 (수 분 소요) \u2014 {totalCiks}개 기업",
+    "edgar:bulk_convert_done": "\u2713 EDGAR 재무 parquet 변환 완료 (converted={converted} / skipped={skipped} / failed={failed}, {elapsedSec:.0f}s)",
+    "edgar:bulk_fresh": "\u2713 companyfacts.zip 최신 (TTL {ttlHours}h)",
+    "edgar:bulk_quarterly_start": "[dartlab] SEC 분기 메타 벌크 다운로드 중 ({year}Q{quarter}, {sizeMB:.0f}MB)",
+    "edgar:bulk_quarterly_done": "\u2713 {year}Q{quarter} sub/pre/tag parquet 생성 완료",
     "edgar:empty": "{cik} SEC API 응답이 비어있음 (데이터 없음)",
     "edgar:save_done": "저장 완료: {path}",
     "edgar:download_failed": "{cik} SEC API 다운로드 실패: {error}",

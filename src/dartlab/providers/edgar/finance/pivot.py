@@ -91,7 +91,17 @@ def _buildTimeseriesFromFacts(
         pivoted = _computeQ4(pivoted, stmt)
         # post-pivot column rename: fiscal → calendar
         if fiscalToCal:
-            renameMap = {c: fiscalToCal[c] for c in pivoted.columns if c in fiscalToCal}
+            # NVDA 같이 결산월 변경 이력 있는 기업은 fiscal `2010-Q2` / `2010-Q3`
+            # 가 같은 calendar 로 중복 매핑될 수 있음. 먼저 등장한 fiscal 만 rename.
+            existingCols = set(pivoted.columns)
+            claimedTargets: set[str] = set()
+            renameMap: dict[str, str] = {}
+            for c in pivoted.columns:
+                tgt = fiscalToCal.get(c)
+                if tgt is None or tgt == c or tgt in existingCols or tgt in claimedTargets:
+                    continue
+                renameMap[c] = tgt
+                claimedTargets.add(tgt)
             if renameMap:
                 pivoted = pivoted.rename(renameMap)
 
@@ -269,7 +279,10 @@ def _splitStmtFacts(df: pl.DataFrame) -> dict[str, pl.DataFrame]:
     다른 unit 의 entry 가 있을 경우 (소수) 잘못된 합산 위험. 통화성 stmt (BS/IS/CF/CI)
     는 USD only 로 필터링.
     """
-    # XBRL unit 정규화 (USD only)
+    # XBRL unit 정규화 (USD only).
+    # USD/shares(EPS)·shares·pure 등 은 통화 재무제표에 섞이면 스케일 오염 →
+    # 별도 경로로 처리 (pivot 밖). test_l2Coverage 의 basic/diluted_earnings_per_share
+    # 는 별도 EPS 전용 빌더가 필요 (follow-up).
     if "unit" in df.columns:
         df = df.filter(pl.col("unit") == "USD")
     if df.height == 0:

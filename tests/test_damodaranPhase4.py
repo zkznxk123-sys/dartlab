@@ -71,15 +71,18 @@ def test_dFV_samsung_within_realistic_range():
 @pytest.mark.integration
 @pytest.mark.requires_data
 def test_dFV_yangyang_regression_within_3pct():
-    """삼양식품 회귀 — Phase 3 기준 ±3%."""
+    """삼양식품 회귀 — Phase 5 G17 (highGrowth 10년 확장) 후 기준 1,383K ±10%.
+
+    Phase 3: 1,055K → Phase 5 의도된 상향 (highGrowth phases [5,3,2] 확장).
+    """
     import dartlab
     from dartlab.analysis.valuation.dFV import calcDFV
 
     c = dartlab.Company("003230")
     r = calcDFV(c)
     dfv = r["dFV"]
-    # Phase 3 기준 1,055,232 ±3%
-    assert 1_020_000 < dfv < 1_090_000, f"regression: {dfv:,}"
+    # Phase 5 기준 1,383K ±10%
+    assert 1_245_000 < dfv < 1_525_000, f"regression: {dfv:,}"
 
 
 # ── G13 override chain 전파 ────────────────────────────

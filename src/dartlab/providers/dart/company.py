@@ -4561,52 +4561,73 @@ class Company:
             aggs.append(pl.col(c).median().alias(f"{c}_중간값"))
         return df_with_market.group_by("시장").agg(aggs).sort("종목수", descending=True)
 
-    def quant(self, metric=None, *, overrides: dict | None = None, **kwargs):
-        """주가 기술적 분석 — self-discovery 패턴.
+    @property
+    def quant(self):
+        """주가 기술적 분석 — dual access (Phase 8 A3, 4엔진 통일).
+
+            c.quant()                   # 가이드
+            c.quant("모멘텀")            # call form
+            c.quant.momentum()          # attr form
+
+        실제 동작은 ``_quantImpl`` 참조.
+        """
+        from dartlab.core.dualAccess import CallableAccessor
+
+        if "_quantAccessor" not in self._cache:
+            self._cache["_quantAccessor"] = CallableAccessor(self._quantImpl, name="quant")
+        return self._cache["_quantAccessor"]
+
+    def _quantImpl(self, axis=None, *, overrides: dict | None = None, metric=None, **kwargs):
+        """주가 기술적 분석 — 30축 (내부 구현).
 
         Args:
-            metric: 축 이름. None이면 30축 가이드 DataFrame.
-                    "종합"/"verdict" → 종합 기술 판단
-                    "지표"/"indicators" → 45개 기술적 지표
-                    "신호"/"signals" → 매매 신호
-                    "베타"/"beta" → 시장 베타 + CAPM
-                    기타 30축 (모멘텀, 변동성, 팩터 등)
-            overrides: AI/사용자가 기술 분석 파라미터를 교체. 키: window/threshold/period/benchmark.
+            axis: 축 이름. None이면 30축 가이드 DataFrame.
+                  (Phase 8 A1: 기존 `metric=` 은 호환 alias)
+            overrides: 기술 분석 파라미터 교체. 키: window/threshold/period/benchmark.
             **kwargs: 축별 추가 파라미터.
 
         Returns:
-            metric=None → DataFrame (30축 가이드)
-            metric="종합" → dict (verdict, RSI, ADX, SMA 등)
-            metric="지표" → DataFrame (45개 지표)
-
-        Example::
-
-            c = Company("005930")
-            print(c.quant())            # 30축 가이드 (self-discovery)
-            c.quant("종합")              # 종합 판단 dict
-            c.quant("지표")              # 45개 지표 DataFrame
-            c.quant("모멘텀")            # 모멘텀 분석
-            c.quant("RSI", overrides={"window": 14})  # 윈도우 override
+            axis=None → DataFrame (30축 가이드)
+            axis="종합" → dict (verdict, RSI, ADX, SMA 등)
+            axis="지표" → DataFrame (45개 지표)
         """
         from dartlab.core.overrides import validateOverrides
         from dartlab.quant import Quant
 
+        if axis is None and metric is not None:
+            axis = metric
         clean = validateOverrides(overrides, engine="quant")
-        merged = {**clean, **kwargs}  # kwargs 가 명시적 → 우선
+        merged = {**clean, **kwargs}
         q = Quant()
-        if metric is None:
-            return q()  # 가이드 DataFrame
-        result = q(metric, self.stockCode, **merged)
-        # assumptions 투명화 — 4 엔진 공통 utility
+        if axis is None:
+            return q()
+        result = q(axis, self.stockCode, **merged)
         if isinstance(result, dict):
             from dartlab.core.overrides import buildAssumptions
 
-            # quant 는 override 로 넘어온 값만 assumptions 에 반영 (내부 계산 alias 희소)
             enriched = {**result, **{k: v for k, v in merged.items() if k in ("window", "threshold", "period", "benchmark")}}
             assumptions = buildAssumptions(enriched, engine="quant", overrides=clean)
             if assumptions:
                 result.setdefault("assumptions", assumptions)
         return result
+
+    def macro(self, axis=None, target=None, *, overrides: dict | None = None, **kwargs):
+        """시장 매크로 분석 — 회사 컨텍스트에서 자국 시장으로 자동 위임 (Phase 8 A2).
+
+        c.macro() / c.macro("사이클") 형태로 호출. 4엔진 통일 패턴.
+        내부적으로 dartlab.macro(axis, target, market="KR", ...) 위임.
+
+        Args:
+            axis: 분석 축. None이면 6막 가이드.
+            target: 시나리오/타겟 (시나리오 축 등에 사용).
+            overrides: 매크로 시나리오 override.
+
+        Returns:
+            axis=None → 6막 가이드 DataFrame
+            그 외 → 분석 dict
+        """
+        from dartlab.macro import Macro
+        return Macro()(axis, target, market="KR", overrides=overrides, **kwargs)
 
     def industry(self) -> dict | None:
         """이 회사의 밸류체인 산업 내 위치를 분석한다.

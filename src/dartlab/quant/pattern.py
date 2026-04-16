@@ -10,7 +10,7 @@ import numpy as np
 from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 
 
-def analyze_pattern(stockCode: str, *, market: str = "auto", lookback: int = 20, **kwargs) -> dict:
+def calcPattern(stockCode: str, *, market: str = "auto", lookback: int = 20, **kwargs) -> dict:
     """캔들스틱 패턴 + 지지/저항 분석.
 
     Args:

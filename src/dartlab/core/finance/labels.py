@@ -290,6 +290,7 @@ SNAKEID_ALIASES: dict[str, str] = {
     "net_income": "net_profit",
     "net_incomenet_loss_for_the_year": "net_profit",
     "cost_of_revenue": "cost_of_sales",
+    "cost_of_goods_sold": "cost_of_sales",
     "income_before_tax": "profit_before_tax",
     "pretax_income": "profit_before_tax",
     "income_tax_expense": "income_taxes",
@@ -301,6 +302,9 @@ SNAKEID_ALIASES: dict[str, str] = {
     "interest_income": "finance_income",
     "financial_income": "finance_income",
     "selling_general_admin": "selling_and_administrative_expenses",
+    "selling_general_and_administrative": "selling_and_administrative_expenses",
+    "research_and_development": "research_development",
+    "research_and_development_expenses": "research_development",
     "basic_eps": "basic_earnings_per_share",
     "diluted_eps": "diluted_earnings_per_share",
     "gross_profit_on_sales": "gross_profit",
@@ -308,6 +312,7 @@ SNAKEID_ALIASES: dict[str, str] = {
     "total_assets": "assets",
     "inventory": "inventories",
     "property_plant_equipment": "tangible_assets",
+    "property_plant_and_equipment": "tangible_assets",
     "ppe": "tangible_assets",
     "accounts_receivable": "trade_and_other_receivables",
     "trade_receivables": "trade_and_other_receivables",
@@ -328,8 +333,12 @@ SNAKEID_ALIASES: dict[str, str] = {
     "noncurrent_liabilities": "noncurrent_liabilities",
     "non_current_liabilities": "noncurrent_liabilities",
     # ── 자본 ──
+    # standardAccounts 실등록: total_equity (StockholdersEquity), equity_including_nci
+    # (StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest).
+    # fixed-point 확장으로 total_stockholders_equity ↔ 둘 다 포함.
     "total_equity": "owners_of_parent_equity",
-    "total_stockholders_equity": "stockholders_equity",
+    "total_stockholders_equity": "total_equity",
+    "stockholders_equity": "total_equity",
     "equity_including_nci": "total_stockholders_equity",
     "equity_nci": "noncontrolling_interests_equity",
     "noncontrolling_interest": "noncontrolling_interests_equity",
@@ -337,6 +346,7 @@ SNAKEID_ALIASES: dict[str, str] = {
     "issued_capital": "paidin_capital",
     # ── 투자 ──
     "capex": "purchase_of_property_plant_and_equipment",
+    "share_repurchase": "stock_repurchase",
 }
 
 

@@ -42,7 +42,7 @@ def _regimeSeries(close: np.ndarray) -> dict:
     return out
 
 
-def analyze_regime(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
+def calcRegime(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
     """레짐 감지 분석.
 
     Args:

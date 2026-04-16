@@ -11,8 +11,100 @@ import numpy as np
 import polars as pl
 
 from dartlab.quant._helpers import load_scan_parquet
+from dartlab.quant.strategy.metrics import pearsonCorr, spearmanCorr
 
 log = logging.getLogger(__name__)
+
+
+# ══════════════════════════════════════════════════════════════════════
+# Grinold Ch.5-6 — 횡단면 IC
+# ══════════════════════════════════════════════════════════════════════
+#
+# IC_t = corr(factorScore_{i,t}, forwardReturn_{i, t→t+h})  for all i
+#
+# 단일 종목 시계열 IR (factor.py) 과 구분. 이 모듈은 **한 시점에서 전종목 팩터
+# 스코어가 종목을 잘 정렬하는가** 의 Grinold 정의 IC.
+
+
+def calcCrossSectionIC(
+    factorScores: dict[str, float],
+    forwardReturns: dict[str, float],
+) -> dict:
+    """한 시점의 횡단면 IC (Pearson + Spearman + t-stat).
+
+    Returns dict with ic_pearson, ic_spearman, n_stocks, t_stat, is_significant.
+    """
+    common = sorted(set(factorScores) & set(forwardReturns))
+    if len(common) < 10:
+        return {
+            "ic_pearson": float("nan"),
+            "ic_spearman": float("nan"),
+            "n_stocks": len(common),
+            "t_stat": None,
+            "is_significant": False,
+        }
+    x = np.array([factorScores[k] for k in common], dtype=float)
+    y = np.array([forwardReturns[k] for k in common], dtype=float)
+    mask = ~(np.isnan(x) | np.isnan(y))
+    x, y = x[mask], y[mask]
+    if x.size < 10:
+        return {
+            "ic_pearson": float("nan"),
+            "ic_spearman": float("nan"),
+            "n_stocks": int(x.size),
+            "t_stat": None,
+            "is_significant": False,
+        }
+    ic_p = pearsonCorr(x, y)
+    ic_s = spearmanCorr(x, y)
+    n = int(x.size)
+    t_stat: float | None = None
+    perfect = not np.isnan(ic_p) and abs(ic_p) >= 0.9999
+    if not np.isnan(ic_p) and not perfect and n > 2:
+        denom = np.sqrt(max(1.0 - ic_p * ic_p, 1e-12))
+        t_stat = float(ic_p * np.sqrt(n - 2) / denom)
+    return {
+        "ic_pearson": float(ic_p),
+        "ic_spearman": float(ic_s),
+        "n_stocks": n,
+        "t_stat": t_stat,
+        "is_significant": perfect or (t_stat is not None and abs(t_stat) > 2.0),
+    }
+
+
+def icTimeSeries(
+    factorScoresSeries: list[dict[str, float]],
+    forwardReturnsSeries: list[dict[str, float]],
+) -> dict:
+    """IC 시계열 통계 — 여러 시점 IC 의 평균/표준편차/ICIR."""
+    if len(factorScoresSeries) != len(forwardReturnsSeries):
+        raise ValueError("factorScoresSeries / forwardReturnsSeries 길이 불일치")
+    ics: list[float] = []
+    for fs, fr in zip(factorScoresSeries, forwardReturnsSeries):
+        r = calcCrossSectionIC(fs, fr)
+        ic = r.get("ic_spearman")
+        if ic is not None and not (isinstance(ic, float) and np.isnan(ic)):
+            ics.append(float(ic))
+    if len(ics) < 2:
+        return {
+            "mean_ic": float("nan"),
+            "std_ic": float("nan"),
+            "icir": float("nan"),
+            "n_periods": len(ics),
+            "hit_rate": float("nan"),
+        }
+    arr = np.array(ics, dtype=float)
+    mean_ic = float(arr.mean())
+    std_ic = float(arr.std(ddof=1))
+    icir = float(mean_ic / std_ic) if std_ic > 0 else 0.0
+    hit_rate = float(np.mean(np.sign(arr) == np.sign(mean_ic)))
+    return {
+        "mean_ic": mean_ic,
+        "std_ic": std_ic,
+        "icir": icir,
+        "n_periods": len(ics),
+        "hit_rate": hit_rate,
+    }
 
 
 def _parse(val) -> float | None:
@@ -64,7 +156,7 @@ def _load_account(lf: pl.LazyFrame, sj: str, account: str, year: str) -> dict[st
     return result
 
 
-def analyze_ranking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> dict:
+def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> dict:
     """전종목 멀티팩터 복합 순위."""
     result: dict = {"market": market}
 

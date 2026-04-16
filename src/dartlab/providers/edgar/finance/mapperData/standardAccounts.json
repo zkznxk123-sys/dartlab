@@ -3,7 +3,7 @@
     "source": "US-GAAP Taxonomy + Custom Design",
     "description": "EDGAR 표준계정 코드 - US-GAAP 기반 (핵심 재무제표 본문 항목)",
     "version": "3.0.0",
-    "totalAccounts": 206,
+    "totalAccounts": 211,
     "boundary": "재무제표 본문(BS/IS/CF) + 자본변동표(EQ) + 포괄손익(CI) + 주석공시(NT) 전체 항목",
     "statementMapping": {
       "BS": "Balance Sheet",
@@ -2819,6 +2819,77 @@
       "level": 3,
       "line": 630,
       "commonTags": []
+    },
+    {
+      "code": "IS080",
+      "stmt": "IS",
+      "snakeId": "funds_from_operations",
+      "korName": "영업자금",
+      "engName": "Funds From Operations (REIT)",
+      "level": 1,
+      "line": 800,
+      "parent": null,
+      "commonTags": [
+        "FundsFromOperations",
+        "FundsFromOperationsAttributableToCommonShareholders"
+      ]
+    },
+    {
+      "code": "IS081",
+      "stmt": "IS",
+      "snakeId": "rental_income",
+      "korName": "임대수익",
+      "engName": "Rental Income",
+      "level": 2,
+      "line": 810,
+      "parent": "sales",
+      "commonTags": [
+        "OperatingLeasesIncomeStatementLeaseRevenue",
+        "RealEstateRevenueNet",
+        "OperatingLeaseLeaseIncome"
+      ]
+    },
+    {
+      "code": "IS090",
+      "stmt": "IS",
+      "snakeId": "net_interest_income",
+      "korName": "순이자손익",
+      "engName": "Net Interest Income (Bank)",
+      "level": 1,
+      "line": 900,
+      "parent": null,
+      "commonTags": [
+        "InterestIncomeExpenseNet",
+        "InterestIncomeExpenseAfterProvisionForLoanLoss"
+      ]
+    },
+    {
+      "code": "IS092",
+      "stmt": "IS",
+      "snakeId": "noninterest_income",
+      "korName": "비이자수익",
+      "engName": "Non-Interest Income (Bank)",
+      "level": 2,
+      "line": 920,
+      "parent": null,
+      "commonTags": [
+        "NoninterestIncome"
+      ]
+    },
+    {
+      "code": "IS093",
+      "stmt": "IS",
+      "snakeId": "provision_for_loan_losses",
+      "korName": "대손충당금",
+      "engName": "Provision for Loan Losses",
+      "level": 2,
+      "line": 930,
+      "parent": null,
+      "commonTags": [
+        "ProvisionForLoanLeaseAndOtherLosses",
+        "ProvisionForLoanAndLeaseLosses",
+        "ProvisionForLoanLosses"
+      ]
     }
   ]
 }

@@ -287,3 +287,220 @@ def cpcv_splits(n_obs: int, n_splits: int = 6, n_test: int = 2, embargo: int = 0
                 purged.add(k)
         train_idx = np.array([i for i in range(n_obs) if i not in purged], dtype=np.int64)
         yield train_idx, test_idx
+
+
+# ══════════════════════════════════════════════════════════════════════
+# Grinold & Kahn "Active Portfolio Management" Ch.5-8 메트릭
+# ══════════════════════════════════════════════════════════════════════
+#
+# IC (Information Coefficient), IR (Information Ratio), Fundamental Law
+# (IR = IC × √breadth), IC significance (t-stat), factor decay (AR(1)),
+# breadth 자동 추정 — 모두 numpy 순수 구현. scipy 의존 0.
+#
+# 학술 근거:
+# - Grinold, R. & Kahn, R. (2000). Active Portfolio Management 2nd ed.
+#   Ch.5 "Residual Risk and Return: The Information Ratio"
+#   Ch.6 "The Fundamental Law of Active Management"
+#   Ch.8 "Information Analysis"
+#
+# SSOT 원칙: quant 메트릭 전부 이 파일 한 곳.
+
+
+def pearsonCorr(x: np.ndarray, y: np.ndarray) -> float:
+    """Pearson 선형상관계수 — NaN 쌍 제거 후 계산.
+
+    Returns
+    -------
+    float
+        ρ ∈ [-1, 1]. 표본 < 2 또는 분산 0 이면 NaN/0.
+    """
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    mask = ~(np.isnan(x) | np.isnan(y))
+    x, y = x[mask], y[mask]
+    if x.size < 2:
+        return float("nan")
+    xc = x - x.mean()
+    yc = y - y.mean()
+    denom = np.sqrt((xc * xc).sum() * (yc * yc).sum())
+    if denom == 0.0:
+        return 0.0
+    return float((xc * yc).sum() / denom)
+
+
+def _avgRank(a: np.ndarray) -> np.ndarray:
+    """평균 rank. 동률 → 해당 위치 rank 들의 평균으로 대체."""
+    order = np.argsort(a, kind="mergesort")
+    ranks = np.empty_like(order, dtype=float)
+    ranks[order] = np.arange(1, len(a) + 1, dtype=float)
+    sorted_a = a[order]
+    i = 0
+    n = len(a)
+    while i < n:
+        j = i
+        while j + 1 < n and sorted_a[j + 1] == sorted_a[i]:
+            j += 1
+        if j > i:
+            avg = (ranks[order[i:j + 1]]).mean()
+            ranks[order[i:j + 1]] = avg
+        i = j + 1
+    return ranks
+
+
+def spearmanCorr(x: np.ndarray, y: np.ndarray) -> float:
+    """Spearman 순위상관계수 — 동률 평균 rank 처리."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    mask = ~(np.isnan(x) | np.isnan(y))
+    x, y = x[mask], y[mask]
+    if x.size < 2:
+        return float("nan")
+    return pearsonCorr(_avgRank(x), _avgRank(y))
+
+
+def calcIR(alphaSeries: np.ndarray) -> float:
+    """Information Ratio = mean(alpha) / std(alpha). 연환산은 호출자 책임.
+
+    Grinold Ch.5 의 raw IR. std 는 표본표준편차 (ddof=1).
+    """
+    a = np.asarray(alphaSeries, dtype=float)
+    a = a[~np.isnan(a)]
+    if a.size < 2:
+        return float("nan")
+    s = a.std(ddof=1)
+    if s == 0.0:
+        return 0.0
+    return float(a.mean() / s)
+
+
+def fundamentalLawIR(ic: float, breadth: int) -> float:
+    """Fundamental Law of Active Management (Grinold Ch.6): IR = IC × √breadth.
+
+    breadth = 연간 상호 독립인 베팅 수.
+    예) IC=0.05, breadth=400 → IR=1.0 (Grinold 대표 사례).
+    """
+    if breadth < 1:
+        return 0.0
+    return float(ic * np.sqrt(breadth))
+
+
+def rollingTimeSeriesZscore(series: np.ndarray, window: int) -> np.ndarray:
+    """Rolling z-score (Grinold Ch.3 팩터 정규화): z_t = (x_t − μ_w) / σ_w.
+
+    첫 window-1 개는 NaN. std=0 또는 표본<2 이면 NaN.
+    """
+    s = np.asarray(series, dtype=float)
+    n = s.size
+    out = np.full(n, np.nan, dtype=float)
+    if window < 2 or n < window:
+        return out
+    for i in range(window - 1, n):
+        chunk = s[i - window + 1:i + 1]
+        chunk = chunk[~np.isnan(chunk)]
+        if chunk.size < 2:
+            continue
+        sd = chunk.std(ddof=1)
+        if sd == 0.0:
+            continue
+        out[i] = (s[i] - chunk.mean()) / sd
+    return out
+
+
+def icSignificance(icSeries: np.ndarray, *, nStocks: int | None = None) -> dict:
+    """IC 시계열의 통계적 유의성 (Grinold Ch.8).
+
+    t = mean(IC) / (std(IC) / √T). |t| > 2 → 유의.
+    """
+    r = np.asarray(icSeries, dtype=float)
+    r = r[~np.isnan(r)]
+    T = r.size
+    if T < 2:
+        return {
+            "meanIC": float("nan"),
+            "stdIC": float("nan"),
+            "tStat": None,
+            "hitRate": float("nan"),
+            "ci95": (float("nan"), float("nan")),
+            "isSignificant": False,
+            "nPeriods": T,
+            "nStocks": nStocks,
+        }
+    mu = float(r.mean())
+    sd = float(r.std(ddof=1))
+    se = sd / np.sqrt(T) if T > 0 else float("nan")
+    t_stat = float(mu / se) if se > 0 else 0.0
+    hit = float(np.mean(np.sign(r) == np.sign(mu))) if mu != 0 else 0.5
+    return {
+        "meanIC": mu,
+        "stdIC": sd,
+        "tStat": t_stat,
+        "hitRate": hit,
+        "ci95": (float(mu - 1.96 * se), float(mu + 1.96 * se)),
+        "isSignificant": abs(t_stat) > 2.0,
+        "nPeriods": T,
+        "nStocks": nStocks,
+    }
+
+
+def factorDecayRate(icSeries: np.ndarray) -> dict:
+    """IC 시계열 AR(1) 자기상관 → 정보 반감기.
+
+    half_life = ln(0.5) / ln(ρ)  (ρ > 0).
+    """
+    r = np.asarray(icSeries, dtype=float)
+    r = r[~np.isnan(r)]
+    if r.size < 4:
+        return {"autocorr": None, "halfLifePeriods": None, "persistence": "none"}
+    a = r[:-1] - r[:-1].mean()
+    b = r[1:] - r[1:].mean()
+    denom = np.sqrt((a * a).sum() * (b * b).sum())
+    if denom == 0:
+        return {"autocorr": 0.0, "halfLifePeriods": None, "persistence": "none"}
+    rho = float((a * b).sum() / denom)
+    half_life = float(np.log(0.5) / np.log(rho)) if rho > 0.01 else None
+    if rho > 0.5:
+        persistence = "high"
+    elif rho > 0.2:
+        persistence = "medium"
+    elif rho > 0.0:
+        persistence = "low"
+    else:
+        persistence = "none"
+    return {"autocorr": rho, "halfLifePeriods": half_life, "persistence": persistence}
+
+
+def breadthFromFrequency(
+    *, rebalancesPerYear: int, nStocks: int, independenceRatio: float = 1.0,
+) -> int:
+    """Grinold Fundamental Law 의 breadth (N) 자동 추정.
+
+    breadth ≈ rebalancesPerYear × nStocks × independenceRatio.
+    """
+    if rebalancesPerYear < 1 or nStocks < 1:
+        return 0
+    ratio = max(0.0, min(1.0, float(independenceRatio)))
+    return int(rebalancesPerYear * nStocks * ratio)
+
+
+def impliedIRFromICDistribution(icSeries: np.ndarray, breadth: int) -> dict:
+    """IC 분포 + breadth → 이론 IR vs 실현 ICIR 비교."""
+    r = np.asarray(icSeries, dtype=float)
+    r = r[~np.isnan(r)]
+    if r.size < 2:
+        return {
+            "meanIC": float("nan"),
+            "theoreticalIR": float("nan"),
+            "realizedICIR": float("nan"),
+            "efficiency": float("nan"),
+        }
+    mu = float(r.mean())
+    sd = float(r.std(ddof=1))
+    theo_ir = float(mu * np.sqrt(max(breadth, 0)))
+    real_icir = float(mu / sd) if sd > 0 else 0.0
+    eff = float(real_icir / theo_ir) if theo_ir != 0 else float("nan")
+    return {
+        "meanIC": mu,
+        "theoreticalIR": theo_ir,
+        "realizedICIR": real_icir,
+        "efficiency": eff,
+    }

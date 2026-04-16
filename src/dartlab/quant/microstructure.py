@@ -12,7 +12,7 @@ import numpy as np
 from dartlab.quant._helpers import fetch_ohlcv, ohlcv_to_arrays, resolve_market
 
 
-def analyze_liquidity(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
+def calcLiquidity(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     """시장 미시구조 유동성 분석.
 
     Args:

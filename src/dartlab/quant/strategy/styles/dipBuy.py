@@ -23,7 +23,7 @@ RSI > 60 (정상 회복). ATR×2 stop.
 - Schwager "Market Wizards" 인터뷰 다수에서 반복 언급
 
 [관련 dartlab 축]
-regime.analyze_regime, indicators.vrsi, indicators.vema
+regime.calcRegime, indicators.vrsi, indicators.vema
 
 [복제 + 수정 예시]
     rule = (regime_state == 2) & (close > ema50) & (rsi < 40)

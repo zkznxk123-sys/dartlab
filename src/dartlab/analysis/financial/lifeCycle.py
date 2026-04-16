@@ -214,43 +214,42 @@ def _classify(signals: dict, *, growth_adj: float = 0.0) -> tuple[str, float, li
     # 최근 마진 평균 (음수 여부 판단)
     recent_margin = mean(margins[:3]) if len(margins) >= 2 else (margins[0] if margins else None)
 
-    # turnaround 우선 — 최근 음수 → 양수 전환
+    # G20.1: turnaround 우선 강화 — 최근 3년 중 음수 1회 + 최신 양수 (창 확대)
     if len(margins) >= 3:
-        recent = margins[0]
-        prev = mean(margins[1:3])
-        if recent > 0 and prev < 0 and (cagr is None or cagr > 0):
-            return "turnaround", 0.8, _buildHistory(signals)
+        recent3 = margins[:3]
+        if recent3[0] > 0 and any(m < 0 for m in recent3[1:]) and (cagr is None or cagr > -10):
+            return "turnaround", 0.85, _buildHistory(signals)
 
-    # decline — 성장 꺾이고 spread 음수 지속
+    # G20.2: decline — 성장 꺾이고 spread 음수 지속
     if isinstance(cagr, (int, float)) and cagr < 0 and (spread is None or spread < -1.0):
         if recent_margin is not None and recent_margin < 5:
-            return "decline", 0.7, _buildHistory(signals)
-
-    # decline 보조 — 연속 매출 감소 + FCF 감소
+            return "decline", 0.75, _buildHistory(signals)
     if len(yoys) >= 3 and all(y < 0 for y in yoys[:3]):
-        return "decline", 0.65, _buildHistory(signals)
+        return "decline", 0.7, _buildHistory(signals)
 
-    # matureStable — 저성장 + 고배당 + spread ≈ 0
-    if isinstance(cagr, (int, float)) and cagr <= 5 + growth_adj and payout >= 40 and fcf_streak >= 3:
-        conf = 0.85 if (spread is None or abs(spread) < 3.0) else 0.7
-        return "matureStable", conf, _buildHistory(signals)
+    # G20.3: matureStable 엄격화 — CAGR<5 AND payout≥40 AND fcf streak≥3 AND spread 작음
+    # 모든 조건 충족 시에만 (이전: 일부 충족도 흡수 → matureGrowth/turnaround 사각지대)
+    if (isinstance(cagr, (int, float)) and cagr <= 5 + growth_adj
+            and payout >= 40 and fcf_streak >= 3
+            and (spread is None or abs(spread) < 3.0)):
+        return "matureStable", 0.85, _buildHistory(signals)
 
-    # earlyGrowth — 고성장 + 음수 마진 + FCF 음수
+    # G20.4: earlyGrowth — 고성장 + 음수 마진 + FCF 음수
     if isinstance(cagr, (int, float)) and cagr >= 30 + growth_adj:
         if recent_margin is not None and recent_margin < 0 and fcf_streak == 0:
             return "earlyGrowth", 0.75, _buildHistory(signals)
 
-    # highGrowth — 빠른 성장 + 마진 상승 + spread 양수
+    # G20.5: highGrowth — 빠른 성장 + spread 양수 (Damodaran: 고성장기 R&D 확대로 마진 변동 OK)
     if isinstance(cagr, (int, float)) and 15 + growth_adj <= cagr < 35 + growth_adj:
-        if direction != "contracting" and (spread is None or spread > 0):
-            return "highGrowth", 0.7, _buildHistory(signals)
+        if spread is None or spread > 0:
+            return "highGrowth", 0.75, _buildHistory(signals)
 
-    # matureGrowth — 중속 성장 + 배당 개시 + spread 양수
-    if isinstance(cagr, (int, float)) and 5 + growth_adj < cagr < 20 + growth_adj:
-        if fcf_streak >= 2 and (spread is None or spread > 0):
-            return "matureGrowth", 0.65, _buildHistory(signals)
+    # G20.6: matureGrowth 활성화 — CAGR 5~18% + spread 양수 (조건 완화: fcf_streak 의무 제거)
+    if isinstance(cagr, (int, float)) and 5 + growth_adj <= cagr < 18 + growth_adj:
+        if spread is None or spread > 0:
+            return "matureGrowth", 0.7, _buildHistory(signals)
 
-    # fallback — matureStable (가장 보수적)
+    # G20.7: 잔여 — matureStable (보수적 fallback)
     return "matureStable", 0.4, _buildHistory(signals)
 
 

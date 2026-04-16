@@ -103,6 +103,10 @@ def calcGrowthTrend(company, *, basePeriod: str | None = None) -> dict | None:
     niVals = [ni.get(c) for c in reversed(yCols)]
     n = len(yCols) - 1
 
+    # Phase 8 A5
+    from dartlab.core.finance.turningPoint import injectTurningPoints
+    turning_points = injectTurningPoints(history, seriesKey="revenueYoy", minDeltaPct=30.0)
+
     return (
         {
             "history": history,
@@ -112,6 +116,7 @@ def calcGrowthTrend(company, *, basePeriod: str | None = None) -> dict | None:
                 "netIncome": _cagrFromList(niVals, n),
                 "periods": n,
             },
+            "turningPoints": turning_points,
         }
         if history
         else None

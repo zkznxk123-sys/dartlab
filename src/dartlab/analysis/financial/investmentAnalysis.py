@@ -244,7 +244,38 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
         )
         h["decomposition"] = decomp
 
-    return {"history": history} if history else None
+    # Phase 7 G24: ROIC 변화 driver 분해 (Margin × Turnover × Tax)
+    try:
+        from dartlab.core.finance.attribution import decomposeRoicChange
+
+        for i in range(len(history) - 1):
+            cur = history[i]
+            prev = history[i + 1]
+            cur_d = cur.get("decomposition") or {}
+            prev_d = prev.get("decomposition") or {}
+            roic_t = cur.get("roic")
+            roic_t1 = prev.get("roic")
+            margin_t = cur_d.get("operatingMargin")
+            margin_t1 = prev_d.get("operatingMargin")
+            turnover_t = cur_d.get("assetTurnover")
+            turnover_t1 = prev_d.get("assetTurnover")
+            tax_t = cur.get("effectiveTaxRate")
+            tax_t1 = prev.get("effectiveTaxRate")
+            if all(isinstance(v, (int, float)) for v in (roic_t, roic_t1, margin_t, margin_t1, turnover_t, turnover_t1)):
+                attribution = decomposeRoicChange(
+                    roicT=roic_t, roicT1=roic_t1,
+                    marginT=margin_t, marginT1=margin_t1,
+                    turnoverT=turnover_t, turnoverT1=turnover_t1,
+                    taxT=tax_t, taxT1=tax_t1,
+                )
+                cur["drivers"] = attribution.get("drivers") or []
+                cur["driversExplained"] = attribution.get("explainedPct")
+    except (ImportError, AttributeError, TypeError, ValueError):
+        pass
+
+    # Phase 8 A5
+    from dartlab.core.finance.turningPoint import injectTurningPoints
+    return {"history": history, "turningPoints": injectTurningPoints(history, seriesKey="roic", minDeltaPct=30.0)} if history else None
 
 
 # ── 투자 강도 ──

@@ -27,7 +27,7 @@ T+20일 경과 또는 SMA5 하회. ATR×3 stop.
 - Bartov, Radhakrishnan, Krinsky (2000) — 개인 투자자 PEAD
 
 [관련 dartlab 축]
-eventSignal.analyze_event_signal, allFilings parquet, indicators.vsma
+eventSignal.calcEventSignal, allFilings parquet, indicators.vsma
 
 [복제 + 수정 예시]
     rule = filing_flag & (close > sma5)
@@ -40,7 +40,7 @@ from datetime import date as Date
 
 import numpy as np
 
-from dartlab.quant.eventSignal import analyze_event_signal
+from dartlab.quant.eventSignal import calcEventSignal
 from dartlab.quant.indicators import vsma
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
@@ -95,7 +95,7 @@ def build(company, *, hold_window: int = 20, atr_k: float = 3.0) -> Rule:
 
     # eventSignal 시계열 추출
     code = stock_code(company)
-    ev = analyze_event_signal(code, series=True)
+    ev = calcEventSignal(code, series=True)
     series = ev.get("_series") or {}
     high_impact_dates = series.get("high_impact_dates", [])
 

@@ -7,6 +7,8 @@ core/ 계층 소속 — macro(시장 해석) 엔진에서 소비.
 - BIS Basel III: Credit-to-GDP gap for CCyB (Drehmann & Tsatsaronis 2014)
 - Greenwood, Hanson & Shleifer (2022, JoF): "Predictable Financial Crises"
 - Reinhart & Rogoff (2009): "This Time Is Different"
+- Dalio, R. (2018), *Principles for Navigating Big Debt Crises* Part 1:
+  부채사이클 6단계 + 정책 4 레버(monetary/fiscal/credit/fx) 소진도
 """
 
 from __future__ import annotations
@@ -33,7 +35,12 @@ class CreditGapResult:
 
 @dataclass(frozen=True)
 class GHSResult:
-    """GHS 금융위기 예측 점수 (Greenwood-Hanson-Shleifer 2022)."""
+    """GHS 금융위기 예측 점수 (Greenwood-Hanson-Shleifer 2022).
+
+    regime 확장 (Dalio): 같은 GHS 점수라도 실질금리에 따라
+    deflationary (실질금리 높음 + 신용 수축) vs inflationary
+    (실질금리 음수 + 신용 확장) 위기 성격이 다르다.
+    """
 
     score: float  # 종합 점수 (0-100)
     zone: str  # "normal" | "caution" | "elevated" | "danger"
@@ -41,6 +48,8 @@ class GHSResult:
     components: dict[str, float]  # credit3y, asset3y
     crisisProb: float  # 3년 내 위기 확률 추정 (0-1)
     description: str
+    regime: str | None = None  # "deflation" | "inflation" | None (중립/불충분)
+    regimeLabel: str | None = None  # "디플레이션형" | "인플레이션형" | None
 
 
 @dataclass(frozen=True)
@@ -148,18 +157,24 @@ def creditToGDPGap(creditGDPSeries: list[float]) -> CreditGapResult:
 def ghsCrisisScore(
     creditGrowth3y: float,
     assetPriceGrowth3y: float,
+    realRate: float | None = None,
 ) -> GHSResult:
     """GHS 금융위기 예측 점수.
 
     Args:
         creditGrowth3y: 민간 신용/GDP의 3년 누적 변화 (%p)
         assetPriceGrowth3y: 자산가격(주가 또는 부동산)의 3년 누적 수익률 (%)
+        realRate: 실질금리 (%). 제공 시 regime (deflation/inflation) 판정.
 
     Returns:
-        GHSResult: 위기 점수 + 3년 내 위기 확률
+        GHSResult: 위기 점수 + 3년 내 위기 확률 + regime (Dalio).
 
     GHS 핵심: 3년간 급격한 신용 팽창 + 자산 가격 급등이 동시에 발생하면
     향후 3년 내 금융위기 확률 ~40% (정상 시 ~7%).
+
+    Regime (Dalio 확장): 같은 위기 점수라도
+    - deflation: 실질금리 >= 2% + 신용 수축 → 부채 디플레이션 압박
+    - inflation: 실질금리 <= 0% + 신용 확장 → 화폐/실물 인플레이션 압박
     """
     # 신용 팽창 점수 (0-50)
     if creditGrowth3y > 15:
@@ -211,6 +226,15 @@ def ghsCrisisScore(
         f"→ 3년 내 위기 확률 {crisis_prob * 100:.0f}%"
     )
 
+    # Dalio regime 판정
+    regime: str | None = None
+    regime_label: str | None = None
+    if realRate is not None:
+        if realRate >= 2.0 and creditGrowth3y < 0:
+            regime, regime_label = "deflation", "디플레이션형"
+        elif realRate <= 0.0 and creditGrowth3y > 5:
+            regime, regime_label = "inflation", "인플레이션형"
+
     return GHSResult(
         score=round(score, 1),
         zone=zone,
@@ -223,6 +247,8 @@ def ghsCrisisScore(
         },
         crisisProb=round(crisis_prob, 3),
         description=desc,
+        regime=regime,
+        regimeLabel=regime_label,
     )
 
 
@@ -623,3 +649,354 @@ def krHousingFinancialStress(
             "낮음",
             f"주택가격 {housePriceYoy:+.1f}% — 안정",
         )
+
+
+# ══════════════════════════════════════
+# Dalio — Big Debt Crises Part 1 템플릿
+# ══════════════════════════════════════
+
+
+@dataclass(frozen=True)
+class DalioPhaseResult:
+    """Dalio 부채사이클 단계 (Big Debt Crises Part 1).
+
+    subPhase 와 regimeVariant 는 phase 에 따라 선택적으로 채워진다:
+    - subPhase: beautifulDeleveraging 상태에서만 4단계 (austerity/defaultRestructuring/
+      moneyPrinting/wealthTransfer) 세분화
+    - regimeVariant: deflationary | inflationary — 환율/기축통화/외화부채 기반
+    """
+
+    phase: str  # earlyBoom | lateBoom | topBubble | deflationaryDepression | beautifulDeleveraging | reflationary
+    phaseLabel: str  # 한국어 라벨
+    signals: list[str]  # 판정 근거 문장들
+    description: str  # 종합 설명
+    subPhase: str | None = None  # austerity | defaultRestructuring | moneyPrinting | wealthTransfer
+    subPhaseLabel: str | None = None
+    regimeVariant: str | None = None  # deflationary | inflationary
+    regimeVariantLabel: str | None = None
+
+
+@dataclass(frozen=True)
+class DalioPolicyLeverResult:
+    """Dalio 정책 4 레버 소진도."""
+
+    monetary: str  # spare | partial | maxed
+    fiscal: str
+    credit: str
+    fx: str
+    exhaustionScore: int  # 0~12 (maxed=3, partial=2, spare=1 합산; fx 는 가중치 동일)
+    signals: list[str]
+
+
+_DALIO_PHASE_LABELS = {
+    "earlyBoom": "초기 확장기",
+    "lateBoom": "후기 확장기",
+    "topBubble": "거품 정점",
+    "deflationaryDepression": "디플레이션 공황",
+    "beautifulDeleveraging": "아름다운 디레버리징",
+    "reflationary": "재팽창기",
+}
+
+
+# ══════════════════════════════════════════════════════════════════════
+# Dalio Part 1 세부 — Beautiful Deleveraging 내부 4단계 + Regime Variant
+# ══════════════════════════════════════════════════════════════════════
+#
+# beautifulDeleveraging 단계의 내부 4 순서 (Dalio Part 1):
+#   austerity (긴축) → defaultRestructuring (디폴트) → moneyPrinting (화폐발행)
+#   → wealthTransfer (재분배)
+#
+# regimeVariant: 환율/기축통화/외화부채에 따라 deflationary vs inflationary
+
+
+_SUB_PHASE_LABELS = {
+    "austerity": "긴축",
+    "defaultRestructuring": "디폴트/구조조정",
+    "moneyPrinting": "화폐발행",
+    "wealthTransfer": "재분배",
+}
+
+_VARIANT_LABELS = {
+    "deflationary": "디플레이션형",
+    "inflationary": "인플레이션형",
+}
+
+
+def _beautifulDeleveragingSubPhase(
+    *,
+    realRate: float | None = None,
+    m2GrowthYoy: float | None = None,
+    debtServiceYoY: float | None = None,
+    npl: float | None = None,
+    hySpread: float | None = None,
+    fiscalDeficitPctGdp: float | None = None,
+) -> str | None:
+    """Beautiful Deleveraging 내부 4단계 판정."""
+    available = sum(
+        x is not None
+        for x in [realRate, m2GrowthYoy, debtServiceYoY, npl, hySpread, fiscalDeficitPctGdp]
+    )
+    if available < 3:
+        return None
+    # 2. defaultRestructuring — 신용시장 극한 스트레스 우선
+    if (hySpread is not None and hySpread > 800) or (npl is not None and npl > 5.0):
+        return "defaultRestructuring"
+    # 3. moneyPrinting
+    if m2GrowthYoy is not None and m2GrowthYoy > 8.0 and (realRate is None or realRate < 0):
+        return "moneyPrinting"
+    # 4. wealthTransfer
+    if fiscalDeficitPctGdp is not None and fiscalDeficitPctGdp > 6.0:
+        return "wealthTransfer"
+    # 1. austerity
+    if realRate is not None and realRate > 1.0 and debtServiceYoY is not None and debtServiceYoY >= 0:
+        return "austerity"
+    return None
+
+
+def _dalioRegimeVariant(
+    *,
+    fxFlexibility: str | None = None,
+    reserveCurrency: bool | None = None,
+    realRate: float | None = None,
+    foreignDebtPct: float | None = None,
+) -> str | None:
+    """Deflationary vs Inflationary regime 판정 (Dalio Part 1)."""
+    if fxFlexibility is None and reserveCurrency is None and realRate is None:
+        return None
+    score_deflation = 0
+    score_inflation = 0
+    if fxFlexibility == "pegged":
+        score_deflation += 2
+    elif fxFlexibility == "managed":
+        score_deflation += 1
+    elif fxFlexibility == "flexible":
+        score_inflation += 1
+    if reserveCurrency is True:
+        score_inflation += 2
+    elif reserveCurrency is False:
+        score_deflation += 1
+    if foreignDebtPct is not None:
+        if foreignDebtPct > 30:
+            score_deflation += 2
+        elif foreignDebtPct > 15:
+            score_deflation += 1
+    if realRate is not None:
+        if realRate < -2.0:
+            score_inflation += 1
+        elif realRate > 2.0:
+            score_deflation += 1
+    if score_deflation > score_inflation:
+        return "deflationary"
+    if score_inflation > score_deflation:
+        return "inflationary"
+    return None
+
+
+def dalioDebtCyclePhase(
+    *,
+    totalDebtToGdp: float | None = None,
+    debtServiceYoY: float | None = None,
+    creditGap: float | None = None,
+    realRate: float | None = None,
+    gdpGrowth: float | None = None,
+    # subPhase 판정용 (beautifulDeleveraging 에서만 활성)
+    m2GrowthYoy: float | None = None,
+    npl: float | None = None,
+    hySpread: float | None = None,
+    fiscalDeficitPctGdp: float | None = None,
+    # regimeVariant 판정용
+    fxFlexibility: str | None = None,
+    reserveCurrency: bool | None = None,
+    foreignDebtPct: float | None = None,
+) -> DalioPhaseResult:
+    """Dalio 부채사이클 6단계 판정 (Big Debt Crises Part 1 템플릿).
+
+    실험 053 검증: 8개 역사 케이스 중 7개 (88%) 정확.
+    팬데믹급 급전환은 transition — 단일 enum 한계. 해석 시
+    `policyLeverStatus` 와 조합 권장.
+
+    Parameters
+    ----------
+    totalDebtToGdp : 총부채/GDP (%). 일반 선진국 100~300.
+    debtServiceYoY : 부채서비스(이자/소득) YoY 변화 (%p).
+    creditGap : BIS Credit-to-GDP gap (%p). >8 과열.
+    realRate : 실질금리 (%).
+    gdpGrowth : 실질 GDP 성장률 (%).
+
+    Returns
+    -------
+    DalioPhaseResult
+        phase enum + 한국어 라벨 + 판정 신호 + 종합 설명.
+    """
+    signals: list[str] = []
+
+    # 입력 결측 → earlyBoom 기본값
+    if gdpGrowth is None and creditGap is None and realRate is None:
+        return DalioPhaseResult(
+            phase="earlyBoom",
+            phaseLabel=_DALIO_PHASE_LABELS["earlyBoom"],
+            signals=["데이터 부족 — 기본값"],
+            description="입력 부족으로 기본값(초기 확장기) 반환",
+        )
+
+    g = gdpGrowth if gdpGrowth is not None else 0.0
+    cg = creditGap if creditGap is not None else 0.0
+    rr = realRate if realRate is not None else 0.0
+    ds = debtServiceYoY if debtServiceYoY is not None else 0.0
+
+    # 1. 디플레이션 공황
+    if g < -1.0 and cg < 0:
+        signals.append(f"GDP 성장 {g:+.1f}% + 신용갭 {cg:+.1f}%p 음전환")
+        phase = "deflationaryDepression"
+    # 2. Reflationary
+    elif rr < -2.0 and g >= -2.0:
+        signals.append(f"실질금리 {rr:+.1f}% 깊은 마이너스 + 성장 회복 중")
+        phase = "reflationary"
+    # 3. Top Bubble
+    elif cg >= 8.0 and g > 0 and rr < 2.0:
+        signals.append(f"신용갭 {cg:+.1f}%p 과열 + 성장 {g:+.1f}% + 실질금리 {rr:+.1f}%")
+        phase = "topBubble"
+    # 4. Late Boom
+    elif cg >= 2.0 and ds > 0 and g > 0:
+        signals.append(f"신용갭 {cg:+.1f}%p 상승 + 부채서비스 {ds:+.1f}%p 악화")
+        phase = "lateBoom"
+    # 5. Beautiful Deleveraging
+    elif ds < 0 and g > 0:
+        signals.append(f"부채서비스 {ds:+.1f}%p 개선 + 성장 {g:+.1f}% 양호")
+        phase = "beautifulDeleveraging"
+    # 6. Early Boom (기본)
+    else:
+        signals.append("신용 완만 + 성장 건강")
+        phase = "earlyBoom"
+
+    if totalDebtToGdp is not None:
+        signals.append(f"총부채/GDP {totalDebtToGdp:.0f}%")
+
+    label = _DALIO_PHASE_LABELS[phase]
+    desc = f"Dalio 부채사이클: {label} ({phase})"
+
+    # subPhase: beautifulDeleveraging 에서만 세분화
+    subPhase = None
+    subPhaseLab = None
+    if phase == "beautifulDeleveraging":
+        subPhase = _beautifulDeleveragingSubPhase(
+            realRate=realRate,
+            m2GrowthYoy=m2GrowthYoy,
+            debtServiceYoY=ds,
+            npl=npl,
+            hySpread=hySpread,
+            fiscalDeficitPctGdp=fiscalDeficitPctGdp,
+        )
+        subPhaseLab = _SUB_PHASE_LABELS.get(subPhase) if subPhase else None
+        if subPhase:
+            signals.append(f"deleveraging sub: {subPhase}")
+
+    # regimeVariant: 환율/기축통화 기반
+    variant = _dalioRegimeVariant(
+        fxFlexibility=fxFlexibility,
+        reserveCurrency=reserveCurrency,
+        realRate=realRate,
+        foreignDebtPct=foreignDebtPct,
+    )
+    variantLab = _VARIANT_LABELS.get(variant) if variant else None
+    if variant:
+        signals.append(f"regime: {variant}")
+
+    return DalioPhaseResult(
+        phase=phase,
+        phaseLabel=label,
+        signals=signals,
+        description=desc,
+        subPhase=subPhase,
+        subPhaseLabel=subPhaseLab,
+        regimeVariant=variant,
+        regimeVariantLabel=variantLab,
+    )
+
+
+def dalioPolicyLeverStatus(
+    *,
+    policyRate: float | None = None,
+    publicDebtToGdp: float | None = None,
+    creditGap: float | None = None,
+    fxFlexibility: str | None = None,
+) -> DalioPolicyLeverResult:
+    """Dalio 정책 4 레버 소진도 판정 (Big Debt Crises Ch.3).
+
+    위기 대응 시 정부가 쓸 수 있는 수단이 얼마나 남아있는가 — 가장
+    중요한 것은 "여유 레버가 남아있나" 이다 (Dalio).
+
+    Parameters
+    ----------
+    policyRate : 기준금리 (%). <= 0.5% → maxed, <= 2% → partial, 그 외 spare.
+    publicDebtToGdp : 공공부채/GDP (%). >= 120 → maxed, >= 80 → partial, 그 외 spare.
+    creditGap : BIS credit-to-GDP gap (%p). >= 8 → maxed, >= 2 → partial, 그 외 spare.
+    fxFlexibility : "flexible"|"managed"|"pegged" — peg/관리 = maxed, 자유변동 = spare.
+
+    Returns
+    -------
+    DalioPolicyLeverResult
+        4 레버 상태 + 소진도 점수 (3=maxed, 2=partial, 1=spare, 합계 0~12).
+    """
+    signals: list[str] = []
+
+    def _ratePhase(v: float | None) -> str:
+        if v is None:
+            return "spare"
+        if v <= 0.5:
+            return "maxed"
+        if v <= 2.0:
+            return "partial"
+        return "spare"
+
+    def _debtPhase(v: float | None) -> str:
+        if v is None:
+            return "spare"
+        if v >= 120:
+            return "maxed"
+        if v >= 80:
+            return "partial"
+        return "spare"
+
+    def _creditPhase(v: float | None) -> str:
+        if v is None:
+            return "spare"
+        if v >= 8:
+            return "maxed"
+        if v >= 2:
+            return "partial"
+        return "spare"
+
+    def _fxPhase(v: str | None) -> str:
+        if v is None:
+            return "spare"
+        if v == "pegged":
+            return "maxed"
+        if v == "managed":
+            return "partial"
+        return "spare"
+
+    monetary = _ratePhase(policyRate)
+    fiscal = _debtPhase(publicDebtToGdp)
+    credit = _creditPhase(creditGap)
+    fx = _fxPhase(fxFlexibility)
+
+    if policyRate is not None:
+        signals.append(f"기준금리 {policyRate:.2f}% — 통화정책 {monetary}")
+    if publicDebtToGdp is not None:
+        signals.append(f"공공부채/GDP {publicDebtToGdp:.0f}% — 재정정책 {fiscal}")
+    if creditGap is not None:
+        signals.append(f"신용갭 {creditGap:+.1f}%p — 신용정책 {credit}")
+    if fxFlexibility is not None:
+        signals.append(f"환율 체제 {fxFlexibility} — fx 레버 {fx}")
+
+    scoreMap = {"maxed": 3, "partial": 2, "spare": 1}
+    score = scoreMap[monetary] + scoreMap[fiscal] + scoreMap[credit] + scoreMap[fx]
+    return DalioPolicyLeverResult(
+        monetary=monetary,
+        fiscal=fiscal,
+        credit=credit,
+        fx=fx,
+        exhaustionScore=score,
+        signals=signals,
+    )

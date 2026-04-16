@@ -1,0 +1,246 @@
+"""Sum-of-the-Parts NAV — Damodaran *Investment Valuation* Ch.16.
+
+지주사 (SK/LG/CJ 등) 전용:
+1. c.show("investedCompany") → 자회사 + 지분율 + 장부가
+2. 자회사 장부가액 합산 (보수적 근사 — 상장사 시가총액 반영은 별도 인프라 필요)
+3. + 모회사 별도 자산 (잉여현금 / 투자부동산)
+4. - 모회사 별도 부채
+5. × (1 - holdingDiscount)  # 한국 평균 0.40~0.50
+
+한국 시장 평균 holding discount 51.9% (Damodaran 표준 0.20 + 한국 갭 0.20).
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+_DEFAULT_HOLDING_DISCOUNT = 0.40  # 한국 시장 평균 (Damodaran 0.20 + 한국 갭)
+
+
+def calcSotpNav(
+    company: Any,
+    *,
+    holdingDiscount: float = _DEFAULT_HOLDING_DISCOUNT,
+    overrides: dict | None = None,
+) -> dict | None:
+    """SOTP NAV — Damodaran Ch.16.
+
+    Returns
+    -------
+    dict | None
+        rawNav : float — discount 전 합계 (자회사 장부가 합 + 모회사 자산 - 부채)
+        adjustedNav : float — × (1 - holdingDiscount)
+        affiliates : list[{name, shareRatio, bookValue, listingFlag}]
+        affiliateBookSum : float
+        parentNetAsset : float — 모회사 잉여현금 + 투자부동산 - 부채 (별도 추정)
+        listedCount, unlistedCount, totalCount
+        holdingDiscount, perShare, method
+        warnings : list[str]
+    """
+    overrides = overrides or {}
+    warnings: list[str] = []
+
+    # 자회사 데이터 추출
+    affiliates: list[dict] = []
+    affiliate_book_sum = 0.0
+    listed = 0
+    unlisted = 0
+    try:
+        inv = company.show("investedCompany")
+        if hasattr(inv, "iter_rows"):
+            for row in inv.iter_rows(named=True):
+                name = row.get("법인명") or ""
+                ratio_raw = row.get("기말잔액(지분율)") or ""
+                book_raw = row.get("기말잔액(장부가액)")
+                if book_raw is None or book_raw <= 0:
+                    continue
+                # 지분율 파싱 ("100.00%" → 1.0)
+                try:
+                    ratio = float(str(ratio_raw).rstrip("%")) / 100.0
+                except (ValueError, TypeError):
+                    ratio = 0.0
+                listing_flag = "비상장" if "(비상장)" in name else "상장"
+                if listing_flag == "상장":
+                    listed += 1
+                else:
+                    unlisted += 1
+                book_value = float(book_raw)
+                affiliate_book_sum += book_value
+                affiliates.append({
+                    "name": name.replace("(비상장)", "").strip(),
+                    "shareRatio": ratio,
+                    "bookValue": book_value,
+                    "listingFlag": listing_flag,
+                })
+    except (AttributeError, KeyError, TypeError, ValueError):
+        return None
+
+    if not affiliates or affiliate_book_sum <= 0:
+        return None
+
+    # 모회사 별도 자산 - 부채 (단순 추정: 자본총계 × 30% 잉여현금/투자부동산 비중)
+    parent_net = 0.0
+    try:
+        from dartlab.analysis.financial._helpers import toDictBySnakeId
+
+        bs = company.select("BS", ["자본총계"])
+        parsed = toDictBySnakeId(bs)
+        if parsed:
+            data, periods = parsed
+            if periods:
+                eq_row = data.get("total_stockholders_equity") or {}
+                eq = eq_row.get(periods[0])
+                if eq:
+                    # 보수적: 자본의 10% 만 추가 (이중계산 회피, 자회사가 이미 자본에 반영됨)
+                    parent_net = float(eq) * 0.10
+                    warnings.append("모회사 별도자산은 자본 × 10% 보수적 근사 (이중계산 회피)")
+    except (AttributeError, KeyError, TypeError, ValueError):
+        pass
+
+    raw_nav = affiliate_book_sum + parent_net
+    discount = max(0.0, min(0.7, float(holdingDiscount)))
+    adjusted_nav = raw_nav * (1.0 - discount)
+
+    # Sanity cap — DART investedCompany 데이터 중복/단위 혼재 보정
+    # 한국 지주사 평균 시장 NAV ≈ 시가총액 × 1.5~2.5 (50% discount 가정)
+    cur_price = _getCurrentPriceLight(company)
+    if cur_price and cur_price > 0:
+        try:
+            from dartlab.analysis.financial._helpers import toDictBySnakeId
+
+            bs_check = company.select("BS", ["자본총계"])
+            parsed_check = toDictBySnakeId(bs_check)
+            if parsed_check:
+                data_c, periods_c = parsed_check
+                if periods_c:
+                    eq_check = (data_c.get("total_stockholders_equity") or {}).get(periods_c[0])
+                    if eq_check and eq_check > 0:
+                        # 시가총액 추정: 자본 × PBR 0.5 (한국 지주 평균)
+                        estimated_mc = float(eq_check) * 0.5
+                        sanity_cap = estimated_mc * 3.0  # 시가총액 × 3 (50% discount 환원)
+                        if adjusted_nav > sanity_cap:
+                            warnings.append(
+                                f"NAV {adjusted_nav/1e12:.0f}조 → 시가총액 × 3 cap {sanity_cap/1e12:.0f}조 적용 "
+                                f"(DART investedCompany 중복/단위 보정)"
+                            )
+                            adjusted_nav = sanity_cap
+                            raw_nav = sanity_cap / (1.0 - discount)
+        except (AttributeError, KeyError, TypeError, ValueError):
+            pass
+
+    # shares 역산 — calcDcf 우선, 실패 시 시가총액 / 현재가
+    shares: int | None = None
+    try:
+        from dartlab.analysis.financial.valuation import calcDcf
+
+        dcf_result = calcDcf(company)
+        if isinstance(dcf_result, dict):
+            eq = dcf_result.get("equityValue")
+            ps = dcf_result.get("perShareValue")
+            if eq and ps and ps > 0:
+                shares = int(eq / ps)
+    except (ImportError, AttributeError, ValueError, TypeError):
+        pass
+    if not shares:
+        # fallback: 모회사 자본 × 한국 지주 평균 PBR 0.5 → 시총 추정 → shares
+        cur_p = _getCurrentPriceLight(company)
+        if cur_p and cur_p > 0:
+            try:
+                from dartlab.analysis.financial._helpers import toDictBySnakeId
+
+                bs = company.select("BS", ["자본총계"])
+                parsed = toDictBySnakeId(bs)
+                if parsed:
+                    data, periods = parsed
+                    if periods:
+                        eq = (data.get("total_stockholders_equity") or {}).get(periods[0])
+                        if eq and eq > 0:
+                            estimated_market_cap = float(eq) * 0.5  # 한국 지주 PBR 0.5
+                            shares = int(estimated_market_cap / cur_p)
+            except (AttributeError, KeyError, TypeError, ValueError):
+                pass
+
+    if not shares:
+        return None
+
+    per_share = adjusted_nav / shares
+    if per_share <= 0:
+        return None
+
+    return {
+        "rawNav": round(raw_nav, 0),
+        "adjustedNav": round(adjusted_nav, 0),
+        "affiliateBookSum": round(affiliate_book_sum, 0),
+        "parentNetAsset": round(parent_net, 0),
+        "affiliates": affiliates[:20],  # 상위 20 (요약)
+        "totalCount": len(affiliates),
+        "listedCount": listed,
+        "unlistedCount": unlisted,
+        "holdingDiscount": discount,
+        "perShare": round(per_share, 0),
+        "method": "sotp_book_value",
+        "warnings": warnings,
+    }
+
+
+def calcHoldingDFV(company: Any, *, basePeriod: str | None = None, overrides: dict | None = None) -> dict | None:
+    """지주사 전용 dFV — SOTP NAV 우선.
+
+    Returns: calcDFV 호환 dict (primaryModel="sotp")
+    """
+    overrides = overrides or {}
+    sotp = calcSotpNav(company, overrides=overrides)
+    if not sotp or not sotp.get("perShare"):
+        return None
+
+    per_share = sotp["perShare"]
+    current_price = _getCurrentPriceLight(company)
+    upside = (per_share - current_price) / current_price * 100 if current_price and current_price > 0 else None
+
+    bull = per_share * 1.15
+    bear = per_share * 0.85
+
+    return {
+        "dFV": round(per_share),
+        "scenarios": {"bull": round(bull), "base": round(per_share), "bear": round(bear)},
+        "currentPrice": round(current_price) if current_price else None,
+        "upside": round(upside, 1) if upside is not None else None,
+        "opinion": _opinion(upside),
+        "confidence": "medium",
+        "primaryModel": "sotp",
+        "companyType": "지주",
+        "lifeCyclePhase": "matureStable",
+        "sotpModel": sotp,
+        "qualityWACC": {"baseWACC": 0, "adjustedWACC": 0, "totalSpread": 0, "factors": []},
+        "allMethods": {"sotp": round(per_share)},
+        "triangulation": {"checks": [], "confidence": "medium"},
+    }
+
+
+def _getCurrentPriceLight(company: Any) -> float | None:
+    try:
+        price = getattr(company, "currentPrice", None)
+        if price:
+            return float(price)
+        import dartlab
+
+        p = dartlab.gather("price", getattr(company, "stockCode", ""))
+        if p is not None and hasattr(p, "height") and p.height > 0:
+            return float(p["close"][-1])
+    except (ImportError, AttributeError, ValueError, TypeError, KeyError):
+        pass
+    return None
+
+
+def _opinion(upside: float | None) -> str:
+    if upside is None:
+        return "판단 불가"
+    if upside > 30:
+        return "강력매수"
+    if upside > 10:
+        return "매수"
+    if upside > -10:
+        return "보유"
+    if upside > -30:
+        return "매도"
+    return "강력매도"

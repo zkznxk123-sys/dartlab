@@ -139,8 +139,38 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
     result: dict[str, Any] = {"history": history}
     if isFinancial:
         result["isFinancial"] = True
+
+    # Phase 7 G24: 영업마진 변화 driver 분해 — 각 history entry 에 drivers 주입
+    # 이전기 대비 원가율/판관비/환율 driver 자동 분해 (McKinsey + Damodaran Ch.11)
+    if not isFinancial:
+        try:
+            from dartlab.core.finance.attribution import decomposeMarginChange
+
+            for i in range(len(history) - 1):
+                cur = history[i]
+                prev = history[i + 1]
+                rev_t = cur.get("revenue")
+                rev_t1 = prev.get("revenue")
+                cogs_t = cur.get("cogs")
+                cogs_t1 = prev.get("cogs")
+                sga_t = cur.get("sga")
+                sga_t1 = prev.get("sga")
+                if all(isinstance(v, (int, float)) for v in (rev_t, rev_t1, cogs_t, cogs_t1, sga_t, sga_t1)):
+                    attribution = decomposeMarginChange(
+                        revenueT=rev_t, revenueT1=rev_t1,
+                        cogsT=cogs_t, cogsT1=cogs_t1,
+                        sgaT=sga_t, sgaT1=sga_t1,
+                    )
+                    cur["drivers"] = attribution.get("drivers") or []
+                    cur["driversExplained"] = attribution.get("explainedPct")
+        except (ImportError, AttributeError, TypeError, ValueError):
+            pass
+
+    # Phase 8 A5: turningPoints 헬퍼 1줄
+    from dartlab.core.finance.turningPoint import injectTurningPoints
+    result["turningPoints"] = injectTurningPoints(history, seriesKey="operatingMargin", minDeltaPct=25.0)
+
     # R22-2: AI 가 표 만들 때 핵심 컬럼을 빠뜨리지 않도록 명시.
-    # 사용자가 "수익성" 물었으면 마진율 (operatingMargin/netMargin/grossMargin) 이 핵심.
     result["displayHints"] = {
         "core": ["period", "revenue", "operatingMargin", "netMargin", "grossMargin"],
         "note": "수익성 응답 시 operatingMargin/netMargin/grossMargin 컬럼을 표에 반드시 포함",

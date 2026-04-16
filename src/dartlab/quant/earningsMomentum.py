@@ -24,7 +24,7 @@ def _parse(val) -> float | None:
     return parseNumStr(val)
 
 
-def analyze_earnings(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
+def calcEarnings(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     """SUE + PEAD 이익 모멘텀 분석."""
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}

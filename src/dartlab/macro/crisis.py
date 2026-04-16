@@ -14,6 +14,8 @@ log = logging.getLogger(__name__)
 
 from dartlab.core.finance.crisisDetector import (
     creditToGDPGap,
+    dalioDebtCyclePhase,
+    dalioPolicyLeverStatus,
     fisherDebtDeflation,
     ghsCrisisScore,
     kooBalanceSheetRecession,
@@ -96,6 +98,21 @@ def _fetch_crisis_data(market: str, as_of: str | None = None) -> dict[str, float
             data[label] = fetch_latest(g, sid)
         data["us_cpi_yoy"] = fetch_yoy(g, "CPIAUCSL")
 
+        # Dalio 부채사이클 기반지표 (Big Debt Crises Part 1)
+        # 공공부채/GDP, 실질GDP 성장률, 10Y TIPS (실질금리)
+        data["public_debt_to_gdp"] = fetch_latest(g, "GFDEGDQ188S")
+        data["gdp_growth"] = fetch_latest(g, "A191RL1Q225SBEA")
+        data["real_rate"] = fetch_latest(g, "DFII10")
+
+        # 부채서비스율 YoY 변화 — TDSP 시계열에서 4분기 diff
+        tdsp_list = fetch_series_list(g, "TDSP")
+        if tdsp_list and len(tdsp_list) >= 5:
+            data["debt_service_yoy"] = tdsp_list[-1] - tdsp_list[-5]
+
+        # 총부채/GDP (TCMDO / GDP) — credit_gdp_series 의 최신값 재사용
+        if data.get("credit_gdp_series"):
+            data["total_debt_to_gdp"] = data["credit_gdp_series"][-1]
+
     return {k: v for k, v in data.items() if v is not None}
 
 
@@ -142,7 +159,7 @@ def analyze_crisis(*, market: str = "US", as_of: str | None = None, overrides: d
         else:
             credit_3y = 0
 
-        ghs = ghsCrisisScore(credit_3y, sp500_3y)
+        ghs = ghsCrisisScore(credit_3y, sp500_3y, realRate=kwargs.get("realRate"))
         result["ghsScore"] = {
             "score": ghs.score,
             "zone": ghs.zone,
@@ -150,6 +167,8 @@ def analyze_crisis(*, market: str = "US", as_of: str | None = None, overrides: d
             "components": ghs.components,
             "crisisProb": ghs.crisisProb,
             "description": ghs.description,
+            "regime": ghs.regime,
+            "regimeLabel": ghs.regimeLabel,
         }
     else:
         result["ghsScore"] = None
@@ -295,6 +314,105 @@ def analyze_crisis(*, market: str = "US", as_of: str | None = None, overrides: d
             "confidence": mk.confidence,
             "signals": mk.signals,
             "description": mk.description,
+        }
+    except (KeyError, ValueError, TypeError, AttributeError):
+        pass
+
+    # ── Dalio Part 2: detail case matching (Weimar/GreatDepression/Subprime) ──
+    result["dalioCaseMatch"] = None
+    try:
+        from dartlab.core.finance.dalioCaseMatch import matchDalioDetailCase
+
+        case_state = {
+            "totalDebtToGdp": data.get("total_debt_to_gdp"),
+            "creditGap": credit_gap_val,
+            "realRate": data.get("real_rate"),
+            "gdpGrowth": data.get("gdp_growth"),
+            "debtServiceYoY": data.get("debt_service_yoy"),
+        }
+        if any(v is not None for v in case_state.values()):
+            result["dalioCaseMatch"] = matchDalioDetailCase(case_state, topK=3)
+    except (ImportError, KeyError, ValueError, TypeError):
+        pass
+
+    # ── Dalio Part 3: 48-case compendium matching ──
+    result["dalio48Match"] = None
+    try:
+        from dartlab.core.finance.dalio48Match import match48Cases
+
+        state_48 = {
+            "peakDebtToGdp": data.get("total_debt_to_gdp"),
+            "peakCreditGap": credit_gap_val,
+            "troughRealRate": data.get("real_rate"),
+            "troughGdpGrowth": data.get("gdp_growth"),
+        }
+        if any(v is not None for v in state_48.values()):
+            result["dalio48Match"] = match48Cases(state_48, topK=5)
+    except (ImportError, KeyError, ValueError, TypeError):
+        pass
+
+    # ── R&R 위기 유형 분류 + 역사 매칭 ──
+    result["crisisType"] = None
+    result["rrMatch"] = None
+    try:
+        from dartlab.core.finance.rrCrisisDB import classifyCrisisType, matchRrHistorical
+
+        ct = classifyCrisisType(
+            hySpread=hy_current,
+            npl=data.get("npl"),
+            fxDepreciationYoy=kwargs.get("fxDepreciationYoy"),
+            inflationYoy=data.get("us_cpi_yoy") or data.get("cpi_yoy"),
+            sovereignSpread=kwargs.get("sovereignSpread"),
+            gdpGrowth=data.get("gdp_growth"),
+        )
+        result["crisisType"] = {
+            "activeTypes": ct["activeTypes"],
+            "dominantType": ct["dominantType"],
+            "isTripleCrisis": ct["isTripleCrisis"],
+            "signals": ct["signals"],
+        }
+        if ct["activeTypes"]:
+            result["rrMatch"] = matchRrHistorical(
+                ct["activeTypes"],
+                country=market.upper() if market.upper() in ("US", "KR") else None,
+                topK=3,
+            )
+    except (ImportError, KeyError, ValueError, TypeError):
+        pass
+
+    # ── Dalio 부채사이클 + 정책 4 레버 ──
+    # Big Debt Crises Part 1 — 6 phase enum + 4 lever 소진도
+    # 입력: kwargs 우선, 없으면 _fetch_crisis_data 에서 자동 주입
+    result["debtCyclePhase"] = None
+    result["policyLeverStatus"] = None
+    try:
+        dp = dalioDebtCyclePhase(
+            totalDebtToGdp=kwargs.get("totalDebtToGdp") or data.get("total_debt_to_gdp"),
+            debtServiceYoY=kwargs.get("debtServiceYoY") or data.get("debt_service_yoy"),
+            creditGap=credit_gap_val,
+            realRate=kwargs.get("realRate") or data.get("real_rate"),
+            gdpGrowth=kwargs.get("gdpGrowth") or data.get("gdp_growth"),
+        )
+        result["debtCyclePhase"] = {
+            "phase": dp.phase,
+            "phaseLabel": dp.phaseLabel,
+            "signals": list(dp.signals),
+            "description": dp.description,
+        }
+
+        pl = dalioPolicyLeverStatus(
+            policyRate=kwargs.get("policyRate") or data.get("fed_funds"),
+            publicDebtToGdp=kwargs.get("publicDebtToGdp") or data.get("public_debt_to_gdp"),
+            creditGap=credit_gap_val,
+            fxFlexibility=kwargs.get("fxFlexibility"),
+        )
+        result["policyLeverStatus"] = {
+            "monetary": pl.monetary,
+            "fiscal": pl.fiscal,
+            "credit": pl.credit,
+            "fx": pl.fx,
+            "exhaustionScore": pl.exhaustionScore,
+            "signals": list(pl.signals),
         }
     except (KeyError, ValueError, TypeError, AttributeError):
         pass

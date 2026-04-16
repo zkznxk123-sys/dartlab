@@ -31,7 +31,7 @@ def _volatilitySeries(close: np.ndarray, window: int = 20) -> dict:
     }
 
 
-def analyze_volatility(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
+def calcVolatility(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
     """변동성 종합 분석.
 
     Args:

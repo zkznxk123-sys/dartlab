@@ -637,34 +637,30 @@ class Company:
         """
         return "USD"
 
-    def quant(self, metric=None, **kwargs):
-        """주가 기술적 분석 — self-discovery 패턴.
+    @property
+    def quant(self):
+        """주가 기술적 분석 — dual access (Phase 8 A3)."""
+        from dartlab.core.dualAccess import CallableAccessor
 
-        Args:
-            metric: 축 이름. None이면 30축 가이드 DataFrame.
-                    "종합"/"verdict" → 종합 기술 판단
-                    "지표"/"indicators" → 45개 기술적 지표
-                    "신호"/"signals" → 매매 신호
-                    "베타"/"beta" → 시장 베타 + CAPM
-                    기타 30축 (모멘텀, 변동성, 팩터 등)
+        if "_quantAccessor" not in self._cache:
+            self._cache["_quantAccessor"] = CallableAccessor(self._quantImpl, name="quant")
+        return self._cache["_quantAccessor"]
 
-        Returns:
-            metric=None → DataFrame (30축 가이드)
-            metric="종합" → dict (verdict, RSI, ADX, SMA 등)
-
-        Example::
-
-            c = Company("AAPL")
-            print(c.quant())            # 30축 가이드 (self-discovery)
-            c.quant("종합")              # 종합 판단
-            c.quant("베타")              # 시장 베타
-        """
+    def _quantImpl(self, axis=None, *, metric=None, **kwargs):
+        """주가 기술적 분석 — 30축 (내부 구현)."""
         from dartlab.quant import Quant
 
+        if axis is None and metric is not None:
+            axis = metric
         q = Quant()
-        if metric is None:
-            return q()  # 가이드 DataFrame
-        return q(metric, self.stockCode, **kwargs)
+        if axis is None:
+            return q()
+        return q(axis, self.stockCode, **kwargs)
+
+    def macro(self, axis=None, target=None, *, overrides: dict | None = None, **kwargs):
+        """시장 매크로 분석 — EDGAR 회사는 US 시장 위임 (Phase 8 A2)."""
+        from dartlab.macro import Macro
+        return Macro()(axis, target, market="US", overrides=overrides, **kwargs)
 
     def view(self, *, port: int = 8400) -> None:
         """브라우저에서 공시 뷰어를 열어 sections/index를 시각화.

@@ -14,7 +14,7 @@ from dartlab.quant._helpers import resolve_market
 log = logging.getLogger(__name__)
 
 
-def analyze_flow(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
+def calcFlow(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
     """기관/외국인 수급 분석.
 
     Args:

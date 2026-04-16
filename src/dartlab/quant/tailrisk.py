@@ -30,7 +30,7 @@ def _tailriskSeries(close: np.ndarray, window: int = 252) -> dict:
     return {"rolling_mdd": rolling_mdd, "rolling_cvar": rolling_cvar}
 
 
-def analyze_tailrisk(
+def calcTailrisk(
     stockCode: str, *, market: str = "auto", riskFree: float = 0.0, series: bool = False, **kwargs
 ) -> dict:
     """꼬리위험 종합 분석.

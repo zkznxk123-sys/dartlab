@@ -15,7 +15,6 @@ lifeCycle 기반 자동 선택:
 
 from __future__ import annotations
 
-import math
 from statistics import pstdev
 from typing import Any
 

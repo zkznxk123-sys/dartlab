@@ -12,7 +12,7 @@ from dartlab.quant._helpers import load_changes_for_stock, resolve_market
 log = logging.getLogger(__name__)
 
 
-def analyze_tone_change(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
+def calcToneChange(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     """기간별 공시 톤 변화 분석."""
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}

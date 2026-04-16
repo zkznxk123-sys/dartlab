@@ -173,13 +173,26 @@ class EdgarMapper:
 
     @classmethod
     def getTagsForSnakeIds(cls, snakeIds: list[str]) -> set[str]:
-        """지정한 snakeId에 매핑된 모든 원본 태그를 반환."""
+        """지정한 snakeId에 매핑된 모든 원본 태그를 반환.
+
+        SNAKEID_ALIASES 양방향 확장:
+        - 입력 snakeId 가 alias 의 key → value(primary) 도 검색
+        - 입력 snakeId 가 alias 의 value → key(alias) 도 검색
+        이렇게 하면 DART 식 이름("cost_of_goods_sold") 을 넣어도
+        EDGAR primary ("cost_of_sales") 의 commonTags 를 수집한다.
+        """
         cls._ensureLoaded()
         sidSet = set(snakeIds)
-        # EDGAR_TO_DART_ALIASES 역방향 포함
-        for edgarSid, dartSid in EDGAR_TO_DART_ALIASES.items():
-            if dartSid in sidSet:
-                sidSet.add(edgarSid)
+        # fixed-point 확장 — A→B→C 같은 2-hop alias 체인도 해결.
+        while True:
+            prevSize = len(sidSet)
+            for aliasSid, primarySid in EDGAR_TO_DART_ALIASES.items():
+                if aliasSid in sidSet:
+                    sidSet.add(primarySid)
+                if primarySid in sidSet:
+                    sidSet.add(aliasSid)
+            if len(sidSet) == prevSize:
+                break
         tags: set[str] = set()
         for acct in cls._accounts:
             if acct["snakeId"] in sidSet:

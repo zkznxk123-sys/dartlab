@@ -120,7 +120,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     # ── 4막: 금융 시스템은 괜찮나 (신용/유동���) ──
     "liquidity": _AxisEntry(
         module="dartlab.macro.liquidity",
-        fn="analyze_liquidity",
+        fn="calcLiquidity",
         label="��동성",
         description="M2 + 연준 B/S + NFCI + 자체 FCI",
         example='macro("유동성")',
@@ -145,7 +145,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "sentiment": _AxisEntry(
         module="dartlab.macro.sentiment",
-        fn="analyze_sentiment",
+        fn="calcSentiment",
         label="심���",
         description="공포탐욕 근사 + VIX 구간 + JLN 실물 불확실���",
         example='macro("심리")',
@@ -315,12 +315,11 @@ class Macro:
             act_str = f"제{entry.act}막" if entry.act > 0 else "종합"
             rows.append(
                 {
-                    "act": act_str,
-                    "actLabel": act_label,
                     "axis": key,
                     "label": entry.label,
                     "description": entry.description,
                     "example": entry.example,
+                    "group": f"{act_str}: {act_label}",
                 }
             )
         return pl.DataFrame(rows)

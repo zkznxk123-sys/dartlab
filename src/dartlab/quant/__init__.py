@@ -53,7 +53,7 @@ class _AxisEntry:
 _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     "indicators": _AxisEntry(
         module="dartlab.quant._ax_technical",
-        fn="analyze_indicators",
+        fn="calcIndicators",
         label="지표",
         description="45개 기술적 지표 DataFrame (SMA, EMA, MACD, RSI, BB 등)",
         example='quant("지표", "005930")',
@@ -61,7 +61,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "signals": _AxisEntry(
         module="dartlab.quant._ax_technical",
-        fn="analyze_signals",
+        fn="calcSignals",
         label="신호",
         description="최근 매매 신호 이벤트 (골든크로스, RSI, MACD, 볼린저)",
         example='quant("신호", "005930")',
@@ -69,7 +69,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "verdict": _AxisEntry(
         module="dartlab.quant._ax_technical",
-        fn="analyze_verdict",
+        fn="calcVerdict",
         label="판단",
         description="종합 기술적 판단 (강세/중립/약세) + RSI/SMA/BB",
         example='quant("판단", "005930")',
@@ -77,7 +77,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "momentum": _AxisEntry(
         module="dartlab.quant.momentum",
-        fn="analyze_momentum",
+        fn="calcMomentum",
         label="모멘텀",
         description="12-1개월 횡단면, 시계열 모멘텀, 52주 신고가 비율",
         example='quant("모멘텀", "005930")',
@@ -85,7 +85,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "volatility": _AxisEntry(
         module="dartlab.quant.volatility",
-        fn="analyze_volatility",
+        fn="calcVolatility",
         label="변동성",
         description="GARCH(1,1), HAR-RV 실현변동성, 변동성 기간구조",
         example='quant("변동성", "005930")',
@@ -93,7 +93,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "regime": _AxisEntry(
         module="dartlab.quant.regime",
-        fn="analyze_regime",
+        fn="calcRegime",
         label="레짐",
         description="Hamilton 2-state HMM (bull/bear), 추세추종 신호",
         example='quant("레짐", "005930")',
@@ -101,7 +101,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "pattern": _AxisEntry(
         module="dartlab.quant.pattern",
-        fn="analyze_pattern",
+        fn="calcPattern",
         label="패턴",
         description="캔들스틱 10종 + zigzag 기반 지지/저항",
         example='quant("패턴", "005930")',
@@ -109,7 +109,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "chartPatterns": _AxisEntry(
         module="dartlab.quant.chartPatterns",
-        fn="analyze_chartPatterns",
+        fn="calcChartPatterns",
         label="차트패턴",
         description="거시 차트 패턴 — W/M/H&S/삼중/원형 (자동 인식 + 목표가)",
         example='quant("차트패턴", "005930")',
@@ -118,7 +118,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     # ── B: 리스크 (risk) — 가격 + 벤치마크 ────────────────
     "beta": _AxisEntry(
         module="dartlab.quant._ax_technical",
-        fn="analyze_beta",
+        fn="calcBeta",
         label="베타",
         description="시장 베타 + CAPM + 알파 + R²",
         example='quant("베타", "005930")',
@@ -126,7 +126,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "factor": _AxisEntry(
         module="dartlab.quant.factor",
-        fn="analyze_factor",
+        fn="decomposeFactor",
         label="팩터",
         description="Fama-French 5 + q-factor 분해 (MKT/SMB/HML/RMW/CMA)",
         example='quant("팩터", "005930")',
@@ -134,7 +134,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "tailrisk": _AxisEntry(
         module="dartlab.quant.tailrisk",
-        fn="analyze_tailrisk",
+        fn="calcTailrisk",
         label="꼬리위험",
         description="CVaR, 최대낙폭, Sortino, 하방편차",
         example='quant("꼬리위험", "005930")',
@@ -142,7 +142,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "residual": _AxisEntry(
         module="dartlab.quant.residual",
-        fn="analyze_residual",
+        fn="calcResidual",
         label="잔여수익",
         description="팩터 제거 후 잔여 모멘텀/알파",
         example='quant("잔여수익", "005930")',
@@ -151,7 +151,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     # ── C: 미시구조 (microstructure) — 가격 + 거래량/수급 ─
     "liquidity": _AxisEntry(
         module="dartlab.quant.microstructure",
-        fn="analyze_liquidity",
+        fn="calcLiquidity",
         label="유동성",
         description="Amihud 비유동성, Roll 스프레드, 회전율",
         example='quant("유동성", "005930")',
@@ -159,7 +159,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "flow": _AxisEntry(
         module="dartlab.quant.flowAnalysis",
-        fn="analyze_flow",
+        fn="calcFlow",
         label="수급",
         description="기관/외국인 매매 분석 (KR전용)",
         example='quant("수급", "005930")',
@@ -167,7 +167,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "volume": _AxisEntry(
         module="dartlab.quant.volumeAnalysis",
-        fn="analyze_volume",
+        fn="calcVolume",
         label="거래량",
         description="OBV 추세, 거래량-가격 괴리, 누적분배",
         example='quant("거래량", "005930")',
@@ -176,7 +176,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     # ── D: 펀더멘털 퀀트 (fundamental) — scan 프리빌드 ────
     "divergence": _AxisEntry(
         module="dartlab.quant._ax_technical",
-        fn="analyze_divergence",
+        fn="calcDivergence",
         label="괴리",
         description="재무-기술적 괴리 진단",
         example='quant("괴리", "005930")',
@@ -184,7 +184,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "quality": _AxisEntry(
         module="dartlab.quant.qualityFactor",
-        fn="analyze_quality",
+        fn="calcQuality",
         label="퀄리티",
         description="Asness 퀄리티 팩터: 수익성+안전성+성장성 복합",
         example='quant("퀄리티", "005930")',
@@ -192,7 +192,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "value": _AxisEntry(
         module="dartlab.quant.valueFactor",
-        fn="analyze_value",
+        fn="calcValue",
         label="가치",
         description="가치 신호: PBR/PER/PSR vs 가격 모멘텀",
         example='quant("가치", "005930")',
@@ -200,7 +200,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "earnings": _AxisEntry(
         module="dartlab.quant.earningsMomentum",
-        fn="analyze_earnings",
+        fn="calcEarnings",
         label="이익모멘텀",
         description="SUE, PEAD, 이익 수정 모멘텀",
         example='quant("이익모멘텀", "005930")',
@@ -209,7 +209,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     # ── E: 텍스트/공시 (text) — dartlab 고유 차별화 ───────
     "sentiment": _AxisEntry(
         module="dartlab.quant.textSentiment",
-        fn="analyze_sentiment",
+        fn="calcSentiment",
         label="공시심리",
         description="Loughran-McDonald 감성 사전 기반 공시 텍스트 스코어링",
         example='quant("공시심리", "005930")',
@@ -217,7 +217,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "toneChange": _AxisEntry(
         module="dartlab.quant.toneChange",
-        fn="analyze_tone_change",
+        fn="calcToneChange",
         label="톤변화",
         description="기간별 공시 톤 변화 감지",
         example='quant("톤변화", "005930")',
@@ -225,7 +225,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "eventSignal": _AxisEntry(
         module="dartlab.quant.eventSignal",
-        fn="analyze_event_signal",
+        fn="calcEventSignal",
         label="이벤트신호",
         description="allFilings 이벤트 기반 신호 (경영진변경, M&A 등)",
         example='quant("이벤트신호", "005930")',
@@ -233,7 +233,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "riskText": _AxisEntry(
         module="dartlab.quant.riskText",
-        fn="analyze_risk_text",
+        fn="calcRiskText",
         label="리스크텍스트",
         description="리스크 팩터 출현/소멸 텍스트 델타",
         example='quant("리스크텍스트", "005930")',
@@ -241,7 +241,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "governanceQuant": _AxisEntry(
         module="dartlab.quant.governanceQuant",
-        fn="analyze_governance_quant",
+        fn="calcGovernanceQuant",
         label="거버넌스퀀트",
         description="지배구조 품질 정량화 (사외이사비율, 감사의견, 보수)",
         example='quant("거버넌스퀀트", "005930")',
@@ -250,7 +250,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     # ── F: 횡단면 (crossSection) — 시장 레벨 ─────────────
     "ranking": _AxisEntry(
         module="dartlab.quant.ranking",
-        fn="analyze_ranking",
+        fn="calcRanking",
         label="순위",
         description="멀티팩터 복합 순위 (모멘텀+가치+퀄리티+리스크)",
         example='quant("순위")',
@@ -259,7 +259,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "pairs": _AxisEntry(
         module="dartlab.quant.pairsTrading",
-        fn="analyze_pairs",
+        fn="calcPairs",
         label="페어",
         description="공적분 기반 페어 트레이딩 후보 탐색",
         example='quant("페어")',
@@ -268,7 +268,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "screen": _AxisEntry(
         module="dartlab.quant.screening",
-        fn="analyze_screen",
+        fn="calcScreen",
         label="스크린",
         description="팩터 스크리닝 프리셋 (가치/모멘텀/퀄리티/저변동)",
         example='quant("스크린")',
@@ -278,7 +278,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     # ── G: 포트폴리오 (portfolio) — 멀티종목 ─────────────
     "meanvar": _AxisEntry(
         module="dartlab.quant.portfolio",
-        fn="analyze_meanvar",
+        fn="optimizeMeanVar",
         label="평균분산",
         description="Markowitz 평균-분산 최적화",
         example='quant("평균분산", ["005930","000660"])',
@@ -287,7 +287,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "riskparity": _AxisEntry(
         module="dartlab.quant.portfolio",
-        fn="analyze_riskparity",
+        fn="optimizeRiskParity",
         label="리스크패리티",
         description="HRP (Lopez de Prado) 계층적 리스크 패리티",
         example='quant("리스크패리티", ["005930","000660"])',
@@ -296,7 +296,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "allocation": _AxisEntry(
         module="dartlab.quant.portfolio",
-        fn="analyze_allocation",
+        fn="allocateERC",
         label="자산배분",
         description="Equal Risk Contribution (Maillard 2010) — 종목별 위험 기여도 균등 배분",
         example='quant("자산배분", ["005930","000660"])',

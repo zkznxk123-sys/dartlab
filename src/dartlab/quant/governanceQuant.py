@@ -41,7 +41,7 @@ def _safe_float(val) -> float | None:
         return None
 
 
-def analyze_governance_quant(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
+def calcGovernanceQuant(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     """거버넌스 품질 정량화."""
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}

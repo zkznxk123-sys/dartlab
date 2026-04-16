@@ -18,9 +18,9 @@ def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: 
     """
     from dartlab.macro.assets import analyze_assets
     from dartlab.macro.cycle import analyze_cycle
-    from dartlab.macro.liquidity import analyze_liquidity
+    from dartlab.macro.liquidity import calcLiquidity
     from dartlab.macro.rates import analyze_rates
-    from dartlab.macro.sentiment import analyze_sentiment
+    from dartlab.macro.sentiment import calcSentiment
 
     # as_of/overrides를 전체 축에 전파
     _ax = {"market": market, "as_of": as_of, "overrides": overrides}
@@ -28,8 +28,8 @@ def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: 
     cycle = analyze_cycle(**_ax)
     rates = analyze_rates(**_ax)
     assets = analyze_assets(**_ax)
-    sentiment = analyze_sentiment(**_ax)
-    liquidity = analyze_liquidity(**_ax)
+    sentiment = calcSentiment(**_ax)
+    liquidity = calcLiquidity(**_ax)
 
     # 신규 축 (실패해도 종합 판정은 계속)
     forecast_result = None

@@ -20,7 +20,7 @@ c.quant("모멘텀")         # 단일 축 분석
 
 | 항목 | 내용 |
 |------|------|
-| 레이어 | L1 |
+| 레이어 | L2 |
 | 진입점 | `c.quant()`, `c.quant("종합")`, `dartlab.quant("축", "종목")` |
 | 소비 | gather(price, flow), scan 프리빌드 parquet, docs/changes parquet |
 | 생산 | ai(L3)가 정량 판단에 소비, review가 기술적 섹션에 소비 |
@@ -260,6 +260,16 @@ review 6막 시장분석 섹션에 `strategySnapshot` 카드 자동 등장 — 8
 | HRP | Lopez de Prado (2016) | riskparity |
 | Black-Litterman | Black & Litterman (1992) | allocation |
 | Engle-Granger | Engle & Granger (1987) | pairs |
+| Information Coefficient / IR | Grinold & Kahn (2000) *Active Portfolio Management* Ch.6 | `strategy/metrics.py::calcIR` + `factor.py` |
+| Fundamental Law of Active Management | Grinold & Kahn Ch.6 | `strategy/metrics.py::fundamentalLawIR` |
+| Cross-sectional IC / ICIR | Grinold & Kahn Ch.5 | `ranking.py::calcCrossSectionIC` |
+| Residual Risk Decomposition | Grinold & Kahn Ch.7 | `factor.py::decomposeRisk` |
+| Information Analysis (IC significance, decay, breadth) | Grinold & Kahn Ch.8 | `strategy/metrics.py` (icSignificance/factorDecayRate/breadthFromFrequency) |
+| Holdings Factor Decomposition | Grinold & Kahn Ch.3-4 | `portfolio.py::holdingsToFactorExposure` |
+| Constrained Min-Variance (sector/factor cap) | Grinold & Kahn Ch.13 | `portfolio.py::constrainedMinVariance` |
+
+모든 Grinold 수식은 **quant 엔진 (L2) 내부** 에 위치 — 다른 L2 엔진이 공유하지 않는 전용 수식.
+`core/` (L0) 로 올리지 않음. (대비: Damodaran 수식은 credit↔valuation 공유 필요 → core/finance).
 
 ## 지표 45개 (indicators.py)
 

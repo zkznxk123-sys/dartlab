@@ -250,6 +250,12 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
                 "이익품질 플래그",
             ),
             _CalcEntry(
+                "calcQualityAnomalies",
+                "dartlab.analysis.financial.earningsQuality",
+                "qualityAnomalies",
+                "Phase 7 — Damodaran Ch.4 회계 품질 이상치 (Beneish + Sloan + 5 카테고리 + 감사보고서 docs)",
+            ),
+            _CalcEntry(
                 "calcRichardsonAccrual",
                 "dartlab.analysis.financial.earningsQuality",
                 "richardsonAccrual",
@@ -1009,7 +1015,7 @@ class Analysis:
         return pl.DataFrame(rows)
 
     def _guide(self) -> pl.DataFrame:
-        """축 가이드 — 통일 컬럼 (axis, label, description, example, partId, items)."""
+        """축 가이드 — 4엔진 통일 컬럼 (axis, label, description, example, group, items)."""
         rows = []
         for key, entry in _AXIS_REGISTRY.items():
             rows.append(
@@ -1018,7 +1024,7 @@ class Analysis:
                     "label": getattr(entry, "label", key),
                     "description": entry.description,
                     "example": entry.example,
-                    "partId": entry.partId,
+                    "group": entry.section,
                     "items": len(entry.calcs),
                 }
             )

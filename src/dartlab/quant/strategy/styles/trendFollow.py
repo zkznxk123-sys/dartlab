@@ -27,7 +27,7 @@ EMA20 < EMA60 (데스크로스) 또는 ATR×3 trailing stop 도달 (Chandelier E
 - Moskowitz, Ooi, Pedersen (2012) "Time Series Momentum"
 
 [관련 dartlab 축]
-indicators.vema, signals.vmacdSignal, momentum.analyze_momentum (ts12_1)
+indicators.vema, signals.vmacdSignal, momentum.calcMomentum (ts12_1)
 
 [복제 + 수정 예시]
     from dartlab.quant.strategy import Signal, Rule

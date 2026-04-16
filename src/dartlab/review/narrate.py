@@ -382,7 +382,7 @@ def narrateGrowth(yoy: float | None, cagr: float | None) -> str | None:
 
 
 def narrateMargin(data: dict) -> str | None:
-    """마진 추이 해석."""
+    """마진 추이 해석 — Phase 7: drivers (인과) + turningPoints (변화점) 자동 포함."""
     history = data.get("history", [])
     if len(history) < 2:
         return None
@@ -405,8 +405,30 @@ def narrateMargin(data: dict) -> str | None:
         text += f"이며, {len(margins)}기 연속 악화 추세다"
     else:
         text += "이다"
+    text += "."
 
-    return text + "."
+    # Phase 7 G24: drivers 자동 narrative (왜 그런가)
+    drivers = latest.get("drivers") or []
+    if drivers and abs(delta) >= 0.5:  # 변화 유의미 시만
+        top = sorted(drivers, key=lambda d: abs(d.get("contribution_pp") or 0), reverse=True)[:2]
+        parts = []
+        for d in top:
+            contrib = d.get("contribution_pp")
+            if contrib is None or abs(contrib) < 0.3:
+                continue
+            sign = "+" if contrib > 0 else ""
+            parts.append(f"{d['factor']} {sign}{contrib:.1f}%p")
+        if parts:
+            text += f" 주요 driver — {', '.join(parts)}."
+
+    # Phase 7 G25: turningPoints — 최근 주요 변화점 1건
+    tps = data.get("turningPoints") or []
+    recent_tp = next((tp for tp in tps if tp.get("magnitude") in ("moderate", "major")), None)
+    if recent_tp:
+        direction_kr = "급등" if recent_tp["direction"] == "up" else "급락"
+        text += f" {recent_tp['period']}에 {direction_kr} ({recent_tp['before']:.1f}% → {recent_tp['after']:.1f}%)."
+
+    return text
 
 
 def narrateCashFlow(data: dict, fmtAmt=None) -> str | None:
@@ -482,7 +504,7 @@ def narrateDistress(data: dict) -> str | None:
 
 
 def narrateROIC(data: dict) -> str | None:
-    """ROIC vs WACC 해석."""
+    """ROIC vs WACC 해석 — Phase 7: drivers (Margin×Turnover×Tax 분해) + turningPoints 포함."""
     history = data.get("history", [])
     if not history:
         return None
@@ -501,7 +523,38 @@ def narrateROIC(data: dict) -> str | None:
             text += f", WACC 대비 Spread +{spread:.1f}%p — 자본비용을 상회하여 가치를 창출 중이다"
         else:
             text += f", WACC 대비 Spread {spread:+.1f}%p — 투자 자본이 가치를 파괴하고 있다"
-    return text + "."
+    text += "."
+
+    # Phase 7 G24: ROIC 변화 drivers (Margin × Turnover × Tax)
+    drivers = latest.get("drivers") or []
+    if drivers:
+        top = sorted(drivers, key=lambda d: abs(d.get("contribution_pp") or 0), reverse=True)
+        parts = []
+        for d in top[:2]:
+            contrib = d.get("contribution_pp")
+            if contrib is None or abs(contrib) < 0.5:
+                continue
+            sign = "+" if contrib > 0 else ""
+            parts.append(f"{d['factor']} {sign}{contrib:.1f}%p")
+        if parts:
+            text += f" ROIC 변화 driver — {', '.join(parts)}."
+
+    # Phase 7 G25: ROIC turningPoints
+    tps = data.get("turningPoints") or []
+    recent_tp = next((tp for tp in tps if tp.get("magnitude") in ("moderate", "major")), None)
+    if recent_tp:
+        direction_kr = "급등" if recent_tp["direction"] == "up" else "급락"
+        text += f" {recent_tp['period']}에 {direction_kr} ({recent_tp['before']:.1f}% → {recent_tp['after']:.1f}%)."
+
+    # decomposition (Phase 1) — dominantDriver 도 첨부
+    decomp = latest.get("decomposition") or {}
+    dominant = decomp.get("dominantDriver")
+    if dominant == "margin":
+        text += " (마진 중심 ROIC — 가격 결정력 우위)"
+    elif dominant == "turnover":
+        text += " (자산회전 중심 ROIC — 효율성 우위)"
+
+    return text
 
 
 def narrateValuation(data: dict) -> str | None:
@@ -986,8 +1039,61 @@ def narrateLifeCycle(data: dict | None) -> str | None:
     return " ".join(parts)
 
 
+# Phase 5 G18: valuationSins 규칙별 Damodaran rationale + override 힌트
+_SINS_RATIONALE: dict[str, dict[str, str]] = {
+    "roic_wacc_persist": {
+        "hint": "5~10년 내 ROIC-WACC spread 축소 고려 (경쟁 진입으로 abnormal return 소멸, Damodaran Ch.12)",
+        "override": "overrides={'terminalGrowth': 2.5, 'growthRates': [현재×0.5]}",
+    },
+    "g_vs_rf": {
+        "hint": "영구성장률은 무위험수익률 초과 불가 (Damodaran 상한 권고)",
+        "override": "overrides={'terminalGrowth': rf-0.5}",
+    },
+    "tv_weight": {
+        "hint": "Terminal Value 비중 75% 초과 시 explicit 구간 확장 필요 (Ch.12)",
+        "override": "overrides={'growthYears': [기존×2]}",
+    },
+    "reinvest_identity": {
+        "hint": "g = reinvestRate × ROIC 등식 위반 — 수학적 모순 (Ch.12)",
+        "override": "overrides={'reinvestmentPath': [수정값]}",
+    },
+    "control_synergy_overlap": {
+        "hint": "Control + Synergy 합산이 standalone × 50% 초과 — 이중계산 위험 (Dark Ch.17)",
+        "override": "",
+    },
+    "margin_ceiling": {
+        "hint": "영업마진이 업종 상위 1.5배 초과 — 경쟁 진입 시 마진 회귀 가능 (Ch.11)",
+        "override": "overrides={'opm': peer_p75}",
+    },
+    "single_model": {
+        "hint": "단일 방법론 의존 — 삼각검증 필요 (Damodaran 권고)",
+        "override": "overrides={'primaryModel': 'rim'} 등으로 다중 모델 호출",
+    },
+    "story_numbers_gap": {
+        "hint": "기업유형 미판정 — narrative 없는 valuation 은 Damodaran 원칙 위반",
+        "override": "",
+    },
+}
+
+
+def _formatFlag(flag: dict, marker: str) -> list[str]:
+    """flag 1건 → 3줄 (reason / Damodaran hint / override)."""
+    key = flag.get("key", "")
+    reason = flag.get("reason", "")
+    rationale = _SINS_RATIONALE.get(key, {})
+    out = [f"{marker} {reason}"]
+    if rationale.get("hint"):
+        out.append(f"   ↳ {rationale['hint']}")
+    if rationale.get("override"):
+        out.append(f"   ↳ 대응: {rationale['override']}")
+    return out
+
+
 def narrateValuationSins(data: dict | None) -> str | None:
-    """calcValuationSins 결과 → 자연어 (정합성 경고 요약)."""
+    """calcValuationSins → 자연어 (정합성 경고 + Damodaran rationale + override 힌트).
+
+    Phase 5 G18: 위반 규칙별 _SINS_RATIONALE 자동 삽입.
+    """
     if not data:
         return None
     flags = data.get("flags") or []
@@ -997,14 +1103,14 @@ def narrateValuationSins(data: dict | None) -> str | None:
     critical = [f for f in flags if f.get("severity") == "critical"]
     warns = [f for f in flags if f.get("severity") == "warn"]
     info = [f for f in flags if f.get("severity") == "info"]
-    parts = [f"밸류에이션 검증 (전체 {severity}):"]
+    parts: list[str] = [f"밸류에이션 검증 (전체 {severity}):"]
     for f in critical:
-        parts.append(f"🔴 {f.get('reason')}")
+        parts.extend(_formatFlag(f, "🔴"))
     for f in warns:
-        parts.append(f"🟡 {f.get('reason')}")
+        parts.extend(_formatFlag(f, "🟡"))
     if info and not (critical or warns):
         for f in info[:2]:
-            parts.append(f"ℹ {f.get('reason')}")
+            parts.extend(_formatFlag(f, "ℹ"))
     return " ".join(parts)
 
 

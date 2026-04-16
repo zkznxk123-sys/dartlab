@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 _ADF_CRITICAL = {"1%": -3.43, "5%": -2.86, "10%": -2.57}
 
 
-def analyze_pairs(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> dict:
+def calcPairs(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> dict:
     """공적분 기반 페어 탐색."""
     result: dict = {"market": market}
 

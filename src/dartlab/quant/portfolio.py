@@ -205,7 +205,7 @@ def _build_returns(stockCodes: list[str]) -> tuple[np.ndarray | None, list[str]]
     return matrix, valid_codes
 
 
-def analyze_meanvar(
+def optimizeMeanVar(
     stockCodes: list[str],
     *,
     market: str = "auto",
@@ -289,7 +289,7 @@ def analyze_meanvar(
     return result
 
 
-def analyze_riskparity(stockCodes: list[str], *, market: str = "auto", **kwargs) -> dict:
+def optimizeRiskParity(stockCodes: list[str], *, market: str = "auto", **kwargs) -> dict:
     """HRP — 계층적 리스크 패리티 (Lopez de Prado 2016)."""
     result: dict = {"stockCodes": stockCodes}
 
@@ -411,7 +411,7 @@ def _cluster_variance(cov: np.ndarray, indices: list[int]) -> float:
     return float(ivp @ sub_cov @ ivp)
 
 
-def analyze_allocation(stockCodes: list[str], *, market: str = "auto", **kwargs) -> dict:
+def allocateERC(stockCodes: list[str], *, market: str = "auto", **kwargs) -> dict:
     """리스크 버짓팅 — Equal Risk Contribution."""
     result: dict = {"stockCodes": stockCodes}
 
@@ -460,3 +460,171 @@ def analyze_allocation(stockCodes: list[str], *, market: str = "auto", **kwargs)
     result["converged"] = converged
     result["targetRC"] = round(target_rc, 4)
     return result
+
+
+# ══════════════════════════════════════════════════════════════════════
+# Grinold Ch.3-4 — Holdings Decomposition (Factor Exposure + Risk Budget)
+# ══════════════════════════════════════════════════════════════════════
+
+
+def holdingsToFactorExposure(
+    weights: dict[str, float],
+    factorLoadings: dict[str, dict[str, float]],
+) -> dict[str, float]:
+    """포트폴리오 weights × 종목별 loadings → 포트폴리오 factor exposure."""
+    exposure: dict[str, float] = {}
+    for stock, w in weights.items():
+        loadings = factorLoadings.get(stock)
+        if not loadings:
+            continue
+        for fname, ld in loadings.items():
+            exposure[fname] = exposure.get(fname, 0.0) + w * ld
+    return {k: float(v) for k, v in exposure.items()}
+
+
+def riskBudgetByFactor(
+    portfolioExposure: dict[str, float],
+    factorCov: dict[tuple[str, str], float],
+    factorNames: list[str],
+) -> dict:
+    """팩터별 리스크 기여도 (Grinold Ch.3).
+
+    portfolio variance = e^T × Σ × e;
+    risk contribution_k = e_k × (Σ × e)_k / σ_p².
+    """
+    k = len(factorNames)
+    if k == 0:
+        return {"totalVariance": 0.0, "marginalContrib": {}, "pctContrib": {}}
+    e = np.array([portfolioExposure.get(f, 0.0) for f in factorNames], dtype=float)
+    Sigma = np.zeros((k, k), dtype=float)
+    for i, fi in enumerate(factorNames):
+        for j, fj in enumerate(factorNames):
+            v = factorCov.get((fi, fj)) or factorCov.get((fj, fi)) or 0.0
+            Sigma[i, j] = v
+    Se = Sigma @ e
+    total_var = float(e @ Se)
+    if total_var <= 0:
+        return {
+            "totalVariance": total_var,
+            "marginalContrib": {f: 0.0 for f in factorNames},
+            "pctContrib": {f: 0.0 for f in factorNames},
+        }
+    marginal = {f: float(Se[i]) for i, f in enumerate(factorNames)}
+    pct = {f: float(e[i] * Se[i] / total_var) for i, f in enumerate(factorNames)}
+    return {"totalVariance": total_var, "marginalContrib": marginal, "pctContrib": pct}
+
+
+def activeExposure(
+    portfolioWeights: dict[str, float],
+    benchmarkWeights: dict[str, float],
+    factorLoadings: dict[str, dict[str, float]],
+) -> dict[str, float]:
+    """액티브 익스포저 = 포트 노출 − 벤치 노출 (Grinold Ch.4)."""
+    stocks = set(portfolioWeights) | set(benchmarkWeights)
+    active = {s: portfolioWeights.get(s, 0.0) - benchmarkWeights.get(s, 0.0) for s in stocks}
+    return holdingsToFactorExposure(active, factorLoadings)
+
+
+# ══════════════════════════════════════════════════════════════════════
+# Grinold Ch.13 — Constrained Min-Variance (Projected Gradient + Dykstra)
+# ══════════════════════════════════════════════════════════════════════
+#
+# cvxpy 의존 금지. numpy 직접 구현.
+
+
+def _projectSimplexBoxSectors(
+    w: np.ndarray,
+    *,
+    boxMin: float,
+    boxMax: float,
+    sectorMemberships: dict[int, list[int]] | None,
+    sectorCaps: dict[int, float] | None,
+    innerIter: int = 50,
+) -> np.ndarray:
+    """Σw=1, box, sector cap 동시 투영 — Dykstra 반복 투영."""
+    n = w.size
+    p = np.clip(w, boxMin, boxMax)
+    for _ in range(innerIter):
+        old = p.copy()
+        gap = 1.0 - p.sum()
+        if abs(gap) > 1e-12:
+            p = p + gap / n
+        p = np.clip(p, boxMin, boxMax)
+        if sectorMemberships and sectorCaps:
+            for sid, idx in sectorMemberships.items():
+                cap = sectorCaps.get(sid)
+                if cap is None or not idx:
+                    continue
+                s = p[idx].sum()
+                if s > cap:
+                    p[idx] = p[idx] * (cap / s)
+        if float(np.linalg.norm(p - old)) < 1e-10:
+            break
+    total = p.sum()
+    if total > 0:
+        p = p / total
+    return p
+
+
+def constrainedMinVariance(
+    cov: np.ndarray,
+    *,
+    boxMin: float = 0.0,
+    boxMax: float = 1.0,
+    sectorMemberships: dict[int, list[int]] | None = None,
+    sectorCaps: dict[int, float] | None = None,
+    maxIter: int = 500,
+    tol: float = 1e-8,
+) -> dict:
+    """제약 Min-Variance (Grinold Ch.13) — Projected Gradient.
+
+    min w^T Σ w s.t. Σw=1, w ∈ [boxMin, boxMax], sector caps.
+    """
+    S = np.asarray(cov, dtype=float)
+    n = S.shape[0]
+    if n == 0:
+        return {"weights": np.array([]), "variance": 0.0, "converged": True, "iterations": 0}
+    w = np.ones(n) / n
+    eigmax = float(np.linalg.eigvalsh(S).max()) if n > 0 else 1.0
+    if eigmax <= 0:
+        eigmax = 1.0
+    step = 1.0 / (2.0 * eigmax)
+    prev = w.copy()
+    converged = False
+    it = 0
+    for it in range(maxIter):
+        grad = 2.0 * S @ w
+        w_new = w - step * grad
+        w_new = _projectSimplexBoxSectors(
+            w_new,
+            boxMin=boxMin,
+            boxMax=boxMax,
+            sectorMemberships=sectorMemberships,
+            sectorCaps=sectorCaps,
+        )
+        diff = float(np.linalg.norm(w_new - prev))
+        prev = w_new.copy()
+        w = w_new
+        if diff < tol:
+            converged = True
+            break
+    return {
+        "weights": w,
+        "variance": float(w @ S @ w),
+        "converged": converged,
+        "iterations": it + 1,
+    }
+
+
+def factorExposureConstraint(
+    weights: np.ndarray,
+    factorLoadings: np.ndarray,
+    factorLimits: np.ndarray,
+) -> dict:
+    """팩터 익스포저 제약 체크 (|exposure| ≤ limit)."""
+    w = np.asarray(weights, dtype=float)
+    L = np.asarray(factorLoadings, dtype=float)
+    lim = np.asarray(factorLimits, dtype=float)
+    exp = L.T @ w
+    breaches = [int(i) for i in range(len(exp)) if abs(exp[i]) > lim[i]]
+    return {"exposure": exp, "breaches": breaches, "compliant": len(breaches) == 0}

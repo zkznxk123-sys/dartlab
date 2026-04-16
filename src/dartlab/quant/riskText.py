@@ -35,7 +35,7 @@ _RISK_KEYWORDS = {
 }
 
 
-def analyze_risk_text(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
+def calcRiskText(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     """리스크 팩터 텍스트 델타 분석."""
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}

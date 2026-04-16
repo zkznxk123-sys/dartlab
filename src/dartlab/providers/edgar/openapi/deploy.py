@@ -1,21 +1,20 @@
 """EDGAR 데이터 → HuggingFace 데이터셋 배포.
 
-`upload_folder` 를 사용해 카테고리별 폴더를 **단일 커밋**으로 업로드한다.
-과거 `upload_file` 루프는 HF per-repo 커밋 제한(128/hr) 에 걸렸음.
+⛔ **원칙: finance / meta 는 HF 에 올리지 않는다.**
+SEC 자체 벌크(`companyfacts.zip` daily + 분기 `{Y}q{Q}.zip`) 가 원본이고
+사용자 PC 에서 자동 다운로드·변환하므로 HF 미러링은 낭비 + rate limit 원인.
+
+HF 에 올리는 것은 **dartlab 파생물** 만:
+- `scan` → edgar/scan  (buildEdgarFinance() 프리빌드, 재계산 비용 큼)
+- `docs` → edgar/docs  (submissions API HTML 섹션 파싱 결과)
 
 사용법::
 
     from dartlab.providers.edgar.openapi.deploy import deployEdgarToHF
-    deployEdgarToHF(categories=["finance", "meta", "scan", "docs"])
-
-카테고리:
-- finance → edgar/finance  (companyfacts.zip 벌크 파생 parquet)
-- meta    → edgar/meta     (분기 벌크 sub/pre/tag 파생)
-- scan    → edgar/scan     (buildEdgarFinance() 프리빌드)
-- docs    → edgar/docs     (submissions API 10-K/10-Q HTML 섹션)
+    deployEdgarToHF(categories=["scan", "docs"])  # 기본값
 
 `data.sec.gov/api/xbrl/companyfacts` API 파생물은 업로드 대상이 아니다 —
-사용자가 `c.finance.refreshFromApi()` 로 로컬만 갱신한다.
+사용자가 `c.refreshFromApi()` 로 로컬만 갱신한다.
 """
 
 from __future__ import annotations
@@ -28,13 +27,15 @@ from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
 
 _log = logging.getLogger(__name__)
 
-# cat 키 → DATA_RELEASES 키
+# HF 에 업로드 허용된 카테고리 — dartlab 파생물만.
+# finance / meta 는 SEC 벌크가 원본이므로 사용자 PC 에서 자동 다운로드 (HF 미러링 없음).
 _CATEGORY_MAP = {
-    "finance": "edgar",
-    "meta": "edgarMeta",
     "scan": "edgarScan",
     "docs": "edgarDocs",
 }
+
+# 업로드 명시 차단 목록 (원본이 SEC 벌크, HF 미러링 정책상 제외)
+_BULK_ORIGIN_CATEGORIES = {"finance", "meta"}
 
 
 def deployEdgarToHF(
@@ -70,10 +71,16 @@ def deployEdgarToHF(
     if not hfToken and not dryRun:
         raise ValueError("HF_TOKEN이 필요합니다. 환경변수 또는 token 파라미터로 설정하세요.")
 
-    cats = categories or ["finance", "meta", "scan", "docs"]
+    cats = categories or ["scan", "docs"]
 
     validCats: list[str] = []
     for cat in cats:
+        if cat in _BULK_ORIGIN_CATEGORIES:
+            print(
+                f"[deploy] '{cat}' 는 SEC 벌크가 원본이라 HF 미러링 정책상 제외 "
+                f"(사용자 PC 에서 자동 다운로드). 스킵."
+            )
+            continue
         configKey = _CATEGORY_MAP.get(cat, cat)
         if configKey not in DATA_RELEASES:
             print(f"[deploy] 카테고리 '{cat}' → configKey '{configKey}'가 DATA_RELEASES에 없음. 스킵.")

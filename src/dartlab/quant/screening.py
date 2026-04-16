@@ -137,7 +137,7 @@ def _parse(val) -> float | None:
     return parseNumStr(val)
 
 
-def analyze_screen(*, market: str = "KR", preset: str = "quality", stockCode: str | None = None, **kwargs) -> dict:
+def calcScreen(*, market: str = "KR", preset: str = "quality", stockCode: str | None = None, **kwargs) -> dict:
     """팩터 스크리닝."""
     if preset not in _PRESETS:
         return {"error": f"알 수 없는 프리셋: {preset}", "available": list(_PRESETS.keys())}

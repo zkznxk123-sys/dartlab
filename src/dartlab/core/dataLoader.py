@@ -352,28 +352,10 @@ def loadData(
             asOf=asOf,
             refresh=refresh,
         )
-    elif not path.exists():
-        from dartlab.core.guidance import emit
-        from dartlab.core.guidance import format as gfmt
-
-        label = DATA_RELEASES[category]["label"]
-        emit("download:start", stockCode=stockCode, label=label)
-        try:
-            _download(stockCode, path, category)
-            size = path.stat().st_size
-            sizeStr = f"{size / 1024:.0f}KB" if size < 1024 * 1024 else f"{size / 1024 / 1024:.1f}MB"
-            emit("download:done_short", sizeStr=sizeStr)
-        except (URLError, socket.timeout, OSError) as e:
-            if path.exists():
-                path.unlink()
-            key = "error:download_failed"
-            raise RuntimeError(gfmt(key, stockCode=stockCode, label=label, error=str(e))) from e
-        except ValueError:
-            if path.exists():
-                path.unlink()
-            raise
-    elif _shouldRefreshDart(path, refresh):
-        _refreshFromHf(stockCode, path, category)
+    else:
+        _ensureLocalParquet(
+            stockCode, path, category, shouldRefresh=_shouldRefreshDart(path, refresh)
+        )
     # lazy scan: sinceYear 필터 또는 컬럼 프로젝션이 있으면 scan_parquet 사용
     yearColCandidates = ("year", "bsns_year")
     useLazy = sinceYear is not None or columns is not None
@@ -398,6 +380,84 @@ def loadData(
     else:
         df = pl.read_parquet(str(path))
     return _normalizeLoadedFrame(df, category)
+
+
+def _ensureLocalParquet(
+    stockCode: str, path: Path, category: str, *, shouldRefresh: bool
+) -> None:
+    """카테고리별 로컬 parquet 보장 (최초 로드 + refresh 통합 라우터).
+
+    - ``edgar`` → SEC 벌크 (companyfacts.zip) 자동 다운로드·변환, HF 미러링 없음
+    - 그 외 → HF 다운로드 + ETag 기반 증분 갱신
+    """
+    if category == "edgar":
+        _ensureEdgarFinanceFromBulk(stockCode, path, refresh=shouldRefresh)
+        return
+
+    if not path.exists():
+        _downloadFromHf(stockCode, path, category)
+        return
+
+    if shouldRefresh:
+        _refreshFromHf(stockCode, path, category)
+
+
+def _downloadFromHf(stockCode: str, path: Path, category: str) -> None:
+    """HF 최초 다운로드 + 안내 + 예외 처리 단일 블록."""
+    from dartlab.core.guidance import emit
+    from dartlab.core.guidance import format as gfmt
+
+    label = DATA_RELEASES[category]["label"]
+    emit("download:start", stockCode=stockCode, label=label)
+    try:
+        _download(stockCode, path, category)
+    except (URLError, socket.timeout, OSError) as e:
+        if path.exists():
+            path.unlink()
+        raise RuntimeError(
+            gfmt("error:download_failed", stockCode=stockCode, label=label, error=str(e))
+        ) from e
+    except ValueError:
+        if path.exists():
+            path.unlink()
+        raise
+
+    size = path.stat().st_size
+    sizeStr = f"{size / 1024:.0f}KB" if size < 1024 * 1024 else f"{size / 1024 / 1024:.1f}MB"
+    emit("download:done_short", sizeStr=sizeStr)
+
+
+def _ensureEdgarFinanceFromBulk(
+    stockCode: str, path: Path, *, refresh: bool = False
+) -> None:
+    """EDGAR finance {cik}.parquet 을 SEC 벌크에서 보장.
+
+    dartlab 은 ``companyfacts.zip`` (SEC daily, ~1.37GB) 을 사용자 PC 에 받아서
+    16,600+ CIK parquet 으로 일괄 변환한다. HF 미러링 없음 — SEC 가 원본.
+
+    정책:
+    - path 없으면: 벌크 다운로드 + 전체 변환 (최초 1회 5~15분)
+    - refresh=True + zip 갱신: 전체 재변환 (daily 갱신 반영)
+    - refresh=True + zip 미갱신: 아무것도 안 함 (낭비 방지)
+    """
+    from dartlab.providers.edgar.bulk import (
+        convertBulkToParquets,
+        downloadCompanyfactsBulk,
+    )
+
+    zipPath = downloadCompanyfactsBulk(force=False)  # ETag + TTL 기반 재사용
+    convertedStamp = zipPath.parent / "companyfacts.converted"
+    zipFresher = (
+        not convertedStamp.exists()
+        or zipPath.stat().st_mtime > convertedStamp.stat().st_mtime
+    )
+    if not path.exists() or (refresh and zipFresher):
+        convertBulkToParquets(zipPath=zipPath)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"{stockCode} (CIK={path.stem}) EDGAR finance parquet 생성 실패 — "
+            f"companyfacts.zip 에 해당 CIK 없음 (상장 폐지/비공시 기업 가능성)."
+        )
 
 
 def _ensureEdgarDocs(

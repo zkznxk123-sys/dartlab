@@ -35,7 +35,7 @@ KOSDAQ 소형주는 외국인 비중 낮아 효과 약함.
 - KRX 외국인 수급 통계
 
 [관련 dartlab 축]
-flowAnalysis.analyze_flow (KR only), gather/flow.py
+flowAnalysis.calcFlow (KR only), gather/flow.py
 
 [복제 + 수정 예시]
     rule = (foreign_cum5 > 0) & (inst_cum5 > 0)
@@ -48,7 +48,7 @@ from datetime import date as Date
 
 import numpy as np
 
-from dartlab.quant.flowAnalysis import analyze_flow
+from dartlab.quant.flowAnalysis import calcFlow
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import get_arrays, is_kr, stock_code
@@ -81,7 +81,7 @@ def build(company, *, atr_k: float = 3.0):
         )
 
     code = stock_code(company)
-    fl = analyze_flow(code, series=True)
+    fl = calcFlow(code, series=True)
     series = fl.get("_series") or {}
     flow_dates = series.get("date", [])
     fc5 = series.get("foreign_cum5")

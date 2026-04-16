@@ -26,8 +26,66 @@ src/dartlab/analysis/CREDIT.md 참조.
 
 from __future__ import annotations
 
-# ── 7축 레지스트리 ──
+from dataclasses import asdict, dataclass
 
+# ── 7축 레지스트리 (Phase 8 A4: 4엔진 통일 — @dataclass _AxisEntry) ──
+
+
+@dataclass(frozen=True)
+class _AxisEntry:
+    """credit 축 메타데이터. analysis/quant/macro 와 동일 패턴."""
+
+    axis: str           # 영문 키 (정규)
+    label: str          # 한글 라벨 = 과거 _CREDIT_AXES 의 fullName
+    description: str
+    example: str
+    group: str = "dCR"  # 그룹 분류 (가이드 DF 표준 컬럼)
+
+
+_AXIS_REGISTRY: dict[str, _AxisEntry] = {
+    "grade": _AxisEntry(
+        axis="grade", label="등급",
+        description="dCR 종합 등급 + 점수 + 7축 가중평균 (default)",
+        example='c.credit("등급")', group="dCR",
+    ),
+    "repayment": _AxisEntry(
+        axis="repayment", label="채무상환능력",
+        description="이자보상배율, 부채상환능력",
+        example='c.credit("채무상환")', group="dCR",
+    ),
+    "leverage": _AxisEntry(
+        axis="leverage", label="자본구조",
+        description="부채비율, 자본 안정성",
+        example='c.credit("자본구조")', group="dCR",
+    ),
+    "liquidity": _AxisEntry(
+        axis="liquidity", label="유동성",
+        description="유동비율, 단기 상환 여력",
+        example='c.credit("유동성")', group="dCR",
+    ),
+    "cashflow": _AxisEntry(
+        axis="cashflow", label="현금흐름",
+        description="OCF, FCF 안정성",
+        example='c.credit("현금흐름")', group="dCR",
+    ),
+    "business": _AxisEntry(
+        axis="business", label="사업안정성",
+        description="매출 변동성, 사업 지속성",
+        example='c.credit("사업안정성")', group="dCR",
+    ),
+    "reliability": _AxisEntry(
+        axis="reliability", label="재무신뢰성",
+        description="감사의견, 회계 일관성",
+        example='c.credit("재무신뢰성")', group="dCR",
+    ),
+    "disclosure": _AxisEntry(
+        axis="disclosure", label="공시리스크",
+        description="공시 변경, 정정 빈도",
+        example='c.credit("공시리스크")', group="dCR",
+    ),
+}
+
+# 하위 호환 — 기존 코드가 _CREDIT_AXES (한글키→fullName) 참조하는 곳용.
 _CREDIT_AXES: dict[str, str] = {
     "채무상환": "채무상환능력",
     "자본구조": "자본구조",
@@ -37,58 +95,6 @@ _CREDIT_AXES: dict[str, str] = {
     "재무신뢰성": "재무신뢰성",
     "공시리스크": "공시리스크",
 }
-
-# 가이드 메타: axis(영문) | label(한글) | description | example
-_AXIS_META: list[dict[str, str]] = [
-    {
-        "axis": "grade",
-        "label": "등급",
-        "description": "dCR 종합 등급 + 점수 + 7축 가중평균 (default)",
-        "example": 'c.credit("등급")',
-    },
-    {
-        "axis": "repayment",
-        "label": "채무상환",
-        "description": "이자보상배율, 부채상환능력",
-        "example": 'c.credit("채무상환")',
-    },
-    {
-        "axis": "leverage",
-        "label": "자본구조",
-        "description": "부채비율, 자본 안정성",
-        "example": 'c.credit("자본구조")',
-    },
-    {
-        "axis": "liquidity",
-        "label": "유동성",
-        "description": "유동비율, 단기 상환 여력",
-        "example": 'c.credit("유동성")',
-    },
-    {
-        "axis": "cashflow",
-        "label": "현금흐름",
-        "description": "OCF, FCF 안정성",
-        "example": 'c.credit("현금흐름")',
-    },
-    {
-        "axis": "business",
-        "label": "사업안정성",
-        "description": "매출 변동성, 사업 지속성",
-        "example": 'c.credit("사업안정성")',
-    },
-    {
-        "axis": "reliability",
-        "label": "재무신뢰성",
-        "description": "감사의견, 회계 일관성",
-        "example": 'c.credit("재무신뢰성")',
-    },
-    {
-        "axis": "disclosure",
-        "label": "공시리스크",
-        "description": "공시 변경, 정정 빈도",
-        "example": 'c.credit("공시리스크")',
-    },
-]
 
 _ALIASES: dict[str, str] = {
     "repayment": "채무상환",
@@ -114,11 +120,11 @@ def guide():
     """credit 엔진 7축 + 종합 가이드 DataFrame.
 
     Returns:
-        polars DataFrame (axis, label, description, example)
+        polars DataFrame (axis, label, description, example, group)
     """
     import polars as pl
 
-    return pl.DataFrame(_AXIS_META)
+    return pl.DataFrame([asdict(e) for e in _AXIS_REGISTRY.values()])
 
 
 def _resolveAxis(axis: str) -> str | None:

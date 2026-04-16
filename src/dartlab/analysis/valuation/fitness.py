@@ -36,7 +36,9 @@ _MODEL_MATRIX: dict[tuple[str | None, str | None], dict] = {
     ("턴어라운드", None): {"primary": "relative", "secondary": [], "survivalAdj": True},
     # 교차 (대표적 조합만 명시, 나머지 fallback)
     ("성장", "highGrowth"): {"primary": "dcf2stage", "secondary": ["rim", "relative"]},
-    ("사이클", "matureStable"): {"primary": "dcf", "secondary": ["relative"]},  # normalized DCF
+    # Phase 5 G16: 사이클 × matureStable (한전/항공/해운 등) 은 netDebt 거대 → DCF 구조적 부적합
+    # Damodaran 권고 "거대 손실 이력 + 대규모 자본구조 기업은 상대가치 우선"
+    ("사이클", "matureStable"): {"primary": "relative", "secondary": ["dcf2stage", "rim"]},
     ("현금부자", "matureStable"): {"primary": "dcf", "secondary": ["rim", "ddm"]},
     ("턴어라운드", "turnaround"): {"primary": "relative", "secondary": ["dcf2stage"], "survivalAdj": True},
     # 기본

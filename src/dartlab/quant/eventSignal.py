@@ -31,7 +31,7 @@ def _classify(report_name: str) -> tuple[str, int]:
     return "routine", 1
 
 
-def analyze_event_signal(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
+def calcEventSignal(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
     """allFilings 이벤트 기반 신호 분석.
 
     Args:

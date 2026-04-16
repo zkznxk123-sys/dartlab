@@ -10,14 +10,14 @@ import numpy as np
 from dartlab.quant._helpers import fetch_benchmark, fetch_ohlcv, ohlcv_to_arrays, resolve_market
 
 
-def analyze_residual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
+def calcResidual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     """팩터 제거 후 잔여 모멘텀/알파."""
     market = resolve_market(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
 
-    from dartlab.quant.factor import analyze_factor
+    from dartlab.quant.factor import decomposeFactor
 
-    fr = analyze_factor(stockCode, market=market)
+    fr = decomposeFactor(stockCode, market=market)
     if "error" in fr:
         return {**result, "error": fr["error"]}
 

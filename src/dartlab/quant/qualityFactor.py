@@ -66,7 +66,7 @@ def _crosssec_zscore(value: float, all_values: list[float]) -> float:
     return float(max(-3, min(3, z)))
 
 
-def analyze_quality(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
+def calcQuality(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     """Asness 퀄리티 팩터 — 횡단면 z-score 기반.
 
     Args:

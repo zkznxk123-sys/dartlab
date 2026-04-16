@@ -277,17 +277,68 @@ def _initBar(total: int, *, show: bool, unit: str = "B"):
 
 
 def _emitStart(totalBytes: int) -> None:
-    _log.info(
-        "companyfacts.zip 다운로드 시작 — %.1f MB", totalBytes / 1024 / 1024
-    )
+    """companyfacts.zip 다운로드 시작 안내 — guide.emit 으로 [dartlab] 출력."""
+    try:
+        from dartlab.guide.messaging import emit
+
+        emit("edgar:bulk_download_start")
+    except ImportError:
+        pass
+    _log.info("companyfacts.zip 다운로드 시작 — %.1f MB", totalBytes / 1024 / 1024)
 
 
-def _emitDone(zipPath: Path, downloaded: int) -> None:
+def _emitDone(zipPath: Path, downloaded: int, *, elapsedSec: float = 0.0) -> None:
+    """다운로드 완료 안내."""
+    try:
+        from dartlab.guide.messaging import emit
+
+        emit(
+            "edgar:bulk_download_done",
+            sizeMB=downloaded / 1024 / 1024,
+            elapsedSec=elapsedSec,
+        )
+    except ImportError:
+        pass
     _log.info(
         "companyfacts.zip 다운로드 완료 — %s (%.1f MB)",
         zipPath,
         downloaded / 1024 / 1024,
     )
+
+
+def _emitFresh(ttlHours: int) -> None:
+    try:
+        from dartlab.guide.messaging import emit
+
+        emit("edgar:bulk_fresh", ttlHours=ttlHours)
+    except ImportError:
+        pass
+
+
+def _emitConvertStart(totalCiks: int) -> None:
+    try:
+        from dartlab.guide.messaging import emit
+
+        emit("edgar:bulk_convert_start", totalCiks=totalCiks)
+    except ImportError:
+        pass
+
+
+def _emitConvertDone(
+    *, converted: int, skipped: int, failed: int, elapsedSec: float
+) -> None:
+    try:
+        from dartlab.guide.messaging import emit
+
+        emit(
+            "edgar:bulk_convert_done",
+            converted=converted,
+            skipped=skipped,
+            failed=failed,
+            elapsedSec=elapsedSec,
+        )
+    except ImportError:
+        pass
 
 
 __all__ = [

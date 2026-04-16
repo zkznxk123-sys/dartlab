@@ -124,7 +124,28 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
 
     if not history:
         return None
-    return {"history": history}
+
+    # Phase 7 G24: FCF 변화 driver 분해
+    try:
+        from dartlab.core.finance.attribution import decomposeFcfChange
+
+        for i in range(len(history) - 1):
+            cur = history[i]
+            prev = history[i + 1]
+            if all(isinstance(cur.get(k), (int, float)) for k in ("fcf", "ocf", "capex")) and \
+               all(isinstance(prev.get(k), (int, float)) for k in ("fcf", "ocf", "capex")):
+                attr = decomposeFcfChange(
+                    fcfT=cur["fcf"], fcfT1=prev["fcf"],
+                    ocfT=cur["ocf"], ocfT1=prev["ocf"],
+                    capexT=cur["capex"], capexT1=prev["capex"],
+                )
+                cur["fcfDrivers"] = attr.get("drivers") or []
+    except (ImportError, AttributeError, TypeError, ValueError):
+        pass
+
+    # Phase 8 A5
+    from dartlab.core.finance.turningPoint import injectTurningPoints
+    return {"history": history, "turningPoints": injectTurningPoints(history, seriesKey="fcf", minDeltaPct=40.0)}
 
 
 # ── 이익의 현금 뒷받침 ──

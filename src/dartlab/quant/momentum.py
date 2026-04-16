@@ -32,7 +32,7 @@ def _momentumSeries(close: np.ndarray) -> dict:
     return out
 
 
-def analyze_momentum(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
+def calcMomentum(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
     """모멘텀 종합 분석.
 
     Args:

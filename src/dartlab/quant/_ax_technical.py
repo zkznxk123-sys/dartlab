@@ -31,7 +31,7 @@ def _get_ohlcv(stockCode: str, **kwargs):
 # ── 축 함수들 ────────────────────────────────────────────
 
 
-def analyze_indicators(stockCode: str, **kwargs: Any) -> Any:
+def calcIndicators(stockCode: str, **kwargs: Any) -> Any:
     """45개 기술적 지표 DataFrame."""
     ohlcv, err = _get_ohlcv(stockCode, **kwargs)
     if err:
@@ -41,7 +41,7 @@ def analyze_indicators(stockCode: str, **kwargs: Any) -> Any:
     return enrichWithIndicators(ohlcv)
 
 
-def analyze_signals(stockCode: str, **kwargs: Any) -> Any:
+def calcSignals(stockCode: str, **kwargs: Any) -> Any:
     """최근 매매 신호."""
     ohlcv, err = _get_ohlcv(stockCode, **kwargs)
     if err:
@@ -54,7 +54,7 @@ def analyze_signals(stockCode: str, **kwargs: Any) -> Any:
     return calcTechnicalSignals(wrapper)
 
 
-def analyze_verdict(stockCode: str, **kwargs: Any) -> dict:
+def calcVerdict(stockCode: str, **kwargs: Any) -> dict:
     """종합 기술적 판단."""
     ohlcv, err = _get_ohlcv(stockCode, **kwargs)
     if err:
@@ -64,7 +64,7 @@ def analyze_verdict(stockCode: str, **kwargs: Any) -> dict:
     return technicalVerdict(ohlcv)
 
 
-def analyze_beta(stockCode: str, **kwargs: Any) -> dict:
+def calcBeta(stockCode: str, **kwargs: Any) -> dict:
     """시장 베타 + CAPM."""
     ohlcv, err = _get_ohlcv(stockCode, **kwargs)
     if err:
@@ -77,7 +77,7 @@ def analyze_beta(stockCode: str, **kwargs: Any) -> dict:
     return calcMarketBeta(wrapper)
 
 
-def analyze_divergence(stockCode: str, **kwargs: Any) -> dict:
+def calcDivergence(stockCode: str, **kwargs: Any) -> dict:
     """재무-기술적 괴리 진단."""
     ohlcv, err = _get_ohlcv(stockCode, **kwargs)
     if err:
