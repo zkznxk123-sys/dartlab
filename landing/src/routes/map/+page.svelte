@@ -13,6 +13,13 @@
 
 	let { data }: { data: PageData } = $props();
 	let tourOpen = $state(false);
+	let moversDismissed = $state(false);
+
+	// 총 변화 건수
+	let moversCount = $derived.by(() => {
+		const cats = (data as any)?.movers?.categories || {};
+		return (Object.values(cats) as any[]).reduce((s, c: any) => s + (c.entries?.length || 0), 0);
+	});
 
 	// ── 뷰 모드 ──
 	// atlas: 34개 산업 노드 + 산업간 supplier flow (default)
@@ -858,6 +865,18 @@
 
 	<!-- 메인 지도 -->
 	<main class="map-main">
+		<!-- 변화 감지 배너 (dismissible) -->
+		{#if moversCount > 0 && !moversDismissed}
+			<div class="movers-banner">
+				<span class="m-icon">⚡</span>
+				<span class="m-text">
+					이번 회계연도 급변 <strong>{moversCount}건</strong> 감지 — ROE 개선/악화 · 매출 급증/급락 · 부채 스트레스
+				</span>
+				<a class="m-cta" href="{base}/changes">상세 보기 →</a>
+				<button class="m-close" onclick={() => (moversDismissed = true)} aria-label="닫기">✕</button>
+			</div>
+		{/if}
+
 		{#if viewMode === 'industry' && industryLoading && !industryDetail}
 			<div class="loading-overlay">
 				<div>
@@ -1391,6 +1410,63 @@
 	.map-main {
 		position: relative;
 		overflow: hidden;
+	}
+
+	/* 변화 감지 배너 */
+	.movers-banner {
+		position: absolute;
+		top: 16px;
+		left: 50%;
+		transform: translateX(-50%);
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 8px 14px;
+		background: rgba(15, 18, 25, 0.92);
+		border: 1px solid rgba(251, 191, 36, 0.4);
+		border-radius: 999px;
+		color: #f1f5f9;
+		font-size: 12px;
+		backdrop-filter: blur(8px);
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+		z-index: 4;
+		max-width: calc(100% - 120px);
+	}
+	.m-icon {
+		font-size: 14px;
+	}
+	.m-text strong {
+		color: #fbbf24;
+	}
+	.m-cta {
+		color: #60a5fa;
+		text-decoration: none;
+		font-weight: 600;
+		white-space: nowrap;
+	}
+	.m-cta:hover {
+		color: #93c5fd;
+	}
+	.m-close {
+		background: none;
+		border: none;
+		color: #64748b;
+		cursor: pointer;
+		font-size: 14px;
+		padding: 0 4px;
+	}
+	.m-close:hover {
+		color: #f1f5f9;
+	}
+	@media (max-width: 768px) {
+		.movers-banner {
+			font-size: 11px;
+			max-width: calc(100% - 32px);
+			padding: 6px 10px;
+		}
+		.m-text {
+			display: none;
+		}
 	}
 
 	.loading-overlay {

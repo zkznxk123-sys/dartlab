@@ -627,6 +627,175 @@ def buildIndustryStats(scanMetrics: dict[str, dict]) -> dict:
     return out
 
 
+def buildMovers(
+    scanMetrics: dict[str, dict],
+    yoyDeltas: dict[str, dict],
+    indStats: dict,
+) -> dict:
+    """변화 감지 — 급변 회사 Top N.
+
+    카테고리
+    --------
+    - **profitImprove**: ROE 개선 상위 (Δ > 0, |z| ≥ 1.5 in industry)
+    - **profitDecline**: ROE 악화 상위 (Δ < 0, |z| ≥ 1.5)
+    - **revenueSpike**: 매출 YoY 급증 상위 (> +30%)
+    - **revenueDrop**: 매출 YoY 급락 상위 (< -20%)
+    - **debtStress**: 부채비율 급증 (+20%p 이상 AND 최종 > 150%)
+    - **extremeWarning**: |ROE Δ| > 100%p 등 극단 이상치 — 검증 필요
+
+    각 항목은 "왜 급변인가" 1줄 노트 포함 (재분류/회계이슈 주의).
+    """
+    nodes = loadNodes()
+    taxonomy = loadTaxonomy()
+    codeMeta = {n.stockCode: n for n in nodes if n.primary}
+
+    def _entry(code: str, extras: dict) -> dict | None:
+        n = codeMeta.get(code)
+        if not n:
+            return None
+        ind = taxonomy[n.industry].name if n.industry in taxonomy else n.industry
+        m = scanMetrics.get(code, {})
+        d = yoyDeltas.get(code, {})
+        return {
+            "stockCode": code,
+            "corpName": n.corpName,
+            "industry": n.industry,
+            "industryName": ind,
+            "revenue": n.revenue or 0,
+            "roe": m.get("roe"),
+            "opMargin": m.get("opMargin"),
+            "debtRatio": m.get("debtRatio"),
+            "roeDelta": d.get("roeDelta"),
+            "opMarginDelta": d.get("opMarginDelta"),
+            "debtRatioDelta": d.get("debtRatioDelta"),
+            "revenueYoyPct": d.get("revenueYoyPct"),
+            "asOfYear": d.get("asOfYear"),
+            **extras,
+        }
+
+    # 산업별 ROE 분포로 industry-aware z-score 계산
+    def _roe_zscore(code: str) -> float | None:
+        n = codeMeta.get(code)
+        if not n:
+            return None
+        roe = scanMetrics.get(code, {}).get("roe")
+        if roe is None:
+            return None
+        dist = indStats.get(n.industry, {}).get("distribution", {}).get("roe")
+        if not dist or not dist.get("std"):
+            return None
+        return (roe - dist["mean"]) / dist["std"]
+
+    profit_improve = []
+    profit_decline = []
+    revenue_spike = []
+    revenue_drop = []
+    debt_stress = []
+    extreme_warn = []
+
+    for code, d in yoyDeltas.items():
+        m = scanMetrics.get(code, {})
+        # Extreme (검증 필요)
+        if d.get("roeDelta") is not None and abs(d["roeDelta"]) > 100:
+            e = _entry(code, {
+                "signal": f"ROE Δ{d['roeDelta']:+.1f}%p — 극단 변화",
+                "note": "1회성 이익/자본잠식/재분류 가능성. 원본 공시 검증 필요.",
+            })
+            if e:
+                extreme_warn.append(e)
+            continue  # 정상 카테고리엔 넣지 않음
+
+        # Revenue YoY
+        rev_yoy = d.get("revenueYoyPct")
+        if rev_yoy is not None:
+            if rev_yoy >= 30:
+                e = _entry(code, {
+                    "signal": f"매출 YoY +{rev_yoy:.1f}% — 고성장",
+                    "note": f"{d.get('priorYear')}→{d.get('asOfYear')} 매출 급증. 신제품/시장 확대 가능성.",
+                })
+                if e:
+                    revenue_spike.append(e)
+            elif rev_yoy <= -20:
+                e = _entry(code, {
+                    "signal": f"매출 YoY {rev_yoy:+.1f}% — 급락",
+                    "note": f"{d.get('priorYear')}→{d.get('asOfYear')} 매출 급감. 수요 둔화/고객사 이탈 의심.",
+                })
+                if e:
+                    revenue_drop.append(e)
+
+        # ROE 개선/악화 (industry-aware z-score)
+        roe_d = d.get("roeDelta")
+        if roe_d is not None:
+            z = _roe_zscore(code)
+            if z is not None and abs(z) >= 1.5:
+                if roe_d > 0:
+                    e = _entry(code, {
+                        "signal": f"ROE Δ{roe_d:+.1f}%p · 산업 z={z:+.1f}σ",
+                        "note": "수익성 개선. 원인은 본업 회복/일회성 여부 확인.",
+                    })
+                    if e:
+                        profit_improve.append(e)
+                elif roe_d < 0:
+                    e = _entry(code, {
+                        "signal": f"ROE Δ{roe_d:+.1f}%p · 산업 z={z:+.1f}σ",
+                        "note": "수익성 악화. 마진 압박/일회성 손실 가능성.",
+                    })
+                    if e:
+                        profit_decline.append(e)
+
+        # 부채 스트레스
+        debt_d = d.get("debtRatioDelta")
+        debt_now = m.get("debtRatio")
+        if debt_d is not None and debt_now is not None and debt_d >= 20 and debt_now > 150:
+            e = _entry(code, {
+                "signal": f"부채비율 {debt_now:.0f}% (+{debt_d:.0f}%p)",
+                "note": "부채 급증 + 높은 절대값. 재무 스트레스 신호.",
+            })
+            if e:
+                debt_stress.append(e)
+
+    def _top_by(arr: list, key: str, reverse=True, n=20) -> list:
+        arr.sort(key=lambda x: abs(x.get(key) or 0), reverse=reverse)
+        return arr[:n]
+
+    return {
+        "asOf": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "categories": {
+            "profitImprove": {
+                "title": "수익성 개선 (ROE)",
+                "description": "산업 평균 대비 유의미하게 ROE 가 개선된 기업 (industry z-score ≥ 1.5σ, Δ > 0).",
+                "entries": _top_by(profit_improve, "roeDelta"),
+            },
+            "profitDecline": {
+                "title": "수익성 악화 (ROE)",
+                "description": "산업 평균 대비 유의미하게 ROE 가 악화된 기업. 마진 압박 또는 1회성 손실 의심.",
+                "entries": _top_by(profit_decline, "roeDelta"),
+            },
+            "revenueSpike": {
+                "title": "매출 급증 (YoY +30% 이상)",
+                "description": "전년 대비 매출이 크게 성장한 기업. 신제품/시장 확대 가능성.",
+                "entries": _top_by(revenue_spike, "revenueYoyPct"),
+            },
+            "revenueDrop": {
+                "title": "매출 급락 (YoY -20% 이하)",
+                "description": "전년 대비 매출이 크게 감소한 기업. 수요 둔화/고객사 이탈 의심.",
+                "entries": _top_by(revenue_drop, "revenueYoyPct"),
+            },
+            "debtStress": {
+                "title": "부채 스트레스",
+                "description": "부채비율이 +20%p 이상 증가하고 현재 150%+ 인 기업. 재무 리스크 조기 신호.",
+                "entries": _top_by(debt_stress, "debtRatioDelta"),
+            },
+            "extremeWarning": {
+                "title": "⚠ 극단 변화 — 검증 필요",
+                "description": "ROE 변화 |100%p| 초과. 재분류·자본잠식·1회성 이익 등 회계 이슈 가능성. 수동 검증 권장.",
+                "entries": _top_by(extreme_warn, "roeDelta"),
+            },
+        },
+        "disclaimer": "규칙 기반 스캐너. 재분류/합병/분할상장 노이즈 구분 불가. 투자 판단 전 원본 공시 확인 필수.",
+    }
+
+
 def buildSearchIndex() -> list[dict]:
     """회사명/코드 검색 인덱스."""
     nodes = loadNodes()
@@ -732,6 +901,15 @@ def main() -> None:
         json.dumps(indStats, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     print(f"  - {len(indStats)}개 산업 (avgRoe + topN + supply flows)")
+
+    # Movers — 급변 회사 Top N (변화 감지)
+    print("[변화 감지] movers.json")
+    movers = buildMovers(scanMetrics, yoyDeltas, indStats)
+    (OUT_DIR / "movers.json").write_text(
+        json.dumps(movers, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    cat_counts = {k: len(v["entries"]) for k, v in movers["categories"].items()}
+    print(f"  - {sum(cat_counts.values())}건 (카테고리별: {cat_counts})")
 
     # Search index
     print("[검색] search-index.json")
