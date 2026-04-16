@@ -53,6 +53,50 @@ def test_macro_company_bound_market_routing():
     assert isinstance(g_kr, pl.DataFrame)
 
 
+@pytest.mark.unit
+def test_phase10_h2_review_secondary_on_company():
+    """Phase 10 H2 — review 2차 가공 메서드가 Company 에 노출 (DART+EDGAR)."""
+    import dartlab
+
+    c = dartlab.Company("005930")
+    for name in ("causalWeights", "valuationImpact", "storyTree", "narrativeDiff"):
+        assert hasattr(c, name), f"Company.{name} missing (Phase 10 H2)"
+        assert callable(getattr(c, name)), f"Company.{name} not callable"
+
+
+@pytest.mark.unit
+def test_phase10_section_act_field():
+    """Phase 10 F1 — SectionMeta.act 필드가 23섹션 + 3메타 모두 설정."""
+    from dartlab.review.catalog import SECTIONS
+
+    # 모든 섹션이 act 필드 보유
+    for s in SECTIONS:
+        assert hasattr(s, "act"), f"{s.key} missing act"
+        assert s.act in (0, 1, 2, 3, 4, 5, 6), f"{s.key} invalid act={s.act}"
+
+    # 6막 모두 최소 1 섹션
+    acts = {s.act for s in SECTIONS}
+    for a in (1, 2, 3, 4, 5, 6):
+        assert a in acts, f"act {a} has no section"
+
+
+@pytest.mark.unit
+def test_phase10_invariants_20():
+    """Phase 10 F2 — 불변량 20개 구현."""
+    from dartlab.review.validators.validators import _INVARIANTS
+
+    assert len(_INVARIANTS) >= 20, f"불변량 {len(_INVARIANTS)}개 (20 미만)"
+
+
+@pytest.mark.unit
+def test_phase10_storyValidation_in_all_reportTypes():
+    """Phase 10 F4 — 11 reportType 전부 storyValidation 포함."""
+    from dartlab.review.reportTypes import REPORT_TYPES
+
+    for key, rt in REPORT_TYPES.items():
+        assert "storyValidation" in rt.sectionOrder, f"{key} missing storyValidation"
+
+
 # ── kwargs 명명 ────────────────────────────────────────────
 
 
