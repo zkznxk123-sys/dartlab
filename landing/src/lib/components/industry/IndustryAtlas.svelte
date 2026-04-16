@@ -43,6 +43,98 @@
 	let hovered: string | null = $state(null);
 	let simulation: any = null;
 
+	// 팬·줌 상태
+	let zoom = $state(1);
+	let panX = $state(0);
+	let panY = $state(0);
+	let isPanning = $state(false);
+	let panStart = { x: 0, y: 0, px: 0, py: 0 };
+
+	// 노드 드래그 상태
+	let dragNode: any = $state(null);
+	let dragMoved = $state(false);
+
+	function onWheel(e: WheelEvent) {
+		e.preventDefault();
+		const factor = e.deltaY > 0 ? 0.9 : 1.1;
+		const newZoom = Math.max(0.3, Math.min(5, zoom * factor));
+		if (!container) return;
+		const rect = container.getBoundingClientRect();
+		const mx = e.clientX - rect.left;
+		const my = e.clientY - rect.top;
+		panX = mx - (mx - panX) * (newZoom / zoom);
+		panY = my - (my - panY) * (newZoom / zoom);
+		zoom = newZoom;
+	}
+
+	function onSvgMouseDown(e: MouseEvent) {
+		if ((e.target as Element).closest('.node')) return; // 노드는 별도 처리
+		isPanning = true;
+		panStart = { x: e.clientX, y: e.clientY, px: panX, py: panY };
+	}
+
+	function onNodeMouseDown(e: MouseEvent, n: any) {
+		e.stopPropagation();
+		dragNode = n;
+		dragMoved = false;
+		// simulation 고정
+		n.fx = n.x;
+		n.fy = n.y;
+	}
+
+	function onWindowMouseMove(e: MouseEvent) {
+		if (dragNode && container) {
+			dragMoved = true;
+			const rect = container.getBoundingClientRect();
+			// 역변환: 화면 좌표 → simulation 좌표
+			const mx = (e.clientX - rect.left - panX) / zoom;
+			const my = (e.clientY - rect.top - panY) / zoom;
+			dragNode.fx = mx;
+			dragNode.fy = my;
+			dragNode.x = mx;
+			dragNode.y = my;
+			simulation?.alpha(0.3).restart();
+			// Svelte 반응
+			simNodes = [...simNodes];
+		} else if (isPanning) {
+			panX = panStart.px + (e.clientX - panStart.x);
+			panY = panStart.py + (e.clientY - panStart.y);
+		}
+	}
+
+	function onWindowMouseUp() {
+		if (dragNode && !dragMoved) {
+			// 클릭으로 간주 — 고정 해제 + select
+			dragNode.fx = null;
+			dragNode.fy = null;
+			onSelect?.(dragNode);
+		} else if (dragNode) {
+			// 드래그 완료 — 고정 해제 (force 다시 흘러가게 하려면 null, 고정하려면 유지)
+			// 사용자가 배치한 위치 유지: fx/fy 그대로. 두 번 클릭하면 해제.
+		}
+		dragNode = null;
+		isPanning = false;
+	}
+
+	function onNodeDoubleClick(n: any) {
+		// 고정 해제 → force 재시작
+		n.fx = null;
+		n.fy = null;
+		simulation?.alpha(0.3).restart();
+	}
+
+	function resetView() {
+		zoom = 1;
+		panX = 0;
+		panY = 0;
+		// 모든 고정 해제
+		for (const n of simNodes) {
+			n.fx = null;
+			n.fy = null;
+		}
+		simulation?.alpha(0.5).restart();
+	}
+
 	function radius(nodeCount: number): number {
 		// area ∝ nodeCount, min 18, max 90
 		return Math.max(18, Math.min(90, 9 + Math.sqrt(nodeCount) * 4.5));
@@ -202,8 +294,19 @@
 	}
 </script>
 
-<div bind:this={container} class="atlas-container">
+<svelte:window onmousemove={onWindowMouseMove} onmouseup={onWindowMouseUp} />
+
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<div
+	bind:this={container}
+	class="atlas-container"
+	onwheel={onWheel}
+	onmousedown={onSvgMouseDown}
+	role="application"
+	aria-label="산업 지도"
+>
 	<svg width={w} height={h} viewBox="0 0 {w} {h}">
+		<g transform="translate({panX}, {panY}) scale({zoom})">
 		<defs>
 			<filter id="flow-glow" x="-50%" y="-50%" width="200%" height="200%">
 				<feGaussianBlur stdDeviation="2" result="blur" />
@@ -259,10 +362,12 @@
 				<g
 					class="node"
 					class:dim={!isConnected(n.id)}
+					class:fixed={n.fx != null}
 					transform="translate({n.x ?? 0}, {n.y ?? 0})"
 					onmouseenter={() => (hovered = n.id)}
 					onmouseleave={() => (hovered = null)}
-					onclick={() => onSelect?.(n)}
+					onmousedown={(e: MouseEvent) => onNodeMouseDown(e, n)}
+					ondblclick={() => onNodeDoubleClick(n)}
 					role="button"
 					tabindex="0"
 					onkeydown={(e: KeyboardEvent) => e.key === 'Enter' && onSelect?.(n)}
@@ -312,7 +417,15 @@
 				</g>
 			{/each}
 		</g>
+		</g>
 	</svg>
+
+	<!-- 팬·줌 컨트롤 + 초기화 -->
+	<div class="controls">
+		<button class="ctl" onclick={resetView} title="화면 초기화 + 노드 고정 해제">
+			{zoom.toFixed(1)}× ⟳
+		</button>
+	</div>
 
 	<!-- 범례 -->
 	<div class="legend">
@@ -340,16 +453,50 @@
 			),
 			#050811;
 		overflow: hidden;
+		cursor: grab;
+	}
+	.atlas-container:active {
+		cursor: grabbing;
+	}
+	.controls {
+		position: absolute;
+		top: 16px;
+		right: 16px;
+		display: flex;
+		gap: 6px;
+		z-index: 5;
+	}
+	.ctl {
+		padding: 6px 10px;
+		background: rgba(15, 18, 25, 0.85);
+		border: 1px solid #1e2433;
+		border-radius: 6px;
+		color: #cbd5e1;
+		font-size: 11px;
+		font-family: monospace;
+		cursor: pointer;
+		backdrop-filter: blur(8px);
+	}
+	.ctl:hover {
+		background: rgba(30, 36, 51, 0.95);
+		border-color: #334155;
+		color: #f1f5f9;
 	}
 	svg {
 		display: block;
 	}
 	.node {
-		cursor: pointer;
+		cursor: grab;
 		transition: opacity 0.2s;
 	}
 	.node.dim {
 		opacity: 0.25;
+	}
+	.node:active {
+		cursor: grabbing;
+	}
+	.node.fixed circle {
+		stroke-dasharray: 4 2;
 	}
 	.node:hover circle {
 		filter: brightness(1.15);

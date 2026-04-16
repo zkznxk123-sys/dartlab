@@ -223,7 +223,38 @@
 		lastMouse = { x: e.clientX, y: e.clientY };
 	}
 
+	// 노드 드래그
+	let dragNode: any = $state(null);
+	let dragMoved = $state(false);
+
+	function onNodeMouseDown(e: MouseEvent, n: any) {
+		e.stopPropagation();
+		dragNode = n;
+		dragMoved = false;
+		n.fx = n.x;
+		n.fy = n.y;
+	}
+
+	function onNodeDoubleClick(n: any) {
+		n.fx = null;
+		n.fy = null;
+		simulation?.alpha(0.3).restart();
+	}
+
 	function onMouseMove(e: MouseEvent) {
+		if (dragNode && container) {
+			dragMoved = true;
+			const rect = container.getBoundingClientRect();
+			const mx = (e.clientX - rect.left - panX) / zoom;
+			const my = (e.clientY - rect.top - panY) / zoom;
+			dragNode.fx = mx;
+			dragNode.fy = my;
+			dragNode.x = mx;
+			dragNode.y = my;
+			simulation?.alpha(0.3).restart();
+			simNodes = [...simNodes];
+			return;
+		}
 		if (!isDragging) return;
 		panX += e.clientX - lastMouse.x;
 		panY += e.clientY - lastMouse.y;
@@ -231,6 +262,12 @@
 	}
 
 	function onMouseUp() {
+		if (dragNode && !dragMoved) {
+			// 간단 클릭으로 취급 (handleClick 은 원래 <g onclick> 에 위임)
+			dragNode.fx = null;
+			dragNode.fy = null;
+		}
+		dragNode = null;
 		isDragging = false;
 	}
 
@@ -296,10 +333,13 @@
 						class="node"
 						class:dim={!isConnected(n.id)}
 						class:selected={selectedId === n.id}
+						class:fixed={n.fx != null}
 						transform="translate({n.x ?? 0},{n.y ?? 0})"
 						onmouseenter={() => (hovered = n.id)}
 						onmouseleave={() => (hovered = null)}
-						onclick={() => handleClick(n)}
+						onmousedown={(e: MouseEvent) => onNodeMouseDown(e, n)}
+						onclick={() => !dragMoved && handleClick(n)}
+						ondblclick={() => onNodeDoubleClick(n)}
 						role="button"
 						tabindex="0"
 						onkeydown={(e: KeyboardEvent) => e.key === 'Enter' && handleClick(n)}
@@ -390,6 +430,9 @@
 	}
 	.node.dim {
 		opacity: 0.18;
+	}
+	.node.fixed circle {
+		stroke-dasharray: 4 2;
 	}
 	.node:hover circle {
 		filter: brightness(1.15);
