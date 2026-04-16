@@ -83,11 +83,8 @@ experiments/105_filingSemanticMap/docsStore/stemIndex.npz
 /tmp_*.json
 /test_*.png
 
-# Video production artifacts
-video/
-
-# SNS pipeline + outputs (entire workspace is local-only)
-dartlab-sns/
+# SNS + Video pipeline (local-only workspace, assets/docs/video/toolkit 통합)
+/sns/
 tests/fixtures/dart/docs/034730.parquet
 tests/fixtures/dart/docs/055550.parquet
 unsloth_compiled_cache/

@@ -8,10 +8,10 @@
 #   bash scripts/sns/render_carousel.sh 001-018880-hanon-systems
 #
 # Requires:
-#   dartlab-sns/posts/<post>/hook.json
+#   sns/posts/<post>/hook.json
 #
 # Outputs:
-#   dartlab-sns/posts/<post>/carousel/0{1..5}-{hook,context,chart,insight,cta}.png
+#   sns/posts/<post>/carousel/0{1..5}-{hook,context,chart,insight,cta}.png
 
 set -euo pipefail
 
@@ -22,7 +22,7 @@ if [[ -z "$POST" ]]; then
 fi
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-POST_DIR="$ROOT_DIR/dartlab-sns/posts/$POST"
+POST_DIR="$ROOT_DIR/sns/posts/$POST"
 REMOTION_DIR="$ROOT_DIR/scripts/sns/remotion-sns"
 PROPS_FILE="$POST_DIR/hook.json"
 OUT_DIR="$POST_DIR/carousel"
