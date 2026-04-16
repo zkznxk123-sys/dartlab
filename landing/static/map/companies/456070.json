@@ -91,5 +91,140 @@
       "stage": "formulation",
       "revenue": 20684
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "063160",
+        "corpName": "종근당바이오",
+        "industry": "pharma",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002210",
+        "corpName": "동성제약",
+        "industry": "food",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "174900",
+        "corpName": "앱클론",
+        "industry": "pharma",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000100",
+        "corpName": "유한양행",
+        "industry": "pharma",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003850",
+        "corpName": "보령",
+        "industry": "pharma",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011040",
+        "corpName": "경동제약",
+        "industry": "pharma",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037460",
+        "corpName": "삼지전자",
+        "industry": "telecom",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065570",
+        "corpName": "삼영이엔씨",
+        "industry": "telecom",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "139480",
+        "corpName": "이마트",
+        "industry": "retail",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031440",
+        "corpName": "신세계푸드",
+        "industry": "retail",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "128940",
+        "corpName": "한미약품",
+        "industry": "pharma",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214390",
+        "corpName": "경보제약",
+        "industry": "pharma",
+        "viaCode": "185750",
+        "viaName": "종근당",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

@@ -339,5 +339,353 @@
       "stage": "polymer",
       "revenue": 236718
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "012610",
+        "viaName": "경인양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023530",
+        "corpName": "롯데쇼핑",
+        "industry": "textile",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025000",
+        "corpName": "KPX케미칼",
+        "industry": "software",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003920",
+        "corpName": "남양유업",
+        "industry": "pharma",
+        "viaCode": "268280",
+        "viaName": "미원에스씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090430",
+        "corpName": "아모레퍼시픽",
+        "industry": "cosmetics",
+        "viaCode": "002840",
+        "viaName": "미원상사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002790",
+        "corpName": "아모레퍼시픽홀딩스",
+        "industry": "chemical",
+        "viaCode": "002840",
+        "viaName": "미원상사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000860",
+        "corpName": "강남제비스코",
+        "industry": "chemical",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023000",
+        "corpName": "삼원강재",
+        "industry": "auto",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "industry": "buildingMaterials",
+        "viaCode": "134380",
+        "viaName": "미원화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064550",
+        "corpName": "바이오니아",
+        "industry": "pharma",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005290",
+        "corpName": "동진쎄미켐",
+        "industry": "electronics",
+        "viaCode": "002840",
+        "viaName": "미원상사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008060",
+        "corpName": "대덕",
+        "industry": "electronics",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047810",
+        "corpName": "한국항공우주",
+        "industry": "aerospace",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051910",
+        "corpName": "LG화학",
+        "industry": "chemical",
+        "viaCode": "107590",
+        "viaName": "미원홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000400",
+        "corpName": "롯데손해보험",
+        "industry": "finance",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089860",
+        "corpName": "롯데렌탈",
+        "industry": "logistics",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008490",
+        "corpName": "서흥",
+        "industry": "chemical",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014100",
+        "corpName": "메디앙스",
+        "industry": "retail",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005300",
+        "corpName": "롯데칠성음료",
+        "industry": "food",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011170",
+        "corpName": "롯데케미칼",
+        "industry": "chemical",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011320",
+        "corpName": "유니크",
+        "industry": "machinery",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004000",
+        "corpName": "롯데정밀화학",
+        "industry": "chemical",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071840",
+        "corpName": "롯데하이마트",
+        "industry": "retail",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "280360",
+        "corpName": "롯데웰푸드",
+        "industry": "food",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005380",
+        "corpName": "현대자동차",
+        "industry": "auto",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007690",
+        "corpName": "국도화학",
+        "industry": "chemical",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088390",
+        "corpName": "이녹스",
+        "industry": "railroad",
+        "viaCode": "134380",
+        "viaName": "미원화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "063160",
+        "corpName": "종근당바이오",
+        "industry": "pharma",
+        "viaCode": "002840",
+        "viaName": "미원상사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095340",
+        "corpName": "ISC",
+        "industry": "retail",
+        "viaCode": "012610",
+        "viaName": "경인양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100120",
+        "corpName": "뷰웍스",
+        "industry": "medicalDevice",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "353200",
+        "corpName": "대덕전자",
+        "industry": "electronics",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033780",
+        "corpName": "케이티앤지",
+        "industry": "food",
+        "viaCode": "002840",
+        "viaName": "미원상사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000430",
+        "corpName": "대원강업",
+        "industry": "auto",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "286940",
+        "corpName": "롯데이노베이트",
+        "industry": "software",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005950",
+        "corpName": "이수화학",
+        "industry": "food",
+        "viaCode": "134380",
+        "viaName": "미원화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068240",
+        "corpName": "다원시스",
+        "industry": "semiconductor",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051900",
+        "corpName": "LG생활건강",
+        "industry": "electronics",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004990",
+        "corpName": "롯데지주",
+        "industry": "finance",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000270",
+        "corpName": "기아",
+        "industry": "auto",
+        "viaCode": "005710",
+        "viaName": "대원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011500",
+        "corpName": "한농화성",
+        "industry": "cosmetics",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "002840",
+        "to": "033780",
+        "type": "supplier",
+        "amount": 35080.0,
+        "ratio": null,
+        "product": "Ethyl Alcohol, XF49-C3281/SF-C0813,Mihapol PBS-50, Micolin A-526 외",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "023450",
+        "to": "051900",
+        "type": "supplier",
+        "amount": 2655.0,
+        "ratio": null,
+        "product": "소다회, AOS, 우지, Palm Stearin Oil 등",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 7
+  }
 }

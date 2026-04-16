@@ -203,5 +203,199 @@
       "stage": "apparel",
       "revenue": 34098
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "285130",
+        "corpName": "SK케미칼",
+        "industry": "software",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003540",
+        "corpName": "대신증권",
+        "industry": "finance",
+        "viaCode": "002100",
+        "viaName": "경농",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028300",
+        "corpName": "HLB",
+        "industry": "pharma",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004700",
+        "corpName": "조광피혁",
+        "industry": "auto",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015760",
+        "corpName": "한국전력공사",
+        "industry": "energy",
+        "viaCode": "002100",
+        "viaName": "경농",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002020",
+        "corpName": "코오롱",
+        "industry": "finance",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004800",
+        "corpName": "효성",
+        "industry": "chemical",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032640",
+        "corpName": "LG유플러스",
+        "industry": "telecom",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000540",
+        "corpName": "흥국화재",
+        "industry": "finance",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006120",
+        "corpName": "SK디스커버리",
+        "industry": "software",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
+        "viaCode": "002100",
+        "viaName": "경농",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095340",
+        "corpName": "ISC",
+        "industry": "retail",
+        "viaCode": "002100",
+        "viaName": "경농",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298020",
+        "corpName": "효성티앤씨",
+        "industry": "chemical",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "402340",
+        "corpName": "SK스퀘어",
+        "industry": "software",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "461300",
+        "corpName": "아이스크림미디어",
+        "industry": "education",
+        "viaCode": "002100",
+        "viaName": "경농",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003830",
+        "corpName": "대한화섬",
+        "industry": "aerospace",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "120110",
+        "corpName": "코오롱인더",
+        "industry": "plastic",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001470",
+        "corpName": "삼부토건",
+        "industry": "construction",
+        "viaCode": "002100",
+        "viaName": "경농",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018670",
+        "corpName": "SK가스",
+        "industry": "software",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095190",
+        "corpName": "이엠코리아",
+        "industry": "machinery",
+        "viaCode": "003240",
+        "viaName": "태광산업",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "003240",
+        "to": "120110",
+        "type": "supplier",
+        "amount": 677.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

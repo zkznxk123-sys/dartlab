@@ -203,5 +203,513 @@
       "stage": "formulation",
       "revenue": 20684
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "024720",
+        "corpName": "콜마홀딩스",
+        "industry": "retail",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027050",
+        "corpName": "코리아나",
+        "industry": "cosmetics",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "439090",
+        "corpName": "마녀공장",
+        "industry": "cosmetics",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "222040",
+        "corpName": "코스맥스엔비티",
+        "industry": "pharma",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "195940",
+        "corpName": "HK이노엔",
+        "industry": "pharma",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064820",
+        "corpName": "케이프",
+        "industry": "auto",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "278990",
+        "corpName": "EMB",
+        "industry": "battery",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
+        "viaCode": "200130",
+        "viaName": "콜마비앤에이치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090430",
+        "corpName": "아모레퍼시픽",
+        "industry": "cosmetics",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "251280",
+        "corpName": "안지오랩",
+        "industry": "pharma",
+        "viaCode": "200130",
+        "viaName": "콜마비앤에이치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004720",
+        "corpName": "팜젠사이언스",
+        "industry": "pharma",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002790",
+        "corpName": "아모레퍼시픽홀딩스",
+        "industry": "chemical",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "278470",
+        "corpName": "에이피알",
+        "industry": "cosmetics",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "200130",
+        "viaName": "콜마비앤에이치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038530",
+        "corpName": "케이바이오",
+        "industry": "retail",
+        "viaCode": "200130",
+        "viaName": "콜마비앤에이치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041190",
+        "corpName": "우리기술투자",
+        "industry": "finance",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214420",
+        "corpName": "토니모리",
+        "industry": "cosmetics",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "277410",
+        "corpName": "인산가",
+        "industry": "food",
+        "viaCode": "200130",
+        "viaName": "콜마비앤에이치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "168330",
+        "corpName": "내츄럴엔도텍",
+        "industry": "food",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "021240",
+        "corpName": "코웨이",
+        "industry": "electronics",
+        "viaCode": "200130",
+        "viaName": "콜마비앤에이치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044820",
+        "corpName": "코스맥스비티아이",
+        "industry": "food",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123840",
+        "corpName": "뉴온",
+        "industry": "semiconductor",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200670",
+        "corpName": "휴메딕스",
+        "industry": "pharma",
+        "viaCode": "200130",
+        "viaName": "콜마비앤에이치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "142760",
+        "corpName": "모아라이프플러스",
+        "industry": "pharma",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047770",
+        "corpName": "코데즈컴바인",
+        "industry": "textile",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "159580",
+        "corpName": "제로투세븐",
+        "industry": "retail",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "200130",
+        "viaName": "콜마비앤에이치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032940",
+        "corpName": "원익",
+        "industry": "semiconductor",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "270870",
+        "corpName": "뉴트리",
+        "industry": "food",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004270",
+        "corpName": "남성",
+        "industry": "telecom",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "460870",
+        "corpName": "에스엠씨지",
+        "industry": "construction",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054050",
+        "corpName": "농우바이오",
+        "industry": "agriculture",
+        "viaCode": "200130",
+        "viaName": "콜마비앤에이치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "114840",
+        "corpName": "아이패밀리에스씨",
+        "industry": "cosmetics",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "317860",
+        "corpName": "노드메이슨",
+        "industry": "cosmetics",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "175250",
+        "corpName": "아이큐어",
+        "industry": "cosmetics",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014100",
+        "corpName": "메디앙스",
+        "industry": "retail",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "357230",
+        "corpName": "에이치피오",
+        "industry": "pharma",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019550",
+        "corpName": "SBI인베스트먼트",
+        "industry": "finance",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "314130",
+        "corpName": "지놈앤컴퍼니",
+        "industry": "pharma",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "237880",
+        "corpName": "클리오",
+        "industry": "cosmetics",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "471820",
+        "corpName": "셀로맥스사이언스",
+        "industry": "pharma",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348350",
+        "corpName": "위드텍",
+        "industry": "electronics",
+        "viaCode": "200130",
+        "viaName": "콜마비앤에이치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "383930",
+        "corpName": "디티앤씨알오",
+        "industry": "pharma",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217480",
+        "corpName": "에스디생명공학",
+        "industry": "cosmetics",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "293780",
+        "corpName": "압타바이오",
+        "industry": "pharma",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348150",
+        "corpName": "고바이오랩",
+        "industry": "pharma",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
+        "viaCode": "200130",
+        "viaName": "콜마비앤에이치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078520",
+        "corpName": "에이블씨엔씨",
+        "industry": "realestate",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187220",
+        "corpName": "디티앤씨",
+        "industry": "consulting",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051900",
+        "corpName": "LG생활건강",
+        "industry": "electronics",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "236810",
+        "corpName": "엔비티",
+        "industry": "software",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "192820",
+        "viaName": "코스맥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "479960",
+        "corpName": "위너스",
+        "industry": "telecom",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161890",
+        "corpName": "한국콜마",
+        "industry": "cosmetics",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "192820",
+        "to": "278470",
+        "type": "supplier",
+        "amount": 368611.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "192820",
+        "to": "032940",
+        "type": "supplier",
+        "amount": 24026.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 3
+  }
 }

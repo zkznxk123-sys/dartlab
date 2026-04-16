@@ -83,5 +83,36 @@
       "stage": "packaging",
       "revenue": 15344
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "050890",
+        "corpName": "쏠리드",
+        "industry": "telecom",
+        "viaCode": "039740",
+        "viaName": "한국정보공학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
+        "viaCode": "039740",
+        "viaName": "한국정보공학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "486990",
+        "corpName": "노타",
+        "industry": "software",
+        "viaCode": "039740",
+        "viaName": "한국정보공학",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

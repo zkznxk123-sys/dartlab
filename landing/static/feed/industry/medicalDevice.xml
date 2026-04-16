@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>dartlab 변화 감지 · medicalDevice</title>
+<link>https://eddmpython.github.io/dartlab/industry/medicalDevice</link>
+<description>medicalDevice 산업 이번 회계연도 급변 회사</description>
+<language>ko-kr</language>
+<lastBuildDate>Thu, 16 Apr 2026 09:50:46 +0000</lastBuildDate>
+<item>
+  <title>[수익성 개선 (ROE)] 바텍 (의료기기)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=043150</link>
+  <guid isPermaLink="false">profitImprove-043150-2025</guid>
+  <category>수익성 개선 (ROE)</category>
+  <description>ROE Δ+68.8%p · 산업 z=+3.6σ | 수익성 개선. 원인은 본업 회복/일회성 여부 확인.</description>
+</item>
+<item>
+  <title>[수익성 악화 (ROE)] 더테크놀로지 (의료기기)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=043090</link>
+  <guid isPermaLink="false">profitDecline-043090-2025</guid>
+  <category>수익성 악화 (ROE)</category>
+  <description>ROE Δ-85.4%p · 산업 z=-3.7σ | 수익성 악화. 마진 압박/일회성 손실 가능성.</description>
+</item>
+<item>
+  <title>[수익성 악화 (ROE)] 레이저쎌 (의료기기)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=412350</link>
+  <guid isPermaLink="false">profitDecline-412350-2025</guid>
+  <category>수익성 악화 (ROE)</category>
+  <description>ROE Δ-55.1%p · 산업 z=-2.5σ | 수익성 악화. 마진 압박/일회성 손실 가능성.</description>
+</item>
+<item>
+  <title>[수익성 악화 (ROE)] 레이저옵텍 (의료기기)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=199550</link>
+  <guid isPermaLink="false">profitDecline-199550-2025</guid>
+  <category>수익성 악화 (ROE)</category>
+  <description>ROE Δ-40.5%p · 산업 z=-1.6σ | 수익성 악화. 마진 압박/일회성 손실 가능성.</description>
+</item>
+<item>
+  <title>[⚠ 극단 변화 — 검증 필요] 알파AI (의료기기)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=043100</link>
+  <guid isPermaLink="false">extremeWarning-043100-2025</guid>
+  <category>⚠ 극단 변화 — 검증 필요</category>
+  <description>ROE Δ-3634.9%p — 극단 변화 | 1회성 이익/자본잠식/재분류 가능성. 원본 공시 검증 필요.</description>
+</item>
+</channel>
+</rss>

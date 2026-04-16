@@ -119,5 +119,20 @@
       "stage": "platform",
       "revenue": 80991
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "038880",
+        "corpName": "아이에이",
+        "industry": "electronics",
+        "viaCode": "069920",
+        "viaName": "엑시온그룹",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

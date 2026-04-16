@@ -176,5 +176,84 @@
       "stage": "general",
       "revenue": 20185
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "278650",
+        "corpName": "HLB바이오스텝",
+        "industry": "pharma",
+        "viaCode": "322970",
+        "viaName": "무진메디",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "308080",
+        "corpName": "바이젠셀",
+        "industry": "pharma",
+        "viaCode": "065350",
+        "viaName": "신성델타테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "003100",
+        "viaName": "선광",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086520",
+        "corpName": "에코프로",
+        "industry": "chemical",
+        "viaCode": "383310",
+        "viaName": "에코프로에이치엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "247540",
+        "corpName": "에코프로비엠",
+        "industry": "chemical",
+        "viaCode": "383310",
+        "viaName": "에코프로에이치엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "450080",
+        "corpName": "에코프로머티",
+        "industry": "chemical",
+        "viaCode": "383310",
+        "viaName": "에코프로에이치엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "373220",
+        "corpName": "LG에너지솔루션",
+        "industry": "chemical",
+        "viaCode": "065350",
+        "viaName": "신성델타테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "416180",
+        "corpName": "신성에스티",
+        "industry": "electronics",
+        "viaCode": "065350",
+        "viaName": "신성델타테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002320",
+        "corpName": "한진",
+        "industry": "logistics",
+        "viaCode": "003100",
+        "viaName": "선광",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 4
+  }
 }

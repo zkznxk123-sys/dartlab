@@ -152,5 +152,28 @@
       "stage": "general",
       "revenue": 8551
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "004450",
+        "corpName": "삼화왕관",
+        "industry": "steel",
+        "viaCode": "023600",
+        "viaName": "삼보판지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005610",
+        "corpName": "SPC삼립",
+        "industry": "food",
+        "viaCode": "023600",
+        "viaName": "삼보판지",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

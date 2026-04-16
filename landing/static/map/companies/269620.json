@@ -143,5 +143,44 @@
       "stage": "oem",
       "revenue": 108837
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "018290",
+        "corpName": "브이티",
+        "industry": "plastic",
+        "viaCode": "030350",
+        "viaName": "드래곤플라이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "139050",
+        "corpName": "BF랩스",
+        "industry": "software",
+        "viaCode": "030350",
+        "viaName": "드래곤플라이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307930",
+        "corpName": "컴퍼니케이",
+        "industry": "finance",
+        "viaCode": "030350",
+        "viaName": "드래곤플라이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "076610",
+        "corpName": "해성옵틱스",
+        "industry": "electronics",
+        "viaCode": "030350",
+        "viaName": "드래곤플라이",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

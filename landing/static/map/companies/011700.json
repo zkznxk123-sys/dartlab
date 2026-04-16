@@ -139,5 +139,36 @@
       "stage": "",
       "revenue": 9601
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "010950",
+        "corpName": "S-Oil",
+        "industry": "chemical",
+        "viaCode": "002960",
+        "viaName": "한국쉘석유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005380",
+        "corpName": "현대자동차",
+        "industry": "auto",
+        "viaCode": "002960",
+        "viaName": "한국쉘석유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "339950",
+        "corpName": "아이비김영",
+        "industry": "education",
+        "viaCode": "002960",
+        "viaName": "한국쉘석유",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

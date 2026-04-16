@@ -150,5 +150,60 @@
       "stage": "platform",
       "revenue": 80991
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "064260",
+        "corpName": "다날",
+        "industry": "finance",
+        "viaCode": "035620",
+        "viaName": "바른손이앤에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "081180",
+        "corpName": "쎄크",
+        "industry": "medicalDevice",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "179720",
+        "corpName": "머니무브",
+        "industry": "finance",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035080",
+        "corpName": "그래디언트",
+        "industry": "retail",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307930",
+        "corpName": "컴퍼니케이",
+        "industry": "finance",
+        "viaCode": "035620",
+        "viaName": "바른손이앤에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "289170",
+        "corpName": "바이오텐",
+        "industry": "pharma",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

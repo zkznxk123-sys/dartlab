@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "buildId": "20260416-084401",
-  "buildTime": "2026-04-16T08:44:01Z",
-  "commitSha": "bdf64084",
+  "buildId": "20260416-095048",
+  "buildTime": "2026-04-16T09:50:48Z",
+  "commitSha": "d75fea15",
   "dataAsOf": {
     "dart": "2026-04-10T13:46:23Z",
     "finance": "2026-04-16T08:27:17Z",
-    "reviews": "2026-04-16T08:38:16Z",
+    "reviews": "2026-04-16T09:47:14Z",
     "taxonomy": "2026-04-13T11:46:11Z"
   },
   "sizes": {
@@ -15,7 +15,7 @@
     "insights.json": 17580,
     "industryStats.json": 183254,
     "search-index.json": 306478,
-    "companies/": 22557177
+    "companies/": 69021845
   },
   "counts": {}
 }

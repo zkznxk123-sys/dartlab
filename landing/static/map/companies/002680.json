@@ -359,5 +359,883 @@
       "stage": "raw",
       "revenue": 44013
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "052900",
+        "corpName": "KX하이텍",
+        "industry": "plastic",
+        "viaCode": "064820",
+        "viaName": "케이프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100220",
+        "corpName": "비상교육",
+        "industry": "media",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "039030",
+        "viaName": "이오테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011810",
+        "corpName": "STX",
+        "industry": "food",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024070",
+        "corpName": "WISCOM",
+        "industry": "chemical",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "070960",
+        "corpName": "모나용평",
+        "industry": "realestate",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068290",
+        "corpName": "삼성출판사",
+        "industry": "realestate",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
+        "viaCode": "230360",
+        "viaName": "에코마케팅",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "industry": "buildingMaterials",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005290",
+        "corpName": "동진쎄미켐",
+        "industry": "electronics",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095720",
+        "corpName": "웅진씽크빅",
+        "industry": "realestate",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "222980",
+        "corpName": "한국맥널티",
+        "industry": "food",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017800",
+        "corpName": "현대엘리베이터",
+        "industry": "shipbuilding",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "043100",
+        "corpName": "알파AI",
+        "industry": "medicalDevice",
+        "viaCode": "064820",
+        "viaName": "케이프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "050110",
+        "corpName": "캠시스",
+        "industry": "electronics",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "238490",
+        "corpName": "힘스",
+        "industry": "electronics",
+        "viaCode": "207940",
+        "viaName": "삼성바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051900",
+        "corpName": "LG생활건강",
+        "industry": "electronics",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "365900",
+        "corpName": "브이씨",
+        "industry": "leisure",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "311690",
+        "corpName": "CJ 바이오사이언스",
+        "industry": "food",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005880",
+        "corpName": "대한해운",
+        "industry": "shipbuilding",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012330",
+        "corpName": "현대모비스",
+        "industry": "auto",
+        "viaCode": "378850",
+        "viaName": "화승알앤에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071050",
+        "corpName": "한국금융지주",
+        "industry": "finance",
+        "viaCode": "064820",
+        "viaName": "케이프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "240810",
+        "corpName": "원익IPS",
+        "industry": "semiconductor",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052600",
+        "corpName": "한네트",
+        "industry": "finance",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009410",
+        "corpName": "태영건설",
+        "industry": "construction",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033790",
+        "corpName": "피노",
+        "industry": "telecom",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008490",
+        "corpName": "서흥",
+        "industry": "chemical",
+        "viaCode": "168330",
+        "viaName": "내츄럴엔도텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016580",
+        "corpName": "환인제약",
+        "industry": "food",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086790",
+        "corpName": "하나금융지주",
+        "industry": "finance",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028100",
+        "corpName": "동아지질",
+        "industry": "construction",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "303360",
+        "corpName": "프로티아",
+        "industry": "medicalDevice",
+        "viaCode": "064820",
+        "viaName": "케이프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "139480",
+        "corpName": "이마트",
+        "industry": "retail",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047310",
+        "corpName": "파워로직스",
+        "industry": "electronics",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "072710",
+        "corpName": "농심홀딩스",
+        "industry": "food",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007690",
+        "corpName": "국도화학",
+        "industry": "chemical",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "219750",
+        "corpName": "한국비티비",
+        "industry": "pharma",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016360",
+        "corpName": "삼성증권",
+        "industry": "finance",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053980",
+        "corpName": "오상자이엘",
+        "industry": "software",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "320000",
+        "corpName": "한울반도체",
+        "industry": "machinery",
+        "viaCode": "039030",
+        "viaName": "이오테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "0008Z0",
+        "corpName": "에스엔시스",
+        "industry": "electrical",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "020000",
+        "corpName": "한섬",
+        "industry": "textile",
+        "viaCode": "064820",
+        "viaName": "케이프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052860",
+        "corpName": "아이앤씨",
+        "industry": "semiconductor",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004590",
+        "corpName": "한국가구",
+        "industry": "retail",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "253450",
+        "corpName": "스튜디오드래곤",
+        "industry": "media",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "389020",
+        "corpName": "자람테크놀로지",
+        "industry": "semiconductor",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078890",
+        "corpName": "가온그룹",
+        "industry": "telecom",
+        "viaCode": "064820",
+        "viaName": "케이프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038950",
+        "corpName": "파인디지털",
+        "industry": "telecom",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006660",
+        "corpName": "삼성공조",
+        "industry": "electronics",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001790",
+        "corpName": "대한제당",
+        "industry": "food",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054210",
+        "corpName": "이랜텍",
+        "industry": "electronics",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "362990",
+        "corpName": "드림인사이트",
+        "industry": "media",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "289010",
+        "corpName": "아이스크림에듀",
+        "industry": "media",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005740",
+        "corpName": "크라운해태홀딩스",
+        "industry": "food",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214330",
+        "corpName": "금호에이치티",
+        "industry": "electronics",
+        "viaCode": "207940",
+        "viaName": "삼성바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032640",
+        "corpName": "LG유플러스",
+        "industry": "telecom",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "126560",
+        "corpName": "현대퓨처넷",
+        "industry": "telecom",
+        "viaCode": "064820",
+        "viaName": "케이프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "128940",
+        "corpName": "한미약품",
+        "industry": "pharma",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "039030",
+        "viaName": "이오테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267260",
+        "corpName": "HD현대일렉트릭",
+        "industry": "shipbuilding",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069960",
+        "corpName": "현대백화점",
+        "industry": "retail",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "196450",
+        "corpName": "코아시아씨엠",
+        "industry": "machinery",
+        "viaCode": "064820",
+        "viaName": "케이프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348150",
+        "corpName": "고바이오랩",
+        "industry": "pharma",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "376300",
+        "corpName": "디어유",
+        "industry": "software",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "346010",
+        "corpName": "타이드",
+        "industry": "electronics",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "236810",
+        "corpName": "엔비티",
+        "industry": "software",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "215200",
+        "corpName": "메가스터디교육",
+        "industry": "education",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "241590",
+        "corpName": "화승엔터프라이즈",
+        "industry": "textile",
+        "viaCode": "378850",
+        "viaName": "화승알앤에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031980",
+        "corpName": "피에스케이홀딩스",
+        "industry": "semiconductor",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004170",
+        "corpName": "신세계",
+        "industry": "retail",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "357780",
+        "corpName": "솔브레인",
+        "industry": "electronics",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "122870",
+        "corpName": "와이지엔터테인먼트",
+        "industry": "media",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "126730",
+        "corpName": "코칩",
+        "industry": "electronics",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064960",
+        "corpName": "SNT모티브",
+        "industry": "electronics",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "048550",
+        "corpName": "SM C&C",
+        "industry": "media",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016880",
+        "corpName": "웅진",
+        "industry": "education",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008770",
+        "corpName": "호텔신라",
+        "industry": "leisure",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009680",
+        "corpName": "모토닉",
+        "industry": "electronics",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001680",
+        "corpName": "대상",
+        "industry": "food",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "363280",
+        "corpName": "티와이홀딩스",
+        "industry": "finance",
+        "viaCode": "064820",
+        "viaName": "케이프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083450",
+        "corpName": "GST",
+        "industry": "chemical",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069540",
+        "corpName": "빛과전자",
+        "industry": "telecom",
+        "viaCode": "064820",
+        "viaName": "케이프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "039030",
+        "viaName": "이오테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004990",
+        "corpName": "롯데지주",
+        "industry": "finance",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004060",
+        "corpName": "SG세계물산",
+        "industry": "retail",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "139130",
+        "corpName": "iM금융지주",
+        "industry": "finance",
+        "viaCode": "032830",
+        "viaName": "삼성생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "050960",
+        "corpName": "수산아이앤티",
+        "industry": "software",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004490",
+        "corpName": "세방전지",
+        "industry": "battery",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "115500",
+        "corpName": "케이씨에스",
+        "industry": "railroad",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032800",
+        "corpName": "판타지오",
+        "industry": "media",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011150",
+        "corpName": "CJ씨푸드",
+        "industry": "food",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "007390",
+        "viaName": "네이처셀",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001750",
+        "corpName": "한양증권",
+        "industry": "finance",
+        "viaCode": "064820",
+        "viaName": "케이프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "202960",
+        "corpName": "판도라티비",
+        "industry": "electronics",
+        "viaCode": "035720",
+        "viaName": "카카오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000880",
+        "corpName": "한화",
+        "industry": "aerospace",
+        "viaCode": "005930",
+        "viaName": "삼성전자",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "005930",
+        "to": "009150",
+        "type": "supplier",
+        "amount": 1293843.0,
+        "ratio": 49.4,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "009150",
+        "to": "005930",
+        "type": "supplier",
+        "amount": 59043.0,
+        "ratio": 7.9,
+        "product": "Camera Module",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "097520",
+        "to": "005930",
+        "type": "supplier",
+        "amount": 59043.0,
+        "ratio": 7.9,
+        "product": "Camera Module",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "357780",
+        "to": "005930",
+        "type": "supplier",
+        "amount": 29900.0,
+        "ratio": 17.1,
+        "product": "Chemical",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "090460",
+        "to": "005930",
+        "type": "supplier",
+        "amount": 26522.0,
+        "ratio": 20.3,
+        "product": "FPCA",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "122900",
+        "to": "207940",
+        "type": "supplier",
+        "amount": 4034.0,
+        "ratio": null,
+        "product": "Filter 등",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "005930",
+        "to": "045970",
+        "type": "supplier",
+        "amount": 2981.0,
+        "ratio": 0.7,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 13
+  }
 }

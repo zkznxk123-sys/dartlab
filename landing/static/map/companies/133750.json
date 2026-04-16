@@ -435,5 +435,812 @@
       "stage": "general",
       "revenue": 2538
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "005720",
+        "corpName": "넥센",
+        "industry": "plastic",
+        "viaCode": "033830",
+        "viaName": "티비씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052900",
+        "corpName": "KX하이텍",
+        "industry": "plastic",
+        "viaCode": "083550",
+        "viaName": "케이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010960",
+        "corpName": "삼호개발",
+        "industry": "construction",
+        "viaCode": "033830",
+        "viaName": "티비씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "030610",
+        "viaName": "교보증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011810",
+        "corpName": "STX",
+        "industry": "food",
+        "viaCode": "064400",
+        "viaName": "LG씨엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "070960",
+        "corpName": "모나용평",
+        "industry": "realestate",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024880",
+        "corpName": "케이피에프",
+        "industry": "steel",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
+        "viaCode": "244460",
+        "viaName": "올리패스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015260",
+        "corpName": "에이엔피",
+        "industry": "electronics",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002790",
+        "corpName": "아모레퍼시픽홀딩스",
+        "industry": "chemical",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030520",
+        "corpName": "한글과컴퓨터",
+        "industry": "software",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "industry": "buildingMaterials",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095720",
+        "corpName": "웅진씽크빅",
+        "industry": "realestate",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "129920",
+        "corpName": "대성하이텍",
+        "industry": "electronics",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "243070",
+        "corpName": "휴온스",
+        "industry": "pharma",
+        "viaCode": "083550",
+        "viaName": "케이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085810",
+        "corpName": "알티캐스트",
+        "industry": "telecom",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "317240",
+        "corpName": "TS트릴리온",
+        "industry": "chemical",
+        "viaCode": "083550",
+        "viaName": "케이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003520",
+        "corpName": "영진약품",
+        "industry": "pharma",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "043610",
+        "corpName": "KT지니뮤직",
+        "industry": "telecom",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017370",
+        "corpName": "우신시스템",
+        "industry": "electronics",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017800",
+        "corpName": "현대엘리베이터",
+        "industry": "shipbuilding",
+        "viaCode": "033830",
+        "viaName": "티비씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "108670",
+        "corpName": "LX하우시스",
+        "industry": "electronics",
+        "viaCode": "064400",
+        "viaName": "LG씨엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "309710",
+        "corpName": "아이티켐",
+        "industry": "pharma",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011420",
+        "corpName": "갤럭시아에스엠",
+        "industry": "media",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "246720",
+        "corpName": "아스타",
+        "industry": "semiconductor",
+        "viaCode": "083550",
+        "viaName": "케이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039860",
+        "corpName": "나노엔텍",
+        "industry": "pharma",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "439260",
+        "corpName": "대한조선",
+        "industry": "shipbuilding",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "354200",
+        "corpName": "엔젠바이오",
+        "industry": "realestate",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "114810",
+        "corpName": "한솔아이원스",
+        "industry": "electronics",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "145020",
+        "corpName": "휴젤",
+        "industry": "pharma",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051900",
+        "corpName": "LG생활건강",
+        "industry": "electronics",
+        "viaCode": "064400",
+        "viaName": "LG씨엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "046440",
+        "corpName": "KG모빌리언스",
+        "industry": "finance",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "170790",
+        "corpName": "파이오링크",
+        "industry": "telecom",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217590",
+        "corpName": "티엠씨",
+        "industry": "electrical",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036710",
+        "corpName": "심텍홀딩스",
+        "industry": "consulting",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067160",
+        "corpName": "SOOP",
+        "industry": "software",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005880",
+        "corpName": "대한해운",
+        "industry": "shipbuilding",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036580",
+        "corpName": "팜스코",
+        "industry": "food",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001120",
+        "corpName": "LX인터내셔널",
+        "industry": "textile",
+        "viaCode": "064400",
+        "viaName": "LG씨엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011070",
+        "corpName": "LG이노텍",
+        "industry": "electronics",
+        "viaCode": "064400",
+        "viaName": "LG씨엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058430",
+        "corpName": "포스코스틸리온",
+        "industry": "steel",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "237820",
+        "corpName": "플레이디",
+        "industry": "media",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "361610",
+        "corpName": "SK아이이테크놀로지",
+        "industry": "software",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010470",
+        "corpName": "오리콤",
+        "industry": "media",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "475580",
+        "corpName": "에이럭스",
+        "industry": "machinery",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052600",
+        "corpName": "한네트",
+        "industry": "finance",
+        "viaCode": "033830",
+        "viaName": "티비씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009410",
+        "corpName": "태영건설",
+        "industry": "construction",
+        "viaCode": "030610",
+        "viaName": "교보증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036420",
+        "corpName": "콘텐트리중앙",
+        "industry": "media",
+        "viaCode": "033830",
+        "viaName": "티비씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033790",
+        "corpName": "피노",
+        "industry": "telecom",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "418470",
+        "corpName": "KT밀리의서재",
+        "industry": "telecom",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052420",
+        "corpName": "오성첨단소재",
+        "industry": "plastic",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024830",
+        "corpName": "세원물산",
+        "industry": "auto",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "139480",
+        "corpName": "이마트",
+        "industry": "retail",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067630",
+        "corpName": "HLB생명과학",
+        "industry": "pharma",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095340",
+        "corpName": "ISC",
+        "industry": "retail",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033780",
+        "corpName": "케이티앤지",
+        "industry": "food",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "431190",
+        "corpName": "케이쓰리아이",
+        "industry": "software",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006370",
+        "corpName": "대구백화점",
+        "industry": "retail",
+        "viaCode": "033830",
+        "viaName": "티비씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016360",
+        "corpName": "삼성증권",
+        "industry": "finance",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "320000",
+        "corpName": "한울반도체",
+        "industry": "machinery",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "020000",
+        "corpName": "한섬",
+        "industry": "textile",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024720",
+        "corpName": "콜마홀딩스",
+        "industry": "retail",
+        "viaCode": "083550",
+        "viaName": "케이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025560",
+        "corpName": "미래산업",
+        "industry": "electronics",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003800",
+        "corpName": "에이스침대",
+        "industry": "paper",
+        "viaCode": "033830",
+        "viaName": "티비씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "064400",
+        "viaName": "LG씨엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038950",
+        "corpName": "파인디지털",
+        "industry": "telecom",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016600",
+        "corpName": "큐캐피탈",
+        "industry": "chemical",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024850",
+        "corpName": "HLB이노베이션",
+        "industry": "semiconductor",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010060",
+        "corpName": "OCI홀딩스",
+        "industry": "chemical",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019570",
+        "corpName": "플루토스",
+        "industry": "finance",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001790",
+        "corpName": "대한제당",
+        "industry": "food",
+        "viaCode": "083550",
+        "viaName": "케이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068270",
+        "corpName": "셀트리온",
+        "industry": "pharma",
+        "viaCode": "033830",
+        "viaName": "티비씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015760",
+        "corpName": "한국전력공사",
+        "industry": "energy",
+        "viaCode": "215200",
+        "viaName": "메가스터디교육",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "221800",
+        "corpName": "유투바이오",
+        "industry": "pharma",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032640",
+        "corpName": "LG유플러스",
+        "industry": "telecom",
+        "viaCode": "064400",
+        "viaName": "LG씨엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053300",
+        "corpName": "한국정보인증",
+        "industry": "software",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "108320",
+        "corpName": "LX세미콘",
+        "industry": "semiconductor",
+        "viaCode": "064400",
+        "viaName": "LG씨엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "126560",
+        "corpName": "현대퓨처넷",
+        "industry": "telecom",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "347890",
+        "corpName": "엠투아이",
+        "industry": "retail",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013720",
+        "corpName": "THE CUBE&",
+        "industry": "electronics",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "359090",
+        "corpName": "씨엔알리서치",
+        "industry": "consulting",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100700",
+        "corpName": "세운메디칼",
+        "industry": "retail",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002960",
+        "corpName": "한국쉘석유",
+        "industry": "food",
+        "viaCode": "339950",
+        "viaName": "아이비김영",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "206950",
+        "corpName": "볼빅",
+        "industry": "leisure",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "316140",
+        "corpName": "우리금융지주",
+        "industry": "finance",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069960",
+        "corpName": "현대백화점",
+        "industry": "retail",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007070",
+        "corpName": "GS리테일",
+        "industry": "retail",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015360",
+        "corpName": "INVENI",
+        "industry": "consulting",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "376300",
+        "corpName": "디어유",
+        "industry": "software",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017390",
+        "corpName": "서울도시가스",
+        "industry": "energy",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "241590",
+        "corpName": "화승엔터프라이즈",
+        "industry": "textile",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031980",
+        "corpName": "피에스케이홀딩스",
+        "industry": "semiconductor",
+        "viaCode": "083550",
+        "viaName": "케이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "043220",
+        "corpName": "티에스넥스젠",
+        "industry": "energy",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004170",
+        "corpName": "신세계",
+        "industry": "retail",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "285130",
+        "corpName": "SK케미칼",
+        "industry": "software",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053450",
+        "corpName": "세코닉스",
+        "industry": "machinery",
+        "viaCode": "033830",
+        "viaName": "티비씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "049520",
+        "corpName": "유아이엘",
+        "industry": "electronics",
+        "viaCode": "030200",
+        "viaName": "케이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "322180",
+        "corpName": "LS티라유텍",
+        "industry": "machinery",
+        "viaCode": "041510",
+        "viaName": "에스엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "357780",
+        "corpName": "솔브레인",
+        "industry": "electronics",
+        "viaCode": "083550",
+        "viaName": "케이엠",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 14
+  }
 }

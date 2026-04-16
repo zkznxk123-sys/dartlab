@@ -257,5 +257,668 @@
       "stage": "platform",
       "revenue": 80991
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "208640",
+        "corpName": "썸에이지",
+        "industry": "realestate",
+        "viaCode": "205500",
+        "viaName": "넥써쓰",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005960",
+        "corpName": "동부건설",
+        "industry": "aerospace",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "industry": "buildingMaterials",
+        "viaCode": "122870",
+        "viaName": "와이지엔터테인먼트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "094480",
+        "corpName": "갤럭시아머니트리",
+        "industry": "finance",
+        "viaCode": "122870",
+        "viaName": "와이지엔터테인먼트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002020",
+        "corpName": "코오롱",
+        "industry": "finance",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "193250",
+        "viaName": "링크드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037030",
+        "corpName": "파워넷",
+        "industry": "electrical",
+        "viaCode": "057680",
+        "viaName": "티사이언티픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003070",
+        "corpName": "코오롱글로벌",
+        "industry": "construction",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037270",
+        "corpName": "YG PLUS",
+        "industry": "media",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000230",
+        "corpName": "일동홀딩스",
+        "industry": "food",
+        "viaCode": "002720",
+        "viaName": "국제약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085310",
+        "corpName": "엔케이",
+        "industry": "food",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "140070",
+        "corpName": "서플러스글로벌",
+        "industry": "retail",
+        "viaCode": "002720",
+        "viaName": "국제약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065650",
+        "corpName": "하이퍼코퍼레이션",
+        "industry": "retail",
+        "viaCode": "057680",
+        "viaName": "티사이언티픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "050110",
+        "corpName": "캠시스",
+        "industry": "electronics",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044380",
+        "corpName": "주연테크",
+        "industry": "realestate",
+        "viaCode": "193250",
+        "viaName": "링크드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036570",
+        "corpName": "엔씨소프트",
+        "industry": "software",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "122870",
+        "viaName": "와이지엔터테인먼트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051780",
+        "corpName": "큐로홀딩스",
+        "industry": "electronics",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036090",
+        "corpName": "위지트",
+        "industry": "electronics",
+        "viaCode": "057680",
+        "viaName": "티사이언티픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "278470",
+        "corpName": "에이피알",
+        "industry": "cosmetics",
+        "viaCode": "122870",
+        "viaName": "와이지엔터테인먼트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039830",
+        "corpName": "오로라",
+        "industry": "consulting",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001060",
+        "corpName": "JW중외제약",
+        "industry": "food",
+        "viaCode": "002720",
+        "viaName": "국제약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "460870",
+        "corpName": "에스엠씨지",
+        "industry": "construction",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "475580",
+        "corpName": "에이럭스",
+        "industry": "machinery",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031310",
+        "corpName": "아이즈비전",
+        "industry": "chemical",
+        "viaCode": "057680",
+        "viaName": "티사이언티픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000540",
+        "corpName": "흥국화재",
+        "industry": "finance",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307750",
+        "corpName": "국전약품",
+        "industry": "pharma",
+        "viaCode": "002720",
+        "viaName": "국제약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066980",
+        "corpName": "한성크린텍",
+        "industry": "environment",
+        "viaCode": "057680",
+        "viaName": "티사이언티픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "002720",
+        "viaName": "국제약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352820",
+        "corpName": "하이브",
+        "industry": "media",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214390",
+        "corpName": "경보제약",
+        "industry": "pharma",
+        "viaCode": "002720",
+        "viaName": "국제약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "262260",
+        "corpName": "에이프로",
+        "industry": "electrical",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066410",
+        "corpName": "버킷스튜디오",
+        "industry": "telecom",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007460",
+        "corpName": "에이프로젠",
+        "industry": "realestate",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "363260",
+        "corpName": "모비데이즈",
+        "industry": "media",
+        "viaCode": "193250",
+        "viaName": "링크드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052790",
+        "corpName": "액토즈소프트",
+        "industry": "software",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377300",
+        "corpName": "카카오페이",
+        "industry": "finance",
+        "viaCode": "122870",
+        "viaName": "와이지엔터테인먼트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "296160",
+        "corpName": "프로젠",
+        "industry": "pharma",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100590",
+        "corpName": "머큐리",
+        "industry": "telecom",
+        "viaCode": "057680",
+        "viaName": "티사이언티픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "190650",
+        "corpName": "코리아에셋투자증권",
+        "industry": "finance",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090430",
+        "corpName": "아모레퍼시픽",
+        "industry": "cosmetics",
+        "viaCode": "002720",
+        "viaName": "국제약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016600",
+        "corpName": "큐캐피탈",
+        "industry": "chemical",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018680",
+        "corpName": "서울제약",
+        "industry": "pharma",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052300",
+        "corpName": "오션인더블유",
+        "industry": "logistics",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083640",
+        "corpName": "인콘",
+        "industry": "software",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006880",
+        "corpName": "신송홀딩스",
+        "industry": "retail",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019570",
+        "corpName": "플루토스",
+        "industry": "finance",
+        "viaCode": "057680",
+        "viaName": "티사이언티픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068270",
+        "corpName": "셀트리온",
+        "industry": "pharma",
+        "viaCode": "002720",
+        "viaName": "국제약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "323410",
+        "corpName": "카카오뱅크",
+        "industry": "finance",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003580",
+        "corpName": "HLB글로벌",
+        "industry": "food",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001040",
+        "corpName": "CJ",
+        "industry": "food",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "172670",
+        "corpName": "에이엘티",
+        "industry": "semiconductor",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065060",
+        "corpName": "지엔코",
+        "industry": "textile",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019170",
+        "corpName": "신풍제약",
+        "industry": "pharma",
+        "viaCode": "002720",
+        "viaName": "국제약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
+        "viaCode": "122870",
+        "viaName": "와이지엔터테인먼트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035760",
+        "corpName": "CJ ENM",
+        "industry": "media",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "118000",
+        "corpName": "메타케어",
+        "industry": "pharma",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "293490",
+        "corpName": "카카오게임즈",
+        "industry": "software",
+        "viaCode": "205500",
+        "viaName": "넥써쓰",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003530",
+        "corpName": "한화투자증권",
+        "industry": "aerospace",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "121800",
+        "corpName": "비덴트",
+        "industry": "electronics",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001290",
+        "corpName": "상상인증권",
+        "industry": "finance",
+        "viaCode": "193250",
+        "viaName": "링크드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "238090",
+        "corpName": "앤디포스",
+        "industry": "plastic",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "122870",
+        "viaName": "와이지엔터테인먼트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "021240",
+        "corpName": "코웨이",
+        "industry": "electronics",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011780",
+        "corpName": "금호석유화학",
+        "industry": "chemical",
+        "viaCode": "002720",
+        "viaName": "국제약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "040350",
+        "corpName": "크레오에스지",
+        "industry": "software",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "108230",
+        "corpName": "톱텍",
+        "industry": "electronics",
+        "viaCode": "002720",
+        "viaName": "국제약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016880",
+        "corpName": "웅진",
+        "industry": "education",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "057680",
+        "viaName": "티사이언티픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047040",
+        "corpName": "대우건설",
+        "industry": "construction",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092730",
+        "corpName": "네오팜",
+        "industry": "chemical",
+        "viaCode": "002720",
+        "viaName": "국제약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031860",
+        "corpName": "디에이치엑스컴퍼니",
+        "industry": "retail",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "131100",
+        "corpName": "티엔엔터테인먼트",
+        "industry": "food",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078860",
+        "corpName": "스테이지원엔터",
+        "industry": "media",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091700",
+        "corpName": "파트론",
+        "industry": "electronics",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073570",
+        "corpName": "리튬포어스",
+        "industry": "misc",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 7
+  }
 }

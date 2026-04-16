@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>dartlab 변화 감지 · education</title>
+<link>https://eddmpython.github.io/dartlab/industry/education</link>
+<description>education 산업 이번 회계연도 급변 회사</description>
+<language>ko-kr</language>
+<lastBuildDate>Thu, 16 Apr 2026 09:50:46 +0000</lastBuildDate>
+<item>
+  <title>[수익성 개선 (ROE)] 멀티캠퍼스 (교육)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=067280</link>
+  <guid isPermaLink="false">profitImprove-067280-2025</guid>
+  <category>수익성 개선 (ROE)</category>
+  <description>ROE Δ+48.3%p · 산업 z=+2.3σ | 수익성 개선. 원인은 본업 회복/일회성 여부 확인.</description>
+</item>
+<item>
+  <title>[수익성 악화 (ROE)] 비유테크놀러지 (교육)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=230980</link>
+  <guid isPermaLink="false">profitDecline-230980-2025</guid>
+  <category>수익성 악화 (ROE)</category>
+  <description>ROE Δ-22.7%p · 산업 z=-2.1σ | 수익성 악화. 마진 압박/일회성 손실 가능성.</description>
+</item>
+<item>
+  <title>[매출 급락 (YoY -20% 이하)] 비유테크놀러지 (교육)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=230980</link>
+  <guid isPermaLink="false">revenueDrop-230980-2025</guid>
+  <category>매출 급락 (YoY -20% 이하)</category>
+  <description>매출 YoY -92.2% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
+</item>
+<item>
+  <title>[부채 스트레스] 비유테크놀러지 (교육)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=230980</link>
+  <guid isPermaLink="false">debtStress-230980-2025</guid>
+  <category>부채 스트레스</category>
+  <description>부채비율 1337% (+851%p) | 부채 급증 + 높은 절대값. 재무 스트레스 신호.</description>
+</item>
+</channel>
+</rss>

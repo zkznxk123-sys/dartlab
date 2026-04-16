@@ -4722,5 +4722,11 @@
       "stage": "airframe",
       "revenue": 36964
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [],
+    "hop2Edges": [],
+    "hub": true,
+    "direct1HopCount": 232
+  }
 }

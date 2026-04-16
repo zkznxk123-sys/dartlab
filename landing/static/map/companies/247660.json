@@ -132,5 +132,20 @@
       "stage": "",
       "revenue": 63555
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "226590",
+        "corpName": "엠디바이스",
+        "industry": "electronics",
+        "viaCode": "402490",
+        "viaName": "그린리소스",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

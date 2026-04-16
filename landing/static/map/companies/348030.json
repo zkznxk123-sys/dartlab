@@ -155,5 +155,76 @@
       "stage": "platform",
       "revenue": 80991
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "217270",
+        "corpName": "넵튠",
+        "industry": "software",
+        "viaCode": "095660",
+        "viaName": "네오위즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "216050",
+        "corpName": "인크로스",
+        "industry": "media",
+        "viaCode": "095660",
+        "viaName": "네오위즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "104200",
+        "corpName": "NHN벅스",
+        "industry": "media",
+        "viaCode": "095660",
+        "viaName": "네오위즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "042420",
+        "corpName": "네오위즈홀딩스",
+        "industry": "software",
+        "viaCode": "095660",
+        "viaName": "네오위즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060250",
+        "corpName": "NHN KCP",
+        "industry": "finance",
+        "viaCode": "095660",
+        "viaName": "네오위즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "181710",
+        "corpName": "NHN",
+        "industry": "software",
+        "viaCode": "095660",
+        "viaName": "네오위즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "170790",
+        "corpName": "파이오링크",
+        "industry": "telecom",
+        "viaCode": "095660",
+        "viaName": "네오위즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "112040",
+        "corpName": "위메이드",
+        "industry": "software",
+        "viaCode": "095660",
+        "viaName": "네오위즈",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

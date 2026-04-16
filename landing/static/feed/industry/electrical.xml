@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>dartlab 변화 감지 · electrical</title>
+<link>https://eddmpython.github.io/dartlab/industry/electrical</link>
+<description>electrical 산업 이번 회계연도 급변 회사</description>
+<language>ko-kr</language>
+<lastBuildDate>Thu, 16 Apr 2026 09:50:46 +0000</lastBuildDate>
+<item>
+  <title>[수익성 개선 (ROE)] 와이투솔루션 (전기장비)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=011690</link>
+  <guid isPermaLink="false">profitImprove-011690-2025</guid>
+  <category>수익성 개선 (ROE)</category>
+  <description>ROE Δ+95.2%p · 산업 z=+3.7σ | 수익성 개선. 원인은 본업 회복/일회성 여부 확인.</description>
+</item>
+<item>
+  <title>[수익성 악화 (ROE)] 센서뷰 (전기장비)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=321370</link>
+  <guid isPermaLink="false">profitDecline-321370-2025</guid>
+  <category>수익성 악화 (ROE)</category>
+  <description>ROE Δ-76.3%p · 산업 z=-3.4σ | 수익성 악화. 마진 압박/일회성 손실 가능성.</description>
+</item>
+</channel>
+</rss>

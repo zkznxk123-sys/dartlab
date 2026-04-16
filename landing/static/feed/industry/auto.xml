@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>dartlab 변화 감지 · auto</title>
+<link>https://eddmpython.github.io/dartlab/industry/auto</link>
+<description>auto 산업 이번 회계연도 급변 회사</description>
+<language>ko-kr</language>
+<lastBuildDate>Thu, 16 Apr 2026 09:50:46 +0000</lastBuildDate>
+<item>
+  <title>[수익성 개선 (ROE)] 두올 (자동차)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=016740</link>
+  <guid isPermaLink="false">profitImprove-016740-2025</guid>
+  <category>수익성 개선 (ROE)</category>
+  <description>ROE Δ+99.6%p · 산업 z=+2.1σ | 수익성 개선. 원인은 본업 회복/일회성 여부 확인.</description>
+</item>
+<item>
+  <title>[매출 급증 (YoY +30% 이상)] 나노실리칸첨단소재 (자동차)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=286750</link>
+  <guid isPermaLink="false">revenueSpike-286750-2025</guid>
+  <category>매출 급증 (YoY +30% 이상)</category>
+  <description>매출 YoY +1421.9% — 고성장 | 2024→2025 매출 급증. 신제품/시장 확대 가능성.</description>
+</item>
+<item>
+  <title>[부채 스트레스] 케이프 (자동차)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=064820</link>
+  <guid isPermaLink="false">debtStress-064820-2025</guid>
+  <category>부채 스트레스</category>
+  <description>부채비율 1442% (+14900%p) | 부채 급증 + 높은 절대값. 재무 스트레스 신호.</description>
+</item>
+<item>
+  <title>[⚠ 극단 변화 — 검증 필요] 디젠스 (자동차)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=113810</link>
+  <guid isPermaLink="false">extremeWarning-113810-2025</guid>
+  <category>⚠ 극단 변화 — 검증 필요</category>
+  <description>ROE Δ-4002.2%p — 극단 변화 | 1회성 이익/자본잠식/재분류 가능성. 원본 공시 검증 필요.</description>
+</item>
+</channel>
+</rss>

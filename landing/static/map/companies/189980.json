@@ -119,5 +119,100 @@
       "stage": "raw",
       "revenue": 44013
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "348370",
+        "corpName": "엔켐",
+        "industry": "battery",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006280",
+        "corpName": "녹십자",
+        "industry": "pharma",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307180",
+        "corpName": "아이엘",
+        "industry": "chemical",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "112610",
+        "corpName": "씨에스윈드",
+        "industry": "energy",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192080",
+        "corpName": "더블유게임즈",
+        "industry": "software",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "258790",
+        "corpName": "소프트캠프",
+        "industry": "software",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069460",
+        "corpName": "대호에이엘",
+        "industry": "retail",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "185750",
+        "corpName": "종근당",
+        "industry": "pharma",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "102460",
+        "corpName": "이연제약",
+        "industry": "pharma",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052860",
+        "corpName": "아이앤씨",
+        "industry": "semiconductor",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

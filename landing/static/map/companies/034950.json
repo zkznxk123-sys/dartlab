@@ -188,5 +188,665 @@
       "stage": "general",
       "revenue": 13276
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "030190",
+        "corpName": "NICE평가정보",
+        "industry": "software",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032830",
+        "corpName": "삼성생명",
+        "industry": "finance",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005610",
+        "corpName": "SPC삼립",
+        "industry": "food",
+        "viaCode": "001680",
+        "viaName": "대상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009150",
+        "corpName": "삼성전기",
+        "industry": "electronics",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000880",
+        "corpName": "한화",
+        "industry": "aerospace",
+        "viaCode": "001680",
+        "viaName": "대상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001750",
+        "corpName": "한양증권",
+        "industry": "finance",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "230240",
+        "corpName": "에치에프알",
+        "industry": "telecom",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028050",
+        "corpName": "삼성E&A",
+        "industry": "construction",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067280",
+        "corpName": "멀티캠퍼스",
+        "industry": "education",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010950",
+        "corpName": "S-Oil",
+        "industry": "chemical",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004270",
+        "corpName": "남성",
+        "industry": "telecom",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011170",
+        "corpName": "롯데케미칼",
+        "industry": "chemical",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029480",
+        "corpName": "광무",
+        "industry": "telecom",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "228850",
+        "corpName": "레이언스",
+        "industry": "medicalDevice",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "203650",
+        "corpName": "드림시큐리티",
+        "industry": "software",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004960",
+        "corpName": "한신공영",
+        "industry": "construction",
+        "viaCode": "001680",
+        "viaName": "대상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067830",
+        "corpName": "세이브존I&C",
+        "industry": "realestate",
+        "viaCode": "001680",
+        "viaName": "대상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "001680",
+        "viaName": "대상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051900",
+        "corpName": "LG생활건강",
+        "industry": "electronics",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038880",
+        "corpName": "아이에이",
+        "industry": "electronics",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010140",
+        "corpName": "삼성중공업",
+        "industry": "shipbuilding",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084690",
+        "corpName": "대상홀딩스",
+        "industry": "finance",
+        "viaCode": "001680",
+        "viaName": "대상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023410",
+        "corpName": "유진기업",
+        "industry": "construction",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "134380",
+        "corpName": "미원화학",
+        "industry": "cosmetics",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "026960",
+        "corpName": "동서",
+        "industry": "paper",
+        "viaCode": "001680",
+        "viaName": "대상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018260",
+        "corpName": "삼성에스디에스",
+        "industry": "shipbuilding",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "373110",
+        "corpName": "엑셀세라퓨틱스",
+        "industry": "pharma",
+        "viaCode": "001680",
+        "viaName": "대상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016580",
+        "corpName": "환인제약",
+        "industry": "food",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028260",
+        "corpName": "삼성물산",
+        "industry": "construction",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012750",
+        "corpName": "에스원",
+        "industry": "electronics",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352820",
+        "corpName": "하이브",
+        "industry": "media",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004970",
+        "corpName": "신라교역",
+        "industry": "auto",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "021880",
+        "corpName": "메이슨캐피탈",
+        "industry": "finance",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067370",
+        "corpName": "선바이오",
+        "industry": "chemical",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016360",
+        "corpName": "삼성증권",
+        "industry": "finance",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "300720",
+        "corpName": "한일시멘트",
+        "industry": "construction",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "115160",
+        "corpName": "휴맥스",
+        "industry": "electronics",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052860",
+        "corpName": "아이앤씨",
+        "industry": "semiconductor",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000810",
+        "corpName": "삼성화재해상보험",
+        "industry": "finance",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035600",
+        "corpName": "KG이니시스",
+        "industry": "software",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "0126Z0",
+        "corpName": "삼성에피스홀딩스",
+        "industry": "finance",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "278990",
+        "corpName": "EMB",
+        "industry": "battery",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078930",
+        "corpName": "GS",
+        "industry": "chemical",
+        "viaCode": "001680",
+        "viaName": "대상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086890",
+        "corpName": "이수앱지스",
+        "industry": "pharma",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007660",
+        "corpName": "이수페타시스",
+        "industry": "electronics",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030000",
+        "corpName": "제일기획",
+        "industry": "media",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004000",
+        "corpName": "롯데정밀화학",
+        "industry": "chemical",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012630",
+        "corpName": "HDC",
+        "industry": "finance",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028080",
+        "corpName": "휴맥스홀딩스",
+        "industry": "software",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "457190",
+        "corpName": "이수스페셜티케미컬",
+        "industry": "chemical",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007070",
+        "corpName": "GS리테일",
+        "industry": "retail",
+        "viaCode": "001680",
+        "viaName": "대상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003530",
+        "corpName": "한화투자증권",
+        "industry": "aerospace",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004170",
+        "corpName": "신세계",
+        "industry": "retail",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006400",
+        "corpName": "삼성SDI",
+        "industry": "chemical",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
+        "viaCode": "001680",
+        "viaName": "대상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005690",
+        "corpName": "파미셀",
+        "industry": "pharma",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038070",
+        "corpName": "서린바이오",
+        "industry": "retail",
+        "viaCode": "005950",
+        "viaName": "이수화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016250",
+        "corpName": "SGC E&C",
+        "industry": "construction",
+        "viaCode": "001680",
+        "viaName": "대상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001340",
+        "corpName": "PKC",
+        "industry": "chemical",
+        "viaCode": "001680",
+        "viaName": "대상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "207940",
+        "corpName": "삼성바이오로직스",
+        "industry": "pharma",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067390",
+        "corpName": "아스트",
+        "industry": "aerospace",
+        "viaCode": "001680",
+        "viaName": "대상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "339950",
+        "corpName": "아이비김영",
+        "industry": "education",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008770",
+        "corpName": "호텔신라",
+        "industry": "leisure",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001390",
+        "corpName": "KG케미칼",
+        "industry": "environment",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034310",
+        "corpName": "NICE",
+        "industry": "finance",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083450",
+        "corpName": "GST",
+        "industry": "chemical",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "029780",
+        "viaName": "삼성카드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "097950",
+        "corpName": "CJ제일제당",
+        "industry": "food",
+        "viaCode": "001680",
+        "viaName": "대상",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "001680",
+        "to": "005610",
+        "type": "supplier",
+        "amount": 8068920.0,
+        "ratio": null,
+        "product": "당류",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "005950",
+        "to": "051900",
+        "type": "supplier",
+        "amount": 2655.0,
+        "ratio": null,
+        "product": "소다회, AOS, 우지, Palm Stearin Oil 등",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 4
+  }
 }

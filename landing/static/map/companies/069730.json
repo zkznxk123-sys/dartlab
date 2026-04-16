@@ -192,5 +192,388 @@
       "stage": "processing",
       "revenue": 50486
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "004490",
+        "corpName": "세방전지",
+        "industry": "battery",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000810",
+        "corpName": "삼성화재해상보험",
+        "industry": "finance",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "462520",
+        "corpName": "조선내화",
+        "industry": "buildingMaterials",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005420",
+        "corpName": "코스모화학",
+        "industry": "chemical",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007770",
+        "corpName": "한일화학",
+        "industry": "chemical",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004890",
+        "corpName": "동일산업",
+        "industry": "steel",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "061970",
+        "corpName": "LB세미콘",
+        "industry": "semiconductor",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000880",
+        "corpName": "한화",
+        "industry": "aerospace",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006280",
+        "corpName": "녹십자",
+        "industry": "pharma",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000670",
+        "corpName": "영풍",
+        "industry": "retail",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014280",
+        "corpName": "금강공업",
+        "industry": "construction",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025820",
+        "corpName": "이구산업",
+        "industry": "realestate",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051910",
+        "corpName": "LG화학",
+        "industry": "chemical",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084010",
+        "corpName": "대한제강",
+        "industry": "construction",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079170",
+        "corpName": "한창산업",
+        "industry": "steel",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "103140",
+        "corpName": "풍산",
+        "industry": "steel",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006650",
+        "corpName": "대한유화",
+        "industry": "chemical",
+        "viaCode": "155660",
+        "viaName": "DSR",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007810",
+        "corpName": "코리아써키트",
+        "industry": "realestate",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005250",
+        "corpName": "녹십자홀딩스",
+        "industry": "pharma",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012160",
+        "corpName": "영흥",
+        "industry": "steel",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086790",
+        "corpName": "하나금융지주",
+        "industry": "finance",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036560",
+        "corpName": "KZ정밀",
+        "industry": "machinery",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037460",
+        "corpName": "삼지전자",
+        "industry": "telecom",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006340",
+        "corpName": "대원전선",
+        "industry": "electrical",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "317120",
+        "corpName": "라닉스",
+        "industry": "software",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051370",
+        "corpName": "인터플렉스",
+        "industry": "electronics",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071840",
+        "corpName": "롯데하이마트",
+        "industry": "retail",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006040",
+        "corpName": "동원산업",
+        "industry": "finance",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002240",
+        "corpName": "고려제강",
+        "industry": "steel",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000240",
+        "corpName": "한국앤컴퍼니",
+        "industry": "finance",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "306200",
+        "corpName": "세아제강",
+        "industry": "steel",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "055550",
+        "corpName": "신한지주",
+        "industry": "finance",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033170",
+        "corpName": "시그네틱스",
+        "industry": "semiconductor",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "346010",
+        "corpName": "타이드",
+        "industry": "electronics",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005810",
+        "corpName": "풍산홀딩스",
+        "industry": "retail",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161390",
+        "corpName": "한국타이어앤테크놀로지",
+        "industry": "auto",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013520",
+        "corpName": "화승코퍼레이션",
+        "industry": "plastic",
+        "viaCode": "010130",
+        "viaName": "고려아연",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

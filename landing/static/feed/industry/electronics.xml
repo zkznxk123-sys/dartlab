@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>dartlab 변화 감지 · electronics</title>
+<link>https://eddmpython.github.io/dartlab/industry/electronics</link>
+<description>electronics 산업 이번 회계연도 급변 회사</description>
+<language>ko-kr</language>
+<lastBuildDate>Thu, 16 Apr 2026 09:50:46 +0000</lastBuildDate>
+<item>
+  <title>[매출 급증 (YoY +30% 이상)] 디티씨 (전자부품)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=066670</link>
+  <guid isPermaLink="false">revenueSpike-066670-2025</guid>
+  <category>매출 급증 (YoY +30% 이상)</category>
+  <description>매출 YoY +5131.6% — 고성장 | 2024→2025 매출 급증. 신제품/시장 확대 가능성.</description>
+</item>
+<item>
+  <title>[매출 급락 (YoY -20% 이하)] 케이이엠텍 (전자부품)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=106080</link>
+  <guid isPermaLink="false">revenueDrop-106080-2025</guid>
+  <category>매출 급락 (YoY -20% 이하)</category>
+  <description>매출 YoY -91.5% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
+</item>
+<item>
+  <title>[매출 급락 (YoY -20% 이하)] 베셀 (전자부품)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=177350</link>
+  <guid isPermaLink="false">revenueDrop-177350-2025</guid>
+  <category>매출 급락 (YoY -20% 이하)</category>
+  <description>매출 YoY -86.2% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
+</item>
+<item>
+  <title>[부채 스트레스] 아진산업 (전자부품)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=013310</link>
+  <guid isPermaLink="false">debtStress-013310-2025</guid>
+  <category>부채 스트레스</category>
+  <description>부채비율 343% (+11751%p) | 부채 급증 + 높은 절대값. 재무 스트레스 신호.</description>
+</item>
+<item>
+  <title>[부채 스트레스] 디에이피 (전자부품)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=066900</link>
+  <guid isPermaLink="false">debtStress-066900-2025</guid>
+  <category>부채 스트레스</category>
+  <description>부채비율 1341% (+1335%p) | 부채 급증 + 높은 절대값. 재무 스트레스 신호.</description>
+</item>
+<item>
+  <title>[부채 스트레스] 미코 (전자부품)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=059090</link>
+  <guid isPermaLink="false">debtStress-059090-2025</guid>
+  <category>부채 스트레스</category>
+  <description>부채비율 229% (+848%p) | 부채 급증 + 높은 절대값. 재무 스트레스 신호.</description>
+</item>
+<item>
+  <title>[⚠ 극단 변화 — 검증 필요] 오디텍 (전자부품)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=080520</link>
+  <guid isPermaLink="false">extremeWarning-080520-2025</guid>
+  <category>⚠ 극단 변화 — 검증 필요</category>
+  <description>ROE Δ+2893.5%p — 극단 변화 | 1회성 이익/자본잠식/재분류 가능성. 원본 공시 검증 필요.</description>
+</item>
+<item>
+  <title>[⚠ 극단 변화 — 검증 필요] 동아엘텍 (전자부품)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=088130</link>
+  <guid isPermaLink="false">extremeWarning-088130-2025</guid>
+  <category>⚠ 극단 변화 — 검증 필요</category>
+  <description>ROE Δ-2107.2%p — 극단 변화 | 1회성 이익/자본잠식/재분류 가능성. 원본 공시 검증 필요.</description>
+</item>
+</channel>
+</rss>

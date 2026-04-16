@@ -150,5 +150,156 @@
       "stage": "imaging",
       "revenue": 3959
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "139050",
+        "corpName": "BF랩스",
+        "industry": "software",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065150",
+        "corpName": "대산F&B",
+        "industry": "leisure",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "076610",
+        "corpName": "해성옵틱스",
+        "industry": "electronics",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214430",
+        "corpName": "아이쓰리시스템",
+        "industry": "machinery",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "241520",
+        "corpName": "DSC인베스트먼트",
+        "industry": "finance",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "190510",
+        "corpName": "나무가",
+        "industry": "electronics",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "101400",
+        "viaName": "엔시트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "101400",
+        "viaName": "엔시트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "203690",
+        "corpName": "아크솔루션스",
+        "industry": "cosmetics",
+        "viaCode": "101400",
+        "viaName": "엔시트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091700",
+        "corpName": "파트론",
+        "industry": "electronics",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003580",
+        "corpName": "HLB글로벌",
+        "industry": "food",
+        "viaCode": "101400",
+        "viaName": "엔시트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086390",
+        "corpName": "유니테스트",
+        "industry": "semiconductor",
+        "viaCode": "101400",
+        "viaName": "엔시트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "297890",
+        "corpName": "HB솔루션",
+        "industry": "electronics",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019570",
+        "corpName": "플루토스",
+        "industry": "finance",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017900",
+        "corpName": "광전자",
+        "industry": "semiconductor",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123010",
+        "corpName": "알엔티엑스",
+        "industry": "semiconductor",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "365900",
+        "corpName": "브이씨",
+        "industry": "leisure",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084650",
+        "corpName": "랩지노믹스",
+        "industry": "pharma",
+        "viaCode": "101400",
+        "viaName": "엔시트론",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

@@ -91,5 +91,60 @@
       "stage": "",
       "revenue": 9601
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "092790",
+        "corpName": "넥스틸",
+        "industry": "medicalDevice",
+        "viaCode": "267320",
+        "viaName": "나인테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030610",
+        "corpName": "교보증권",
+        "industry": "finance",
+        "viaCode": "267320",
+        "viaName": "나인테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "434190",
+        "corpName": "탈로스",
+        "industry": "battery",
+        "viaCode": "267320",
+        "viaName": "나인테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348210",
+        "corpName": "넥스틴",
+        "industry": "semiconductor",
+        "viaCode": "267320",
+        "viaName": "나인테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "364950",
+        "corpName": "에이아이코리아",
+        "industry": "battery",
+        "viaCode": "267320",
+        "viaName": "나인테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "267320",
+        "viaName": "나인테크",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

@@ -138,5 +138,492 @@
       "stage": "retail",
       "revenue": 69295
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "083660",
+        "corpName": "CSA 코스믹",
+        "industry": "cosmetics",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033230",
+        "corpName": "인성정보",
+        "industry": "software",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377460",
+        "corpName": "위니아에이드",
+        "industry": "shipbuilding",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052400",
+        "corpName": "코나아이",
+        "industry": "telecom",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "244920",
+        "corpName": "에이플러스에셋",
+        "industry": "finance",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004560",
+        "corpName": "현대비앤지스틸",
+        "industry": "steel",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "234100",
+        "corpName": "폴라리스세원",
+        "industry": "electronics",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024840",
+        "corpName": "KBI메탈",
+        "industry": "auto",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099320",
+        "corpName": "쎄트렉아이",
+        "industry": "realestate",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "050860",
+        "corpName": "아세아텍",
+        "industry": "machinery",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086890",
+        "corpName": "이수앱지스",
+        "industry": "pharma",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008970",
+        "corpName": "KBI동양철관",
+        "industry": "construction",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267850",
+        "corpName": "아시아나IDT",
+        "industry": "software",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086280",
+        "corpName": "현대글로비스",
+        "industry": "logistics",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002320",
+        "corpName": "한진",
+        "industry": "logistics",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "021240",
+        "corpName": "코웨이",
+        "industry": "electronics",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058430",
+        "corpName": "포스코스틸리온",
+        "industry": "steel",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065680",
+        "corpName": "우주일렉트로",
+        "industry": "electronics",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003490",
+        "corpName": "대한항공",
+        "industry": "logistics",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "182360",
+        "corpName": "큐브엔터",
+        "industry": "media",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007660",
+        "corpName": "이수페타시스",
+        "industry": "electronics",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "299030",
+        "corpName": "하나기술",
+        "industry": "machinery",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001500",
+        "corpName": "현대차증권",
+        "industry": "realestate",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012330",
+        "corpName": "현대모비스",
+        "industry": "auto",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005490",
+        "corpName": "POSCO홀딩스",
+        "industry": "steel",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047050",
+        "corpName": "포스코인터내셔널",
+        "industry": "steel",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123010",
+        "corpName": "알엔티엑스",
+        "industry": "semiconductor",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298690",
+        "corpName": "에어부산",
+        "industry": "aerospace",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001020",
+        "corpName": "페이퍼코리아",
+        "industry": "construction",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "022100",
+        "corpName": "포스코DX",
+        "industry": "steel",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006740",
+        "corpName": "블루산업개발",
+        "industry": "paper",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067390",
+        "corpName": "아스트",
+        "industry": "aerospace",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078340",
+        "corpName": "컴투스",
+        "industry": "software",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001620",
+        "corpName": "케이비아이동국실업",
+        "industry": "electronics",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "272450",
+        "corpName": "진에어",
+        "industry": "aerospace",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003070",
+        "corpName": "코오롱글로벌",
+        "industry": "construction",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005430",
+        "corpName": "한국공항",
+        "industry": "aerospace",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307950",
+        "corpName": "현대오토에버",
+        "industry": "software",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041020",
+        "corpName": "폴라리스오피스",
+        "industry": "software",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011210",
+        "corpName": "현대위아",
+        "industry": "auto",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "020560",
+        "corpName": "아시아나항공",
+        "industry": "aerospace",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352820",
+        "corpName": "하이브",
+        "industry": "media",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "077970",
+        "corpName": "STX엔진",
+        "industry": "auto",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005380",
+        "corpName": "현대자동차",
+        "industry": "auto",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064350",
+        "corpName": "현대로템",
+        "industry": "railroad",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "021880",
+        "corpName": "메이슨캐피탈",
+        "industry": "finance",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "114630",
+        "corpName": "폴라리스우노",
+        "industry": "chemical",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044180",
+        "corpName": "KD",
+        "industry": "construction",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "180640",
+        "corpName": "한진칼",
+        "industry": "consulting",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005950",
+        "corpName": "이수화학",
+        "industry": "food",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009520",
+        "corpName": "포스코엠텍",
+        "industry": "steel",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "120110",
+        "corpName": "코오롱인더",
+        "industry": "plastic",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003670",
+        "corpName": "포스코퓨처엠",
+        "industry": "steel",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069540",
+        "corpName": "빛과전자",
+        "industry": "telecom",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "224060",
+        "corpName": "더코디",
+        "industry": "electronics",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214320",
+        "corpName": "이노션",
+        "industry": "media",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000270",
+        "corpName": "기아",
+        "industry": "auto",
+        "viaCode": "038880",
+        "viaName": "아이에이",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

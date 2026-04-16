@@ -535,8 +535,18 @@
 	<title>산업지도 | dartlab 전자공시</title>
 	<meta
 		name="description"
-		content="한국 상장사 2,664사 산업 생태계 지도. 34개 산업 → 공급망 드릴다운."
+		content="한국 상장사 2,664사 · 34개 산업 · 공급망 18,418 관계. 10초 안에 보는 산업 생태계 지도."
 	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="dartlab 산업지도 — 한국 상장사 2,664사 생태계" />
+	<meta
+		property="og:description"
+		content="34 산업 × 공급망 드릴다운 · 변화 감지 · 조건 검색 · 비교. 10초 안에 보는 지도."
+	/>
+	<meta property="og:image" content="https://eddmpython.github.io/dartlab/og-image.png" />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
 <div class="map-page">

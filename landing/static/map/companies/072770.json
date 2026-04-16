@@ -119,5 +119,84 @@
       "stage": "service",
       "revenue": 13713
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "078590",
+        "corpName": "휴림에이텍",
+        "industry": "auto",
+        "viaCode": "033540",
+        "viaName": "파라텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "263860",
+        "corpName": "지니언스",
+        "industry": "telecom",
+        "viaCode": "033540",
+        "viaName": "파라텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054180",
+        "corpName": "메디콕스",
+        "industry": "shipbuilding",
+        "viaCode": "033540",
+        "viaName": "파라텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "033540",
+        "viaName": "파라텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034230",
+        "corpName": "파라다이스",
+        "industry": "leisure",
+        "viaCode": "033540",
+        "viaName": "파라텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090710",
+        "corpName": "휴림로봇",
+        "industry": "machinery",
+        "viaCode": "033540",
+        "viaName": "파라텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000050",
+        "corpName": "경방",
+        "industry": "retail",
+        "viaCode": "033540",
+        "viaName": "파라텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013700",
+        "corpName": "까뮤이앤씨",
+        "industry": "realestate",
+        "viaCode": "033540",
+        "viaName": "파라텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192410",
+        "corpName": "오늘이엔엠",
+        "industry": "telecom",
+        "viaCode": "033540",
+        "viaName": "파라텍",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

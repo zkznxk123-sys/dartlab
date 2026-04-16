@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>dartlab 변화 감지 · retail</title>
+<link>https://eddmpython.github.io/dartlab/industry/retail</link>
+<description>retail 산업 이번 회계연도 급변 회사</description>
+<language>ko-kr</language>
+<lastBuildDate>Thu, 16 Apr 2026 09:50:46 +0000</lastBuildDate>
+<item>
+  <title>[⚠ 극단 변화 — 검증 필요] 소노스퀘어 (유통·소매)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=007720</link>
+  <guid isPermaLink="false">extremeWarning-007720-2025</guid>
+  <category>⚠ 극단 변화 — 검증 필요</category>
+  <description>ROE Δ-320770.5%p — 극단 변화 | 1회성 이익/자본잠식/재분류 가능성. 원본 공시 검증 필요.</description>
+</item>
+<item>
+  <title>[⚠ 극단 변화 — 검증 필요] SG세계물산 (유통·소매)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=004060</link>
+  <guid isPermaLink="false">extremeWarning-004060-2025</guid>
+  <category>⚠ 극단 변화 — 검증 필요</category>
+  <description>ROE Δ+19040.3%p — 극단 변화 | 1회성 이익/자본잠식/재분류 가능성. 원본 공시 검증 필요.</description>
+</item>
+</channel>
+</rss>

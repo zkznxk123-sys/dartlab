@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>dartlab 변화 감지 · buildingMaterials</title>
+<link>https://eddmpython.github.io/dartlab/industry/buildingMaterials</link>
+<description>buildingMaterials 산업 이번 회계연도 급변 회사</description>
+<language>ko-kr</language>
+<lastBuildDate>Thu, 16 Apr 2026 09:50:46 +0000</lastBuildDate>
+<item>
+  <title>[수익성 악화 (ROE)] 대림통상 (시멘트·요업)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=006570</link>
+  <guid isPermaLink="false">profitDecline-006570-2025</guid>
+  <category>수익성 악화 (ROE)</category>
+  <description>ROE Δ-8.5%p · 산업 z=-2.4σ | 수익성 악화. 마진 압박/일회성 손실 가능성.</description>
+</item>
+</channel>
+</rss>

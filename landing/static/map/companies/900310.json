@@ -125,5 +125,11 @@
       "stage": "manufacturing",
       "revenue": 11163
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

@@ -128,5 +128,36 @@
       "stage": "general",
       "revenue": 8027
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "086060",
+        "corpName": "진바이오텍",
+        "industry": "food",
+        "viaCode": "289170",
+        "viaName": "바이오텐",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "289170",
+        "viaName": "바이오텐",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018700",
+        "corpName": "바른손",
+        "industry": "retail",
+        "viaCode": "289170",
+        "viaName": "바이오텐",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

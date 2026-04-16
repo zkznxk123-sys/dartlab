@@ -131,5 +131,60 @@
       "stage": "service",
       "revenue": 13713
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "036690",
+        "corpName": "코맥스",
+        "industry": "electronics",
+        "viaCode": "064260",
+        "viaName": "다날",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018700",
+        "corpName": "바른손",
+        "industry": "retail",
+        "viaCode": "064260",
+        "viaName": "다날",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "064260",
+        "viaName": "다날",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
+        "viaCode": "064260",
+        "viaName": "다날",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035620",
+        "corpName": "바른손이앤에이",
+        "industry": "finance",
+        "viaCode": "064260",
+        "viaName": "다날",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307930",
+        "corpName": "컴퍼니케이",
+        "industry": "finance",
+        "viaCode": "064260",
+        "viaName": "다날",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

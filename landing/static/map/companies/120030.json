@@ -229,5 +229,913 @@
       "stage": "processing",
       "revenue": 50486
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "005070",
+        "corpName": "코스모신소재",
+        "industry": "battery",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068790",
+        "corpName": "DMS",
+        "industry": "electronics",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002900",
+        "corpName": "TYM",
+        "industry": "retail",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "271980",
+        "corpName": "제일약품",
+        "industry": "pharma",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034730",
+        "corpName": "SK",
+        "industry": "software",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "100840",
+        "viaName": "SNT에너지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "industry": "buildingMaterials",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038530",
+        "corpName": "케이바이오",
+        "industry": "retail",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060570",
+        "corpName": "드림어스컴퍼니",
+        "industry": "media",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010780",
+        "corpName": "아이에스동서",
+        "industry": "food",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039200",
+        "corpName": "오스코텍",
+        "industry": "pharma",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "183490",
+        "corpName": "엔지켐생명과학",
+        "industry": "pharma",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078140",
+        "corpName": "대봉엘에스",
+        "industry": "cosmetics",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003520",
+        "corpName": "영진약품",
+        "industry": "pharma",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "210980",
+        "corpName": "SK디앤디",
+        "industry": "software",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011170",
+        "corpName": "롯데케미칼",
+        "industry": "chemical",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307180",
+        "corpName": "아이엘",
+        "industry": "chemical",
+        "viaCode": "100840",
+        "viaName": "SNT에너지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039860",
+        "corpName": "나노엔텍",
+        "industry": "pharma",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001740",
+        "corpName": "SK네트웍스",
+        "industry": "software",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013570",
+        "corpName": "디와이",
+        "industry": "electronics",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079430",
+        "corpName": "현대리바트",
+        "industry": "paper",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "475150",
+        "corpName": "SK이터닉스",
+        "industry": "software",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007820",
+        "corpName": "에스엠코어",
+        "industry": "machinery",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023410",
+        "corpName": "유진기업",
+        "industry": "construction",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "134380",
+        "corpName": "미원화학",
+        "industry": "cosmetics",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052260",
+        "corpName": "현대바이오랜드",
+        "industry": "chemical",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
+        "industry": "chemical",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100090",
+        "corpName": "SK오션플랜트",
+        "industry": "software",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "326030",
+        "corpName": "에스케이바이오팜",
+        "industry": "pharma",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033270",
+        "corpName": "유나이티드",
+        "industry": "pharma",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089590",
+        "corpName": "제주항공",
+        "industry": "aerospace",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001540",
+        "corpName": "안국약품",
+        "industry": "pharma",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "361610",
+        "corpName": "SK아이이테크놀로지",
+        "industry": "software",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091120",
+        "corpName": "이엠텍",
+        "industry": "electronics",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092220",
+        "corpName": "KEC",
+        "industry": "semiconductor",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014280",
+        "corpName": "금강공업",
+        "industry": "construction",
+        "viaCode": "000590",
+        "viaName": "CS홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000050",
+        "corpName": "경방",
+        "industry": "retail",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003570",
+        "corpName": "SNT다이내믹스",
+        "industry": "machinery",
+        "viaCode": "100840",
+        "viaName": "SNT에너지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008490",
+        "corpName": "서흥",
+        "industry": "chemical",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038010",
+        "corpName": "제일테크노스",
+        "industry": "semiconductor",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036530",
+        "corpName": "SNT홀딩스",
+        "industry": "finance",
+        "viaCode": "100840",
+        "viaName": "SNT에너지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012750",
+        "corpName": "에스원",
+        "industry": "electronics",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "040300",
+        "corpName": "YTN",
+        "industry": "media",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214390",
+        "corpName": "경보제약",
+        "industry": "pharma",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095340",
+        "corpName": "ISC",
+        "industry": "retail",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054620",
+        "corpName": "APS",
+        "industry": "telecom",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "219750",
+        "corpName": "한국비티비",
+        "industry": "pharma",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016360",
+        "corpName": "삼성증권",
+        "industry": "finance",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "311390",
+        "corpName": "네오크레마",
+        "industry": "food",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "300720",
+        "corpName": "한일시멘트",
+        "industry": "construction",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000810",
+        "corpName": "삼성화재해상보험",
+        "industry": "finance",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161890",
+        "corpName": "한국콜마",
+        "industry": "cosmetics",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003240",
+        "corpName": "태광산업",
+        "industry": "chemical",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024720",
+        "corpName": "콜마홀딩스",
+        "industry": "retail",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "241840",
+        "corpName": "에이스토리",
+        "industry": "telecom",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "216050",
+        "corpName": "인크로스",
+        "industry": "media",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "190650",
+        "corpName": "코리아에셋투자증권",
+        "industry": "finance",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090430",
+        "corpName": "아모레퍼시픽",
+        "industry": "cosmetics",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054210",
+        "corpName": "이랜텍",
+        "industry": "electronics",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "251970",
+        "corpName": "펌텍코리아",
+        "industry": "cosmetics",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015760",
+        "corpName": "한국전력공사",
+        "industry": "energy",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000210",
+        "corpName": "DL",
+        "industry": "construction",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009240",
+        "corpName": "한샘",
+        "industry": "construction",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038500",
+        "corpName": "삼표시멘트",
+        "industry": "construction",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "128940",
+        "corpName": "한미약품",
+        "industry": "pharma",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037460",
+        "corpName": "삼지전자",
+        "industry": "telecom",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348350",
+        "corpName": "위드텍",
+        "industry": "electronics",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012630",
+        "corpName": "HDC",
+        "industry": "finance",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "353190",
+        "corpName": "휴럼",
+        "industry": "food",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018670",
+        "corpName": "SK가스",
+        "industry": "software",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "460860",
+        "corpName": "동국제강",
+        "industry": "steel",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004170",
+        "corpName": "신세계",
+        "industry": "retail",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011790",
+        "corpName": "SKC",
+        "industry": "software",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005420",
+        "corpName": "코스모화학",
+        "industry": "chemical",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "321550",
+        "corpName": "티움바이오",
+        "industry": "textile",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006110",
+        "corpName": "삼아알미늄",
+        "industry": "food",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023900",
+        "corpName": "풍국주정",
+        "industry": "pharma",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "302440",
+        "corpName": "SK바이오사이언스",
+        "industry": "pharma",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004440",
+        "corpName": "삼일씨엔에스",
+        "industry": "buildingMaterials",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011040",
+        "corpName": "경동제약",
+        "industry": "pharma",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079980",
+        "corpName": "휴비스",
+        "industry": "textile",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003300",
+        "corpName": "한일홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "285130",
+        "viaName": "SK케미칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017480",
+        "corpName": "삼현철강",
+        "industry": "steel",
+        "viaCode": "100840",
+        "viaName": "SNT에너지",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "006650",
+        "to": "285130",
+        "type": "supplier",
+        "amount": 167893.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "023410",
+        "to": "375500",
+        "type": "supplier",
+        "amount": 137414.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "004020",
+        "to": "375500",
+        "type": "supplier",
+        "amount": 93947.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "460860",
+        "to": "375500",
+        "type": "supplier",
+        "amount": 93947.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "079430",
+        "to": "375500",
+        "type": "supplier",
+        "amount": 71217.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "002840",
+        "to": "033780",
+        "type": "supplier",
+        "amount": 35080.0,
+        "ratio": null,
+        "product": "Ethyl Alcohol, XF49-C3281/SF-C0813,Mihapol PBS-50, Micolin A-526 외",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "078140",
+        "to": "033780",
+        "type": "supplier",
+        "amount": 35080.0,
+        "ratio": null,
+        "product": "Ethyl Alcohol, XF49-C3281/SF-C0813,Mihapol PBS-50, Micolin A-526 외",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "038500",
+        "to": "375500",
+        "type": "supplier",
+        "amount": 18245.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "183490",
+        "to": "285130",
+        "type": "supplier",
+        "amount": 12800.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "271980",
+        "to": "033780",
+        "type": "supplier",
+        "amount": 3549.0,
+        "ratio": null,
+        "product": "CMZ(I)",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 5
+  }
 }

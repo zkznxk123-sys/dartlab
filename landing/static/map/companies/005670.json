@@ -147,5 +147,252 @@
       "stage": "raw",
       "revenue": 44013
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "222040",
+        "corpName": "코스맥스엔비티",
+        "industry": "pharma",
+        "viaCode": "217480",
+        "viaName": "에스디생명공학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002900",
+        "corpName": "TYM",
+        "industry": "retail",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "393970",
+        "corpName": "대진첨단소재",
+        "industry": "chemical",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038530",
+        "corpName": "케이바이오",
+        "industry": "retail",
+        "viaCode": "217480",
+        "viaName": "에스디생명공학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085660",
+        "corpName": "차바이오텍",
+        "industry": "pharma",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065680",
+        "corpName": "우주일렉트로",
+        "industry": "electronics",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "220100",
+        "corpName": "퓨쳐켐",
+        "industry": "chemical",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "106080",
+        "corpName": "케이이엠텍",
+        "industry": "electronics",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "273640",
+        "corpName": "와이엠텍",
+        "industry": "electrical",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058820",
+        "corpName": "CMG제약",
+        "industry": "pharma",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082270",
+        "corpName": "젬백스",
+        "industry": "software",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192820",
+        "corpName": "코스맥스",
+        "industry": "cosmetics",
+        "viaCode": "217480",
+        "viaName": "에스디생명공학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161890",
+        "corpName": "한국콜마",
+        "industry": "cosmetics",
+        "viaCode": "217480",
+        "viaName": "에스디생명공학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090460",
+        "corpName": "비에이치",
+        "industry": "electronics",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009190",
+        "corpName": "대양금속",
+        "industry": "steel",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "194700",
+        "corpName": "노바렉스",
+        "industry": "pharma",
+        "viaCode": "217480",
+        "viaName": "에스디생명공학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003530",
+        "corpName": "한화투자증권",
+        "industry": "aerospace",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "217480",
+        "viaName": "에스디생명공학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "118990",
+        "corpName": "모트렉스",
+        "industry": "auto",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "241710",
+        "corpName": "코스메카코리아",
+        "industry": "cosmetics",
+        "viaCode": "217480",
+        "viaName": "에스디생명공학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "236810",
+        "corpName": "엔비티",
+        "industry": "software",
+        "viaCode": "217480",
+        "viaName": "에스디생명공학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003220",
+        "corpName": "대원제약",
+        "industry": "pharma",
+        "viaCode": "217480",
+        "viaName": "에스디생명공학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "251370",
+        "corpName": "와이엠티",
+        "industry": "electronics",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "175250",
+        "corpName": "아이큐어",
+        "industry": "cosmetics",
+        "viaCode": "217480",
+        "viaName": "에스디생명공학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "155650",
+        "corpName": "와이엠씨",
+        "industry": "semiconductor",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217590",
+        "corpName": "티엠씨",
+        "industry": "electrical",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

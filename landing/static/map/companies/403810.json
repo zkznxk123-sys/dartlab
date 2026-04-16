@@ -95,5 +95,316 @@
       "stage": "retail",
       "revenue": 69295
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "121440",
+        "corpName": "골프존홀딩스",
+        "industry": "leisure",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001230",
+        "corpName": "동국홀딩스",
+        "industry": "steel",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "107600",
+        "corpName": "새빗켐",
+        "industry": "environment",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035290",
+        "corpName": "골드앤에스",
+        "industry": "media",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068790",
+        "corpName": "DMS",
+        "industry": "electronics",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "238090",
+        "corpName": "앤디포스",
+        "industry": "plastic",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "253450",
+        "corpName": "스튜디오드래곤",
+        "industry": "media",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009160",
+        "corpName": "SIMPAC",
+        "industry": "auto",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079550",
+        "corpName": "LIG넥스원",
+        "industry": "aerospace",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073490",
+        "corpName": "이노와이어리스",
+        "industry": "machinery",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "049520",
+        "corpName": "유아이엘",
+        "industry": "electronics",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011150",
+        "corpName": "CJ씨푸드",
+        "industry": "food",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052300",
+        "corpName": "오션인더블유",
+        "industry": "logistics",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038530",
+        "corpName": "케이바이오",
+        "industry": "retail",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031330",
+        "corpName": "에스에이엠티",
+        "industry": "electronics",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "366030",
+        "corpName": "공구우먼",
+        "industry": "textile",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "045100",
+        "corpName": "한양이엔지",
+        "industry": "consulting",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001040",
+        "corpName": "CJ",
+        "industry": "food",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079810",
+        "corpName": "디이엔티",
+        "industry": "electrical",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "215000",
+        "corpName": "골프존",
+        "industry": "leisure",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000120",
+        "corpName": "CJ대한통운",
+        "industry": "food",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079160",
+        "corpName": "CJ CGV",
+        "industry": "food",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000500",
+        "corpName": "가온전선",
+        "industry": "retail",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "129260",
+        "corpName": "인터지스",
+        "industry": "logistics",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035760",
+        "corpName": "CJ ENM",
+        "industry": "media",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "097230",
+        "corpName": "HJ중공업",
+        "industry": "construction",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377030",
+        "corpName": "비트맥스",
+        "industry": "software",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100840",
+        "corpName": "SNT에너지",
+        "industry": "machinery",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001740",
+        "corpName": "SK네트웍스",
+        "industry": "software",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051500",
+        "corpName": "CJ프레시웨이",
+        "industry": "food",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065570",
+        "corpName": "삼영이엔씨",
+        "industry": "telecom",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "097950",
+        "corpName": "CJ제일제당",
+        "industry": "food",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "311690",
+        "corpName": "CJ 바이오사이언스",
+        "industry": "food",
+        "viaCode": "307180",
+        "viaName": "아이엘",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

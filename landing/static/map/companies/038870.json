@@ -274,5 +274,292 @@
       "stage": "general",
       "revenue": 13276
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "068790",
+        "corpName": "DMS",
+        "industry": "electronics",
+        "viaCode": "126600",
+        "viaName": "BGF에코머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "105330",
+        "corpName": "케이엔더블유",
+        "industry": "plastic",
+        "viaCode": "126600",
+        "viaName": "BGF에코머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "131760",
+        "corpName": "파인텍",
+        "industry": "electronics",
+        "viaCode": "089970",
+        "viaName": "브이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008930",
+        "corpName": "한미사이언스",
+        "industry": "pharma",
+        "viaCode": "089970",
+        "viaName": "브이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027830",
+        "corpName": "대성창투",
+        "industry": "finance",
+        "viaCode": "089970",
+        "viaName": "브이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "089470",
+        "viaName": "HDC현대EP",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "251970",
+        "corpName": "펌텍코리아",
+        "industry": "cosmetics",
+        "viaCode": "089970",
+        "viaName": "브이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011780",
+        "corpName": "금호석유화학",
+        "industry": "chemical",
+        "viaCode": "089470",
+        "viaName": "HDC현대EP",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099520",
+        "corpName": "DGI",
+        "industry": "retail",
+        "viaCode": "089970",
+        "viaName": "브이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298000",
+        "corpName": "효성화학",
+        "industry": "chemical",
+        "viaCode": "126600",
+        "viaName": "BGF에코머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051910",
+        "corpName": "LG화학",
+        "industry": "chemical",
+        "viaCode": "089470",
+        "viaName": "HDC현대EP",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067390",
+        "corpName": "아스트",
+        "industry": "aerospace",
+        "viaCode": "126600",
+        "viaName": "BGF에코머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "128940",
+        "corpName": "한미약품",
+        "industry": "pharma",
+        "viaCode": "089970",
+        "viaName": "브이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065530",
+        "corpName": "와이어블",
+        "industry": "telecom",
+        "viaCode": "050090",
+        "viaName": "비케이홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "240810",
+        "corpName": "원익IPS",
+        "industry": "semiconductor",
+        "viaCode": "089970",
+        "viaName": "브이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001620",
+        "corpName": "케이비아이동국실업",
+        "industry": "electronics",
+        "viaCode": "089470",
+        "viaName": "HDC현대EP",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006650",
+        "corpName": "대한유화",
+        "industry": "chemical",
+        "viaCode": "089470",
+        "viaName": "HDC현대EP",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053610",
+        "corpName": "프로텍",
+        "industry": "chemical",
+        "viaCode": "089970",
+        "viaName": "브이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "089970",
+        "viaName": "브이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011170",
+        "corpName": "롯데케미칼",
+        "industry": "chemical",
+        "viaCode": "126600",
+        "viaName": "BGF에코머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034310",
+        "corpName": "NICE",
+        "industry": "finance",
+        "viaCode": "027410",
+        "viaName": "BGF",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016090",
+        "corpName": "대현",
+        "industry": "retail",
+        "viaCode": "089970",
+        "viaName": "브이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054950",
+        "corpName": "제이브이엠",
+        "industry": "machinery",
+        "viaCode": "089970",
+        "viaName": "브이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007210",
+        "corpName": "벽산",
+        "industry": "auto",
+        "viaCode": "126600",
+        "viaName": "BGF에코머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016710",
+        "corpName": "대성홀딩스",
+        "industry": "realestate",
+        "viaCode": "089970",
+        "viaName": "브이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012630",
+        "corpName": "HDC",
+        "industry": "finance",
+        "viaCode": "089470",
+        "viaName": "HDC현대EP",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "900140",
+        "corpName": "엘브이엠씨",
+        "industry": "retail",
+        "viaCode": "089970",
+        "viaName": "브이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "119830",
+        "corpName": "아이텍",
+        "industry": "semiconductor",
+        "viaCode": "043910",
+        "viaName": "자연과환경",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298020",
+        "corpName": "효성티앤씨",
+        "industry": "chemical",
+        "viaCode": "126600",
+        "viaName": "BGF에코머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000300",
+        "corpName": "DH오토넥스",
+        "industry": "telecom",
+        "viaCode": "089470",
+        "viaName": "HDC현대EP",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "290120",
+        "corpName": "DH오토리드",
+        "industry": "auto",
+        "viaCode": "089470",
+        "viaName": "HDC현대EP",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000040",
+        "corpName": "KR모터스",
+        "industry": "food",
+        "viaCode": "089970",
+        "viaName": "브이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "050090",
+        "viaName": "비케이홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "027410",
+        "viaName": "BGF",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038680",
+        "corpName": "에스넷",
+        "industry": "food",
+        "viaCode": "027410",
+        "viaName": "BGF",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 7
+  }
 }

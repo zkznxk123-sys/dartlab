@@ -336,5 +336,812 @@
       "stage": "formulation",
       "revenue": 20684
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "005070",
+        "corpName": "코스모신소재",
+        "industry": "battery",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "354320",
+        "corpName": "알멕",
+        "industry": "plastic",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298040",
+        "corpName": "효성중공업",
+        "industry": "chemical",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024880",
+        "corpName": "케이피에프",
+        "industry": "steel",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002780",
+        "corpName": "진흥기업",
+        "industry": "construction",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014710",
+        "corpName": "사조씨푸드",
+        "industry": "agriculture",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "117730",
+        "corpName": "티로보틱스",
+        "industry": "machinery",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "222670",
+        "corpName": "플럼라인생명과학",
+        "industry": "pharma",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060570",
+        "corpName": "드림어스컴퍼니",
+        "industry": "media",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "097780",
+        "corpName": "에코볼트",
+        "industry": "electronics",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "094480",
+        "corpName": "갤럭시아머니트리",
+        "industry": "finance",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095720",
+        "corpName": "웅진씽크빅",
+        "industry": "realestate",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "226590",
+        "corpName": "엠디바이스",
+        "industry": "electronics",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002020",
+        "corpName": "코오롱",
+        "industry": "finance",
+        "viaCode": "060590",
+        "viaName": "씨티씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "183300",
+        "corpName": "코미코",
+        "industry": "electronics",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "080530",
+        "corpName": "코디",
+        "industry": "cosmetics",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069140",
+        "corpName": "누리플랜",
+        "industry": "steel",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "462510",
+        "corpName": "라메디텍",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "246960",
+        "corpName": "SCL사이언스",
+        "industry": "chemical",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "115180",
+        "corpName": "큐리언트",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082270",
+        "corpName": "젬백스",
+        "industry": "software",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "210980",
+        "corpName": "SK디앤디",
+        "industry": "software",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078600",
+        "corpName": "대주전자재료",
+        "industry": "battery",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "127710",
+        "corpName": "아시아경제",
+        "industry": "media",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "357580",
+        "corpName": "아모센스",
+        "industry": "auto",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006090",
+        "corpName": "사조오양",
+        "industry": "realestate",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025900",
+        "corpName": "동화기업",
+        "industry": "paper",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011420",
+        "corpName": "갤럭시아에스엠",
+        "industry": "media",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009320",
+        "corpName": "아진전자부품",
+        "industry": "electronics",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "048530",
+        "corpName": "인트론바이오",
+        "industry": "pharma",
+        "viaCode": "060590",
+        "viaName": "씨티씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001740",
+        "corpName": "SK네트웍스",
+        "industry": "software",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "347850",
+        "corpName": "디앤디파마텍",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "381620",
+        "corpName": "제닉스로보틱스",
+        "industry": "machinery",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096760",
+        "corpName": "JW홀딩스",
+        "industry": "retail",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "464500",
+        "corpName": "아이언디바이스",
+        "industry": "semiconductor",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086450",
+        "corpName": "동국제약",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "290650",
+        "corpName": "엘앤씨바이오",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "142280",
+        "corpName": "녹십자엠에스",
+        "industry": "pharma",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267250",
+        "corpName": "HD현대",
+        "industry": "shipbuilding",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "214450",
+        "viaName": "파마리서치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067990",
+        "corpName": "도이치모터스",
+        "industry": "retail",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018310",
+        "corpName": "삼목에스폼",
+        "industry": "plastic",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "218150",
+        "corpName": "미래생명자원",
+        "industry": "food",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064820",
+        "corpName": "케이프",
+        "industry": "auto",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
+        "viaCode": "214450",
+        "viaName": "파마리서치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "213420",
+        "corpName": "덕산네오룩스",
+        "industry": "electronics",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "278470",
+        "corpName": "에이피알",
+        "industry": "cosmetics",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033240",
+        "corpName": "자화전자",
+        "industry": "electronics",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052710",
+        "corpName": "아모텍",
+        "industry": "electronics",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
+        "industry": "chemical",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032350",
+        "corpName": "롯데관광개발",
+        "industry": "realestate",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "418550",
+        "corpName": "제이오",
+        "industry": "consulting",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092220",
+        "corpName": "KEC",
+        "industry": "semiconductor",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091120",
+        "corpName": "이엠텍",
+        "industry": "electronics",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067920",
+        "corpName": "이글루",
+        "industry": "software",
+        "viaCode": "214450",
+        "viaName": "파마리서치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003960",
+        "corpName": "사조대림",
+        "industry": "food",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "131220",
+        "corpName": "대한과학",
+        "industry": "retail",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "358570",
+        "corpName": "지아이이노베이션",
+        "industry": "pharma",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017180",
+        "corpName": "명문제약",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "487570",
+        "corpName": "HS효성",
+        "industry": "chemical",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018260",
+        "corpName": "삼성에스디에스",
+        "industry": "shipbuilding",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079160",
+        "corpName": "CJ CGV",
+        "industry": "food",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "185490",
+        "corpName": "아이진",
+        "industry": "pharma",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "103140",
+        "corpName": "풍산",
+        "industry": "steel",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006200",
+        "corpName": "한국전자홀딩스",
+        "industry": "consulting",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307750",
+        "corpName": "국전약품",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092040",
+        "corpName": "아미코젠",
+        "industry": "food",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "338220",
+        "corpName": "뷰노",
+        "industry": "software",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "214450",
+        "viaName": "파마리서치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "382840",
+        "corpName": "원준",
+        "industry": "machinery",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "314130",
+        "corpName": "지놈앤컴퍼니",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352820",
+        "corpName": "하이브",
+        "industry": "media",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088390",
+        "corpName": "이녹스",
+        "industry": "railroad",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "376930",
+        "corpName": "노을",
+        "industry": "software",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067630",
+        "corpName": "HLB생명과학",
+        "industry": "pharma",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "103590",
+        "corpName": "일진전기",
+        "industry": "electrical",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "097520",
+        "corpName": "엠씨넥스",
+        "industry": "electronics",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192650",
+        "corpName": "드림텍",
+        "industry": "electronics",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033780",
+        "corpName": "케이티앤지",
+        "industry": "food",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066360",
+        "corpName": "체리부로",
+        "industry": "food",
+        "viaCode": "060590",
+        "viaName": "씨티씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "234080",
+        "corpName": "JW생명과학",
+        "industry": "pharma",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "062040",
+        "corpName": "산일전기",
+        "industry": "electrical",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "389470",
+        "corpName": "인벤티지랩",
+        "industry": "software",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002710",
+        "corpName": "TCC스틸",
+        "industry": "steel",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "474170",
+        "corpName": "루미르",
+        "industry": "aerospace",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "363260",
+        "corpName": "모비데이즈",
+        "industry": "media",
+        "viaCode": "214450",
+        "viaName": "파마리서치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "295310",
+        "corpName": "에이치브이엠",
+        "industry": "semiconductor",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015020",
+        "corpName": "이스타코",
+        "industry": "realestate",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214320",
+        "corpName": "이노션",
+        "industry": "media",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377300",
+        "corpName": "카카오페이",
+        "industry": "finance",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "253450",
+        "corpName": "스튜디오드래곤",
+        "industry": "media",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "353810",
+        "corpName": "이지바이오",
+        "industry": "chemical",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "462870",
+        "corpName": "시프트업",
+        "industry": "software",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "175140",
+        "corpName": "휴먼테크놀로지",
+        "industry": "telecom",
+        "viaCode": "187870",
+        "viaName": "디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "454910",
+        "corpName": "두산로보틱스",
+        "industry": "machinery",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 10
+  }
 }

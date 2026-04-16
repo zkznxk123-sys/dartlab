@@ -111,5 +111,44 @@
       "stage": "platform",
       "revenue": 80991
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "001820",
+        "corpName": "삼화콘덴서공업",
+        "industry": "electronics",
+        "viaCode": "011230",
+        "viaName": "삼화전자공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009470",
+        "corpName": "삼화전기",
+        "industry": "electronics",
+        "viaCode": "011230",
+        "viaName": "삼화전자공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "043590",
+        "corpName": "웰킵스하이텍",
+        "industry": "semiconductor",
+        "viaCode": "011230",
+        "viaName": "삼화전자공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066670",
+        "corpName": "디티씨",
+        "industry": "electronics",
+        "viaCode": "011230",
+        "viaName": "삼화전자공업",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

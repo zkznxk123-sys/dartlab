@@ -155,5 +155,68 @@
       "stage": "processing",
       "revenue": 50486
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "025560",
+        "corpName": "미래산업",
+        "industry": "electronics",
+        "viaCode": "145210",
+        "viaName": "다이나믹디자인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089140",
+        "corpName": "넥스턴앤롤코리아",
+        "industry": "machinery",
+        "viaCode": "145210",
+        "viaName": "다이나믹디자인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "145210",
+        "viaName": "다이나믹디자인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "131400",
+        "corpName": "이브이첨단소재",
+        "industry": "electronics",
+        "viaCode": "145210",
+        "viaName": "다이나믹디자인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
+        "viaCode": "145210",
+        "viaName": "다이나믹디자인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016800",
+        "corpName": "퍼시스",
+        "industry": "paper",
+        "viaCode": "134790",
+        "viaName": "시디즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "447690",
+        "corpName": "아이오바이오",
+        "industry": "pharma",
+        "viaCode": "134790",
+        "viaName": "시디즈",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

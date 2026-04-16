@@ -191,5 +191,183 @@
       "stage": "apparel",
       "revenue": 34098
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "010130",
+        "corpName": "고려아연",
+        "industry": "steel",
+        "viaCode": "069730",
+        "viaName": "DSR제강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "285130",
+        "corpName": "SK케미칼",
+        "industry": "software",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000880",
+        "corpName": "한화",
+        "industry": "aerospace",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
+        "industry": "chemical",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003720",
+        "corpName": "삼영",
+        "industry": "chemical",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000210",
+        "corpName": "DL",
+        "industry": "construction",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "393890",
+        "corpName": "더블유씨피",
+        "industry": "battery",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004800",
+        "corpName": "효성",
+        "industry": "chemical",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "361610",
+        "corpName": "SK아이이테크놀로지",
+        "industry": "software",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006120",
+        "corpName": "SK디스커버리",
+        "industry": "software",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037460",
+        "corpName": "삼지전자",
+        "industry": "telecom",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012750",
+        "corpName": "에스원",
+        "industry": "electronics",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012630",
+        "corpName": "HDC",
+        "industry": "finance",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298020",
+        "corpName": "효성티앤씨",
+        "industry": "chemical",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009830",
+        "corpName": "한화솔루션",
+        "industry": "chemical",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089470",
+        "corpName": "HDC현대EP",
+        "industry": "chemical",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036640",
+        "corpName": "HRS",
+        "industry": "chemical",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "006650",
+        "to": "285130",
+        "type": "supplier",
+        "amount": 167893.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

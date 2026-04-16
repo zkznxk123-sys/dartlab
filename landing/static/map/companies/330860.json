@@ -184,5 +184,119 @@
       "stage": "packaging",
       "revenue": 15344
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "033640",
+        "viaName": "네패스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068790",
+        "corpName": "DMS",
+        "industry": "electronics",
+        "viaCode": "033640",
+        "viaName": "네패스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "424980",
+        "corpName": "마이크로투나노",
+        "industry": "semiconductor",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003540",
+        "corpName": "대신증권",
+        "industry": "finance",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033310",
+        "corpName": "엠투엔",
+        "industry": "electronics",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060260",
+        "corpName": "뉴보텍",
+        "industry": "chemical",
+        "viaCode": "033640",
+        "viaName": "네패스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "196490",
+        "corpName": "디에이테크놀로지",
+        "industry": "machinery",
+        "viaCode": "033640",
+        "viaName": "네패스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "464500",
+        "corpName": "아이언디바이스",
+        "industry": "semiconductor",
+        "viaCode": "033640",
+        "viaName": "네패스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004270",
+        "corpName": "남성",
+        "industry": "telecom",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "033640",
+        "to": "060260",
+        "type": "supplier",
+        "amount": 289.0,
+        "ratio": 40.0,
+        "product": "토트",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

@@ -189,5 +189,604 @@
       "stage": "processing",
       "revenue": 50486
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "010130",
+        "corpName": "고려아연",
+        "industry": "steel",
+        "viaCode": "004890",
+        "viaName": "동일산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036570",
+        "corpName": "엔씨소프트",
+        "industry": "software",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073240",
+        "corpName": "금호타이어",
+        "industry": "retail",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007530",
+        "corpName": "와이엠",
+        "industry": "steel",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034220",
+        "corpName": "LG디스플레이",
+        "industry": "electronics",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006400",
+        "corpName": "삼성SDI",
+        "industry": "chemical",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011790",
+        "corpName": "SKC",
+        "industry": "software",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024880",
+        "corpName": "케이피에프",
+        "industry": "steel",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009150",
+        "corpName": "삼성전기",
+        "industry": "electronics",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090430",
+        "corpName": "아모레퍼시픽",
+        "industry": "cosmetics",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006110",
+        "corpName": "삼아알미늄",
+        "industry": "food",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "258610",
+        "corpName": "케일럼",
+        "industry": "aerospace",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060150",
+        "corpName": "인선이엔티",
+        "industry": "environment",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
+        "industry": "chemical",
+        "viaCode": "004890",
+        "viaName": "동일산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010780",
+        "corpName": "아이에스동서",
+        "industry": "food",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058430",
+        "corpName": "포스코스틸리온",
+        "industry": "steel",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002020",
+        "corpName": "코오롱",
+        "industry": "finance",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023800",
+        "corpName": "인지컨트롤스",
+        "industry": "electronics",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009240",
+        "corpName": "한샘",
+        "industry": "construction",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071050",
+        "corpName": "한국금융지주",
+        "industry": "finance",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005490",
+        "corpName": "POSCO홀딩스",
+        "industry": "steel",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001070",
+        "corpName": "대한방직",
+        "industry": "construction",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "207940",
+        "corpName": "삼성바이오로직스",
+        "industry": "pharma",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051910",
+        "corpName": "LG화학",
+        "industry": "chemical",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047050",
+        "corpName": "포스코인터내셔널",
+        "industry": "steel",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "022100",
+        "corpName": "포스코DX",
+        "industry": "steel",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067900",
+        "corpName": "와이엔텍",
+        "industry": "construction",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001020",
+        "corpName": "페이퍼코리아",
+        "industry": "construction",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067390",
+        "corpName": "아스트",
+        "industry": "aerospace",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064960",
+        "corpName": "SNT모티브",
+        "industry": "electronics",
+        "viaCode": "004890",
+        "viaName": "동일산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084010",
+        "corpName": "대한제강",
+        "industry": "construction",
+        "viaCode": "004890",
+        "viaName": "동일산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012620",
+        "corpName": "원일특강",
+        "industry": "steel",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008770",
+        "corpName": "호텔신라",
+        "industry": "leisure",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "103140",
+        "corpName": "풍산",
+        "industry": "steel",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013720",
+        "corpName": "THE CUBE&",
+        "industry": "electronics",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "475560",
+        "corpName": "더본코리아",
+        "industry": "food",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086790",
+        "corpName": "하나금융지주",
+        "industry": "finance",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "389500",
+        "corpName": "에스비비테크",
+        "industry": "machinery",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006360",
+        "corpName": "GS건설",
+        "industry": "construction",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011170",
+        "corpName": "롯데케미칼",
+        "industry": "chemical",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "093380",
+        "corpName": "풍강",
+        "industry": "steel",
+        "viaCode": "004890",
+        "viaName": "동일산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "004890",
+        "viaName": "동일산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "149300",
+        "corpName": "아퓨어스",
+        "industry": "pharma",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033130",
+        "corpName": "디지틀조선",
+        "industry": "software",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "139480",
+        "corpName": "이마트",
+        "industry": "retail",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "206950",
+        "corpName": "볼빅",
+        "industry": "leisure",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "317120",
+        "corpName": "라닉스",
+        "industry": "software",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "072710",
+        "corpName": "농심홀딩스",
+        "industry": "food",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069960",
+        "corpName": "현대백화점",
+        "industry": "retail",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "077970",
+        "corpName": "STX엔진",
+        "industry": "auto",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004980",
+        "corpName": "성신양회",
+        "industry": "construction",
+        "viaCode": "004890",
+        "viaName": "동일산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "293490",
+        "corpName": "카카오게임즈",
+        "industry": "software",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002240",
+        "corpName": "고려제강",
+        "industry": "steel",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095270",
+        "corpName": "웨이브일렉트로",
+        "industry": "telecom",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009520",
+        "corpName": "포스코엠텍",
+        "industry": "steel",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "120110",
+        "corpName": "코오롱인더",
+        "industry": "plastic",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086520",
+        "corpName": "에코프로",
+        "industry": "chemical",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001440",
+        "corpName": "대한전선",
+        "industry": "electrical",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003670",
+        "corpName": "포스코퓨처엠",
+        "industry": "steel",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013570",
+        "corpName": "디와이",
+        "industry": "electronics",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006260",
+        "corpName": "LS",
+        "industry": "machinery",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "177830",
+        "corpName": "파버나인",
+        "industry": "electronics",
+        "viaCode": "217590",
+        "viaName": "티엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "304100",
+        "corpName": "솔트룩스",
+        "industry": "software",
+        "viaCode": "004890",
+        "viaName": "동일산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "061040",
+        "corpName": "알에프텍",
+        "industry": "telecom",
+        "viaCode": "024090",
+        "viaName": "디씨엠",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 3
+  }
 }

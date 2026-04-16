@@ -6533,5 +6533,11 @@
       "stage": "securities",
       "revenue": 103925
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [],
+    "hop2Edges": [],
+    "hub": true,
+    "direct1HopCount": 302
+  }
 }

@@ -159,5 +159,305 @@
       "stage": "",
       "revenue": 63555
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "024720",
+        "corpName": "콜마홀딩스",
+        "industry": "retail",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006400",
+        "corpName": "삼성SDI",
+        "industry": "chemical",
+        "viaCode": "054210",
+        "viaName": "이랜텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "195940",
+        "corpName": "HK이노엔",
+        "industry": "pharma",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200130",
+        "corpName": "콜마비앤에이치",
+        "industry": "pharma",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004710",
+        "corpName": "한솔테크닉스",
+        "industry": "electronics",
+        "viaCode": "054210",
+        "viaName": "이랜텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "054210",
+        "viaName": "이랜텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "382800",
+        "corpName": "지앤비에스 에코",
+        "industry": "machinery",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352700",
+        "corpName": "씨앤투스",
+        "industry": "electronics",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095720",
+        "corpName": "웅진씽크빅",
+        "industry": "realestate",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018290",
+        "corpName": "브이티",
+        "industry": "plastic",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069460",
+        "corpName": "대호에이엘",
+        "industry": "retail",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "215000",
+        "corpName": "골프존",
+        "industry": "leisure",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "251270",
+        "corpName": "넷마블",
+        "industry": "software",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037030",
+        "corpName": "파워넷",
+        "industry": "electrical",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016880",
+        "corpName": "웅진",
+        "industry": "education",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "128820",
+        "corpName": "대성산업",
+        "industry": "retail",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "054210",
+        "viaName": "이랜텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006360",
+        "corpName": "GS건설",
+        "industry": "construction",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037070",
+        "corpName": "파세코",
+        "industry": "electronics",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352820",
+        "corpName": "하이브",
+        "industry": "media",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "222420",
+        "corpName": "쎄노텍",
+        "industry": "buildingMaterials",
+        "viaCode": "054210",
+        "viaName": "이랜텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085310",
+        "corpName": "엔케이",
+        "industry": "food",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033780",
+        "corpName": "케이티앤지",
+        "industry": "food",
+        "viaCode": "054210",
+        "viaName": "이랜텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "054210",
+        "viaName": "이랜텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "289220",
+        "corpName": "자이언트스텝",
+        "industry": "media",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038880",
+        "corpName": "아이에이",
+        "industry": "electronics",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000810",
+        "corpName": "삼성화재해상보험",
+        "industry": "finance",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161890",
+        "corpName": "한국콜마",
+        "industry": "cosmetics",
+        "viaCode": "021240",
+        "viaName": "코웨이",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "037030",
+        "to": "021240",
+        "type": "supplier",
+        "amount": 90128.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "264850",
+        "to": "021240",
+        "type": "supplier",
+        "amount": 2996.0,
+        "ratio": null,
+        "product": "",
+        "hop": 1,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

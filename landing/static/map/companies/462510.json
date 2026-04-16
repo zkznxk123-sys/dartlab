@@ -180,5 +180,833 @@
       "stage": "formulation",
       "revenue": 20684
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "045660",
+        "corpName": "에이텍",
+        "industry": "electronics",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030190",
+        "corpName": "NICE평가정보",
+        "industry": "software",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214370",
+        "corpName": "케어젠",
+        "industry": "pharma",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "451760",
+        "corpName": "컨텍",
+        "industry": "construction",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377450",
+        "corpName": "리파인",
+        "industry": "software",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092780",
+        "corpName": "DYP",
+        "industry": "auto",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "206640",
+        "viaName": "바디텍메드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014680",
+        "corpName": "한솔케미칼",
+        "industry": "machinery",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003550",
+        "corpName": "LG",
+        "industry": "electronics",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002790",
+        "corpName": "아모레퍼시픽홀딩스",
+        "industry": "chemical",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200130",
+        "corpName": "콜마비앤에이치",
+        "industry": "pharma",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038530",
+        "corpName": "케이바이오",
+        "industry": "retail",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086280",
+        "corpName": "현대글로비스",
+        "industry": "logistics",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348340",
+        "corpName": "뉴로메카",
+        "industry": "machinery",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014820",
+        "corpName": "동원시스템즈",
+        "industry": "plastic",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "317240",
+        "corpName": "TS트릴리온",
+        "industry": "chemical",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005490",
+        "corpName": "POSCO홀딩스",
+        "industry": "steel",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032940",
+        "corpName": "원익",
+        "industry": "semiconductor",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377740",
+        "corpName": "바이오노트",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "115180",
+        "corpName": "큐리언트",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "317860",
+        "corpName": "노드메이슨",
+        "industry": "cosmetics",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "127710",
+        "corpName": "아시아경제",
+        "industry": "media",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016090",
+        "corpName": "대현",
+        "industry": "retail",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217480",
+        "corpName": "에스디생명공학",
+        "industry": "cosmetics",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "417180",
+        "corpName": "핑거스토리",
+        "industry": "media",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "098070",
+        "corpName": "한텍",
+        "industry": "machinery",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002100",
+        "corpName": "경농",
+        "industry": "chemical",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "347850",
+        "corpName": "디앤디파마텍",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "252990",
+        "corpName": "샘씨엔에스",
+        "industry": "buildingMaterials",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "408470",
+        "corpName": "한패스",
+        "industry": "finance",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "290090",
+        "corpName": "트윔",
+        "industry": "software",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079430",
+        "corpName": "현대리바트",
+        "industry": "paper",
+        "viaCode": "206640",
+        "viaName": "바디텍메드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "464500",
+        "corpName": "아이언디바이스",
+        "industry": "semiconductor",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013570",
+        "corpName": "디와이",
+        "industry": "electronics",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086450",
+        "corpName": "동국제약",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "368970",
+        "corpName": "오에스피",
+        "industry": "food",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "290650",
+        "corpName": "엘앤씨바이오",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "459510",
+        "corpName": "나우로보틱스",
+        "industry": "machinery",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "206640",
+        "viaName": "바디텍메드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "362320",
+        "corpName": "청담글로벌",
+        "industry": "cosmetics",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "277810",
+        "corpName": "레인보우로보틱스",
+        "industry": "machinery",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064820",
+        "corpName": "케이프",
+        "industry": "auto",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003920",
+        "corpName": "남양유업",
+        "industry": "pharma",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "453340",
+        "corpName": "현대그린푸드",
+        "industry": "retail",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "253590",
+        "corpName": "네오셈",
+        "industry": "semiconductor",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065450",
+        "corpName": "빅텍",
+        "industry": "machinery",
+        "viaCode": "206640",
+        "viaName": "바디텍메드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "226950",
+        "corpName": "올릭스",
+        "industry": "software",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214420",
+        "corpName": "토니모리",
+        "industry": "cosmetics",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "163730",
+        "corpName": "핑거",
+        "industry": "software",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091120",
+        "corpName": "이엠텍",
+        "industry": "electronics",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017180",
+        "corpName": "명문제약",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "388610",
+        "corpName": "지에프씨생명과학",
+        "industry": "chemical",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "475960",
+        "corpName": "토모큐브",
+        "industry": "machinery",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047810",
+        "corpName": "한국항공우주",
+        "industry": "aerospace",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "424960",
+        "corpName": "스마트레이더시스템",
+        "industry": "machinery",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "460870",
+        "corpName": "에스엠씨지",
+        "industry": "construction",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "418250",
+        "corpName": "시큐레터",
+        "industry": "software",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "373110",
+        "corpName": "엑셀세라퓨틱스",
+        "industry": "pharma",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307750",
+        "corpName": "국전약품",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028260",
+        "corpName": "삼성물산",
+        "industry": "construction",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "338220",
+        "corpName": "뷰노",
+        "industry": "software",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "170900",
+        "corpName": "동아에스티",
+        "industry": "pharma",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "314130",
+        "corpName": "지놈앤컴퍼니",
+        "industry": "pharma",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "289930",
+        "corpName": "웨이비스",
+        "industry": "electronics",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "473980",
+        "corpName": "노머스",
+        "industry": "software",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214390",
+        "corpName": "경보제약",
+        "industry": "pharma",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "489460",
+        "corpName": "바이오비쥬",
+        "industry": "chemical",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000810",
+        "corpName": "삼성화재해상보험",
+        "industry": "finance",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060540",
+        "corpName": "에스에이티",
+        "industry": "machinery",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024720",
+        "corpName": "콜마홀딩스",
+        "industry": "retail",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "318010",
+        "corpName": "팜스빌",
+        "industry": "food",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090430",
+        "corpName": "아모레퍼시픽",
+        "industry": "cosmetics",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024850",
+        "corpName": "HLB이노베이션",
+        "industry": "semiconductor",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "331740",
+        "corpName": "아우토크립트",
+        "industry": "software",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267980",
+        "corpName": "매일유업",
+        "industry": "food",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001790",
+        "corpName": "대한제당",
+        "industry": "food",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "251970",
+        "corpName": "펌텍코리아",
+        "industry": "cosmetics",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "371950",
+        "corpName": "풍원정밀",
+        "industry": "electronics",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001720",
+        "corpName": "신영증권",
+        "industry": "finance",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123690",
+        "corpName": "한국화장품",
+        "industry": "cosmetics",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "114840",
+        "corpName": "아이패밀리에스씨",
+        "industry": "cosmetics",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123860",
+        "corpName": "아나패스",
+        "industry": "semiconductor",
+        "viaCode": "006620",
+        "viaName": "동구바이오제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348370",
+        "corpName": "엔켐",
+        "industry": "battery",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "399720",
+        "corpName": "가온칩스",
+        "industry": "construction",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "179530",
+        "corpName": "애드바이오텍",
+        "industry": "food",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "316140",
+        "corpName": "우리금융지주",
+        "industry": "finance",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348350",
+        "corpName": "위드텍",
+        "industry": "electronics",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "308430",
+        "corpName": "셀비온",
+        "industry": "pharma",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348150",
+        "corpName": "고바이오랩",
+        "industry": "pharma",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "194700",
+        "corpName": "노바렉스",
+        "industry": "pharma",
+        "viaCode": "161890",
+        "viaName": "한국콜마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015360",
+        "corpName": "INVENI",
+        "industry": "consulting",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "055550",
+        "corpName": "신한지주",
+        "industry": "finance",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009830",
+        "corpName": "한화솔루션",
+        "industry": "chemical",
+        "viaCode": "003540",
+        "viaName": "대신증권",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "161890",
+        "to": "483650",
+        "type": "supplier",
+        "amount": 155679.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "161890",
+        "to": "032940",
+        "type": "supplier",
+        "amount": 24026.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 4
+  }
 }

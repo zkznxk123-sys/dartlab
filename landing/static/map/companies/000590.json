@@ -194,5 +194,172 @@
       "stage": "apparel",
       "revenue": 34098
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "010130",
+        "corpName": "고려아연",
+        "industry": "steel",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "138930",
+        "corpName": "BNK금융지주",
+        "industry": "finance",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011810",
+        "corpName": "STX",
+        "industry": "food",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "285130",
+        "corpName": "SK케미칼",
+        "industry": "software",
+        "viaCode": "120030",
+        "viaName": "조선선재",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000970",
+        "corpName": "한국주철관공업",
+        "industry": "steel",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "093640",
+        "corpName": "케이알엠",
+        "industry": "semiconductor",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003610",
+        "corpName": "방림",
+        "industry": "shipbuilding",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012210",
+        "corpName": "삼미금속",
+        "industry": "electronics",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039310",
+        "corpName": "세중",
+        "industry": "software",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053260",
+        "corpName": "금강철강",
+        "industry": "steel",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002460",
+        "corpName": "HS화성",
+        "industry": "construction",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033780",
+        "corpName": "케이티앤지",
+        "industry": "food",
+        "viaCode": "120030",
+        "viaName": "조선선재",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002140",
+        "corpName": "고려산업",
+        "industry": "realestate",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100840",
+        "corpName": "SNT에너지",
+        "industry": "machinery",
+        "viaCode": "120030",
+        "viaName": "조선선재",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "375500",
+        "corpName": "DL이앤씨",
+        "industry": "construction",
+        "viaCode": "120030",
+        "viaName": "조선선재",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035890",
+        "corpName": "서희건설",
+        "industry": "realestate",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073010",
+        "corpName": "케이에스피",
+        "industry": "auto",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

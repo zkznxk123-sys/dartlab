@@ -83,5 +83,100 @@
       "stage": "formulation",
       "revenue": 20684
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "185490",
+        "corpName": "아이진",
+        "industry": "pharma",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006280",
+        "corpName": "녹십자",
+        "industry": "pharma",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214330",
+        "corpName": "금호에이치티",
+        "industry": "electronics",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200670",
+        "corpName": "휴메딕스",
+        "industry": "pharma",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "389470",
+        "corpName": "인벤티지랩",
+        "industry": "software",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092040",
+        "corpName": "아미코젠",
+        "industry": "food",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019550",
+        "corpName": "SBI인베스트먼트",
+        "industry": "finance",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "137310",
+        "corpName": "에스디바이오센서",
+        "industry": "pharma",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377740",
+        "corpName": "바이오노트",
+        "industry": "pharma",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

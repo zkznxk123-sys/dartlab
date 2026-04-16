@@ -145,5 +145,52 @@
       "stage": "formulation",
       "revenue": 20684
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "000250",
+        "viaName": "삼천당제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017370",
+        "corpName": "우신시스템",
+        "industry": "electronics",
+        "viaCode": "000250",
+        "viaName": "삼천당제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "000250",
+        "viaName": "삼천당제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "124560",
+        "corpName": "태웅로직스",
+        "industry": "logistics",
+        "viaCode": "000250",
+        "viaName": "삼천당제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073570",
+        "corpName": "리튬포어스",
+        "industry": "misc",
+        "viaCode": "000250",
+        "viaName": "삼천당제약",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

@@ -119,5 +119,44 @@
       "stage": "formulation",
       "revenue": 20684
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "243070",
+        "corpName": "휴온스",
+        "industry": "pharma",
+        "viaCode": "308430",
+        "viaName": "셀비온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003540",
+        "corpName": "대신증권",
+        "industry": "finance",
+        "viaCode": "308430",
+        "viaName": "셀비온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "378800",
+        "corpName": "샤페론",
+        "industry": "pharma",
+        "viaCode": "308430",
+        "viaName": "셀비온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000100",
+        "corpName": "유한양행",
+        "industry": "pharma",
+        "viaCode": "308430",
+        "viaName": "셀비온",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

@@ -125,5 +125,44 @@
       "stage": "imaging",
       "revenue": 3959
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "007070",
+        "corpName": "GS리테일",
+        "industry": "retail",
+        "viaCode": "003680",
+        "viaName": "한성기업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066980",
+        "corpName": "한성크린텍",
+        "industry": "environment",
+        "viaCode": "003680",
+        "viaName": "한성기업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078930",
+        "corpName": "GS",
+        "industry": "chemical",
+        "viaCode": "003680",
+        "viaName": "한성기업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095910",
+        "corpName": "에스에너지",
+        "industry": "energy",
+        "viaCode": "003680",
+        "viaName": "한성기업",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

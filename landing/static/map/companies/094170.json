@@ -140,5 +140,151 @@
       "stage": "packaging",
       "revenue": 15344
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "097520",
+        "corpName": "엠씨넥스",
+        "industry": "electronics",
+        "viaCode": "049630",
+        "viaName": "재영솔루텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "049630",
+        "viaName": "재영솔루텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "119830",
+        "corpName": "아이텍",
+        "industry": "semiconductor",
+        "viaCode": "049630",
+        "viaName": "재영솔루텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "190510",
+        "corpName": "나무가",
+        "industry": "electronics",
+        "viaCode": "049630",
+        "viaName": "재영솔루텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003650",
+        "corpName": "미창석유공업",
+        "industry": "plastic",
+        "viaCode": "039030",
+        "viaName": "이오테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065680",
+        "corpName": "우주일렉트로",
+        "industry": "electronics",
+        "viaCode": "039030",
+        "viaName": "이오테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "039030",
+        "viaName": "이오테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092300",
+        "corpName": "현우산업",
+        "industry": "electronics",
+        "viaCode": "039030",
+        "viaName": "이오테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "039030",
+        "viaName": "이오테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "039030",
+        "viaName": "이오테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "039030",
+        "viaName": "이오테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "050110",
+        "corpName": "캠시스",
+        "industry": "electronics",
+        "viaCode": "049630",
+        "viaName": "재영솔루텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091700",
+        "corpName": "파트론",
+        "industry": "electronics",
+        "viaCode": "049630",
+        "viaName": "재영솔루텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "320000",
+        "corpName": "한울반도체",
+        "industry": "machinery",
+        "viaCode": "039030",
+        "viaName": "이오테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348350",
+        "corpName": "위드텍",
+        "industry": "electronics",
+        "viaCode": "039030",
+        "viaName": "이오테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002680",
+        "corpName": "한탑",
+        "industry": "food",
+        "viaCode": "039030",
+        "viaName": "이오테크닉스",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "049630",
+        "to": "097520",
+        "type": "supplier",
+        "amount": 84749.0,
+        "ratio": 9.8,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

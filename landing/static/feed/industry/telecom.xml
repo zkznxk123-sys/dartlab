@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>dartlab 변화 감지 · telecom</title>
+<link>https://eddmpython.github.io/dartlab/industry/telecom</link>
+<description>telecom 산업 이번 회계연도 급변 회사</description>
+<language>ko-kr</language>
+<lastBuildDate>Thu, 16 Apr 2026 09:50:46 +0000</lastBuildDate>
+<item>
+  <title>[수익성 개선 (ROE)] 인텔리안테크 (통신장비)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=189300</link>
+  <guid isPermaLink="false">profitImprove-189300-2025</guid>
+  <category>수익성 개선 (ROE)</category>
+  <description>ROE Δ+93.3%p · 산업 z=+2.2σ | 수익성 개선. 원인은 본업 회복/일회성 여부 확인.</description>
+</item>
+<item>
+  <title>[매출 급증 (YoY +30% 이상)] 빛과전자 (통신장비)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=069540</link>
+  <guid isPermaLink="false">revenueSpike-069540-2025</guid>
+  <category>매출 급증 (YoY +30% 이상)</category>
+  <description>매출 YoY +909.9% — 고성장 | 2024→2025 매출 급증. 신제품/시장 확대 가능성.</description>
+</item>
+<item>
+  <title>[매출 급증 (YoY +30% 이상)] 코위버 (통신장비)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=056360</link>
+  <guid isPermaLink="false">revenueSpike-056360-2025</guid>
+  <category>매출 급증 (YoY +30% 이상)</category>
+  <description>매출 YoY +713.8% — 고성장 | 2024→2025 매출 급증. 신제품/시장 확대 가능성.</description>
+</item>
+<item>
+  <title>[매출 급락 (YoY -20% 이하)] 이루온 (통신장비)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=065440</link>
+  <guid isPermaLink="false">revenueDrop-065440-2025</guid>
+  <category>매출 급락 (YoY -20% 이하)</category>
+  <description>매출 YoY -86.0% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
+</item>
+<item>
+  <title>[매출 급락 (YoY -20% 이하)] 멤레이비티 (통신장비)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=072770</link>
+  <guid isPermaLink="false">revenueDrop-072770-2025</guid>
+  <category>매출 급락 (YoY -20% 이하)</category>
+  <description>매출 YoY -85.4% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
+</item>
+</channel>
+</rss>

@@ -117,5 +117,172 @@
       "stage": "securities",
       "revenue": 103925
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "208860",
+        "corpName": "다산디엠씨",
+        "industry": "software",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060280",
+        "corpName": "큐렉소",
+        "industry": "retail",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006620",
+        "corpName": "동구바이오제약",
+        "industry": "pharma",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "0007C0",
+        "corpName": "아크릴",
+        "industry": "software",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095500",
+        "corpName": "미래나노텍",
+        "industry": "electronics",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036830",
+        "corpName": "솔브레인홀딩스",
+        "industry": "electronics",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "143160",
+        "corpName": "아이디스",
+        "industry": "telecom",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "461030",
+        "corpName": "아이엠비디엑스",
+        "industry": "pharma",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348350",
+        "corpName": "위드텍",
+        "industry": "electronics",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "127120",
+        "corpName": "제이에스링크",
+        "industry": "pharma",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "154040",
+        "corpName": "다산솔루에타",
+        "industry": "electronics",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "220180",
+        "corpName": "핸디소프트",
+        "industry": "software",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

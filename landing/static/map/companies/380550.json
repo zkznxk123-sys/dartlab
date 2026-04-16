@@ -91,5 +91,92 @@
       "stage": "polymer",
       "revenue": 236718
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307750",
+        "corpName": "국전약품",
+        "industry": "pharma",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "453860",
+        "corpName": "에이에스텍",
+        "industry": "food",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003120",
+        "corpName": "일성아이에스",
+        "industry": "pharma",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003000",
+        "corpName": "부광약품",
+        "industry": "pharma",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "293780",
+        "corpName": "압타바이오",
+        "industry": "pharma",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "293480",
+        "corpName": "하나제약",
+        "industry": "pharma",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "432980",
+        "corpName": "엠에프씨",
+        "industry": "pharma",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

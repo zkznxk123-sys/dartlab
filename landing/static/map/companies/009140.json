@@ -128,5 +128,36 @@
       "stage": "",
       "revenue": 63555
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "393970",
+        "corpName": "대진첨단소재",
+        "industry": "chemical",
+        "viaCode": "106080",
+        "viaName": "케이이엠텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007530",
+        "corpName": "와이엠",
+        "industry": "steel",
+        "viaCode": "106080",
+        "viaName": "케이이엠텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "382800",
+        "corpName": "지앤비에스 에코",
+        "industry": "machinery",
+        "viaCode": "106080",
+        "viaName": "케이이엠텍",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

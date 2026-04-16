@@ -5518,5 +5518,11 @@
       "stage": "content",
       "revenue": 10833
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [],
+    "hop2Edges": [],
+    "hub": true,
+    "direct1HopCount": 267
+  }
 }

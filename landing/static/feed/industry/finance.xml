@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>dartlab 변화 감지 · finance</title>
+<link>https://eddmpython.github.io/dartlab/industry/finance</link>
+<description>finance 산업 이번 회계연도 급변 회사</description>
+<language>ko-kr</language>
+<lastBuildDate>Thu, 16 Apr 2026 09:50:46 +0000</lastBuildDate>
+<item>
+  <title>[매출 급락 (YoY -20% 이하)] 우리기술투자 (금융)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=041190</link>
+  <guid isPermaLink="false">revenueDrop-041190-2025</guid>
+  <category>매출 급락 (YoY -20% 이하)</category>
+  <description>매출 YoY -99.1% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
+</item>
+<item>
+  <title>[부채 스트레스] 동양생명 (금융)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=082640</link>
+  <guid isPermaLink="false">debtStress-082640-2025</guid>
+  <category>부채 스트레스</category>
+  <description>부채비율 2082% (+788%p) | 부채 급증 + 높은 절대값. 재무 스트레스 신호.</description>
+</item>
+<item>
+  <title>[부채 스트레스] 한양증권 (금융)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=001750</link>
+  <guid isPermaLink="false">debtStress-001750-2025</guid>
+  <category>부채 스트레스</category>
+  <description>부채비율 922% (+685%p) | 부채 급증 + 높은 절대값. 재무 스트레스 신호.</description>
+</item>
+</channel>
+</rss>

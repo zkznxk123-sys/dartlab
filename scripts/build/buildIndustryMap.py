@@ -860,7 +860,7 @@ def main() -> None:
         )
     print(f"  - {len(taxonomy)}개 산업 JSON 생성")
 
-    # L3 Companies enrichment (AI insights, blog, 재무, 공급망 인사이트)
+    # L3 Companies enrichment (AI insights, blog, 재무, 공급망 인사이트, 2-hop)
     # --companies 0 (기본) = 전 종목 enrich. 양수면 상위 N개만
     from dartlab.industry.build.enrichCompany import _loadBlogIndex, enrichCompanyData
 
@@ -868,6 +868,13 @@ def main() -> None:
     edges = loadEdges()
     blogIndex = _loadBlogIndex()
     print(f"  - 블로그 인덱스: {sum(len(v) for v in blogIndex.values())}건, {len(blogIndex)}사 커버")
+
+    # 2-hop 공급망 사전 계산
+    from dartlab.industry.build.hop2 import computeHop2
+
+    print("  - 2-hop 공급망 사전 계산...")
+    hop2Data = computeHop2()
+    print(f"    · {len(hop2Data)} 종목 × hop2 (허브는 1.5-hop 제한)")
 
     sortedCompanies = sorted(nodes, key=lambda n: n.revenue or 0, reverse=True)
     if args.companies > 0:
@@ -882,7 +889,7 @@ def main() -> None:
         if not ego:
             continue
         try:
-            enriched = enrichCompanyData(n.stockCode, ego, edges, nodes, blogIndex)
+            enriched = enrichCompanyData(n.stockCode, ego, edges, nodes, blogIndex, hop2Data)
             if enriched.get("aiInsight") or enriched.get("blogPosts") or enriched.get("financials5y"):
                 enrichedCount += 1
         except Exception as e:
@@ -931,6 +938,19 @@ def main() -> None:
         print("  - insights.json 생성")
     except subprocess.CalledProcessError as e:
         print(f"  ⚠ 인사이트 랭킹 생성 실패: {e.stderr}")
+
+    # RSS + iCal feeds (변화 감지 구독)
+    print("[피드] RSS + iCal 생성")
+    try:
+        subprocess.run(
+            ["python", "-X", "utf8", str(Path(__file__).parent / "buildFeeds.py")],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        print("  - feed/movers.xml · feed/industry/*.xml · feed/calendar.ics")
+    except subprocess.CalledProcessError as e:
+        print(f"  ⚠ 피드 생성 실패: {e.stderr}")
 
     # 메타데이터: 빌드 시각 + 데이터 소스별 최신성
     print("[메타] meta.json")

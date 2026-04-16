@@ -157,6 +157,14 @@
 		name="description"
 		content="한국 상장사 2,664사를 ROE·영업이익률·부채·성장률·산업 조건으로 필터링. 결과 공유 URL · CSV export."
 	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="조건 검색 스크리너 — dartlab" />
+	<meta
+		property="og:description"
+		content="산업 × ROE × 영업이익률 × 부채 × 성장률 다중 조건. URL 공유 · CSV."
+	/>
+	<meta property="og:image" content="https://eddmpython.github.io/dartlab/og-image.png" />
+	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
 <div class="page">

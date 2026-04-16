@@ -118,5 +118,428 @@
       "stage": "formulation",
       "revenue": 20684
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "025620",
+        "corpName": "차AI헬스케어",
+        "industry": "cosmetics",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003240",
+        "corpName": "태광산업",
+        "industry": "chemical",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024720",
+        "corpName": "콜마홀딩스",
+        "industry": "retail",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023760",
+        "corpName": "한국캐피탈",
+        "industry": "finance",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377460",
+        "corpName": "위니아에이드",
+        "industry": "shipbuilding",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006400",
+        "corpName": "삼성SDI",
+        "industry": "chemical",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "195940",
+        "corpName": "HK이노엔",
+        "industry": "pharma",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084180",
+        "corpName": "수성웹툰",
+        "industry": "machinery",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "297890",
+        "corpName": "HB솔루션",
+        "industry": "electronics",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004720",
+        "corpName": "팜젠사이언스",
+        "industry": "pharma",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078150",
+        "corpName": "HB테크놀러지",
+        "industry": "electronics",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200130",
+        "corpName": "콜마비앤에이치",
+        "industry": "pharma",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060250",
+        "corpName": "NHN KCP",
+        "industry": "finance",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200580",
+        "corpName": "메디쎄이",
+        "industry": "medicalDevice",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027830",
+        "corpName": "대성창투",
+        "industry": "finance",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024950",
+        "corpName": "삼천리자전거",
+        "industry": "retail",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023800",
+        "corpName": "인지컨트롤스",
+        "industry": "electronics",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "046120",
+        "corpName": "오르비텍",
+        "industry": "electronics",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "299030",
+        "corpName": "하나기술",
+        "industry": "machinery",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069140",
+        "corpName": "누리플랜",
+        "industry": "steel",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "232140",
+        "corpName": "와이씨",
+        "industry": "semiconductor",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "282880",
+        "corpName": "코윈테크",
+        "industry": "electronics",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "126560",
+        "corpName": "현대퓨처넷",
+        "industry": "telecom",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005490",
+        "corpName": "POSCO홀딩스",
+        "industry": "steel",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "338840",
+        "corpName": "와이바이오로직스",
+        "industry": "pharma",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "081660",
+        "corpName": "미스토홀딩스",
+        "industry": "retail",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001020",
+        "corpName": "페이퍼코리아",
+        "industry": "construction",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067390",
+        "corpName": "아스트",
+        "industry": "aerospace",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034020",
+        "corpName": "두산에너빌리티",
+        "industry": "machinery",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092870",
+        "corpName": "엑시콘",
+        "industry": "semiconductor",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000540",
+        "corpName": "흥국화재",
+        "industry": "finance",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "057050",
+        "corpName": "현대홈쇼핑",
+        "industry": "electronics",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "104200",
+        "corpName": "NHN벅스",
+        "industry": "media",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082920",
+        "corpName": "비츠로셀",
+        "industry": "battery",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016710",
+        "corpName": "대성홀딩스",
+        "industry": "realestate",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "077970",
+        "corpName": "STX엔진",
+        "industry": "auto",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069960",
+        "corpName": "현대백화점",
+        "industry": "retail",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "118000",
+        "corpName": "메타케어",
+        "industry": "pharma",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "097230",
+        "corpName": "HJ중공업",
+        "industry": "construction",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005440",
+        "corpName": "현대지에프홀딩스",
+        "industry": "realestate",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000040",
+        "corpName": "KR모터스",
+        "industry": "food",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000240",
+        "corpName": "한국앤컴퍼니",
+        "industry": "finance",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003830",
+        "corpName": "대한화섬",
+        "industry": "aerospace",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "417970",
+        "corpName": "모델솔루션",
+        "industry": "machinery",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "252990",
+        "corpName": "샘씨엔에스",
+        "industry": "buildingMaterials",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079430",
+        "corpName": "현대리바트",
+        "industry": "paper",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "020000",
+        "corpName": "한섬",
+        "industry": "textile",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161390",
+        "corpName": "한국타이어앤테크놀로지",
+        "industry": "auto",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "181710",
+        "corpName": "NHN",
+        "industry": "software",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161890",
+        "corpName": "한국콜마",
+        "industry": "cosmetics",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041440",
+        "corpName": "현대에버다임",
+        "industry": "machinery",
+        "viaCode": "044780",
+        "viaName": "에이치케이",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

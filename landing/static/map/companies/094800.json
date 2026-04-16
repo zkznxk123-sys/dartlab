@@ -83,5 +83,108 @@
       "stage": "securities",
       "revenue": 103925
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "211050",
+        "corpName": "인카금융서비스",
+        "industry": "finance",
+        "viaCode": "085620",
+        "viaName": "미래에셋생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039340",
+        "corpName": "한국경제TV",
+        "industry": "media",
+        "viaCode": "085620",
+        "viaName": "미래에셋생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "085620",
+        "viaName": "미래에셋생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054620",
+        "corpName": "APS",
+        "industry": "telecom",
+        "viaCode": "085620",
+        "viaName": "미래에셋생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "278990",
+        "corpName": "EMB",
+        "industry": "battery",
+        "viaCode": "085620",
+        "viaName": "미래에셋생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035420",
+        "corpName": "NAVER",
+        "industry": "software",
+        "viaCode": "085620",
+        "viaName": "미래에셋생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052770",
+        "corpName": "아이톡시",
+        "industry": "software",
+        "viaCode": "085620",
+        "viaName": "미래에셋생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
+        "viaCode": "085620",
+        "viaName": "미래에셋생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "040300",
+        "corpName": "YTN",
+        "industry": "media",
+        "viaCode": "085620",
+        "viaName": "미래에셋생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
+        "viaCode": "085620",
+        "viaName": "미래에셋생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088980",
+        "corpName": "맥쿼리인프라",
+        "industry": "finance",
+        "viaCode": "085620",
+        "viaName": "미래에셋생명",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008870",
+        "corpName": "금비",
+        "industry": "construction",
+        "viaCode": "085620",
+        "viaName": "미래에셋생명",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>dartlab 변화 감지 · realestate</title>
+<link>https://eddmpython.github.io/dartlab/industry/realestate</link>
+<description>realestate 산업 이번 회계연도 급변 회사</description>
+<language>ko-kr</language>
+<lastBuildDate>Thu, 16 Apr 2026 09:50:46 +0000</lastBuildDate>
+<item>
+  <title>[매출 급락 (YoY -20% 이하)] 현대차증권 (부동산)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=001500</link>
+  <guid isPermaLink="false">revenueDrop-001500-2025</guid>
+  <category>매출 급락 (YoY -20% 이하)</category>
+  <description>매출 YoY -98.5% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
+</item>
+<item>
+  <title>[⚠ 극단 변화 — 검증 필요] 까뮤이앤씨 (부동산)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=013700</link>
+  <guid isPermaLink="false">extremeWarning-013700-2025</guid>
+  <category>⚠ 극단 변화 — 검증 필요</category>
+  <description>ROE Δ-7608.5%p — 극단 변화 | 1회성 이익/자본잠식/재분류 가능성. 원본 공시 검증 필요.</description>
+</item>
+</channel>
+</rss>

@@ -110,5 +110,11 @@
       "stage": "retail",
       "revenue": 69295
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

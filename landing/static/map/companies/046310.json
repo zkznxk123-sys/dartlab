@@ -119,5 +119,79 @@
       "stage": "airframe",
       "revenue": 36964
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "031330",
+        "corpName": "에스에이엠티",
+        "industry": "electronics",
+        "viaCode": "318020",
+        "viaName": "포인트모바일",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
+        "viaCode": "318020",
+        "viaName": "포인트모바일",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "259630",
+        "corpName": "엠플러스",
+        "industry": "machinery",
+        "viaCode": "318020",
+        "viaName": "포인트모바일",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "331380",
+        "corpName": "포커스에이아이",
+        "industry": "machinery",
+        "viaCode": "318020",
+        "viaName": "포인트모바일",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "336570",
+        "corpName": "원텍",
+        "industry": "medicalDevice",
+        "viaCode": "318020",
+        "viaName": "포인트모바일",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
+        "viaCode": "318020",
+        "viaName": "포인트모바일",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "365900",
+        "corpName": "브이씨",
+        "industry": "leisure",
+        "viaCode": "318020",
+        "viaName": "포인트모바일",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "336570",
+        "to": "318020",
+        "type": "supplier",
+        "amount": 444680.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

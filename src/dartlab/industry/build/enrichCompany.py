@@ -107,7 +107,11 @@ def _getAIInsight(stockCode: str) -> dict | None:
 
 
 def _getFinancials5y(stockCode: str) -> list[dict]:
-    """scan/finance.parquet에서 5년 연간 재무 추출 (2021~2025)."""
+    """scan/finance.parquet에서 최근 10년 연간 재무 추출.
+
+    이름은 5y 유지(하위호환). 실제로는 **10년까지** 확장. 프런트는
+    `financials5y` 배열 길이 기반으로 sparkline 길이 자동 조정.
+    """
     try:
         import polars as pl
 
@@ -118,12 +122,17 @@ def _getFinancials5y(stockCode: str) -> list[dict]:
         if not finPath.exists():
             return []
 
+        # 최근 10년 자동 계산 (현재 연도 기준)
+        from datetime import datetime
+        thisYear = datetime.now().year
+        years = [str(y) for y in range(thisYear - 9, thisYear + 1)]
+
         df = (
             pl.scan_parquet(str(finPath))
             .filter(pl.col("stockCode") == stockCode)
             .filter(pl.col("reprt_nm") == "4분기")  # 연간 누적
             .filter(pl.col("account_id_std").is_in(["sales", "operating_profit", "net_profit", "total_assets"]))
-            .filter(pl.col("bsns_year").is_in(["2021", "2022", "2023", "2024", "2025"]))
+            .filter(pl.col("bsns_year").is_in(years))
             .select(["bsns_year", "fs_div", "account_id_std", "thstrm_amount"])
             .collect()
         )
@@ -137,7 +146,7 @@ def _getFinancials5y(stockCode: str) -> list[dict]:
 
         # CFS 우선, OFS fallback 계정별
         result: list[dict] = []
-        for year in ["2021", "2022", "2023", "2024", "2025"]:
+        for year in years:
             year_df = df.filter(pl.col("bsns_year") == year)
             if year_df.height == 0:
                 continue
@@ -168,6 +177,7 @@ def enrichCompanyData(
     edges: list[Any],
     nodes: list[Any],
     blogIndex: dict[str, list[dict]] | None = None,
+    hop2Data: dict[str, dict] | None = None,
 ) -> dict:
     """기존 ego JSON에 추가 데이터를 병합.
 
@@ -252,13 +262,17 @@ def enrichCompanyData(
                 }
             )
 
+    # 2-hop 공급망 (선택적)
+    hop2 = (hop2Data or {}).get(stockCode, {}) if hop2Data else {}
+
     return {
         **egoData,
         "aiInsight": aiInsight,
         "blogPosts": blogPosts,
-        "financials5y": financials5y,
+        "financials5y": financials5y,  # 이름 유지 (하위호환), 실제 최대 10년
         "supplyInsights": supplyInsights,
         "suppliers": suppliers,
         "customers": customers,
         "peers": peers,
+        "hop2": hop2,  # {hop2Neighbors, hop2Edges, hub, direct1HopCount}
     }

@@ -16,6 +16,13 @@
   "blogPosts": [],
   "financials5y": [
     {
+      "year": "2020",
+      "sales": 10703932277.0,
+      "operating_profit": 4635688582.0,
+      "net_profit": 4347602797.0,
+      "total_assets": 68169579087.0
+    },
+    {
       "year": "2021",
       "sales": 12787580042.0,
       "operating_profit": 4384993768.0,
@@ -91,5 +98,6 @@
       "stage": "platform",
       "revenue": 80991
     }
-  ]
+  ],
+  "hop2": {}
 }

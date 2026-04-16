@@ -150,5 +150,268 @@
       "stage": "apparel",
       "revenue": 34098
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "122900",
+        "corpName": "아이마켓코리아",
+        "industry": "retail",
+        "viaCode": "018290",
+        "viaName": "브이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377460",
+        "corpName": "위니아에이드",
+        "industry": "shipbuilding",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032830",
+        "corpName": "삼성생명",
+        "industry": "finance",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "308100",
+        "corpName": "형지글로벌",
+        "industry": "textile",
+        "viaCode": "204610",
+        "viaName": "티쓰리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011810",
+        "corpName": "STX",
+        "industry": "food",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024880",
+        "corpName": "케이피에프",
+        "industry": "steel",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047080",
+        "corpName": "한빛소프트",
+        "industry": "software",
+        "viaCode": "204610",
+        "viaName": "티쓰리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035080",
+        "corpName": "그래디언트",
+        "industry": "retail",
+        "viaCode": "018290",
+        "viaName": "브이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "131760",
+        "corpName": "파인텍",
+        "industry": "electronics",
+        "viaCode": "018290",
+        "viaName": "브이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058970",
+        "corpName": "엠로",
+        "industry": "software",
+        "viaCode": "204610",
+        "viaName": "티쓰리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "018290",
+        "viaName": "브이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "021240",
+        "corpName": "코웨이",
+        "industry": "electronics",
+        "viaCode": "018290",
+        "viaName": "브이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033270",
+        "corpName": "유나이티드",
+        "industry": "pharma",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "182360",
+        "corpName": "큐브엔터",
+        "industry": "media",
+        "viaCode": "018290",
+        "viaName": "브이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "241770",
+        "corpName": "메카로",
+        "industry": "semiconductor",
+        "viaCode": "018290",
+        "viaName": "브이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001520",
+        "corpName": "동양",
+        "industry": "construction",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "451220",
+        "corpName": "아이엠티",
+        "industry": "machinery",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067390",
+        "corpName": "아스트",
+        "industry": "aerospace",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030350",
+        "corpName": "드래곤플라이",
+        "industry": "software",
+        "viaCode": "018290",
+        "viaName": "브이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "018290",
+        "viaName": "브이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "077970",
+        "corpName": "STX엔진",
+        "industry": "auto",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051490",
+        "corpName": "나라엠앤디",
+        "industry": "electronics",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "104540",
+        "corpName": "코렌텍",
+        "industry": "medicalDevice",
+        "viaCode": "018290",
+        "viaName": "브이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "241710",
+        "corpName": "코스메카코리아",
+        "industry": "cosmetics",
+        "viaCode": "018290",
+        "viaName": "브이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013570",
+        "corpName": "디와이",
+        "industry": "electronics",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073570",
+        "corpName": "리튬포어스",
+        "industry": "misc",
+        "viaCode": "018290",
+        "viaName": "브이티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038880",
+        "corpName": "아이에이",
+        "industry": "electronics",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "304100",
+        "corpName": "솔트룩스",
+        "industry": "software",
+        "viaCode": "204610",
+        "viaName": "티쓰리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217590",
+        "corpName": "티엠씨",
+        "industry": "electrical",
+        "viaCode": "001020",
+        "viaName": "페이퍼코리아",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 3
+  }
 }

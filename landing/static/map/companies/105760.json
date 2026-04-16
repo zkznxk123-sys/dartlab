@@ -259,5 +259,228 @@
       "stage": "service",
       "revenue": 13713
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "084850",
+        "viaName": "아이티엠반도체",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "245620",
+        "corpName": "EDGC",
+        "industry": "pharma",
+        "viaCode": "034310",
+        "viaName": "NICE",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "030190",
+        "viaName": "NICE평가정보",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "036800",
+        "viaName": "나이스정보통신",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000810",
+        "corpName": "삼성화재해상보험",
+        "industry": "finance",
+        "viaCode": "030190",
+        "viaName": "NICE평가정보",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039840",
+        "corpName": "디오",
+        "industry": "media",
+        "viaCode": "034310",
+        "viaName": "NICE",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002900",
+        "corpName": "TYM",
+        "industry": "retail",
+        "viaCode": "034310",
+        "viaName": "NICE",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029780",
+        "corpName": "삼성카드",
+        "industry": "aerospace",
+        "viaCode": "030190",
+        "viaName": "NICE평가정보",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003540",
+        "corpName": "대신증권",
+        "industry": "finance",
+        "viaCode": "030190",
+        "viaName": "NICE평가정보",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073110",
+        "corpName": "엘엠에스",
+        "industry": "auto",
+        "viaCode": "030190",
+        "viaName": "NICE평가정보",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "084850",
+        "viaName": "아이티엠반도체",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090080",
+        "corpName": "평화산업",
+        "industry": "electronics",
+        "viaCode": "084850",
+        "viaName": "아이티엠반도체",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027410",
+        "corpName": "BGF",
+        "industry": "retail",
+        "viaCode": "034310",
+        "viaName": "NICE",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003300",
+        "corpName": "한일홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "030190",
+        "viaName": "NICE평가정보",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095500",
+        "corpName": "미래나노텍",
+        "industry": "electronics",
+        "viaCode": "084850",
+        "viaName": "아이티엠반도체",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003570",
+        "corpName": "SNT다이내믹스",
+        "industry": "machinery",
+        "viaCode": "034310",
+        "viaName": "NICE",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "030190",
+        "viaName": "NICE평가정보",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012750",
+        "corpName": "에스원",
+        "industry": "electronics",
+        "viaCode": "034310",
+        "viaName": "NICE",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "020560",
+        "corpName": "아시아나항공",
+        "industry": "aerospace",
+        "viaCode": "036800",
+        "viaName": "나이스정보통신",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028670",
+        "corpName": "팬오션",
+        "industry": "logistics",
+        "viaCode": "034310",
+        "viaName": "NICE",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "030190",
+        "viaName": "NICE평가정보",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "030190",
+        "viaName": "NICE평가정보",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013310",
+        "corpName": "아진산업",
+        "industry": "electronics",
+        "viaCode": "034310",
+        "viaName": "NICE",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005940",
+        "corpName": "NH투자증권",
+        "industry": "finance",
+        "viaCode": "303030",
+        "viaName": "지니틱스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "056080",
+        "corpName": "유진로봇",
+        "industry": "machinery",
+        "viaCode": "034310",
+        "viaName": "NICE",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "030190",
+        "viaName": "NICE평가정보",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "103230",
+        "corpName": "에스앤더블류",
+        "industry": "electronics",
+        "viaCode": "027040",
+        "viaName": "서울전자통신",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 8
+  }
 }

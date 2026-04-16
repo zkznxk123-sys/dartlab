@@ -197,5 +197,303 @@
       "stage": "",
       "revenue": 63555
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "030190",
+        "corpName": "NICE평가정보",
+        "industry": "software",
+        "viaCode": "073110",
+        "viaName": "엘엠에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "040610",
+        "viaName": "SG&G",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027040",
+        "corpName": "서울전자통신",
+        "industry": "retail",
+        "viaCode": "073110",
+        "viaName": "엘엠에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006400",
+        "corpName": "삼성SDI",
+        "industry": "chemical",
+        "viaCode": "004060",
+        "viaName": "SG세계물산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "063570",
+        "corpName": "NICE인프라",
+        "industry": "consulting",
+        "viaCode": "073110",
+        "viaName": "엘엠에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034730",
+        "corpName": "SK",
+        "industry": "software",
+        "viaCode": "004060",
+        "viaName": "SG세계물산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187790",
+        "corpName": "나노",
+        "industry": "chemical",
+        "viaCode": "073110",
+        "viaName": "엘엠에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "040610",
+        "viaName": "SG&G",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069620",
+        "corpName": "대웅제약",
+        "industry": "pharma",
+        "viaCode": "004060",
+        "viaName": "SG세계물산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "004060",
+        "viaName": "SG세계물산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "057540",
+        "corpName": "옴니시스템",
+        "industry": "energy",
+        "viaCode": "073110",
+        "viaName": "엘엠에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
+        "industry": "chemical",
+        "viaCode": "004060",
+        "viaName": "SG세계물산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032080",
+        "corpName": "아즈텍WB",
+        "industry": "textile",
+        "viaCode": "004060",
+        "viaName": "SG세계물산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "073110",
+        "viaName": "엘엠에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002020",
+        "corpName": "코오롱",
+        "industry": "finance",
+        "viaCode": "001380",
+        "viaName": "SG글로벌",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003090",
+        "corpName": "대웅",
+        "industry": "pharma",
+        "viaCode": "004060",
+        "viaName": "SG세계물산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "128940",
+        "corpName": "한미약품",
+        "industry": "pharma",
+        "viaCode": "004060",
+        "viaName": "SG세계물산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038460",
+        "corpName": "바이오스마트",
+        "industry": "electronics",
+        "viaCode": "073110",
+        "viaName": "엘엠에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084850",
+        "corpName": "아이티엠반도체",
+        "industry": "electronics",
+        "viaCode": "073110",
+        "viaName": "엘엠에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004140",
+        "corpName": "동방",
+        "industry": "logistics",
+        "viaCode": "073110",
+        "viaName": "엘엠에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034310",
+        "corpName": "NICE",
+        "industry": "finance",
+        "viaCode": "073110",
+        "viaName": "엘엠에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028260",
+        "corpName": "삼성물산",
+        "industry": "construction",
+        "viaCode": "004060",
+        "viaName": "SG세계물산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "108670",
+        "corpName": "LX하우시스",
+        "industry": "electronics",
+        "viaCode": "001380",
+        "viaName": "SG글로벌",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012750",
+        "corpName": "에스원",
+        "industry": "electronics",
+        "viaCode": "004060",
+        "viaName": "SG세계물산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "130580",
+        "corpName": "나이스디앤비",
+        "industry": "consulting",
+        "viaCode": "073110",
+        "viaName": "엘엠에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "303030",
+        "corpName": "지니틱스",
+        "industry": "semiconductor",
+        "viaCode": "073110",
+        "viaName": "엘엠에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
+        "viaCode": "004060",
+        "viaName": "SG세계물산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036800",
+        "corpName": "나이스정보통신",
+        "industry": "telecom",
+        "viaCode": "073110",
+        "viaName": "엘엠에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "255220",
+        "corpName": "SG",
+        "industry": "buildingMaterials",
+        "viaCode": "040610",
+        "viaName": "SG&G",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "055550",
+        "corpName": "신한지주",
+        "industry": "finance",
+        "viaCode": "004060",
+        "viaName": "SG세계물산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053980",
+        "corpName": "오상자이엘",
+        "industry": "software",
+        "viaCode": "073110",
+        "viaName": "엘엠에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035250",
+        "corpName": "강원랜드",
+        "industry": "leisure",
+        "viaCode": "004060",
+        "viaName": "SG세계물산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035420",
+        "corpName": "NAVER",
+        "industry": "software",
+        "viaCode": "004060",
+        "viaName": "SG세계물산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "363260",
+        "corpName": "모비데이즈",
+        "industry": "media",
+        "viaCode": "004060",
+        "viaName": "SG세계물산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101490",
+        "corpName": "에스앤에스텍",
+        "industry": "semiconductor",
+        "viaCode": "073110",
+        "viaName": "엘엠에스",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "108670",
+        "to": "001380",
+        "type": "supplier",
+        "amount": 13184533.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 4
+  }
 }

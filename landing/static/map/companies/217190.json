@@ -119,5 +119,60 @@
       "stage": "packaging",
       "revenue": 15344
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "192650",
+        "corpName": "드림텍",
+        "industry": "electronics",
+        "viaCode": "067310",
+        "viaName": "하나마이크론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "461030",
+        "corpName": "아이엠비디엑스",
+        "industry": "pharma",
+        "viaCode": "067310",
+        "viaName": "하나마이크론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "067310",
+        "viaName": "하나마이크론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "297890",
+        "corpName": "HB솔루션",
+        "industry": "electronics",
+        "viaCode": "067310",
+        "viaName": "하나마이크론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "166090",
+        "corpName": "하나머티리얼즈",
+        "industry": "semiconductor",
+        "viaCode": "067310",
+        "viaName": "하나마이크론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "332570",
+        "corpName": "PS일렉트로닉스",
+        "industry": "electronics",
+        "viaCode": "067310",
+        "viaName": "하나마이크론",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

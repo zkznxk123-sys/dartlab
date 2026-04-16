@@ -117,5 +117,36 @@
       "stage": "imaging",
       "revenue": 3959
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "192250",
+        "viaName": "케이사인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001290",
+        "corpName": "상상인증권",
+        "industry": "finance",
+        "viaCode": "192250",
+        "viaName": "케이사인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "208350",
+        "corpName": "지란지교시큐리티",
+        "industry": "software",
+        "viaCode": "192250",
+        "viaName": "케이사인",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

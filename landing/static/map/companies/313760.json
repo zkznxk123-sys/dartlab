@@ -112,5 +112,11 @@
       "stage": "oem",
       "revenue": 108837
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

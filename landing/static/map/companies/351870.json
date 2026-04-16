@@ -98,5 +98,79 @@
       "stage": "agency",
       "revenue": 11749
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "025620",
+        "corpName": "차AI헬스케어",
+        "industry": "cosmetics",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024090",
+        "corpName": "디씨엠",
+        "industry": "construction",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "143540",
+        "corpName": "영우디에스피",
+        "industry": "electronics",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064090",
+        "corpName": "인크레더블버즈",
+        "industry": "retail",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004710",
+        "corpName": "한솔테크닉스",
+        "industry": "electronics",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058450",
+        "corpName": "한주에이알티",
+        "industry": "electronics",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "061040",
+        "to": "004710",
+        "type": "supplier",
+        "amount": 1701.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

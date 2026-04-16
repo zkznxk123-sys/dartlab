@@ -131,5 +131,36 @@
       "stage": "general",
       "revenue": 20185
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "005950",
+        "corpName": "이수화학",
+        "industry": "food",
+        "viaCode": "034950",
+        "viaName": "한국기업평가",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001680",
+        "corpName": "대상",
+        "industry": "food",
+        "viaCode": "034950",
+        "viaName": "한국기업평가",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029780",
+        "corpName": "삼성카드",
+        "industry": "aerospace",
+        "viaCode": "034950",
+        "viaName": "한국기업평가",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

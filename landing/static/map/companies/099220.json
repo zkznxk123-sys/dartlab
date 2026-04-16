@@ -5788,5 +5788,11 @@
       "stage": "generation",
       "revenue": 29316
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [],
+    "hop2Edges": [],
+    "hub": true,
+    "direct1HopCount": 285
+  }
 }

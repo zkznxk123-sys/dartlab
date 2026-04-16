@@ -155,5 +155,148 @@
       "stage": "apparel",
       "revenue": 34098
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "033540",
+        "corpName": "파라텍",
+        "industry": "machinery",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051630",
+        "corpName": "진양화학",
+        "industry": "plastic",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083420",
+        "corpName": "그린케미칼",
+        "industry": "food",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004800",
+        "corpName": "효성",
+        "industry": "chemical",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025000",
+        "corpName": "KPX케미칼",
+        "industry": "software",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "105550",
+        "corpName": "엣지파운드리",
+        "industry": "machinery",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "114450",
+        "corpName": "그린생명과학",
+        "industry": "pharma",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010640",
+        "corpName": "진양폴리우레탄",
+        "industry": "plastic",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009830",
+        "corpName": "한화솔루션",
+        "industry": "chemical",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "118990",
+        "corpName": "모트렉스",
+        "industry": "auto",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090710",
+        "corpName": "휴림로봇",
+        "industry": "machinery",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016740",
+        "corpName": "두올",
+        "industry": "auto",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092230",
+        "corpName": "KPX홀딩스",
+        "industry": "chemical",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192410",
+        "corpName": "오늘이엔엠",
+        "industry": "telecom",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003780",
+        "corpName": "진양산업",
+        "industry": "retail",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

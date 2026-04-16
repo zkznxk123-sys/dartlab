@@ -112,5 +112,92 @@
       "stage": "",
       "revenue": 63555
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "064400",
+        "corpName": "LG씨엔에스",
+        "industry": "electronics",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010140",
+        "corpName": "삼성중공업",
+        "industry": "shipbuilding",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034220",
+        "corpName": "LG디스플레이",
+        "industry": "electronics",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "045510",
+        "corpName": "정원엔시스",
+        "industry": "software",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051900",
+        "corpName": "LG생활건강",
+        "industry": "electronics",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "0008Z0",
+        "corpName": "에스엔시스",
+        "industry": "electrical",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071200",
+        "corpName": "인피니트헬스케어",
+        "industry": "pharma",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

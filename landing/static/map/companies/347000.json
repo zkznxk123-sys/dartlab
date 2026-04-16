@@ -139,5 +139,60 @@
       "stage": "",
       "revenue": 63555
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "103140",
+        "corpName": "풍산",
+        "industry": "steel",
+        "viaCode": "082920",
+        "viaName": "비츠로셀",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "488900",
+        "corpName": "비츠로넥스텍",
+        "industry": "energy",
+        "viaCode": "082920",
+        "viaName": "비츠로셀",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054220",
+        "corpName": "비츠로시스",
+        "industry": "electrical",
+        "viaCode": "082920",
+        "viaName": "비츠로셀",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "042370",
+        "corpName": "비츠로테크",
+        "industry": "electrical",
+        "viaCode": "082920",
+        "viaName": "비츠로셀",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "082920",
+        "viaName": "비츠로셀",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005810",
+        "corpName": "풍산홀딩스",
+        "industry": "retail",
+        "viaCode": "082920",
+        "viaName": "비츠로셀",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

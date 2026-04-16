@@ -145,5 +145,92 @@
       "stage": "retail",
       "revenue": 69295
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "013870",
+        "viaName": "지엠비코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "241690",
+        "viaName": "유니테크노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001510",
+        "corpName": "SK증권",
+        "industry": "software",
+        "viaCode": "013870",
+        "viaName": "지엠비코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002030",
+        "corpName": "아세아",
+        "industry": "consulting",
+        "viaCode": "241690",
+        "viaName": "유니테크노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082640",
+        "corpName": "동양생명",
+        "industry": "finance",
+        "viaCode": "241690",
+        "viaName": "유니테크노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "125020",
+        "corpName": "티씨머티리얼즈",
+        "industry": "medicalDevice",
+        "viaCode": "241690",
+        "viaName": "유니테크노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047310",
+        "corpName": "파워로직스",
+        "industry": "electronics",
+        "viaCode": "241690",
+        "viaName": "유니테크노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011210",
+        "corpName": "현대위아",
+        "industry": "auto",
+        "viaCode": "013870",
+        "viaName": "지엠비코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013570",
+        "corpName": "디와이",
+        "industry": "electronics",
+        "viaCode": "241690",
+        "viaName": "유니테크노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004270",
+        "corpName": "남성",
+        "industry": "telecom",
+        "viaCode": "013870",
+        "viaName": "지엠비코리아",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

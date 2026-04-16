@@ -117,5 +117,172 @@
       "stage": "formulation",
       "revenue": 20684
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "222040",
+        "corpName": "코스맥스엔비티",
+        "industry": "pharma",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084690",
+        "corpName": "대상홀딩스",
+        "industry": "finance",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "204610",
+        "corpName": "티쓰리",
+        "industry": "software",
+        "viaCode": "058970",
+        "viaName": "엠로",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047080",
+        "corpName": "한빛소프트",
+        "industry": "software",
+        "viaCode": "058970",
+        "viaName": "엠로",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "049960",
+        "corpName": "쎌바이오텍",
+        "industry": "pharma",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267980",
+        "corpName": "매일유업",
+        "industry": "food",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005990",
+        "corpName": "매일홀딩스",
+        "industry": "food",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214420",
+        "corpName": "토니모리",
+        "industry": "cosmetics",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044820",
+        "corpName": "코스맥스비티아이",
+        "industry": "food",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "159580",
+        "corpName": "제로투세븐",
+        "industry": "retail",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018260",
+        "corpName": "삼성에스디에스",
+        "industry": "shipbuilding",
+        "viaCode": "058970",
+        "viaName": "엠로",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192820",
+        "corpName": "코스맥스",
+        "industry": "cosmetics",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003620",
+        "corpName": "KG모빌리티",
+        "industry": "electronics",
+        "viaCode": "058970",
+        "viaName": "엠로",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "058970",
+        "viaName": "엠로",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007070",
+        "corpName": "GS리테일",
+        "industry": "retail",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003530",
+        "corpName": "한화투자증권",
+        "industry": "aerospace",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031440",
+        "corpName": "신세계푸드",
+        "industry": "retail",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

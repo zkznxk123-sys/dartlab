@@ -124,5 +124,76 @@
       "stage": "",
       "revenue": 9601
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "125210",
+        "corpName": "아모그린텍",
+        "industry": "electronics",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082210",
+        "corpName": "옵트론텍",
+        "industry": "machinery",
+        "viaCode": "241520",
+        "viaName": "DSC인베스트먼트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "357580",
+        "corpName": "아모센스",
+        "industry": "auto",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084440",
+        "corpName": "유비온",
+        "industry": "education",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "103660",
+        "corpName": "씨앗",
+        "industry": "chemical",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044990",
+        "corpName": "에이치엔에스하이텍",
+        "industry": "electronics",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060850",
+        "corpName": "영림원소프트랩",
+        "industry": "software",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

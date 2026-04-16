@@ -174,5 +174,76 @@
       "stage": "retail",
       "revenue": 69295
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "044380",
+        "corpName": "주연테크",
+        "industry": "realestate",
+        "viaCode": "004870",
+        "viaName": "티웨이홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "091810",
+        "viaName": "티웨이항공",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "091810",
+        "viaName": "티웨이항공",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "091810",
+        "viaName": "티웨이항공",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010950",
+        "corpName": "S-Oil",
+        "industry": "chemical",
+        "viaCode": "004870",
+        "viaName": "티웨이홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036000",
+        "corpName": "예림당",
+        "industry": "telecom",
+        "viaCode": "091810",
+        "viaName": "티웨이항공",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "004870",
+        "viaName": "티웨이홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028670",
+        "corpName": "팬오션",
+        "industry": "logistics",
+        "viaCode": "091810",
+        "viaName": "티웨이항공",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

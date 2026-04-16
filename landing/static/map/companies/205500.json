@@ -188,5 +188,284 @@
       "stage": "platform",
       "revenue": 80991
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "061090",
+        "corpName": "세나테크놀로지",
+        "industry": "retail",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044380",
+        "corpName": "주연테크",
+        "industry": "realestate",
+        "viaCode": "193250",
+        "viaName": "링크드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "122870",
+        "corpName": "와이지엔터테인먼트",
+        "industry": "media",
+        "viaCode": "058630",
+        "viaName": "엠게임",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069080",
+        "corpName": "웹젠",
+        "industry": "software",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047820",
+        "corpName": "초록뱀미디어",
+        "industry": "telecom",
+        "viaCode": "058630",
+        "viaName": "엠게임",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024090",
+        "corpName": "디씨엠",
+        "industry": "construction",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "373200",
+        "corpName": "엑스플러스",
+        "industry": "misc",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "323410",
+        "corpName": "카카오뱅크",
+        "industry": "finance",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001360",
+        "corpName": "삼성제약",
+        "industry": "food",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078340",
+        "corpName": "컴투스",
+        "industry": "software",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "251270",
+        "corpName": "넷마블",
+        "industry": "software",
+        "viaCode": "058630",
+        "viaName": "엠게임",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "048550",
+        "corpName": "SM C&C",
+        "industry": "media",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217270",
+        "corpName": "넵튠",
+        "industry": "software",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054780",
+        "corpName": "키이스트",
+        "industry": "software",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002720",
+        "corpName": "국제약품",
+        "industry": "food",
+        "viaCode": "058630",
+        "viaName": "엠게임",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377300",
+        "corpName": "카카오페이",
+        "industry": "finance",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090460",
+        "corpName": "비에이치",
+        "industry": "electronics",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016710",
+        "corpName": "대성홀딩스",
+        "industry": "realestate",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "040300",
+        "corpName": "YTN",
+        "industry": "media",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003530",
+        "corpName": "한화투자증권",
+        "industry": "aerospace",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "063440",
+        "corpName": "SM Life Design",
+        "industry": "media",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "376300",
+        "corpName": "디어유",
+        "industry": "software",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016360",
+        "corpName": "삼성증권",
+        "industry": "finance",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "057680",
+        "corpName": "티사이언티픽",
+        "industry": "software",
+        "viaCode": "058630",
+        "viaName": "엠게임",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "259960",
+        "corpName": "크래프톤",
+        "industry": "software",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "363260",
+        "corpName": "모비데이즈",
+        "industry": "media",
+        "viaCode": "193250",
+        "viaName": "링크드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052770",
+        "corpName": "아이톡시",
+        "industry": "software",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001290",
+        "corpName": "상상인증권",
+        "industry": "finance",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "112040",
+        "corpName": "위메이드",
+        "industry": "software",
+        "viaCode": "293490",
+        "viaName": "카카오게임즈",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 4
+  }
 }

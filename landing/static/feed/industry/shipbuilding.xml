@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>dartlab 변화 감지 · shipbuilding</title>
+<link>https://eddmpython.github.io/dartlab/industry/shipbuilding</link>
+<description>shipbuilding 산업 이번 회계연도 급변 회사</description>
+<language>ko-kr</language>
+<lastBuildDate>Thu, 16 Apr 2026 09:50:46 +0000</lastBuildDate>
+<item>
+  <title>[수익성 개선 (ROE)] 위니아에이드 (조선·해운)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=377460</link>
+  <guid isPermaLink="false">profitImprove-377460-2025</guid>
+  <category>수익성 개선 (ROE)</category>
+  <description>ROE Δ+74.6%p · 산업 z=+4.0σ | 수익성 개선. 원인은 본업 회복/일회성 여부 확인.</description>
+</item>
+<item>
+  <title>[부채 스트레스] 위니아에이드 (조선·해운)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=377460</link>
+  <guid isPermaLink="false">debtStress-377460-2025</guid>
+  <category>부채 스트레스</category>
+  <description>부채비율 334% (+2826%p) | 부채 급증 + 높은 절대값. 재무 스트레스 신호.</description>
+</item>
+</channel>
+</rss>

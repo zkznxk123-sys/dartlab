@@ -102,5 +102,116 @@
       "stage": "securities",
       "revenue": 103925
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "035620",
+        "corpName": "바른손이앤에이",
+        "industry": "finance",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005750",
+        "corpName": "대림바스",
+        "industry": "realestate",
+        "viaCode": "189300",
+        "viaName": "인텔리안테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "451760",
+        "corpName": "컨텍",
+        "industry": "construction",
+        "viaCode": "189300",
+        "viaName": "인텔리안테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "050890",
+        "corpName": "쏠리드",
+        "industry": "telecom",
+        "viaCode": "189300",
+        "viaName": "인텔리안테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "189300",
+        "viaName": "인텔리안테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "189300",
+        "viaName": "인텔리안테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064260",
+        "corpName": "다날",
+        "industry": "finance",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "081180",
+        "corpName": "쎄크",
+        "industry": "medicalDevice",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035080",
+        "corpName": "그래디언트",
+        "industry": "retail",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "189300",
+        "viaName": "인텔리안테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "225570",
+        "corpName": "넥슨게임즈",
+        "industry": "software",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307930",
+        "corpName": "컴퍼니케이",
+        "industry": "finance",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "289170",
+        "corpName": "바이오텐",
+        "industry": "pharma",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

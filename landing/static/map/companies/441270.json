@@ -174,5 +174,508 @@
       "stage": "",
       "revenue": 63555
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "253450",
+        "corpName": "스튜디오드래곤",
+        "industry": "media",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452260",
+        "corpName": "한화갤러리아",
+        "industry": "aerospace",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023530",
+        "corpName": "롯데쇼핑",
+        "industry": "textile",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011150",
+        "corpName": "CJ씨푸드",
+        "industry": "food",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069260",
+        "corpName": "티케이지휴켐스",
+        "industry": "chemical",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037560",
+        "corpName": "LG헬로비전",
+        "industry": "electronics",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "215360",
+        "corpName": "우리산업",
+        "industry": "medicalDevice",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000880",
+        "corpName": "한화",
+        "industry": "aerospace",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "072470",
+        "corpName": "우리산업홀딩스",
+        "industry": "electronics",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067170",
+        "corpName": "오텍",
+        "industry": "auto",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "106240",
+        "viaName": "파인테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018500",
+        "corpName": "동원금속",
+        "industry": "electronics",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "243070",
+        "corpName": "휴온스",
+        "industry": "pharma",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "022220",
+        "corpName": "티케이지애강",
+        "industry": "chemical",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "046120",
+        "corpName": "오르비텍",
+        "industry": "electronics",
+        "viaCode": "106240",
+        "viaName": "파인테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091120",
+        "corpName": "이엠텍",
+        "industry": "electronics",
+        "viaCode": "106240",
+        "viaName": "파인테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012510",
+        "corpName": "더존비즈온",
+        "industry": "realestate",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001040",
+        "corpName": "CJ",
+        "industry": "food",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "396300",
+        "corpName": "세아메카닉스",
+        "industry": "electronics",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047050",
+        "corpName": "포스코인터내셔널",
+        "industry": "steel",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064960",
+        "corpName": "SNT모티브",
+        "industry": "electronics",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000400",
+        "corpName": "롯데손해보험",
+        "industry": "finance",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089860",
+        "corpName": "롯데렌탈",
+        "industry": "logistics",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000120",
+        "corpName": "CJ대한통운",
+        "industry": "food",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079160",
+        "corpName": "CJ CGV",
+        "industry": "food",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008490",
+        "corpName": "서흥",
+        "industry": "chemical",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192820",
+        "corpName": "코스맥스",
+        "industry": "cosmetics",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005300",
+        "corpName": "롯데칠성음료",
+        "industry": "food",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "169330",
+        "corpName": "엠브레인",
+        "industry": "consulting",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006360",
+        "corpName": "GS건설",
+        "industry": "construction",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011170",
+        "corpName": "롯데케미칼",
+        "industry": "chemical",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082740",
+        "corpName": "한화엔진",
+        "industry": "aerospace",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "049120",
+        "viaName": "파인디앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "272210",
+        "corpName": "한화시스템",
+        "industry": "aerospace",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "170900",
+        "corpName": "동아에스티",
+        "industry": "pharma",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "042660",
+        "corpName": "한화오션",
+        "industry": "shipbuilding",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033250",
+        "corpName": "체시스",
+        "industry": "electronics",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036530",
+        "corpName": "SNT홀딩스",
+        "industry": "finance",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004000",
+        "corpName": "롯데정밀화학",
+        "industry": "chemical",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071840",
+        "corpName": "롯데하이마트",
+        "industry": "retail",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005380",
+        "corpName": "현대자동차",
+        "industry": "auto",
+        "viaCode": "106240",
+        "viaName": "파인테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089980",
+        "corpName": "상아프론테크",
+        "industry": "electronics",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "114920",
+        "corpName": "대주이엔티",
+        "industry": "steel",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035760",
+        "corpName": "CJ ENM",
+        "industry": "media",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "337840",
+        "corpName": "유엑스엔",
+        "industry": "medicalDevice",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003530",
+        "corpName": "한화투자증권",
+        "industry": "aerospace",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005950",
+        "corpName": "이수화학",
+        "industry": "food",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012450",
+        "corpName": "한화에어로스페이스",
+        "industry": "aerospace",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085620",
+        "corpName": "미래에셋생명",
+        "industry": "finance",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009830",
+        "corpName": "한화솔루션",
+        "industry": "chemical",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051500",
+        "corpName": "CJ프레시웨이",
+        "industry": "food",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004990",
+        "corpName": "롯데지주",
+        "industry": "finance",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "489790",
+        "corpName": "한화비전",
+        "industry": "aerospace",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "097950",
+        "corpName": "CJ제일제당",
+        "industry": "food",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "106240",
+        "viaName": "파인테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "311690",
+        "corpName": "CJ 바이오사이언스",
+        "industry": "food",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "309930",
+        "corpName": "조이웍스앤코",
+        "industry": "retail",
+        "viaCode": "278990",
+        "viaName": "EMB",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 3
+  }
 }

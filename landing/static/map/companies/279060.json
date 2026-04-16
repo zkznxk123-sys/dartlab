@@ -83,5 +83,52 @@
       "stage": "",
       "revenue": 63555
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "015760",
+        "corpName": "한국전력공사",
+        "industry": "energy",
+        "viaCode": "360070",
+        "viaName": "탑머티리얼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "282880",
+        "corpName": "코윈테크",
+        "industry": "electronics",
+        "viaCode": "360070",
+        "viaName": "탑머티리얼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047310",
+        "corpName": "파워로직스",
+        "industry": "electronics",
+        "viaCode": "360070",
+        "viaName": "탑머티리얼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "455180",
+        "corpName": "케이지에이",
+        "industry": "auto",
+        "viaCode": "360070",
+        "viaName": "탑머티리얼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065130",
+        "corpName": "탑엔지니어링",
+        "industry": "electronics",
+        "viaCode": "360070",
+        "viaName": "탑머티리얼",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

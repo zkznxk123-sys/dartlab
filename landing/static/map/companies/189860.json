@@ -121,5 +121,225 @@
       "stage": "cable",
       "revenue": 6245
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "104700",
+        "corpName": "한국철강",
+        "industry": "construction",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "117580",
+        "corpName": "대성에너지",
+        "industry": "energy",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023410",
+        "corpName": "유진기업",
+        "industry": "construction",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004170",
+        "corpName": "신세계",
+        "industry": "retail",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018310",
+        "corpName": "삼목에스폼",
+        "industry": "plastic",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "453340",
+        "corpName": "현대그린푸드",
+        "industry": "retail",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039010",
+        "corpName": "현대에이치티",
+        "industry": "retail",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011090",
+        "corpName": "에넥스",
+        "industry": "paper",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089590",
+        "corpName": "제주항공",
+        "industry": "aerospace",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032640",
+        "corpName": "LG유플러스",
+        "industry": "telecom",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014280",
+        "corpName": "금강공업",
+        "industry": "construction",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084010",
+        "corpName": "대한제강",
+        "industry": "construction",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001210",
+        "corpName": "금호전기",
+        "industry": "electrical",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079430",
+        "corpName": "현대리바트",
+        "industry": "paper",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "300720",
+        "corpName": "한일시멘트",
+        "industry": "construction",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "460860",
+        "corpName": "동국제강",
+        "industry": "steel",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "189860",
+        "to": "002460",
+        "type": "supplier",
+        "amount": 13679.0,
+        "ratio": null,
+        "product": "",
+        "hop": 1,
+        "source": "docs_table"
+      },
+      {
+        "from": "104700",
+        "to": "002460",
+        "type": "supplier",
+        "amount": 10763.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "004020",
+        "to": "002460",
+        "type": "supplier",
+        "amount": 6179.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "460860",
+        "to": "002460",
+        "type": "supplier",
+        "amount": 6179.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "011090",
+        "to": "002460",
+        "type": "supplier",
+        "amount": 4460.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      },
+      {
+        "from": "023410",
+        "to": "002460",
+        "type": "supplier",
+        "amount": 2967.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

@@ -193,5 +193,84 @@
       "stage": "electrolyte",
       "revenue": 3128
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "068270",
+        "corpName": "셀트리온",
+        "industry": "pharma",
+        "viaCode": "131290",
+        "viaName": "티에스이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092870",
+        "corpName": "엑시콘",
+        "industry": "semiconductor",
+        "viaCode": "219130",
+        "viaName": "타이거일렉",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "203690",
+        "corpName": "아크솔루션스",
+        "industry": "cosmetics",
+        "viaCode": "096870",
+        "viaName": "엘디티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "413300",
+        "corpName": "티엘엔지니어링",
+        "industry": "construction",
+        "viaCode": "131290",
+        "viaName": "티에스이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068760",
+        "corpName": "셀트리온제약",
+        "industry": "pharma",
+        "viaCode": "131290",
+        "viaName": "티에스이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "172670",
+        "corpName": "에이엘티",
+        "industry": "semiconductor",
+        "viaCode": "131290",
+        "viaName": "티에스이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035890",
+        "corpName": "서희건설",
+        "industry": "realestate",
+        "viaCode": "131290",
+        "viaName": "티에스이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
+        "viaCode": "219130",
+        "viaName": "타이거일렉",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "480370",
+        "corpName": "씨케이솔루션",
+        "industry": "consulting",
+        "viaCode": "131290",
+        "viaName": "티에스이",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 3
+  }
 }

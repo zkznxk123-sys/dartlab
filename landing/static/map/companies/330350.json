@@ -172,5 +172,100 @@
       "stage": "formulation",
       "revenue": 20684
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "389470",
+        "viaName": "인벤티지랩",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "278650",
+        "corpName": "HLB바이오스텝",
+        "industry": "pharma",
+        "viaCode": "389470",
+        "viaName": "인벤티지랩",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "243070",
+        "corpName": "휴온스",
+        "industry": "pharma",
+        "viaCode": "294090",
+        "viaName": "이오플로우",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "206650",
+        "corpName": "유바이오로직스",
+        "industry": "pharma",
+        "viaCode": "389470",
+        "viaName": "인벤티지랩",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016710",
+        "corpName": "대성홀딩스",
+        "industry": "realestate",
+        "viaCode": "294090",
+        "viaName": "이오플로우",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "115160",
+        "corpName": "휴맥스",
+        "industry": "electronics",
+        "viaCode": "294090",
+        "viaName": "이오플로우",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348080",
+        "corpName": "큐라티스",
+        "industry": "pharma",
+        "viaCode": "389470",
+        "viaName": "인벤티지랩",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "237690",
+        "corpName": "에스티팜",
+        "industry": "pharma",
+        "viaCode": "389470",
+        "viaName": "인벤티지랩",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028300",
+        "corpName": "HLB",
+        "industry": "pharma",
+        "viaCode": "389470",
+        "viaName": "인벤티지랩",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069620",
+        "corpName": "대웅제약",
+        "industry": "pharma",
+        "viaCode": "389470",
+        "viaName": "인벤티지랩",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "337840",
+        "corpName": "유엑스엔",
+        "industry": "medicalDevice",
+        "viaCode": "294090",
+        "viaName": "이오플로우",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

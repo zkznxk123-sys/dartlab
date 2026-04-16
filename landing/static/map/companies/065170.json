@@ -176,5 +176,628 @@
       "stage": "retail",
       "revenue": 69295
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "034730",
+        "corpName": "SK",
+        "industry": "software",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200130",
+        "corpName": "콜마비앤에이치",
+        "industry": "pharma",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038530",
+        "corpName": "케이바이오",
+        "industry": "retail",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060570",
+        "corpName": "드림어스컴퍼니",
+        "industry": "media",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "097780",
+        "corpName": "에코볼트",
+        "industry": "electronics",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047820",
+        "corpName": "초록뱀미디어",
+        "industry": "telecom",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352940",
+        "corpName": "인바이오",
+        "industry": "chemical",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "424870",
+        "corpName": "이뮨온시아",
+        "industry": "pharma",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000100",
+        "corpName": "유한양행",
+        "industry": "pharma",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "210980",
+        "corpName": "SK디앤디",
+        "industry": "software",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "288980",
+        "corpName": "모아데이타",
+        "industry": "software",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071950",
+        "corpName": "코아스",
+        "industry": "food",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003060",
+        "corpName": "에이프로젠바이오로직스",
+        "industry": "pharma",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039860",
+        "corpName": "나노엔텍",
+        "industry": "pharma",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001740",
+        "corpName": "SK네트웍스",
+        "industry": "software",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013570",
+        "corpName": "디와이",
+        "industry": "electronics",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "265740",
+        "corpName": "엔에프씨",
+        "industry": "cosmetics",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "475150",
+        "corpName": "SK이터닉스",
+        "industry": "software",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007820",
+        "corpName": "에스엠코어",
+        "industry": "machinery",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109960",
+        "corpName": "앱토크롬",
+        "industry": "software",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052260",
+        "corpName": "현대바이오랜드",
+        "industry": "chemical",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
+        "industry": "chemical",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100090",
+        "corpName": "SK오션플랜트",
+        "industry": "software",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "326030",
+        "corpName": "에스케이바이오팜",
+        "industry": "pharma",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033270",
+        "corpName": "유나이티드",
+        "industry": "pharma",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "418550",
+        "corpName": "제이오",
+        "industry": "consulting",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "361610",
+        "corpName": "SK아이이테크놀로지",
+        "industry": "software",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092220",
+        "corpName": "KEC",
+        "industry": "semiconductor",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000050",
+        "corpName": "경방",
+        "industry": "retail",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012750",
+        "corpName": "에스원",
+        "industry": "electronics",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095340",
+        "corpName": "ISC",
+        "industry": "retail",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054620",
+        "corpName": "APS",
+        "industry": "telecom",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "219750",
+        "corpName": "한국비티비",
+        "industry": "pharma",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007460",
+        "corpName": "에이프로젠",
+        "industry": "realestate",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053030",
+        "corpName": "바이넥스",
+        "industry": "pharma",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161890",
+        "corpName": "한국콜마",
+        "industry": "cosmetics",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068330",
+        "corpName": "일신바이오",
+        "industry": "machinery",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "216050",
+        "corpName": "인크로스",
+        "industry": "media",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "190650",
+        "corpName": "코리아에셋투자증권",
+        "industry": "finance",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052300",
+        "corpName": "오션인더블유",
+        "industry": "logistics",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "227950",
+        "corpName": "엔투텍",
+        "industry": "semiconductor",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "335810",
+        "corpName": "프리시젼바이오",
+        "industry": "pharma",
+        "viaCode": "086220",
+        "viaName": "광동헬스바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "194700",
+        "corpName": "노바렉스",
+        "industry": "pharma",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "270520",
+        "corpName": "앱튼",
+        "industry": "consulting",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018670",
+        "corpName": "SK가스",
+        "industry": "software",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095700",
+        "corpName": "제넥신",
+        "industry": "pharma",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001290",
+        "corpName": "상상인증권",
+        "industry": "finance",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "285130",
+        "corpName": "SK케미칼",
+        "industry": "software",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011790",
+        "corpName": "SKC",
+        "industry": "software",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "318060",
+        "corpName": "그래피",
+        "industry": "chemical",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079980",
+        "corpName": "휴비스",
+        "industry": "textile",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "063760",
+        "corpName": "이엘피",
+        "industry": "electronics",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006120",
+        "corpName": "SK디스커버리",
+        "industry": "software",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078860",
+        "corpName": "스테이지원엔터",
+        "industry": "media",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "402340",
+        "corpName": "SK스퀘어",
+        "industry": "software",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009290",
+        "corpName": "광동제약",
+        "industry": "food",
+        "viaCode": "086220",
+        "viaName": "광동헬스바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034120",
+        "corpName": "SBS",
+        "industry": "electronics",
+        "viaCode": "302440",
+        "viaName": "SK바이오사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007680",
+        "corpName": "대원",
+        "industry": "construction",
+        "viaCode": "296160",
+        "viaName": "프로젠",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 4
+  }
 }

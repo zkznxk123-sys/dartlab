@@ -148,5 +148,228 @@
       "stage": "",
       "revenue": 9601
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "086220",
+        "corpName": "광동헬스바이오",
+        "industry": "pharma",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "296160",
+        "corpName": "프로젠",
+        "industry": "pharma",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065170",
+        "corpName": "비엘팜텍",
+        "industry": "retail",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "278990",
+        "corpName": "EMB",
+        "industry": "battery",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "137310",
+        "corpName": "에스디바이오센서",
+        "industry": "pharma",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200130",
+        "corpName": "콜마비앤에이치",
+        "industry": "pharma",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352940",
+        "corpName": "인바이오",
+        "industry": "chemical",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "318060",
+        "corpName": "그래피",
+        "industry": "chemical",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "418550",
+        "corpName": "제이오",
+        "industry": "consulting",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "131220",
+        "corpName": "대한과학",
+        "industry": "retail",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091120",
+        "corpName": "이엠텍",
+        "industry": "electronics",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377740",
+        "corpName": "바이오노트",
+        "industry": "pharma",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "259630",
+        "corpName": "엠플러스",
+        "industry": "machinery",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "288980",
+        "corpName": "모아데이타",
+        "industry": "software",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "294090",
+        "corpName": "이오플로우",
+        "industry": "machinery",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "119830",
+        "corpName": "아이텍",
+        "industry": "semiconductor",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "194700",
+        "corpName": "노바렉스",
+        "industry": "pharma",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053030",
+        "corpName": "바이넥스",
+        "industry": "pharma",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "265740",
+        "corpName": "엔에프씨",
+        "industry": "cosmetics",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161890",
+        "corpName": "한국콜마",
+        "industry": "cosmetics",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

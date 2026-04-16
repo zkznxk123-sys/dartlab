@@ -188,5 +188,124 @@
       "stage": "retail",
       "revenue": 69295
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "052860",
+        "corpName": "아이앤씨",
+        "industry": "semiconductor",
+        "viaCode": "032980",
+        "viaName": "바이온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "083660",
+        "viaName": "CSA 코스믹",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "110020",
+        "corpName": "전진바이오팜",
+        "industry": "chemical",
+        "viaCode": "032980",
+        "viaName": "바이온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "032980",
+        "viaName": "바이온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012450",
+        "corpName": "한화에어로스페이스",
+        "industry": "aerospace",
+        "viaCode": "258610",
+        "viaName": "케일럼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054180",
+        "corpName": "메디콕스",
+        "industry": "shipbuilding",
+        "viaCode": "032980",
+        "viaName": "바이온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "197140",
+        "corpName": "디지캡",
+        "industry": "telecom",
+        "viaCode": "032980",
+        "viaName": "바이온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "020120",
+        "corpName": "키다리스튜디오",
+        "industry": "media",
+        "viaCode": "134580",
+        "viaName": "탑코미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109070",
+        "corpName": "주성코퍼레이션",
+        "industry": "telecom",
+        "viaCode": "032980",
+        "viaName": "바이온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069540",
+        "corpName": "빛과전자",
+        "industry": "telecom",
+        "viaCode": "083660",
+        "viaName": "CSA 코스믹",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038880",
+        "corpName": "아이에이",
+        "industry": "electronics",
+        "viaCode": "083660",
+        "viaName": "CSA 코스믹",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006740",
+        "corpName": "블루산업개발",
+        "industry": "paper",
+        "viaCode": "083660",
+        "viaName": "CSA 코스믹",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217590",
+        "corpName": "티엠씨",
+        "industry": "electrical",
+        "viaCode": "258610",
+        "viaName": "케일럼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006380",
+        "corpName": "카프로",
+        "industry": "chemical",
+        "viaCode": "258610",
+        "viaName": "케일럼",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 4
+  }
 }

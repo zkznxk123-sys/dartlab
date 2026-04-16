@@ -201,6 +201,13 @@
 <svelte:head>
 	<title>기업 비교 | dartlab 전자공시</title>
 	<meta name="description" content="한국 상장사 최대 4사 비교 — 재무/공급망/AI 분석 나란히." />
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="기업 비교 — dartlab" />
+	<meta property="og:description" content="4사 재무·공급망·AI 나란히. 공통 공급사 교집합 자동." />
+	<meta property="og:image" content="https://eddmpython.github.io/dartlab/og-image.png" />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
 <div class="page">

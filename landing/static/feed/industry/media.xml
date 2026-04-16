@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>dartlab 변화 감지 · media</title>
+<link>https://eddmpython.github.io/dartlab/industry/media</link>
+<description>media 산업 이번 회계연도 급변 회사</description>
+<language>ko-kr</language>
+<lastBuildDate>Thu, 16 Apr 2026 09:50:46 +0000</lastBuildDate>
+<item>
+  <title>[수익성 개선 (ROE)] 에스엠 (미디어·엔터)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=041510</link>
+  <guid isPermaLink="false">profitImprove-041510-2025</guid>
+  <category>수익성 개선 (ROE)</category>
+  <description>ROE Δ+76.4%p · 산업 z=+2.4σ | 수익성 개선. 원인은 본업 회복/일회성 여부 확인.</description>
+</item>
+<item>
+  <title>[수익성 악화 (ROE)] 콘텐트리중앙 (미디어·엔터)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=036420</link>
+  <guid isPermaLink="false">profitDecline-036420-2025</guid>
+  <category>수익성 악화 (ROE)</category>
+  <description>ROE Δ-72.7%p · 산업 z=-2.4σ | 수익성 악화. 마진 압박/일회성 손실 가능성.</description>
+</item>
+<item>
+  <title>[매출 급락 (YoY -20% 이하)] 삼화네트웍스 (미디어·엔터)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=046390</link>
+  <guid isPermaLink="false">revenueDrop-046390-2025</guid>
+  <category>매출 급락 (YoY -20% 이하)</category>
+  <description>매출 YoY -98.6% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
+</item>
+<item>
+  <title>[부채 스트레스] 차이커뮤니케이션 (미디어·엔터)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=351870</link>
+  <guid isPermaLink="false">debtStress-351870-2025</guid>
+  <category>부채 스트레스</category>
+  <description>부채비율 191% (+12057%p) | 부채 급증 + 높은 절대값. 재무 스트레스 신호.</description>
+</item>
+<item>
+  <title>[부채 스트레스] 코다코 (미디어·엔터)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=046070</link>
+  <guid isPermaLink="false">debtStress-046070-2025</guid>
+  <category>부채 스트레스</category>
+  <description>부채비율 1754% (+3138%p) | 부채 급증 + 높은 절대값. 재무 스트레스 신호.</description>
+</item>
+<item>
+  <title>[부채 스트레스] 콘텐트리중앙 (미디어·엔터)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=036420</link>
+  <guid isPermaLink="false">debtStress-036420-2025</guid>
+  <category>부채 스트레스</category>
+  <description>부채비율 346% (+2941%p) | 부채 급증 + 높은 절대값. 재무 스트레스 신호.</description>
+</item>
+</channel>
+</rss>

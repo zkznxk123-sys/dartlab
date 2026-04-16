@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>dartlab 변화 감지 · food</title>
+<link>https://eddmpython.github.io/dartlab/industry/food</link>
+<description>food 산업 이번 회계연도 급변 회사</description>
+<language>ko-kr</language>
+<lastBuildDate>Thu, 16 Apr 2026 09:50:46 +0000</lastBuildDate>
+<item>
+  <title>[매출 급락 (YoY -20% 이하)] 동방아그로 (식품·음료)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=007590</link>
+  <guid isPermaLink="false">revenueDrop-007590-2025</guid>
+  <category>매출 급락 (YoY -20% 이하)</category>
+  <description>매출 YoY -88.9% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
+</item>
+<item>
+  <title>[부채 스트레스] 유니온머티리얼 (식품·음료)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=047400</link>
+  <guid isPermaLink="false">debtStress-047400-2025</guid>
+  <category>부채 스트레스</category>
+  <description>부채비율 632% (+508%p) | 부채 급증 + 높은 절대값. 재무 스트레스 신호.</description>
+</item>
+</channel>
+</rss>

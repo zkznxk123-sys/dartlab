@@ -75,6 +75,13 @@
   "blogPosts": [],
   "financials5y": [
     {
+      "year": "2020",
+      "sales": 20649384057.0,
+      "operating_profit": 453002205.0,
+      "net_profit": 1154691789.0,
+      "total_assets": 206331783988.0
+    },
+    {
       "year": "2022",
       "sales": 28220170142.0,
       "operating_profit": 1662041363.0,
@@ -168,5 +175,172 @@
       "stage": "agency",
       "revenue": 11749
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
+        "viaCode": "009070",
+        "viaName": "케이씨티시",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "024800",
+        "viaName": "유성티엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025560",
+        "corpName": "미래산업",
+        "industry": "electronics",
+        "viaCode": "024800",
+        "viaName": "유성티엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032830",
+        "corpName": "삼성생명",
+        "industry": "finance",
+        "viaCode": "024800",
+        "viaName": "유성티엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "009070",
+        "viaName": "케이씨티시",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030610",
+        "corpName": "교보증권",
+        "industry": "finance",
+        "viaCode": "024800",
+        "viaName": "유성티엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089150",
+        "corpName": "케이씨티",
+        "industry": "software",
+        "viaCode": "009070",
+        "viaName": "케이씨티시",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "024800",
+        "viaName": "유성티엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000120",
+        "corpName": "CJ대한통운",
+        "industry": "food",
+        "viaCode": "009070",
+        "viaName": "케이씨티시",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009410",
+        "corpName": "태영건설",
+        "industry": "construction",
+        "viaCode": "024800",
+        "viaName": "유성티엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "009070",
+        "viaName": "케이씨티시",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034310",
+        "corpName": "NICE",
+        "industry": "finance",
+        "viaCode": "245620",
+        "viaName": "EDGC",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "024800",
+        "viaName": "유성티엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "024800",
+        "viaName": "유성티엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028260",
+        "corpName": "삼성물산",
+        "industry": "construction",
+        "viaCode": "024800",
+        "viaName": "유성티엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002390",
+        "corpName": "한독",
+        "industry": "realestate",
+        "viaCode": "245620",
+        "viaName": "EDGC",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "238490",
+        "corpName": "힘스",
+        "industry": "electronics",
+        "viaCode": "245620",
+        "viaName": "EDGC",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023590",
+        "corpName": "다우기술",
+        "industry": "realestate",
+        "viaCode": "024800",
+        "viaName": "유성티엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035890",
+        "corpName": "서희건설",
+        "industry": "realestate",
+        "viaCode": "024800",
+        "viaName": "유성티엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "009070",
+        "viaName": "케이씨티시",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 3
+  }
 }

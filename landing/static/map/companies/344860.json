@@ -125,5 +125,79 @@
       "stage": "polymer",
       "revenue": 236718
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "085310",
+        "corpName": "엔케이",
+        "industry": "food",
+        "viaCode": "078140",
+        "viaName": "대봉엘에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033780",
+        "corpName": "케이티앤지",
+        "industry": "food",
+        "viaCode": "078140",
+        "viaName": "대봉엘에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082800",
+        "corpName": "비보존 제약",
+        "industry": "pharma",
+        "viaCode": "078140",
+        "viaName": "대봉엘에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
+        "viaCode": "078140",
+        "viaName": "대봉엘에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "043220",
+        "corpName": "티에스넥스젠",
+        "industry": "energy",
+        "viaCode": "078140",
+        "viaName": "대봉엘에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200670",
+        "corpName": "휴메딕스",
+        "industry": "pharma",
+        "viaCode": "078140",
+        "viaName": "대봉엘에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "347740",
+        "corpName": "피엔케이피부임상연구센타",
+        "industry": "consulting",
+        "viaCode": "078140",
+        "viaName": "대봉엘에스",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "078140",
+        "to": "033780",
+        "type": "supplier",
+        "amount": 35080.0,
+        "ratio": null,
+        "product": "Ethyl Alcohol, XF49-C3281/SF-C0813,Mihapol PBS-50, Micolin A-526 외",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

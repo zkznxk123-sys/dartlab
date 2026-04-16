@@ -54,6 +54,22 @@
 		name="description"
 		content={`${ind.name} 산업 ${ind.nodeCount}사의 공정별 구조, 공급망 엣지 ${edges.length}건, 총 매출 ${formatRev(ind.totalRevenue)}`}
 	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content={`${ind.name} 산업지도 — dartlab`} />
+	<meta
+		property="og:description"
+		content={`${ind.nodeCount}사 · 총매출 ${formatRev(ind.totalRevenue)} · Top ROE/성장/위험 + 공급망`}
+	/>
+	<meta property="og:image" content="https://eddmpython.github.io/dartlab/og-image.png" />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<link
+		rel="alternate"
+		type="application/rss+xml"
+		title={`${ind.name} 변화 감지 RSS`}
+		href={`/dartlab/feed/industry/${data.id}.xml`}
+	/>
 </svelte:head>
 
 <div class="wrap">

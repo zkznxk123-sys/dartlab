@@ -276,5 +276,388 @@
       "stage": "general",
       "revenue": 8027
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "253450",
+        "corpName": "스튜디오드래곤",
+        "industry": "media",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "486990",
+        "corpName": "노타",
+        "industry": "software",
+        "viaCode": "090150",
+        "viaName": "아이윈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011150",
+        "corpName": "CJ씨푸드",
+        "industry": "food",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038870",
+        "corpName": "에코바이오",
+        "industry": "consulting",
+        "viaCode": "126600",
+        "viaName": "BGF에코머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "234100",
+        "corpName": "폴라리스세원",
+        "industry": "electronics",
+        "viaCode": "090150",
+        "viaName": "아이윈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037560",
+        "corpName": "LG헬로비전",
+        "industry": "electronics",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "272290",
+        "corpName": "이녹스첨단소재",
+        "industry": "electronics",
+        "viaCode": "090150",
+        "viaName": "아이윈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085660",
+        "corpName": "차바이오텍",
+        "industry": "pharma",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "090150",
+        "viaName": "아이윈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000210",
+        "corpName": "DL",
+        "industry": "construction",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298000",
+        "corpName": "효성화학",
+        "industry": "chemical",
+        "viaCode": "126600",
+        "viaName": "BGF에코머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001040",
+        "corpName": "CJ",
+        "industry": "food",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "208710",
+        "corpName": "포톤",
+        "industry": "electronics",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005490",
+        "corpName": "POSCO홀딩스",
+        "industry": "steel",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047050",
+        "corpName": "포스코인터내셔널",
+        "industry": "steel",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123010",
+        "corpName": "알엔티엑스",
+        "industry": "semiconductor",
+        "viaCode": "090150",
+        "viaName": "아이윈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "072130",
+        "corpName": "유엔젤",
+        "industry": "telecom",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004270",
+        "corpName": "남성",
+        "industry": "telecom",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067390",
+        "corpName": "아스트",
+        "industry": "aerospace",
+        "viaCode": "126600",
+        "viaName": "BGF에코머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "050090",
+        "corpName": "비케이홀딩스",
+        "industry": "media",
+        "viaCode": "027410",
+        "viaName": "BGF",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000120",
+        "corpName": "CJ대한통운",
+        "industry": "food",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079160",
+        "corpName": "CJ CGV",
+        "industry": "food",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "271940",
+        "corpName": "일진하이솔루스",
+        "industry": "railroad",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011170",
+        "corpName": "롯데케미칼",
+        "industry": "chemical",
+        "viaCode": "126600",
+        "viaName": "BGF에코머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033640",
+        "corpName": "네패스",
+        "industry": "electronics",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034310",
+        "corpName": "NICE",
+        "industry": "finance",
+        "viaCode": "027410",
+        "viaName": "BGF",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015860",
+        "corpName": "일진홀딩스",
+        "industry": "electrical",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007210",
+        "corpName": "벽산",
+        "industry": "auto",
+        "viaCode": "126600",
+        "viaName": "BGF에코머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041020",
+        "corpName": "폴라리스오피스",
+        "industry": "software",
+        "viaCode": "090150",
+        "viaName": "아이윈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123750",
+        "corpName": "알톤",
+        "industry": "railroad",
+        "viaCode": "090150",
+        "viaName": "아이윈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088390",
+        "corpName": "이녹스",
+        "industry": "railroad",
+        "viaCode": "090150",
+        "viaName": "아이윈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035760",
+        "corpName": "CJ ENM",
+        "industry": "media",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "473980",
+        "corpName": "노머스",
+        "industry": "software",
+        "viaCode": "090150",
+        "viaName": "아이윈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307180",
+        "corpName": "아이엘",
+        "industry": "chemical",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298020",
+        "corpName": "효성티앤씨",
+        "industry": "chemical",
+        "viaCode": "126600",
+        "viaName": "BGF에코머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "114630",
+        "corpName": "폴라리스우노",
+        "industry": "chemical",
+        "viaCode": "090150",
+        "viaName": "아이윈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "375500",
+        "corpName": "DL이앤씨",
+        "industry": "construction",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "950140",
+        "corpName": "잉글우드랩",
+        "industry": "cosmetics",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051500",
+        "corpName": "CJ프레시웨이",
+        "industry": "food",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "097950",
+        "corpName": "CJ제일제당",
+        "industry": "food",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "027410",
+        "viaName": "BGF",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038680",
+        "corpName": "에스넷",
+        "industry": "food",
+        "viaCode": "027410",
+        "viaName": "BGF",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "311690",
+        "corpName": "CJ 바이오사이언스",
+        "industry": "food",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065130",
+        "corpName": "탑엔지니어링",
+        "industry": "electronics",
+        "viaCode": "068790",
+        "viaName": "DMS",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 5
+  }
 }

@@ -128,5 +128,84 @@
       "stage": "raw",
       "revenue": 44013
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "208140",
+        "corpName": "정다운",
+        "industry": "food",
+        "viaCode": "195500",
+        "viaName": "마니커에프앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "353810",
+        "corpName": "이지바이오",
+        "industry": "chemical",
+        "viaCode": "195500",
+        "viaName": "마니커에프앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352940",
+        "corpName": "인바이오",
+        "industry": "chemical",
+        "viaCode": "195500",
+        "viaName": "마니커에프앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027740",
+        "corpName": "마니커",
+        "industry": "realestate",
+        "viaCode": "195500",
+        "viaName": "마니커에프앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027710",
+        "corpName": "팜스토리",
+        "industry": "food",
+        "viaCode": "195500",
+        "viaName": "마니커에프앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "153710",
+        "corpName": "옵티팜",
+        "industry": "pharma",
+        "viaCode": "195500",
+        "viaName": "마니커에프앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073560",
+        "corpName": "우리손에프앤지",
+        "industry": "food",
+        "viaCode": "195500",
+        "viaName": "마니커에프앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "340570",
+        "corpName": "티앤엘",
+        "industry": "pharma",
+        "viaCode": "195500",
+        "viaName": "마니커에프앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035810",
+        "corpName": "이지홀딩스",
+        "industry": "food",
+        "viaCode": "195500",
+        "viaName": "마니커에프앤지",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

@@ -119,5 +119,76 @@
       "stage": "general",
       "revenue": 20185
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "036640",
+        "viaName": "HRS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015590",
+        "corpName": "DKME",
+        "industry": "machinery",
+        "viaCode": "036640",
+        "viaName": "HRS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006650",
+        "corpName": "대한유화",
+        "industry": "chemical",
+        "viaCode": "036640",
+        "viaName": "HRS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004690",
+        "corpName": "삼천리",
+        "industry": "energy",
+        "viaCode": "036640",
+        "viaName": "HRS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001250",
+        "corpName": "GS글로벌",
+        "industry": "chemical",
+        "viaCode": "036640",
+        "viaName": "HRS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083650",
+        "corpName": "비에이치아이",
+        "industry": "machinery",
+        "viaCode": "036640",
+        "viaName": "HRS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078930",
+        "corpName": "GS",
+        "industry": "chemical",
+        "viaCode": "036640",
+        "viaName": "HRS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101930",
+        "corpName": "인화정공",
+        "industry": "electronics",
+        "viaCode": "036640",
+        "viaName": "HRS",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

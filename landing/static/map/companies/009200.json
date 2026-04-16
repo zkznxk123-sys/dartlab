@@ -232,5 +232,300 @@
       "stage": "general",
       "revenue": 8296
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "429270",
+        "corpName": "시지트로닉스",
+        "industry": "semiconductor",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "340360",
+        "corpName": "다보링크",
+        "industry": "telecom",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052400",
+        "corpName": "코나아이",
+        "industry": "telecom",
+        "viaCode": "001270",
+        "viaName": "부국증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "464080",
+        "corpName": "에스오에스랩",
+        "industry": "machinery",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064820",
+        "corpName": "케이프",
+        "industry": "auto",
+        "viaCode": "001270",
+        "viaName": "부국증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "310210",
+        "corpName": "보로노이",
+        "industry": "pharma",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052260",
+        "corpName": "현대바이오랜드",
+        "industry": "chemical",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "178320",
+        "corpName": "서진시스템",
+        "industry": "electronics",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011780",
+        "corpName": "금호석유화학",
+        "industry": "chemical",
+        "viaCode": "001810",
+        "viaName": "무림SP",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034810",
+        "corpName": "해성산업",
+        "industry": "realestate",
+        "viaCode": "009580",
+        "viaName": "무림P&P",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003300",
+        "corpName": "한일홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "001270",
+        "viaName": "부국증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082640",
+        "corpName": "동양생명",
+        "industry": "finance",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004360",
+        "corpName": "세방",
+        "industry": "logistics",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "451220",
+        "corpName": "아이엠티",
+        "industry": "machinery",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "338840",
+        "corpName": "와이바이오로직스",
+        "industry": "pharma",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002290",
+        "corpName": "삼일기업공사",
+        "industry": "construction",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001720",
+        "corpName": "신영증권",
+        "industry": "finance",
+        "viaCode": "009580",
+        "viaName": "무림P&P",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012320",
+        "corpName": "경동인베스트",
+        "industry": "finance",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030210",
+        "corpName": "다올투자증권",
+        "industry": "realestate",
+        "viaCode": "001270",
+        "viaName": "부국증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001390",
+        "corpName": "KG케미칼",
+        "industry": "environment",
+        "viaCode": "001270",
+        "viaName": "부국증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "146060",
+        "corpName": "율촌",
+        "industry": "plastic",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "137400",
+        "corpName": "피엔티",
+        "industry": "machinery",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
+        "viaCode": "001270",
+        "viaName": "부국증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009460",
+        "corpName": "한창제지",
+        "industry": "paper",
+        "viaCode": "009580",
+        "viaName": "무림P&P",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "258790",
+        "corpName": "소프트캠프",
+        "industry": "software",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003460",
+        "corpName": "유화증권",
+        "industry": "finance",
+        "viaCode": "001270",
+        "viaName": "부국증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "417180",
+        "corpName": "핑거스토리",
+        "industry": "media",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066360",
+        "corpName": "체리부로",
+        "industry": "food",
+        "viaCode": "001270",
+        "viaName": "부국증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "140070",
+        "corpName": "서플러스글로벌",
+        "industry": "retail",
+        "viaCode": "001270",
+        "viaName": "부국증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000240",
+        "corpName": "한국앤컴퍼니",
+        "industry": "finance",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016360",
+        "corpName": "삼성증권",
+        "industry": "finance",
+        "viaCode": "009580",
+        "viaName": "무림P&P",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027970",
+        "corpName": "한국제지",
+        "industry": "paper",
+        "viaCode": "009580",
+        "viaName": "무림P&P",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "118990",
+        "corpName": "모트렉스",
+        "industry": "auto",
+        "viaCode": "001270",
+        "viaName": "부국증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "300720",
+        "corpName": "한일시멘트",
+        "industry": "construction",
+        "viaCode": "001270",
+        "viaName": "부국증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025540",
+        "corpName": "한국단자공업",
+        "industry": "electronics",
+        "viaCode": "001270",
+        "viaName": "부국증권",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 4
+  }
 }

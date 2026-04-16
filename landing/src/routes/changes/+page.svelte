@@ -72,6 +72,17 @@
 		name="description"
 		content="한국 상장사 이번 분기 급변 Top N. ROE 개선/악화, 매출 급증/급락, 부채 스트레스, 극단 이상치."
 	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="변화 감지 — dartlab" />
+	<meta
+		property="og:description"
+		content="한국 상장사 이번 회계연도 급변 Top. ROE·매출·부채 6 카테고리 자동 감지."
+	/>
+	<meta property="og:image" content="https://eddmpython.github.io/dartlab/og-image.png" />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<link rel="alternate" type="application/rss+xml" title="dartlab 변화 감지 RSS" href="/dartlab/feed/movers.xml" />
 </svelte:head>
 
 <div class="page">

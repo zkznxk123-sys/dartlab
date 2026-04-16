@@ -162,5 +162,68 @@
       "stage": "",
       "revenue": 63555
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "067570",
+        "corpName": "엔브이에이치코리아",
+        "industry": "electronics",
+        "viaCode": "200880",
+        "viaName": "서연이화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "200880",
+        "viaName": "서연이화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "130500",
+        "corpName": "GH신소재",
+        "industry": "textile",
+        "viaCode": "007860",
+        "viaName": "서연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101330",
+        "corpName": "모베이스",
+        "industry": "telecom",
+        "viaCode": "007860",
+        "viaName": "서연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000490",
+        "corpName": "대동",
+        "industry": "electronics",
+        "viaCode": "200880",
+        "viaName": "서연이화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012860",
+        "corpName": "모베이스전자",
+        "industry": "telecom",
+        "viaCode": "200880",
+        "viaName": "서연이화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "265520",
+        "corpName": "AP시스템",
+        "industry": "electronics",
+        "viaCode": "200880",
+        "viaName": "서연이화",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

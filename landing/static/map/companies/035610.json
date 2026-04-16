@@ -183,5 +183,60 @@
       "stage": "general",
       "revenue": 13276
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "009270",
+        "corpName": "신원",
+        "industry": "retail",
+        "viaCode": "071200",
+        "viaName": "인피니트헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032850",
+        "corpName": "비트컴퓨터",
+        "industry": "software",
+        "viaCode": "071200",
+        "viaName": "인피니트헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "045510",
+        "corpName": "정원엔시스",
+        "industry": "software",
+        "viaCode": "071200",
+        "viaName": "인피니트헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "333620",
+        "corpName": "엔시스",
+        "industry": "electrical",
+        "viaCode": "071200",
+        "viaName": "인피니트헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032620",
+        "corpName": "GC메디아이",
+        "industry": "software",
+        "viaCode": "071200",
+        "viaName": "인피니트헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000150",
+        "corpName": "두산",
+        "industry": "machinery",
+        "viaCode": "071200",
+        "viaName": "인피니트헬스케어",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

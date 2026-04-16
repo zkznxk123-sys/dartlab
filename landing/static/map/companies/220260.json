@@ -121,5 +121,52 @@
       "stage": "polymer",
       "revenue": 236718
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "145990",
+        "corpName": "삼양사",
+        "industry": "food",
+        "viaCode": "009300",
+        "viaName": "삼아제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003300",
+        "corpName": "한일홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "009300",
+        "viaName": "삼아제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "009300",
+        "viaName": "삼아제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014530",
+        "corpName": "극동유화",
+        "industry": "electronics",
+        "viaCode": "009300",
+        "viaName": "삼아제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000020",
+        "corpName": "동화약품",
+        "industry": "retail",
+        "viaCode": "009300",
+        "viaName": "삼아제약",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

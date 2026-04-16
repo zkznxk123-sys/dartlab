@@ -129,5 +129,164 @@
       "stage": "packaging",
       "revenue": 15344
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "017960",
+        "corpName": "한국카본",
+        "industry": "chemical",
+        "viaCode": "007660",
+        "viaName": "이수페타시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "330860",
+        "corpName": "네패스아크",
+        "industry": "semiconductor",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "007660",
+        "viaName": "이수페타시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086890",
+        "corpName": "이수앱지스",
+        "industry": "pharma",
+        "viaCode": "007660",
+        "viaName": "이수페타시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003540",
+        "corpName": "대신증권",
+        "industry": "finance",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "industry": "buildingMaterials",
+        "viaCode": "007660",
+        "viaName": "이수페타시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002020",
+        "corpName": "코오롱",
+        "industry": "finance",
+        "viaCode": "007660",
+        "viaName": "이수페타시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033310",
+        "corpName": "엠투엔",
+        "industry": "electronics",
+        "viaCode": "007660",
+        "viaName": "이수페타시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004270",
+        "corpName": "남성",
+        "industry": "telecom",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "007660",
+        "viaName": "이수페타시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352820",
+        "corpName": "하이브",
+        "industry": "media",
+        "viaCode": "007660",
+        "viaName": "이수페타시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089980",
+        "corpName": "상아프론테크",
+        "industry": "electronics",
+        "viaCode": "007660",
+        "viaName": "이수페타시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "020150",
+        "corpName": "롯데에너지머티리얼즈",
+        "industry": "electronics",
+        "viaCode": "007660",
+        "viaName": "이수페타시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "457190",
+        "corpName": "이수스페셜티케미컬",
+        "industry": "chemical",
+        "viaCode": "007660",
+        "viaName": "이수페타시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005950",
+        "corpName": "이수화학",
+        "industry": "food",
+        "viaCode": "007660",
+        "viaName": "이수페타시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "120110",
+        "corpName": "코오롱인더",
+        "industry": "plastic",
+        "viaCode": "007660",
+        "viaName": "이수페타시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038880",
+        "corpName": "아이에이",
+        "industry": "electronics",
+        "viaCode": "007660",
+        "viaName": "이수페타시스",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

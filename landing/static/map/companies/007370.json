@@ -119,5 +119,268 @@
       "stage": "formulation",
       "revenue": 20684
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024880",
+        "corpName": "케이피에프",
+        "industry": "steel",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "061250",
+        "corpName": "화일약품",
+        "industry": "food",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069620",
+        "corpName": "대웅제약",
+        "industry": "pharma",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
+        "industry": "chemical",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "178320",
+        "corpName": "서진시스템",
+        "industry": "electronics",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003490",
+        "corpName": "대한항공",
+        "industry": "logistics",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "243070",
+        "corpName": "휴온스",
+        "industry": "pharma",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025540",
+        "corpName": "한국단자공업",
+        "industry": "electronics",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "363250",
+        "corpName": "진시스템",
+        "industry": "software",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047050",
+        "corpName": "포스코인터내셔널",
+        "industry": "steel",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "185750",
+        "corpName": "종근당",
+        "industry": "pharma",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "207940",
+        "corpName": "삼성바이오로직스",
+        "industry": "pharma",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003520",
+        "corpName": "영진약품",
+        "industry": "pharma",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "339950",
+        "corpName": "아이비김영",
+        "industry": "education",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000100",
+        "corpName": "유한양행",
+        "industry": "pharma",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016580",
+        "corpName": "환인제약",
+        "industry": "food",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011170",
+        "corpName": "롯데케미칼",
+        "industry": "chemical",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028260",
+        "corpName": "삼성물산",
+        "industry": "construction",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005380",
+        "corpName": "현대자동차",
+        "industry": "auto",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033780",
+        "corpName": "케이티앤지",
+        "industry": "food",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "180640",
+        "corpName": "한진칼",
+        "industry": "consulting",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001740",
+        "corpName": "SK네트웍스",
+        "industry": "software",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086520",
+        "corpName": "에코프로",
+        "industry": "chemical",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095700",
+        "corpName": "제넥신",
+        "industry": "pharma",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086450",
+        "corpName": "동국제약",
+        "industry": "pharma",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
+        "viaCode": "011040",
+        "viaName": "경동제약",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

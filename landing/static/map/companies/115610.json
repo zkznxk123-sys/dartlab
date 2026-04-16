@@ -112,5 +112,28 @@
       "stage": "packaging",
       "revenue": 15344
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "154040",
+        "corpName": "다산솔루에타",
+        "industry": "electronics",
+        "viaCode": "208860",
+        "viaName": "다산디엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039560",
+        "corpName": "다산네트웍스",
+        "industry": "telecom",
+        "viaCode": "208860",
+        "viaName": "다산디엠씨",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

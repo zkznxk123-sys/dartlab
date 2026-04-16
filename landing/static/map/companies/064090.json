@@ -157,5 +157,159 @@
       "stage": "retail",
       "revenue": 69295
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "025620",
+        "corpName": "차AI헬스케어",
+        "industry": "cosmetics",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "119830",
+        "corpName": "아이텍",
+        "industry": "semiconductor",
+        "viaCode": "206400",
+        "viaName": "베노티앤알",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "351870",
+        "corpName": "차이커뮤니케이션",
+        "industry": "media",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024090",
+        "corpName": "디씨엠",
+        "industry": "construction",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069330",
+        "corpName": "유아이디",
+        "industry": "electronics",
+        "viaCode": "179900",
+        "viaName": "유티아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "179900",
+        "viaName": "유티아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "291650",
+        "corpName": "압타머사이언스",
+        "industry": "pharma",
+        "viaCode": "206400",
+        "viaName": "베노티앤알",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085810",
+        "corpName": "알티캐스트",
+        "industry": "telecom",
+        "viaCode": "206400",
+        "viaName": "베노티앤알",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "143160",
+        "corpName": "아이디스",
+        "industry": "telecom",
+        "viaCode": "179900",
+        "viaName": "유티아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019550",
+        "corpName": "SBI인베스트먼트",
+        "industry": "finance",
+        "viaCode": "179900",
+        "viaName": "유티아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "143540",
+        "corpName": "영우디에스피",
+        "industry": "electronics",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "110790",
+        "corpName": "크리스에프앤씨",
+        "industry": "leisure",
+        "viaCode": "206400",
+        "viaName": "베노티앤알",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004710",
+        "corpName": "한솔테크닉스",
+        "industry": "electronics",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058450",
+        "corpName": "한주에이알티",
+        "industry": "electronics",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "179900",
+        "viaName": "유티아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "179900",
+        "viaName": "유티아이",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [
+      {
+        "from": "061040",
+        "to": "004710",
+        "type": "supplier",
+        "amount": 1701.0,
+        "ratio": null,
+        "product": "",
+        "hop": 2,
+        "source": "docs_table"
+      }
+    ],
+    "hub": false,
+    "direct1HopCount": 3
+  }
 }

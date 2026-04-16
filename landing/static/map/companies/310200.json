@@ -119,5 +119,84 @@
       "stage": "service",
       "revenue": 13713
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "127710",
+        "corpName": "아시아경제",
+        "industry": "media",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "229500",
+        "corpName": "노브메타파마",
+        "industry": "pharma",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064820",
+        "corpName": "케이프",
+        "industry": "auto",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001260",
+        "corpName": "남광토건",
+        "industry": "construction",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "110790",
+        "corpName": "크리스에프앤씨",
+        "industry": "leisure",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "166090",
+        "corpName": "하나머티리얼즈",
+        "industry": "semiconductor",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

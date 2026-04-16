@@ -138,5 +138,252 @@
       "stage": "platform",
       "revenue": 80991
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "429270",
+        "corpName": "시지트로닉스",
+        "industry": "semiconductor",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "340360",
+        "corpName": "다보링크",
+        "industry": "telecom",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "464080",
+        "corpName": "에스오에스랩",
+        "industry": "machinery",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "310210",
+        "corpName": "보로노이",
+        "industry": "pharma",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052260",
+        "corpName": "현대바이오랜드",
+        "industry": "chemical",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006280",
+        "corpName": "녹십자",
+        "industry": "pharma",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "189980",
+        "corpName": "흥국에프엔비",
+        "industry": "food",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "178320",
+        "corpName": "서진시스템",
+        "industry": "electronics",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069460",
+        "corpName": "대호에이엘",
+        "industry": "retail",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082640",
+        "corpName": "동양생명",
+        "industry": "finance",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004360",
+        "corpName": "세방",
+        "industry": "logistics",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "185750",
+        "corpName": "종근당",
+        "industry": "pharma",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "102460",
+        "corpName": "이연제약",
+        "industry": "pharma",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "451220",
+        "corpName": "아이엠티",
+        "industry": "machinery",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "338840",
+        "corpName": "와이바이오로직스",
+        "industry": "pharma",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002290",
+        "corpName": "삼일기업공사",
+        "industry": "construction",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012320",
+        "corpName": "경동인베스트",
+        "industry": "finance",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348370",
+        "corpName": "엔켐",
+        "industry": "battery",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "146060",
+        "corpName": "율촌",
+        "industry": "plastic",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "112610",
+        "corpName": "씨에스윈드",
+        "industry": "energy",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "137400",
+        "corpName": "피엔티",
+        "industry": "machinery",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192080",
+        "corpName": "더블유게임즈",
+        "industry": "software",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009580",
+        "corpName": "무림P&P",
+        "industry": "paper",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "417180",
+        "corpName": "핑거스토리",
+        "industry": "media",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307180",
+        "corpName": "아이엘",
+        "industry": "chemical",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000240",
+        "corpName": "한국앤컴퍼니",
+        "industry": "finance",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052860",
+        "corpName": "아이앤씨",
+        "industry": "semiconductor",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009200",
+        "corpName": "무림페이퍼",
+        "industry": "paper",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

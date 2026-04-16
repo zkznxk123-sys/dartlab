@@ -112,5 +112,68 @@
       "stage": "service",
       "revenue": 13713
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "244460",
+        "corpName": "올리패스",
+        "industry": "software",
+        "viaCode": "114190",
+        "viaName": "강원에너지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "076080",
+        "corpName": "웰크론한텍",
+        "industry": "machinery",
+        "viaCode": "114190",
+        "viaName": "강원에너지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "238090",
+        "corpName": "앤디포스",
+        "industry": "plastic",
+        "viaCode": "114190",
+        "viaName": "강원에너지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "114190",
+        "viaName": "강원에너지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "114190",
+        "viaName": "강원에너지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065950",
+        "corpName": "웰크론",
+        "industry": "electronics",
+        "viaCode": "114190",
+        "viaName": "강원에너지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "247540",
+        "corpName": "에코프로비엠",
+        "industry": "chemical",
+        "viaCode": "114190",
+        "viaName": "강원에너지",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 1
+  }
 }

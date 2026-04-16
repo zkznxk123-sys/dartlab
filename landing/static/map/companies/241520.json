@@ -124,5 +124,124 @@
       "stage": "securities",
       "revenue": 103925
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "139050",
+        "corpName": "BF랩스",
+        "industry": "software",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065150",
+        "corpName": "대산F&B",
+        "industry": "leisure",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "076610",
+        "corpName": "해성옵틱스",
+        "industry": "electronics",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214430",
+        "corpName": "아이쓰리시스템",
+        "industry": "machinery",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "190510",
+        "corpName": "나무가",
+        "industry": "electronics",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091700",
+        "corpName": "파트론",
+        "industry": "electronics",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "302550",
+        "corpName": "리메드",
+        "industry": "medicalDevice",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "297890",
+        "corpName": "HB솔루션",
+        "industry": "electronics",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101400",
+        "corpName": "엔시트론",
+        "industry": "semiconductor",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017900",
+        "corpName": "광전자",
+        "industry": "semiconductor",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123010",
+        "corpName": "알엔티엑스",
+        "industry": "semiconductor",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019570",
+        "corpName": "플루토스",
+        "industry": "finance",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "365900",
+        "corpName": "브이씨",
+        "industry": "leisure",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027360",
+        "corpName": "아주IB투자",
+        "industry": "finance",
+        "viaCode": "068100",
+        "viaName": "케이웨더",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 2
+  }
 }

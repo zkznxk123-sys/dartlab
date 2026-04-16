@@ -169,5 +169,148 @@
       "stage": "agency",
       "revenue": 11749
     }
-  ]
+  ],
+  "hop2": {
+    "hop2Neighbors": [
+      {
+        "stockCode": "083660",
+        "corpName": "CSA 코스믹",
+        "industry": "cosmetics",
+        "viaCode": "064240",
+        "viaName": "홈캐스트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "110020",
+        "corpName": "전진바이오팜",
+        "industry": "chemical",
+        "viaCode": "032980",
+        "viaName": "바이온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "020120",
+        "viaName": "키다리스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036570",
+        "corpName": "엔씨소프트",
+        "industry": "software",
+        "viaCode": "020120",
+        "viaName": "키다리스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "032980",
+        "viaName": "바이온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "273060",
+        "corpName": "와이즈버즈",
+        "industry": "media",
+        "viaCode": "020120",
+        "viaName": "키다리스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054180",
+        "corpName": "메디콕스",
+        "industry": "shipbuilding",
+        "viaCode": "032980",
+        "viaName": "바이온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "242040",
+        "corpName": "나무기술",
+        "industry": "realestate",
+        "viaCode": "020120",
+        "viaName": "키다리스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "197140",
+        "corpName": "디지캡",
+        "industry": "telecom",
+        "viaCode": "032980",
+        "viaName": "바이온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "143240",
+        "corpName": "사람인",
+        "industry": "software",
+        "viaCode": "020120",
+        "viaName": "키다리스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
+        "viaCode": "020120",
+        "viaName": "키다리스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109070",
+        "corpName": "주성코퍼레이션",
+        "industry": "telecom",
+        "viaCode": "032980",
+        "viaName": "바이온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023590",
+        "corpName": "다우기술",
+        "industry": "realestate",
+        "viaCode": "020120",
+        "viaName": "키다리스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053300",
+        "corpName": "한국정보인증",
+        "industry": "software",
+        "viaCode": "020120",
+        "viaName": "키다리스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032190",
+        "corpName": "다우데이타",
+        "industry": "retail",
+        "viaCode": "020120",
+        "viaName": "키다리스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052860",
+        "corpName": "아이앤씨",
+        "industry": "semiconductor",
+        "viaCode": "032980",
+        "viaName": "바이온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "258610",
+        "corpName": "케일럼",
+        "industry": "aerospace",
+        "viaCode": "064240",
+        "viaName": "홈캐스트",
+        "hopDistance": 2
+      }
+    ],
+    "hop2Edges": [],
+    "hub": false,
+    "direct1HopCount": 3
+  }
 }

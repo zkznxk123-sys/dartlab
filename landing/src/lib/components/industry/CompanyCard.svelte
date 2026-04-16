@@ -475,6 +475,25 @@
 		</div>
 	{/if}
 
+	<!-- 5.5 2-hop 공급망 (있으면) -->
+	{#if detail?.hop2?.hop2Neighbors?.length}
+		<div class="section">
+			<h3>
+				2-hop 공급망
+				{#if detail.hop2.hub}<span class="hop2-hub-tag">허브 · 제한됨</span>{/if}
+			</h3>
+			<p class="hop2-note">1-hop 이웃을 통해 연결된 회사 Top 10 — "내 공급사의 공급사"</p>
+			<ul class="hop2-list">
+				{#each detail.hop2.hop2Neighbors.slice(0, 10) as h (h.stockCode)}
+					<li>
+						<a href="{base}/map?focus={h.stockCode}" class="hop2-far">{h.corpName}</a>
+						<span class="hop2-via">경유: {h.viaName}</span>
+					</li>
+				{/each}
+			</ul>
+		</div>
+	{/if}
+
 	<!-- 6. AI 인사이트 + 블로그 -->
 	{#if aiInsight}
 		<div class="section">
@@ -927,6 +946,51 @@
 		color: #64748b;
 		font-size: 10px;
 		margin-left: 4px;
+	}
+
+	/* 2-hop 섹션 */
+	.hop2-hub-tag {
+		font-size: 9px;
+		padding: 1px 6px;
+		background: rgba(251, 191, 36, 0.15);
+		color: #fbbf24;
+		border-radius: 3px;
+		font-weight: 500;
+		margin-left: 6px;
+	}
+	.hop2-note {
+		margin: 0 0 8px;
+		font-size: 11px;
+		color: #64748b;
+		line-height: 1.5;
+	}
+	.hop2-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	.hop2-list li {
+		display: flex;
+		justify-content: space-between;
+		gap: 8px;
+		padding: 5px 0;
+		border-bottom: 1px dashed #1e2433;
+		font-size: 12px;
+	}
+	.hop2-list li:last-child {
+		border-bottom: none;
+	}
+	.hop2-far {
+		color: #60a5fa;
+		text-decoration: none;
+		font-weight: 500;
+	}
+	.hop2-far:hover {
+		text-decoration: underline;
+	}
+	.hop2-via {
+		color: #64748b;
+		font-size: 10px;
 	}
 
 	.chips {
