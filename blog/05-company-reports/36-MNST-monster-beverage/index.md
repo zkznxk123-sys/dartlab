@@ -40,6 +40,7 @@ ai:
 <script>
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
+import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 </script>
 
 > **현금부자** | 음료 > 에너지드링크 | 2026-04-15 dartlab 실측
@@ -52,6 +53,9 @@ import StackBar from '$lib/components/blog/StackBar.svelte';
 
 <!-- SVG: 1992 Hansen 인수 → 2012 Monster 사명 변경 → 2015 KO 파트너십 → 2025 시총 $130B 이정표 타임라인 -->
 ![36 Monster 타임라인](./assets/36-timeline.svg)
+
+
+<HFDataLink code="MNST" kind="edgar" />
 
 ---
 

@@ -39,6 +39,7 @@ ai:
 <script>
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
+import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 </script>
 
 > **턴어라운드** | 건설 > 주택개발 | 2026-04-12 dartlab 실측
@@ -70,6 +71,9 @@ c.analysis("financial", "수익성")
 ![타임라인 요약](./assets/20-timeline.svg)
 
 먼저 2020년, 2,500억이 증발한 날부터 시작하자.
+
+
+<HFDataLink code="294870" />
 
 ---
 

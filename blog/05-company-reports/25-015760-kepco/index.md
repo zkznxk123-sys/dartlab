@@ -38,12 +38,16 @@ ai:
 <script>
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
+import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 </script>
 
 
 > **전기요금 1원이 5,600억을 만든다 — 정부가 재무제표를 쓰는 회사.**
 
 ![한국전력 송전탑](./assets/25-kepco-power-tower.webp)
+
+
+<HFDataLink code="015760" />
 
 ---
 

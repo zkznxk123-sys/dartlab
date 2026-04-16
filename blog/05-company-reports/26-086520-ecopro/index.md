@@ -38,12 +38,16 @@ ai:
 <script>
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
+import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 </script>
 
 
 > **시총 78조를 찍은 회사의 영업이익은 864억이었다 — 숫자가 아니라 서사를 산 시장.**
 
 ![에코프로 양극재 공장](./assets/26-ecopro-battery-factory.webp)
+
+
+<HFDataLink code="086520" />
 
 ---
 

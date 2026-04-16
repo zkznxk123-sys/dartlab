@@ -39,6 +39,7 @@ ai:
 <script>
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
+import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 </script>
 
 > **전환** | 통신 > 이동통신 | 2026-04-12 dartlab 실측
@@ -76,6 +77,9 @@ c.analysis("financial", "수익성")
 이 글은 세 가지를 추적한다. 첫째, SKT는 어떻게 8년간 OPM 10%를 지켰는가(1막). 둘째, 해킹 한 번이 재무제표에 어떻게 찍혔는가(2~3막). 셋째, 이 회사는 고배당주인가, AI 전환주인가 — 정체성의 갈림길(4~5막).
 
 "어?" 포인트 네 개를 미리 꺼내자. ① 해킹 피해자 2,500만 명, 한국 인구의 절반. ② 배당성향 143%가 사실상 0%로. ③ OPM 10%에서 6.3%로, 한 해 만에. ④ 5G 투자 끝났는데 AI(에이닷) 때문에 CAPEX 다시 늘어난다. 이 네 가지가 이 회사의 2025년을 설명한다.
+
+
+<HFDataLink code="017670" />
 
 ---
 

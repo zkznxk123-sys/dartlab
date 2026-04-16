@@ -39,6 +39,7 @@ ai:
 <script>
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
+import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 </script>
 
 ## 기업이야기 시리즈 (23편)
@@ -82,6 +83,9 @@ c.show("IS", period=["2022", "2023", "2024"])
 이 질문에 답하려면 세 가지를 봐야 한다. 첫째, 2023년 4월 29일 검단에서 실제로 무슨 일이 있었는가. 둘째, 왜 분산 반영이 아닌 "빅배스(Big Bath)"를 선택했는가. 셋째, 이 전략이 HDC현대산업개발의 전략과 어떻게 다른가. 그리고 마지막으로 하나 더. 이 회복이 지속 가능한가.
 
 5막에 걸쳐 추적한다.
+
+
+<HFDataLink code="006360" />
 
 ---
 

@@ -38,12 +38,16 @@ ai:
 <script>
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
+import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 </script>
 
 
 > **매출 49조인데 이익 $208M — 마진 0.6%의 회사가 3,370만명 유출 후에도 살아남은 이유.**
 
 ![쿠팡 물류센터](./assets/27-coupang-fulfillment.webp)
+
+
+<HFDataLink code="CPNG" kind="edgar" />
 
 ---
 
