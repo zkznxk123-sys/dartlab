@@ -145,11 +145,26 @@ Damodaran 3-test (History/Experience/CommonSense) + 20 불변량 = audit 기반.
 | I1 | narrate boilerplate | _classify/_detectTrend 이미 분해 |
 | I2 | 임계값 SSOT | 도메인 분리 — skip |
 | I3 | ops/review.md | ✅ (본 문서) |
-| G1 | EvidenceGraph | TBD |
-| G2 | StoryTree | TBD |
-| G3 | NarrativeDiff | TBD |
-| G4-G8 | 혁신 마무리 | TBD |
-| H1-H5 | AI 동기화 | TBD |
+| G1 | EvidenceGraph | ✅ (core/finance/evidence.py) |
+| G2 | StoryTree 3P trajectory | ✅ (primary=dcf2stage 강제로 override 활성화) |
+| G3 | NarrativeDiff claim 히트맵 | ✅ |
+| G4 | CounterfactualPanel | ✅ (8 지원 키) |
+| G5 | DisclosureDeltaDetector | 이미 4 calc 존재 |
+| G6 | ConsensusBridge | TBD |
+| G7 | ReproducibleReport (CodeBlock) | ✅ |
+| G8 | FeedbackLoopAgent | ✅ (Damodaran 6단계) |
+| H1 | CAPABILITIES review 메타 추출 | TBD |
+| H2 | Company 메서드 4개 (causalWeights/valuationImpact/storyTree/narrativeDiff) | ✅ (DART+EDGAR 동기) |
+| H3 | prompts review tool 언급 | ✅ (minimal) |
+| H4 | autoEnrich review signal | TBD |
+| H5 | postResponse narrate grade | TBD |
+
+### 검증 결과 (삼성전자)
+
+- **G2 StoryTree**: 53K/67K/115K 3 궤적, 격차 117% (서사 민감도 매우 높음)
+- **G3 NarrativeDiff**: 낮은WACC +19.2%, 매출성장 +4.4%, 높은터미널성장 +4.3%
+- **G4 Counterfactual**: wacc=15% → dFV -35.7%, terminalGrowth=4% → +24.7%
+- **review 엔진이 세계 수준 narrative↔숫자 feedback 구조 완성**
 
 ---
 

@@ -97,6 +97,41 @@ def test_phase10_storyValidation_in_all_reportTypes():
         assert "storyValidation" in rt.sectionOrder, f"{key} missing storyValidation"
 
 
+@pytest.mark.unit
+def test_phase10_g1_evidence_dataclass():
+    """Phase 10 G1 — Evidence SSOT dataclass."""
+    from dartlab.core.finance.evidence import Evidence, EvidenceGraph, buildCalcEvidence
+
+    ev = buildCalcEvidence("opm", "2025Q3", {"rev": 1000, "opi": 150})
+    assert ev.source == "calc"
+    assert "opm" in ev.quote
+
+    g = EvidenceGraph(claim="OPM 15%")
+    g.add(ev)
+    assert len(g.evidence) == 1
+    assert "calc" in g.format_footnote()
+
+
+@pytest.mark.unit
+def test_phase10_g4_counterfactual_supported_keys():
+    """Phase 10 G4 — Counterfactual 지원 키 8종."""
+    from dartlab.review.counterfactual import _SUPPORTED_KEYS
+
+    required = {"wacc", "terminalGrowth", "growthRates", "marginPath",
+                "reinvestmentPath", "pSurvival", "liquidationDiscount", "countryCode"}
+    assert required.issubset(set(_SUPPORTED_KEYS.keys()))
+
+
+@pytest.mark.unit
+def test_phase10_g7_codeblock():
+    """Phase 10 G7 — CodeBlock (ReproducibleReport 기반)."""
+    from dartlab.review.blocks import CodeBlock
+
+    cb = CodeBlock(code="c.analysis('수익성')", language="python", caption="재현")
+    assert cb.language == "python"
+    assert "analysis" in cb.code
+
+
 # ── kwargs 명명 ────────────────────────────────────────────
 
 
