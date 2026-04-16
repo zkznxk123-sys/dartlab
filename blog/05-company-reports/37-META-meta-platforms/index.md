@@ -309,7 +309,7 @@ ca["dividendPolicy"]["history"][0]
 | 현금 | 35.9 | 14.7 | 16.6 | 17.6 | 19.1 |
 | 총차입금 | **58.7** | 28.8 | 18.4 | 10.0 | 0 |
 
-<StackBar data={[{year:"2021",자본:84.1,부채:31.0},{year:"2022",자본:101.1,부채:41.1},{year:"2023",자본:128.3,부채:60.0},{year:"2024",자본:124.9,부채:76.5},{year:"2025",자본:217.2,부채:148.8}]} keys={["자본","부채"]} colors={["#22c55e","#ef4444"]} title="자본 vs 부채 추이" unit="$B" />
+<StackBar data={[{year:"2021",segments:[{label:"자본",value:84.1,color:"#22c55e"},{label:"부채",value:31.0,color:"#ef4444"}]},{year:"2022",segments:[{label:"자본",value:101.1,color:"#22c55e"},{label:"부채",value:41.1,color:"#ef4444"}]},{year:"2023",segments:[{label:"자본",value:128.3,color:"#22c55e"},{label:"부채",value:60.0,color:"#ef4444"}]},{year:"2024",segments:[{label:"자본",value:124.9,color:"#22c55e"},{label:"부채",value:76.5,color:"#ef4444"}]},{year:"2025",segments:[{label:"자본",value:217.2,color:"#22c55e"},{label:"부채",value:148.8,color:"#ef4444"}]}]} title="자본 vs 부채 추이" unit="$B" />
 
 ### 총자산 1년에 +59%
 
