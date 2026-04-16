@@ -57,10 +57,14 @@ def calcEffectiveTaxRate(company, *, basePeriod: str | None = None) -> dict | No
     # 법정세율 (한국 기준, 2023~)
     statutoryRate = 24.0  # 과세표준 구간에 따라 다르나 대기업 근사
 
+    # Phase 15 A1: Q4 함정 제거 — Q4 fallback 컬럼은 annualSumFlow 로 4분기 합산
+    from dartlab.core.finance.flow import annualSumFlow
+
+    allPeriods = set(isPeriods)
     history = []
     for col in yCols:
-        ptIncome = ptRow.get(col) or 0
-        taxExpense = taxRow.get(col) or 0
+        ptIncome = annualSumFlow(ptRow, col, allPeriods, withFallback=True) or 0
+        taxExpense = annualSumFlow(taxRow, col, allPeriods, withFallback=True) or 0
 
         effectiveTaxRate = None
         taxGap = None
@@ -120,10 +124,18 @@ def calcTaxCashConversion(company, *, basePeriod: str | None = None) -> dict | N
     yCols = annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
+
+    # Phase 15 A1: Q4 함정 제거 — annualSumFlow 로 4분기 합산 (Q4 fallback 대응)
+    from dartlab.core.finance.flow import annualSumFlow
+    allIsPeriods = set(isPeriods)
+    cfPeriods = cfParsed[1] if cfParsed else []
+    allCfPeriods = set(cfPeriods) if cfPeriods else set()
+
     history = []
     for col in yCols:
-        taxExpense = abs(taxExpRow.get(col) or 0)
-        taxPaidVal = taxPaidRow.get(col) if taxPaidRow else None
+        taxExpVal = annualSumFlow(taxExpRow, col, allIsPeriods, withFallback=True) or 0
+        taxExpense = abs(taxExpVal)
+        taxPaidVal = annualSumFlow(taxPaidRow, col, allCfPeriods, withFallback=True) if taxPaidRow else None
         taxPaid = abs(taxPaidVal) if taxPaidVal is not None else None
 
         taxCashRatio = None

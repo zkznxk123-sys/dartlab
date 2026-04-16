@@ -134,9 +134,13 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
     yCols = annualColsFromPeriods(isPeriods)
     if len(yCols) < 4:
         return None
+    # Phase 15 A1: Q4 함정 제거 — annualSumFlow 로 4분기 합산 (주석과 실제 이행 일치)
+    from dartlab.core.finance.flow import annualSumFlow
+
+    allIsPeriods = set(isPeriods)
     rev_data = []
     for col in sorted(yCols):
-        val = revRow.get(col)
+        val = annualSumFlow(revRow, col, allIsPeriods, withFallback=True)
         year_str = col.replace("Q4", "").replace("A", "")
         try:
             year = int(year_str)

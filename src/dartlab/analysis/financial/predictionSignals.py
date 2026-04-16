@@ -120,15 +120,19 @@ def calcEarningsMomentum(company, *, basePeriod: str | None = None) -> dict | No
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if len(yCols) < 3:
         return None
-    # Sloan 분해 시계열
+
+    # Phase 15 A1: Q4 함정 제거 — IS/CF flow 는 annualSumFlow (주석 실제 이행). BS 는 stock → 직접.
+    from dartlab.core.finance.flow import annualSumFlow
+    allIsPeriods = set(isPeriods)
+    allCfPeriods = set(cfPeriods)
+
     history = []
     for col in yCols:
-        # IS/CF 는 flow → annualSumFlow 경유. BS 는 stock → 직접
-        ni = niRow.get(col) or 0
-        ocf = ocfRow.get(col) or 0
+        ni = annualSumFlow(niRow, col, allIsPeriods, withFallback=True) or 0
+        ocf = annualSumFlow(ocfRow, col, allCfPeriods, withFallback=True) or 0
         ta = _get(taRow, col)  # BS stock — Q4 가 연말잔액이라 그대로 OK
-        rev = revRow.get(col) or 0
-        oi = oiRow.get(col) or 0
+        rev = annualSumFlow(revRow, col, allIsPeriods, withFallback=True) or 0
+        oi = annualSumFlow(oiRow, col, allIsPeriods, withFallback=True) or 0
         te = _get(teRow, col)  # BS stock
         accrual = ni - ocf
 
