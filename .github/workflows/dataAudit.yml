@@ -1,0 +1,48 @@
+name: Data Audit
+
+# ──────────────────────────────────────────────────────────────
+# 매일 1회 데이터 파이프라인 감사 — 실패 시 Issue 자동 알림.
+#
+# 감사 대상: Data Sync / Data Prebuild / EDGAR Data Sync / Update KindList.
+#
+# 수동 (workflow_dispatch):
+#   - 즉시 감사 실행 (실패 Issue 갱신 포함)
+#
+# full 모드 수집은 dataSync.yml workflow_dispatch (mode=full) 로 이전.
+# ──────────────────────────────────────────────────────────────
+
+on:
+  schedule:
+    - cron: '0 20 * * *'  # UTC 20:00 = KST 05:00, 일일 감사
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+concurrency:
+  group: data-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Pipeline health check
+        run: uv run python .github/scripts/monitorPipeline.py
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -150,14 +150,16 @@ jobs:
         env:
           DARTLAB_DATA_DIR: ${{ github.workspace }}/data
 
-      # ── 5. HF 업로드 (upload_folder 단일 커밋) ──
-      - name: Deploy to HuggingFace
+      # ── 5. HF 업로드 (dartlab 파생물만) ──
+      # finance / meta 는 SEC 벌크가 원본이므로 HF 미러링 없음 (사용자 PC 자동 다운로드).
+      # HF 업로드 대상: scan 프리빌드 + docs 섹션 파싱 결과.
+      - name: Deploy to HuggingFace (scan + docs)
         run: |
           uv run python -X utf8 -c "
           import os
           os.environ.setdefault('DARTLAB_DATA_DIR', '${{ github.workspace }}/data')
           from dartlab.providers.edgar.openapi.deploy import deployEdgarToHF
-          cats = ['finance', 'meta', 'scan']
+          cats = ['scan']
           if '${{ github.event.schedule }}' == '0 3 * * 0' or '${{ github.event.inputs.collectDocs }}' == 'true':
               cats.append('docs')
           result = deployEdgarToHF(categories=cats)

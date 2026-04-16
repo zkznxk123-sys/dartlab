@@ -15,9 +15,9 @@ from datetime import datetime, timezone
 
 MONITORED_WORKFLOWS = [
     "Data Sync",
-    "EDGAR Data Sync",
+    "Data Prebuild (DART)",
+    "EDGAR Data Sync (Bulk)",
     "Update KindList",
-    "Data Prebuild",
 ]
 
 FAILURE_LABEL = "pipeline-failure"

@@ -65,14 +65,19 @@ data/edgar/
 └── scan/finance.parquet                 # 전종목 프리빌드 (HF 업로드)
 ```
 
-### HF 배포 카테고리 (`DATA_RELEASES`)
+### HF 배포 정책 — dartlab 파생물만
 
-| 카테고리 | HF 경로 | 생성 소스 |
-|---------|--------|-----------|
-| `edgar` | `edgar/finance/` | companyfacts.zip 파생 parquet |
-| `edgarMeta` | `edgar/meta/` | 분기 벌크 sub/pre/tag 파생 |
-| `edgarDocs` | `edgar/docs/` | submissions API 10-K/10-Q fetch |
-| `edgarScan` | `edgar/scan/` | buildEdgarFinance() 프리빌드 |
+| 카테고리 | 원본 소스 | HF 미러링 | 이유 |
+|---------|----------|:-----:|------|
+| `edgar` (finance) | SEC `companyfacts.zip` daily | ❌ | 사용자 PC 자동 다운로드·변환 (원본이 공개 벌크) |
+| `edgarMeta` | SEC `{Y}q{Q}.zip` quarterly | ❌ | 사용자 PC 자동 다운로드·변환 (원본이 공개 벌크) |
+| `edgarDocs` | SEC submissions API + HTML 파싱 | ✅ | dartlab 파생물 (섹션 추출 결과) |
+| `edgarScan` | `buildEdgarFinance()` 프리빌드 | ✅ | dartlab 파생물 (재계산 비용 큼) |
+
+**원칙:**
+- SEC 자체 공개 벌크가 있는 데이터(finance, meta)는 **HF 미러링 없음** — dartlab 이 SEC 에서 직접 받아 로컬 변환
+- dartlab 계산 파생물(scan, docs)만 HF 업로드 — 사용자가 직접 만들기에 시간 오래 걸림
+- HF 정책은 `providers/edgar/openapi/deploy.py::_BULK_ORIGIN_CATEGORIES` 가 finance/meta 를 차단한다
 
 ---
 

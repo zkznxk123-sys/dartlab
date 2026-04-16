@@ -1,24 +1,20 @@
 name: Data Sync
 
 # ──────────────────────────────────────────────────────────────
-# 메인 데이터 수집 워크플로우 (2026-04-06 통합)
+# DART 메인 데이터 수집 (2026-04-16 정리)
 #
-# 동작:
-#   1. DART list.json으로 최근 N일 정기공시 조회 (API 1회)
+# 자동 cron (recent 모드):
+#   1. DART list.json 으로 최근 N일 정기공시 조회
 #   2. 카테고리별 독립 누락 검사 (docs rcept_no + finance reprt_code)
 #   3. 누락된 종목·분기만 수집 — 88분기 차집합 X
 #   4. 이전 실행 pending.txt (API 한도 잘림) 우선 회수
 #   5. 변경 파일만 HF push
 #
-# 통합 전:
-#   - dataSync.yml (KST 02:00) 88분기 차집합, 5h
-#   - dataSyncDaily.yml (KST 03:00) list.json 기반, 45m+2.5h
-#   - dataPipeline.yml (KST 05:00) audit + workflow_dispatch full
+# 수동 (workflow_dispatch):
+#   - mode=recent (기본): list.json 기반 경량 수집 (~30분)
+#   - mode=full: 88분기 차집합 수집 (~5시간, 이전 dataPipeline full 모드 대체)
 #
-# 통합 후 (이 파일):
-#   - KST 03:00 + 15:00 매일 2회 (12시간마다)
-#   - 가벼운 list.json 경로만 자동 실행
-#   - workflow_dispatch로 full 모드(88분기 차집합) 수동 가능
+# 파이프라인 상세: ops/data.md
 # ──────────────────────────────────────────────────────────────
 
 on:
