@@ -1,0 +1,211 @@
+{
+  "ego": {
+    "stockCode": "206640",
+    "corpName": "바디텍메드",
+    "industry": "medicalDevice",
+    "stage": "diagnostic",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1621,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "065450",
+      "corpName": "빅텍",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 830
+    },
+    {
+      "stockCode": "079430",
+      "corpName": "현대리바트",
+      "industry": "paper",
+      "stage": "general",
+      "revenue": 15462
+    },
+    {
+      "stockCode": "462510",
+      "corpName": "라메디텍",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 72
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "206640",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005830",
+      "to": "206640",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "065450",
+      "to": "206640",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "079430",
+      "to": "206640",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "206640",
+      "to": "462510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "206640",
+      "to": "462510",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 10.4%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 157707960354.0,
+      "operating_profit": 51935958627.0,
+      "net_profit": 47395067413.0,
+      "total_assets": 192242056154.0
+    },
+    {
+      "year": "2022",
+      "sales": 118076842537.0,
+      "operating_profit": 24671164725.0,
+      "net_profit": 24151534406.0,
+      "total_assets": 195655908180.0
+    },
+    {
+      "year": "2023",
+      "sales": 134219239677.0,
+      "operating_profit": 28476969172.0,
+      "net_profit": 721752626.0,
+      "total_assets": 227901663330.0
+    },
+    {
+      "year": "2024",
+      "sales": 138160173429.0,
+      "operating_profit": 26150858416.0,
+      "net_profit": 27220056540.0,
+      "total_assets": 254674448283.0
+    },
+    {
+      "year": "2025",
+      "sales": 162093303707.0,
+      "operating_profit": 28940373359.0,
+      "net_profit": 23879556722.0,
+      "total_assets": 281633435473.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "011560",
+      "corpName": "세보엠이씨",
+      "stage": "imaging",
+      "revenue": 7158
+    },
+    {
+      "stockCode": "092790",
+      "corpName": "넥스틸",
+      "stage": "imaging",
+      "revenue": 5510
+    },
+    {
+      "stockCode": "215360",
+      "corpName": "우리산업",
+      "stage": "imaging",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "043150",
+      "corpName": "바텍",
+      "stage": "imaging",
+      "revenue": 4264
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "stage": "imaging",
+      "revenue": 3959
+    }
+  ]
+}

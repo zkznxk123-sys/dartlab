@@ -1,0 +1,204 @@
+{
+  "ego": {
+    "stockCode": "208350",
+    "corpName": "지란지교시큐리티",
+    "industry": "software",
+    "stage": "ai",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 389,
+    "confidence": 0.76,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "192250",
+      "corpName": "케이사인",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 484
+    },
+    {
+      "stockCode": "275630",
+      "corpName": "에스에스알",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 130
+    },
+    {
+      "stockCode": "347700",
+      "corpName": "스피어",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 956
+    },
+    {
+      "stockCode": "434480",
+      "corpName": "모니터랩",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 192
+    }
+  ],
+  "edges": [
+    {
+      "from": "192250",
+      "to": "208350",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "208350",
+      "to": "275630",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "208350",
+      "to": "347700",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "208350",
+      "to": "434480",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "275630",
+      "to": "208350",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "208350",
+      "to": "434480",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 12.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 57332148376.0,
+      "operating_profit": 72143790.0,
+      "net_profit": -5659498067.0,
+      "total_assets": 104495937215.0
+    },
+    {
+      "year": "2022",
+      "sales": 65382543444.0,
+      "operating_profit": 1863816671.0,
+      "net_profit": 1452905133.0,
+      "total_assets": 123609862385.0
+    },
+    {
+      "year": "2023",
+      "sales": 35281556819.0,
+      "operating_profit": 1836738399.0,
+      "net_profit": 10939986148.0,
+      "total_assets": 92553608517.0
+    },
+    {
+      "year": "2024",
+      "sales": 34122987523.0,
+      "operating_profit": 1377556243.0,
+      "net_profit": -1333107852.0,
+      "total_assets": 85103437682.0
+    },
+    {
+      "year": "2025",
+      "sales": 38927841312.0,
+      "operating_profit": 2483169475.0,
+      "net_profit": -952681093.0,
+      "total_assets": 87935331147.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

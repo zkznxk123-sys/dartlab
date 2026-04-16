@@ -1,0 +1,135 @@
+{
+  "ego": {
+    "stockCode": "340930",
+    "corpName": "유일에너테크",
+    "industry": "machinery",
+    "stage": "special",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 600,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001720",
+      "corpName": "신영증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "001720",
+      "to": "340930",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001720",
+      "to": "340930",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 29355057248.0,
+      "operating_profit": -5817195175.0,
+      "net_profit": -2361387624.0,
+      "total_assets": 88853255733.0
+    },
+    {
+      "year": "2022",
+      "sales": 47468577156.0,
+      "operating_profit": -19282004973.0,
+      "net_profit": 14477765505.0,
+      "total_assets": 156003228014.0
+    },
+    {
+      "year": "2023",
+      "sales": 38507805865.0,
+      "operating_profit": -10108980369.0,
+      "net_profit": -13224110578.0,
+      "total_assets": 174510680249.0
+    },
+    {
+      "year": "2024",
+      "sales": 59689568831.0,
+      "operating_profit": -16722746774.0,
+      "net_profit": -28707577238.0,
+      "total_assets": 168762499779.0
+    },
+    {
+      "year": "2025",
+      "sales": 60014953095.0,
+      "operating_profit": -2713122013.0,
+      "net_profit": 0.0,
+      "total_assets": 175737293292.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

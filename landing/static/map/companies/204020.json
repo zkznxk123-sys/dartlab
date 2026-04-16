@@ -1,0 +1,154 @@
+{
+  "ego": {
+    "stockCode": "204020",
+    "corpName": "그리티",
+    "industry": "textile",
+    "stage": "apparel",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 2017,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005850",
+      "corpName": "에스엘",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 52399
+    },
+    {
+      "stockCode": "230360",
+      "corpName": "에코마케팅",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 4488
+    }
+  ],
+  "edges": [
+    {
+      "from": "204020",
+      "to": "005850",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "204020",
+      "to": "230360",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "230360",
+      "to": "204020",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 10.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 108704667058.0,
+      "operating_profit": -7556310175.0,
+      "net_profit": -7051370102.0,
+      "total_assets": 86545475147.0
+    },
+    {
+      "year": "2022",
+      "sales": 143116381797.0,
+      "operating_profit": 2873864446.0,
+      "net_profit": null,
+      "total_assets": 88501695093.0
+    },
+    {
+      "year": "2023",
+      "sales": 176102433452.0,
+      "operating_profit": 11123087525.0,
+      "net_profit": 8486793202.0,
+      "total_assets": 93959767090.0
+    },
+    {
+      "year": "2024",
+      "sales": 194740127235.0,
+      "operating_profit": 12310141430.0,
+      "net_profit": 9689498818.0,
+      "total_assets": 102868220061.0
+    },
+    {
+      "year": "2025",
+      "sales": 201717579283.0,
+      "operating_profit": 7852792954.0,
+      "net_profit": 4694525281.0,
+      "total_assets": 142254331667.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

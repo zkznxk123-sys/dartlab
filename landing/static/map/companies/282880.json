@@ -1,0 +1,332 @@
+{
+  "ego": {
+    "stockCode": "282880",
+    "corpName": "코윈테크",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1547,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "360070",
+      "corpName": "탑머티리얼",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 231
+    },
+    {
+      "stockCode": "262260",
+      "corpName": "에이프로",
+      "industry": "electrical",
+      "stage": "power",
+      "revenue": 1471
+    },
+    {
+      "stockCode": "044780",
+      "corpName": "에이치케이",
+      "industry": "medicalDevice",
+      "stage": "therapeutic",
+      "revenue": 542
+    },
+    {
+      "stockCode": "065130",
+      "corpName": "탑엔지니어링",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 7985
+    },
+    {
+      "stockCode": "226320",
+      "corpName": "잇츠한불",
+      "industry": "cosmetics",
+      "stage": "brand",
+      "revenue": 1534
+    }
+  ],
+  "edges": [
+    {
+      "from": "006800",
+      "to": "282880",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "088350",
+      "to": "282880",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "360070",
+      "to": "282880",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "282880",
+      "to": "360070",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "262260",
+      "to": "282880",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "044780",
+      "to": "282880",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "065130",
+      "to": "282880",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "360070",
+      "to": "282880",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "226320",
+      "to": "282880",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 106349899896.0,
+      "operating_profit": 6616194447.0,
+      "net_profit": 5579637955.0,
+      "total_assets": 186416429847.0
+    },
+    {
+      "year": "2022",
+      "sales": 201154916332.0,
+      "operating_profit": 14781550437.0,
+      "net_profit": 2624000970.0,
+      "total_assets": 343051434688.0
+    },
+    {
+      "year": "2023",
+      "sales": 335958325532.0,
+      "operating_profit": 22817285083.0,
+      "net_profit": 22429639690.0,
+      "total_assets": 466593987882.0
+    },
+    {
+      "year": "2024",
+      "sales": 244389953265.0,
+      "operating_profit": 3602921129.0,
+      "net_profit": 16193952998.0,
+      "total_assets": 438385883721.0
+    },
+    {
+      "year": "2025",
+      "sales": 154701003144.0,
+      "operating_profit": -25447396955.0,
+      "net_profit": 1700631184.0,
+      "total_assets": 428236310837.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "construction",
+        1
+      ],
+      [
+        "electrical",
+        1
+      ],
+      [
+        "medicalDevice",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "engineering",
+        1
+      ],
+      [
+        "power",
+        1
+      ],
+      [
+        "therapeutic",
+        1
+      ],
+      [
+        "display",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "360070",
+      "corpName": "탑머티리얼",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "262260",
+      "corpName": "에이프로",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "044780",
+      "corpName": "에이치케이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "065130",
+      "corpName": "탑엔지니어링",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

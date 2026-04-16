@@ -1,0 +1,317 @@
+{
+  "ego": {
+    "stockCode": "078140",
+    "corpName": "대봉엘에스",
+    "industry": "cosmetics",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1021,
+    "confidence": 0.8,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "082800",
+      "corpName": "비보존 제약",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 593
+    },
+    {
+      "stockCode": "347740",
+      "corpName": "피엔케이피부임상연구센타",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 228
+    },
+    {
+      "stockCode": "085310",
+      "corpName": "엔케이",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 1301
+    },
+    {
+      "stockCode": "084110",
+      "corpName": "휴온스글로벌",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 8475
+    },
+    {
+      "stockCode": "200670",
+      "corpName": "휴메딕스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 7
+    },
+    {
+      "stockCode": "344860",
+      "corpName": "이노진",
+      "industry": "chemical",
+      "stage": "",
+      "revenue": 82
+    },
+    {
+      "stockCode": "043220",
+      "corpName": "티에스넥스젠",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 145
+    }
+  ],
+  "edges": [
+    {
+      "from": "078140",
+      "to": "033780",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 35080.0,
+      "ratio": null,
+      "product": "Ethyl Alcohol, XF49-C3281/SF-C0813,Mihapol PBS-50, Micolin A-526 외",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "Ethyl Alcohol, XF49-C3281/SF-C0813,Mihapol PBS-50, Micolin A-526 외"
+    },
+    {
+      "from": "078140",
+      "to": "082800",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "078140",
+      "to": "347740",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "078140",
+      "to": "085310",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "084110",
+      "to": "078140",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "200670",
+      "to": "078140",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "078140",
+      "to": "344860",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "347740",
+      "to": "078140",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "078140",
+      "to": "043220",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.2%"
+    },
+    {
+      "from": "084110",
+      "to": "078140",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.2%"
+    },
+    {
+      "from": "200670",
+      "to": "078140",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 82957177173.0,
+      "operating_profit": 9685603580.0,
+      "net_profit": 10041827934.0,
+      "total_assets": 163237496592.0
+    },
+    {
+      "year": "2022",
+      "sales": 93504353114.0,
+      "operating_profit": 8174396525.0,
+      "net_profit": 8627667769.0,
+      "total_assets": 186136904194.0
+    },
+    {
+      "year": "2023",
+      "sales": 87622205173.0,
+      "operating_profit": 3800763406.0,
+      "net_profit": 6181779860.0,
+      "total_assets": 194919922942.0
+    },
+    {
+      "year": "2024",
+      "sales": 93953561154.0,
+      "operating_profit": 9053878830.0,
+      "net_profit": 9686688886.0,
+      "total_assets": 238712852479.0
+    },
+    {
+      "year": "2025",
+      "sales": 102063530166.0,
+      "operating_profit": 7331523353.0,
+      "net_profit": 10058593929.0,
+      "total_assets": 264960926642.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "product": "Ethyl Alcohol, XF49-C3281/SF-C0813,Mihapol PBS-50, Micolin A-526 외",
+      "amount": 35080.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "082800",
+      "corpName": "비보존 제약",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "344860",
+      "corpName": "이노진",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "stage": "manufacturing",
+      "revenue": 42528
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "278470",
+      "corpName": "에이피알",
+      "stage": "manufacturing",
+      "revenue": 15273
+    },
+    {
+      "stockCode": "257720",
+      "corpName": "실리콘투",
+      "stage": "manufacturing",
+      "revenue": 11163
+    }
+  ]
+}

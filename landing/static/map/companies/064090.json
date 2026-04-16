@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "064090",
+    "corpName": "인크레더블버즈",
+    "industry": "retail",
+    "stage": "wholesale",
+    "role": "도매",
+    "stream": "midstream",
+    "revenue": 72,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "206400",
+      "corpName": "베노티앤알",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 48
+    },
+    {
+      "stockCode": "179900",
+      "corpName": "유티아이",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 200
+    },
+    {
+      "stockCode": "061040",
+      "corpName": "알에프텍",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 2660
+    }
+  ],
+  "edges": [
+    {
+      "from": "064090",
+      "to": "206400",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "064090",
+      "to": "179900",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "064090",
+      "to": "061040",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 30300618072.0,
+      "operating_profit": -7850172376.0,
+      "net_profit": null,
+      "total_assets": 22862786680.0
+    },
+    {
+      "year": "2022",
+      "sales": 29367045498.0,
+      "operating_profit": -13229119702.0,
+      "net_profit": 0.0,
+      "total_assets": 8640387576.0
+    },
+    {
+      "year": "2023",
+      "sales": 6900744761.0,
+      "operating_profit": -568633743.0,
+      "net_profit": -6989588143.0,
+      "total_assets": 60237586878.0
+    },
+    {
+      "year": "2024",
+      "sales": 4560824449.0,
+      "operating_profit": -3535124234.0,
+      "net_profit": 19027885730.0,
+      "total_assets": 99822167362.0
+    },
+    {
+      "year": "2025",
+      "sales": 7211902064.0,
+      "operating_profit": -6078614066.0,
+      "net_profit": -30204179171.0,
+      "total_assets": 70958916483.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

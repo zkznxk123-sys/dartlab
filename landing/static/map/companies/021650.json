@@ -1,0 +1,311 @@
+{
+  "ego": {
+    "stockCode": "021650",
+    "corpName": "한국큐빅",
+    "industry": "plastic",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2272,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002810",
+      "corpName": "삼영무역",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 2107
+    },
+    {
+      "stockCode": "250060",
+      "corpName": "모비스",
+      "industry": "auto",
+      "stage": "powertrain",
+      "revenue": 51
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "109610",
+      "corpName": "에스와이",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 5016
+    }
+  ],
+  "edges": [
+    {
+      "from": "021650",
+      "to": "002810",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "002810",
+      "to": "021650",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "250060",
+      "to": "021650",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "012330",
+      "to": "021650",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "002810",
+      "to": "021650",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "051910",
+      "to": "021650",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "021650",
+      "to": "002810",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "021650",
+      "to": "109610",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 172101995255.0,
+      "operating_profit": 9100089379.0,
+      "net_profit": 7531552116.0,
+      "total_assets": 137540359804.0
+    },
+    {
+      "year": "2022",
+      "sales": 210049895609.0,
+      "operating_profit": 9058282896.0,
+      "net_profit": 6529074801.0,
+      "total_assets": 158338451425.0
+    },
+    {
+      "year": "2023",
+      "sales": 252096865048.0,
+      "operating_profit": 10647846417.0,
+      "net_profit": 8263592527.0,
+      "total_assets": 173294438614.0
+    },
+    {
+      "year": "2024",
+      "sales": 252147530422.0,
+      "operating_profit": 11435096474.0,
+      "net_profit": 9701104111.0,
+      "total_assets": 171466664708.0
+    },
+    {
+      "year": "2025",
+      "sales": 227225841275.0,
+      "operating_profit": 7932698423.0,
+      "net_profit": 4617518631.0,
+      "total_assets": 163085716744.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "auto",
+        2
+      ],
+      [
+        "machinery",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "powertrain",
+        1
+      ],
+      [
+        "oem",
+        1
+      ],
+      [
+        "precision",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "250060",
+      "corpName": "모비스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002810",
+      "corpName": "삼영무역",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "002810",
+      "corpName": "삼영무역",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005720",
+      "corpName": "넥센",
+      "stage": "general",
+      "revenue": 35865
+    },
+    {
+      "stockCode": "002350",
+      "corpName": "넥센타이어",
+      "stage": "general",
+      "revenue": 31896
+    },
+    {
+      "stockCode": "013520",
+      "corpName": "화승코퍼레이션",
+      "stage": "general",
+      "revenue": 16398
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "stage": "general",
+      "revenue": 13729
+    },
+    {
+      "stockCode": "004840",
+      "corpName": "DRB동일",
+      "stage": "general",
+      "revenue": 8027
+    }
+  ]
+}

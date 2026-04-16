@@ -1,0 +1,284 @@
+{
+  "ego": {
+    "stockCode": "004720",
+    "corpName": "팜젠사이언스",
+    "industry": "pharma",
+    "stage": "formulation",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1731,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "950130",
+      "corpName": "엑세스바이오",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 0
+    },
+    {
+      "stockCode": "008490",
+      "corpName": "서흥",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 7223
+    },
+    {
+      "stockCode": "044780",
+      "corpName": "에이치케이",
+      "industry": "medicalDevice",
+      "stage": "therapeutic",
+      "revenue": 542
+    },
+    {
+      "stockCode": "200670",
+      "corpName": "휴메딕스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 7
+    },
+    {
+      "stockCode": "023910",
+      "corpName": "대한약품",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 2086
+    }
+  ],
+  "edges": [
+    {
+      "from": "192820",
+      "to": "004720",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004720",
+      "to": "950130",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "008490",
+      "to": "004720",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004720",
+      "to": "044780",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "200670",
+      "to": "004720",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004720",
+      "to": "023910",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "950130",
+      "to": "004720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 99970033154.0,
+      "operating_profit": -5037919443.0,
+      "net_profit": 32465959378.0,
+      "total_assets": 220323823004.0
+    },
+    {
+      "year": "2022",
+      "sales": 26101260407.0,
+      "operating_profit": 7472363774.0,
+      "net_profit": 70059662048.0,
+      "total_assets": 317391477026.0
+    },
+    {
+      "year": "2023",
+      "sales": 184483119.0,
+      "operating_profit": 9126798156.0,
+      "net_profit": 5726202308.0,
+      "total_assets": 335917098602.0
+    },
+    {
+      "year": "2024",
+      "sales": 155769978235.0,
+      "operating_profit": 10643268036.0,
+      "net_profit": 2789765616.0,
+      "total_assets": 363450447280.0
+    },
+    {
+      "year": "2025",
+      "sales": 173072508298.0,
+      "operating_profit": 5986652772.0,
+      "net_profit": -116655840137.0,
+      "total_assets": 195413585967.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "cosmetics",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ],
+      [
+        "pharma",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "manufacturing",
+        1
+      ],
+      [
+        "specialty",
+        1
+      ],
+      [
+        "research",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "008490",
+      "corpName": "서흥",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "200670",
+      "corpName": "휴메딕스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

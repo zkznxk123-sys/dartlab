@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "060720",
+    "corpName": "KH바텍",
+    "industry": "electronics",
+    "stage": "set",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 4249,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "238490",
+      "corpName": "힘스",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 593
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "060720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005830",
+      "to": "060720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "238490",
+      "to": "060720",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 339842788109.0,
+      "operating_profit": 26919687491.0,
+      "net_profit": 33412209394.0,
+      "total_assets": 381851259789.0
+    },
+    {
+      "year": "2022",
+      "sales": 363915189191.0,
+      "operating_profit": 32517326322.0,
+      "net_profit": 0.0,
+      "total_assets": 344760762321.0
+    },
+    {
+      "year": "2023",
+      "sales": 363572099173.0,
+      "operating_profit": 33607563323.0,
+      "net_profit": 30935074981.0,
+      "total_assets": 342517480233.0
+    },
+    {
+      "year": "2024",
+      "sales": 311011706199.0,
+      "operating_profit": 21858202762.0,
+      "net_profit": 195.0,
+      "total_assets": 387122812875.0
+    },
+    {
+      "year": "2025",
+      "sales": 424904200489.0,
+      "operating_profit": 31752377839.0,
+      "net_profit": 0.0,
+      "total_assets": 404150935791.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

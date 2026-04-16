@@ -1,0 +1,166 @@
+{
+  "ego": {
+    "stockCode": "216080",
+    "corpName": "제테마",
+    "industry": "pharma",
+    "stage": "api",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 769,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000020",
+      "corpName": "동화약품",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 4964
+    },
+    {
+      "stockCode": "251630",
+      "corpName": "브이원텍",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 490
+    }
+  ],
+  "edges": [
+    {
+      "from": "000020",
+      "to": "216080",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "251630",
+      "to": "216080",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000020",
+      "to": "216080",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.6%"
+    },
+    {
+      "from": "251630",
+      "to": "216080",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.4%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 33222759331.0,
+      "operating_profit": 2278946076.0,
+      "net_profit": 0.0,
+      "total_assets": 147925225081.0
+    },
+    {
+      "year": "2022",
+      "sales": 45993818218.0,
+      "operating_profit": 4005811892.0,
+      "net_profit": null,
+      "total_assets": 188353597818.0
+    },
+    {
+      "year": "2023",
+      "sales": 58716076773.0,
+      "operating_profit": 2633639012.0,
+      "net_profit": 13965914305.0,
+      "total_assets": 244228998208.0
+    },
+    {
+      "year": "2024",
+      "sales": 68520182954.0,
+      "operating_profit": 4110925721.0,
+      "net_profit": -188252851.0,
+      "total_assets": 222716913359.0
+    },
+    {
+      "year": "2025",
+      "sales": 76902884066.0,
+      "operating_profit": 3819154313.0,
+      "net_profit": -6602741705.0,
+      "total_assets": 209135993481.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

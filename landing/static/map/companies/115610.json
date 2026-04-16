@@ -1,0 +1,116 @@
+{
+  "ego": {
+    "stockCode": "115610",
+    "corpName": "이미지스",
+    "industry": "semiconductor",
+    "stage": "design",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 132,
+    "confidence": 0.6,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "208860",
+      "corpName": "다산디엠씨",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 1137
+    }
+  ],
+  "edges": [
+    {
+      "from": "208860",
+      "to": "115610",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 21320668621.0,
+      "operating_profit": 560614984.0,
+      "net_profit": 882717282.0,
+      "total_assets": 11595042045.0
+    },
+    {
+      "year": "2022",
+      "sales": 21917076908.0,
+      "operating_profit": 1551363628.0,
+      "net_profit": 1806425437.0,
+      "total_assets": 16571889810.0
+    },
+    {
+      "year": "2023",
+      "sales": 16100183610.0,
+      "operating_profit": -2313092777.0,
+      "net_profit": -4610901786.0,
+      "total_assets": 22336713563.0
+    },
+    {
+      "year": "2025",
+      "sales": 13222397763.0,
+      "operating_profit": -1987171358.0,
+      "net_profit": -1836792589.0,
+      "total_assets": 13554900717.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

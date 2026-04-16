@@ -1,0 +1,135 @@
+{
+  "ego": {
+    "stockCode": "169330",
+    "corpName": "엠브레인",
+    "industry": "consulting",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 218,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000050",
+      "corpName": "경방",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 4125
+    },
+    {
+      "stockCode": "278990",
+      "corpName": "EMB",
+      "industry": "battery",
+      "stage": "cell",
+      "revenue": 238
+    }
+  ],
+  "edges": [
+    {
+      "from": "000050",
+      "to": "169330",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "169330",
+      "to": "278990",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 22158754349.0,
+      "operating_profit": 4569120980.0,
+      "net_profit": 4062777235.0,
+      "total_assets": 46909014610.0
+    },
+    {
+      "year": "2022",
+      "sales": 21106465865.0,
+      "operating_profit": 2899564936.0,
+      "net_profit": 2625936743.0,
+      "total_assets": 45047451910.0
+    },
+    {
+      "year": "2023",
+      "sales": 20366515313.0,
+      "operating_profit": 1535371170.0,
+      "net_profit": 1462208881.0,
+      "total_assets": 49455335307.0
+    },
+    {
+      "year": "2024",
+      "sales": 21834854522.0,
+      "operating_profit": 2535334450.0,
+      "net_profit": 144806898.0,
+      "total_assets": 48673317882.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "003030",
+      "corpName": "세아제강지주",
+      "stage": "general",
+      "revenue": 37596
+    },
+    {
+      "stockCode": "000070",
+      "corpName": "삼양홀딩스",
+      "stage": "general",
+      "revenue": 33483
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "036710",
+      "corpName": "심텍홀딩스",
+      "stage": "general",
+      "revenue": 15281
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "stage": "general",
+      "revenue": 13276
+    }
+  ]
+}

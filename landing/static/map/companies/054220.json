@@ -1,0 +1,235 @@
+{
+  "ego": {
+    "stockCode": "054220",
+    "corpName": "비츠로시스",
+    "industry": "electrical",
+    "stage": "power",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 448,
+    "confidence": 0.6,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "042370",
+      "corpName": "비츠로테크",
+      "industry": "electrical",
+      "stage": "power",
+      "revenue": 4323
+    },
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "082920",
+      "corpName": "비츠로셀",
+      "industry": "battery",
+      "stage": "electrolyte",
+      "revenue": 2431
+    },
+    {
+      "stockCode": "488900",
+      "corpName": "비츠로넥스텍",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 368
+    },
+    {
+      "stockCode": "115500",
+      "corpName": "케이씨에스",
+      "industry": "railroad",
+      "stage": "general",
+      "revenue": 249
+    }
+  ],
+  "edges": [
+    {
+      "from": "042370",
+      "to": "054220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "054220",
+      "to": "031210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "054220",
+      "to": "042370",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "054220",
+      "to": "082920",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "054220",
+      "to": "488900",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "082920",
+      "to": "054220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "115500",
+      "to": "054220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "115500",
+      "to": "054220",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3656597108.0,
+      "operating_profit": -5110221953.0,
+      "net_profit": -4793821601.0,
+      "total_assets": 13500086549.0
+    },
+    {
+      "year": "2022",
+      "sales": 8988875448.0,
+      "operating_profit": -2359243704.0,
+      "net_profit": -2381209822.0,
+      "total_assets": 28201357122.0
+    },
+    {
+      "year": "2023",
+      "sales": 19552896164.0,
+      "operating_profit": -7056918833.0,
+      "net_profit": -6342052544.0,
+      "total_assets": 40710235274.0
+    },
+    {
+      "year": "2024",
+      "sales": 25652898941.0,
+      "operating_profit": -6143381048.0,
+      "net_profit": -10292890167.0,
+      "total_assets": 51320541267.0
+    },
+    {
+      "year": "2025",
+      "sales": 44811475268.0,
+      "operating_profit": 57731185.0,
+      "net_profit": 1520972564.0,
+      "total_assets": 53728870232.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "010120",
+      "corpName": "엘에스일렉트릭",
+      "stage": "power",
+      "revenue": 49658
+    },
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "stage": "cable",
+      "revenue": 36360
+    },
+    {
+      "stockCode": "015860",
+      "corpName": "일진홀딩스",
+      "stage": "power",
+      "revenue": 22827
+    },
+    {
+      "stockCode": "103590",
+      "corpName": "일진전기",
+      "stage": "power",
+      "revenue": 20446
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "stage": "cable",
+      "revenue": 6245
+    }
+  ]
+}

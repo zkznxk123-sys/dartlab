@@ -1,0 +1,187 @@
+{
+  "ego": {
+    "stockCode": "100130",
+    "corpName": "동국S&C",
+    "industry": "steel",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 1197,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005160",
+      "corpName": "동국산업",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 7278
+    },
+    {
+      "stockCode": "075970",
+      "corpName": "동국알앤에스",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 1107
+    }
+  ],
+  "edges": [
+    {
+      "from": "100130",
+      "to": "005160",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "005160",
+      "to": "100130",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "075970",
+      "to": "100130",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "100130",
+      "to": "005160",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "100130",
+      "to": "075970",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 378775972995.0,
+      "operating_profit": 18346300211.0,
+      "net_profit": 16831863398.0,
+      "total_assets": 451115063748.0
+    },
+    {
+      "year": "2022",
+      "sales": 477142893660.0,
+      "operating_profit": -11395530339.0,
+      "net_profit": -8329417290.0,
+      "total_assets": 503022501999.0
+    },
+    {
+      "year": "2023",
+      "sales": 398256036328.0,
+      "operating_profit": -31751419911.0,
+      "net_profit": -30208157901.0,
+      "total_assets": 472601990302.0
+    },
+    {
+      "year": "2024",
+      "sales": 165779489924.0,
+      "operating_profit": -5534041323.0,
+      "net_profit": 0.0,
+      "total_assets": 310764184164.0
+    },
+    {
+      "year": "2025",
+      "sales": 119684884783.0,
+      "operating_profit": 6944254857.0,
+      "net_profit": -1670905549.0,
+      "total_assets": 256327957251.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "005160",
+      "corpName": "동국산업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

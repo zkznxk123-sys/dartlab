@@ -1,0 +1,426 @@
+{
+  "ego": {
+    "stockCode": "131970",
+    "corpName": "두산테스나",
+    "industry": "semiconductor",
+    "stage": "test",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 3039,
+    "confidence": 0.95,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "010470",
+      "corpName": "오리콤",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 2277
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "095340",
+      "corpName": "ISC",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 2202
+    },
+    {
+      "stockCode": "336260",
+      "corpName": "두산퓨얼셀",
+      "industry": "machinery",
+      "stage": "",
+      "revenue": 4548
+    },
+    {
+      "stockCode": "454910",
+      "corpName": "두산로보틱스",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 330
+    },
+    {
+      "stockCode": "241560",
+      "corpName": "두산밥캣",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 62
+    },
+    {
+      "stockCode": "490470",
+      "corpName": "세미파이브",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 0
+    },
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "317870",
+      "corpName": "엔바이오니아",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 0
+    },
+    {
+      "stockCode": "332570",
+      "corpName": "PS일렉트로닉스",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 1255
+    }
+  ],
+  "edges": [
+    {
+      "from": "131970",
+      "to": "000150",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000150",
+      "to": "131970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "010470",
+      "to": "131970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "034020",
+      "to": "131970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "095340",
+      "to": "131970",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "131970",
+      "to": "336260",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "131970",
+      "to": "454910",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "131970",
+      "to": "241560",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "131970",
+      "to": "000150",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "131970",
+      "to": "034020",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "131970",
+      "to": "010470",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "131970",
+      "to": "490470",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "241560",
+      "to": "131970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "336260",
+      "to": "131970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "454910",
+      "to": "131970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001450",
+      "to": "131970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 0.1%"
+    },
+    {
+      "from": "131970",
+      "to": "317870",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.4%"
+    },
+    {
+      "from": "332570",
+      "to": "131970",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 3.6%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 207584466664.0,
+      "operating_profit": 54062137444.0,
+      "net_profit": 47166344546.0,
+      "total_assets": 533494570498.0
+    },
+    {
+      "year": "2022",
+      "sales": 277655937555.0,
+      "operating_profit": 67169269292.0,
+      "net_profit": 52333033783.0,
+      "total_assets": 767016734136.0
+    },
+    {
+      "year": "2023",
+      "sales": 338652254525.0,
+      "operating_profit": 60778799323.0,
+      "net_profit": 49077381672.0,
+      "total_assets": 763115310220.0
+    },
+    {
+      "year": "2024",
+      "sales": 373117930000.0,
+      "operating_profit": 37923282000.0,
+      "net_profit": 36781312000.0,
+      "total_assets": 787696560000.0
+    },
+    {
+      "year": "2025",
+      "sales": 303874072000.0,
+      "operating_profit": -940826000.0,
+      "net_profit": 1510043000.0,
+      "total_assets": 703775464000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "retail",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "retail",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "095340",
+      "corpName": "ISC",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

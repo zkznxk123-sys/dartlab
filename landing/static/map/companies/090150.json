@@ -1,0 +1,371 @@
+{
+  "ego": {
+    "stockCode": "090150",
+    "corpName": "아이윈",
+    "industry": "auto",
+    "stage": "oem",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 1159,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "041020",
+      "corpName": "폴라리스오피스",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 3242
+    },
+    {
+      "stockCode": "088390",
+      "corpName": "이녹스",
+      "industry": "railroad",
+      "stage": "",
+      "revenue": 591
+    },
+    {
+      "stockCode": "105330",
+      "corpName": "케이엔더블유",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 811
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "473980",
+      "corpName": "노머스",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 757
+    },
+    {
+      "stockCode": "123010",
+      "corpName": "알엔티엑스",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 384
+    },
+    {
+      "stockCode": "114630",
+      "corpName": "폴라리스우노",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 1018
+    },
+    {
+      "stockCode": "123750",
+      "corpName": "알톤",
+      "industry": "railroad",
+      "stage": "",
+      "revenue": 322
+    },
+    {
+      "stockCode": "234100",
+      "corpName": "폴라리스세원",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2426
+    },
+    {
+      "stockCode": "272290",
+      "corpName": "이녹스첨단소재",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 4396
+    },
+    {
+      "stockCode": "486990",
+      "corpName": "노타",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "041020",
+      "to": "090150",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "088390",
+      "to": "090150",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "105330",
+      "to": "090150",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "024110",
+      "to": "090150",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "090150",
+      "to": "473980",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "090150",
+      "to": "123010",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "114630",
+      "to": "090150",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "123010",
+      "to": "090150",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "123750",
+      "to": "090150",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "234100",
+      "to": "090150",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "272290",
+      "to": "090150",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "090150",
+      "to": "486990",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 90626244365.0,
+      "operating_profit": 2489232126.0,
+      "net_profit": 2255031540.0,
+      "total_assets": 126846594158.0
+    },
+    {
+      "year": "2022",
+      "sales": 94425491702.0,
+      "operating_profit": 2258539282.0,
+      "net_profit": -3624332798.0,
+      "total_assets": 179727966412.0
+    },
+    {
+      "year": "2023",
+      "sales": 108275071416.0,
+      "operating_profit": 6353994073.0,
+      "net_profit": -35506485811.0,
+      "total_assets": 139684241933.0
+    },
+    {
+      "year": "2024",
+      "sales": 119318697988.0,
+      "operating_profit": 7901469034.0,
+      "net_profit": -3903283527.0,
+      "total_assets": 130047144320.0
+    },
+    {
+      "year": "2025",
+      "sales": 115909884130.0,
+      "operating_profit": 6875269241.0,
+      "net_profit": 8954915856.0,
+      "total_assets": 132122705447.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "plastic",
+        1
+      ],
+      [
+        "finance",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        1
+      ],
+      [
+        "bank",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "105330",
+      "corpName": "케이엔더블유",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "486990",
+      "corpName": "노타",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

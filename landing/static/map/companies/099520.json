@@ -1,0 +1,238 @@
+{
+  "ego": {
+    "stockCode": "099520",
+    "corpName": "DGI",
+    "industry": "retail",
+    "stage": "wholesale",
+    "role": "도매",
+    "stream": "midstream",
+    "revenue": 252,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "052790",
+      "corpName": "액토즈소프트",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 699
+    },
+    {
+      "stockCode": "043360",
+      "corpName": "디지아이",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 213
+    },
+    {
+      "stockCode": "089970",
+      "corpName": "브이엠",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 1444
+    },
+    {
+      "stockCode": "051380",
+      "corpName": "피씨디렉트",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 3730
+    },
+    {
+      "stockCode": "002020",
+      "corpName": "코오롱",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 58861
+    },
+    {
+      "stockCode": "177830",
+      "corpName": "파버나인",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 1325
+    }
+  ],
+  "edges": [
+    {
+      "from": "052790",
+      "to": "099520",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "099520",
+      "to": "043360",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "099520",
+      "to": "089970",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "051380",
+      "to": "099520",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "099520",
+      "to": "002020",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "177830",
+      "to": "099520",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 27428788078.0,
+      "operating_profit": -6743641790.0,
+      "net_profit": 0.0,
+      "total_assets": 23990314802.0
+    },
+    {
+      "year": "2022",
+      "sales": 25873130375.0,
+      "operating_profit": 288540751.0,
+      "net_profit": 0.0,
+      "total_assets": 23068889622.0
+    },
+    {
+      "year": "2023",
+      "sales": 13391973891.0,
+      "operating_profit": -4392338334.0,
+      "net_profit": -5034579008.0,
+      "total_assets": 28396993613.0
+    },
+    {
+      "year": "2024",
+      "sales": 21360983111.0,
+      "operating_profit": 503079763.0,
+      "net_profit": null,
+      "total_assets": 28672300883.0
+    },
+    {
+      "year": "2025",
+      "sales": 25172528475.0,
+      "operating_profit": -3299650687.0,
+      "net_profit": -3286458569.0,
+      "total_assets": 29371778873.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "retail",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "retail",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "051380",
+      "corpName": "피씨디렉트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

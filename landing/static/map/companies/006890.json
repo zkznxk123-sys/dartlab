@@ -1,0 +1,399 @@
+{
+  "ego": {
+    "stockCode": "006890",
+    "corpName": "태경케미컬",
+    "industry": "chemical",
+    "stage": "basic",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 613,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "014580",
+      "corpName": "태경비케이",
+      "industry": "environment",
+      "stage": "general",
+      "revenue": 3859
+    },
+    {
+      "stockCode": "015890",
+      "corpName": "태경산업",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 7771
+    },
+    {
+      "stockCode": "171120",
+      "corpName": "라이온켐텍",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 1303
+    },
+    {
+      "stockCode": "160550",
+      "corpName": "NEW",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 1427
+    },
+    {
+      "stockCode": "248070",
+      "corpName": "솔루엠",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 17002
+    },
+    {
+      "stockCode": "060150",
+      "corpName": "인선이엔티",
+      "industry": "environment",
+      "stage": "general",
+      "revenue": 1872
+    },
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 41625
+    }
+  ],
+  "edges": [
+    {
+      "from": "006890",
+      "to": "000720",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "006890",
+      "to": "014580",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "006890",
+      "to": "015890",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "006890",
+      "to": "171120",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "006890",
+      "to": "160550",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "006890",
+      "to": "014580",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "014580",
+      "to": "006890",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "006890",
+      "to": "015890",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "015890",
+      "to": "006890",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "171120",
+      "to": "006890",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "006890",
+      "to": "015890",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "006890",
+      "to": "248070",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.2%"
+    },
+    {
+      "from": "006890",
+      "to": "060150",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.6%"
+    },
+    {
+      "from": "006890",
+      "to": "005930",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "006890",
+      "to": "068270",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    },
+    {
+      "from": "015890",
+      "to": "006890",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 16.3%"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "내부유보 비중 76% — 자기 힘으로 성장",
+    "strengths": [
+      "내부유보 비중 76% — 자기 힘으로 성장",
+      "부채비율 30% -- 매우 안정",
+      "순이익률 상위 5% (21.7%)"
+    ],
+    "weaknesses": [
+      "영업이익률 3기 연속 하락 (-4.9%)",
+      "영업적자 (-4.9%)",
+      "매출원가율 3년 연속 상승 (61.2% -> 80.4%)"
+    ],
+    "sector": "소재 > 화학",
+    "source": "audit",
+    "createdAt": "1775430966.5572314"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 54066186889.0,
+      "operating_profit": 12135092981.0,
+      "net_profit": 10914685864.0,
+      "total_assets": 160745889274.0
+    },
+    {
+      "year": "2022",
+      "sales": 59613478497.0,
+      "operating_profit": 10400584716.0,
+      "net_profit": 8867607142.0,
+      "total_assets": 167391898805.0
+    },
+    {
+      "year": "2023",
+      "sales": 70748221182.0,
+      "operating_profit": 17877381574.0,
+      "net_profit": 17372104698.0,
+      "total_assets": 182882306558.0
+    },
+    {
+      "year": "2024",
+      "sales": 71116461803.0,
+      "operating_profit": 13705903914.0,
+      "net_profit": 12615780135.0,
+      "total_assets": 184309192873.0
+    },
+    {
+      "year": "2025",
+      "sales": 61347896962.0,
+      "operating_profit": 2063376471.0,
+      "net_profit": null,
+      "total_assets": 224431427050.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "014580",
+      "corpName": "태경비케이",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "015890",
+      "corpName": "태경산업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

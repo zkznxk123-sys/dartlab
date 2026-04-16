@@ -1,0 +1,95 @@
+{
+  "ego": {
+    "stockCode": "129890",
+    "corpName": "앱코",
+    "industry": "electronics",
+    "stage": "set",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 834,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 101831877627.0,
+      "operating_profit": -9216869752.0,
+      "net_profit": -7106999218.0,
+      "total_assets": 124197731685.0
+    },
+    {
+      "year": "2022",
+      "sales": 82663362781.0,
+      "operating_profit": -15494887356.0,
+      "net_profit": -17628609150.0,
+      "total_assets": 99727004704.0
+    },
+    {
+      "year": "2023",
+      "sales": 98938963953.0,
+      "operating_profit": 2154943774.0,
+      "net_profit": 0.0,
+      "total_assets": 95724127176.0
+    },
+    {
+      "year": "2025",
+      "sales": 83427579554.0,
+      "operating_profit": 3176674216.0,
+      "net_profit": 0.0,
+      "total_assets": 103765097070.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

@@ -1,0 +1,179 @@
+{
+  "ego": {
+    "stockCode": "006050",
+    "corpName": "국영지앤엠",
+    "industry": "construction",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 602,
+    "confidence": 0.9,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 7973
+    },
+    {
+      "stockCode": "002380",
+      "corpName": "케이씨씨",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 64838
+    }
+  ],
+  "edges": [
+    {
+      "from": "029460",
+      "to": "006050",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "002380",
+      "to": "006050",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 55030165959.0,
+      "operating_profit": -6739784124.0,
+      "net_profit": -4860435655.0,
+      "total_assets": 66277051082.0
+    },
+    {
+      "year": "2022",
+      "sales": 63599420068.0,
+      "operating_profit": 2121316409.0,
+      "net_profit": 1857625862.0,
+      "total_assets": 66153338523.0
+    },
+    {
+      "year": "2023",
+      "sales": 76640521220.0,
+      "operating_profit": 942168843.0,
+      "net_profit": 778346165.0,
+      "total_assets": 72212642366.0
+    },
+    {
+      "year": "2024",
+      "sales": 75411207520.0,
+      "operating_profit": 902779810.0,
+      "net_profit": 2580101315.0,
+      "total_assets": 72940186081.0
+    },
+    {
+      "year": "2025",
+      "sales": 60198966693.0,
+      "operating_profit": 929319448.0,
+      "net_profit": 1694991337.0,
+      "total_assets": 73663110356.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "energy",
+        1
+      ],
+      [
+        "construction",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "distribution",
+        1
+      ],
+      [
+        "material",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002380",
+      "corpName": "케이씨씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

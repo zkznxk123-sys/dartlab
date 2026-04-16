@@ -1,0 +1,192 @@
+{
+  "ego": {
+    "stockCode": "000180",
+    "corpName": "성창기업지주",
+    "industry": "consulting",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 1272,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002820",
+      "corpName": "SUN&L",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 2724
+    },
+    {
+      "stockCode": "004910",
+      "corpName": "조광페인트",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 2027
+    },
+    {
+      "stockCode": "006060",
+      "corpName": "화승인더스트리",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 17810
+    }
+  ],
+  "edges": [
+    {
+      "from": "002820",
+      "to": "000180",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004910",
+      "to": "000180",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "002820",
+      "to": "000180",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "004910",
+      "to": "000180",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "006060",
+      "to": "000180",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 1.5%"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "은 2가지입니다.",
+    "strengths": [],
+    "weaknesses": [],
+    "sector": "SectorInfo(산업재/상업서비스와공급품, conf=0.70, src=ksic)",
+    "source": "live",
+    "createdAt": "1776089060.9534175"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 197940313061.0,
+      "operating_profit": 10471849670.0,
+      "net_profit": 5938031129.0,
+      "total_assets": 703740104842.0
+    },
+    {
+      "year": "2022",
+      "sales": 227519697624.0,
+      "operating_profit": -11487135610.0,
+      "net_profit": -13134358819.0,
+      "total_assets": 820314254965.0
+    },
+    {
+      "year": "2023",
+      "sales": 166253799305.0,
+      "operating_profit": -16701274741.0,
+      "net_profit": -24022292887.0,
+      "total_assets": 769067174916.0
+    },
+    {
+      "year": "2024",
+      "sales": 143105590875.0,
+      "operating_profit": -7293464621.0,
+      "net_profit": -3623156326.0,
+      "total_assets": 719893318041.0
+    },
+    {
+      "year": "2025",
+      "sales": 127218274093.0,
+      "operating_profit": -6928127999.0,
+      "net_profit": -20640100656.0,
+      "total_assets": 861188044244.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "003030",
+      "corpName": "세아제강지주",
+      "stage": "general",
+      "revenue": 37596
+    },
+    {
+      "stockCode": "000070",
+      "corpName": "삼양홀딩스",
+      "stage": "general",
+      "revenue": 33483
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "036710",
+      "corpName": "심텍홀딩스",
+      "stage": "general",
+      "revenue": 15281
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "stage": "general",
+      "revenue": 13276
+    }
+  ]
+}

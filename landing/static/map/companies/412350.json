@@ -1,0 +1,95 @@
+{
+  "ego": {
+    "stockCode": "412350",
+    "corpName": "레이저쎌",
+    "industry": "medicalDevice",
+    "stage": "imaging",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 47,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2022",
+      "sales": 6032906052.0,
+      "operating_profit": -5033301516.0,
+      "net_profit": -4131432766.0,
+      "total_assets": 38065298485.0
+    },
+    {
+      "year": "2023",
+      "sales": 6026961356.0,
+      "operating_profit": -5779730382.0,
+      "net_profit": -182193510.0,
+      "total_assets": 40079781998.0
+    },
+    {
+      "year": "2024",
+      "sales": 4015870540.0,
+      "operating_profit": -9208984969.0,
+      "net_profit": -8496805459.0,
+      "total_assets": 45490838442.0
+    },
+    {
+      "year": "2025",
+      "sales": 4684448307.0,
+      "operating_profit": -13546745061.0,
+      "net_profit": -489198080.0,
+      "total_assets": 42926540324.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "011560",
+      "corpName": "세보엠이씨",
+      "stage": "imaging",
+      "revenue": 7158
+    },
+    {
+      "stockCode": "092790",
+      "corpName": "넥스틸",
+      "stage": "imaging",
+      "revenue": 5510
+    },
+    {
+      "stockCode": "215360",
+      "corpName": "우리산업",
+      "stage": "imaging",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "043150",
+      "corpName": "바텍",
+      "stage": "imaging",
+      "revenue": 4264
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "stage": "imaging",
+      "revenue": 3959
+    }
+  ]
+}

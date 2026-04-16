@@ -1,0 +1,275 @@
+{
+  "ego": {
+    "stockCode": "032980",
+    "corpName": "바이온",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 206,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "110020",
+      "corpName": "전진바이오팜",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 137
+    },
+    {
+      "stockCode": "052860",
+      "corpName": "아이앤씨",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 369
+    },
+    {
+      "stockCode": "261520",
+      "corpName": "이지스",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 0
+    },
+    {
+      "stockCode": "054180",
+      "corpName": "메디콕스",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 282
+    },
+    {
+      "stockCode": "064240",
+      "corpName": "홈캐스트",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 980
+    },
+    {
+      "stockCode": "083660",
+      "corpName": "CSA 코스믹",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 279
+    },
+    {
+      "stockCode": "109070",
+      "corpName": "주성코퍼레이션",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 854
+    },
+    {
+      "stockCode": "134580",
+      "corpName": "탑코미디어",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 486
+    },
+    {
+      "stockCode": "197140",
+      "corpName": "디지캡",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 666
+    }
+  ],
+  "edges": [
+    {
+      "from": "032980",
+      "to": "110020",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "032980",
+      "to": "052860",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "032980",
+      "to": "261520",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "054180",
+      "to": "032980",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "064240",
+      "to": "032980",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "083660",
+      "to": "032980",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "109070",
+      "to": "032980",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "134580",
+      "to": "032980",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "032980",
+      "to": "197140",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.8%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 13612529132.0,
+      "operating_profit": -5302990608.0,
+      "net_profit": null,
+      "total_assets": 47239308083.0
+    },
+    {
+      "year": "2022",
+      "sales": 13515632660.0,
+      "operating_profit": -6750947017.0,
+      "net_profit": -9780718460.0,
+      "total_assets": 30119495284.0
+    },
+    {
+      "year": "2023",
+      "sales": 8889038206.0,
+      "operating_profit": -6630325912.0,
+      "net_profit": -6703348412.0,
+      "total_assets": 26249372944.0
+    },
+    {
+      "year": "2024",
+      "sales": 26955800348.0,
+      "operating_profit": -3251871916.0,
+      "net_profit": 0.0,
+      "total_assets": 84728806115.0
+    },
+    {
+      "year": "2025",
+      "sales": 20595859527.0,
+      "operating_profit": -1796212791.0,
+      "net_profit": -6605730086.0,
+      "total_assets": 53330991516.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

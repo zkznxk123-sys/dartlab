@@ -1,0 +1,224 @@
+{
+  "ego": {
+    "stockCode": "200710",
+    "corpName": "에이디테크놀로지",
+    "industry": "semiconductor",
+    "stage": "design",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1645,
+    "confidence": 0.84,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "211270",
+      "corpName": "AP위성",
+      "industry": "telecom",
+      "stage": "device",
+      "revenue": 478
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "101390",
+      "corpName": "아이엠",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 918
+    },
+    {
+      "stockCode": "389020",
+      "corpName": "자람테크놀로지",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 106
+    },
+    {
+      "stockCode": "440110",
+      "corpName": "파두",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 924
+    }
+  ],
+  "edges": [
+    {
+      "from": "200710",
+      "to": "211270",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "088350",
+      "to": "200710",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "200710",
+      "to": "101390",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "200710",
+      "to": "389020",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "200710",
+      "to": "440110",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 322083657505.0,
+      "operating_profit": 11386146508.0,
+      "net_profit": 15113447818.0,
+      "total_assets": 234198491068.0
+    },
+    {
+      "year": "2022",
+      "sales": 164248769577.0,
+      "operating_profit": 4397640236.0,
+      "net_profit": 5621152191.0,
+      "total_assets": 234055082976.0
+    },
+    {
+      "year": "2023",
+      "sales": 100172177678.0,
+      "operating_profit": -17407233831.0,
+      "net_profit": -16256430677.0,
+      "total_assets": 289424082041.0
+    },
+    {
+      "year": "2024",
+      "sales": 106545463919.0,
+      "operating_profit": -16953519212.0,
+      "net_profit": -14257442047.0,
+      "total_assets": 244893383816.0
+    },
+    {
+      "year": "2025",
+      "sales": 164511629858.0,
+      "operating_profit": 2852844756.0,
+      "net_profit": 3578357069.0,
+      "total_assets": 293465147035.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "211270",
+      "corpName": "AP위성",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "389020",
+      "corpName": "자람테크놀로지",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "440110",
+      "corpName": "파두",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

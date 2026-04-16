@@ -1,0 +1,143 @@
+{
+  "ego": {
+    "stockCode": "286750",
+    "corpName": "나노실리칸첨단소재",
+    "industry": "auto",
+    "stage": "electronics",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 60,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "121600",
+      "corpName": "나노신소재",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 1117
+    }
+  ],
+  "edges": [
+    {
+      "from": "121600",
+      "to": "286750",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 7004484412.0,
+      "operating_profit": -1635040163.0,
+      "net_profit": -2824300484.0,
+      "total_assets": 32994830622.0
+    },
+    {
+      "year": "2022",
+      "sales": 7139299058.0,
+      "operating_profit": -3593951350.0,
+      "net_profit": -2398820425.0,
+      "total_assets": 28135673158.0
+    },
+    {
+      "year": "2023",
+      "sales": 6459076533.0,
+      "operating_profit": -2482020008.0,
+      "net_profit": -6284184495.0,
+      "total_assets": 28767401676.0
+    },
+    {
+      "year": "2024",
+      "sales": 5278777668.0,
+      "operating_profit": -3439815714.0,
+      "net_profit": 238348937.0,
+      "total_assets": 28082033901.0
+    },
+    {
+      "year": "2025",
+      "sales": 5976639350.0,
+      "operating_profit": -6580662725.0,
+      "net_profit": 0.0,
+      "total_assets": 44973138429.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "construction",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "engineering",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "121600",
+      "corpName": "나노신소재",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

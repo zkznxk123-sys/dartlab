@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "065690",
+    "corpName": "파커스",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 535,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "038110",
+      "corpName": "에코플라스틱",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 25620
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "industry": "semiconductor",
+      "stage": "test",
+      "revenue": 29419
+    }
+  ],
+  "edges": [
+    {
+      "from": "038110",
+      "to": "065690",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "122690",
+      "to": "065690",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 93681678892.0,
+      "operating_profit": 1199616977.0,
+      "net_profit": 8643744697.0,
+      "total_assets": 146634984192.0
+    },
+    {
+      "year": "2022",
+      "sales": 73121511677.0,
+      "operating_profit": -15191703582.0,
+      "net_profit": -11900755815.0,
+      "total_assets": 139765925933.0
+    },
+    {
+      "year": "2023",
+      "sales": 63616324294.0,
+      "operating_profit": -9535740999.0,
+      "net_profit": -12635006269.0,
+      "total_assets": 118074911135.0
+    },
+    {
+      "year": "2024",
+      "sales": 63689337418.0,
+      "operating_profit": -1428088437.0,
+      "net_profit": -2159408495.0,
+      "total_assets": 115027215431.0
+    },
+    {
+      "year": "2025",
+      "sales": 53499990345.0,
+      "operating_profit": -12735489947.0,
+      "net_profit": 6697483923.0,
+      "total_assets": 81293288223.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

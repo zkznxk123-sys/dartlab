@@ -1,0 +1,102 @@
+{
+  "ego": {
+    "stockCode": "013990",
+    "corpName": "아가방컴퍼니",
+    "industry": "textile",
+    "stage": "apparel",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 1891,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 150978014442.0,
+      "operating_profit": 5905777500.0,
+      "net_profit": 13171496757.0,
+      "total_assets": 195113831431.0
+    },
+    {
+      "year": "2022",
+      "sales": 174318344068.0,
+      "operating_profit": 14530167691.0,
+      "net_profit": 0.0,
+      "total_assets": 208363581297.0
+    },
+    {
+      "year": "2023",
+      "sales": 186412760361.0,
+      "operating_profit": 16576163171.0,
+      "net_profit": 0.0,
+      "total_assets": 221814457457.0
+    },
+    {
+      "year": "2024",
+      "sales": 182742831122.0,
+      "operating_profit": 15205969477.0,
+      "net_profit": 0.0,
+      "total_assets": 223766799611.0
+    },
+    {
+      "year": "2025",
+      "sales": 189078048828.0,
+      "operating_profit": 13987123318.0,
+      "net_profit": -913841828.0,
+      "total_assets": null
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "222980",
+    "corpName": "한국맥널티",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 963,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 3336059
+    }
+  ],
+  "edges": [
+    {
+      "from": "222980",
+      "to": "005930",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 53409780309.0,
+      "operating_profit": 1615572343.0,
+      "net_profit": 1902864020.0,
+      "total_assets": 85376179964.0
+    },
+    {
+      "year": "2022",
+      "sales": 70214592825.0,
+      "operating_profit": -669783264.0,
+      "net_profit": -3016716177.0,
+      "total_assets": 89220620856.0
+    },
+    {
+      "year": "2023",
+      "sales": 78399918458.0,
+      "operating_profit": -4185981235.0,
+      "net_profit": -4307130117.0,
+      "total_assets": 84502783190.0
+    },
+    {
+      "year": "2024",
+      "sales": 88832089424.0,
+      "operating_profit": 571296895.0,
+      "net_profit": 79520510.0,
+      "total_assets": 81317586081.0
+    },
+    {
+      "year": "2025",
+      "sales": 96309714203.0,
+      "operating_profit": -1104575559.0,
+      "net_profit": -1265982108.0,
+      "total_assets": 83165714018.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

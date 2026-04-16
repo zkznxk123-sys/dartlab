@@ -1,0 +1,185 @@
+{
+  "ego": {
+    "stockCode": "024950",
+    "corpName": "삼천리자전거",
+    "industry": "retail",
+    "stage": "wholesale",
+    "role": "도매",
+    "stream": "midstream",
+    "revenue": 1756,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 52755
+    },
+    {
+      "stockCode": "094850",
+      "corpName": "참좋은여행",
+      "industry": "logistics",
+      "stage": "",
+      "revenue": 921
+    },
+    {
+      "stockCode": "044780",
+      "corpName": "에이치케이",
+      "industry": "medicalDevice",
+      "stage": "therapeutic",
+      "revenue": 542
+    }
+  ],
+  "edges": [
+    {
+      "from": "024950",
+      "to": "004690",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "024950",
+      "to": "094850",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "024950",
+      "to": "044780",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "094850",
+      "to": "024950",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "094850",
+      "to": "024950",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 7.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 127268431960.0,
+      "operating_profit": 10845931913.0,
+      "net_profit": null,
+      "total_assets": 122865943771.0
+    },
+    {
+      "year": "2022",
+      "sales": 116235211617.0,
+      "operating_profit": 1139154482.0,
+      "net_profit": -5040427448.0,
+      "total_assets": 142666966956.0
+    },
+    {
+      "year": "2023",
+      "sales": 106783297522.0,
+      "operating_profit": -6290389338.0,
+      "net_profit": 6200377346.0,
+      "total_assets": 271350680444.0
+    },
+    {
+      "year": "2024",
+      "sales": 161167353566.0,
+      "operating_profit": 3013641806.0,
+      "net_profit": -99101316.0,
+      "total_assets": 281334013848.0
+    },
+    {
+      "year": "2025",
+      "sales": 175559935938.0,
+      "operating_profit": 12425252616.0,
+      "net_profit": 11578403106.0,
+      "total_assets": 298998412143.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

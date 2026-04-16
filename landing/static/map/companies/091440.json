@@ -1,0 +1,180 @@
+{
+  "ego": {
+    "stockCode": "091440",
+    "corpName": "한울소재과학",
+    "industry": "telecom",
+    "stage": "infra",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 134,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "320000",
+      "corpName": "한울반도체",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 115
+    },
+    {
+      "stockCode": "276730",
+      "corpName": "한울앤제주",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 139
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "038540",
+      "corpName": "상상인",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 4186
+    }
+  ],
+  "edges": [
+    {
+      "from": "091440",
+      "to": "320000",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "091440",
+      "to": "276730",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "091440",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "091440",
+      "to": "038540",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 34590886535.0,
+      "operating_profit": -4772001922.0,
+      "net_profit": 0.0,
+      "total_assets": 47467318668.0
+    },
+    {
+      "year": "2022",
+      "sales": 23045775227.0,
+      "operating_profit": -9357511297.0,
+      "net_profit": 0.0,
+      "total_assets": 44763820241.0
+    },
+    {
+      "year": "2023",
+      "sales": 37597363642.0,
+      "operating_profit": -4053331724.0,
+      "net_profit": -5763316678.0,
+      "total_assets": 42929150486.0
+    },
+    {
+      "year": "2024",
+      "sales": 17338602355.0,
+      "operating_profit": -12946778962.0,
+      "net_profit": 0.0,
+      "total_assets": 129215868817.0
+    },
+    {
+      "year": "2025",
+      "sales": 13435067440.0,
+      "operating_profit": -24598727272.0,
+      "net_profit": -33772574695.0,
+      "total_assets": 120408458403.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

@@ -1,0 +1,393 @@
+{
+  "ego": {
+    "stockCode": "041910",
+    "corpName": "폴라리스AI파마",
+    "industry": "pharma",
+    "stage": "api",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 555,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "041020",
+      "corpName": "폴라리스오피스",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 3242
+    },
+    {
+      "stockCode": "114630",
+      "corpName": "폴라리스우노",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 1018
+    },
+    {
+      "stockCode": "234100",
+      "corpName": "폴라리스세원",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2426
+    },
+    {
+      "stockCode": "092200",
+      "corpName": "디아이씨",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 0
+    },
+    {
+      "stockCode": "067010",
+      "corpName": "이씨에스",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 216
+    },
+    {
+      "stockCode": "220180",
+      "corpName": "핸디소프트",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 314
+    },
+    {
+      "stockCode": "003160",
+      "corpName": "디아이",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 4323
+    },
+    {
+      "stockCode": "069510",
+      "corpName": "에스텍",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 4682
+    },
+    {
+      "stockCode": "038530",
+      "corpName": "케이바이오",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 873
+    },
+    {
+      "stockCode": "048530",
+      "corpName": "인트론바이오",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 57
+    },
+    {
+      "stockCode": "464490",
+      "corpName": "쿼드메디슨",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 42
+    },
+    {
+      "stockCode": "085310",
+      "corpName": "엔케이",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 1301
+    }
+  ],
+  "edges": [
+    {
+      "from": "041020",
+      "to": "041910",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "041910",
+      "to": "041020",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "041910",
+      "to": "114630",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "041910",
+      "to": "234100",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "041910",
+      "to": "092200",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "041910",
+      "to": "067010",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "041910",
+      "to": "220180",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "041910",
+      "to": "003160",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "069510",
+      "to": "041910",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "041910",
+      "to": "069510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "041910",
+      "to": "038530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "041910",
+      "to": "048530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "041910",
+      "to": "464490",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "041910",
+      "to": "085310",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "114630",
+      "to": "041910",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "network",
+      "evidence": "경영참여 지분 6.2%"
+    },
+    {
+      "from": "234100",
+      "to": "041910",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "network",
+      "evidence": "경영참여 지분 7.3%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 60400509532.0,
+      "operating_profit": 4205376900.0,
+      "net_profit": 6874812746.0,
+      "total_assets": 134360827389.0
+    },
+    {
+      "year": "2022",
+      "sales": 62036332957.0,
+      "operating_profit": 3161738705.0,
+      "net_profit": -6363853296.0,
+      "total_assets": 124319007605.0
+    },
+    {
+      "year": "2023",
+      "sales": 64214830710.0,
+      "operating_profit": 5343807014.0,
+      "net_profit": 3823642695.0,
+      "total_assets": 121898737914.0
+    },
+    {
+      "year": "2025",
+      "sales": 55543076772.0,
+      "operating_profit": 3188673368.0,
+      "net_profit": 0.0,
+      "total_assets": 195928871523.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "set",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "069510",
+      "corpName": "에스텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "290090",
+    "corpName": "트윔",
+    "industry": "software",
+    "stage": "ai",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 210,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "003540",
+      "corpName": "대신증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 50639
+    }
+  ],
+  "edges": [
+    {
+      "from": "003540",
+      "to": "290090",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 21602999976.0,
+      "operating_profit": 1267349459.0,
+      "net_profit": 2223196739.0,
+      "total_assets": 81293682790.0
+    },
+    {
+      "year": "2022",
+      "sales": 19561616492.0,
+      "operating_profit": -6462409302.0,
+      "net_profit": -5331063918.0,
+      "total_assets": 73261307070.0
+    },
+    {
+      "year": "2023",
+      "sales": 34492364516.0,
+      "operating_profit": 2009168277.0,
+      "net_profit": -10.0,
+      "total_assets": 78941652049.0
+    },
+    {
+      "year": "2024",
+      "sales": 29281443941.0,
+      "operating_profit": 601607786.0,
+      "net_profit": -16233083.0,
+      "total_assets": 72317532361.0
+    },
+    {
+      "year": "2025",
+      "sales": 21040468279.0,
+      "operating_profit": -4083362675.0,
+      "net_profit": -3100819229.0,
+      "total_assets": 69281155564.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

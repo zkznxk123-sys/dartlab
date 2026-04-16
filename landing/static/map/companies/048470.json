@@ -1,0 +1,163 @@
+{
+  "ego": {
+    "stockCode": "048470",
+    "corpName": "대동스틸",
+    "industry": "steel",
+    "stage": "product",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1192,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "018310",
+      "corpName": "삼목에스폼",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 3170
+    },
+    {
+      "stockCode": "071090",
+      "corpName": "하이스틸",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 2566
+    }
+  ],
+  "edges": [
+    {
+      "from": "005490",
+      "to": "048470",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "048470",
+      "to": "018310",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "071090",
+      "to": "048470",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 165415928585.0,
+      "operating_profit": 17583078651.0,
+      "net_profit": 14518211964.0,
+      "total_assets": 108435498240.0
+    },
+    {
+      "year": "2022",
+      "sales": 182452648537.0,
+      "operating_profit": -6081345442.0,
+      "net_profit": -4592250172.0,
+      "total_assets": 95509243441.0
+    },
+    {
+      "year": "2023",
+      "sales": 137634680158.0,
+      "operating_profit": -2423860142.0,
+      "net_profit": -2189485193.0,
+      "total_assets": 95401499782.0
+    },
+    {
+      "year": "2025",
+      "sales": 119163920715.0,
+      "operating_profit": -1166249453.0,
+      "net_profit": 276225108.0,
+      "total_assets": 92820161438.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "018310",
+      "corpName": "삼목에스폼",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

@@ -1,0 +1,253 @@
+{
+  "ego": {
+    "stockCode": "204620",
+    "corpName": "글로벌텍스프리",
+    "industry": "finance",
+    "stage": "securities",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 1541,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "066980",
+      "corpName": "한성크린텍",
+      "industry": "environment",
+      "stage": "general",
+      "revenue": 1999
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "417180",
+      "corpName": "핑거스토리",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 173
+    },
+    {
+      "stockCode": "036090",
+      "corpName": "위지트",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 4830
+    }
+  ],
+  "edges": [
+    {
+      "from": "066980",
+      "to": "204620",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "161890",
+      "to": "204620",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. (제조서비스업)원재료 및 생산설비"
+    },
+    {
+      "from": "417180",
+      "to": "204620",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. (제조서비스업)원재료 및 생산설비"
+    },
+    {
+      "from": "204620",
+      "to": "417180",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "204620",
+      "to": "036090",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "417180",
+      "to": "204620",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "204620",
+      "to": "066980",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 3.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 38144495124.0,
+      "operating_profit": -13769326935.0,
+      "net_profit": -25896083228.0,
+      "total_assets": 129986737431.0
+    },
+    {
+      "year": "2022",
+      "sales": 49359709950.0,
+      "operating_profit": -2716901537.0,
+      "net_profit": -11193864337.0,
+      "total_assets": 145359492271.0
+    },
+    {
+      "year": "2023",
+      "sales": 93373547015.0,
+      "operating_profit": 14776893088.0,
+      "net_profit": -8882041799.0,
+      "total_assets": 166931913519.0
+    },
+    {
+      "year": "2024",
+      "sales": 129729725356.0,
+      "operating_profit": 21771465088.0,
+      "net_profit": 5577574777.0,
+      "total_assets": 174537046596.0
+    },
+    {
+      "year": "2025",
+      "sales": 154056520360.0,
+      "operating_profit": 28985101394.0,
+      "net_profit": 35450404143.0,
+      "total_assets": 184069135881.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "cosmetics",
+        1
+      ],
+      [
+        "media",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "manufacturing",
+        1
+      ],
+      [
+        "content",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "417180",
+      "corpName": "핑거스토리",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
+  ]
+}

@@ -1,0 +1,408 @@
+{
+  "ego": {
+    "stockCode": "079960",
+    "corpName": "동양이엔피",
+    "industry": "electronics",
+    "stage": "set",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 5965,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "009470",
+      "corpName": "삼화전기",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2301
+    },
+    {
+      "stockCode": "004710",
+      "corpName": "한솔테크닉스",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 12524
+    },
+    {
+      "stockCode": "017040",
+      "corpName": "광명전기",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 959
+    },
+    {
+      "stockCode": "054090",
+      "corpName": "삼진엘앤디",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 1363
+    },
+    {
+      "stockCode": "013570",
+      "corpName": "디와이",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 12448
+    },
+    {
+      "stockCode": "031330",
+      "corpName": "에스에이엠티",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 37566
+    },
+    {
+      "stockCode": "232530",
+      "corpName": "이엠티",
+      "industry": "semiconductor",
+      "stage": "materials",
+      "revenue": 0
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    },
+    {
+      "stockCode": "127980",
+      "corpName": "화인써키트",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 818
+    },
+    {
+      "stockCode": "005680",
+      "corpName": "삼영전자공업",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 1497
+    }
+  ],
+  "edges": [
+    {
+      "from": "009470",
+      "to": "079960",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 85939010.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "079960",
+      "to": "004710",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "079960",
+      "to": "017040",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "079960",
+      "to": "054090",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "079960",
+      "to": "013570",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "031330",
+      "to": "079960",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "232530",
+      "to": "079960",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "041510",
+      "to": "079960",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "127980",
+      "to": "079960",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "005680",
+      "to": "079960",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 519420958620.0,
+      "operating_profit": 14817419407.0,
+      "net_profit": 17711477074.0,
+      "total_assets": 356465250559.0
+    },
+    {
+      "year": "2022",
+      "sales": 559811298016.0,
+      "operating_profit": 27751409294.0,
+      "net_profit": 22957023437.0,
+      "total_assets": 386125787488.0
+    },
+    {
+      "year": "2023",
+      "sales": 536914173334.0,
+      "operating_profit": 42958412627.0,
+      "net_profit": 46963597785.0,
+      "total_assets": 424283930280.0
+    },
+    {
+      "year": "2024",
+      "sales": 548392783461.0,
+      "operating_profit": 51618125791.0,
+      "net_profit": 69500629427.0,
+      "total_assets": 488522792219.0
+    },
+    {
+      "year": "2025",
+      "sales": 596475211237.0,
+      "operating_profit": 53617577881.0,
+      "net_profit": 49451743539.0,
+      "total_assets": 536293012645.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 6,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 85939010.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 3,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        4
+      ],
+      [
+        "semiconductor",
+        1
+      ],
+      [
+        "media",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "component",
+        2
+      ],
+      [
+        "display",
+        1
+      ],
+      [
+        "materials",
+        1
+      ],
+      [
+        "agency",
+        1
+      ],
+      [
+        "set",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "009470",
+      "corpName": "삼화전기",
+      "product": "",
+      "amount": 85939010.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "031330",
+      "corpName": "에스에이엠티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "232530",
+      "corpName": "이엠티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "127980",
+      "corpName": "화인써키트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "005680",
+      "corpName": "삼영전자공업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "004710",
+      "corpName": "한솔테크닉스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "017040",
+      "corpName": "광명전기",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "054090",
+      "corpName": "삼진엘앤디",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

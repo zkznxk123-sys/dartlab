@@ -1,0 +1,228 @@
+{
+  "ego": {
+    "stockCode": "010820",
+    "corpName": "퍼스텍",
+    "industry": "realestate",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 2948,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "004270",
+      "corpName": "남성",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 775
+    },
+    {
+      "stockCode": "010040",
+      "corpName": "한국내화",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 4063
+    },
+    {
+      "stockCode": "093370",
+      "corpName": "후성",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 4716
+    },
+    {
+      "stockCode": "098070",
+      "corpName": "한텍",
+      "industry": "machinery",
+      "stage": "",
+      "revenue": 1719
+    }
+  ],
+  "edges": [
+    {
+      "from": "004270",
+      "to": "010820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "010040",
+      "to": "010820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "010820",
+      "to": "010040",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "010820",
+      "to": "093370",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "010820",
+      "to": "098070",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "093370",
+      "to": "010820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "098070",
+      "to": "010820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "010820",
+      "to": "093370",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.3%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 136697477681.0,
+      "operating_profit": 4334722379.0,
+      "net_profit": 3874217894.0,
+      "total_assets": 185612511300.0
+    },
+    {
+      "year": "2022",
+      "sales": 160154489954.0,
+      "operating_profit": 3112927906.0,
+      "net_profit": 1794177256.0,
+      "total_assets": 211309947551.0
+    },
+    {
+      "year": "2023",
+      "sales": 173103350935.0,
+      "operating_profit": 2508074315.0,
+      "net_profit": 4620136432.0,
+      "total_assets": 265075748454.0
+    },
+    {
+      "year": "2024",
+      "sales": 207273257566.0,
+      "operating_profit": 4348353305.0,
+      "net_profit": 10919360117.0,
+      "total_assets": 350454400155.0
+    },
+    {
+      "year": "2025",
+      "sales": 294842426804.0,
+      "operating_profit": 10663228873.0,
+      "net_profit": 14726828528.0,
+      "total_assets": 403060377892.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "023590",
+      "corpName": "다우기술",
+      "stage": "general",
+      "revenue": 174950
+    },
+    {
+      "stockCode": "005440",
+      "corpName": "현대지에프홀딩스",
+      "stage": "general",
+      "revenue": 80916
+    },
+    {
+      "stockCode": "058650",
+      "corpName": "세아홀딩스",
+      "stage": "general",
+      "revenue": 66111
+    },
+    {
+      "stockCode": "034810",
+      "corpName": "해성산업",
+      "stage": "general",
+      "revenue": 22601
+    },
+    {
+      "stockCode": "002990",
+      "corpName": "금호건설",
+      "stage": "general",
+      "revenue": 20185
+    }
+  ]
+}

@@ -588,7 +588,12 @@ def buildSearchIndex() -> list[dict]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--companies", type=int, default=500, help="상위 N개사만 생성")
+    parser.add_argument(
+        "--companies",
+        type=int,
+        default=0,
+        help="상위 N개사만 enrich (0 = 전 종목, 기본). 빠른 개발 빌드 시 500 등 지정",
+    )
     parser.add_argument("--all-industries", action="store_true", help="모든 산업 상세 생성")
     args = parser.parse_args()
 
@@ -623,8 +628,8 @@ def main() -> None:
         )
     print(f"  - {len(taxonomy)}개 산업 JSON 생성")
 
-    # L3 Companies (상위 N개) + enrichment (AI insights, blog, 재무, 공급망 인사이트)
-    print(f"[L3] 상위 {args.companies}개사 enrich egograph...")
+    # L3 Companies enrichment (AI insights, blog, 재무, 공급망 인사이트)
+    # --companies 0 (기본) = 전 종목 enrich. 양수면 상위 N개만
     from dartlab.industry.build.enrichCompany import _loadBlogIndex, enrichCompanyData
 
     nodes = loadNodes()
@@ -632,7 +637,13 @@ def main() -> None:
     blogIndex = _loadBlogIndex()
     print(f"  - 블로그 인덱스: {sum(len(v) for v in blogIndex.values())}건, {len(blogIndex)}사 커버")
 
-    topCompanies = sorted(nodes, key=lambda n: n.revenue or 0, reverse=True)[: args.companies]
+    sortedCompanies = sorted(nodes, key=lambda n: n.revenue or 0, reverse=True)
+    if args.companies > 0:
+        topCompanies = sortedCompanies[: args.companies]
+        print(f"[L3] 상위 {len(topCompanies)}개사 enrich egograph (개발용 제한)...")
+    else:
+        topCompanies = sortedCompanies
+        print(f"[L3] 전 종목 {len(topCompanies)}사 enrich egograph...")
     enrichedCount = 0
     for n in topCompanies:
         ego = buildCompanyEgograph(n.stockCode)

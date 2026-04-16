@@ -1,0 +1,221 @@
+{
+  "ego": {
+    "stockCode": "483650",
+    "corpName": "달바글로벌",
+    "industry": "pharma",
+    "stage": "formulation",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 5197,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "001630",
+      "corpName": "종근당홀딩스",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 9590
+    },
+    {
+      "stockCode": "016710",
+      "corpName": "대성홀딩스",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 12226
+    },
+    {
+      "stockCode": "024720",
+      "corpName": "콜마홀딩스",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 6301
+    }
+  ],
+  "edges": [
+    {
+      "from": "161890",
+      "to": "483650",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 155679.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "001630",
+      "to": "483650",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    },
+    {
+      "from": "016710",
+      "to": "483650",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "024720",
+      "to": "483650",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.9%"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "[개선/높음] 화장품 경험 0에서 공장 없이 미스트 5000만병. OPM 26%. 차입금 0.",
+    "strengths": [
+      "OPM 26% + 매총이익률 76%",
+      "금융차입 0% 현금부자"
+    ],
+    "weaknesses": [
+      "해외 의존도",
+      "브랜드 단순성"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.2560833"
+  },
+  "blogPosts": [
+    {
+      "slug": "12-483650-dalba-global",
+      "title": "달바글로벌 (483650) — 2,700개 종목을 스캔했더니 영업이익률 26%짜리 화장품 회사가 걸렸다",
+      "description": "전종목 횡단분석에서 발견한 회사. 공장 없이 미스트 하나로 5,000만병. 매출총이익률 76%. 금융차입 0%. 컨설턴트 출신이 화장품 경험 0에서 시작해 5,000억을 만든 구조를 dartlab으로 추적한다.",
+      "date": "2026-04-09",
+      "grade": "dCR 미산출",
+      "storyTemplate": "성장",
+      "verdict": "화장품 경험 0에서 공장 없이 미스트 5000만병. OPM 26%. 차입금 0.",
+      "direction": "개선",
+      "confidence": "높음",
+      "archetype": "성장",
+      "strengths": [
+        "OPM 26% + 매총이익률 76%",
+        "금융차입 0% 현금부자"
+      ],
+      "weaknesses": [
+        "해외 의존도",
+        "브랜드 단순성"
+      ],
+      "keyMetrics": {
+        "revenue": 0.52,
+        "opm": 26.0,
+        "roe": 19.9,
+        "fcf": 0.07
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/483650-dalba-global.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2024",
+      "sales": 309062616157.0,
+      "operating_profit": 59844712688.0,
+      "net_profit": 0.0,
+      "total_assets": 136108165193.0
+    },
+    {
+      "year": "2025",
+      "sales": 519735447906.0,
+      "operating_profit": 101469415203.0,
+      "net_profit": 79053534113.0,
+      "total_assets": 255334642397.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 155679.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "cosmetics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "manufacturing",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "product": "",
+      "amount": 155679.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

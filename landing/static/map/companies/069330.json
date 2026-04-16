@@ -1,0 +1,151 @@
+{
+  "ego": {
+    "stockCode": "069330",
+    "corpName": "유아이디",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2,
+    "confidence": 0.84,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "177830",
+      "corpName": "파버나인",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 1325
+    },
+    {
+      "stockCode": "179900",
+      "corpName": "유티아이",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 200
+    }
+  ],
+  "edges": [
+    {
+      "from": "069330",
+      "to": "177830",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "179900",
+      "to": "069330",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 62149741.0,
+      "operating_profit": 6023033337.0,
+      "net_profit": 0.0,
+      "total_assets": 36962369365.0
+    },
+    {
+      "year": "2022",
+      "sales": 23119848.0,
+      "operating_profit": 3867134237.0,
+      "net_profit": 0.0,
+      "total_assets": 37089622729.0
+    },
+    {
+      "year": "2023",
+      "sales": 125690650.0,
+      "operating_profit": -325392074.0,
+      "net_profit": -167072503.0,
+      "total_assets": 43479678131.0
+    },
+    {
+      "year": "2024",
+      "sales": 387746806.0,
+      "operating_profit": 244020616.0,
+      "net_profit": 0.0,
+      "total_assets": 43229983991.0
+    },
+    {
+      "year": "2025",
+      "sales": 211315950.0,
+      "operating_profit": 1301726619.0,
+      "net_profit": 1285612509.0,
+      "total_assets": 45806496740.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "177830",
+      "corpName": "파버나인",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

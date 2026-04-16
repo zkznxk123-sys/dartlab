@@ -1,0 +1,305 @@
+{
+  "ego": {
+    "stockCode": "393890",
+    "corpName": "더블유씨피",
+    "industry": "battery",
+    "stage": "separator",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1108,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "006650",
+      "corpName": "대한유화",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 33478
+    },
+    {
+      "stockCode": "014530",
+      "corpName": "극동유화",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 10217
+    },
+    {
+      "stockCode": "001630",
+      "corpName": "종근당홀딩스",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 9590
+    },
+    {
+      "stockCode": "016360",
+      "corpName": "삼성증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "054670",
+      "corpName": "대한뉴팜",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 2024
+    },
+    {
+      "stockCode": "123890",
+      "corpName": "한국자산신탁",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 2043
+    },
+    {
+      "stockCode": "160980",
+      "corpName": "싸이맥스",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 1644
+    },
+    {
+      "stockCode": "163730",
+      "corpName": "핑거",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 916
+    },
+    {
+      "stockCode": "344820",
+      "corpName": "케이씨씨글라스",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 19006
+    }
+  ],
+  "edges": [
+    {
+      "from": "006650",
+      "to": "393890",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "014530",
+      "to": "393890",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001630",
+      "to": "393890",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "016360",
+      "to": "393890",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "054670",
+      "to": "393890",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "123890",
+      "to": "393890",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    },
+    {
+      "from": "160980",
+      "to": "393890",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "163730",
+      "to": "393890",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "344820",
+      "to": "393890",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.2%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2022",
+      "sales": 257451425430.0,
+      "operating_profit": 58027154917.0,
+      "net_profit": 55257959855.0,
+      "total_assets": 1078240739103.0
+    },
+    {
+      "year": "2023",
+      "sales": 304986337193.0,
+      "operating_profit": 46391318239.0,
+      "net_profit": 53621155391.0,
+      "total_assets": 1358510063106.0
+    },
+    {
+      "year": "2024",
+      "sales": 322073352106.0,
+      "operating_profit": -70938111834.0,
+      "net_profit": 0.0,
+      "total_assets": 1810190530958.0
+    },
+    {
+      "year": "2025",
+      "sales": 110812962474.0,
+      "operating_profit": -127642966602.0,
+      "net_profit": -162065805577.0,
+      "total_assets": 1945436490500.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "basic",
+        1
+      ],
+      [
+        "component",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "006650",
+      "corpName": "대한유화",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "014530",
+      "corpName": "극동유화",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "007340",
+      "corpName": "DN오토모티브",
+      "stage": "cell",
+      "revenue": 36757
+    },
+    {
+      "stockCode": "066970",
+      "corpName": "엘앤에프",
+      "stage": "cathode",
+      "revenue": 21549
+    },
+    {
+      "stockCode": "004490",
+      "corpName": "세방전지",
+      "stage": "cell",
+      "revenue": 21187
+    },
+    {
+      "stockCode": "005070",
+      "corpName": "코스모신소재",
+      "stage": "cathode",
+      "revenue": 4563
+    },
+    {
+      "stockCode": "348370",
+      "corpName": "엔켐",
+      "stage": "electrolyte",
+      "revenue": 3128
+    }
+  ]
+}

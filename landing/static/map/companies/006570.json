@@ -1,0 +1,132 @@
+{
+  "ego": {
+    "stockCode": "006570",
+    "corpName": "대림통상",
+    "industry": "buildingMaterials",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 17,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "060560",
+      "corpName": "HC홈센타",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 2988
+    }
+  ],
+  "edges": [
+    {
+      "from": "006570",
+      "to": "060560",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 831335.0,
+      "ratio": null,
+      "product": "타일",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "타일"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2953078337.0,
+      "operating_profit": 2943841594.0,
+      "net_profit": 340647786.0,
+      "total_assets": 165802431487.0
+    },
+    {
+      "year": "2022",
+      "sales": 71684301630.0,
+      "operating_profit": 6951768177.0,
+      "net_profit": 3827885023.0,
+      "total_assets": 171792618625.0
+    },
+    {
+      "year": "2023",
+      "sales": 80694343612.0,
+      "operating_profit": -4932768955.0,
+      "net_profit": null,
+      "total_assets": 177143797015.0
+    },
+    {
+      "year": "2024",
+      "sales": 66666499796.0,
+      "operating_profit": -3414516400.0,
+      "net_profit": null,
+      "total_assets": 162827837044.0
+    },
+    {
+      "year": "2025",
+      "sales": 1673885856.0,
+      "operating_profit": -9566103074.0,
+      "net_profit": null,
+      "total_assets": 154793298808.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "060560",
+      "corpName": "HC홈센타",
+      "product": "타일",
+      "amount": 831335.0,
+      "type": "supplier",
+      "confidence": 0.9
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "003300",
+      "corpName": "한일홀딩스",
+      "stage": "general",
+      "revenue": 19305
+    },
+    {
+      "stockCode": "000480",
+      "corpName": "시알홀딩스",
+      "stage": "general",
+      "revenue": 8278
+    },
+    {
+      "stockCode": "462520",
+      "corpName": "조선내화",
+      "stage": "general",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "010040",
+      "corpName": "한국내화",
+      "stage": "general",
+      "revenue": 4063
+    },
+    {
+      "stockCode": "004440",
+      "corpName": "삼일씨엔에스",
+      "stage": "general",
+      "revenue": 2231
+    }
+  ]
+}

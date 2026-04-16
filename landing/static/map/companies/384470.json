@@ -1,0 +1,109 @@
+{
+  "ego": {
+    "stockCode": "384470",
+    "corpName": "코어라인소프트",
+    "industry": "pharma",
+    "stage": "device",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 43,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "338220",
+      "corpName": "뷰노",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 348
+    }
+  ],
+  "edges": [
+    {
+      "from": "338220",
+      "to": "384470",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 2.5%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2023",
+      "sales": 4100632868.0,
+      "operating_profit": -11656276687.0,
+      "net_profit": -14082727158.0,
+      "total_assets": 15861941171.0
+    },
+    {
+      "year": "2024",
+      "sales": 3929182690.0,
+      "operating_profit": -13779081599.0,
+      "net_profit": -14137902346.0,
+      "total_assets": 24664846746.0
+    },
+    {
+      "year": "2025",
+      "sales": 4283668051.0,
+      "operating_profit": -13444847755.0,
+      "net_profit": -14496260923.0,
+      "total_assets": 40792632929.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

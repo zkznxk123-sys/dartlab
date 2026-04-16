@@ -1,0 +1,159 @@
+{
+  "ego": {
+    "stockCode": "001420",
+    "corpName": "태원물산",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 149,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "183190",
+      "corpName": "아세아시멘트",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 10228
+    }
+  ],
+  "edges": [
+    {
+      "from": "001420",
+      "to": "002030",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001420",
+      "to": "183190",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 14713198577.0,
+      "operating_profit": -491800940.0,
+      "net_profit": 81272711.0,
+      "total_assets": 37439040672.0
+    },
+    {
+      "year": "2022",
+      "sales": 10954651040.0,
+      "operating_profit": -525103179.0,
+      "net_profit": 0.0,
+      "total_assets": 34948504183.0
+    },
+    {
+      "year": "2023",
+      "sales": 9212314418.0,
+      "operating_profit": -810959814.0,
+      "net_profit": 0.0,
+      "total_assets": 37386713995.0
+    },
+    {
+      "year": "2024",
+      "sales": 11570639556.0,
+      "operating_profit": -894285012.0,
+      "net_profit": 17468736717.0,
+      "total_assets": 53539770506.0
+    },
+    {
+      "year": "2025",
+      "sales": 14864855000.0,
+      "operating_profit": -978465756.0,
+      "net_profit": 0.0,
+      "total_assets": 45421078401.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "183190",
+      "corpName": "아세아시멘트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

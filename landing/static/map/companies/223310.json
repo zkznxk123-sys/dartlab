@@ -1,0 +1,273 @@
+{
+  "ego": {
+    "stockCode": "223310",
+    "corpName": "사토시홀딩스",
+    "industry": "pharma",
+    "stage": "formulation",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 189,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "060900",
+      "corpName": "에이전트AI",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 131
+    },
+    {
+      "stockCode": "062970",
+      "corpName": "한국첨단소재",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 36
+    },
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "377030",
+      "corpName": "비트맥스",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 272
+    },
+    {
+      "stockCode": "053950",
+      "corpName": "경남제약",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 559
+    },
+    {
+      "stockCode": "098660",
+      "corpName": "에스티오",
+      "industry": "textile",
+      "stage": "apparel",
+      "revenue": 715
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ],
+  "edges": [
+    {
+      "from": "060900",
+      "to": "223310",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "062970",
+      "to": "223310",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "223310",
+      "to": "062970",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "223310",
+      "to": "031210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "223310",
+      "to": "377030",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "223310",
+      "to": "053950",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "223310",
+      "to": "060900",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "223310",
+      "to": "098660",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "223310",
+      "to": "041510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "377030",
+      "to": "223310",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 16677098599.0,
+      "operating_profit": -4439010761.0,
+      "net_profit": -8361520141.0,
+      "total_assets": 23337207688.0
+    },
+    {
+      "year": "2022",
+      "sales": 20726718540.0,
+      "operating_profit": 424123177.0,
+      "net_profit": -2265130271.0,
+      "total_assets": 27562995189.0
+    },
+    {
+      "year": "2023",
+      "sales": 27520272873.0,
+      "operating_profit": 293842758.0,
+      "net_profit": -1317336656.0,
+      "total_assets": 25658157819.0
+    },
+    {
+      "year": "2024",
+      "sales": 21744455014.0,
+      "operating_profit": -3220882649.0,
+      "net_profit": -10367381699.0,
+      "total_assets": 35281055388.0
+    },
+    {
+      "year": "2025",
+      "sales": 18896124016.0,
+      "operating_profit": -7477162029.0,
+      "net_profit": -31524469694.0,
+      "total_assets": 69196205413.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

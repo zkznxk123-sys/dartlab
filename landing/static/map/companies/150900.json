@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "150900",
+    "corpName": "파수",
+    "industry": "software",
+    "stage": "ai",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 467,
+    "confidence": 0.76,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "100790",
+      "corpName": "미래에셋벤처투자",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "226400",
+      "corpName": "오스테오닉",
+      "industry": "medicalDevice",
+      "stage": "therapeutic",
+      "revenue": 454
+    }
+  ],
+  "edges": [
+    {
+      "from": "100790",
+      "to": "150900",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "161390",
+      "to": "150900",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 1.4%"
+    },
+    {
+      "from": "226400",
+      "to": "150900",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 42174716141.0,
+      "operating_profit": 4229246699.0,
+      "net_profit": 4106888081.0,
+      "total_assets": 44771307373.0
+    },
+    {
+      "year": "2022",
+      "sales": 44123812663.0,
+      "operating_profit": 5196974333.0,
+      "net_profit": 5273931495.0,
+      "total_assets": 51658562352.0
+    },
+    {
+      "year": "2023",
+      "sales": 42663565494.0,
+      "operating_profit": 3814974790.0,
+      "net_profit": 4396308722.0,
+      "total_assets": 46927869849.0
+    },
+    {
+      "year": "2024",
+      "sales": 46103328375.0,
+      "operating_profit": 3900271332.0,
+      "net_profit": 4488338312.0,
+      "total_assets": 50192542234.0
+    },
+    {
+      "year": "2025",
+      "sales": 46676052578.0,
+      "operating_profit": 2535965884.0,
+      "net_profit": 2661868838.0,
+      "total_assets": 48813630242.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

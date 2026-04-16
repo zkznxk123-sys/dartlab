@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "159010",
+    "corpName": "아스플로",
+    "industry": "machinery",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 0,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "382800",
+      "corpName": "지앤비에스 에코",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 919
+    }
+  ],
+  "edges": [
+    {
+      "from": "159010",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "006800",
+      "to": "159010",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.4%"
+    },
+    {
+      "from": "382800",
+      "to": "159010",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 56116151616.0,
+      "operating_profit": 3964291117.0,
+      "net_profit": 3978550131.0,
+      "total_assets": 94776487880.0
+    },
+    {
+      "year": "2022",
+      "sales": null,
+      "operating_profit": 10502786502.0,
+      "net_profit": 9053357515.0,
+      "total_assets": 111359877525.0
+    },
+    {
+      "year": "2023",
+      "sales": null,
+      "operating_profit": 6353099941.0,
+      "net_profit": 3574931894.0,
+      "total_assets": 130159313906.0
+    },
+    {
+      "year": "2024",
+      "sales": null,
+      "operating_profit": -1863944824.0,
+      "net_profit": -2367405915.0,
+      "total_assets": 138247317749.0
+    },
+    {
+      "year": "2025",
+      "sales": null,
+      "operating_profit": -7014701152.0,
+      "net_profit": -9937488884.0,
+      "total_assets": 118463666486.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

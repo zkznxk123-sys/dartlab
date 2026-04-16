@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "036010",
+    "corpName": "아비코전자",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1339,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "005680",
+      "corpName": "삼영전자공업",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 1497
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "036010",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036010",
+      "to": "005680",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "088350",
+      "to": "036010",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 147677122947.0,
+      "operating_profit": 3054500170.0,
+      "net_profit": 3705201062.0,
+      "total_assets": 141692966450.0
+    },
+    {
+      "year": "2022",
+      "sales": 164696756994.0,
+      "operating_profit": 11291045446.0,
+      "net_profit": 9358568386.0,
+      "total_assets": 147450603812.0
+    },
+    {
+      "year": "2023",
+      "sales": 125029847788.0,
+      "operating_profit": -4711554747.0,
+      "net_profit": -2373030276.0,
+      "total_assets": 145065262405.0
+    },
+    {
+      "year": "2024",
+      "sales": 120929975441.0,
+      "operating_profit": -4876861940.0,
+      "net_profit": -5822800534.0,
+      "total_assets": 142543980828.0
+    },
+    {
+      "year": "2025",
+      "sales": 133852502966.0,
+      "operating_profit": 8313696930.0,
+      "net_profit": 9521504401.0,
+      "total_assets": 152985921922.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

@@ -1,0 +1,185 @@
+{
+  "ego": {
+    "stockCode": "101140",
+    "corpName": "인바이오젠",
+    "industry": "food",
+    "stage": "processing",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 63,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "066410",
+      "corpName": "버킷스튜디오",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 173
+    },
+    {
+      "stockCode": "121800",
+      "corpName": "비덴트",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 101
+    },
+    {
+      "stockCode": "352940",
+      "corpName": "인바이오",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "066410",
+      "to": "101140",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "101140",
+      "to": "066410",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "101140",
+      "to": "121800",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "101140",
+      "to": "352940",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "121800",
+      "to": "101140",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 10480817714.0,
+      "operating_profit": -7932253132.0,
+      "net_profit": 94124949825.0,
+      "total_assets": 274474964053.0
+    },
+    {
+      "year": "2022",
+      "sales": 11403730922.0,
+      "operating_profit": -6332916874.0,
+      "net_profit": -117218208176.0,
+      "total_assets": 144283848412.0
+    },
+    {
+      "year": "2023",
+      "sales": 6240804636.0,
+      "operating_profit": -6151980412.0,
+      "net_profit": 11344109632.0,
+      "total_assets": 145703789452.0
+    },
+    {
+      "year": "2024",
+      "sales": 7041061562.0,
+      "operating_profit": -6093214907.0,
+      "net_profit": 16122333887.0,
+      "total_assets": 162730128455.0
+    },
+    {
+      "year": "2025",
+      "sales": 6296747709.0,
+      "operating_profit": -4332844227.0,
+      "net_profit": -1418662962.0,
+      "total_assets": 159993398792.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

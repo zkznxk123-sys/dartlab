@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "214610",
+    "corpName": "롤링스톤",
+    "industry": "pharma",
+    "stage": "device",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 109,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "059090",
+      "corpName": "미코",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 9770
+    },
+    {
+      "stockCode": "183300",
+      "corpName": "코미코",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 6041
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "214610",
+      "to": "059090",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "214610",
+      "to": "183300",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "214610",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 30302075601.0,
+      "operating_profit": -10895042538.0,
+      "net_profit": -10585392552.0,
+      "total_assets": 88677421907.0
+    },
+    {
+      "year": "2022",
+      "sales": 16111429183.0,
+      "operating_profit": -25900397615.0,
+      "net_profit": -38919205919.0,
+      "total_assets": 57511783958.0
+    },
+    {
+      "year": "2023",
+      "sales": 5367423455.0,
+      "operating_profit": -19375745660.0,
+      "net_profit": -25794884647.0,
+      "total_assets": 61317988254.0
+    },
+    {
+      "year": "2024",
+      "sales": 4640103575.0,
+      "operating_profit": -19234571811.0,
+      "net_profit": -30848770809.0,
+      "total_assets": 54466556163.0
+    },
+    {
+      "year": "2025",
+      "sales": 10884865055.0,
+      "operating_profit": -9935154074.0,
+      "net_profit": -24099001800.0,
+      "total_assets": 25363452677.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

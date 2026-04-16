@@ -1,0 +1,125 @@
+{
+  "ego": {
+    "stockCode": "239890",
+    "corpName": "피엔에이치테크",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 301,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "016710",
+      "corpName": "대성홀딩스",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 12226
+    }
+  ],
+  "edges": [
+    {
+      "from": "239890",
+      "to": "016710",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 24058981006.0,
+      "operating_profit": 3653358543.0,
+      "net_profit": 0.0,
+      "total_assets": 34211666932.0
+    },
+    {
+      "year": "2022",
+      "sales": 35043741542.0,
+      "operating_profit": 4803053619.0,
+      "net_profit": 7563900649.0,
+      "total_assets": 62552305467.0
+    },
+    {
+      "year": "2023",
+      "sales": 40181180331.0,
+      "operating_profit": 6506488174.0,
+      "net_profit": 5621975904.0,
+      "total_assets": 71095525178.0
+    },
+    {
+      "year": "2025",
+      "sales": 30119070313.0,
+      "operating_profit": 2194119359.0,
+      "net_profit": 2870442435.0,
+      "total_assets": 67213925448.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "016710",
+      "corpName": "대성홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

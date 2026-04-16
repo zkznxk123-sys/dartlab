@@ -1,0 +1,154 @@
+{
+  "ego": {
+    "stockCode": "302550",
+    "corpName": "리메드",
+    "industry": "medicalDevice",
+    "stage": "imaging",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 245,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "082210",
+      "corpName": "옵트론텍",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 1957
+    },
+    {
+      "stockCode": "101400",
+      "corpName": "엔시트론",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 344
+    }
+  ],
+  "edges": [
+    {
+      "from": "082210",
+      "to": "302550",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "101400",
+      "to": "302550",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "082210",
+      "to": "302550",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 20195049000.0,
+      "operating_profit": 1123164634.0,
+      "net_profit": 752329674.0,
+      "total_assets": 77198041373.0
+    },
+    {
+      "year": "2022",
+      "sales": 21363454119.0,
+      "operating_profit": 1661058369.0,
+      "net_profit": 3951245350.0,
+      "total_assets": 78125244582.0
+    },
+    {
+      "year": "2023",
+      "sales": 18536134645.0,
+      "operating_profit": -2859712374.0,
+      "net_profit": 319244646.0,
+      "total_assets": 55060329028.0
+    },
+    {
+      "year": "2024",
+      "sales": 25554051153.0,
+      "operating_profit": 1121187641.0,
+      "net_profit": 7380754458.0,
+      "total_assets": 59062954350.0
+    },
+    {
+      "year": "2025",
+      "sales": 24504879379.0,
+      "operating_profit": 725837577.0,
+      "net_profit": 526194539.0,
+      "total_assets": 53909494092.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "011560",
+      "corpName": "세보엠이씨",
+      "stage": "imaging",
+      "revenue": 7158
+    },
+    {
+      "stockCode": "092790",
+      "corpName": "넥스틸",
+      "stage": "imaging",
+      "revenue": 5510
+    },
+    {
+      "stockCode": "215360",
+      "corpName": "우리산업",
+      "stage": "imaging",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "043150",
+      "corpName": "바텍",
+      "stage": "imaging",
+      "revenue": 4264
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "stage": "imaging",
+      "revenue": 3959
+    }
+  ]
+}

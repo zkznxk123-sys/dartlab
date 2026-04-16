@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "014470",
+    "corpName": "부방",
+    "industry": "realestate",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 3195,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "036640",
+      "corpName": "HRS",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 789
+    }
+  ],
+  "edges": [
+    {
+      "from": "014470",
+      "to": "036640",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 319767433431.0,
+      "operating_profit": -4330515940.0,
+      "net_profit": null,
+      "total_assets": 346311070672.0
+    },
+    {
+      "year": "2022",
+      "sales": 338458898642.0,
+      "operating_profit": 915792675.0,
+      "net_profit": 31240536755.0,
+      "total_assets": 368514352079.0
+    },
+    {
+      "year": "2023",
+      "sales": 331046894011.0,
+      "operating_profit": -342355688.0,
+      "net_profit": -26004983702.0,
+      "total_assets": 299873288165.0
+    },
+    {
+      "year": "2024",
+      "sales": 348186460187.0,
+      "operating_profit": 4873277070.0,
+      "net_profit": 11519268610.0,
+      "total_assets": 317267769482.0
+    },
+    {
+      "year": "2025",
+      "sales": 319483898417.0,
+      "operating_profit": 1752619977.0,
+      "net_profit": 2327596992.0,
+      "total_assets": 249762179008.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "023590",
+      "corpName": "다우기술",
+      "stage": "general",
+      "revenue": 174950
+    },
+    {
+      "stockCode": "005440",
+      "corpName": "현대지에프홀딩스",
+      "stage": "general",
+      "revenue": 80916
+    },
+    {
+      "stockCode": "058650",
+      "corpName": "세아홀딩스",
+      "stage": "general",
+      "revenue": 66111
+    },
+    {
+      "stockCode": "034810",
+      "corpName": "해성산업",
+      "stage": "general",
+      "revenue": 22601
+    },
+    {
+      "stockCode": "002990",
+      "corpName": "금호건설",
+      "stage": "general",
+      "revenue": 20185
+    }
+  ]
+}

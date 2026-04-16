@@ -1,0 +1,230 @@
+{
+  "ego": {
+    "stockCode": "091970",
+    "corpName": "나노캠텍",
+    "industry": "plastic",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 501,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "043090",
+      "corpName": "더테크놀로지",
+      "industry": "medicalDevice",
+      "stage": "imaging",
+      "revenue": 126
+    },
+    {
+      "stockCode": "210120",
+      "corpName": "캔버스엔",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 40
+    },
+    {
+      "stockCode": "054540",
+      "corpName": "삼영엠텍",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 1185
+    },
+    {
+      "stockCode": "025560",
+      "corpName": "미래산업",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 508
+    }
+  ],
+  "edges": [
+    {
+      "from": "091970",
+      "to": "002030",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "091970",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "091970",
+      "to": "043090",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "091970",
+      "to": "210120",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "091970",
+      "to": "054540",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "210120",
+      "to": "091970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "025560",
+      "to": "091970",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 7.5%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 47065982998.0,
+      "operating_profit": -10485419926.0,
+      "net_profit": -13754901664.0,
+      "total_assets": 80810904126.0
+    },
+    {
+      "year": "2022",
+      "sales": 50163614732.0,
+      "operating_profit": -2444704792.0,
+      "net_profit": -534660840.0,
+      "total_assets": 47018839581.0
+    },
+    {
+      "year": "2023",
+      "sales": 42401462051.0,
+      "operating_profit": -1843750735.0,
+      "net_profit": -6185738245.0,
+      "total_assets": 54793192139.0
+    },
+    {
+      "year": "2024",
+      "sales": 55510197733.0,
+      "operating_profit": 177820407.0,
+      "net_profit": -3720969779.0,
+      "total_assets": 73006055556.0
+    },
+    {
+      "year": "2025",
+      "sales": 50111277900.0,
+      "operating_profit": -262421464.0,
+      "net_profit": -1447722996.0,
+      "total_assets": 74157987502.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005720",
+      "corpName": "넥센",
+      "stage": "general",
+      "revenue": 35865
+    },
+    {
+      "stockCode": "002350",
+      "corpName": "넥센타이어",
+      "stage": "general",
+      "revenue": 31896
+    },
+    {
+      "stockCode": "013520",
+      "corpName": "화승코퍼레이션",
+      "stage": "general",
+      "revenue": 16398
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "stage": "general",
+      "revenue": 13729
+    },
+    {
+      "stockCode": "004840",
+      "corpName": "DRB동일",
+      "stage": "general",
+      "revenue": 8027
+    }
+  ]
+}

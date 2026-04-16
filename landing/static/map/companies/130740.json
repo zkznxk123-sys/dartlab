@@ -1,0 +1,269 @@
+{
+  "ego": {
+    "stockCode": "130740",
+    "corpName": "티피씨글로벌",
+    "industry": "semiconductor",
+    "stage": "test",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 794,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001720",
+      "corpName": "신영증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "059270",
+      "corpName": "해성에어로보틱스",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 151
+    },
+    {
+      "stockCode": "053700",
+      "corpName": "삼보모터스",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 16846
+    },
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "035760",
+      "corpName": "CJ ENM",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 51345
+    },
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "042520",
+      "corpName": "한스바이오메드",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 199
+    }
+  ],
+  "edges": [
+    {
+      "from": "001720",
+      "to": "130740",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "059270",
+      "to": "130740",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "130740",
+      "to": "053700",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "130740",
+      "to": "059270",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "130740",
+      "to": "005930",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "130740",
+      "to": "035760",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "130740",
+      "to": "001040",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "130740",
+      "to": "042520",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 80394390816.0,
+      "operating_profit": 476856722.0,
+      "net_profit": -2325761461.0,
+      "total_assets": 131871795953.0
+    },
+    {
+      "year": "2022",
+      "sales": 81344275889.0,
+      "operating_profit": -1608652657.0,
+      "net_profit": 2216264698.0,
+      "total_assets": 118590043145.0
+    },
+    {
+      "year": "2023",
+      "sales": 79495864095.0,
+      "operating_profit": -2818722194.0,
+      "net_profit": -6399107984.0,
+      "total_assets": 117402991103.0
+    },
+    {
+      "year": "2024",
+      "sales": 80422348875.0,
+      "operating_profit": -901735070.0,
+      "net_profit": -306836314.0,
+      "total_assets": 112833101054.0
+    },
+    {
+      "year": "2025",
+      "sales": 79404293659.0,
+      "operating_profit": -3261498580.0,
+      "net_profit": -375261456.0,
+      "total_assets": 123558382927.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "059270",
+      "corpName": "해성에어로보틱스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

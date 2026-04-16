@@ -1,0 +1,173 @@
+{
+  "ego": {
+    "stockCode": "335810",
+    "corpName": "프리시젼바이오",
+    "industry": "pharma",
+    "stage": "device",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 199,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "009290",
+      "corpName": "광동제약",
+      "industry": "food",
+      "stage": "processing",
+      "revenue": 16595
+    },
+    {
+      "stockCode": "086220",
+      "corpName": "광동헬스바이오",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 670
+    },
+    {
+      "stockCode": "099190",
+      "corpName": "아이센스",
+      "industry": "medicalDevice",
+      "stage": "diagnostic",
+      "revenue": 3154
+    }
+  ],
+  "edges": [
+    {
+      "from": "009290",
+      "to": "335810",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "086220",
+      "to": "335810",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "099190",
+      "to": "335810",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "335810",
+      "to": "099190",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 15887167812.0,
+      "operating_profit": -4269467129.0,
+      "net_profit": -4152248836.0,
+      "total_assets": 55718355910.0
+    },
+    {
+      "year": "2022",
+      "sales": 20458017811.0,
+      "operating_profit": -4500034137.0,
+      "net_profit": 0.0,
+      "total_assets": 59009538881.0
+    },
+    {
+      "year": "2023",
+      "sales": 20391168324.0,
+      "operating_profit": -4810588506.0,
+      "net_profit": 0.0,
+      "total_assets": 62478116634.0
+    },
+    {
+      "year": "2024",
+      "sales": 19134127922.0,
+      "operating_profit": -5366154453.0,
+      "net_profit": 0.0,
+      "total_assets": 52039023615.0
+    },
+    {
+      "year": "2025",
+      "sales": 19925825433.0,
+      "operating_profit": -5381489055.0,
+      "net_profit": 0.0,
+      "total_assets": 53074290379.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

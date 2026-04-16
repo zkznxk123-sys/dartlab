@@ -1,0 +1,143 @@
+{
+  "ego": {
+    "stockCode": "347000",
+    "corpName": "센코",
+    "industry": "electronics",
+    "stage": "module",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 367,
+    "confidence": 0.8,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "082920",
+      "corpName": "비츠로셀",
+      "industry": "battery",
+      "stage": "electrolyte",
+      "revenue": 2431
+    }
+  ],
+  "edges": [
+    {
+      "from": "082920",
+      "to": "347000",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 27589913370.0,
+      "operating_profit": 2639839721.0,
+      "net_profit": 2874171645.0,
+      "total_assets": 73299254939.0
+    },
+    {
+      "year": "2022",
+      "sales": 40803201331.0,
+      "operating_profit": 2757333155.0,
+      "net_profit": 979861383.0,
+      "total_assets": 76783952864.0
+    },
+    {
+      "year": "2023",
+      "sales": 33952242199.0,
+      "operating_profit": 2245775452.0,
+      "net_profit": -1161720602.0,
+      "total_assets": 69624568954.0
+    },
+    {
+      "year": "2024",
+      "sales": 35862109477.0,
+      "operating_profit": 2718008245.0,
+      "net_profit": 2529398796.0,
+      "total_assets": 67017008333.0
+    },
+    {
+      "year": "2025",
+      "sales": 36725295188.0,
+      "operating_profit": 2504690284.0,
+      "net_profit": 4715209101.0,
+      "total_assets": 71324160320.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "battery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "electrolyte",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "082920",
+      "corpName": "비츠로셀",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

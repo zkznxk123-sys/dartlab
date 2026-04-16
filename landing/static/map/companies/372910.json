@@ -1,0 +1,242 @@
+{
+  "ego": {
+    "stockCode": "372910",
+    "corpName": "한컴라이프케어",
+    "industry": "medicalDevice",
+    "stage": "therapeutic",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 921,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "030520",
+      "corpName": "한글과컴퓨터",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 3267
+    },
+    {
+      "stockCode": "054920",
+      "corpName": "한컴위드",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 7712
+    },
+    {
+      "stockCode": "086960",
+      "corpName": "MDS테크",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 1877
+    },
+    {
+      "stockCode": "259630",
+      "corpName": "엠플러스",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 1842
+    },
+    {
+      "stockCode": "026890",
+      "corpName": "스틱인베스트먼트",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 912
+    },
+    {
+      "stockCode": "084680",
+      "corpName": "이월드",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 887
+    }
+  ],
+  "edges": [
+    {
+      "from": "030520",
+      "to": "372910",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "054920",
+      "to": "372910",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "086960",
+      "to": "372910",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "372910",
+      "to": "030520",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "372910",
+      "to": "054920",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "372910",
+      "to": "259630",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "372910",
+      "to": "026890",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "372910",
+      "to": "084680",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 121140356659.0,
+      "operating_profit": 4787002473.0,
+      "net_profit": 4835069260.0,
+      "total_assets": 214127311865.0
+    },
+    {
+      "year": "2022",
+      "sales": 100120112846.0,
+      "operating_profit": -1332071025.0,
+      "net_profit": 65471588.0,
+      "total_assets": 208029841056.0
+    },
+    {
+      "year": "2023",
+      "sales": 112779715327.0,
+      "operating_profit": 1832106411.0,
+      "net_profit": 871118626.0,
+      "total_assets": 182210002869.0
+    },
+    {
+      "year": "2024",
+      "sales": 104776425927.0,
+      "operating_profit": 7488962506.0,
+      "net_profit": 7374593390.0,
+      "total_assets": 198508016060.0
+    },
+    {
+      "year": "2025",
+      "sales": 92088469654.0,
+      "operating_profit": -727292956.0,
+      "net_profit": -7665648499.0,
+      "total_assets": 203628184111.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "011560",
+      "corpName": "세보엠이씨",
+      "stage": "imaging",
+      "revenue": 7158
+    },
+    {
+      "stockCode": "092790",
+      "corpName": "넥스틸",
+      "stage": "imaging",
+      "revenue": 5510
+    },
+    {
+      "stockCode": "215360",
+      "corpName": "우리산업",
+      "stage": "imaging",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "043150",
+      "corpName": "바텍",
+      "stage": "imaging",
+      "revenue": 4264
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "stage": "imaging",
+      "revenue": 3959
+    }
+  ]
+}

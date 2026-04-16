@@ -1,0 +1,174 @@
+{
+  "ego": {
+    "stockCode": "331380",
+    "corpName": "포커스에이아이",
+    "industry": "machinery",
+    "stage": "precision",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 453,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    },
+    {
+      "stockCode": "023410",
+      "corpName": "유진기업",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 13327
+    },
+    {
+      "stockCode": "318020",
+      "corpName": "포인트모바일",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 872
+    }
+  ],
+  "edges": [
+    {
+      "from": "041510",
+      "to": "331380",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "331380",
+      "to": "023410",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "331380",
+      "to": "318020",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 8.8%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 48150106982.0,
+      "operating_profit": 4110432563.0,
+      "net_profit": null,
+      "total_assets": 33342180122.0
+    },
+    {
+      "year": "2022",
+      "sales": 61625592172.0,
+      "operating_profit": 2664914693.0,
+      "net_profit": 0.0,
+      "total_assets": 37573293411.0
+    },
+    {
+      "year": "2023",
+      "sales": 59458221600.0,
+      "operating_profit": 2646343421.0,
+      "net_profit": 2467813093.0,
+      "total_assets": 36457004260.0
+    },
+    {
+      "year": "2025",
+      "sales": 45308322646.0,
+      "operating_profit": -10202525900.0,
+      "net_profit": -10262167430.0,
+      "total_assets": 46665341279.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "media",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "agency",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

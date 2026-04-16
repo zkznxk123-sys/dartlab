@@ -1,0 +1,180 @@
+{
+  "ego": {
+    "stockCode": "048910",
+    "corpName": "대원미디어",
+    "industry": "media",
+    "stage": "content",
+    "role": "서비스",
+    "stream": "upstream",
+    "revenue": 3428,
+    "confidence": 0.9,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "060280",
+      "corpName": "큐렉소",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 745
+    },
+    {
+      "stockCode": "053210",
+      "corpName": "케이티스카이라이프",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 9842
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 80991
+    },
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 282442
+    }
+  ],
+  "edges": [
+    {
+      "from": "048910",
+      "to": "060280",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "048910",
+      "to": "053210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "048910",
+      "to": "035720",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "048910",
+      "to": "030200",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 299832921140.0,
+      "operating_profit": 12252412072.0,
+      "net_profit": 2861629062.0,
+      "total_assets": 164127568446.0
+    },
+    {
+      "year": "2022",
+      "sales": 303453855521.0,
+      "operating_profit": 14269892845.0,
+      "net_profit": 5608679410.0,
+      "total_assets": 192326155023.0
+    },
+    {
+      "year": "2023",
+      "sales": 316061909775.0,
+      "operating_profit": 13806865689.0,
+      "net_profit": 6214288574.0,
+      "total_assets": 212944544325.0
+    },
+    {
+      "year": "2024",
+      "sales": 256364073040.0,
+      "operating_profit": 1616163472.0,
+      "net_profit": -1566942590.0,
+      "total_assets": 206013118638.0
+    },
+    {
+      "year": "2025",
+      "sales": 342849675064.0,
+      "operating_profit": 9950399426.0,
+      "net_profit": -57167167.0,
+      "total_assets": 231998926962.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "035760",
+      "corpName": "CJ ENM",
+      "stage": "content",
+      "revenue": 51345
+    },
+    {
+      "stockCode": "030000",
+      "corpName": "제일기획",
+      "stage": "content",
+      "revenue": 45469
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "214320",
+      "corpName": "이노션",
+      "stage": "platform",
+      "revenue": 21460
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ]
+}

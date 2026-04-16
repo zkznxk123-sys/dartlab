@@ -1,0 +1,226 @@
+{
+  "ego": {
+    "stockCode": "041920",
+    "corpName": "메디아나",
+    "industry": "medicalDevice",
+    "stage": "imaging",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 649,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "095340",
+      "corpName": "ISC",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 2202
+    },
+    {
+      "stockCode": "208370",
+      "corpName": "셀바스헬스케어",
+      "industry": "telecom",
+      "stage": "device",
+      "revenue": 308
+    },
+    {
+      "stockCode": "108860",
+      "corpName": "셀바스AI",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 1148
+    }
+  ],
+  "edges": [
+    {
+      "from": "095340",
+      "to": "041920",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "041920",
+      "to": "208370",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "041920",
+      "to": "108860",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "041920",
+      "to": "108860",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "108860",
+      "to": "041920",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "208370",
+      "to": "041920",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 56802196319.0,
+      "operating_profit": 8259725752.0,
+      "net_profit": 8774275601.0,
+      "total_assets": 90170329991.0
+    },
+    {
+      "year": "2022",
+      "sales": 68346731750.0,
+      "operating_profit": 10610097890.0,
+      "net_profit": 10597920980.0,
+      "total_assets": 103445326685.0
+    },
+    {
+      "year": "2023",
+      "sales": 78421203014.0,
+      "operating_profit": 9402286818.0,
+      "net_profit": 8893421851.0,
+      "total_assets": 111922367875.0
+    },
+    {
+      "year": "2024",
+      "sales": 57038971899.0,
+      "operating_profit": 1309225935.0,
+      "net_profit": 0.0,
+      "total_assets": 139558595671.0
+    },
+    {
+      "year": "2025",
+      "sales": 64944817855.0,
+      "operating_profit": 5950379397.0,
+      "net_profit": 5274496431.0,
+      "total_assets": 146835881738.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "retail",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "retail",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "095340",
+      "corpName": "ISC",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "108860",
+      "corpName": "셀바스AI",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "011560",
+      "corpName": "세보엠이씨",
+      "stage": "imaging",
+      "revenue": 7158
+    },
+    {
+      "stockCode": "092790",
+      "corpName": "넥스틸",
+      "stage": "imaging",
+      "revenue": 5510
+    },
+    {
+      "stockCode": "215360",
+      "corpName": "우리산업",
+      "stage": "imaging",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "043150",
+      "corpName": "바텍",
+      "stage": "imaging",
+      "revenue": 4264
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "stage": "imaging",
+      "revenue": 3959
+    }
+  ]
+}

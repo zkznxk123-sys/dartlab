@@ -1,0 +1,192 @@
+{
+  "ego": {
+    "stockCode": "197140",
+    "corpName": "디지캡",
+    "industry": "telecom",
+    "stage": "service",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 666,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "052220",
+      "corpName": "iMBC",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 400
+    },
+    {
+      "stockCode": "203650",
+      "corpName": "드림시큐리티",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 3189
+    },
+    {
+      "stockCode": "032980",
+      "corpName": "바이온",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 206
+    }
+  ],
+  "edges": [
+    {
+      "from": "017670",
+      "to": "197140",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "052220",
+      "to": "197140",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "197140",
+      "to": "203650",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "203650",
+      "to": "197140",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "032980",
+      "to": "197140",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.8%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 28631983022.0,
+      "operating_profit": 282890126.0,
+      "net_profit": 100768949.0,
+      "total_assets": 62655408609.0
+    },
+    {
+      "year": "2022",
+      "sales": 25792993514.0,
+      "operating_profit": 681584190.0,
+      "net_profit": 792332465.0,
+      "total_assets": 53659074828.0
+    },
+    {
+      "year": "2023",
+      "sales": 24626727594.0,
+      "operating_profit": -664818243.0,
+      "net_profit": -3292102853.0,
+      "total_assets": 50287676510.0
+    },
+    {
+      "year": "2024",
+      "sales": 32013726035.0,
+      "operating_profit": -1597169407.0,
+      "net_profit": 1139832963.0,
+      "total_assets": 74492167404.0
+    },
+    {
+      "year": "2025",
+      "sales": 66632227178.0,
+      "operating_profit": -2530392638.0,
+      "net_profit": -528568955.0,
+      "total_assets": 75880001736.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "ego": {
+    "stockCode": "402490",
+    "corpName": "그린리소스",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1022,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "247660",
+      "corpName": "나노씨엠에스",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 53
+    },
+    {
+      "stockCode": "226590",
+      "corpName": "엠디바이스",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 965
+    }
+  ],
+  "edges": [
+    {
+      "from": "402490",
+      "to": "247660",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "402490",
+      "to": "226590",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 5.7%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2023",
+      "sales": 16501343055.0,
+      "operating_profit": 3268355911.0,
+      "net_profit": 2602076258.0,
+      "total_assets": 71337367292.0
+    },
+    {
+      "year": "2024",
+      "sales": 18498939484.0,
+      "operating_profit": 1071726412.0,
+      "net_profit": 2405609515.0,
+      "total_assets": 111842711182.0
+    },
+    {
+      "year": "2025",
+      "sales": 102155379135.0,
+      "operating_profit": 6032761230.0,
+      "net_profit": 10540367883.0,
+      "total_assets": 147237264962.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "247660",
+      "corpName": "나노씨엠에스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

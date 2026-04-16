@@ -1,0 +1,102 @@
+{
+  "ego": {
+    "stockCode": "290740",
+    "corpName": "액트로",
+    "industry": "machinery",
+    "stage": "special",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2449,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 92326395351.0,
+      "operating_profit": -2156720713.0,
+      "net_profit": 2870970026.0,
+      "total_assets": 98876846790.0
+    },
+    {
+      "year": "2022",
+      "sales": 132980435155.0,
+      "operating_profit": -5770031333.0,
+      "net_profit": -9330275899.0,
+      "total_assets": 92014191518.0
+    },
+    {
+      "year": "2023",
+      "sales": 156846101861.0,
+      "operating_profit": 4692405185.0,
+      "net_profit": 5745559474.0,
+      "total_assets": 118755638465.0
+    },
+    {
+      "year": "2024",
+      "sales": 203084124613.0,
+      "operating_profit": 2416736264.0,
+      "net_profit": 1485089888.0,
+      "total_assets": 113717820282.0
+    },
+    {
+      "year": "2025",
+      "sales": 244938933154.0,
+      "operating_profit": 6578777793.0,
+      "net_profit": 7375733351.0,
+      "total_assets": 123668697714.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

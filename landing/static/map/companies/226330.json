@@ -1,0 +1,154 @@
+{
+  "ego": {
+    "stockCode": "226330",
+    "corpName": "신테카바이오",
+    "industry": "software",
+    "stage": "ai",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 34,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "industry": "pharma",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "086890",
+      "corpName": "이수앱지스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 567
+    }
+  ],
+  "edges": [
+    {
+      "from": "000100",
+      "to": "226330",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "086890",
+      "to": "226330",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000100",
+      "to": "226330",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.5%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 316658569.0,
+      "operating_profit": -8891510563.0,
+      "net_profit": -14802796153.0,
+      "total_assets": 67879160851.0
+    },
+    {
+      "year": "2022",
+      "sales": 243991568.0,
+      "operating_profit": -11792093799.0,
+      "net_profit": -4506425723.0,
+      "total_assets": 55688724060.0
+    },
+    {
+      "year": "2023",
+      "sales": 123405804.0,
+      "operating_profit": -12276297771.0,
+      "net_profit": -11397644740.0,
+      "total_assets": 52916637886.0
+    },
+    {
+      "year": "2024",
+      "sales": 120887133.0,
+      "operating_profit": -14269530180.0,
+      "net_profit": -7213184096.0,
+      "total_assets": 43714974994.0
+    },
+    {
+      "year": "2025",
+      "sales": 3429231736.0,
+      "operating_profit": -10764609170.0,
+      "net_profit": -17378023885.0,
+      "total_assets": 46534749599.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

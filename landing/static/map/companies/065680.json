@@ -1,0 +1,262 @@
+{
+  "ego": {
+    "stockCode": "065680",
+    "corpName": "우주일렉트로",
+    "industry": "electronics",
+    "stage": "set",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 1864,
+    "confidence": 0.84,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "007530",
+      "corpName": "와이엠",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 1771
+    },
+    {
+      "stockCode": "039030",
+      "corpName": "이오테크닉스",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 3809
+    },
+    {
+      "stockCode": "038880",
+      "corpName": "아이에이",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 412
+    },
+    {
+      "stockCode": "091340",
+      "corpName": "S&K폴리텍",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 3102
+    },
+    {
+      "stockCode": "093190",
+      "corpName": "빅솔론",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 1335
+    },
+    {
+      "stockCode": "198080",
+      "corpName": "캐프",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 2952
+    },
+    {
+      "stockCode": "214330",
+      "corpName": "금호에이치티",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 3854
+    }
+  ],
+  "edges": [
+    {
+      "from": "007530",
+      "to": "065680",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "039030",
+      "to": "065680",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "065680",
+      "to": "038880",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "065680",
+      "to": "091340",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "093190",
+      "to": "065680",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "065680",
+      "to": "198080",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "065680",
+      "to": "214330",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 205678843818.0,
+      "operating_profit": 24357814887.0,
+      "net_profit": null,
+      "total_assets": -78415589.0
+    },
+    {
+      "year": "2022",
+      "sales": 187205499317.0,
+      "operating_profit": 17811725429.0,
+      "net_profit": 12219357336.0,
+      "total_assets": 205778455189.0
+    },
+    {
+      "year": "2023",
+      "sales": 159897623025.0,
+      "operating_profit": 8014187683.0,
+      "net_profit": 5615967439.0,
+      "total_assets": 298458120380.0
+    },
+    {
+      "year": "2024",
+      "sales": 176181835330.0,
+      "operating_profit": 20125236440.0,
+      "net_profit": 19834818298.0,
+      "total_assets": 327733689956.0
+    },
+    {
+      "year": "2025",
+      "sales": 186420206961.0,
+      "operating_profit": 21809545822.0,
+      "net_profit": 21573660787.0,
+      "total_assets": 345782147365.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "091340",
+      "corpName": "S&K폴리텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "198080",
+      "corpName": "캐프",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "214330",
+      "corpName": "금호에이치티",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

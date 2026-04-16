@@ -1,0 +1,204 @@
+{
+  "ego": {
+    "stockCode": "044380",
+    "corpName": "주연테크",
+    "industry": "realestate",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 626,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "004870",
+      "corpName": "티웨이홀딩스",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 7
+    },
+    {
+      "stockCode": "046970",
+      "corpName": "우리로",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 425
+    },
+    {
+      "stockCode": "193250",
+      "corpName": "링크드",
+      "industry": "auto",
+      "stage": "powertrain",
+      "revenue": 105
+    },
+    {
+      "stockCode": "036000",
+      "corpName": "예림당",
+      "industry": "telecom",
+      "stage": "device",
+      "revenue": 103
+    }
+  ],
+  "edges": [
+    {
+      "from": "004870",
+      "to": "044380",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "046970",
+      "to": "044380",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "193250",
+      "to": "044380",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004870",
+      "to": "044380",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "036000",
+      "to": "044380",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.4%"
+    },
+    {
+      "from": "193250",
+      "to": "044380",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 88248282788.0,
+      "operating_profit": -542222576.0,
+      "net_profit": 3115174580.0,
+      "total_assets": 59714398945.0
+    },
+    {
+      "year": "2022",
+      "sales": 66667583595.0,
+      "operating_profit": -6294304449.0,
+      "net_profit": 0.0,
+      "total_assets": 53242325293.0
+    },
+    {
+      "year": "2023",
+      "sales": 43504587021.0,
+      "operating_profit": -4656483408.0,
+      "net_profit": -1853744.0,
+      "total_assets": 45913552331.0
+    },
+    {
+      "year": "2024",
+      "sales": 53068185647.0,
+      "operating_profit": -2902454919.0,
+      "net_profit": -2630921499.0,
+      "total_assets": 42542059412.0
+    },
+    {
+      "year": "2025",
+      "sales": 62628503833.0,
+      "operating_profit": -1676717973.0,
+      "net_profit": null,
+      "total_assets": 45597070898.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "023590",
+      "corpName": "다우기술",
+      "stage": "general",
+      "revenue": 174950
+    },
+    {
+      "stockCode": "005440",
+      "corpName": "현대지에프홀딩스",
+      "stage": "general",
+      "revenue": 80916
+    },
+    {
+      "stockCode": "058650",
+      "corpName": "세아홀딩스",
+      "stage": "general",
+      "revenue": 66111
+    },
+    {
+      "stockCode": "034810",
+      "corpName": "해성산업",
+      "stage": "general",
+      "revenue": 22601
+    },
+    {
+      "stockCode": "002990",
+      "corpName": "금호건설",
+      "stage": "general",
+      "revenue": 20185
+    }
+  ]
+}

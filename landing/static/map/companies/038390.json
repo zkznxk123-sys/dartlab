@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "038390",
+    "corpName": "레드캡투어",
+    "industry": "logistics",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 3656,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "228850",
+      "corpName": "레이언스",
+      "industry": "medicalDevice",
+      "stage": "imaging",
+      "revenue": 1147
+    }
+  ],
+  "edges": [
+    {
+      "from": "228850",
+      "to": "038390",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 228932661347.0,
+      "operating_profit": 20469193641.0,
+      "net_profit": 12091045735.0,
+      "total_assets": 489685302919.0
+    },
+    {
+      "year": "2022",
+      "sales": 262064785478.0,
+      "operating_profit": 36321615765.0,
+      "net_profit": 21235274767.0,
+      "total_assets": 621855923430.0
+    },
+    {
+      "year": "2023",
+      "sales": 338183142415.0,
+      "operating_profit": 38770681338.0,
+      "net_profit": 0.0,
+      "total_assets": 742762504229.0
+    },
+    {
+      "year": "2024",
+      "sales": 358876963707.0,
+      "operating_profit": 43565664081.0,
+      "net_profit": 0.0,
+      "total_assets": 697234577881.0
+    },
+    {
+      "year": "2025",
+      "sales": 365552937696.0,
+      "operating_profit": 46775282613.0,
+      "net_profit": 23682586713.0,
+      "total_assets": 710291517359.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "086280",
+      "corpName": "현대글로비스",
+      "stage": "general",
+      "revenue": 295664
+    },
+    {
+      "stockCode": "003490",
+      "corpName": "대한항공",
+      "stage": "general",
+      "revenue": 252255
+    },
+    {
+      "stockCode": "028670",
+      "corpName": "팬오션",
+      "stage": "general",
+      "revenue": 54329
+    },
+    {
+      "stockCode": "002320",
+      "corpName": "한진",
+      "stage": "general",
+      "revenue": 30649
+    },
+    {
+      "stockCode": "089860",
+      "corpName": "롯데렌탈",
+      "stage": "",
+      "revenue": 29188
+    }
+  ]
+}

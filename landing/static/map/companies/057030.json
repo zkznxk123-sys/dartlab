@@ -1,0 +1,102 @@
+{
+  "ego": {
+    "stockCode": "057030",
+    "corpName": "YBM넷",
+    "industry": "education",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 518,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 58331472718.0,
+      "operating_profit": 3634171515.0,
+      "net_profit": -29673.0,
+      "total_assets": 83151433507.0
+    },
+    {
+      "year": "2022",
+      "sales": 62562529887.0,
+      "operating_profit": 4781298295.0,
+      "net_profit": -24212.0,
+      "total_assets": 88057648188.0
+    },
+    {
+      "year": "2023",
+      "sales": 60480863497.0,
+      "operating_profit": 5121862757.0,
+      "net_profit": 5066856947.0,
+      "total_assets": 81958709301.0
+    },
+    {
+      "year": "2024",
+      "sales": 58329367193.0,
+      "operating_profit": 2793912411.0,
+      "net_profit": 3173814152.0,
+      "total_assets": 81369397980.0
+    },
+    {
+      "year": "2025",
+      "sales": 51834368698.0,
+      "operating_profit": 949990702.0,
+      "net_profit": 1601615624.0,
+      "total_assets": 80121356515.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "016880",
+      "corpName": "웅진",
+      "stage": "general",
+      "revenue": 11507
+    },
+    {
+      "stockCode": "215200",
+      "corpName": "메가스터디교육",
+      "stage": "general",
+      "revenue": 8849
+    },
+    {
+      "stockCode": "019680",
+      "corpName": "대교",
+      "stage": "general",
+      "revenue": 6500
+    },
+    {
+      "stockCode": "067280",
+      "corpName": "멀티캠퍼스",
+      "stage": "general",
+      "revenue": 3308
+    },
+    {
+      "stockCode": "068930",
+      "corpName": "디지털대성",
+      "stage": "general",
+      "revenue": 2538
+    }
+  ]
+}

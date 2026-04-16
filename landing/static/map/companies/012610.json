@@ -1,0 +1,197 @@
+{
+  "ego": {
+    "stockCode": "012610",
+    "corpName": "경인양행",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 3797,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "095340",
+      "corpName": "ISC",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 2202
+    },
+    {
+      "stockCode": "049550",
+      "corpName": "잉크테크",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 690
+    },
+    {
+      "stockCode": "107590",
+      "corpName": "미원홀딩스",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 4927
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "012610",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "012610",
+      "to": "095340",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "012610",
+      "to": "049550",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "012610",
+      "to": "107590",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 403325658612.0,
+      "operating_profit": 28354678017.0,
+      "net_profit": 0.0,
+      "total_assets": 579492465098.0
+    },
+    {
+      "year": "2022",
+      "sales": 402637341238.0,
+      "operating_profit": 28060459106.0,
+      "net_profit": 0.0,
+      "total_assets": 548252999063.0
+    },
+    {
+      "year": "2023",
+      "sales": 345408240080.0,
+      "operating_profit": -2247161467.0,
+      "net_profit": 0.0,
+      "total_assets": 538955972428.0
+    },
+    {
+      "year": "2024",
+      "sales": 374231082201.0,
+      "operating_profit": 24226048531.0,
+      "net_profit": 0.0,
+      "total_assets": 544969281413.0
+    },
+    {
+      "year": "2025",
+      "sales": 379701831841.0,
+      "operating_profit": 16266027114.0,
+      "net_profit": 0.0,
+      "total_assets": 526807131416.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "049550",
+      "corpName": "잉크테크",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "107590",
+      "corpName": "미원홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

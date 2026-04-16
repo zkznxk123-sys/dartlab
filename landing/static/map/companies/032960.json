@@ -1,0 +1,179 @@
+{
+  "ego": {
+    "stockCode": "032960",
+    "corpName": "동일기연",
+    "industry": "electronics",
+    "stage": "set",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 6,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "industry": "electrical",
+      "stage": "cable",
+      "revenue": 36360
+    },
+    {
+      "stockCode": "025820",
+      "corpName": "이구산업",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 5078
+    }
+  ],
+  "edges": [
+    {
+      "from": "001440",
+      "to": "032960",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "025820",
+      "to": "032960",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 25293149620.0,
+      "operating_profit": 75149058.0,
+      "net_profit": 7766279615.0,
+      "total_assets": 66265155540.0
+    },
+    {
+      "year": "2022",
+      "sales": 1048031529.0,
+      "operating_profit": 1101722833.0,
+      "net_profit": 1046846747.0,
+      "total_assets": 66427509101.0
+    },
+    {
+      "year": "2023",
+      "sales": 826403305.0,
+      "operating_profit": 422580762.0,
+      "net_profit": 0.0,
+      "total_assets": 67979697406.0
+    },
+    {
+      "year": "2024",
+      "sales": 772674269.0,
+      "operating_profit": 191505571.0,
+      "net_profit": 1179532.0,
+      "total_assets": 69371193791.0
+    },
+    {
+      "year": "2025",
+      "sales": 615828026.0,
+      "operating_profit": -61855477.0,
+      "net_profit": 6482384822.0,
+      "total_assets": 68619261553.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "electrical",
+        1
+      ],
+      [
+        "realestate",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "cable",
+        1
+      ],
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "025820",
+      "corpName": "이구산업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

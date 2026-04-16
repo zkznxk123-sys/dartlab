@@ -1,0 +1,199 @@
+{
+  "ego": {
+    "stockCode": "052220",
+    "corpName": "iMBC",
+    "industry": "media",
+    "stage": "content",
+    "role": "서비스",
+    "stream": "upstream",
+    "revenue": 400,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "101390",
+      "corpName": "아이엠",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 918
+    },
+    {
+      "stockCode": "197140",
+      "corpName": "디지캡",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 666
+    },
+    {
+      "stockCode": "086980",
+      "corpName": "쇼박스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 627
+    },
+    {
+      "stockCode": "100790",
+      "corpName": "미래에셋벤처투자",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "160550",
+      "corpName": "NEW",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 1427
+    }
+  ],
+  "edges": [
+    {
+      "from": "052220",
+      "to": "101390",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "052220",
+      "to": "197140",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "086980",
+      "to": "052220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "100790",
+      "to": "052220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "160550",
+      "to": "052220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 46832866825.0,
+      "operating_profit": 2341141221.0,
+      "net_profit": 0.0,
+      "total_assets": 71723971098.0
+    },
+    {
+      "year": "2022",
+      "sales": 47460159206.0,
+      "operating_profit": 2558248419.0,
+      "net_profit": 1785803939.0,
+      "total_assets": 70094091455.0
+    },
+    {
+      "year": "2023",
+      "sales": 46303655129.0,
+      "operating_profit": 1156866116.0,
+      "net_profit": 0.0,
+      "total_assets": 74008499100.0
+    },
+    {
+      "year": "2024",
+      "sales": 45442807948.0,
+      "operating_profit": 634528436.0,
+      "net_profit": 2012796967.0,
+      "total_assets": 73752314930.0
+    },
+    {
+      "year": "2025",
+      "sales": 40045648499.0,
+      "operating_profit": -7632134757.0,
+      "net_profit": -5433678446.0,
+      "total_assets": 67045841217.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "035760",
+      "corpName": "CJ ENM",
+      "stage": "content",
+      "revenue": 51345
+    },
+    {
+      "stockCode": "030000",
+      "corpName": "제일기획",
+      "stage": "content",
+      "revenue": 45469
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "214320",
+      "corpName": "이노션",
+      "stage": "platform",
+      "revenue": 21460
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ]
+}

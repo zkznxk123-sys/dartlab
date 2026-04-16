@@ -1,0 +1,175 @@
+{
+  "ego": {
+    "stockCode": "163560",
+    "corpName": "동일고무벨트",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 3646,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "004840",
+      "corpName": "DRB동일",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 8027
+    },
+    {
+      "stockCode": "000910",
+      "corpName": "유니온",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 2024
+    }
+  ],
+  "edges": [
+    {
+      "from": "163560",
+      "to": "004840",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004840",
+      "to": "163560",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "163560",
+      "to": "000910",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "163560",
+      "to": "004840",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 277512533269.0,
+      "operating_profit": 871568800.0,
+      "net_profit": 6064529480.0,
+      "total_assets": 313829241625.0
+    },
+    {
+      "year": "2022",
+      "sales": 390439849813.0,
+      "operating_profit": 8078839374.0,
+      "net_profit": 6892156121.0,
+      "total_assets": 381228401577.0
+    },
+    {
+      "year": "2023",
+      "sales": 357776406425.0,
+      "operating_profit": 13689300437.0,
+      "net_profit": 8382538376.0,
+      "total_assets": 374040833046.0
+    },
+    {
+      "year": "2024",
+      "sales": 336983162562.0,
+      "operating_profit": 9586743700.0,
+      "net_profit": 9926280408.0,
+      "total_assets": 354076507146.0
+    },
+    {
+      "year": "2025",
+      "sales": 364602809366.0,
+      "operating_profit": 18564940328.0,
+      "net_profit": 10658276723.0,
+      "total_assets": 355346619626.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "004840",
+      "corpName": "DRB동일",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

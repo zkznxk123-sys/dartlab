@@ -1,0 +1,235 @@
+{
+  "ego": {
+    "stockCode": "084990",
+    "corpName": "헬릭스미스",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 26,
+    "confidence": 0.943,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001630",
+      "corpName": "종근당홀딩스",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 9590
+    },
+    {
+      "stockCode": "016790",
+      "corpName": "현대사료",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 1130
+    },
+    {
+      "stockCode": "019570",
+      "corpName": "플루토스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 129
+    },
+    {
+      "stockCode": "086820",
+      "corpName": "바이오솔루션",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 152
+    },
+    {
+      "stockCode": "258830",
+      "corpName": "세종메디칼",
+      "industry": "medicalDevice",
+      "stage": "imaging",
+      "revenue": 185
+    }
+  ],
+  "edges": [
+    {
+      "from": "001630",
+      "to": "084990",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "016790",
+      "to": "084990",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "019570",
+      "to": "084990",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "084990",
+      "to": "086820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "084990",
+      "to": "258830",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "086820",
+      "to": "084990",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "258830",
+      "to": "084990",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "001630",
+      "to": "084990",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 2316243855.0,
+      "operating_profit": -48518323592.0,
+      "net_profit": -52648378043.0,
+      "total_assets": 282500918861.0
+    },
+    {
+      "year": "2022",
+      "sales": 2799607474.0,
+      "operating_profit": -52579212448.0,
+      "net_profit": -43064614533.0,
+      "total_assets": 254061826024.0
+    },
+    {
+      "year": "2023",
+      "sales": 4201622674.0,
+      "operating_profit": -35245452809.0,
+      "net_profit": -64088431010.0,
+      "total_assets": 227279287342.0
+    },
+    {
+      "year": "2024",
+      "sales": 4973971890.0,
+      "operating_profit": -17954754544.0,
+      "net_profit": -15486291754.0,
+      "total_assets": 148889638599.0
+    },
+    {
+      "year": "2025",
+      "sales": 2598149668.0,
+      "operating_profit": -9898072049.0,
+      "net_profit": -460120665.0,
+      "total_assets": 143196902028.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

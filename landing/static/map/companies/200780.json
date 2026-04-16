@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "200780",
+    "corpName": "비씨월드제약",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 758,
+    "confidence": 0.6,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "289080",
+      "corpName": "SV인베스트먼트",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 47
+    }
+  ],
+  "edges": [
+    {
+      "from": "200780",
+      "to": "031210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "200780",
+      "to": "289080",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 62079356724.0,
+      "operating_profit": -1798448805.0,
+      "net_profit": -1478347183.0,
+      "total_assets": 185100828913.0
+    },
+    {
+      "year": "2022",
+      "sales": 72702521723.0,
+      "operating_profit": 1861671365.0,
+      "net_profit": 59776115.0,
+      "total_assets": 183050718778.0
+    },
+    {
+      "year": "2023",
+      "sales": 75110698903.0,
+      "operating_profit": 6365158872.0,
+      "net_profit": 258517475.0,
+      "total_assets": 184110788686.0
+    },
+    {
+      "year": "2024",
+      "sales": 74814338700.0,
+      "operating_profit": 1499910278.0,
+      "net_profit": 1116154627.0,
+      "total_assets": 176312918381.0
+    },
+    {
+      "year": "2025",
+      "sales": 75799976796.0,
+      "operating_profit": 1996621516.0,
+      "net_profit": -3142932405.0,
+      "total_assets": 176801274862.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

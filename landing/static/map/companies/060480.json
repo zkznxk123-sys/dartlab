@@ -1,0 +1,188 @@
+{
+  "ego": {
+    "stockCode": "060480",
+    "corpName": "국일신동",
+    "industry": "steel",
+    "stage": "processing",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 298,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "025820",
+      "corpName": "이구산업",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 5078
+    },
+    {
+      "stockCode": "043340",
+      "corpName": "에쎈테크",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 579
+    }
+  ],
+  "edges": [
+    {
+      "from": "025820",
+      "to": "060480",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "060480",
+      "to": "043340",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "060480",
+      "to": "025820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "025820",
+      "to": "060480",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 21357080343.0,
+      "operating_profit": 950586822.0,
+      "net_profit": 867990172.0,
+      "total_assets": 53022841045.0
+    },
+    {
+      "year": "2022",
+      "sales": 20047963446.0,
+      "operating_profit": 385392950.0,
+      "net_profit": 1006345773.0,
+      "total_assets": 52204389695.0
+    },
+    {
+      "year": "2023",
+      "sales": 13809431020.0,
+      "operating_profit": -2191984516.0,
+      "net_profit": -1221030329.0,
+      "total_assets": 49814874013.0
+    },
+    {
+      "year": "2025",
+      "sales": 29767954540.0,
+      "operating_profit": -209964265.0,
+      "net_profit": 97340749.0,
+      "total_assets": 46633517222.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "realestate",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "025820",
+      "corpName": "이구산업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "043340",
+      "corpName": "에쎈테크",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

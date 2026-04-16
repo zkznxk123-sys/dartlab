@@ -1,0 +1,190 @@
+{
+  "ego": {
+    "stockCode": "001460",
+    "corpName": "BYC",
+    "industry": "realestate",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 1632,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "0007C0",
+      "corpName": "아크릴",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 133
+    },
+    {
+      "stockCode": "232140",
+      "corpName": "와이씨",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 2726
+    },
+    {
+      "stockCode": "317690",
+      "corpName": "퀀타매트릭스",
+      "industry": "medicalDevice",
+      "stage": "diagnostic",
+      "revenue": 37
+    }
+  ],
+  "edges": [
+    {
+      "from": "0007C0",
+      "to": "001460",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001460",
+      "to": "232140",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001460",
+      "to": "317690",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 164445893789.0,
+      "operating_profit": 26711346464.0,
+      "net_profit": 29855489397.0,
+      "total_assets": 684434512150.0
+    },
+    {
+      "year": "2022",
+      "sales": 169680336869.0,
+      "operating_profit": 25326353051.0,
+      "net_profit": 35286502037.0,
+      "total_assets": 668872026401.0
+    },
+    {
+      "year": "2023",
+      "sales": 168401523886.0,
+      "operating_profit": 27498394275.0,
+      "net_profit": 23666593032.0,
+      "total_assets": 685663060325.0
+    },
+    {
+      "year": "2024",
+      "sales": 165207568941.0,
+      "operating_profit": 23832906913.0,
+      "net_profit": 18408690484.0,
+      "total_assets": 696400955313.0
+    },
+    {
+      "year": "2025",
+      "sales": 163166613171.0,
+      "operating_profit": 26573558468.0,
+      "net_profit": 8144884.0,
+      "total_assets": 775789336133.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "software",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "platform",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "0007C0",
+      "corpName": "아크릴",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "317690",
+      "corpName": "퀀타매트릭스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "023590",
+      "corpName": "다우기술",
+      "stage": "general",
+      "revenue": 174950
+    },
+    {
+      "stockCode": "005440",
+      "corpName": "현대지에프홀딩스",
+      "stage": "general",
+      "revenue": 80916
+    },
+    {
+      "stockCode": "058650",
+      "corpName": "세아홀딩스",
+      "stage": "general",
+      "revenue": 66111
+    },
+    {
+      "stockCode": "034810",
+      "corpName": "해성산업",
+      "stage": "general",
+      "revenue": 22601
+    },
+    {
+      "stockCode": "002990",
+      "corpName": "금호건설",
+      "stage": "general",
+      "revenue": 20185
+    }
+  ]
+}

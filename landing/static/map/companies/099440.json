@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "099440",
+    "corpName": "스맥",
+    "industry": "machinery",
+    "stage": "special",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1536,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "011210",
+      "corpName": "현대위아",
+      "industry": "auto",
+      "stage": "chassis",
+      "revenue": 84816
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    },
+    {
+      "stockCode": "036530",
+      "corpName": "SNT홀딩스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 22357
+    }
+  ],
+  "edges": [
+    {
+      "from": "099440",
+      "to": "011210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "099440",
+      "to": "041510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "036530",
+      "to": "099440",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 8.2%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 128499940215.0,
+      "operating_profit": -10990413438.0,
+      "net_profit": -16397975866.0,
+      "total_assets": 190252321766.0
+    },
+    {
+      "year": "2022",
+      "sales": 159473204075.0,
+      "operating_profit": 11745651889.0,
+      "net_profit": 9682109800.0,
+      "total_assets": 193578829580.0
+    },
+    {
+      "year": "2023",
+      "sales": 176628631520.0,
+      "operating_profit": 22035848534.0,
+      "net_profit": 16680552004.0,
+      "total_assets": 207350367361.0
+    },
+    {
+      "year": "2024",
+      "sales": 201298944290.0,
+      "operating_profit": 23955100228.0,
+      "net_profit": 22133889833.0,
+      "total_assets": 301090392237.0
+    },
+    {
+      "year": "2025",
+      "sales": 153589636057.0,
+      "operating_profit": -16809504557.0,
+      "net_profit": -21494427733.0,
+      "total_assets": 301515657631.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

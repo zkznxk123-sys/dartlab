@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "225530",
+    "corpName": "HC보광산업",
+    "industry": "construction",
+    "stage": "material",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 385,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "060560",
+      "corpName": "HC홈센타",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 2988
+    }
+  ],
+  "edges": [
+    {
+      "from": "225530",
+      "to": "060560",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 71898463686.0,
+      "operating_profit": 13214491053.0,
+      "net_profit": 10111336092.0,
+      "total_assets": 146064509233.0
+    },
+    {
+      "year": "2022",
+      "sales": 87471227933.0,
+      "operating_profit": 15372295022.0,
+      "net_profit": 12074741153.0,
+      "total_assets": 145980361650.0
+    },
+    {
+      "year": "2023",
+      "sales": 85460172473.0,
+      "operating_profit": 18912752031.0,
+      "net_profit": 0.0,
+      "total_assets": 165717975257.0
+    },
+    {
+      "year": "2024",
+      "sales": 63877146203.0,
+      "operating_profit": 8863028851.0,
+      "net_profit": 0.0,
+      "total_assets": 179145646984.0
+    },
+    {
+      "year": "2025",
+      "sales": 38493462752.0,
+      "operating_profit": -4871625215.0,
+      "net_profit": -2492104615.0,
+      "total_assets": 175263808874.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

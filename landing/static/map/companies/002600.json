@@ -1,0 +1,285 @@
+{
+  "ego": {
+    "stockCode": "002600",
+    "corpName": "조흥",
+    "industry": "construction",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 4882,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "001000",
+      "corpName": "신라섬유",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 36
+    },
+    {
+      "stockCode": "007310",
+      "corpName": "오뚜기",
+      "industry": "food",
+      "stage": "processing",
+      "revenue": 36745
+    },
+    {
+      "stockCode": "160550",
+      "corpName": "NEW",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 1427
+    },
+    {
+      "stockCode": "004970",
+      "corpName": "신라교역",
+      "industry": "auto",
+      "stage": "chassis",
+      "revenue": 4547
+    },
+    {
+      "stockCode": "012620",
+      "corpName": "원일특강",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 3981
+    },
+    {
+      "stockCode": "025870",
+      "corpName": "신라에스지",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 700
+    },
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 12332
+    }
+  ],
+  "edges": [
+    {
+      "from": "002600",
+      "to": "139480",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "밀가루, 치즈, 크림, 유지류, 초콜릿 등",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "밀가루, 치즈, 크림, 유지류, 초콜릿 등"
+    },
+    {
+      "from": "001000",
+      "to": "002600",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "002600",
+      "to": "007310",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "002600",
+      "to": "160550",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "004970",
+      "to": "002600",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "007310",
+      "to": "002600",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "012620",
+      "to": "002600",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "025870",
+      "to": "002600",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "002600",
+      "to": "031440",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 250861244971.0,
+      "operating_profit": 19072641425.0,
+      "net_profit": 16074914918.0,
+      "total_assets": 267558823330.0
+    },
+    {
+      "year": "2022",
+      "sales": 324035752456.0,
+      "operating_profit": 14975758634.0,
+      "net_profit": 11131140357.0,
+      "total_assets": 433755476780.0
+    },
+    {
+      "year": "2023",
+      "sales": 405945609421.0,
+      "operating_profit": 15648302437.0,
+      "net_profit": 355244125.0,
+      "total_assets": 394002199996.0
+    },
+    {
+      "year": "2024",
+      "sales": 428162970536.0,
+      "operating_profit": 20834881066.0,
+      "net_profit": 0.0,
+      "total_assets": 399122282497.0
+    },
+    {
+      "year": "2025",
+      "sales": 488246059548.0,
+      "operating_profit": 18629765819.0,
+      "net_profit": 0.0,
+      "total_assets": 434783887139.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "product": "밀가루, 치즈, 크림, 유지류, 초콜릿 등",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "031440",
+      "corpName": "신세계푸드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

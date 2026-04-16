@@ -1,0 +1,180 @@
+{
+  "ego": {
+    "stockCode": "371950",
+    "corpName": "풍원정밀",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 324,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "017900",
+      "corpName": "광전자",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 1327
+    },
+    {
+      "stockCode": "003540",
+      "corpName": "대신증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 50639
+    },
+    {
+      "stockCode": "123890",
+      "corpName": "한국자산신탁",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 2043
+    },
+    {
+      "stockCode": "238490",
+      "corpName": "힘스",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 593
+    }
+  ],
+  "edges": [
+    {
+      "from": "371950",
+      "to": "017900",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "003540",
+      "to": "371950",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 5.0%"
+    },
+    {
+      "from": "123890",
+      "to": "371950",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "238490",
+      "to": "371950",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 41953096064.0,
+      "operating_profit": 3062481905.0,
+      "net_profit": 2842457200.0,
+      "total_assets": 66332984998.0
+    },
+    {
+      "year": "2022",
+      "sales": 44913983313.0,
+      "operating_profit": 751345764.0,
+      "net_profit": null,
+      "total_assets": 108238060211.0
+    },
+    {
+      "year": "2023",
+      "sales": 43054017785.0,
+      "operating_profit": -21932415342.0,
+      "net_profit": null,
+      "total_assets": 102819951208.0
+    },
+    {
+      "year": "2024",
+      "sales": 49263385713.0,
+      "operating_profit": -18248147075.0,
+      "net_profit": -30132497557.0,
+      "total_assets": 96349143591.0
+    },
+    {
+      "year": "2025",
+      "sales": 32363366118.0,
+      "operating_profit": -19933760853.0,
+      "net_profit": -23583226913.0,
+      "total_assets": 80333957792.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

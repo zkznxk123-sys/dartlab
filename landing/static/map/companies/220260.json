@@ -1,0 +1,125 @@
+{
+  "ego": {
+    "stockCode": "220260",
+    "corpName": "켐트로스",
+    "industry": "chemical",
+    "stage": "specialty",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 568,
+    "confidence": 0.84,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "009300",
+      "corpName": "삼아제약",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 778
+    }
+  ],
+  "edges": [
+    {
+      "from": "220260",
+      "to": "009300",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 48294721313.0,
+      "operating_profit": 3836844273.0,
+      "net_profit": 4409196923.0,
+      "total_assets": 95236849662.0
+    },
+    {
+      "year": "2022",
+      "sales": 57025284590.0,
+      "operating_profit": 4442342875.0,
+      "net_profit": 3811169019.0,
+      "total_assets": 97458776272.0
+    },
+    {
+      "year": "2023",
+      "sales": 47464098463.0,
+      "operating_profit": 3433724667.0,
+      "net_profit": 2803432300.0,
+      "total_assets": 97844878087.0
+    },
+    {
+      "year": "2025",
+      "sales": 56809696904.0,
+      "operating_profit": 1048331370.0,
+      "net_profit": -11841396874.0,
+      "total_assets": 124211924370.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "009300",
+      "corpName": "삼아제약",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

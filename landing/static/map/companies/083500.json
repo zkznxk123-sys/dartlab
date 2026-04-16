@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "083500",
+    "corpName": "에프엔에스테크",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 737,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "187870",
+      "corpName": "디바이스",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 841
+    },
+    {
+      "stockCode": "238490",
+      "corpName": "힘스",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 593
+    }
+  ],
+  "edges": [
+    {
+      "from": "187870",
+      "to": "083500",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.4%"
+    },
+    {
+      "from": "238490",
+      "to": "083500",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.2%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 66085795000.0,
+      "operating_profit": 2356433619.0,
+      "net_profit": 1552771110.0,
+      "total_assets": 99793225276.0
+    },
+    {
+      "year": "2022",
+      "sales": 67642003556.0,
+      "operating_profit": 5815829219.0,
+      "net_profit": -752348434.0,
+      "total_assets": 92366386030.0
+    },
+    {
+      "year": "2023",
+      "sales": 38883827391.0,
+      "operating_profit": 2282069656.0,
+      "net_profit": 1757233787.0,
+      "total_assets": 108597629047.0
+    },
+    {
+      "year": "2024",
+      "sales": 88482201894.0,
+      "operating_profit": 8805382808.0,
+      "net_profit": 13994241936.0,
+      "total_assets": 128914258277.0
+    },
+    {
+      "year": "2025",
+      "sales": 73657803682.0,
+      "operating_profit": 10349896551.0,
+      "net_profit": 8691875828.0,
+      "total_assets": 121876000647.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

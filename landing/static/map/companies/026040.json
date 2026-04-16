@@ -1,0 +1,136 @@
+{
+  "ego": {
+    "stockCode": "026040",
+    "corpName": "제이에스티나",
+    "industry": "misc",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 722,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "040300",
+      "corpName": "YTN",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 1342
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ],
+  "edges": [
+    {
+      "from": "026040",
+      "to": "040300",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "026040",
+      "to": "041510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 67332598457.0,
+      "operating_profit": 1355507077.0,
+      "net_profit": 17615824499.0,
+      "total_assets": 64949455347.0
+    },
+    {
+      "year": "2022",
+      "sales": 77880466417.0,
+      "operating_profit": 2580912695.0,
+      "net_profit": 1307771554.0,
+      "total_assets": 59186700308.0
+    },
+    {
+      "year": "2023",
+      "sales": 75362474833.0,
+      "operating_profit": -582699119.0,
+      "net_profit": 792213904.0,
+      "total_assets": 54581404067.0
+    },
+    {
+      "year": "2024",
+      "sales": 74433968530.0,
+      "operating_profit": -2602941211.0,
+      "net_profit": -1495491944.0,
+      "total_assets": 50660994202.0
+    },
+    {
+      "year": "2025",
+      "sales": 72242575120.0,
+      "operating_profit": 706459594.0,
+      "net_profit": 1826602025.0,
+      "total_assets": 55314581660.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "284740",
+      "corpName": "쿠쿠홈시스",
+      "stage": "",
+      "revenue": 11213
+    },
+    {
+      "stockCode": "285490",
+      "corpName": "노바텍",
+      "stage": "",
+      "revenue": 556
+    },
+    {
+      "stockCode": "188260",
+      "corpName": "세니젠",
+      "stage": "",
+      "revenue": 154
+    },
+    {
+      "stockCode": "373200",
+      "corpName": "엑스플러스",
+      "stage": "",
+      "revenue": 101
+    }
+  ]
+}

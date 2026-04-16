@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "131370",
+    "corpName": "알서포트",
+    "industry": "software",
+    "stage": "platform",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 488,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "479960",
+      "corpName": "위너스",
+      "industry": "telecom",
+      "stage": "device",
+      "revenue": 312
+    },
+    {
+      "stockCode": "237880",
+      "corpName": "클리오",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 3289
+    },
+    {
+      "stockCode": "087600",
+      "corpName": "픽셀플러스",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 427
+    }
+  ],
+  "edges": [
+    {
+      "from": "131370",
+      "to": "479960",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "131370",
+      "to": "237880",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "131370",
+      "to": "087600",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 52469273022.0,
+      "operating_profit": 17455957407.0,
+      "net_profit": 24519445929.0,
+      "total_assets": 93900528494.0
+    },
+    {
+      "year": "2022",
+      "sales": 48599235514.0,
+      "operating_profit": 7246745357.0,
+      "net_profit": 4199262847.0,
+      "total_assets": 96160855312.0
+    },
+    {
+      "year": "2023",
+      "sales": 50411451721.0,
+      "operating_profit": 7927568472.0,
+      "net_profit": 0.0,
+      "total_assets": 102474954665.0
+    },
+    {
+      "year": "2024",
+      "sales": 47528312054.0,
+      "operating_profit": 3678242611.0,
+      "net_profit": 0.0,
+      "total_assets": 120486014072.0
+    },
+    {
+      "year": "2025",
+      "sales": 48845260894.0,
+      "operating_profit": 2393373710.0,
+      "net_profit": 1800272319.0,
+      "total_assets": 109811029962.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

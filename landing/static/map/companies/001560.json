@@ -1,0 +1,102 @@
+{
+  "ego": {
+    "stockCode": "001560",
+    "corpName": "제일연마",
+    "industry": "construction",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 789,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 79747901283.0,
+      "operating_profit": 6604428633.0,
+      "net_profit": 6095205487.0,
+      "total_assets": 106469253369.0
+    },
+    {
+      "year": "2022",
+      "sales": 83435241806.0,
+      "operating_profit": 5129135206.0,
+      "net_profit": 2207065876.0,
+      "total_assets": 104117875897.0
+    },
+    {
+      "year": "2023",
+      "sales": null,
+      "operating_profit": 7891764655.0,
+      "net_profit": 10901736704.0,
+      "total_assets": 106615084744.0
+    },
+    {
+      "year": "2024",
+      "sales": 81974461738.0,
+      "operating_profit": 5753862882.0,
+      "net_profit": 6006943143.0,
+      "total_assets": 116092096071.0
+    },
+    {
+      "year": "2025",
+      "sales": 78898942508.0,
+      "operating_profit": 4241793251.0,
+      "net_profit": 13643926853.0,
+      "total_assets": 121234213232.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

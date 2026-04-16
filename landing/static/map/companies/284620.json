@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "284620",
+    "corpName": "카이노스메드",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 12,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "389650",
+      "corpName": "넥스트바이오메디컬",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 165
+    },
+    {
+      "stockCode": "011320",
+      "corpName": "유니크",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 4302
+    }
+  ],
+  "edges": [
+    {
+      "from": "284620",
+      "to": "389650",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "011320",
+      "to": "284620",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1662425507.0,
+      "operating_profit": -11219274373.0,
+      "net_profit": -16225404831.0,
+      "total_assets": 41956762393.0
+    },
+    {
+      "year": "2022",
+      "sales": 130024441.0,
+      "operating_profit": -16155656398.0,
+      "net_profit": -15913941243.0,
+      "total_assets": 38982480685.0
+    },
+    {
+      "year": "2023",
+      "sales": 267311985.0,
+      "operating_profit": -16811614766.0,
+      "net_profit": -4223612.0,
+      "total_assets": 20985105999.0
+    },
+    {
+      "year": "2024",
+      "sales": 590366156.0,
+      "operating_profit": -12327872668.0,
+      "net_profit": -12190154740.0,
+      "total_assets": 10741788152.0
+    },
+    {
+      "year": "2025",
+      "sales": 1171631910.0,
+      "operating_profit": -6438933559.0,
+      "net_profit": 0.0,
+      "total_assets": 6617374960.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

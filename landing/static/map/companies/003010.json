@@ -1,0 +1,178 @@
+{
+  "ego": {
+    "stockCode": "003010",
+    "corpName": "혜인",
+    "industry": "auto",
+    "stage": "chassis",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2417,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "006040",
+      "corpName": "동원산업",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 95837
+    },
+    {
+      "stockCode": "119850",
+      "corpName": "지엔씨에너지",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 2626
+    },
+    {
+      "stockCode": "183490",
+      "corpName": "엔지켐생명과학",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 678
+    }
+  ],
+  "edges": [
+    {
+      "from": "003010",
+      "to": "006040",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "003010",
+      "to": "119850",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "183490",
+      "to": "003010",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 16237227747.0,
+      "operating_profit": 9063861690.0,
+      "net_profit": 0.0,
+      "total_assets": 194738254040.0
+    },
+    {
+      "year": "2022",
+      "sales": 178029520688.0,
+      "operating_profit": 2682218552.0,
+      "net_profit": 0.0,
+      "total_assets": 240522145627.0
+    },
+    {
+      "year": "2023",
+      "sales": 105267292372.0,
+      "operating_profit": 9142102686.0,
+      "net_profit": 7404407309.0,
+      "total_assets": 253960586979.0
+    },
+    {
+      "year": "2024",
+      "sales": 80462164868.0,
+      "operating_profit": 14157545456.0,
+      "net_profit": 7274399159.0,
+      "total_assets": 262939817516.0
+    },
+    {
+      "year": "2025",
+      "sales": 241713123892.0,
+      "operating_profit": 17552440394.0,
+      "net_profit": 0.0,
+      "total_assets": 250662335905.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "006040",
+      "corpName": "동원산업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "119850",
+      "corpName": "지엔씨에너지",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

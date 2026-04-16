@@ -1,0 +1,292 @@
+{
+  "ego": {
+    "stockCode": "106240",
+    "corpName": "파인테크닉스",
+    "industry": "electrical",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 429,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "046120",
+      "corpName": "오르비텍",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 579
+    },
+    {
+      "stockCode": "049120",
+      "corpName": "파인디앤씨",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 658
+    },
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "441270",
+      "corpName": "파인엠텍",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 2391
+    },
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "091120",
+      "corpName": "이엠텍",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2051
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "278990",
+      "corpName": "EMB",
+      "industry": "battery",
+      "stage": "cell",
+      "revenue": 238
+    }
+  ],
+  "edges": [
+    {
+      "from": "046120",
+      "to": "106240",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "049120",
+      "to": "106240",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "066570",
+      "to": "106240",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "106240",
+      "to": "046120",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "106240",
+      "to": "049120",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "106240",
+      "to": "441270",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "106240",
+      "to": "005380",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "106240",
+      "to": "091120",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "106240",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    },
+    {
+      "from": "278990",
+      "to": "106240",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "441270",
+      "to": "106240",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 433367771780.0,
+      "operating_profit": 35948644414.0,
+      "net_profit": 53547268427.0,
+      "total_assets": 335272116938.0
+    },
+    {
+      "year": "2022",
+      "sales": 51459059482.0,
+      "operating_profit": 724352897.0,
+      "net_profit": 250629517741.0,
+      "total_assets": 163552894651.0
+    },
+    {
+      "year": "2023",
+      "sales": 59576122521.0,
+      "operating_profit": 1247614307.0,
+      "net_profit": -3730442039.0,
+      "total_assets": 170985133797.0
+    },
+    {
+      "year": "2024",
+      "sales": 57768466076.0,
+      "operating_profit": -1735718579.0,
+      "net_profit": -7356164621.0,
+      "total_assets": 148992066367.0
+    },
+    {
+      "year": "2025",
+      "sales": 42876376647.0,
+      "operating_profit": -6412864510.0,
+      "net_profit": -22221958418.0,
+      "total_assets": 130050787211.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "010120",
+      "corpName": "엘에스일렉트릭",
+      "stage": "power",
+      "revenue": 49658
+    },
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "stage": "cable",
+      "revenue": 36360
+    },
+    {
+      "stockCode": "015860",
+      "corpName": "일진홀딩스",
+      "stage": "power",
+      "revenue": 22827
+    },
+    {
+      "stockCode": "103590",
+      "corpName": "일진전기",
+      "stage": "power",
+      "revenue": 20446
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "stage": "cable",
+      "revenue": 6245
+    }
+  ]
+}

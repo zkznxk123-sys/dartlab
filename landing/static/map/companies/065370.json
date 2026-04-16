@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "065370",
+    "corpName": "위세아이텍",
+    "industry": "software",
+    "stage": "ai",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 383,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "119830",
+      "corpName": "아이텍",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 485
+    }
+  ],
+  "edges": [
+    {
+      "from": "065370",
+      "to": "119830",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 34064031790.0,
+      "operating_profit": 5812757273.0,
+      "net_profit": 0.0,
+      "total_assets": 47467869285.0
+    },
+    {
+      "year": "2022",
+      "sales": 37892065422.0,
+      "operating_profit": 1304673381.0,
+      "net_profit": 3870234650.0,
+      "total_assets": 49026014662.0
+    },
+    {
+      "year": "2023",
+      "sales": 27625153460.0,
+      "operating_profit": -2868674786.0,
+      "net_profit": 0.0,
+      "total_assets": 50468695958.0
+    },
+    {
+      "year": "2024",
+      "sales": 35028457232.0,
+      "operating_profit": 927730373.0,
+      "net_profit": 0.0,
+      "total_assets": 71958424244.0
+    },
+    {
+      "year": "2025",
+      "sales": 38258327979.0,
+      "operating_profit": 786004716.0,
+      "net_profit": 1454510181.0,
+      "total_assets": 66432682733.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

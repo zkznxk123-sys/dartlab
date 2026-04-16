@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "148150",
+    "corpName": "세경하이테크",
+    "industry": "chemical",
+    "stage": "polymer",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2779,
+    "confidence": 0.9,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001510",
+      "corpName": "SK증권",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 0
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "203450",
+      "corpName": "유니온바이오메트릭스",
+      "industry": "telecom",
+      "stage": "",
+      "revenue": 513
+    }
+  ],
+  "edges": [
+    {
+      "from": "001510",
+      "to": "148150",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "148150",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "203450",
+      "to": "148150",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": null,
+      "operating_profit": 17351344523.0,
+      "net_profit": 22728941965.0,
+      "total_assets": 262045826035.0
+    },
+    {
+      "year": "2022",
+      "sales": null,
+      "operating_profit": 7998634087.0,
+      "net_profit": 16523044446.0,
+      "total_assets": 208799817269.0
+    },
+    {
+      "year": "2023",
+      "sales": null,
+      "operating_profit": 36183441126.0,
+      "net_profit": 8659317557.0,
+      "total_assets": 304280443576.0
+    },
+    {
+      "year": "2024",
+      "sales": null,
+      "operating_profit": 31495713182.0,
+      "net_profit": 41295446912.0,
+      "total_assets": 344987582774.0
+    },
+    {
+      "year": "2025",
+      "sales": 277917111183.0,
+      "operating_profit": 1762505924.0,
+      "net_profit": 47801871717.0,
+      "total_assets": 346450278522.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

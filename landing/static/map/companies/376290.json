@@ -1,0 +1,132 @@
+{
+  "ego": {
+    "stockCode": "376290",
+    "corpName": "씨유테크",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 2165,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 3336059
+    }
+  ],
+  "edges": [
+    {
+      "from": "376290",
+      "to": "005930",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 263845323563.0,
+      "operating_profit": 19896187024.0,
+      "net_profit": 15305635633.0,
+      "total_assets": 136793025436.0
+    },
+    {
+      "year": "2022",
+      "sales": 216440887837.0,
+      "operating_profit": 4603329633.0,
+      "net_profit": 3816787591.0,
+      "total_assets": 144333703461.0
+    },
+    {
+      "year": "2023",
+      "sales": 172928955346.0,
+      "operating_profit": 2171604116.0,
+      "net_profit": 918638875.0,
+      "total_assets": 144330468686.0
+    },
+    {
+      "year": "2024",
+      "sales": 284171371287.0,
+      "operating_profit": 11493672748.0,
+      "net_profit": 13568095066.0,
+      "total_assets": 140401611312.0
+    },
+    {
+      "year": "2025",
+      "sales": 216513076154.0,
+      "operating_profit": 5419934689.0,
+      "net_profit": 1363685620.0,
+      "total_assets": 128940675376.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

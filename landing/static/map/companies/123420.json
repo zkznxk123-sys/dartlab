@@ -1,0 +1,204 @@
+{
+  "ego": {
+    "stockCode": "123420",
+    "corpName": "위메이드플레이",
+    "industry": "software",
+    "stage": "game",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 1253,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "101730",
+      "corpName": "위메이드맥스",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 1488
+    },
+    {
+      "stockCode": "112040",
+      "corpName": "위메이드",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 6140
+    },
+    {
+      "stockCode": "033270",
+      "corpName": "유나이티드",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 2888
+    },
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 875
+    }
+  ],
+  "edges": [
+    {
+      "from": "101730",
+      "to": "123420",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "112040",
+      "to": "123420",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "123420",
+      "to": "101730",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "123420",
+      "to": "112040",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "123420",
+      "to": "033270",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "123420",
+      "to": "099220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 105734197125.0,
+      "operating_profit": 8478267043.0,
+      "net_profit": 14172554724.0,
+      "total_assets": 191156749452.0
+    },
+    {
+      "year": "2022",
+      "sales": 134045125478.0,
+      "operating_profit": 892993172.0,
+      "net_profit": null,
+      "total_assets": 404135013527.0
+    },
+    {
+      "year": "2023",
+      "sales": 121678519778.0,
+      "operating_profit": -436034591.0,
+      "net_profit": null,
+      "total_assets": 391591450887.0
+    },
+    {
+      "year": "2024",
+      "sales": 120411951651.0,
+      "operating_profit": 1053500210.0,
+      "net_profit": 24494199009.0,
+      "total_assets": 404213284468.0
+    },
+    {
+      "year": "2025",
+      "sales": 125264827354.0,
+      "operating_profit": 10743666754.0,
+      "net_profit": 20972196606.0,
+      "total_assets": 316778155367.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

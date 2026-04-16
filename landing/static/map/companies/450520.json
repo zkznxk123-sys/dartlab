@@ -1,0 +1,137 @@
+{
+  "ego": {
+    "stockCode": "450520",
+    "corpName": "인스웨이브",
+    "industry": "realestate",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 390,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "039420",
+      "corpName": "케이엘넷",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 476
+    },
+    {
+      "stockCode": "203450",
+      "corpName": "유니온바이오메트릭스",
+      "industry": "telecom",
+      "stage": "",
+      "revenue": 513
+    }
+  ],
+  "edges": [
+    {
+      "from": "450520",
+      "to": "039420",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "203450",
+      "to": "450520",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2023",
+      "sales": 32603845712.0,
+      "operating_profit": 5181088943.0,
+      "net_profit": 4720146948.0,
+      "total_assets": 57017810018.0
+    },
+    {
+      "year": "2024",
+      "sales": 30412970558.0,
+      "operating_profit": -3593363299.0,
+      "net_profit": -1960250298.0,
+      "total_assets": 55416060803.0
+    },
+    {
+      "year": "2025",
+      "sales": 38958024167.0,
+      "operating_profit": -4855159163.0,
+      "net_profit": -3476596480.0,
+      "total_assets": 52753487249.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "039420",
+      "corpName": "케이엘넷",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "023590",
+      "corpName": "다우기술",
+      "stage": "general",
+      "revenue": 174950
+    },
+    {
+      "stockCode": "005440",
+      "corpName": "현대지에프홀딩스",
+      "stage": "general",
+      "revenue": 80916
+    },
+    {
+      "stockCode": "058650",
+      "corpName": "세아홀딩스",
+      "stage": "general",
+      "revenue": 66111
+    },
+    {
+      "stockCode": "034810",
+      "corpName": "해성산업",
+      "stage": "general",
+      "revenue": 22601
+    },
+    {
+      "stockCode": "002990",
+      "corpName": "금호건설",
+      "stage": "general",
+      "revenue": 20185
+    }
+  ]
+}

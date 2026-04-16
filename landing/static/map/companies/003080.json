@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "003080",
+    "corpName": "SB성보",
+    "industry": "pharma",
+    "stage": "device",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 643,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005850",
+      "corpName": "에스엘",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 52399
+    }
+  ],
+  "edges": [
+    {
+      "from": "003080",
+      "to": "005850",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 57675736223.0,
+      "operating_profit": 1038402940.0,
+      "net_profit": 1360598948.0,
+      "total_assets": 172156874269.0
+    },
+    {
+      "year": "2022",
+      "sales": 66379257981.0,
+      "operating_profit": 1904947045.0,
+      "net_profit": 3936366206.0,
+      "total_assets": 170785287337.0
+    },
+    {
+      "year": "2023",
+      "sales": 62612439874.0,
+      "operating_profit": 201041362.0,
+      "net_profit": 1163430847.0,
+      "total_assets": 165627371912.0
+    },
+    {
+      "year": "2024",
+      "sales": 59837932666.0,
+      "operating_profit": -2930119648.0,
+      "net_profit": -3644166613.0,
+      "total_assets": 216746717512.0
+    },
+    {
+      "year": "2025",
+      "sales": 64334046194.0,
+      "operating_profit": -8143226709.0,
+      "net_profit": 34451884038.0,
+      "total_assets": 228336893035.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

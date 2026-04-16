@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "317530",
+    "corpName": "캐리소프트",
+    "industry": "media",
+    "stage": "content",
+    "role": "서비스",
+    "stream": "upstream",
+    "revenue": 57,
+    "confidence": 0.84,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "181710",
+      "corpName": "NHN",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 25162
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "006800",
+      "to": "317530",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "181710",
+      "to": "317530",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "317530",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 6686099596.0,
+      "operating_profit": -2282770363.0,
+      "net_profit": -2011425211.0,
+      "total_assets": 16997041022.0
+    },
+    {
+      "year": "2022",
+      "sales": 10088032993.0,
+      "operating_profit": -2088411993.0,
+      "net_profit": -1404429349.0,
+      "total_assets": 14947005721.0
+    },
+    {
+      "year": "2023",
+      "sales": 8483510899.0,
+      "operating_profit": -3677587098.0,
+      "net_profit": -5522902385.0,
+      "total_assets": 12023879916.0
+    },
+    {
+      "year": "2024",
+      "sales": 5677574243.0,
+      "operating_profit": -3610777923.0,
+      "net_profit": -205434571.0,
+      "total_assets": 18341922592.0
+    },
+    {
+      "year": "2025",
+      "sales": 5683497607.0,
+      "operating_profit": -3555910328.0,
+      "net_profit": -6321233881.0,
+      "total_assets": 28151686504.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "035760",
+      "corpName": "CJ ENM",
+      "stage": "content",
+      "revenue": 51345
+    },
+    {
+      "stockCode": "030000",
+      "corpName": "제일기획",
+      "stage": "content",
+      "revenue": 45469
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "214320",
+      "corpName": "이노션",
+      "stage": "platform",
+      "revenue": 21460
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ]
+}

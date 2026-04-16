@@ -1,0 +1,170 @@
+{
+  "ego": {
+    "stockCode": "002200",
+    "corpName": "한국수출포장공업",
+    "industry": "paper",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2896,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "027970",
+      "corpName": "한국제지",
+      "industry": "paper",
+      "stage": "general",
+      "revenue": 7537
+    },
+    {
+      "stockCode": "101530",
+      "corpName": "해태제과식품",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 6414
+    },
+    {
+      "stockCode": "005610",
+      "corpName": "SPC삼립",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 33705
+    }
+  ],
+  "edges": [
+    {
+      "from": "002200",
+      "to": "027970",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "002200",
+      "to": "101530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "002200",
+      "to": "005610",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 319224098800.0,
+      "operating_profit": 20005644083.0,
+      "net_profit": 15859236394.0,
+      "total_assets": 331846866963.0
+    },
+    {
+      "year": "2022",
+      "sales": 341420236472.0,
+      "operating_profit": 25702536748.0,
+      "net_profit": 20317167712.0,
+      "total_assets": 345521340104.0
+    },
+    {
+      "year": "2023",
+      "sales": 312304377084.0,
+      "operating_profit": 22880520713.0,
+      "net_profit": 19041696095.0,
+      "total_assets": 357003990077.0
+    },
+    {
+      "year": "2024",
+      "sales": 301761200613.0,
+      "operating_profit": -585859876.0,
+      "net_profit": 3395100263.0,
+      "total_assets": 351203466132.0
+    },
+    {
+      "year": "2025",
+      "sales": 289599658247.0,
+      "operating_profit": -6557378537.0,
+      "net_profit": 0.0,
+      "total_assets": 339512099189.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "005610",
+      "corpName": "SPC삼립",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "213500",
+      "corpName": "한솔제지",
+      "stage": "general",
+      "revenue": 22900
+    },
+    {
+      "stockCode": "079430",
+      "corpName": "현대리바트",
+      "stage": "general",
+      "revenue": 15462
+    },
+    {
+      "stockCode": "009200",
+      "corpName": "무림페이퍼",
+      "stage": "general",
+      "revenue": 12649
+    },
+    {
+      "stockCode": "013890",
+      "corpName": "지누스",
+      "stage": "general",
+      "revenue": 9132
+    },
+    {
+      "stockCode": "002310",
+      "corpName": "아세아제지",
+      "stage": "general",
+      "revenue": 8551
+    }
+  ]
+}

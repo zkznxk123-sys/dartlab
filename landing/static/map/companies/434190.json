@@ -1,0 +1,108 @@
+{
+  "ego": {
+    "stockCode": "434190",
+    "corpName": "탈로스",
+    "industry": "battery",
+    "stage": "cathode",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 0,
+    "confidence": 0.7,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "267320",
+      "corpName": "나인테크",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 824
+    }
+  ],
+  "edges": [
+    {
+      "from": "434190",
+      "to": "267320",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "267320",
+      "to": "434190",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "267320",
+      "corpName": "나인테크",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "007340",
+      "corpName": "DN오토모티브",
+      "stage": "cell",
+      "revenue": 36757
+    },
+    {
+      "stockCode": "066970",
+      "corpName": "엘앤에프",
+      "stage": "cathode",
+      "revenue": 21549
+    },
+    {
+      "stockCode": "004490",
+      "corpName": "세방전지",
+      "stage": "cell",
+      "revenue": 21187
+    },
+    {
+      "stockCode": "005070",
+      "corpName": "코스모신소재",
+      "stage": "cathode",
+      "revenue": 4563
+    },
+    {
+      "stockCode": "348370",
+      "corpName": "엔켐",
+      "stage": "electrolyte",
+      "revenue": 3128
+    }
+  ]
+}

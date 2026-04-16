@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "217730",
+    "corpName": "강스템바이오텍",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 36,
+    "confidence": 0.9,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "011150",
+      "corpName": "CJ씨푸드",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 1921
+    },
+    {
+      "stockCode": "028300",
+      "corpName": "HLB",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 842
+    },
+    {
+      "stockCode": "280360",
+      "corpName": "롯데웰푸드",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 42160
+    }
+  ],
+  "edges": [
+    {
+      "from": "011150",
+      "to": "217730",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "217730",
+      "to": "028300",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "280360",
+      "to": "217730",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 12404664762.0,
+      "operating_profit": -22735544454.0,
+      "net_profit": -21826783594.0,
+      "total_assets": 103147835598.0
+    },
+    {
+      "year": "2022",
+      "sales": 16300572670.0,
+      "operating_profit": -20558498336.0,
+      "net_profit": -20236043247.0,
+      "total_assets": 80591704813.0
+    },
+    {
+      "year": "2023",
+      "sales": 12704101187.0,
+      "operating_profit": -22777439977.0,
+      "net_profit": -21949167960.0,
+      "total_assets": 81253041202.0
+    },
+    {
+      "year": "2024",
+      "sales": 7745823635.0,
+      "operating_profit": -14842348178.0,
+      "net_profit": null,
+      "total_assets": 55986114034.0
+    },
+    {
+      "year": "2025",
+      "sales": 3572463936.0,
+      "operating_profit": -17668125114.0,
+      "net_profit": null,
+      "total_assets": 81493316993.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

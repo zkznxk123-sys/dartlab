@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "071280",
+    "corpName": "로체시스템즈",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1249,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "033250",
+      "corpName": "체시스",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 938
+    }
+  ],
+  "edges": [
+    {
+      "from": "071280",
+      "to": "033250",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 110200154977.0,
+      "operating_profit": 13317744743.0,
+      "net_profit": 9457161902.0,
+      "total_assets": 123549040943.0
+    },
+    {
+      "year": "2022",
+      "sales": 144576199490.0,
+      "operating_profit": 26435799764.0,
+      "net_profit": 20251025219.0,
+      "total_assets": 133763132702.0
+    },
+    {
+      "year": "2023",
+      "sales": 105268915966.0,
+      "operating_profit": 11926044601.0,
+      "net_profit": 8866161027.0,
+      "total_assets": 136781013912.0
+    },
+    {
+      "year": "2024",
+      "sales": 160076968925.0,
+      "operating_profit": 19776572725.0,
+      "net_profit": 12113375809.0,
+      "total_assets": 157469280717.0
+    },
+    {
+      "year": "2025",
+      "sales": 124870173744.0,
+      "operating_profit": 14423291900.0,
+      "net_profit": 12257535043.0,
+      "total_assets": 162369748610.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

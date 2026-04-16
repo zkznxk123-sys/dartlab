@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "035200",
+    "corpName": "프럼파스트",
+    "industry": "construction",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 252,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "348350",
+      "corpName": "위드텍",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 578
+    }
+  ],
+  "edges": [
+    {
+      "from": "348350",
+      "to": "035200",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.2%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 29564006703.0,
+      "operating_profit": 2335457435.0,
+      "net_profit": 2133333352.0,
+      "total_assets": 40715939275.0
+    },
+    {
+      "year": "2022",
+      "sales": 30227839370.0,
+      "operating_profit": 1529339366.0,
+      "net_profit": 1324351206.0,
+      "total_assets": 40783460810.0
+    },
+    {
+      "year": "2023",
+      "sales": 29481472717.0,
+      "operating_profit": 1442763516.0,
+      "net_profit": 0.0,
+      "total_assets": 41162773066.0
+    },
+    {
+      "year": "2024",
+      "sales": 29659703118.0,
+      "operating_profit": 1624232382.0,
+      "net_profit": 1918249222.0,
+      "total_assets": 43402243204.0
+    },
+    {
+      "year": "2025",
+      "sales": 25230889434.0,
+      "operating_profit": -443646135.0,
+      "net_profit": 1021790720.0,
+      "total_assets": 41680469489.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

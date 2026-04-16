@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "227610",
+    "corpName": "아우딘퓨쳐스",
+    "industry": "cosmetics",
+    "stage": "manufacturing",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 424,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "123890",
+      "corpName": "한국자산신탁",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 2043
+    },
+    {
+      "stockCode": "054180",
+      "corpName": "메디콕스",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 282
+    }
+  ],
+  "edges": [
+    {
+      "from": "123890",
+      "to": "227610",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "054180",
+      "to": "227610",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 10.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 43911332269.0,
+      "operating_profit": -7721456887.0,
+      "net_profit": -8319579464.0,
+      "total_assets": 50535704853.0
+    },
+    {
+      "year": "2022",
+      "sales": 35044593341.0,
+      "operating_profit": -9692810262.0,
+      "net_profit": -17255430584.0,
+      "total_assets": 58434791877.0
+    },
+    {
+      "year": "2023",
+      "sales": 32698314649.0,
+      "operating_profit": 162986825.0,
+      "net_profit": -81295360.0,
+      "total_assets": 60238408182.0
+    },
+    {
+      "year": "2024",
+      "sales": 34685968494.0,
+      "operating_profit": -3367749311.0,
+      "net_profit": -6894851566.0,
+      "total_assets": 53240994881.0
+    },
+    {
+      "year": "2025",
+      "sales": 42385393255.0,
+      "operating_profit": -1810505836.0,
+      "net_profit": -3637735412.0,
+      "total_assets": 57848657221.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "stage": "manufacturing",
+      "revenue": 42528
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "278470",
+      "corpName": "에이피알",
+      "stage": "manufacturing",
+      "revenue": 15273
+    },
+    {
+      "stockCode": "257720",
+      "corpName": "실리콘투",
+      "stage": "manufacturing",
+      "revenue": 11163
+    }
+  ]
+}

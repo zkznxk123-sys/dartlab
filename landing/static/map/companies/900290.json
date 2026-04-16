@@ -1,0 +1,190 @@
+{
+  "ego": {
+    "stockCode": "900290",
+    "corpName": "GRT",
+    "industry": "machinery",
+    "stage": "precision",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 15,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001780",
+      "corpName": "알루코",
+      "industry": "steel",
+      "stage": "processing",
+      "revenue": 5757
+    },
+    {
+      "stockCode": "010140",
+      "corpName": "삼성중공업",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 106500
+    },
+    {
+      "stockCode": "054410",
+      "corpName": "케이피티유",
+      "industry": "steel",
+      "stage": "processing",
+      "revenue": 158
+    },
+    {
+      "stockCode": "096530",
+      "corpName": "씨젠",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 4742
+    }
+  ],
+  "edges": [
+    {
+      "from": "001780",
+      "to": "900290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "900290",
+      "to": "010140",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "054410",
+      "to": "900290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "900290",
+      "to": "096530",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "4. 생산설비(연구설비)에 관한 사항(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1074363067.0,
+      "operating_profit": 124633556.0,
+      "net_profit": 178995463.0,
+      "total_assets": 7651717426.0
+    },
+    {
+      "year": "2022",
+      "sales": 1126279950.0,
+      "operating_profit": 213968682.0,
+      "net_profit": null,
+      "total_assets": 8187667350.0
+    },
+    {
+      "year": "2023",
+      "sales": 1317366851.0,
+      "operating_profit": 203586313.0,
+      "net_profit": 144528858.0,
+      "total_assets": 8978303455.0
+    },
+    {
+      "year": "2024",
+      "sales": 1498556074.0,
+      "operating_profit": 234913897.0,
+      "net_profit": 0.0,
+      "total_assets": 11706721032.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "010140",
+      "corpName": "삼성중공업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "096530",
+      "corpName": "씨젠",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

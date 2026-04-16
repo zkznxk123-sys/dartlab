@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "064290",
+    "corpName": "인텍플러스",
+    "industry": "machinery",
+    "stage": "special",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 898,
+    "confidence": 0.6,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001630",
+      "corpName": "종근당홀딩스",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 9590
+    }
+  ],
+  "edges": [
+    {
+      "from": "001630",
+      "to": "064290",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.2%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 119661105867.0,
+      "operating_profit": 27531343673.0,
+      "net_profit": 22642787938.0,
+      "total_assets": 107364092141.0
+    },
+    {
+      "year": "2022",
+      "sales": 118836726448.0,
+      "operating_profit": 19363287600.0,
+      "net_profit": 0.0,
+      "total_assets": 116215726784.0
+    },
+    {
+      "year": "2023",
+      "sales": 74802246295.0,
+      "operating_profit": -11091735610.0,
+      "net_profit": 0.0,
+      "total_assets": 131883508110.0
+    },
+    {
+      "year": "2024",
+      "sales": 83873419602.0,
+      "operating_profit": -15587344842.0,
+      "net_profit": -11868307766.0,
+      "total_assets": 124069358316.0
+    },
+    {
+      "year": "2025",
+      "sales": 89765092570.0,
+      "operating_profit": -3734628764.0,
+      "net_profit": 0.0,
+      "total_assets": 118814866862.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "ego": {
+    "stockCode": "033250",
+    "corpName": "체시스",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 938,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "278990",
+      "corpName": "EMB",
+      "industry": "battery",
+      "stage": "cell",
+      "revenue": 238
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    },
+    {
+      "stockCode": "071280",
+      "corpName": "로체시스템즈",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 1249
+    }
+  ],
+  "edges": [
+    {
+      "from": "278990",
+      "to": "033250",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "033250",
+      "to": "041510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "071280",
+      "to": "033250",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 42905288601.0,
+      "operating_profit": -1652260820.0,
+      "net_profit": -2311455896.0,
+      "total_assets": 81159742752.0
+    },
+    {
+      "year": "2022",
+      "sales": 32817107181.0,
+      "operating_profit": -7470398830.0,
+      "net_profit": -4694341230.0,
+      "total_assets": 75915188601.0
+    },
+    {
+      "year": "2023",
+      "sales": 49004497323.0,
+      "operating_profit": 4565520723.0,
+      "net_profit": 0.0,
+      "total_assets": 90568081356.0
+    },
+    {
+      "year": "2024",
+      "sales": 90263397163.0,
+      "operating_profit": 4676276342.0,
+      "net_profit": 0.0,
+      "total_assets": 83146042729.0
+    },
+    {
+      "year": "2025",
+      "sales": 93839011849.0,
+      "operating_profit": 7528255143.0,
+      "net_profit": 6301318303.0,
+      "total_assets": 86044907740.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "battery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "cell",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "278990",
+      "corpName": "EMB",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "ego": {
+    "stockCode": "303530",
+    "corpName": "이노뎁",
+    "industry": "software",
+    "stage": "platform",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 707,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "115160",
+      "corpName": "휴맥스",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 3942
+    }
+  ],
+  "edges": [
+    {
+      "from": "024110",
+      "to": "303530",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "115160",
+      "to": "303530",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "115160",
+      "to": "303530",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 60038612325.0,
+      "operating_profit": -1514453711.0,
+      "net_profit": -878620997.0,
+      "total_assets": 55310949085.0
+    },
+    {
+      "year": "2022",
+      "sales": 76416490550.0,
+      "operating_profit": 413004227.0,
+      "net_profit": 563087127.0,
+      "total_assets": 55560240995.0
+    },
+    {
+      "year": "2023",
+      "sales": 84032973558.0,
+      "operating_profit": 635755479.0,
+      "net_profit": 1026911045.0,
+      "total_assets": 54127697923.0
+    },
+    {
+      "year": "2024",
+      "sales": 86775972174.0,
+      "operating_profit": -1933924977.0,
+      "net_profit": 0.0,
+      "total_assets": 63382545511.0
+    },
+    {
+      "year": "2025",
+      "sales": 70744057088.0,
+      "operating_profit": -2896673174.0,
+      "net_profit": 0.0,
+      "total_assets": 69535469493.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

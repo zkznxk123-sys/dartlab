@@ -1,0 +1,198 @@
+{
+  "ego": {
+    "stockCode": "000590",
+    "corpName": "CS홀딩스",
+    "industry": "textile",
+    "stage": "apparel",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 1349,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "120030",
+      "corpName": "조선선재",
+      "industry": "steel",
+      "stage": "processing",
+      "revenue": 518
+    },
+    {
+      "stockCode": "014280",
+      "corpName": "금강공업",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 8022
+    }
+  ],
+  "edges": [
+    {
+      "from": "120030",
+      "to": "000590",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000590",
+      "to": "120030",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "000590",
+      "to": "014280",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "120030",
+      "to": "000590",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000590",
+      "to": "014280",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.4%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 159017955309.0,
+      "operating_profit": 19647701659.0,
+      "net_profit": 14664297206.0,
+      "total_assets": 353716995747.0
+    },
+    {
+      "year": "2022",
+      "sales": 175266452048.0,
+      "operating_profit": 15632045335.0,
+      "net_profit": 18788497648.0,
+      "total_assets": 364121570785.0
+    },
+    {
+      "year": "2023",
+      "sales": 171965239524.0,
+      "operating_profit": 19128717935.0,
+      "net_profit": 22145557927.0,
+      "total_assets": 383909710687.0
+    },
+    {
+      "year": "2024",
+      "sales": 141950747269.0,
+      "operating_profit": 22314081505.0,
+      "net_profit": 37853224906.0,
+      "total_assets": 412586797943.0
+    },
+    {
+      "year": "2025",
+      "sales": 134870815287.0,
+      "operating_profit": 20215270547.0,
+      "net_profit": 20996079784.0,
+      "total_assets": 425396197381.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "processing",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "120030",
+      "corpName": "조선선재",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

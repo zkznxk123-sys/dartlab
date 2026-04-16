@@ -1,0 +1,95 @@
+{
+  "ego": {
+    "stockCode": "0001A0",
+    "corpName": "덕양에너젠",
+    "industry": "energy",
+    "stage": "distribution",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 1432,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "industry": "aerospace",
+      "stage": "airframe",
+      "revenue": 747854
+    }
+  ],
+  "edges": [
+    {
+      "from": "000880",
+      "to": "0001A0",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 9.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2025",
+      "sales": 143195229364.0,
+      "operating_profit": 6680358069.0,
+      "net_profit": 4516046395.0,
+      "total_assets": 100805882594.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "stage": "generation",
+      "revenue": 974293
+    },
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "stage": "distribution",
+      "revenue": 357273
+    },
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "stage": "distribution",
+      "revenue": 52755
+    },
+    {
+      "stockCode": "071320",
+      "corpName": "지역난방공사",
+      "stage": "generation",
+      "revenue": 39982
+    },
+    {
+      "stockCode": "112610",
+      "corpName": "씨에스윈드",
+      "stage": "generation",
+      "revenue": 29316
+    }
+  ]
+}

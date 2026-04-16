@@ -1,0 +1,190 @@
+{
+  "ego": {
+    "stockCode": "215380",
+    "corpName": "우정바이오",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 376,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "086040",
+      "corpName": "바이오톡스텍",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 413
+    },
+    {
+      "stockCode": "024720",
+      "corpName": "콜마홀딩스",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 6301
+    },
+    {
+      "stockCode": "220100",
+      "corpName": "퓨쳐켐",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 187
+    },
+    {
+      "stockCode": "383930",
+      "corpName": "디티앤씨알오",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 477
+    }
+  ],
+  "edges": [
+    {
+      "from": "086040",
+      "to": "215380",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "215380",
+      "to": "024720",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "215380",
+      "to": "220100",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "215380",
+      "to": "383930",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 31237784039.0,
+      "operating_profit": -3526487787.0,
+      "net_profit": -1925760435.0,
+      "total_assets": 100136135418.0
+    },
+    {
+      "year": "2022",
+      "sales": 46917852697.0,
+      "operating_profit": -2521314432.0,
+      "net_profit": -1880194422.0,
+      "total_assets": 94993773850.0
+    },
+    {
+      "year": "2023",
+      "sales": 38615630587.0,
+      "operating_profit": -4459664719.0,
+      "net_profit": -5053734964.0,
+      "total_assets": 98332604251.0
+    },
+    {
+      "year": "2025",
+      "sales": 37587048396.0,
+      "operating_profit": -3904140658.0,
+      "net_profit": -5546594984.0,
+      "total_assets": 86795099511.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "220100",
+      "corpName": "퓨쳐켐",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "383930",
+      "corpName": "디티앤씨알오",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

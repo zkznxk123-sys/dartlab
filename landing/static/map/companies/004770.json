@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "004770",
+    "corpName": "써니전자",
+    "industry": "retail",
+    "stage": "wholesale",
+    "role": "도매",
+    "stream": "midstream",
+    "revenue": 124,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "203450",
+      "corpName": "유니온바이오메트릭스",
+      "industry": "telecom",
+      "stage": "",
+      "revenue": 513
+    }
+  ],
+  "edges": [
+    {
+      "from": "004770",
+      "to": "203450",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 16408490531.0,
+      "operating_profit": 1782881472.0,
+      "net_profit": 4503538293.0,
+      "total_assets": 77185258102.0
+    },
+    {
+      "year": "2022",
+      "sales": 17441063486.0,
+      "operating_profit": 1685945860.0,
+      "net_profit": 5036812370.0,
+      "total_assets": 76509689752.0
+    },
+    {
+      "year": "2023",
+      "sales": 12759842344.0,
+      "operating_profit": 901749708.0,
+      "net_profit": 3864294306.0,
+      "total_assets": 82497512373.0
+    },
+    {
+      "year": "2024",
+      "sales": 12809512519.0,
+      "operating_profit": 2576381536.0,
+      "net_profit": 4397579372.0,
+      "total_assets": 85143471743.0
+    },
+    {
+      "year": "2025",
+      "sales": 12360625475.0,
+      "operating_profit": 2200952273.0,
+      "net_profit": 3627600280.0,
+      "total_assets": 86017322502.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

@@ -1,0 +1,336 @@
+{
+  "ego": {
+    "stockCode": "258830",
+    "corpName": "세종메디칼",
+    "industry": "medicalDevice",
+    "stage": "imaging",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 185,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "016790",
+      "corpName": "현대사료",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 1130
+    },
+    {
+      "stockCode": "019570",
+      "corpName": "플루토스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 129
+    },
+    {
+      "stockCode": "084990",
+      "corpName": "헬릭스미스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 26
+    },
+    {
+      "stockCode": "090460",
+      "corpName": "비에이치",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 17927
+    },
+    {
+      "stockCode": "003160",
+      "corpName": "디아이",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 4323
+    },
+    {
+      "stockCode": "092200",
+      "corpName": "디아이씨",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 0
+    },
+    {
+      "stockCode": "0120G0",
+      "corpName": "삼양바이오팜",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 286
+    }
+  ],
+  "edges": [
+    {
+      "from": "258830",
+      "to": "016790",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "016790",
+      "to": "258830",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "019570",
+      "to": "258830",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "084990",
+      "to": "258830",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "258830",
+      "to": "090460",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "258830",
+      "to": "084990",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "003160",
+      "to": "258830",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "092200",
+      "to": "258830",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "0120G0",
+      "to": "258830",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "258830",
+      "to": "016790",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 18020983102.0,
+      "operating_profit": -1535593390.0,
+      "net_profit": -5934549522.0,
+      "total_assets": 91281849906.0
+    },
+    {
+      "year": "2022",
+      "sales": 16082925282.0,
+      "operating_profit": -1799952350.0,
+      "net_profit": -125578148.0,
+      "total_assets": 138199622995.0
+    },
+    {
+      "year": "2023",
+      "sales": 17991718820.0,
+      "operating_profit": 2190258857.0,
+      "net_profit": -19201767394.0,
+      "total_assets": 108461733249.0
+    },
+    {
+      "year": "2024",
+      "sales": 18952234158.0,
+      "operating_profit": -472212733.0,
+      "net_profit": -65092046065.0,
+      "total_assets": 51743575311.0
+    },
+    {
+      "year": "2025",
+      "sales": 18535097964.0,
+      "operating_profit": 2264502775.0,
+      "net_profit": -25447650.0,
+      "total_assets": 59805897360.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "realestate",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ],
+      [
+        "pharma",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        1
+      ],
+      [
+        "component",
+        1
+      ],
+      [
+        "research",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "003160",
+      "corpName": "디아이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "092200",
+      "corpName": "디아이씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "0120G0",
+      "corpName": "삼양바이오팜",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "016790",
+      "corpName": "현대사료",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "011560",
+      "corpName": "세보엠이씨",
+      "stage": "imaging",
+      "revenue": 7158
+    },
+    {
+      "stockCode": "092790",
+      "corpName": "넥스틸",
+      "stage": "imaging",
+      "revenue": 5510
+    },
+    {
+      "stockCode": "215360",
+      "corpName": "우리산업",
+      "stage": "imaging",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "043150",
+      "corpName": "바텍",
+      "stage": "imaging",
+      "revenue": 4264
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "stage": "imaging",
+      "revenue": 3959
+    }
+  ]
+}

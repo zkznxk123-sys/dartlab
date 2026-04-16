@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "136410",
+    "corpName": "아셈스",
+    "industry": "plastic",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 603,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "066670",
+      "corpName": "디티씨",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 1886
+    }
+  ],
+  "edges": [
+    {
+      "from": "024110",
+      "to": "136410",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "066670",
+      "to": "136410",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 42027211286.0,
+      "operating_profit": 6108793422.0,
+      "net_profit": 347034666.0,
+      "total_assets": 75546277293.0
+    },
+    {
+      "year": "2022",
+      "sales": 53052773971.0,
+      "operating_profit": 8685735334.0,
+      "net_profit": 0.0,
+      "total_assets": 99297851134.0
+    },
+    {
+      "year": "2023",
+      "sales": 47734640838.0,
+      "operating_profit": 6008991810.0,
+      "net_profit": 3266063362.0,
+      "total_assets": 100750809306.0
+    },
+    {
+      "year": "2024",
+      "sales": 57174933309.0,
+      "operating_profit": 9224205328.0,
+      "net_profit": 0.0,
+      "total_assets": 106778573762.0
+    },
+    {
+      "year": "2025",
+      "sales": 60272993631.0,
+      "operating_profit": 12001220205.0,
+      "net_profit": 8981921131.0,
+      "total_assets": 114921434215.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005720",
+      "corpName": "넥센",
+      "stage": "general",
+      "revenue": 35865
+    },
+    {
+      "stockCode": "002350",
+      "corpName": "넥센타이어",
+      "stage": "general",
+      "revenue": 31896
+    },
+    {
+      "stockCode": "013520",
+      "corpName": "화승코퍼레이션",
+      "stage": "general",
+      "revenue": 16398
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "stage": "general",
+      "revenue": 13729
+    },
+    {
+      "stockCode": "004840",
+      "corpName": "DRB동일",
+      "stage": "general",
+      "revenue": 8027
+    }
+  ]
+}

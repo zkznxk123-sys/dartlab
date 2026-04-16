@@ -1,0 +1,140 @@
+{
+  "ego": {
+    "stockCode": "002690",
+    "corpName": "동일제강",
+    "industry": "steel",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1473,
+    "confidence": 0.6,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "018310",
+      "corpName": "삼목에스폼",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 3170
+    }
+  ],
+  "edges": [
+    {
+      "from": "002690",
+      "to": "018310",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "핵심 위험: 매출 하락 -> 마진 압박 -> 현금 악화.\n매출이 -10.6% 감소하며 영업이익률이 -5.5%에서 -8.9%로 하락했다. 영업현금흐름도 동반 감소하여 수익-현금 순환이 약화되고 있다.",
+    "strengths": [
+      "순현금 상태",
+      "부채비율 12% -- 매우 안정",
+      "부채비율 하위 6% -- 매우 건전",
+      "DCF 안전마진 41% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출 하락 -> 마진 압박 -> 현금 악화",
+      "매출 3기 연속 역성장 (최근 -10.6%)",
+      "영업이익률 3기 연속 하락 (-8.9%)"
+    ],
+    "sector": "소재 > 금속과광물",
+    "source": "audit",
+    "createdAt": "1775430966.5446925"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 182235773870.0,
+      "operating_profit": 7872984392.0,
+      "net_profit": 8250673190.0,
+      "total_assets": 180512781409.0
+    },
+    {
+      "year": "2022",
+      "sales": 196757615383.0,
+      "operating_profit": 2456929950.0,
+      "net_profit": 3345149095.0,
+      "total_assets": 179708719037.0
+    },
+    {
+      "year": "2023",
+      "sales": 180812604441.0,
+      "operating_profit": -2912558609.0,
+      "net_profit": -3159795782.0,
+      "total_assets": 179232275038.0
+    },
+    {
+      "year": "2024",
+      "sales": 151116114567.0,
+      "operating_profit": -5798526499.0,
+      "net_profit": -483718262.0,
+      "total_assets": 171801171723.0
+    },
+    {
+      "year": "2025",
+      "sales": 147345604058.0,
+      "operating_profit": -3510789127.0,
+      "net_profit": 1350334834.0,
+      "total_assets": 176425911154.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

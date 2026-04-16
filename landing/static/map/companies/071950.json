@@ -1,0 +1,240 @@
+{
+  "ego": {
+    "stockCode": "071950",
+    "corpName": "코아스",
+    "industry": "food",
+    "stage": "distribution",
+    "role": "도매",
+    "stream": "downstream",
+    "revenue": 622,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "302440",
+      "corpName": "SK바이오사이언스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 6514
+    },
+    {
+      "stockCode": "091590",
+      "corpName": "남화토건",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 727
+    },
+    {
+      "stockCode": "166480",
+      "corpName": "코아스템켐온",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 202
+    },
+    {
+      "stockCode": "196300",
+      "corpName": "HLB펩",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 50
+    },
+    {
+      "stockCode": "361610",
+      "corpName": "SK아이이테크놀로지",
+      "industry": "software",
+      "stage": "",
+      "revenue": 2619
+    }
+  ],
+  "edges": [
+    {
+      "from": "071950",
+      "to": "302440",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "071950",
+      "to": "091590",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "166480",
+      "to": "071950",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "071950",
+      "to": "166480",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "071950",
+      "to": "302440",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "071950",
+      "to": "196300",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 8.8%"
+    },
+    {
+      "from": "071950",
+      "to": "361610",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 110769785777.0,
+      "operating_profit": -4666241262.0,
+      "net_profit": -5265753179.0,
+      "total_assets": 79299245941.0
+    },
+    {
+      "year": "2022",
+      "sales": 97886470716.0,
+      "operating_profit": -704501535.0,
+      "net_profit": -1663238571.0,
+      "total_assets": 76246124909.0
+    },
+    {
+      "year": "2023",
+      "sales": 73746191894.0,
+      "operating_profit": -3034190053.0,
+      "net_profit": 0.0,
+      "total_assets": 70446617889.0
+    },
+    {
+      "year": "2024",
+      "sales": 77951547768.0,
+      "operating_profit": -7244717384.0,
+      "net_profit": -8934786618.0,
+      "total_assets": 82510682423.0
+    },
+    {
+      "year": "2025",
+      "sales": 62229199785.0,
+      "operating_profit": -5680240797.0,
+      "net_profit": -31166949178.0,
+      "total_assets": 81414004367.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "091590",
+      "corpName": "남화토건",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "166480",
+      "corpName": "코아스템켐온",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

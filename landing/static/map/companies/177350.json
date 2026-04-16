@@ -1,0 +1,270 @@
+{
+  "ego": {
+    "stockCode": "177350",
+    "corpName": "베셀",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 166,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "089230",
+      "corpName": "THE E&M",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 123
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 7973
+    },
+    {
+      "stockCode": "067010",
+      "corpName": "이씨에스",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 216
+    },
+    {
+      "stockCode": "115500",
+      "corpName": "케이씨에스",
+      "industry": "railroad",
+      "stage": "general",
+      "revenue": 249
+    }
+  ],
+  "edges": [
+    {
+      "from": "089230",
+      "to": "177350",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "177350",
+      "to": "029460",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "177350",
+      "to": "067010",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "177350",
+      "to": "115500",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "029460",
+      "to": "177350",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "067010",
+      "to": "177350",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "115500",
+      "to": "177350",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 24634415940.0,
+      "operating_profit": -7461373986.0,
+      "net_profit": 7983088780.0,
+      "total_assets": 93352088238.0
+    },
+    {
+      "year": "2022",
+      "sales": 44128091436.0,
+      "operating_profit": -6575655326.0,
+      "net_profit": -12136466893.0,
+      "total_assets": 84636785555.0
+    },
+    {
+      "year": "2023",
+      "sales": 26135468474.0,
+      "operating_profit": -13127082607.0,
+      "net_profit": -154608281.0,
+      "total_assets": 72801923213.0
+    },
+    {
+      "year": "2024",
+      "sales": 25708184138.0,
+      "operating_profit": -11718044847.0,
+      "net_profit": null,
+      "total_assets": 51320863538.0
+    },
+    {
+      "year": "2025",
+      "sales": 16571060267.0,
+      "operating_profit": -2612648469.0,
+      "net_profit": null,
+      "total_assets": 58362007088.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "energy",
+        1
+      ],
+      [
+        "software",
+        1
+      ],
+      [
+        "railroad",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "distribution",
+        1
+      ],
+      [
+        "platform",
+        1
+      ],
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "067010",
+      "corpName": "이씨에스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "115500",
+      "corpName": "케이씨에스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

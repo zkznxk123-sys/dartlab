@@ -1,0 +1,381 @@
+{
+  "ego": {
+    "stockCode": "131290",
+    "corpName": "티에스이",
+    "industry": "semiconductor",
+    "stage": "test",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 4289,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "035890",
+      "corpName": "서희건설",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 11001
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "068760",
+      "corpName": "셀트리온제약",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 5364
+    },
+    {
+      "stockCode": "096870",
+      "corpName": "엘디티",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 110
+    },
+    {
+      "stockCode": "219130",
+      "corpName": "타이거일렉",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 0
+    },
+    {
+      "stockCode": "446540",
+      "corpName": "메가터치",
+      "industry": "battery",
+      "stage": "electrolyte",
+      "revenue": 432
+    },
+    {
+      "stockCode": "172670",
+      "corpName": "에이엘티",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 484
+    },
+    {
+      "stockCode": "413300",
+      "corpName": "티엘엔지니어링",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 0
+    },
+    {
+      "stockCode": "480370",
+      "corpName": "씨케이솔루션",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 2910
+    }
+  ],
+  "edges": [
+    {
+      "from": "035890",
+      "to": "131290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "068270",
+      "to": "131290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "068760",
+      "to": "131290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "096870",
+      "to": "131290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "219130",
+      "to": "131290",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "446540",
+      "to": "131290",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "131290",
+      "to": "219130",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "131290",
+      "to": "446540",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "131290",
+      "to": "096870",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "131290",
+      "to": "172670",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "219130",
+      "to": "131290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "131290",
+      "to": "413300",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "446540",
+      "to": "131290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "480370",
+      "to": "131290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 307663254437.0,
+      "operating_profit": 54644719033.0,
+      "net_profit": 44721094719.0,
+      "total_assets": 371789335816.0
+    },
+    {
+      "year": "2022",
+      "sales": 339264169508.0,
+      "operating_profit": 56626172882.0,
+      "net_profit": 53365190430.0,
+      "total_assets": 435835838754.0
+    },
+    {
+      "year": "2023",
+      "sales": 249147689845.0,
+      "operating_profit": -2380122294.0,
+      "net_profit": -2216057144.0,
+      "total_assets": 443121340995.0
+    },
+    {
+      "year": "2024",
+      "sales": 348053207965.0,
+      "operating_profit": 39898852512.0,
+      "net_profit": 45031658141.0,
+      "total_assets": 519408350485.0
+    },
+    {
+      "year": "2025",
+      "sales": 428900789083.0,
+      "operating_profit": 49172057097.0,
+      "net_profit": 38229673563.0,
+      "total_assets": 608025581215.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ],
+      [
+        "battery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "set",
+        1
+      ],
+      [
+        "electrolyte",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "219130",
+      "corpName": "타이거일렉",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "446540",
+      "corpName": "메가터치",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "413300",
+      "corpName": "티엘엔지니어링",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

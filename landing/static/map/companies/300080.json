@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "300080",
+    "corpName": "플리토",
+    "industry": "software",
+    "stage": "platform",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 360,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "035900",
+      "corpName": "JYP Ent.",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 8219
+    }
+  ],
+  "edges": [
+    {
+      "from": "035900",
+      "to": "300080",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 9338274470.0,
+      "operating_profit": -6143736170.0,
+      "net_profit": -5780518467.0,
+      "total_assets": 27908487263.0
+    },
+    {
+      "year": "2022",
+      "sales": 13639437063.0,
+      "operating_profit": -6595175443.0,
+      "net_profit": -5868323015.0,
+      "total_assets": 24767706232.0
+    },
+    {
+      "year": "2023",
+      "sales": 17761267682.0,
+      "operating_profit": -5094024751.0,
+      "net_profit": -6792796311.0,
+      "total_assets": 15771081295.0
+    },
+    {
+      "year": "2024",
+      "sales": 20300590454.0,
+      "operating_profit": -396344850.0,
+      "net_profit": 0.0,
+      "total_assets": 16537997958.0
+    },
+    {
+      "year": "2025",
+      "sales": 35979641976.0,
+      "operating_profit": 6153818311.0,
+      "net_profit": 6448160859.0,
+      "total_assets": 24575168335.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

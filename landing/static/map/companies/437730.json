@@ -1,0 +1,149 @@
+{
+  "ego": {
+    "stockCode": "437730",
+    "corpName": "삼현",
+    "industry": "retail",
+    "stage": "retail",
+    "role": "소매",
+    "stream": "downstream",
+    "revenue": 950,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "241690",
+      "corpName": "유니테크노",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 1072
+    },
+    {
+      "stockCode": "013870",
+      "corpName": "지엠비코리아",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 7873
+    }
+  ],
+  "edges": [
+    {
+      "from": "437730",
+      "to": "241690",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "013870",
+      "to": "437730",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "013870",
+      "to": "437730",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2023",
+      "sales": 99848743018.0,
+      "operating_profit": 9796377029.0,
+      "net_profit": 0.0,
+      "total_assets": 94859740698.0
+    },
+    {
+      "year": "2024",
+      "sales": 100447699055.0,
+      "operating_profit": 5516949984.0,
+      "net_profit": 0.0,
+      "total_assets": 140292826674.0
+    },
+    {
+      "year": "2025",
+      "sales": 95041722249.0,
+      "operating_profit": 805333955.0,
+      "net_profit": 9690725039.0,
+      "total_assets": 202098988834.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "241690",
+      "corpName": "유니테크노",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

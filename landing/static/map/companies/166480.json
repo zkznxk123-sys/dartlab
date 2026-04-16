@@ -1,0 +1,174 @@
+{
+  "ego": {
+    "stockCode": "166480",
+    "corpName": "코아스템켐온",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 202,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "071950",
+      "corpName": "코아스",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 622
+    },
+    {
+      "stockCode": "382800",
+      "corpName": "지앤비에스 에코",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 919
+    }
+  ],
+  "edges": [
+    {
+      "from": "166480",
+      "to": "071950",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "071950",
+      "to": "166480",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "382800",
+      "to": "166480",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 30240039388.0,
+      "operating_profit": -10549814047.0,
+      "net_profit": -4996381858.0,
+      "total_assets": 136408475633.0
+    },
+    {
+      "year": "2022",
+      "sales": 46293144603.0,
+      "operating_profit": -6013330167.0,
+      "net_profit": 2657222509.0,
+      "total_assets": 78614045993.0
+    },
+    {
+      "year": "2023",
+      "sales": 33657156172.0,
+      "operating_profit": -19675632871.0,
+      "net_profit": -17671634878.0,
+      "total_assets": 78591323826.0
+    },
+    {
+      "year": "2024",
+      "sales": 28762459937.0,
+      "operating_profit": -22019245376.0,
+      "net_profit": null,
+      "total_assets": 117457187209.0
+    },
+    {
+      "year": "2025",
+      "sales": 20158947968.0,
+      "operating_profit": -21222616625.0,
+      "net_profit": 0.0,
+      "total_assets": 112371324323.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "food",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "distribution",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "071950",
+      "corpName": "코아스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "ego": {
+    "stockCode": "900250",
+    "corpName": "크리스탈신소재",
+    "industry": "finance",
+    "stage": "fintech",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 4,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "900310",
+      "corpName": "컬러레이",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 3
+    }
+  ],
+  "edges": [
+    {
+      "from": "900250",
+      "to": "900310",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 351118416.0,
+      "operating_profit": 83395570.0,
+      "net_profit": 55227324.0,
+      "total_assets": 1912751918.0
+    },
+    {
+      "year": "2022",
+      "sales": 407024441.0,
+      "operating_profit": 100624504.0,
+      "net_profit": 80561769.0,
+      "total_assets": 2210622501.0
+    },
+    {
+      "year": "2023",
+      "sales": 446935129.0,
+      "operating_profit": 126216500.0,
+      "net_profit": 50125489.0,
+      "total_assets": 2244691084.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "900310",
+      "corpName": "컬러레이",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
+  ]
+}

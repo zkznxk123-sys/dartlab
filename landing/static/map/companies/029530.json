@@ -1,0 +1,151 @@
+{
+  "ego": {
+    "stockCode": "029530",
+    "corpName": "신도리코",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 3173,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "390110",
+      "corpName": "애니메디솔루션",
+      "industry": "medicalDevice",
+      "stage": "imaging",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "029530",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "029530",
+      "to": "390110",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 321884369044.0,
+      "operating_profit": 4323466550.0,
+      "net_profit": 95437496353.0,
+      "total_assets": 1022601242833.0
+    },
+    {
+      "year": "2022",
+      "sales": 378186827805.0,
+      "operating_profit": -2209596552.0,
+      "net_profit": 45016566294.0,
+      "total_assets": 1038493447520.0
+    },
+    {
+      "year": "2023",
+      "sales": 395823115252.0,
+      "operating_profit": 25334080155.0,
+      "net_profit": 54984228871.0,
+      "total_assets": 1078782998517.0
+    },
+    {
+      "year": "2024",
+      "sales": 340994882503.0,
+      "operating_profit": 20156744960.0,
+      "net_profit": 73194606397.0,
+      "total_assets": 1143580683305.0
+    },
+    {
+      "year": "2025",
+      "sales": 317327883419.0,
+      "operating_profit": 6247695108.0,
+      "net_profit": 20068805676.0,
+      "total_assets": 1149029457149.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "390110",
+      "corpName": "애니메디솔루션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

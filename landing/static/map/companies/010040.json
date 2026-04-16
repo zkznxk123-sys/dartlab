@@ -1,0 +1,271 @@
+{
+  "ego": {
+    "stockCode": "010040",
+    "corpName": "한국내화",
+    "industry": "buildingMaterials",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 4063,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002380",
+      "corpName": "케이씨씨",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 64838
+    },
+    {
+      "stockCode": "010820",
+      "corpName": "퍼스텍",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 2948
+    },
+    {
+      "stockCode": "093370",
+      "corpName": "후성",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 4716
+    },
+    {
+      "stockCode": "098070",
+      "corpName": "한텍",
+      "industry": "machinery",
+      "stage": "",
+      "revenue": 1719
+    },
+    {
+      "stockCode": "011810",
+      "corpName": "STX",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 6413
+    },
+    {
+      "stockCode": "084010",
+      "corpName": "대한제강",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 12471
+    }
+  ],
+  "edges": [
+    {
+      "from": "010040",
+      "to": "002380",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "010040",
+      "to": "010820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "010040",
+      "to": "093370",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "010040",
+      "to": "098070",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "010040",
+      "to": "011810",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "010820",
+      "to": "010040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "010040",
+      "to": "084010",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "093370",
+      "to": "010040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "098070",
+      "to": "010040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 271738137334.0,
+      "operating_profit": 8589133409.0,
+      "net_profit": 5684425508.0,
+      "total_assets": 357947858446.0
+    },
+    {
+      "year": "2022",
+      "sales": 358774066756.0,
+      "operating_profit": 10520196988.0,
+      "net_profit": 809211754.0,
+      "total_assets": 325998841087.0
+    },
+    {
+      "year": "2023",
+      "sales": 411810116407.0,
+      "operating_profit": -7538507015.0,
+      "net_profit": -14730463885.0,
+      "total_assets": 333192248433.0
+    },
+    {
+      "year": "2024",
+      "sales": 416008387892.0,
+      "operating_profit": 8586286130.0,
+      "net_profit": 5505120876.0,
+      "total_assets": 307361942953.0
+    },
+    {
+      "year": "2025",
+      "sales": 406341175254.0,
+      "operating_profit": 2776126317.0,
+      "net_profit": -21794108992.0,
+      "total_assets": 275160718628.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "002380",
+      "corpName": "케이씨씨",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "084010",
+      "corpName": "대한제강",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "003300",
+      "corpName": "한일홀딩스",
+      "stage": "general",
+      "revenue": 19305
+    },
+    {
+      "stockCode": "000480",
+      "corpName": "시알홀딩스",
+      "stage": "general",
+      "revenue": 8278
+    },
+    {
+      "stockCode": "462520",
+      "corpName": "조선내화",
+      "stage": "general",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "004440",
+      "corpName": "삼일씨엔에스",
+      "stage": "general",
+      "revenue": 2231
+    },
+    {
+      "stockCode": "000910",
+      "corpName": "유니온",
+      "stage": "general",
+      "revenue": 2024
+    }
+  ]
+}

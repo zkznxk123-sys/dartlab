@@ -1,0 +1,213 @@
+{
+  "ego": {
+    "stockCode": "264450",
+    "corpName": "유비쿼스",
+    "industry": "telecom",
+    "stage": "device",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 1164,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "053980",
+      "corpName": "오상자이엘",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 1364
+    },
+    {
+      "stockCode": "078070",
+      "corpName": "유비쿼스홀딩스",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 1557
+    },
+    {
+      "stockCode": "050890",
+      "corpName": "쏠리드",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 2948
+    },
+    {
+      "stockCode": "073490",
+      "corpName": "이노와이어리스",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 1861
+    }
+  ],
+  "edges": [
+    {
+      "from": "053980",
+      "to": "264450",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "264450",
+      "to": "078070",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "078070",
+      "to": "264450",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "264450",
+      "to": "078070",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "050890",
+      "to": "264450",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.0%"
+    },
+    {
+      "from": "073490",
+      "to": "264450",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 139088362724.0,
+      "operating_profit": 31851878863.0,
+      "net_profit": 28803266494.0,
+      "total_assets": 168013554033.0
+    },
+    {
+      "year": "2022",
+      "sales": 133722826313.0,
+      "operating_profit": 24541815189.0,
+      "net_profit": 21485809256.0,
+      "total_assets": 181625748914.0
+    },
+    {
+      "year": "2023",
+      "sales": 150278202365.0,
+      "operating_profit": 29038985036.0,
+      "net_profit": -1670.0,
+      "total_assets": 204169438281.0
+    },
+    {
+      "year": "2024",
+      "sales": 103793319517.0,
+      "operating_profit": 12370912733.0,
+      "net_profit": 21280049204.0,
+      "total_assets": 202677873136.0
+    },
+    {
+      "year": "2025",
+      "sales": 116437998535.0,
+      "operating_profit": 23104437271.0,
+      "net_profit": 24053039545.0,
+      "total_assets": 223476287308.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "078070",
+      "corpName": "유비쿼스홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

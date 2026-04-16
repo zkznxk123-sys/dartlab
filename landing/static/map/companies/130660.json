@@ -1,0 +1,154 @@
+{
+  "ego": {
+    "stockCode": "130660",
+    "corpName": "한전산업",
+    "industry": "energy",
+    "stage": "generation",
+    "role": "서비스",
+    "stream": "upstream",
+    "revenue": 3945,
+    "confidence": 0.76,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000480",
+      "corpName": "시알홀딩스",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 8278
+    },
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 974293
+    }
+  ],
+  "edges": [
+    {
+      "from": "000480",
+      "to": "130660",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "015760",
+      "to": "130660",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "130660",
+      "to": "015760",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 321065449338.0,
+      "operating_profit": 17515390232.0,
+      "net_profit": 8615983060.0,
+      "total_assets": 163320479666.0
+    },
+    {
+      "year": "2022",
+      "sales": 346042225300.0,
+      "operating_profit": 18651295433.0,
+      "net_profit": 16285862704.0,
+      "total_assets": 157781435629.0
+    },
+    {
+      "year": "2023",
+      "sales": 363261295971.0,
+      "operating_profit": 26038104194.0,
+      "net_profit": 15541995837.0,
+      "total_assets": 203640941365.0
+    },
+    {
+      "year": "2024",
+      "sales": 367526889292.0,
+      "operating_profit": 16143683837.0,
+      "net_profit": 11611875488.0,
+      "total_assets": 219980917783.0
+    },
+    {
+      "year": "2025",
+      "sales": 394548141840.0,
+      "operating_profit": 6574990617.0,
+      "net_profit": 40065.0,
+      "total_assets": 204525534707.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "stage": "generation",
+      "revenue": 974293
+    },
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "stage": "distribution",
+      "revenue": 357273
+    },
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "stage": "distribution",
+      "revenue": 52755
+    },
+    {
+      "stockCode": "071320",
+      "corpName": "지역난방공사",
+      "stage": "generation",
+      "revenue": 39982
+    },
+    {
+      "stockCode": "112610",
+      "corpName": "씨에스윈드",
+      "stage": "generation",
+      "revenue": 29316
+    }
+  ]
+}

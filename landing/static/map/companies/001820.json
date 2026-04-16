@@ -1,0 +1,268 @@
+{
+  "ego": {
+    "stockCode": "001820",
+    "corpName": "삼화콘덴서공업",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 2945,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "213500",
+      "corpName": "한솔제지",
+      "industry": "paper",
+      "stage": "general",
+      "revenue": 22900
+    },
+    {
+      "stockCode": "011230",
+      "corpName": "삼화전자공업",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 296
+    },
+    {
+      "stockCode": "009470",
+      "corpName": "삼화전기",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2301
+    },
+    {
+      "stockCode": "006110",
+      "corpName": "삼아알미늄",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 2715
+    }
+  ],
+  "edges": [
+    {
+      "from": "213500",
+      "to": "001820",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001820",
+      "to": "011230",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "001820",
+      "to": "009470",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "006110",
+      "to": "001820",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "009470",
+      "to": "001820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "011230",
+      "to": "001820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "009470",
+      "to": "001820",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.2%"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "내부유보 비중 87% — 자기 힘으로 성장",
+    "strengths": [
+      "내부유보 비중 87% — 자기 힘으로 성장",
+      "순현금 상태",
+      "부채비율 22% -- 매우 안정"
+    ],
+    "weaknesses": [
+      "매출 고집중 (HHI 9,993) -- 단일 부문 의존",
+      "영업적자 (-0.2%)",
+      "안전마진 -2.1% — 손익분기점 근접"
+    ],
+    "sector": "IT > 반도체와반도체장비",
+    "source": "audit",
+    "createdAt": "1775430966.5406945"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 262159285746.0,
+      "operating_profit": 33168936415.0,
+      "net_profit": 0.0,
+      "total_assets": 269298659241.0
+    },
+    {
+      "year": "2022",
+      "sales": 263469129967.0,
+      "operating_profit": 30515172659.0,
+      "net_profit": 29137403527.0,
+      "total_assets": 287453832625.0
+    },
+    {
+      "year": "2023",
+      "sales": 280768545013.0,
+      "operating_profit": 23693227777.0,
+      "net_profit": 115998365.0,
+      "total_assets": 308031065017.0
+    },
+    {
+      "year": "2024",
+      "sales": 295412198601.0,
+      "operating_profit": 17842307493.0,
+      "net_profit": 0.0,
+      "total_assets": 328114248167.0
+    },
+    {
+      "year": "2025",
+      "sales": 294491998379.0,
+      "operating_profit": 12866483343.0,
+      "net_profit": 0.0,
+      "total_assets": 340250346579.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "paper",
+        1
+      ],
+      [
+        "food",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        1
+      ],
+      [
+        "distribution",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "213500",
+      "corpName": "한솔제지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "006110",
+      "corpName": "삼아알미늄",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

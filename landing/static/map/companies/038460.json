@@ -1,0 +1,286 @@
+{
+  "ego": {
+    "stockCode": "038460",
+    "corpName": "바이오스마트",
+    "industry": "electronics",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 4828,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "032860",
+      "corpName": "더라미",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 509
+    },
+    {
+      "stockCode": "125020",
+      "corpName": "티씨머티리얼즈",
+      "industry": "medicalDevice",
+      "stage": "imaging",
+      "revenue": 2991
+    },
+    {
+      "stockCode": "057540",
+      "corpName": "옴니시스템",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 991
+    },
+    {
+      "stockCode": "036090",
+      "corpName": "위지트",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 4830
+    },
+    {
+      "stockCode": "073110",
+      "corpName": "엘엠에스",
+      "industry": "auto",
+      "stage": "body",
+      "revenue": 696
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "032860",
+      "to": "038460",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "125020",
+      "to": "038460",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "038460",
+      "to": "032860",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "038460",
+      "to": "057540",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "038460",
+      "to": "125020",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "038460",
+      "to": "036090",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "038460",
+      "to": "073110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "038460",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "057540",
+      "to": "038460",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "125020",
+      "to": "038460",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 189183025056.0,
+      "operating_profit": 8031744108.0,
+      "net_profit": 633794501.0,
+      "total_assets": 225851213718.0
+    },
+    {
+      "year": "2022",
+      "sales": 391821770039.0,
+      "operating_profit": 10150504780.0,
+      "net_profit": 721312916.0,
+      "total_assets": 237183206827.0
+    },
+    {
+      "year": "2023",
+      "sales": 456164440535.0,
+      "operating_profit": 10085424100.0,
+      "net_profit": -1727947913.0,
+      "total_assets": 260062933398.0
+    },
+    {
+      "year": "2024",
+      "sales": 484309653002.0,
+      "operating_profit": 20235103005.0,
+      "net_profit": 1055302880.0,
+      "total_assets": 262842630234.0
+    },
+    {
+      "year": "2025",
+      "sales": 482775592982.0,
+      "operating_profit": 22569241564.0,
+      "net_profit": -23066946.0,
+      "total_assets": 309881100162.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "medicalDevice",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "imaging",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "125020",
+      "corpName": "티씨머티리얼즈",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

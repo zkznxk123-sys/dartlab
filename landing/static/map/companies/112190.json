@@ -1,0 +1,138 @@
+{
+  "ego": {
+    "stockCode": "112190",
+    "corpName": "KC산업",
+    "industry": "buildingMaterials",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 0,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "004980",
+      "corpName": "성신양회",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 6580
+    },
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 7973
+    }
+  ],
+  "edges": [
+    {
+      "from": "004980",
+      "to": "112190",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "029460",
+      "to": "112190",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "112190",
+      "to": "029460",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "energy",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "distribution",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "003300",
+      "corpName": "한일홀딩스",
+      "stage": "general",
+      "revenue": 19305
+    },
+    {
+      "stockCode": "000480",
+      "corpName": "시알홀딩스",
+      "stage": "general",
+      "revenue": 8278
+    },
+    {
+      "stockCode": "462520",
+      "corpName": "조선내화",
+      "stage": "general",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "010040",
+      "corpName": "한국내화",
+      "stage": "general",
+      "revenue": 4063
+    },
+    {
+      "stockCode": "004440",
+      "corpName": "삼일씨엔에스",
+      "stage": "general",
+      "revenue": 2231
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "ego": {
+    "stockCode": "080520",
+    "corpName": "오디텍",
+    "industry": "electronics",
+    "stage": "set",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 380,
+    "confidence": 0.76,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "038060",
+      "corpName": "루멘스",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 1755
+    },
+    {
+      "stockCode": "039980",
+      "corpName": "폴라리스AI",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 436
+    },
+    {
+      "stockCode": "066310",
+      "corpName": "큐에스아이",
+      "industry": "medicalDevice",
+      "stage": "therapeutic",
+      "revenue": 233
+    }
+  ],
+  "edges": [
+    {
+      "from": "038060",
+      "to": "080520",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "039980",
+      "to": "080520",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "080520",
+      "to": "066310",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "038060",
+      "to": "080520",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.5%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 54427039739.0,
+      "operating_profit": 4789226966.0,
+      "net_profit": 4104485697.0,
+      "total_assets": 145443710932.0
+    },
+    {
+      "year": "2022",
+      "sales": 40389289878.0,
+      "operating_profit": -3371639793.0,
+      "net_profit": -4054767542.0,
+      "total_assets": 135571022652.0
+    },
+    {
+      "year": "2023",
+      "sales": 34964165951.0,
+      "operating_profit": -4252771289.0,
+      "net_profit": 2950848792.0,
+      "total_assets": 138037594061.0
+    },
+    {
+      "year": "2024",
+      "sales": 37001931925.0,
+      "operating_profit": -6361445277.0,
+      "net_profit": 5471824408.0,
+      "total_assets": 136975371245.0
+    },
+    {
+      "year": "2025",
+      "sales": 37959545863.0,
+      "operating_profit": -2276892782.0,
+      "net_profit": 890599267.0,
+      "total_assets": 134145170682.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "066310",
+      "corpName": "큐에스아이",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

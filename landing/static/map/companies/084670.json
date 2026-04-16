@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "084670",
+    "corpName": "동양고속",
+    "industry": "realestate",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 1252,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "033830",
+      "corpName": "티비씨",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 427
+    },
+    {
+      "stockCode": "089790",
+      "corpName": "제이티",
+      "industry": "semiconductor",
+      "stage": "test",
+      "revenue": 384
+    }
+  ],
+  "edges": [
+    {
+      "from": "084670",
+      "to": "033830",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "084670",
+      "to": "089790",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 81175925442.0,
+      "operating_profit": -22023394046.0,
+      "net_profit": -23943626892.0,
+      "total_assets": 168829554468.0
+    },
+    {
+      "year": "2022",
+      "sales": 100461286806.0,
+      "operating_profit": -11216972073.0,
+      "net_profit": -12780567056.0,
+      "total_assets": 165498374153.0
+    },
+    {
+      "year": "2023",
+      "sales": 119970715686.0,
+      "operating_profit": -287881125.0,
+      "net_profit": -3093450679.0,
+      "total_assets": 168393915617.0
+    },
+    {
+      "year": "2024",
+      "sales": 116774198828.0,
+      "operating_profit": -1530752310.0,
+      "net_profit": -16680416646.0,
+      "total_assets": 157734719637.0
+    },
+    {
+      "year": "2025",
+      "sales": 125183458405.0,
+      "operating_profit": 5098088145.0,
+      "net_profit": 2965035932.0,
+      "total_assets": 157194507262.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "023590",
+      "corpName": "다우기술",
+      "stage": "general",
+      "revenue": 174950
+    },
+    {
+      "stockCode": "005440",
+      "corpName": "현대지에프홀딩스",
+      "stage": "general",
+      "revenue": 80916
+    },
+    {
+      "stockCode": "058650",
+      "corpName": "세아홀딩스",
+      "stage": "general",
+      "revenue": 66111
+    },
+    {
+      "stockCode": "034810",
+      "corpName": "해성산업",
+      "stage": "general",
+      "revenue": 22601
+    },
+    {
+      "stockCode": "002990",
+      "corpName": "금호건설",
+      "stage": "general",
+      "revenue": 20185
+    }
+  ]
+}

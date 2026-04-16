@@ -1,0 +1,240 @@
+{
+  "ego": {
+    "stockCode": "359090",
+    "corpName": "씨엔알리서치",
+    "industry": "consulting",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 650,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "144510",
+      "corpName": "지씨셀",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 1655
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    },
+    {
+      "stockCode": "199730",
+      "corpName": "바이오인프라",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 0
+    },
+    {
+      "stockCode": "266470",
+      "corpName": "바이오인프라생명과학",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 0
+    },
+    {
+      "stockCode": "388870",
+      "corpName": "파로스아이바이오",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "144510",
+      "to": "359090",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "041510",
+      "to": "359090",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "359090",
+      "to": "041510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "359090",
+      "to": "199730",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "359090",
+      "to": "266470",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "359090",
+      "to": "388870",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 43171233227.0,
+      "operating_profit": 5813414468.0,
+      "net_profit": -3304080802.0,
+      "total_assets": 71271780178.0
+    },
+    {
+      "year": "2022",
+      "sales": 48498302953.0,
+      "operating_profit": 4708166846.0,
+      "net_profit": 0.0,
+      "total_assets": 70506586408.0
+    },
+    {
+      "year": "2023",
+      "sales": 55102004323.0,
+      "operating_profit": 6232524670.0,
+      "net_profit": 0.0,
+      "total_assets": 77847768012.0
+    },
+    {
+      "year": "2024",
+      "sales": 59688657389.0,
+      "operating_profit": 3630240161.0,
+      "net_profit": 0.0,
+      "total_assets": 85602229971.0
+    },
+    {
+      "year": "2025",
+      "sales": 64982070922.0,
+      "operating_profit": 1384561417.0,
+      "net_profit": -1564383384.0,
+      "total_assets": 84686909217.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "media",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "agency",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "388870",
+      "corpName": "파로스아이바이오",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "003030",
+      "corpName": "세아제강지주",
+      "stage": "general",
+      "revenue": 37596
+    },
+    {
+      "stockCode": "000070",
+      "corpName": "삼양홀딩스",
+      "stage": "general",
+      "revenue": 33483
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "036710",
+      "corpName": "심텍홀딩스",
+      "stage": "general",
+      "revenue": 15281
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "stage": "general",
+      "revenue": 13276
+    }
+  ]
+}

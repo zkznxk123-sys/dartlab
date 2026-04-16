@@ -1,0 +1,95 @@
+{
+  "ego": {
+    "stockCode": "900100",
+    "corpName": "애머릿지",
+    "industry": "auto",
+    "stage": "chassis",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 0,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 71406175.0,
+      "operating_profit": 1348834.0,
+      "net_profit": 4339527.0,
+      "total_assets": 60402999.0
+    },
+    {
+      "year": "2022",
+      "sales": 51095676.0,
+      "operating_profit": 972148.0,
+      "net_profit": 1070292.0,
+      "total_assets": 60966809.0
+    },
+    {
+      "year": "2023",
+      "sales": 29439851.0,
+      "operating_profit": -7528141.0,
+      "net_profit": -27215050.0,
+      "total_assets": 36708786.0
+    },
+    {
+      "year": "2024",
+      "sales": 13936215.0,
+      "operating_profit": -8408594.0,
+      "net_profit": -11728055.0,
+      "total_assets": 33189480.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+{
+  "ego": {
+    "stockCode": "037370",
+    "corpName": "EG",
+    "industry": "environment",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 628,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000910",
+      "corpName": "유니온",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 2024
+    },
+    {
+      "stockCode": "046070",
+      "corpName": "코다코",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 2710
+    }
+  ],
+  "edges": [
+    {
+      "from": "037370",
+      "to": "000910",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "037370",
+      "to": "046070",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 95693333644.0,
+      "operating_profit": 7577496321.0,
+      "net_profit": 0.0,
+      "total_assets": 145606755674.0
+    },
+    {
+      "year": "2022",
+      "sales": 70189076829.0,
+      "operating_profit": -8562134701.0,
+      "net_profit": -11271838485.0,
+      "total_assets": 154144472522.0
+    },
+    {
+      "year": "2023",
+      "sales": 61797981915.0,
+      "operating_profit": -14353005712.0,
+      "net_profit": -7974361996.0,
+      "total_assets": 149459123165.0
+    },
+    {
+      "year": "2024",
+      "sales": 65213324318.0,
+      "operating_profit": -5466140843.0,
+      "net_profit": 0.0,
+      "total_assets": 151951948568.0
+    },
+    {
+      "year": "2025",
+      "sales": 62750627943.0,
+      "operating_profit": -2165701772.0,
+      "net_profit": 0.0,
+      "total_assets": 151597052789.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "000910",
+      "corpName": "유니온",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "046070",
+      "corpName": "코다코",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001390",
+      "corpName": "KG케미칼",
+      "stage": "general",
+      "revenue": 91016
+    },
+    {
+      "stockCode": "151860",
+      "corpName": "KG에코솔루션",
+      "stage": "general",
+      "revenue": 75772
+    },
+    {
+      "stockCode": "014580",
+      "corpName": "태경비케이",
+      "stage": "general",
+      "revenue": 3859
+    },
+    {
+      "stockCode": "066980",
+      "corpName": "한성크린텍",
+      "stage": "general",
+      "revenue": 1999
+    },
+    {
+      "stockCode": "060150",
+      "corpName": "인선이엔티",
+      "stage": "general",
+      "revenue": 1872
+    }
+  ]
+}

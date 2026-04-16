@@ -1,0 +1,192 @@
+{
+  "ego": {
+    "stockCode": "073540",
+    "corpName": "에프알텍",
+    "industry": "telecom",
+    "stage": "infra",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 253,
+    "confidence": 0.8,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "040300",
+      "corpName": "YTN",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 1342
+    },
+    {
+      "stockCode": "025770",
+      "corpName": "한국정보통신",
+      "industry": "finance",
+      "stage": "fintech",
+      "revenue": 249
+    },
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "230240",
+      "corpName": "에치에프알",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 1420
+    }
+  ],
+  "edges": [
+    {
+      "from": "073540",
+      "to": "040300",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "073540",
+      "to": "025770",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "073540",
+      "to": "030200",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "230240",
+      "to": "073540",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "230240",
+      "to": "073540",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 23116665949.0,
+      "operating_profit": -2152655543.0,
+      "net_profit": 233774491.0,
+      "total_assets": 76779103370.0
+    },
+    {
+      "year": "2022",
+      "sales": 18648483465.0,
+      "operating_profit": -4486494279.0,
+      "net_profit": -17643998.0,
+      "total_assets": 112725108235.0
+    },
+    {
+      "year": "2023",
+      "sales": 24805176748.0,
+      "operating_profit": -501460799.0,
+      "net_profit": 1999447432.0,
+      "total_assets": 78582735363.0
+    },
+    {
+      "year": "2024",
+      "sales": 29759555648.0,
+      "operating_profit": 814561384.0,
+      "net_profit": 1109142838.0,
+      "total_assets": 70810340644.0
+    },
+    {
+      "year": "2025",
+      "sales": 25263688167.0,
+      "operating_profit": 919606633.0,
+      "net_profit": 2204141017.0,
+      "total_assets": 74060340132.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

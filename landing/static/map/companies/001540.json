@@ -1,0 +1,180 @@
+{
+  "ego": {
+    "stockCode": "001540",
+    "corpName": "안국약품",
+    "industry": "pharma",
+    "stage": "formulation",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 3069,
+    "confidence": 0.6,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "069510",
+      "corpName": "에스텍",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 4682
+    },
+    {
+      "stockCode": "174900",
+      "corpName": "앱클론",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 47
+    },
+    {
+      "stockCode": "086450",
+      "corpName": "동국제약",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 9269
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 65797
+    }
+  ],
+  "edges": [
+    {
+      "from": "001540",
+      "to": "069510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001540",
+      "to": "174900",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "086450",
+      "to": "001540",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001540",
+      "to": "033780",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 163533830268.0,
+      "operating_profit": -1084081000.0,
+      "net_profit": 3939217434.0,
+      "total_assets": 219955957073.0
+    },
+    {
+      "year": "2022",
+      "sales": 205388536295.0,
+      "operating_profit": 9675844159.0,
+      "net_profit": 6875382485.0,
+      "total_assets": 223912433648.0
+    },
+    {
+      "year": "2023",
+      "sales": 233675500767.0,
+      "operating_profit": 5061440940.0,
+      "net_profit": -291845669.0,
+      "total_assets": 238597552699.0
+    },
+    {
+      "year": "2024",
+      "sales": 271115916678.0,
+      "operating_profit": 6701374793.0,
+      "net_profit": 16343180693.0,
+      "total_assets": 302535318896.0
+    },
+    {
+      "year": "2025",
+      "sales": 306873904373.0,
+      "operating_profit": 9822537198.0,
+      "net_profit": 0.0,
+      "total_assets": 310952617469.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

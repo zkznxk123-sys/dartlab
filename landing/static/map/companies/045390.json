@@ -1,0 +1,249 @@
+{
+  "ego": {
+    "stockCode": "045390",
+    "corpName": "대아티아이",
+    "industry": "railroad",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1532,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "012630",
+      "corpName": "HDC",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 9483
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "298540",
+      "corpName": "더네이쳐홀딩스",
+      "industry": "textile",
+      "stage": "apparel",
+      "revenue": 4775
+    },
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "053580",
+      "corpName": "웹케시",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 744
+    },
+    {
+      "stockCode": "380540",
+      "corpName": "옵티코어",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 215
+    },
+    {
+      "stockCode": "458870",
+      "corpName": "씨어스테크놀로지",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 482
+    }
+  ],
+  "edges": [
+    {
+      "from": "045390",
+      "to": "012630",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "045390",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "045390",
+      "to": "298540",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "045390",
+      "to": "030200",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "045390",
+      "to": "053580",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "045390",
+      "to": "380540",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.3%"
+    },
+    {
+      "from": "045390",
+      "to": "458870",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.0%"
+    },
+    {
+      "from": "045390",
+      "to": "053580",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.7%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 116252752112.0,
+      "operating_profit": 9606151217.0,
+      "net_profit": 5311973717.0,
+      "total_assets": 193354630444.0
+    },
+    {
+      "year": "2022",
+      "sales": 105547717079.0,
+      "operating_profit": 9400914373.0,
+      "net_profit": 8368988432.0,
+      "total_assets": 199618821905.0
+    },
+    {
+      "year": "2023",
+      "sales": 112334976960.0,
+      "operating_profit": 3561685564.0,
+      "net_profit": 10749558974.0,
+      "total_assets": 251490161868.0
+    },
+    {
+      "year": "2024",
+      "sales": 149149155214.0,
+      "operating_profit": 7908744652.0,
+      "net_profit": 14721829942.0,
+      "total_assets": 292005877872.0
+    },
+    {
+      "year": "2025",
+      "sales": 153189348670.0,
+      "operating_profit": 7559496321.0,
+      "net_profit": 0.0,
+      "total_assets": 336415770831.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "064350",
+      "corpName": "현대로템",
+      "stage": "general",
+      "revenue": 58390
+    },
+    {
+      "stockCode": "271940",
+      "corpName": "일진하이솔루스",
+      "stage": "general",
+      "revenue": 816
+    },
+    {
+      "stockCode": "088390",
+      "corpName": "이녹스",
+      "stage": "",
+      "revenue": 591
+    },
+    {
+      "stockCode": "123750",
+      "corpName": "알톤",
+      "stage": "",
+      "revenue": 322
+    },
+    {
+      "stockCode": "115500",
+      "corpName": "케이씨에스",
+      "stage": "general",
+      "revenue": 249
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "ego": {
+    "stockCode": "111710",
+    "corpName": "남화산업",
+    "industry": "leisure",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 168,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "091590",
+      "corpName": "남화토건",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 727
+    }
+  ],
+  "edges": [
+    {
+      "from": "091590",
+      "to": "111710",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "111710",
+      "to": "091590",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 25893224088.0,
+      "operating_profit": 13828657220.0,
+      "net_profit": 13736701601.0,
+      "total_assets": 166982770974.0
+    },
+    {
+      "year": "2022",
+      "sales": 30435802726.0,
+      "operating_profit": 17721459369.0,
+      "net_profit": 20643476480.0,
+      "total_assets": 182680026557.0
+    },
+    {
+      "year": "2023",
+      "sales": 24670582732.0,
+      "operating_profit": 11794142261.0,
+      "net_profit": 17655540121.0,
+      "total_assets": 193071860537.0
+    },
+    {
+      "year": "2025",
+      "sales": 16771010459.0,
+      "operating_profit": 4093920849.0,
+      "net_profit": 6671954168.0,
+      "total_assets": 202321203420.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "008770",
+      "corpName": "호텔신라",
+      "stage": "general",
+      "revenue": 40683
+    },
+    {
+      "stockCode": "035250",
+      "corpName": "강원랜드",
+      "stage": "general",
+      "revenue": 14767
+    },
+    {
+      "stockCode": "034230",
+      "corpName": "파라다이스",
+      "stage": "general",
+      "revenue": 11499
+    },
+    {
+      "stockCode": "215000",
+      "corpName": "골프존",
+      "stage": "general",
+      "revenue": 4833
+    },
+    {
+      "stockCode": "114090",
+      "corpName": "GKL",
+      "stage": "general",
+      "revenue": 4229
+    }
+  ]
+}

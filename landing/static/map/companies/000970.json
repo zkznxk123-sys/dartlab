@@ -1,0 +1,224 @@
+{
+  "ego": {
+    "stockCode": "000970",
+    "corpName": "한국주철관공업",
+    "industry": "steel",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 4066,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001770",
+      "corpName": "SHD",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 1004
+    },
+    {
+      "stockCode": "058400",
+      "corpName": "KNN",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 685
+    },
+    {
+      "stockCode": "058650",
+      "corpName": "세아홀딩스",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 66111
+    },
+    {
+      "stockCode": "014280",
+      "corpName": "금강공업",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 8022
+    }
+  ],
+  "edges": [
+    {
+      "from": "001770",
+      "to": "000970",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000970",
+      "to": "058400",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "058650",
+      "to": "000970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000970",
+      "to": "058400",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.7%"
+    },
+    {
+      "from": "014280",
+      "to": "000970",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.0%"
+    },
+    {
+      "from": "058650",
+      "to": "000970",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 510185095507.0,
+      "operating_profit": 48569477615.0,
+      "net_profit": 65898905421.0,
+      "total_assets": 423089951776.0
+    },
+    {
+      "year": "2022",
+      "sales": 484291225781.0,
+      "operating_profit": 13990246944.0,
+      "net_profit": 12067999270.0,
+      "total_assets": 424608629316.0
+    },
+    {
+      "year": "2023",
+      "sales": 456325697481.0,
+      "operating_profit": 20384146359.0,
+      "net_profit": 17420022071.0,
+      "total_assets": 434108102058.0
+    },
+    {
+      "year": "2024",
+      "sales": 419416899335.0,
+      "operating_profit": 15445910306.0,
+      "net_profit": 14347893535.0,
+      "total_assets": 429705980847.0
+    },
+    {
+      "year": "2025",
+      "sales": 406620008497.0,
+      "operating_profit": 13295560073.0,
+      "net_profit": 16965249242.0,
+      "total_assets": 435616657290.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "001770",
+      "corpName": "SHD",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

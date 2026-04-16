@@ -1,0 +1,143 @@
+{
+  "ego": {
+    "stockCode": "002360",
+    "corpName": "SH에너지화학",
+    "industry": "chemical",
+    "stage": "polymer",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 986,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 184830
+    }
+  ],
+  "edges": [
+    {
+      "from": "011170",
+      "to": "002360",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 139801659440.0,
+      "operating_profit": 342824636.0,
+      "net_profit": 611077450.0,
+      "total_assets": 119629057587.0
+    },
+    {
+      "year": "2022",
+      "sales": 167355874554.0,
+      "operating_profit": 805218302.0,
+      "net_profit": 1832403955.0,
+      "total_assets": 124160292131.0
+    },
+    {
+      "year": "2023",
+      "sales": 134037726894.0,
+      "operating_profit": -4115868315.0,
+      "net_profit": -2582296699.0,
+      "total_assets": 120793105133.0
+    },
+    {
+      "year": "2024",
+      "sales": 126047268210.0,
+      "operating_profit": -9694396156.0,
+      "net_profit": -10413174918.0,
+      "total_assets": 110375913378.0
+    },
+    {
+      "year": "2025",
+      "sales": 98627094841.0,
+      "operating_profit": -12249904855.0,
+      "net_profit": null,
+      "total_assets": 101820431630.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "basic",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

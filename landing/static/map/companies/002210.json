@@ -1,0 +1,361 @@
+{
+  "ego": {
+    "stockCode": "002210",
+    "corpName": "동성제약",
+    "industry": "food",
+    "stage": "distribution",
+    "role": "도매",
+    "stream": "downstream",
+    "revenue": 872,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "307750",
+      "corpName": "국전약품",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 1310
+    },
+    {
+      "stockCode": "047920",
+      "corpName": "HLB제약",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 2056
+    },
+    {
+      "stockCode": "185750",
+      "corpName": "종근당",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 16924
+    },
+    {
+      "stockCode": "028300",
+      "corpName": "HLB",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 842
+    },
+    {
+      "stockCode": "214390",
+      "corpName": "경보제약",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 2641
+    },
+    {
+      "stockCode": "314140",
+      "corpName": "알피바이오",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 1362
+    },
+    {
+      "stockCode": "001360",
+      "corpName": "삼성제약",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 461
+    },
+    {
+      "stockCode": "044480",
+      "corpName": "빌리언스",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 253
+    },
+    {
+      "stockCode": "352770",
+      "corpName": "셀레스트라",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 20
+    }
+  ],
+  "edges": [
+    {
+      "from": "307750",
+      "to": "002210",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 1541.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "047920",
+      "to": "002210",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "185750",
+      "to": "002210",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "028300",
+      "to": "002210",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "214390",
+      "to": "002210",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "314140",
+      "to": "002210",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001360",
+      "to": "002210",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "044480",
+      "to": "002210",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "352770",
+      "to": "002210",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 84407657781.0,
+      "operating_profit": -5299049228.0,
+      "net_profit": -4312832259.0,
+      "total_assets": 104581874040.0
+    },
+    {
+      "year": "2022",
+      "sales": 83460002471.0,
+      "operating_profit": -3096985196.0,
+      "net_profit": -2121670417.0,
+      "total_assets": 107702060968.0
+    },
+    {
+      "year": "2023",
+      "sales": 88593588700.0,
+      "operating_profit": 596402805.0,
+      "net_profit": -2073909512.0,
+      "total_assets": 114973284037.0
+    },
+    {
+      "year": "2024",
+      "sales": 88448234133.0,
+      "operating_profit": -6593303196.0,
+      "net_profit": null,
+      "total_assets": 151912649154.0
+    },
+    {
+      "year": "2025",
+      "sales": 87168895112.0,
+      "operating_profit": -10118316902.0,
+      "net_profit": -25737002341.0,
+      "total_assets": 168443037239.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 7,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 1541.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 2,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "pharma",
+        6
+      ],
+      [
+        "food",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "formulation",
+        4
+      ],
+      [
+        "research",
+        2
+      ],
+      [
+        "distribution",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "307750",
+      "corpName": "국전약품",
+      "product": "",
+      "amount": 1541.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "047920",
+      "corpName": "HLB제약",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "185750",
+      "corpName": "종근당",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "028300",
+      "corpName": "HLB",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "214390",
+      "corpName": "경보제약",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "314140",
+      "corpName": "알피바이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "001360",
+      "corpName": "삼성제약",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

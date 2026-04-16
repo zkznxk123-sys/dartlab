@@ -1,0 +1,173 @@
+{
+  "ego": {
+    "stockCode": "033920",
+    "corpName": "무학",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1438,
+    "confidence": 0.6,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001940",
+      "corpName": "KISCO홀딩스",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 8253
+    },
+    {
+      "stockCode": "004450",
+      "corpName": "삼화왕관",
+      "industry": "steel",
+      "stage": "",
+      "revenue": 1629
+    },
+    {
+      "stockCode": "092070",
+      "corpName": "디엔에프",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 791
+    }
+  ],
+  "edges": [
+    {
+      "from": "001940",
+      "to": "033920",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004450",
+      "to": "033920",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033920",
+      "to": "092070",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "001940",
+      "to": "033920",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.2%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 126928339596.0,
+      "operating_profit": -890929326.0,
+      "net_profit": -16036159365.0,
+      "total_assets": 646644149778.0
+    },
+    {
+      "year": "2022",
+      "sales": 152832444811.0,
+      "operating_profit": 15643137742.0,
+      "net_profit": -13202293134.0,
+      "total_assets": 605739795014.0
+    },
+    {
+      "year": "2023",
+      "sales": 146573700822.0,
+      "operating_profit": 16162941974.0,
+      "net_profit": 65425861817.0,
+      "total_assets": 639327517358.0
+    },
+    {
+      "year": "2024",
+      "sales": 152059251251.0,
+      "operating_profit": 16875863184.0,
+      "net_profit": 48421929363.0,
+      "total_assets": 680447311689.0
+    },
+    {
+      "year": "2025",
+      "sales": 143830395069.0,
+      "operating_profit": 10235140357.0,
+      "net_profit": 50321647540.0,
+      "total_assets": 719917915104.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

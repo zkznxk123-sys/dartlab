@@ -1,0 +1,109 @@
+{
+  "ego": {
+    "stockCode": "405920",
+    "corpName": "나라셀라",
+    "industry": "retail",
+    "stage": "retail",
+    "role": "소매",
+    "stream": "downstream",
+    "revenue": 821,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "010780",
+      "corpName": "아이에스동서",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 12344
+    }
+  ],
+  "edges": [
+    {
+      "from": "405920",
+      "to": "010780",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2023",
+      "sales": 85325300237.0,
+      "operating_profit": 196480866.0,
+      "net_profit": -1104873844.0,
+      "total_assets": 131253791919.0
+    },
+    {
+      "year": "2024",
+      "sales": 82707219799.0,
+      "operating_profit": -3478071657.0,
+      "net_profit": -5711202453.0,
+      "total_assets": 128241345564.0
+    },
+    {
+      "year": "2025",
+      "sales": 82108561843.0,
+      "operating_profit": 984309945.0,
+      "net_profit": -29993357.0,
+      "total_assets": 119832196883.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

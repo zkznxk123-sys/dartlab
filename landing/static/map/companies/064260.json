@@ -1,0 +1,261 @@
+{
+  "ego": {
+    "stockCode": "064260",
+    "corpName": "다날",
+    "industry": "finance",
+    "stage": "fintech",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 2254,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "036690",
+      "corpName": "코맥스",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 851
+    },
+    {
+      "stockCode": "018700",
+      "corpName": "바른손",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 642
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 80991
+    },
+    {
+      "stockCode": "035620",
+      "corpName": "바른손이앤에이",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 116
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "307930",
+      "corpName": "컴퍼니케이",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "068050",
+      "corpName": "팬엔터테인먼트",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 352
+    }
+  ],
+  "edges": [
+    {
+      "from": "064260",
+      "to": "036690",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "064260",
+      "to": "018700",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "064260",
+      "to": "035720",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "064260",
+      "to": "035620",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "064260",
+      "to": "017670",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "064260",
+      "to": "307930",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "064260",
+      "to": "068050",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "064260",
+      "to": "035620",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "064260",
+      "to": "068050",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 285550121673.0,
+      "operating_profit": 15959749229.0,
+      "net_profit": 56322143013.0,
+      "total_assets": 814206809756.0
+    },
+    {
+      "year": "2022",
+      "sales": 294948282762.0,
+      "operating_profit": -2755768464.0,
+      "net_profit": -33844823562.0,
+      "total_assets": 749394875159.0
+    },
+    {
+      "year": "2023",
+      "sales": 295468234107.0,
+      "operating_profit": 3497746253.0,
+      "net_profit": -27862093347.0,
+      "total_assets": 769811473736.0
+    },
+    {
+      "year": "2024",
+      "sales": 260936633962.0,
+      "operating_profit": 1393329346.0,
+      "net_profit": 2924897911.0,
+      "total_assets": 745592738056.0
+    },
+    {
+      "year": "2025",
+      "sales": 225377154221.0,
+      "operating_profit": 2312158591.0,
+      "net_profit": 0.0,
+      "total_assets": 741963126216.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
+  ]
+}

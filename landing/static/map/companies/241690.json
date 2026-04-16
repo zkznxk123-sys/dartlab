@@ -1,0 +1,334 @@
+{
+  "ego": {
+    "stockCode": "241690",
+    "corpName": "유니테크노",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1072,
+    "confidence": 0.8,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "437730",
+      "corpName": "삼현",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 950
+    },
+    {
+      "stockCode": "125020",
+      "corpName": "티씨머티리얼즈",
+      "industry": "medicalDevice",
+      "stage": "imaging",
+      "revenue": 2991
+    },
+    {
+      "stockCode": "013570",
+      "corpName": "디와이",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 12448
+    },
+    {
+      "stockCode": "082640",
+      "corpName": "동양생명",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "047310",
+      "corpName": "파워로직스",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 6865
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ],
+  "edges": [
+    {
+      "from": "437730",
+      "to": "241690",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "125020",
+      "to": "241690",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "241690",
+      "to": "013570",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "082640",
+      "to": "241690",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "047310",
+      "to": "241690",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "002030",
+      "to": "241690",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "041510",
+      "to": "241690",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 79862819036.0,
+      "operating_profit": 7438470284.0,
+      "net_profit": 9469453903.0,
+      "total_assets": 128047907953.0
+    },
+    {
+      "year": "2022",
+      "sales": 82372227506.0,
+      "operating_profit": 6119272210.0,
+      "net_profit": 0.0,
+      "total_assets": 155505422375.0
+    },
+    {
+      "year": "2023",
+      "sales": 101893975859.0,
+      "operating_profit": 11443596660.0,
+      "net_profit": 9119873859.0,
+      "total_assets": 209707190287.0
+    },
+    {
+      "year": "2024",
+      "sales": 105133809332.0,
+      "operating_profit": 8116951945.0,
+      "net_profit": -6956.0,
+      "total_assets": 231054729210.0
+    },
+    {
+      "year": "2025",
+      "sales": 107159702000.0,
+      "operating_profit": 2054515000.0,
+      "net_profit": -3216938000.0,
+      "total_assets": 239757829000.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 5,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "retail",
+        1
+      ],
+      [
+        "medicalDevice",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ],
+      [
+        "consulting",
+        1
+      ],
+      [
+        "media",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "retail",
+        1
+      ],
+      [
+        "imaging",
+        1
+      ],
+      [
+        "module",
+        1
+      ],
+      [
+        "general",
+        1
+      ],
+      [
+        "agency",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "437730",
+      "corpName": "삼현",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "125020",
+      "corpName": "티씨머티리얼즈",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "047310",
+      "corpName": "파워로직스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "013570",
+      "corpName": "디와이",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

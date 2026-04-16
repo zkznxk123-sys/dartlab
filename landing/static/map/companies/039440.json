@@ -1,0 +1,220 @@
+{
+  "ego": {
+    "stockCode": "039440",
+    "corpName": "에스티아이",
+    "industry": "machinery",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 3281,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "033500",
+      "corpName": "동성화인텍",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 7422
+    },
+    {
+      "stockCode": "037350",
+      "corpName": "성도이엔지",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 7434
+    },
+    {
+      "stockCode": "039420",
+      "corpName": "케이엘넷",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 476
+    },
+    {
+      "stockCode": "102260",
+      "corpName": "동성케미컬",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 12116
+    }
+  ],
+  "edges": [
+    {
+      "from": "024110",
+      "to": "039440",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033500",
+      "to": "039440",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "037350",
+      "to": "039440",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "039440",
+      "to": "039420",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "039440",
+      "to": "037350",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "102260",
+      "to": "039440",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 319513983576.0,
+      "operating_profit": 25565657171.0,
+      "net_profit": 0.0,
+      "total_assets": 336843432075.0
+    },
+    {
+      "year": "2022",
+      "sales": 422418753947.0,
+      "operating_profit": 34766478075.0,
+      "net_profit": 0.0,
+      "total_assets": 328877176561.0
+    },
+    {
+      "year": "2023",
+      "sales": 319462564774.0,
+      "operating_profit": 23946351563.0,
+      "net_profit": 0.0,
+      "total_assets": 316203683290.0
+    },
+    {
+      "year": "2024",
+      "sales": 334022337411.0,
+      "operating_profit": 27287364136.0,
+      "net_profit": 27141396314.0,
+      "total_assets": 368766153343.0
+    },
+    {
+      "year": "2025",
+      "sales": 328058707879.0,
+      "operating_profit": 19718973861.0,
+      "net_profit": 15417982866.0,
+      "total_assets": 366268498846.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "039420",
+      "corpName": "케이엘넷",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

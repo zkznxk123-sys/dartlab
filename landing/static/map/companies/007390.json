@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "007390",
+    "corpName": "네이처셀",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 207,
+    "confidence": 0.84,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002680",
+      "corpName": "한탑",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 824
+    },
+    {
+      "stockCode": "083550",
+      "corpName": "케이엠",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 1354
+    },
+    {
+      "stockCode": "262260",
+      "corpName": "에이프로",
+      "industry": "electrical",
+      "stage": "power",
+      "revenue": 1471
+    }
+  ],
+  "edges": [
+    {
+      "from": "002680",
+      "to": "007390",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "007390",
+      "to": "083550",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "007390",
+      "to": "262260",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 22204011084.0,
+      "operating_profit": -9497790495.0,
+      "net_profit": -32030754951.0,
+      "total_assets": 69649961572.0
+    },
+    {
+      "year": "2022",
+      "sales": 35739550.0,
+      "operating_profit": -9502488683.0,
+      "net_profit": -6813585338.0,
+      "total_assets": 94021004319.0
+    },
+    {
+      "year": "2023",
+      "sales": null,
+      "operating_profit": -10272984987.0,
+      "net_profit": -11680328640.0,
+      "total_assets": 68398678569.0
+    },
+    {
+      "year": "2024",
+      "sales": 32333908156.0,
+      "operating_profit": 597518893.0,
+      "net_profit": 1226158108.0,
+      "total_assets": 71997508759.0
+    },
+    {
+      "year": "2025",
+      "sales": 20734613571.0,
+      "operating_profit": -3646243657.0,
+      "net_profit": -2838308819.0,
+      "total_assets": 74731473448.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

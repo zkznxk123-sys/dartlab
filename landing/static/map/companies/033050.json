@@ -1,0 +1,154 @@
+{
+  "ego": {
+    "stockCode": "033050",
+    "corpName": "제이엠아이",
+    "industry": "chemical",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 898,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "094970",
+      "corpName": "제이엠티",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 2002
+    },
+    {
+      "stockCode": "232530",
+      "corpName": "이엠티",
+      "industry": "semiconductor",
+      "stage": "materials",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "033050",
+      "to": "094970",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "033050",
+      "to": "232530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "094970",
+      "to": "033050",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 48406359069.0,
+      "operating_profit": 1482316586.0,
+      "net_profit": 1895808995.0,
+      "total_assets": 81953143888.0
+    },
+    {
+      "year": "2022",
+      "sales": 64925485182.0,
+      "operating_profit": 4728101014.0,
+      "net_profit": 2480814002.0,
+      "total_assets": 85467596560.0
+    },
+    {
+      "year": "2023",
+      "sales": 74566785312.0,
+      "operating_profit": 4445290729.0,
+      "net_profit": 2449720275.0,
+      "total_assets": 89657744114.0
+    },
+    {
+      "year": "2024",
+      "sales": 80436938348.0,
+      "operating_profit": 4045653403.0,
+      "net_profit": 3770441880.0,
+      "total_assets": 87290299109.0
+    },
+    {
+      "year": "2025",
+      "sales": 89803265878.0,
+      "operating_profit": 4069008999.0,
+      "net_profit": 3430035906.0,
+      "total_assets": 104934467440.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

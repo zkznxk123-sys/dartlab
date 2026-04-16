@@ -1,0 +1,264 @@
+{
+  "ego": {
+    "stockCode": "378800",
+    "corpName": "샤페론",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 2,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "307750",
+      "corpName": "국전약품",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 1310
+    },
+    {
+      "stockCode": "200670",
+      "corpName": "휴메딕스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 7
+    },
+    {
+      "stockCode": "067080",
+      "corpName": "대화제약",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 1431
+    },
+    {
+      "stockCode": "308430",
+      "corpName": "셀비온",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 19
+    },
+    {
+      "stockCode": "054670",
+      "corpName": "대한뉴팜",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 2024
+    }
+  ],
+  "edges": [
+    {
+      "from": "307750",
+      "to": "378800",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "307750",
+      "to": "378800",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "200670",
+      "to": "378800",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "067080",
+      "to": "378800",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "308430",
+      "to": "378800",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "054670",
+      "to": "378800",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2022",
+      "sales": 2000000000.0,
+      "operating_profit": -11029970345.0,
+      "net_profit": -10672728027.0,
+      "total_assets": 35151259992.0
+    },
+    {
+      "year": "2023",
+      "sales": 215251274.0,
+      "operating_profit": -13228301461.0,
+      "net_profit": -12403429287.0,
+      "total_assets": 25008602288.0
+    },
+    {
+      "year": "2024",
+      "sales": 17704497.0,
+      "operating_profit": -15141502559.0,
+      "net_profit": -14902980481.0,
+      "total_assets": 19283684826.0
+    },
+    {
+      "year": "2025",
+      "sales": 227804629.0,
+      "operating_profit": -15839057550.0,
+      "net_profit": -15527830197.0,
+      "total_assets": 27875189599.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "pharma",
+        5
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "research",
+        4
+      ],
+      [
+        "formulation",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "307750",
+      "corpName": "국전약품",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "200670",
+      "corpName": "휴메딕스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "067080",
+      "corpName": "대화제약",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "308430",
+      "corpName": "셀비온",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "054670",
+      "corpName": "대한뉴팜",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

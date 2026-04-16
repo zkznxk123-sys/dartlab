@@ -1,0 +1,166 @@
+{
+  "ego": {
+    "stockCode": "049950",
+    "corpName": "미래컴퍼니",
+    "industry": "machinery",
+    "stage": "precision",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 409,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "354320",
+      "corpName": "알멕",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 1878
+    },
+    {
+      "stockCode": "228670",
+      "corpName": "레이",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 1113
+    }
+  ],
+  "edges": [
+    {
+      "from": "049950",
+      "to": "354320",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "049950",
+      "to": "228670",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "049950",
+      "to": "228670",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "049950",
+      "to": "354320",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 116380646887.0,
+      "operating_profit": 4595755580.0,
+      "net_profit": 6426767073.0,
+      "total_assets": 160687515841.0
+    },
+    {
+      "year": "2022",
+      "sales": 154857082271.0,
+      "operating_profit": 25522241546.0,
+      "net_profit": 29293724901.0,
+      "total_assets": 170947643095.0
+    },
+    {
+      "year": "2023",
+      "sales": 109474293439.0,
+      "operating_profit": -1745963585.0,
+      "net_profit": 0.0,
+      "total_assets": 155294714723.0
+    },
+    {
+      "year": "2024",
+      "sales": 67278649399.0,
+      "operating_profit": -16814682582.0,
+      "net_profit": -7141990639.0,
+      "total_assets": 149198685706.0
+    },
+    {
+      "year": "2025",
+      "sales": 40897794013.0,
+      "operating_profit": -24695644553.0,
+      "net_profit": 0.0,
+      "total_assets": 121863202289.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

@@ -1,0 +1,204 @@
+{
+  "ego": {
+    "stockCode": "317330",
+    "corpName": "덕산테코피아",
+    "industry": "semiconductor",
+    "stage": "materials",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1121,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "077360",
+      "corpName": "덕산하이메탈",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 2364
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "213420",
+      "corpName": "덕산네오룩스",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 3443
+    },
+    {
+      "stockCode": "089890",
+      "corpName": "코세스",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 824
+    }
+  ],
+  "edges": [
+    {
+      "from": "077360",
+      "to": "317330",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "088350",
+      "to": "317330",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "213420",
+      "to": "317330",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "317330",
+      "to": "213420",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "317330",
+      "to": "077360",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "317330",
+      "to": "089890",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 112383155917.0,
+      "operating_profit": 21980938749.0,
+      "net_profit": 17827002974.0,
+      "total_assets": 244335928964.0
+    },
+    {
+      "year": "2022",
+      "sales": 111005121065.0,
+      "operating_profit": 9261039886.0,
+      "net_profit": 16061828691.0,
+      "total_assets": 298526727044.0
+    },
+    {
+      "year": "2023",
+      "sales": 94076712274.0,
+      "operating_profit": -6225474421.0,
+      "net_profit": -19273669673.0,
+      "total_assets": 514367139681.0
+    },
+    {
+      "year": "2024",
+      "sales": 99694431512.0,
+      "operating_profit": -30219465064.0,
+      "net_profit": -72579149118.0,
+      "total_assets": 662991271479.0
+    },
+    {
+      "year": "2025",
+      "sales": 112078954483.0,
+      "operating_profit": -43026410473.0,
+      "net_profit": -76700744016.0,
+      "total_assets": 646705781509.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

@@ -1,0 +1,298 @@
+{
+  "ego": {
+    "stockCode": "133820",
+    "corpName": "화인베스틸",
+    "industry": "shipbuilding",
+    "stage": "build",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1862,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "023790",
+      "corpName": "동일스틸럭스",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 240
+    },
+    {
+      "stockCode": "042660",
+      "corpName": "한화오션",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 127835
+    },
+    {
+      "stockCode": "097230",
+      "corpName": "HJ중공업",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 19997
+    },
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 32034
+    },
+    {
+      "stockCode": "138930",
+      "corpName": "BNK금융지주",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "011200",
+      "corpName": "HMM",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 108914
+    }
+  ],
+  "edges": [
+    {
+      "from": "005490",
+      "to": "133820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "023790",
+      "to": "133820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "133820",
+      "to": "023790",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "042660",
+      "to": "133820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "133820",
+      "to": "097230",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "460860",
+      "to": "133820",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "133820",
+      "to": "023790",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "133820",
+      "to": "138930",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "133820",
+      "to": "011200",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 124076835252.0,
+      "operating_profit": 5534587867.0,
+      "net_profit": 2374205660.0,
+      "total_assets": 183238935517.0
+    },
+    {
+      "year": "2022",
+      "sales": 139604226438.0,
+      "operating_profit": 719072177.0,
+      "net_profit": -2598981749.0,
+      "total_assets": 179622909869.0
+    },
+    {
+      "year": "2023",
+      "sales": 132197701719.0,
+      "operating_profit": -19776770069.0,
+      "net_profit": -792293885.0,
+      "total_assets": 190295962377.0
+    },
+    {
+      "year": "2024",
+      "sales": 119171936760.0,
+      "operating_profit": -19138025747.0,
+      "net_profit": -29497217527.0,
+      "total_assets": 152372838073.0
+    },
+    {
+      "year": "2025",
+      "sales": 186171163411.0,
+      "operating_profit": -1670508010.0,
+      "net_profit": -5112663753.0,
+      "total_assets": 171617473798.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "product",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "460860",
+      "corpName": "동국제강",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "023790",
+      "corpName": "동일스틸럭스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "097230",
+      "corpName": "HJ중공업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "stage": "build",
+      "revenue": 712594
+    },
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "stage": "shipping",
+      "revenue": 299332
+    },
+    {
+      "stockCode": "329180",
+      "corpName": "HD현대중공업",
+      "stage": "build",
+      "revenue": 175806
+    },
+    {
+      "stockCode": "018260",
+      "corpName": "삼성에스디에스",
+      "stage": "shipping",
+      "revenue": 139299
+    },
+    {
+      "stockCode": "042660",
+      "corpName": "한화오션",
+      "stage": "build",
+      "revenue": 127835
+    }
+  ]
+}

@@ -1,0 +1,329 @@
+{
+  "ego": {
+    "stockCode": "003200",
+    "corpName": "일신방직",
+    "industry": "textile",
+    "stage": "fiber",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 5172,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000050",
+      "corpName": "경방",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 4125
+    },
+    {
+      "stockCode": "000950",
+      "corpName": "전방",
+      "industry": "textile",
+      "stage": "fiber",
+      "revenue": 408
+    },
+    {
+      "stockCode": "001720",
+      "corpName": "신영증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "160190",
+      "corpName": "하이젠알앤엠",
+      "industry": "electrical",
+      "stage": "motor",
+      "revenue": 735
+    },
+    {
+      "stockCode": "053050",
+      "corpName": "지에스이",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 1701
+    },
+    {
+      "stockCode": "047770",
+      "corpName": "코데즈컴바인",
+      "industry": "textile",
+      "stage": "apparel",
+      "revenue": 397
+    },
+    {
+      "stockCode": "145990",
+      "corpName": "삼양사",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 25625
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "industry": "textile",
+      "stage": "apparel",
+      "revenue": 40636
+    }
+  ],
+  "edges": [
+    {
+      "from": "000050",
+      "to": "003200",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000950",
+      "to": "003200",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001720",
+      "to": "003200",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003200",
+      "to": "160190",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "003200",
+      "to": "053050",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003200",
+      "to": "047770",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "145990",
+      "to": "003200",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000050",
+      "to": "003200",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "001720",
+      "to": "003200",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "003200",
+      "to": "160190",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 24.3%"
+    },
+    {
+      "from": "111770",
+      "to": "003200",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.8%"
+    },
+    {
+      "from": "145990",
+      "to": "003200",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "내부유보 비중 95% — 자기 힘으로 성장",
+    "strengths": [
+      "내부유보 비중 95% — 자기 힘으로 성장",
+      "Piotroski F 재무 건전 (8/9)",
+      "부채비율 18% -- 매우 안정",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "FCF 적자 — 영업CF보다 투자가 큼",
+      "이익 변동계수 11.12 — 이익 변동성 높음",
+      "이자보상 심각 (1.4배)"
+    ],
+    "sector": "경기관련소비재 > 내구소비재와의류",
+    "source": "audit",
+    "createdAt": "1775430966.5456924"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 601028587672.0,
+      "operating_profit": 60970489628.0,
+      "net_profit": 1352842520.0,
+      "total_assets": 1044004955919.0
+    },
+    {
+      "year": "2022",
+      "sales": 593058768403.0,
+      "operating_profit": -16000918451.0,
+      "net_profit": 114629330181.0,
+      "total_assets": 1176745986062.0
+    },
+    {
+      "year": "2023",
+      "sales": 539409047753.0,
+      "operating_profit": -1021003237.0,
+      "net_profit": 9719711248.0,
+      "total_assets": 1059230389580.0
+    },
+    {
+      "year": "2024",
+      "sales": 523651392861.0,
+      "operating_profit": 9064191185.0,
+      "net_profit": 895882473.0,
+      "total_assets": 1115758897982.0
+    },
+    {
+      "year": "2025",
+      "sales": 517177907810.0,
+      "operating_profit": 12407495279.0,
+      "net_profit": 33915658428.0,
+      "total_assets": 1120711123137.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "047770",
+      "corpName": "코데즈컴바인",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

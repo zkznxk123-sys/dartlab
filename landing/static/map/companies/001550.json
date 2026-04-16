@@ -1,0 +1,207 @@
+{
+  "ego": {
+    "stockCode": "001550",
+    "corpName": "조비",
+    "industry": "textile",
+    "stage": "fiber",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 997,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002100",
+      "corpName": "경농",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 3392
+    },
+    {
+      "stockCode": "003240",
+      "corpName": "태광산업",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 18274
+    }
+  ],
+  "edges": [
+    {
+      "from": "001550",
+      "to": "002100",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "003240",
+      "to": "001550",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001550",
+      "to": "002100",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "002100",
+      "to": "001550",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "002100",
+      "to": "001550",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 55.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 84597515362.0,
+      "operating_profit": 3077405830.0,
+      "net_profit": 0.0,
+      "total_assets": 103778712983.0
+    },
+    {
+      "year": "2022",
+      "sales": 148554917835.0,
+      "operating_profit": 11907297397.0,
+      "net_profit": 8638057676.0,
+      "total_assets": 130041760125.0
+    },
+    {
+      "year": "2023",
+      "sales": 114718158323.0,
+      "operating_profit": -5582069275.0,
+      "net_profit": 0.0,
+      "total_assets": 118588764533.0
+    },
+    {
+      "year": "2024",
+      "sales": 102447803292.0,
+      "operating_profit": 4826994972.0,
+      "net_profit": 640044941.0,
+      "total_assets": 119924769170.0
+    },
+    {
+      "year": "2025",
+      "sales": 99737235320.0,
+      "operating_profit": 3820305556.0,
+      "net_profit": 0.0,
+      "total_assets": 123257989730.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "basic",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "003240",
+      "corpName": "태광산업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "002100",
+      "corpName": "경농",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

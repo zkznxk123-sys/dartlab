@@ -1,0 +1,116 @@
+{
+  "ego": {
+    "stockCode": "072020",
+    "corpName": "중앙백신",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 491,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "365900",
+      "corpName": "브이씨",
+      "industry": "leisure",
+      "stage": "general",
+      "revenue": 469
+    }
+  ],
+  "edges": [
+    {
+      "from": "072020",
+      "to": "365900",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 40913902571.0,
+      "operating_profit": 4541344822.0,
+      "net_profit": 7601859488.0,
+      "total_assets": 112952175770.0
+    },
+    {
+      "year": "2022",
+      "sales": 39299158624.0,
+      "operating_profit": 4282862471.0,
+      "net_profit": 4044456006.0,
+      "total_assets": 114858583010.0
+    },
+    {
+      "year": "2023",
+      "sales": 41867966000.0,
+      "operating_profit": 6993692576.0,
+      "net_profit": 5998119686.0,
+      "total_assets": 119592514189.0
+    },
+    {
+      "year": "2025",
+      "sales": 49068711762.0,
+      "operating_profit": 6478782030.0,
+      "net_profit": 6156817310.0,
+      "total_assets": 122815695040.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

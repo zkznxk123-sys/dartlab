@@ -1,0 +1,458 @@
+{
+  "ego": {
+    "stockCode": "089970",
+    "corpName": "브이엠",
+    "industry": "machinery",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1444,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000040",
+      "corpName": "KR모터스",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 138
+    },
+    {
+      "stockCode": "008930",
+      "corpName": "한미사이언스",
+      "industry": "pharma",
+      "stage": "api",
+      "revenue": 13570
+    },
+    {
+      "stockCode": "016090",
+      "corpName": "대현",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 2405
+    },
+    {
+      "stockCode": "016710",
+      "corpName": "대성홀딩스",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 12226
+    },
+    {
+      "stockCode": "027830",
+      "corpName": "대성창투",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 93
+    },
+    {
+      "stockCode": "038870",
+      "corpName": "에코바이오",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 172
+    },
+    {
+      "stockCode": "053610",
+      "corpName": "프로텍",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 2305
+    },
+    {
+      "stockCode": "054950",
+      "corpName": "제이브이엠",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 1731
+    },
+    {
+      "stockCode": "099520",
+      "corpName": "DGI",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 252
+    },
+    {
+      "stockCode": "128940",
+      "corpName": "한미약품",
+      "industry": "pharma",
+      "stage": "api",
+      "revenue": 129
+    },
+    {
+      "stockCode": "131760",
+      "corpName": "파인텍",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 463
+    },
+    {
+      "stockCode": "251970",
+      "corpName": "펌텍코리아",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 3720
+    },
+    {
+      "stockCode": "900140",
+      "corpName": "엘브이엠씨",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 2
+    },
+    {
+      "stockCode": "100790",
+      "corpName": "미래에셋벤처투자",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "240810",
+      "corpName": "원익IPS",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 9098
+    }
+  ],
+  "edges": [
+    {
+      "from": "000040",
+      "to": "089970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "089970",
+      "to": "008930",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "008930",
+      "to": "089970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "089970",
+      "to": "016090",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "016710",
+      "to": "089970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "027830",
+      "to": "089970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "038870",
+      "to": "089970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "053610",
+      "to": "089970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "054950",
+      "to": "089970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "099520",
+      "to": "089970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "128940",
+      "to": "089970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "131760",
+      "to": "089970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "089970",
+      "to": "131760",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "089970",
+      "to": "251970",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "900140",
+      "to": "089970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "089970",
+      "to": "100790",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.8%"
+    },
+    {
+      "from": "100790",
+      "to": "089970",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.1%"
+    },
+    {
+      "from": "240810",
+      "to": "089970",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 4.7%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 178054009170.0,
+      "operating_profit": 54019004804.0,
+      "net_profit": 46458261444.0,
+      "total_assets": 145632282796.0
+    },
+    {
+      "year": "2022",
+      "sales": 141385258259.0,
+      "operating_profit": 30932088487.0,
+      "net_profit": 27878178036.0,
+      "total_assets": 156634095072.0
+    },
+    {
+      "year": "2023",
+      "sales": 26008551330.0,
+      "operating_profit": -10962872787.0,
+      "net_profit": -6975273692.0,
+      "total_assets": 150925607238.0
+    },
+    {
+      "year": "2024",
+      "sales": 70277411560.0,
+      "operating_profit": -8599624774.0,
+      "net_profit": -3450671433.0,
+      "total_assets": 165703586111.0
+    },
+    {
+      "year": "2025",
+      "sales": 144411787537.0,
+      "operating_profit": 24673087730.0,
+      "net_profit": 26131635359.0,
+      "total_assets": 248727741913.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "008930",
+      "corpName": "한미사이언스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "016090",
+      "corpName": "대현",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "131760",
+      "corpName": "파인텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "251970",
+      "corpName": "펌텍코리아",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

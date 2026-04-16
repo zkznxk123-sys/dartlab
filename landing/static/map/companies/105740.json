@@ -1,0 +1,132 @@
+{
+  "ego": {
+    "stockCode": "105740",
+    "corpName": "디케이락",
+    "industry": "machinery",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1288,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 310629
+    }
+  ],
+  "edges": [
+    {
+      "from": "105740",
+      "to": "000720",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 85547048248.0,
+      "operating_profit": 8356072352.0,
+      "net_profit": 8998352676.0,
+      "total_assets": 153425059878.0
+    },
+    {
+      "year": "2022",
+      "sales": 109938203104.0,
+      "operating_profit": 11418619280.0,
+      "net_profit": 5845398783.0,
+      "total_assets": 172857582421.0
+    },
+    {
+      "year": "2023",
+      "sales": 111449391562.0,
+      "operating_profit": 11788299787.0,
+      "net_profit": 11552198451.0,
+      "total_assets": 191391494606.0
+    },
+    {
+      "year": "2024",
+      "sales": 98422315910.0,
+      "operating_profit": -188420188.0,
+      "net_profit": 2130567887.0,
+      "total_assets": 197697492777.0
+    },
+    {
+      "year": "2025",
+      "sales": 128751186498.0,
+      "operating_profit": 11069921406.0,
+      "net_profit": 6736447825.0,
+      "total_assets": 226208657831.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

@@ -1,0 +1,342 @@
+{
+  "ego": {
+    "stockCode": "036220",
+    "corpName": "오상헬스케어",
+    "industry": "medicalDevice",
+    "stage": "diagnostic",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1286,
+    "confidence": 0.933,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "092200",
+      "corpName": "디아이씨",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 0
+    },
+    {
+      "stockCode": "067010",
+      "corpName": "이씨에스",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 216
+    },
+    {
+      "stockCode": "220180",
+      "corpName": "핸디소프트",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 314
+    },
+    {
+      "stockCode": "003160",
+      "corpName": "디아이",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 4323
+    },
+    {
+      "stockCode": "053980",
+      "corpName": "오상자이엘",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 1364
+    },
+    {
+      "stockCode": "101390",
+      "corpName": "아이엠",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 918
+    },
+    {
+      "stockCode": "336040",
+      "corpName": "타스컴",
+      "industry": "medicalDevice",
+      "stage": "diagnostic",
+      "revenue": 0
+    },
+    {
+      "stockCode": "461030",
+      "corpName": "아이엠비디엑스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 53
+    },
+    {
+      "stockCode": "221800",
+      "corpName": "유투바이오",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 256
+    },
+    {
+      "stockCode": "203450",
+      "corpName": "유니온바이오메트릭스",
+      "industry": "telecom",
+      "stage": "",
+      "revenue": 513
+    }
+  ],
+  "edges": [
+    {
+      "from": "036220",
+      "to": "092200",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036220",
+      "to": "067010",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036220",
+      "to": "220180",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036220",
+      "to": "003160",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036220",
+      "to": "053980",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036220",
+      "to": "101390",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036220",
+      "to": "336040",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036220",
+      "to": "461030",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036220",
+      "to": "221800",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "053980",
+      "to": "036220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "220180",
+      "to": "036220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "036220",
+      "to": "461030",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.7%"
+    },
+    {
+      "from": "036220",
+      "to": "336040",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 4.1%"
+    },
+    {
+      "from": "203450",
+      "to": "036220",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 132326879204.0,
+      "operating_profit": -7083727446.0,
+      "net_profit": 12706534.0,
+      "total_assets": 189374874265.0
+    },
+    {
+      "year": "2022",
+      "sales": 193893072828.0,
+      "operating_profit": 49300174288.0,
+      "net_profit": 40646921172.0,
+      "total_assets": 249183571300.0
+    },
+    {
+      "year": "2023",
+      "sales": 355846882565.0,
+      "operating_profit": 142827493353.0,
+      "net_profit": 228914155.0,
+      "total_assets": 320546708566.0
+    },
+    {
+      "year": "2024",
+      "sales": 80488364604.0,
+      "operating_profit": -24784976694.0,
+      "net_profit": -11391203913.0,
+      "total_assets": 295000202043.0
+    },
+    {
+      "year": "2025",
+      "sales": 128628728661.0,
+      "operating_profit": 2426328739.0,
+      "net_profit": -2348729.0,
+      "total_assets": 336205562297.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "011560",
+      "corpName": "세보엠이씨",
+      "stage": "imaging",
+      "revenue": 7158
+    },
+    {
+      "stockCode": "092790",
+      "corpName": "넥스틸",
+      "stage": "imaging",
+      "revenue": 5510
+    },
+    {
+      "stockCode": "215360",
+      "corpName": "우리산업",
+      "stage": "imaging",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "043150",
+      "corpName": "바텍",
+      "stage": "imaging",
+      "revenue": 4264
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "stage": "imaging",
+      "revenue": 3959
+    }
+  ]
+}

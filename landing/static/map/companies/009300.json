@@ -1,0 +1,272 @@
+{
+  "ego": {
+    "stockCode": "009300",
+    "corpName": "삼아제약",
+    "industry": "pharma",
+    "stage": "formulation",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 778,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000480",
+      "corpName": "시알홀딩스",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 8278
+    },
+    {
+      "stockCode": "003300",
+      "corpName": "한일홀딩스",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 19305
+    },
+    {
+      "stockCode": "145990",
+      "corpName": "삼양사",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 25625
+    },
+    {
+      "stockCode": "220260",
+      "corpName": "켐트로스",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 568
+    },
+    {
+      "stockCode": "000020",
+      "corpName": "동화약품",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 4964
+    },
+    {
+      "stockCode": "014530",
+      "corpName": "극동유화",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 10217
+    }
+  ],
+  "edges": [
+    {
+      "from": "000480",
+      "to": "009300",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003300",
+      "to": "009300",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "145990",
+      "to": "009300",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "220260",
+      "to": "009300",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000020",
+      "to": "009300",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "014530",
+      "to": "009300",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 54666374874.0,
+      "operating_profit": 6048214637.0,
+      "net_profit": 0.0,
+      "total_assets": 189171570690.0
+    },
+    {
+      "year": "2022",
+      "sales": 81699539725.0,
+      "operating_profit": 18253183867.0,
+      "net_profit": 11911612530.0,
+      "total_assets": 203197944143.0
+    },
+    {
+      "year": "2023",
+      "sales": 97211286212.0,
+      "operating_profit": 23500211536.0,
+      "net_profit": 0.0,
+      "total_assets": 231307913073.0
+    },
+    {
+      "year": "2024",
+      "sales": 95580725368.0,
+      "operating_profit": 24466466167.0,
+      "net_profit": 17814465595.0,
+      "total_assets": 248733842277.0
+    },
+    {
+      "year": "2025",
+      "sales": 77799035965.0,
+      "operating_profit": 10978941145.0,
+      "net_profit": 12939815232.0,
+      "total_assets": null
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "food",
+        1
+      ],
+      [
+        "chemical",
+        1
+      ],
+      [
+        "retail",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        1
+      ],
+      [
+        "specialty",
+        1
+      ],
+      [
+        "wholesale",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "145990",
+      "corpName": "삼양사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "220260",
+      "corpName": "켐트로스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "000020",
+      "corpName": "동화약품",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

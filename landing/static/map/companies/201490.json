@@ -1,0 +1,173 @@
+{
+  "ego": {
+    "stockCode": "201490",
+    "corpName": "미투온",
+    "industry": "software",
+    "stage": "game",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 1209,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "190510",
+      "corpName": "나무가",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 4599
+    },
+    {
+      "stockCode": "950190",
+      "corpName": "고스트스튜디오",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 1
+    },
+    {
+      "stockCode": "084680",
+      "corpName": "이월드",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 887
+    }
+  ],
+  "edges": [
+    {
+      "from": "190510",
+      "to": "201490",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "201490",
+      "to": "950190",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "201490",
+      "to": "084680",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "950190",
+      "to": "201490",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 109734234195.0,
+      "operating_profit": 34514887886.0,
+      "net_profit": 25880468480.0,
+      "total_assets": 224200318090.0
+    },
+    {
+      "year": "2022",
+      "sales": 112012049143.0,
+      "operating_profit": 27025243520.0,
+      "net_profit": 20627873610.0,
+      "total_assets": 220653315627.0
+    },
+    {
+      "year": "2023",
+      "sales": 108995415070.0,
+      "operating_profit": 22131483080.0,
+      "net_profit": 17448868120.0,
+      "total_assets": 260840916648.0
+    },
+    {
+      "year": "2024",
+      "sales": 94315651595.0,
+      "operating_profit": 11811385928.0,
+      "net_profit": 3482316451.0,
+      "total_assets": 291047403499.0
+    },
+    {
+      "year": "2025",
+      "sales": 120923979226.0,
+      "operating_profit": 12612285137.0,
+      "net_profit": 2922566606.0,
+      "total_assets": 264876174199.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

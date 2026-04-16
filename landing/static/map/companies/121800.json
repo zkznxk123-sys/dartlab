@@ -1,0 +1,354 @@
+{
+  "ego": {
+    "stockCode": "121800",
+    "corpName": "비덴트",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 101,
+    "confidence": 0.84,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "009810",
+      "corpName": "플레이그램",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 2509
+    },
+    {
+      "stockCode": "066410",
+      "corpName": "버킷스튜디오",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 173
+    },
+    {
+      "stockCode": "069460",
+      "corpName": "대호에이엘",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 2156
+    },
+    {
+      "stockCode": "101140",
+      "corpName": "인바이오젠",
+      "industry": "food",
+      "stage": "processing",
+      "revenue": 63
+    },
+    {
+      "stockCode": "222160",
+      "corpName": "NPX",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 36
+    },
+    {
+      "stockCode": "352940",
+      "corpName": "인바이오",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 0
+    },
+    {
+      "stockCode": "112040",
+      "corpName": "위메이드",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 6140
+    },
+    {
+      "stockCode": "003160",
+      "corpName": "디아이",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 4323
+    },
+    {
+      "stockCode": "052300",
+      "corpName": "오션인더블유",
+      "industry": "logistics",
+      "stage": "general",
+      "revenue": 76
+    },
+    {
+      "stockCode": "047820",
+      "corpName": "초록뱀미디어",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 1722
+    }
+  ],
+  "edges": [
+    {
+      "from": "009810",
+      "to": "121800",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "066410",
+      "to": "121800",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "069460",
+      "to": "121800",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "101140",
+      "to": "121800",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "121800",
+      "to": "222160",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "121800",
+      "to": "066410",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "121800",
+      "to": "101140",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "121800",
+      "to": "352940",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "121800",
+      "to": "112040",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "121800",
+      "to": "069460",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "121800",
+      "to": "003160",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "052300",
+      "to": "121800",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.2%"
+    },
+    {
+      "from": "112040",
+      "to": "121800",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "121800",
+      "to": "047820",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.8%"
+    },
+    {
+      "from": "121800",
+      "to": "066410",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 5.8%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 17686241397.0,
+      "operating_profit": 772428692.0,
+      "net_profit": 223299440697.0,
+      "total_assets": 873508824721.0
+    },
+    {
+      "year": "2022",
+      "sales": 15845457360.0,
+      "operating_profit": -2711623825.0,
+      "net_profit": -161741414629.0,
+      "total_assets": 773462233156.0
+    },
+    {
+      "year": "2023",
+      "sales": 10016939696.0,
+      "operating_profit": -9887229423.0,
+      "net_profit": -25906500192.0,
+      "total_assets": 648609707112.0
+    },
+    {
+      "year": "2024",
+      "sales": 9634816752.0,
+      "operating_profit": -11050100359.0,
+      "net_profit": 0.0,
+      "total_assets": 740817384176.0
+    },
+    {
+      "year": "2025",
+      "sales": 10149724188.0,
+      "operating_profit": -7216693320.0,
+      "net_profit": 0.0,
+      "total_assets": 703109366248.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

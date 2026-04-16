@@ -1,0 +1,194 @@
+{
+  "ego": {
+    "stockCode": "086220",
+    "corpName": "광동헬스바이오",
+    "industry": "pharma",
+    "stage": "formulation",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 670,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "009290",
+      "corpName": "광동제약",
+      "industry": "food",
+      "stage": "processing",
+      "revenue": 16595
+    },
+    {
+      "stockCode": "335810",
+      "corpName": "프리시젼바이오",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 199
+    },
+    {
+      "stockCode": "142760",
+      "corpName": "모아라이프플러스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 112
+    },
+    {
+      "stockCode": "065170",
+      "corpName": "비엘팜텍",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 65
+    }
+  ],
+  "edges": [
+    {
+      "from": "009290",
+      "to": "086220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "086220",
+      "to": "009290",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "086220",
+      "to": "335810",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "086220",
+      "to": "142760",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "065170",
+      "to": "086220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 9.9%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 57773161412.0,
+      "operating_profit": 848247493.0,
+      "net_profit": 438499837.0,
+      "total_assets": 60771071319.0
+    },
+    {
+      "year": "2022",
+      "sales": 63917218053.0,
+      "operating_profit": 1564939202.0,
+      "net_profit": 700928225.0,
+      "total_assets": 55832313547.0
+    },
+    {
+      "year": "2023",
+      "sales": 80157299287.0,
+      "operating_profit": 2629689709.0,
+      "net_profit": 570244287.0,
+      "total_assets": 56897420236.0
+    },
+    {
+      "year": "2025",
+      "sales": 66979543438.0,
+      "operating_profit": 900067416.0,
+      "net_profit": -640823180.0,
+      "total_assets": 62206467351.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "142760",
+      "corpName": "모아라이프플러스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

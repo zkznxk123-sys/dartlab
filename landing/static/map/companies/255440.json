@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "255440",
+    "corpName": "야스",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 348,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ],
+  "edges": [
+    {
+      "from": "034220",
+      "to": "255440",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "255440",
+      "to": "035720",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 49692710775.0,
+      "operating_profit": 1499663105.0,
+      "net_profit": 2102236120.0,
+      "total_assets": 224033772339.0
+    },
+    {
+      "year": "2022",
+      "sales": 54812295302.0,
+      "operating_profit": -4830905960.0,
+      "net_profit": -845462189.0,
+      "total_assets": 216740824000.0
+    },
+    {
+      "year": "2023",
+      "sales": 41987801728.0,
+      "operating_profit": -5437384165.0,
+      "net_profit": -642495464.0,
+      "total_assets": 203450951682.0
+    },
+    {
+      "year": "2024",
+      "sales": 28632024490.0,
+      "operating_profit": -9659263709.0,
+      "net_profit": -551915864.0,
+      "total_assets": 175172179748.0
+    },
+    {
+      "year": "2025",
+      "sales": 34763681766.0,
+      "operating_profit": -6464736287.0,
+      "net_profit": -5509591896.0,
+      "total_assets": 171668213803.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

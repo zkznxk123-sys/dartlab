@@ -1,0 +1,154 @@
+{
+  "ego": {
+    "stockCode": "200470",
+    "corpName": "에이팩트",
+    "industry": "semiconductor",
+    "stage": "test",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1110,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "014830",
+      "corpName": "유니드",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 13388
+    },
+    {
+      "stockCode": "039830",
+      "corpName": "오로라",
+      "industry": "consulting",
+      "stage": "",
+      "revenue": 3281
+    },
+    {
+      "stockCode": "456040",
+      "corpName": "OCI",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 20094
+    }
+  ],
+  "edges": [
+    {
+      "from": "200470",
+      "to": "014830",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "200470",
+      "to": "039830",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "200470",
+      "to": "456040",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 47217098401.0,
+      "operating_profit": 4019710211.0,
+      "net_profit": 2665167513.0,
+      "total_assets": 116061640910.0
+    },
+    {
+      "year": "2022",
+      "sales": 73646384263.0,
+      "operating_profit": 4585911543.0,
+      "net_profit": 3089968502.0,
+      "total_assets": 214145466555.0
+    },
+    {
+      "year": "2023",
+      "sales": 93742317670.0,
+      "operating_profit": -22880495221.0,
+      "net_profit": -16654612063.0,
+      "total_assets": 209505417672.0
+    },
+    {
+      "year": "2025",
+      "sales": 110999185614.0,
+      "operating_profit": 5267413072.0,
+      "net_profit": 5226139451.0,
+      "total_assets": 181859657148.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

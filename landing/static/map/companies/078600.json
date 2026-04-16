@@ -1,0 +1,227 @@
+{
+  "ego": {
+    "stockCode": "078600",
+    "corpName": "대주전자재료",
+    "industry": "battery",
+    "stage": "cell",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2546,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "052710",
+      "corpName": "아모텍",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2373
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "000370",
+      "corpName": "한화손해보험",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "007330",
+      "corpName": "푸른저축은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "123890",
+      "corpName": "한국자산신탁",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 2043
+    }
+  ],
+  "edges": [
+    {
+      "from": "078600",
+      "to": "052710",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "078600",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "088350",
+      "to": "078600",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000370",
+      "to": "078600",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "007330",
+      "to": "078600",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "123890",
+      "to": "078600",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 198707699319.0,
+      "operating_profit": 17596082568.0,
+      "net_profit": 22873184579.0,
+      "total_assets": 298387221700.0
+    },
+    {
+      "year": "2022",
+      "sales": 174098407326.0,
+      "operating_profit": 11970916445.0,
+      "net_profit": 797710887.0,
+      "total_assets": 327888921205.0
+    },
+    {
+      "year": "2023",
+      "sales": 184988881822.0,
+      "operating_profit": 6208941102.0,
+      "net_profit": 695072596.0,
+      "total_assets": 413411034481.0
+    },
+    {
+      "year": "2024",
+      "sales": 219316249770.0,
+      "operating_profit": 29353571296.0,
+      "net_profit": 36871517501.0,
+      "total_assets": 622950058762.0
+    },
+    {
+      "year": "2025",
+      "sales": 254613180231.0,
+      "operating_profit": 20686125141.0,
+      "net_profit": 238866889.0,
+      "total_assets": 660395440186.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "052710",
+      "corpName": "아모텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "007340",
+      "corpName": "DN오토모티브",
+      "stage": "cell",
+      "revenue": 36757
+    },
+    {
+      "stockCode": "066970",
+      "corpName": "엘앤에프",
+      "stage": "cathode",
+      "revenue": 21549
+    },
+    {
+      "stockCode": "004490",
+      "corpName": "세방전지",
+      "stage": "cell",
+      "revenue": 21187
+    },
+    {
+      "stockCode": "005070",
+      "corpName": "코스모신소재",
+      "stage": "cathode",
+      "revenue": 4563
+    },
+    {
+      "stockCode": "348370",
+      "corpName": "엔켐",
+      "stage": "electrolyte",
+      "revenue": 3128
+    }
+  ]
+}

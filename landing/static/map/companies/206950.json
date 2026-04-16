@@ -1,0 +1,319 @@
+{
+  "ego": {
+    "stockCode": "206950",
+    "corpName": "볼빅",
+    "industry": "leisure",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 0,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "042700",
+      "corpName": "한미반도체",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 5767
+    },
+    {
+      "stockCode": "095610",
+      "corpName": "테스",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 3511
+    },
+    {
+      "stockCode": "121440",
+      "corpName": "골프존홀딩스",
+      "industry": "leisure",
+      "stage": "general",
+      "revenue": 3543
+    },
+    {
+      "stockCode": "185490",
+      "corpName": "아이진",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 36
+    },
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "418550",
+      "corpName": "제이오",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 552
+    },
+    {
+      "stockCode": "024090",
+      "corpName": "디씨엠",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 2271
+    },
+    {
+      "stockCode": "101390",
+      "corpName": "아이엠",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 918
+    },
+    {
+      "stockCode": "030210",
+      "corpName": "다올투자증권",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "042700",
+      "to": "206950",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "095610",
+      "to": "206950",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "206950",
+      "to": "121440",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "206950",
+      "to": "185490",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "030200",
+      "to": "206950",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "418550",
+      "to": "206950",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "024090",
+      "to": "206950",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "101390",
+      "to": "206950",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "030210",
+      "to": "206950",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.4%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "telecom",
+        1
+      ],
+      [
+        "consulting",
+        1
+      ],
+      [
+        "construction",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "service",
+        1
+      ],
+      [
+        "general",
+        1
+      ],
+      [
+        "engineering",
+        1
+      ],
+      [
+        "module",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "418550",
+      "corpName": "제이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "024090",
+      "corpName": "디씨엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "101390",
+      "corpName": "아이엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "121440",
+      "corpName": "골프존홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "008770",
+      "corpName": "호텔신라",
+      "stage": "general",
+      "revenue": 40683
+    },
+    {
+      "stockCode": "035250",
+      "corpName": "강원랜드",
+      "stage": "general",
+      "revenue": 14767
+    },
+    {
+      "stockCode": "034230",
+      "corpName": "파라다이스",
+      "stage": "general",
+      "revenue": 11499
+    },
+    {
+      "stockCode": "215000",
+      "corpName": "골프존",
+      "stage": "general",
+      "revenue": 4833
+    },
+    {
+      "stockCode": "114090",
+      "corpName": "GKL",
+      "stage": "general",
+      "revenue": 4229
+    }
+  ]
+}

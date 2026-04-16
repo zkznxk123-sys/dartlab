@@ -1,0 +1,159 @@
+{
+  "ego": {
+    "stockCode": "062040",
+    "corpName": "산일전기",
+    "industry": "electrical",
+    "stage": "power",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 5019,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "001630",
+      "corpName": "종근당홀딩스",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 9590
+    },
+    {
+      "stockCode": "007330",
+      "corpName": "푸른저축은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "190650",
+      "corpName": "코리아에셋투자증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "062040",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "001630",
+      "to": "062040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    },
+    {
+      "from": "007330",
+      "to": "062040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    },
+    {
+      "from": "190650",
+      "to": "062040",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2024",
+      "sales": 333996550771.0,
+      "operating_profit": 109231906505.0,
+      "net_profit": null,
+      "total_assets": 492674198507.0
+    },
+    {
+      "year": "2025",
+      "sales": 501946220880.0,
+      "operating_profit": 178634181593.0,
+      "net_profit": 0.0,
+      "total_assets": 681958856706.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "010120",
+      "corpName": "엘에스일렉트릭",
+      "stage": "power",
+      "revenue": 49658
+    },
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "stage": "cable",
+      "revenue": 36360
+    },
+    {
+      "stockCode": "015860",
+      "corpName": "일진홀딩스",
+      "stage": "power",
+      "revenue": 22827
+    },
+    {
+      "stockCode": "103590",
+      "corpName": "일진전기",
+      "stage": "power",
+      "revenue": 20446
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "stage": "cable",
+      "revenue": 6245
+    }
+  ]
+}

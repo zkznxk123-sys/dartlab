@@ -1,0 +1,102 @@
+{
+  "ego": {
+    "stockCode": "038620",
+    "corpName": "위즈코프",
+    "industry": "telecom",
+    "stage": "service",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 1126,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 35478283378.0,
+      "operating_profit": 812089256.0,
+      "net_profit": 0.0,
+      "total_assets": 86319474149.0
+    },
+    {
+      "year": "2022",
+      "sales": 41213941237.0,
+      "operating_profit": 1447122656.0,
+      "net_profit": 0.0,
+      "total_assets": 87514746971.0
+    },
+    {
+      "year": "2023",
+      "sales": 56065934824.0,
+      "operating_profit": 647813712.0,
+      "net_profit": 0.0,
+      "total_assets": 117204722249.0
+    },
+    {
+      "year": "2024",
+      "sales": 104651520953.0,
+      "operating_profit": 2790810913.0,
+      "net_profit": 0.0,
+      "total_assets": 111624846722.0
+    },
+    {
+      "year": "2025",
+      "sales": 112636294223.0,
+      "operating_profit": 2490161826.0,
+      "net_profit": 4669088030.0,
+      "total_assets": 115967606768.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

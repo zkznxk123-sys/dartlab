@@ -1,0 +1,256 @@
+{
+  "ego": {
+    "stockCode": "382800",
+    "corpName": "지앤비에스 에코",
+    "industry": "machinery",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 919,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "021240",
+      "corpName": "코웨이",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 49636
+    },
+    {
+      "stockCode": "029480",
+      "corpName": "광무",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 76
+    },
+    {
+      "stockCode": "393970",
+      "corpName": "대진첨단소재",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 845
+    },
+    {
+      "stockCode": "365590",
+      "corpName": "하이딥",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 18
+    },
+    {
+      "stockCode": "159010",
+      "corpName": "아스플로",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 0
+    },
+    {
+      "stockCode": "166480",
+      "corpName": "코아스템켐온",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 202
+    },
+    {
+      "stockCode": "106080",
+      "corpName": "케이이엠텍",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 76
+    },
+    {
+      "stockCode": "370090",
+      "corpName": "퓨런티어",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 121
+    }
+  ],
+  "edges": [
+    {
+      "from": "382800",
+      "to": "021240",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "382800",
+      "to": "029480",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    },
+    {
+      "from": "382800",
+      "to": "393970",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "382800",
+      "to": "365590",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "382800",
+      "to": "159010",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "382800",
+      "to": "166480",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "382800",
+      "to": "106080",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.2%"
+    },
+    {
+      "from": "382800",
+      "to": "370090",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 52112857344.0,
+      "operating_profit": 10619904308.0,
+      "net_profit": 10337078780.0,
+      "total_assets": 67901644462.0
+    },
+    {
+      "year": "2022",
+      "sales": 65592093147.0,
+      "operating_profit": 14711923379.0,
+      "net_profit": 14772461013.0,
+      "total_assets": 88908135734.0
+    },
+    {
+      "year": "2023",
+      "sales": 89320182345.0,
+      "operating_profit": 18290380331.0,
+      "net_profit": 17623516769.0,
+      "total_assets": 116341188019.0
+    },
+    {
+      "year": "2024",
+      "sales": 70763128588.0,
+      "operating_profit": 11648559355.0,
+      "net_profit": 12514385768.0,
+      "total_assets": 135086453187.0
+    },
+    {
+      "year": "2025",
+      "sales": 91919436496.0,
+      "operating_profit": 7756388256.0,
+      "net_profit": 6316131877.0,
+      "total_assets": 139485581860.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

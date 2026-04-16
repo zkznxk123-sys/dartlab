@@ -1,0 +1,135 @@
+{
+  "ego": {
+    "stockCode": "115480",
+    "corpName": "씨유메디칼",
+    "industry": "medicalDevice",
+    "stage": "therapeutic",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 482,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "070300",
+      "corpName": "엑스큐어",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 185
+    }
+  ],
+  "edges": [
+    {
+      "from": "070300",
+      "to": "115480",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "115480",
+      "to": "070300",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 35402267064.0,
+      "operating_profit": 7184031902.0,
+      "net_profit": -14141200708.0,
+      "total_assets": 72840957215.0
+    },
+    {
+      "year": "2022",
+      "sales": 46957359252.0,
+      "operating_profit": 10787505168.0,
+      "net_profit": 85875404.0,
+      "total_assets": 88081459096.0
+    },
+    {
+      "year": "2023",
+      "sales": 41803052141.0,
+      "operating_profit": 4940532433.0,
+      "net_profit": -8203644462.0,
+      "total_assets": 85650473753.0
+    },
+    {
+      "year": "2024",
+      "sales": 40629340409.0,
+      "operating_profit": 7801018206.0,
+      "net_profit": -3140743654.0,
+      "total_assets": 103568835562.0
+    },
+    {
+      "year": "2025",
+      "sales": 48222586383.0,
+      "operating_profit": 10812879962.0,
+      "net_profit": 819203805.0,
+      "total_assets": 99662942214.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "011560",
+      "corpName": "세보엠이씨",
+      "stage": "imaging",
+      "revenue": 7158
+    },
+    {
+      "stockCode": "092790",
+      "corpName": "넥스틸",
+      "stage": "imaging",
+      "revenue": 5510
+    },
+    {
+      "stockCode": "215360",
+      "corpName": "우리산업",
+      "stage": "imaging",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "043150",
+      "corpName": "바텍",
+      "stage": "imaging",
+      "revenue": 4264
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "stage": "imaging",
+      "revenue": 3959
+    }
+  ]
+}

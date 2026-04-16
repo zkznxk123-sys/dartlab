@@ -1,0 +1,247 @@
+{
+  "ego": {
+    "stockCode": "006200",
+    "corpName": "한국전자홀딩스",
+    "industry": "consulting",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 2759,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "092220",
+      "corpName": "KEC",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 2296
+    },
+    {
+      "stockCode": "079370",
+      "corpName": "제우스",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 3833
+    },
+    {
+      "stockCode": "033160",
+      "corpName": "엠케이전자",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 10926
+    },
+    {
+      "stockCode": "187870",
+      "corpName": "디바이스",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 841
+    }
+  ],
+  "edges": [
+    {
+      "from": "092220",
+      "to": "006200",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "079370",
+      "to": "006200",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "033160",
+      "to": "006200",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "006200",
+      "to": "092220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "006200",
+      "to": "187870",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "092220",
+      "to": "006200",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 331176392129.0,
+      "operating_profit": 38507381292.0,
+      "net_profit": 5910738043.0,
+      "total_assets": 463627852404.0
+    },
+    {
+      "year": "2022",
+      "sales": 323979889281.0,
+      "operating_profit": 30029847771.0,
+      "net_profit": 15061192426.0,
+      "total_assets": 469100261248.0
+    },
+    {
+      "year": "2023",
+      "sales": 266806350932.0,
+      "operating_profit": -24677103505.0,
+      "net_profit": -25908557587.0,
+      "total_assets": 503113632386.0
+    },
+    {
+      "year": "2025",
+      "sales": 275886966324.0,
+      "operating_profit": null,
+      "net_profit": -1308486784.0,
+      "total_assets": 517233142685.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        2
+      ],
+      [
+        "semiconductor",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "fab",
+        1
+      ],
+      [
+        "display",
+        1
+      ],
+      [
+        "component",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "092220",
+      "corpName": "KEC",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "079370",
+      "corpName": "제우스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "033160",
+      "corpName": "엠케이전자",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "003030",
+      "corpName": "세아제강지주",
+      "stage": "general",
+      "revenue": 37596
+    },
+    {
+      "stockCode": "000070",
+      "corpName": "삼양홀딩스",
+      "stage": "general",
+      "revenue": 33483
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "036710",
+      "corpName": "심텍홀딩스",
+      "stage": "general",
+      "revenue": 15281
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "stage": "general",
+      "revenue": 13276
+    }
+  ]
+}

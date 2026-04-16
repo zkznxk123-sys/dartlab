@@ -1,0 +1,302 @@
+{
+  "ego": {
+    "stockCode": "040350",
+    "corpName": "크레오에스지",
+    "industry": "software",
+    "stage": "solution",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 109,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "016600",
+      "corpName": "큐캐피탈",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 201
+    },
+    {
+      "stockCode": "018680",
+      "corpName": "서울제약",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 521
+    },
+    {
+      "stockCode": "051780",
+      "corpName": "큐로홀딩스",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 68
+    },
+    {
+      "stockCode": "065060",
+      "corpName": "지엔코",
+      "industry": "textile",
+      "stage": "apparel",
+      "revenue": 1109
+    },
+    {
+      "stockCode": "131100",
+      "corpName": "티엔엔터테인먼트",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 1183
+    },
+    {
+      "stockCode": "047820",
+      "corpName": "초록뱀미디어",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 1722
+    }
+  ],
+  "edges": [
+    {
+      "from": "016600",
+      "to": "040350",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "018680",
+      "to": "040350",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "040350",
+      "to": "051780",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "040350",
+      "to": "065060",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "040350",
+      "to": "016600",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "040350",
+      "to": "131100",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "040350",
+      "to": "018680",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "040350",
+      "to": "047820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "047820",
+      "to": "040350",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "051780",
+      "to": "040350",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "065060",
+      "to": "040350",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "131100",
+      "to": "040350",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "016600",
+      "to": "040350",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 4.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 8635341612.0,
+      "operating_profit": -4543547972.0,
+      "net_profit": 0.0,
+      "total_assets": 77861615732.0
+    },
+    {
+      "year": "2022",
+      "sales": 9781170888.0,
+      "operating_profit": -6139169945.0,
+      "net_profit": 0.0,
+      "total_assets": 70069166822.0
+    },
+    {
+      "year": "2023",
+      "sales": 9756217845.0,
+      "operating_profit": -3734725216.0,
+      "net_profit": 0.0,
+      "total_assets": 53596427721.0
+    },
+    {
+      "year": "2024",
+      "sales": 8157056644.0,
+      "operating_profit": -5653531364.0,
+      "net_profit": -13878517939.0,
+      "total_assets": 91503437327.0
+    },
+    {
+      "year": "2025",
+      "sales": 10861107272.0,
+      "operating_profit": -6409391888.0,
+      "net_profit": 0.0,
+      "total_assets": 88916566688.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

@@ -1,0 +1,256 @@
+{
+  "ego": {
+    "stockCode": "242040",
+    "corpName": "나무기술",
+    "industry": "realestate",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 1023,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "020120",
+      "corpName": "키다리스튜디오",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 2175
+    },
+    {
+      "stockCode": "023590",
+      "corpName": "다우기술",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 174950
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "industry": "retail",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "053300",
+      "corpName": "한국정보인증",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 1385
+    },
+    {
+      "stockCode": "136540",
+      "corpName": "윈스테크넷",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 986
+    },
+    {
+      "stockCode": "143240",
+      "corpName": "사람인",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 1212
+    },
+    {
+      "stockCode": "273060",
+      "corpName": "와이즈버즈",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 455
+    }
+  ],
+  "edges": [
+    {
+      "from": "020120",
+      "to": "242040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "023590",
+      "to": "242040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "032190",
+      "to": "242040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "039490",
+      "to": "242040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "053300",
+      "to": "242040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "136540",
+      "to": "242040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "143240",
+      "to": "242040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "273060",
+      "to": "242040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 94465709977.0,
+      "operating_profit": 1077187761.0,
+      "net_profit": -334264454.0,
+      "total_assets": 85919074026.0
+    },
+    {
+      "year": "2022",
+      "sales": 106218514270.0,
+      "operating_profit": 2178471444.0,
+      "net_profit": 0.0,
+      "total_assets": 102227033586.0
+    },
+    {
+      "year": "2023",
+      "sales": 90558433590.0,
+      "operating_profit": -749823439.0,
+      "net_profit": -3154469077.0,
+      "total_assets": 101457162084.0
+    },
+    {
+      "year": "2024",
+      "sales": 91419341397.0,
+      "operating_profit": -2227398114.0,
+      "net_profit": -190633920.0,
+      "total_assets": 97079212236.0
+    },
+    {
+      "year": "2025",
+      "sales": 102273238233.0,
+      "operating_profit": 2251203375.0,
+      "net_profit": 0.0,
+      "total_assets": 101356439305.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "023590",
+      "corpName": "다우기술",
+      "stage": "general",
+      "revenue": 174950
+    },
+    {
+      "stockCode": "005440",
+      "corpName": "현대지에프홀딩스",
+      "stage": "general",
+      "revenue": 80916
+    },
+    {
+      "stockCode": "058650",
+      "corpName": "세아홀딩스",
+      "stage": "general",
+      "revenue": 66111
+    },
+    {
+      "stockCode": "034810",
+      "corpName": "해성산업",
+      "stage": "general",
+      "revenue": 22601
+    },
+    {
+      "stockCode": "002990",
+      "corpName": "금호건설",
+      "stage": "general",
+      "revenue": 20185
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "ego": {
+    "stockCode": "267790",
+    "corpName": "배럴",
+    "industry": "textile",
+    "stage": "apparel",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 592,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "298540",
+      "corpName": "더네이쳐홀딩스",
+      "industry": "textile",
+      "stage": "apparel",
+      "revenue": 4775
+    },
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "267790",
+      "to": "298540",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005830",
+      "to": "267790",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "298540",
+      "to": "267790",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 21528383164.0,
+      "operating_profit": -7715592440.0,
+      "net_profit": -6990478187.0,
+      "total_assets": 51549911319.0
+    },
+    {
+      "year": "2022",
+      "sales": 38031771170.0,
+      "operating_profit": -4333333786.0,
+      "net_profit": 0.0,
+      "total_assets": 47657951642.0
+    },
+    {
+      "year": "2023",
+      "sales": 58163177764.0,
+      "operating_profit": 8503098170.0,
+      "net_profit": 0.0,
+      "total_assets": 67419902554.0
+    },
+    {
+      "year": "2024",
+      "sales": 64445966180.0,
+      "operating_profit": 9080346867.0,
+      "net_profit": 0.0,
+      "total_assets": 75267118508.0
+    },
+    {
+      "year": "2025",
+      "sales": 59192865808.0,
+      "operating_profit": 6645431683.0,
+      "net_profit": 4309611535.0,
+      "total_assets": 80992727341.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "finance",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "insurance",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

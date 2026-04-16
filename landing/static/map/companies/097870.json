@@ -1,0 +1,116 @@
+{
+  "ego": {
+    "stockCode": "097870",
+    "corpName": "효성오앤비",
+    "industry": "chemical",
+    "stage": "polymer",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 42,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 3336059
+    }
+  ],
+  "edges": [
+    {
+      "from": "097870",
+      "to": "005930",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 5834749123.0,
+      "operating_profit": -54217139.0,
+      "net_profit": 58313360.0,
+      "total_assets": 83730695346.0
+    },
+    {
+      "year": "2022",
+      "sales": 7528008936.0,
+      "operating_profit": 1842032014.0,
+      "net_profit": -27583730.0,
+      "total_assets": 88450467330.0
+    },
+    {
+      "year": "2023",
+      "sales": 6208188059.0,
+      "operating_profit": 1144276986.0,
+      "net_profit": 802832573.0,
+      "total_assets": 88993009263.0
+    },
+    {
+      "year": "2024",
+      "sales": 4218058709.0,
+      "operating_profit": 196982644.0,
+      "net_profit": -464241748.0,
+      "total_assets": 89244207922.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

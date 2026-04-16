@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "182400",
+    "corpName": "엔케이젠바이오텍코리아",
+    "industry": "chemical",
+    "stage": "polymer",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 79,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "085310",
+      "corpName": "엔케이",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 1301
+    }
+  ],
+  "edges": [
+    {
+      "from": "182400",
+      "to": "085310",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 13020252251.0,
+      "operating_profit": -47440426375.0,
+      "net_profit": -50336082714.0,
+      "total_assets": 180600794102.0
+    },
+    {
+      "year": "2022",
+      "sales": 11262689377.0,
+      "operating_profit": -49653047361.0,
+      "net_profit": -55607367453.0,
+      "total_assets": 169695057937.0
+    },
+    {
+      "year": "2023",
+      "sales": 9947882202.0,
+      "operating_profit": -67323456909.0,
+      "net_profit": -153434090142.0,
+      "total_assets": 54445233594.0
+    },
+    {
+      "year": "2024",
+      "sales": 8800038505.0,
+      "operating_profit": -4064593226.0,
+      "net_profit": -36941622703.0,
+      "total_assets": 22878781256.0
+    },
+    {
+      "year": "2025",
+      "sales": 7862515138.0,
+      "operating_profit": -2532433603.0,
+      "net_profit": -7342481280.0,
+      "total_assets": 14294115172.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

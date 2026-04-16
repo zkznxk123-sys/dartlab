@@ -1,0 +1,102 @@
+{
+  "ego": {
+    "stockCode": "050760",
+    "corpName": "에스폴리텍",
+    "industry": "plastic",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 668,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 109764344266.0,
+      "operating_profit": 4581270096.0,
+      "net_profit": -31269634.0,
+      "total_assets": 109327588281.0
+    },
+    {
+      "year": "2022",
+      "sales": 82459528154.0,
+      "operating_profit": -1589921950.0,
+      "net_profit": -2838746359.0,
+      "total_assets": 108638110765.0
+    },
+    {
+      "year": "2023",
+      "sales": 73218466053.0,
+      "operating_profit": -2588276959.0,
+      "net_profit": -5476224470.0,
+      "total_assets": 109385124193.0
+    },
+    {
+      "year": "2024",
+      "sales": 80163188870.0,
+      "operating_profit": 643122594.0,
+      "net_profit": 5025190936.0,
+      "total_assets": 111646712259.0
+    },
+    {
+      "year": "2025",
+      "sales": 66755291807.0,
+      "operating_profit": -4813382188.0,
+      "net_profit": -8791961317.0,
+      "total_assets": 110098130121.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005720",
+      "corpName": "넥센",
+      "stage": "general",
+      "revenue": 35865
+    },
+    {
+      "stockCode": "002350",
+      "corpName": "넥센타이어",
+      "stage": "general",
+      "revenue": 31896
+    },
+    {
+      "stockCode": "013520",
+      "corpName": "화승코퍼레이션",
+      "stage": "general",
+      "revenue": 16398
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "stage": "general",
+      "revenue": 13729
+    },
+    {
+      "stockCode": "004840",
+      "corpName": "DRB동일",
+      "stage": "general",
+      "revenue": 8027
+    }
+  ]
+}

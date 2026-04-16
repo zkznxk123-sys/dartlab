@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "318010",
+    "corpName": "팜스빌",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 127,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "003540",
+      "corpName": "대신증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 50639
+    }
+  ],
+  "edges": [
+    {
+      "from": "003540",
+      "to": "318010",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 39027506833.0,
+      "operating_profit": 6159273248.0,
+      "net_profit": 2891474847.0,
+      "total_assets": 74307355945.0
+    },
+    {
+      "year": "2022",
+      "sales": 26113221456.0,
+      "operating_profit": 4062759172.0,
+      "net_profit": 4063506428.0,
+      "total_assets": 74834854855.0
+    },
+    {
+      "year": "2023",
+      "sales": 21394730375.0,
+      "operating_profit": 1632976195.0,
+      "net_profit": 0.0,
+      "total_assets": 71278722308.0
+    },
+    {
+      "year": "2024",
+      "sales": 16724977154.0,
+      "operating_profit": -258082234.0,
+      "net_profit": 0.0,
+      "total_assets": 67139949260.0
+    },
+    {
+      "year": "2025",
+      "sales": 12728245936.0,
+      "operating_profit": -673132038.0,
+      "net_profit": 2888559668.0,
+      "total_assets": 68502067956.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

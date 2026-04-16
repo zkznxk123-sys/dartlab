@@ -1,0 +1,328 @@
+{
+  "ego": {
+    "stockCode": "214420",
+    "corpName": "토니모리",
+    "industry": "cosmetics",
+    "stage": "manufacturing",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2203,
+    "confidence": 0.84,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "236810",
+      "corpName": "엔비티",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 923
+    },
+    {
+      "stockCode": "270870",
+      "corpName": "뉴트리",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 1011
+    },
+    {
+      "stockCode": "241710",
+      "corpName": "코스메카코리아",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 6409
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ],
+  "edges": [
+    {
+      "from": "005830",
+      "to": "214420",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "039490",
+      "to": "214420",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "236810",
+      "to": "214420",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. (제조서비스업)원재료 및 생산설비"
+    },
+    {
+      "from": "270870",
+      "to": "214420",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. (제조서비스업)원재료 및 생산설비"
+    },
+    {
+      "from": "241710",
+      "to": "214420",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. (제조서비스업)원재료 및 생산설비"
+    },
+    {
+      "from": "192820",
+      "to": "214420",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. (제조서비스업)원재료 및 생산설비"
+    },
+    {
+      "from": "161890",
+      "to": "214420",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. (제조서비스업)원재료 및 생산설비"
+    },
+    {
+      "from": "214420",
+      "to": "041510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 114648138200.0,
+      "operating_profit": -13529557979.0,
+      "net_profit": -9230684425.0,
+      "total_assets": 202095812764.0
+    },
+    {
+      "year": "2022",
+      "sales": 126745016191.0,
+      "operating_profit": -7258250448.0,
+      "net_profit": -81590565.0,
+      "total_assets": 199062053733.0
+    },
+    {
+      "year": "2023",
+      "sales": 151091527920.0,
+      "operating_profit": 9616935808.0,
+      "net_profit": 2987856716.0,
+      "total_assets": 202609068278.0
+    },
+    {
+      "year": "2024",
+      "sales": 176995852869.0,
+      "operating_profit": 12102080331.0,
+      "net_profit": 16588488900.0,
+      "total_assets": 210769726620.0
+    },
+    {
+      "year": "2025",
+      "sales": 220273588910.0,
+      "operating_profit": 14364820223.0,
+      "net_profit": 11404870523.0,
+      "total_assets": 226602913355.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "cosmetics",
+        3
+      ],
+      [
+        "software",
+        1
+      ],
+      [
+        "food",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "manufacturing",
+        3
+      ],
+      [
+        "platform",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "236810",
+      "corpName": "엔비티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "270870",
+      "corpName": "뉴트리",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "241710",
+      "corpName": "코스메카코리아",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "stage": "manufacturing",
+      "revenue": 42528
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "278470",
+      "corpName": "에이피알",
+      "stage": "manufacturing",
+      "revenue": 15273
+    },
+    {
+      "stockCode": "257720",
+      "corpName": "실리콘투",
+      "stage": "manufacturing",
+      "revenue": 11163
+    }
+  ]
+}

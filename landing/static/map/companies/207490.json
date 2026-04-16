@@ -1,0 +1,143 @@
+{
+  "ego": {
+    "stockCode": "207490",
+    "corpName": "에이펙스인텍",
+    "industry": "electrical",
+    "stage": "power",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 0,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "004710",
+      "corpName": "한솔테크닉스",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 12524
+    }
+  ],
+  "edges": [
+    {
+      "from": "024110",
+      "to": "207490",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004710",
+      "to": "207490",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "finance",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "bank",
+        1
+      ],
+      [
+        "display",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004710",
+      "corpName": "한솔테크닉스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "010120",
+      "corpName": "엘에스일렉트릭",
+      "stage": "power",
+      "revenue": 49658
+    },
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "stage": "cable",
+      "revenue": 36360
+    },
+    {
+      "stockCode": "015860",
+      "corpName": "일진홀딩스",
+      "stage": "power",
+      "revenue": 22827
+    },
+    {
+      "stockCode": "103590",
+      "corpName": "일진전기",
+      "stage": "power",
+      "revenue": 20446
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "stage": "cable",
+      "revenue": 6245
+    }
+  ]
+}

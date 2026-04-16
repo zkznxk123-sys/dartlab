@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "039610",
+    "corpName": "화성밸브",
+    "industry": "machinery",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 814,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "039610",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 71961904341.0,
+      "operating_profit": 2626030122.0,
+      "net_profit": 2388372353.0,
+      "total_assets": 105271611979.0
+    },
+    {
+      "year": "2022",
+      "sales": 85525543688.0,
+      "operating_profit": 3702458229.0,
+      "net_profit": 2980333411.0,
+      "total_assets": 123476124858.0
+    },
+    {
+      "year": "2023",
+      "sales": 91550544835.0,
+      "operating_profit": 10029597192.0,
+      "net_profit": 8066489164.0,
+      "total_assets": 130325009989.0
+    },
+    {
+      "year": "2024",
+      "sales": 91263944666.0,
+      "operating_profit": 7963490108.0,
+      "net_profit": 7102994731.0,
+      "total_assets": 130853121273.0
+    },
+    {
+      "year": "2025",
+      "sales": 81448684458.0,
+      "operating_profit": -1648107800.0,
+      "net_profit": -1966197176.0,
+      "total_assets": 128787513223.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "ego": {
+    "stockCode": "461300",
+    "corpName": "아이스크림미디어",
+    "industry": "education",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 1959,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002100",
+      "corpName": "경농",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 3392
+    },
+    {
+      "stockCode": "020710",
+      "corpName": "시공테크",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 1684
+    },
+    {
+      "stockCode": "289010",
+      "corpName": "아이스크림에듀",
+      "industry": "media",
+      "stage": "",
+      "revenue": 916
+    }
+  ],
+  "edges": [
+    {
+      "from": "002100",
+      "to": "461300",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "020710",
+      "to": "461300",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "289010",
+      "to": "461300",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "461300",
+      "to": "289010",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "461300",
+      "to": "020710",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "002100",
+      "to": "461300",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2025",
+      "sales": 195910648546.0,
+      "operating_profit": 61763104721.0,
+      "net_profit": 49169465369.0,
+      "total_assets": 266824535765.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "016880",
+      "corpName": "웅진",
+      "stage": "general",
+      "revenue": 11507
+    },
+    {
+      "stockCode": "215200",
+      "corpName": "메가스터디교육",
+      "stage": "general",
+      "revenue": 8849
+    },
+    {
+      "stockCode": "019680",
+      "corpName": "대교",
+      "stage": "general",
+      "revenue": 6500
+    },
+    {
+      "stockCode": "067280",
+      "corpName": "멀티캠퍼스",
+      "stage": "general",
+      "revenue": 3308
+    },
+    {
+      "stockCode": "068930",
+      "corpName": "디지털대성",
+      "stage": "general",
+      "revenue": 2538
+    }
+  ]
+}

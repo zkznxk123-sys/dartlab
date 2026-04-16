@@ -1,0 +1,313 @@
+{
+  "ego": {
+    "stockCode": "050110",
+    "corpName": "캠시스",
+    "industry": "electronics",
+    "stage": "module",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 4899,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "031330",
+      "corpName": "에스에이엠티",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 37566
+    },
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "031860",
+      "corpName": "디에이치엑스컴퍼니",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 145
+    },
+    {
+      "stockCode": "232530",
+      "corpName": "이엠티",
+      "industry": "semiconductor",
+      "stage": "materials",
+      "revenue": 0
+    },
+    {
+      "stockCode": "085670",
+      "corpName": "뉴프렉스",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 1541
+    },
+    {
+      "stockCode": "049630",
+      "corpName": "재영솔루텍",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 1645
+    },
+    {
+      "stockCode": "047820",
+      "corpName": "초록뱀미디어",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 1722
+    }
+  ],
+  "edges": [
+    {
+      "from": "031330",
+      "to": "050110",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "WAFER",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "WAFER"
+    },
+    {
+      "from": "050110",
+      "to": "005930",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "031860",
+      "to": "050110",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "232530",
+      "to": "050110",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "085670",
+      "to": "050110",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "049630",
+      "to": "050110",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "050110",
+      "to": "047820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 526215745046.0,
+      "operating_profit": -22648736811.0,
+      "net_profit": -22594757504.0,
+      "total_assets": 342517177461.0
+    },
+    {
+      "year": "2022",
+      "sales": 733703329797.0,
+      "operating_profit": 13035157594.0,
+      "net_profit": 6290732764.0,
+      "total_assets": 351234339889.0
+    },
+    {
+      "year": "2023",
+      "sales": 500586465075.0,
+      "operating_profit": 6862406040.0,
+      "net_profit": -14105503525.0,
+      "total_assets": 260215961863.0
+    },
+    {
+      "year": "2024",
+      "sales": 378186831557.0,
+      "operating_profit": -11727524256.0,
+      "net_profit": -306486949.0,
+      "total_assets": 251078726364.0
+    },
+    {
+      "year": "2025",
+      "sales": 489937482073.0,
+      "operating_profit": -11268654368.0,
+      "net_profit": 0.0,
+      "total_assets": 250422161791.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        2
+      ],
+      [
+        "semiconductor",
+        1
+      ],
+      [
+        "machinery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "display",
+        1
+      ],
+      [
+        "materials",
+        1
+      ],
+      [
+        "component",
+        1
+      ],
+      [
+        "special",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "031330",
+      "corpName": "에스에이엠티",
+      "product": "WAFER",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "232530",
+      "corpName": "이엠티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "085670",
+      "corpName": "뉴프렉스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "049630",
+      "corpName": "재영솔루텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

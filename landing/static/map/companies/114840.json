@@ -1,0 +1,255 @@
+{
+  "ego": {
+    "stockCode": "114840",
+    "corpName": "아이패밀리에스씨",
+    "industry": "cosmetics",
+    "stage": "manufacturing",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2241,
+    "confidence": 0.9,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "352480",
+      "corpName": "씨앤씨인터내셔널",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 2885
+    },
+    {
+      "stockCode": "123690",
+      "corpName": "한국화장품",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 850
+    },
+    {
+      "stockCode": "003350",
+      "corpName": "한국화장품제조",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 1846
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 23988
+    }
+  ],
+  "edges": [
+    {
+      "from": "352480",
+      "to": "114840",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "123690",
+      "to": "114840",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "003350",
+      "to": "114840",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "161890",
+      "to": "114840",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "192820",
+      "to": "114840",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 71618219782.0,
+      "operating_profit": 5599387454.0,
+      "net_profit": 3644727400.0,
+      "total_assets": 52974587855.0
+    },
+    {
+      "year": "2022",
+      "sales": 85335168954.0,
+      "operating_profit": 9508401029.0,
+      "net_profit": 7639365495.0,
+      "total_assets": 72333625980.0
+    },
+    {
+      "year": "2023",
+      "sales": 148685912955.0,
+      "operating_profit": 23996195140.0,
+      "net_profit": 19997096910.0,
+      "total_assets": 89832890141.0
+    },
+    {
+      "year": "2024",
+      "sales": 204880606161.0,
+      "operating_profit": 33632455532.0,
+      "net_profit": 0.0,
+      "total_assets": 122318512016.0
+    },
+    {
+      "year": "2025",
+      "sales": 224096054183.0,
+      "operating_profit": 27127744195.0,
+      "net_profit": 21836761902.0,
+      "total_assets": 142391571157.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "cosmetics",
+        5
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "manufacturing",
+        5
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "352480",
+      "corpName": "씨앤씨인터내셔널",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "123690",
+      "corpName": "한국화장품",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "003350",
+      "corpName": "한국화장품제조",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "stage": "manufacturing",
+      "revenue": 42528
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "278470",
+      "corpName": "에이피알",
+      "stage": "manufacturing",
+      "revenue": 15273
+    },
+    {
+      "stockCode": "257720",
+      "corpName": "실리콘투",
+      "stage": "manufacturing",
+      "revenue": 11163
+    }
+  ]
+}

@@ -1,0 +1,292 @@
+{
+  "ego": {
+    "stockCode": "066410",
+    "corpName": "버킷스튜디오",
+    "industry": "telecom",
+    "stage": "service",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 173,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "009810",
+      "corpName": "플레이그램",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 2509
+    },
+    {
+      "stockCode": "057680",
+      "corpName": "티사이언티픽",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 364
+    },
+    {
+      "stockCode": "352940",
+      "corpName": "인바이오",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 0
+    },
+    {
+      "stockCode": "121800",
+      "corpName": "비덴트",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 101
+    },
+    {
+      "stockCode": "101140",
+      "corpName": "인바이오젠",
+      "industry": "food",
+      "stage": "processing",
+      "revenue": 63
+    },
+    {
+      "stockCode": "321820",
+      "corpName": "아티스트컴퍼니",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 467
+    },
+    {
+      "stockCode": "047820",
+      "corpName": "초록뱀미디어",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 1722
+    },
+    {
+      "stockCode": "118000",
+      "corpName": "메타케어",
+      "industry": "pharma",
+      "stage": "distribution",
+      "revenue": 328
+    }
+  ],
+  "edges": [
+    {
+      "from": "009810",
+      "to": "066410",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "057680",
+      "to": "066410",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "066410",
+      "to": "352940",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "066410",
+      "to": "121800",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "066410",
+      "to": "101140",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "066410",
+      "to": "321820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "101140",
+      "to": "066410",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "121800",
+      "to": "066410",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "066410",
+      "to": "047820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 0.8%"
+    },
+    {
+      "from": "118000",
+      "to": "066410",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    },
+    {
+      "from": "121800",
+      "to": "066410",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 5.8%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 26399116481.0,
+      "operating_profit": -2084640421.0,
+      "net_profit": 50868341429.0,
+      "total_assets": 302314817478.0
+    },
+    {
+      "year": "2022",
+      "sales": 44648236827.0,
+      "operating_profit": -7319088759.0,
+      "net_profit": -188694041283.0,
+      "total_assets": 316011694175.0
+    },
+    {
+      "year": "2023",
+      "sales": 18890365556.0,
+      "operating_profit": -6521048976.0,
+      "net_profit": 3816357907.0,
+      "total_assets": 256894027916.0
+    },
+    {
+      "year": "2024",
+      "sales": 17461234199.0,
+      "operating_profit": -8262313074.0,
+      "net_profit": 3713563654.0,
+      "total_assets": 190720457988.0
+    },
+    {
+      "year": "2025",
+      "sales": 17273408347.0,
+      "operating_profit": -6182990399.0,
+      "net_profit": -38255148483.0,
+      "total_assets": 173190399977.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "119610",
+    "corpName": "인터로조",
+    "industry": "machinery",
+    "stage": "precision",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1184,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "226320",
+      "corpName": "잇츠한불",
+      "industry": "cosmetics",
+      "stage": "brand",
+      "revenue": 1534
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "119610",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "226320",
+      "to": "119610",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 107534829800.0,
+      "operating_profit": 22640919915.0,
+      "net_profit": 0.0,
+      "total_assets": 230492161800.0
+    },
+    {
+      "year": "2022",
+      "sales": 117822392382.0,
+      "operating_profit": 24173707659.0,
+      "net_profit": 18622225721.0,
+      "total_assets": 259305196407.0
+    },
+    {
+      "year": "2023",
+      "sales": 121842779445.0,
+      "operating_profit": 18315172070.0,
+      "net_profit": 0.0,
+      "total_assets": 278763108083.0
+    },
+    {
+      "year": "2024",
+      "sales": 115840405503.0,
+      "operating_profit": 5816345895.0,
+      "net_profit": 179553685.0,
+      "total_assets": 234398237606.0
+    },
+    {
+      "year": "2025",
+      "sales": 118440022952.0,
+      "operating_profit": 19482998615.0,
+      "net_profit": 12937842297.0,
+      "total_assets": 244892304198.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

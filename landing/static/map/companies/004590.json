@@ -1,0 +1,143 @@
+{
+  "ego": {
+    "stockCode": "004590",
+    "corpName": "한국가구",
+    "industry": "retail",
+    "stage": "wholesale",
+    "role": "도매",
+    "stream": "midstream",
+    "revenue": 1416,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ],
+  "edges": [
+    {
+      "from": "035720",
+      "to": "004590",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 93025796812.0,
+      "operating_profit": 14936233953.0,
+      "net_profit": 0.0,
+      "total_assets": 172494154317.0
+    },
+    {
+      "year": "2022",
+      "sales": 100899670225.0,
+      "operating_profit": 14679524618.0,
+      "net_profit": -7245130.0,
+      "total_assets": 212067164838.0
+    },
+    {
+      "year": "2023",
+      "sales": 102947090163.0,
+      "operating_profit": 12426948013.0,
+      "net_profit": 0.0,
+      "total_assets": 222162824728.0
+    },
+    {
+      "year": "2024",
+      "sales": 128719457546.0,
+      "operating_profit": 17822858597.0,
+      "net_profit": 15985694911.0,
+      "total_assets": 239299815480.0
+    },
+    {
+      "year": "2025",
+      "sales": 141617438014.0,
+      "operating_profit": 17534529185.0,
+      "net_profit": 14272582369.0,
+      "total_assets": 252695149813.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "software",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "platform",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

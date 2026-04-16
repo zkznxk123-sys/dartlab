@@ -1,0 +1,102 @@
+{
+  "ego": {
+    "stockCode": "048430",
+    "corpName": "유라테크",
+    "industry": "electrical",
+    "stage": "power",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1973,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 184268819398.0,
+      "operating_profit": 1142954833.0,
+      "net_profit": 0.0,
+      "total_assets": 143318412875.0
+    },
+    {
+      "year": "2022",
+      "sales": 190072028203.0,
+      "operating_profit": -438926717.0,
+      "net_profit": 0.0,
+      "total_assets": 143497404802.0
+    },
+    {
+      "year": "2023",
+      "sales": 209704070807.0,
+      "operating_profit": 6031551193.0,
+      "net_profit": 17263249540.0,
+      "total_assets": 165264610057.0
+    },
+    {
+      "year": "2024",
+      "sales": 201350449443.0,
+      "operating_profit": 10506324936.0,
+      "net_profit": 0.0,
+      "total_assets": 177890701256.0
+    },
+    {
+      "year": "2025",
+      "sales": 197253919651.0,
+      "operating_profit": 1814073099.0,
+      "net_profit": 11035969535.0,
+      "total_assets": 184843776385.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "010120",
+      "corpName": "엘에스일렉트릭",
+      "stage": "power",
+      "revenue": 49658
+    },
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "stage": "cable",
+      "revenue": 36360
+    },
+    {
+      "stockCode": "015860",
+      "corpName": "일진홀딩스",
+      "stage": "power",
+      "revenue": 22827
+    },
+    {
+      "stockCode": "103590",
+      "corpName": "일진전기",
+      "stage": "power",
+      "revenue": 20446
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "stage": "cable",
+      "revenue": 6245
+    }
+  ]
+}

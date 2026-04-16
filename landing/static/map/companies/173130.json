@@ -1,0 +1,132 @@
+{
+  "ego": {
+    "stockCode": "173130",
+    "corpName": "오파스넷",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 2333,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "078000",
+      "corpName": "텔코웨어",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 384
+    }
+  ],
+  "edges": [
+    {
+      "from": "173130",
+      "to": "078000",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 121756063316.0,
+      "operating_profit": 5796708441.0,
+      "net_profit": 0.0,
+      "total_assets": 76887115863.0
+    },
+    {
+      "year": "2022",
+      "sales": 170585406981.0,
+      "operating_profit": 8523778870.0,
+      "net_profit": 6068542107.0,
+      "total_assets": 119291361210.0
+    },
+    {
+      "year": "2023",
+      "sales": 224980562132.0,
+      "operating_profit": 13950555536.0,
+      "net_profit": 6194159.0,
+      "total_assets": 125993769991.0
+    },
+    {
+      "year": "2024",
+      "sales": 192885362327.0,
+      "operating_profit": 10651501416.0,
+      "net_profit": 0.0,
+      "total_assets": 138071038763.0
+    },
+    {
+      "year": "2025",
+      "sales": 233294461420.0,
+      "operating_profit": 14044634082.0,
+      "net_profit": 12014819475.0,
+      "total_assets": 149069140402.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "078000",
+      "corpName": "텔코웨어",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

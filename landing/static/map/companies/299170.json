@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "299170",
+    "corpName": "더블유에스아이",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 517,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "095270",
+      "corpName": "웨이브일렉트로",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 805
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ],
+  "edges": [
+    {
+      "from": "095270",
+      "to": "299170",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "299170",
+      "to": "041510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 27775612551.0,
+      "operating_profit": 6008943422.0,
+      "net_profit": 7174907394.0,
+      "total_assets": 52387264356.0
+    },
+    {
+      "year": "2022",
+      "sales": 27128845288.0,
+      "operating_profit": 3684173156.0,
+      "net_profit": 4368439607.0,
+      "total_assets": 57464653508.0
+    },
+    {
+      "year": "2023",
+      "sales": 30877345387.0,
+      "operating_profit": 3342668803.0,
+      "net_profit": 2876745018.0,
+      "total_assets": 60529068552.0
+    },
+    {
+      "year": "2024",
+      "sales": 40411341295.0,
+      "operating_profit": 3850124651.0,
+      "net_profit": 1316600823.0,
+      "total_assets": 85398580898.0
+    },
+    {
+      "year": "2025",
+      "sales": 51706061278.0,
+      "operating_profit": 3915666692.0,
+      "net_profit": -3630174980.0,
+      "total_assets": 86862735461.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

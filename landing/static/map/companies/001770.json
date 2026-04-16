@@ -1,0 +1,224 @@
+{
+  "ego": {
+    "stockCode": "001770",
+    "corpName": "SHD",
+    "industry": "steel",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1004,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000970",
+      "corpName": "한국주철관공업",
+      "industry": "steel",
+      "stage": "",
+      "revenue": 4066
+    },
+    {
+      "stockCode": "033500",
+      "corpName": "동성화인텍",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 7422
+    },
+    {
+      "stockCode": "065950",
+      "corpName": "웰크론",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2690
+    },
+    {
+      "stockCode": "076080",
+      "corpName": "웰크론한텍",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 1667
+    },
+    {
+      "stockCode": "053620",
+      "corpName": "태양",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 1404
+    }
+  ],
+  "edges": [
+    {
+      "from": "001770",
+      "to": "000970",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "033500",
+      "to": "001770",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001770",
+      "to": "065950",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001770",
+      "to": "076080",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001770",
+      "to": "053620",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 104770706369.0,
+      "operating_profit": 5712545723.0,
+      "net_profit": 5792585283.0,
+      "total_assets": 71036421199.0
+    },
+    {
+      "year": "2022",
+      "sales": 125263992621.0,
+      "operating_profit": 14179053153.0,
+      "net_profit": 10819013577.0,
+      "total_assets": 88291972478.0
+    },
+    {
+      "year": "2023",
+      "sales": 106293829767.0,
+      "operating_profit": 672776337.0,
+      "net_profit": 110299965.0,
+      "total_assets": 84766158128.0
+    },
+    {
+      "year": "2024",
+      "sales": 106604794578.0,
+      "operating_profit": -4025616576.0,
+      "net_profit": 2927969957.0,
+      "total_assets": 81970747264.0
+    },
+    {
+      "year": "2025",
+      "sales": 100397778375.0,
+      "operating_profit": 2737690568.0,
+      "net_profit": 1968600075.0,
+      "total_assets": 80593567472.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "000970",
+      "corpName": "한국주철관공업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "065950",
+      "corpName": "웰크론",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "076080",
+      "corpName": "웰크론한텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

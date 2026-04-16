@@ -1,0 +1,180 @@
+{
+  "ego": {
+    "stockCode": "143540",
+    "corpName": "영우디에스피",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 805,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "038540",
+      "corpName": "상상인",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 4186
+    },
+    {
+      "stockCode": "061040",
+      "corpName": "알에프텍",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 2660
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "046970",
+      "corpName": "우리로",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 425
+    }
+  ],
+  "edges": [
+    {
+      "from": "038540",
+      "to": "143540",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "061040",
+      "to": "143540",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "143540",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "143540",
+      "to": "046970",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 79638087311.0,
+      "operating_profit": 8483677225.0,
+      "net_profit": 0.0,
+      "total_assets": 89143391954.0
+    },
+    {
+      "year": "2022",
+      "sales": 49532401438.0,
+      "operating_profit": -16372791501.0,
+      "net_profit": 0.0,
+      "total_assets": 82111086496.0
+    },
+    {
+      "year": "2023",
+      "sales": 47814660587.0,
+      "operating_profit": -11093300758.0,
+      "net_profit": 0.0,
+      "total_assets": 71105844024.0
+    },
+    {
+      "year": "2024",
+      "sales": 59066008257.0,
+      "operating_profit": -4973701551.0,
+      "net_profit": 0.0,
+      "total_assets": 68473955097.0
+    },
+    {
+      "year": "2025",
+      "sales": 80504197379.0,
+      "operating_profit": 5907340652.0,
+      "net_profit": 0.0,
+      "total_assets": 68544202671.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

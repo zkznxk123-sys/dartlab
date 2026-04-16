@@ -1,0 +1,102 @@
+{
+  "ego": {
+    "stockCode": "023150",
+    "corpName": "MH에탄올",
+    "industry": "energy",
+    "stage": "distribution",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 947,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 102066936941.0,
+      "operating_profit": 23335312777.0,
+      "net_profit": 5910724310.0,
+      "total_assets": 451460751811.0
+    },
+    {
+      "year": "2022",
+      "sales": 110722401934.0,
+      "operating_profit": 21924889178.0,
+      "net_profit": 11905846678.0,
+      "total_assets": 447440404391.0
+    },
+    {
+      "year": "2023",
+      "sales": 105484095313.0,
+      "operating_profit": 18917521622.0,
+      "net_profit": 5214659931.0,
+      "total_assets": 445231562517.0
+    },
+    {
+      "year": "2024",
+      "sales": 100419425361.0,
+      "operating_profit": 10667609998.0,
+      "net_profit": -19633917601.0,
+      "total_assets": 401701920783.0
+    },
+    {
+      "year": "2025",
+      "sales": 94719109542.0,
+      "operating_profit": 9486236769.0,
+      "net_profit": -2394511761.0,
+      "total_assets": 261165503051.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "stage": "generation",
+      "revenue": 974293
+    },
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "stage": "distribution",
+      "revenue": 357273
+    },
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "stage": "distribution",
+      "revenue": 52755
+    },
+    {
+      "stockCode": "071320",
+      "corpName": "지역난방공사",
+      "stage": "generation",
+      "revenue": 39982
+    },
+    {
+      "stockCode": "112610",
+      "corpName": "씨에스윈드",
+      "stage": "generation",
+      "revenue": 29316
+    }
+  ]
+}

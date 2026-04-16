@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "058610",
+    "corpName": "에스피지",
+    "industry": "electrical",
+    "stage": "motor",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 3417,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "226320",
+      "corpName": "잇츠한불",
+      "industry": "cosmetics",
+      "stage": "brand",
+      "revenue": 1534
+    },
+    {
+      "stockCode": "348350",
+      "corpName": "위드텍",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 578
+    }
+  ],
+  "edges": [
+    {
+      "from": "226320",
+      "to": "058610",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    },
+    {
+      "from": "348350",
+      "to": "058610",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 416334206457.0,
+      "operating_profit": 23536436082.0,
+      "net_profit": 22918185562.0,
+      "total_assets": 365091020584.0
+    },
+    {
+      "year": "2022",
+      "sales": 440476416653.0,
+      "operating_profit": 25478930710.0,
+      "net_profit": 0.0,
+      "total_assets": 354343809612.0
+    },
+    {
+      "year": "2023",
+      "sales": 393785730793.0,
+      "operating_profit": 15969877847.0,
+      "net_profit": 0.0,
+      "total_assets": 346986705154.0
+    },
+    {
+      "year": "2024",
+      "sales": 388476767485.0,
+      "operating_profit": 12335226942.0,
+      "net_profit": 13113747075.0,
+      "total_assets": 397514155964.0
+    },
+    {
+      "year": "2025",
+      "sales": 341670161923.0,
+      "operating_profit": 17939051891.0,
+      "net_profit": 9133325305.0,
+      "total_assets": 428472044456.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "010120",
+      "corpName": "엘에스일렉트릭",
+      "stage": "power",
+      "revenue": 49658
+    },
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "stage": "cable",
+      "revenue": 36360
+    },
+    {
+      "stockCode": "015860",
+      "corpName": "일진홀딩스",
+      "stage": "power",
+      "revenue": 22827
+    },
+    {
+      "stockCode": "103590",
+      "corpName": "일진전기",
+      "stage": "power",
+      "revenue": 20446
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "stage": "cable",
+      "revenue": 6245
+    }
+  ]
+}

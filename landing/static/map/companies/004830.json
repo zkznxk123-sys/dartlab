@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "004830",
+    "corpName": "덕성",
+    "industry": "chemical",
+    "stage": "polymer",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 7,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "137400",
+      "corpName": "피엔티",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 7449
+    }
+  ],
+  "edges": [
+    {
+      "from": "004830",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "004830",
+      "to": "137400",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 115176863547.0,
+      "operating_profit": 3979104643.0,
+      "net_profit": 5922938815.0,
+      "total_assets": 125291791888.0
+    },
+    {
+      "year": "2022",
+      "sales": 133297779331.0,
+      "operating_profit": 5248384446.0,
+      "net_profit": 2515238853.0,
+      "total_assets": 125172358791.0
+    },
+    {
+      "year": "2023",
+      "sales": 107932700729.0,
+      "operating_profit": 5090066210.0,
+      "net_profit": 5634121715.0,
+      "total_assets": 126819096992.0
+    },
+    {
+      "year": "2024",
+      "sales": 1953177740.0,
+      "operating_profit": 8910501328.0,
+      "net_profit": 6799978765.0,
+      "total_assets": 136247328127.0
+    },
+    {
+      "year": "2025",
+      "sales": 670061270.0,
+      "operating_profit": 6235964595.0,
+      "net_profit": 5490204883.0,
+      "total_assets": 152659897436.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

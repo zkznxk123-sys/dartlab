@@ -1,0 +1,252 @@
+{
+  "ego": {
+    "stockCode": "352480",
+    "corpName": "씨앤씨인터내셔널",
+    "industry": "cosmetics",
+    "stage": "manufacturing",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2885,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002790",
+      "corpName": "아모레퍼시픽홀딩스",
+      "industry": "chemical",
+      "stage": "",
+      "revenue": 46232
+    },
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 42528
+    },
+    {
+      "stockCode": "114840",
+      "corpName": "아이패밀리에스씨",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 2241
+    },
+    {
+      "stockCode": "237880",
+      "corpName": "클리오",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 3289
+    },
+    {
+      "stockCode": "000490",
+      "corpName": "대동",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 14847
+    }
+  ],
+  "edges": [
+    {
+      "from": "352480",
+      "to": "002790",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "352480",
+      "to": "090430",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "352480",
+      "to": "114840",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "352480",
+      "to": "237880",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000490",
+      "to": "352480",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 91293592207.0,
+      "operating_profit": 2252228927.0,
+      "net_profit": 0.0,
+      "total_assets": 159731802061.0
+    },
+    {
+      "year": "2022",
+      "sales": 130605728419.0,
+      "operating_profit": 17452497154.0,
+      "net_profit": 16459825510.0,
+      "total_assets": 178950669171.0
+    },
+    {
+      "year": "2023",
+      "sales": 220327417089.0,
+      "operating_profit": 32089995970.0,
+      "net_profit": 0.0,
+      "total_assets": 255976319227.0
+    },
+    {
+      "year": "2024",
+      "sales": 282883855707.0,
+      "operating_profit": 28962985598.0,
+      "net_profit": 0.0,
+      "total_assets": 295080551524.0
+    },
+    {
+      "year": "2025",
+      "sales": 288477800460.0,
+      "operating_profit": 22170749656.0,
+      "net_profit": 0.0,
+      "total_assets": 437835367957.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "component",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "000490",
+      "corpName": "대동",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "002790",
+      "corpName": "아모레퍼시픽홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "114840",
+      "corpName": "아이패밀리에스씨",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "237880",
+      "corpName": "클리오",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "stage": "manufacturing",
+      "revenue": 42528
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "278470",
+      "corpName": "에이피알",
+      "stage": "manufacturing",
+      "revenue": 15273
+    },
+    {
+      "stockCode": "257720",
+      "corpName": "실리콘투",
+      "stage": "manufacturing",
+      "revenue": 11163
+    }
+  ]
+}

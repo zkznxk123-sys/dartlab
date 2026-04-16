@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "084870",
+    "corpName": "티비에이치글로벌",
+    "industry": "textile",
+    "stage": "apparel",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 1824,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "090460",
+      "corpName": "비에이치",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 17927
+    },
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 875
+    },
+    {
+      "stockCode": "225590",
+      "corpName": "패션플랫폼",
+      "industry": "textile",
+      "stage": "fiber",
+      "revenue": 1063
+    }
+  ],
+  "edges": [
+    {
+      "from": "084870",
+      "to": "090460",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "084870",
+      "to": "099220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "225590",
+      "to": "084870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 188075549588.0,
+      "operating_profit": 5337805554.0,
+      "net_profit": -19619878069.0,
+      "total_assets": 117022490325.0
+    },
+    {
+      "year": "2022",
+      "sales": 203091521251.0,
+      "operating_profit": 1957768075.0,
+      "net_profit": 4927301235.0,
+      "total_assets": 112327631684.0
+    },
+    {
+      "year": "2023",
+      "sales": 197103368035.0,
+      "operating_profit": 7860055406.0,
+      "net_profit": 6736053468.0,
+      "total_assets": 110046703211.0
+    },
+    {
+      "year": "2024",
+      "sales": 178464510529.0,
+      "operating_profit": 3360351544.0,
+      "net_profit": -701756146.0,
+      "total_assets": 105764284096.0
+    },
+    {
+      "year": "2025",
+      "sales": 182419159355.0,
+      "operating_profit": 3149919999.0,
+      "net_profit": 884543398.0,
+      "total_assets": 104296475432.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+{
+  "ego": {
+    "stockCode": "321820",
+    "corpName": "아티스트컴퍼니",
+    "industry": "software",
+    "stage": "ai",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 467,
+    "confidence": 0.9,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "066410",
+      "corpName": "버킷스튜디오",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 173
+    },
+    {
+      "stockCode": "200350",
+      "corpName": "아티스트스튜디오",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 146
+    },
+    {
+      "stockCode": "033270",
+      "corpName": "유나이티드",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 2888
+    },
+    {
+      "stockCode": "299900",
+      "corpName": "위지윅스튜디오",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 1020
+    }
+  ],
+  "edges": [
+    {
+      "from": "066410",
+      "to": "321820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "200350",
+      "to": "321820",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "321820",
+      "to": "200350",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "321820",
+      "to": "033270",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "299900",
+      "to": "321820",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.9%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 35420948949.0,
+      "operating_profit": -5475563541.0,
+      "net_profit": -481700777.0,
+      "total_assets": 62091631695.0
+    },
+    {
+      "year": "2022",
+      "sales": 35760012569.0,
+      "operating_profit": -6306382768.0,
+      "net_profit": -18952081115.0,
+      "total_assets": 48981064431.0
+    },
+    {
+      "year": "2023",
+      "sales": 21272385828.0,
+      "operating_profit": -3277590268.0,
+      "net_profit": -292162692.0,
+      "total_assets": 61225407741.0
+    },
+    {
+      "year": "2024",
+      "sales": 21265284097.0,
+      "operating_profit": -3148114885.0,
+      "net_profit": 0.0,
+      "total_assets": 52591911168.0
+    },
+    {
+      "year": "2025",
+      "sales": 46650140282.0,
+      "operating_profit": -3958696884.0,
+      "net_profit": 0.0,
+      "total_assets": 71642914566.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "079190",
+    "corpName": "케스피온",
+    "industry": "telecom",
+    "stage": "infra",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 441,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "365900",
+      "corpName": "브이씨",
+      "industry": "leisure",
+      "stage": "general",
+      "revenue": 469
+    },
+    {
+      "stockCode": "065450",
+      "corpName": "빅텍",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 830
+    },
+    {
+      "stockCode": "155650",
+      "corpName": "와이엠씨",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 1728
+    }
+  ],
+  "edges": [
+    {
+      "from": "079190",
+      "to": "365900",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "065450",
+      "to": "079190",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.0%"
+    },
+    {
+      "from": "155650",
+      "to": "079190",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 4.6%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 38949658749.0,
+      "operating_profit": -4040784840.0,
+      "net_profit": -2916178515.0,
+      "total_assets": 59173138829.0
+    },
+    {
+      "year": "2022",
+      "sales": 55573936751.0,
+      "operating_profit": -3782785329.0,
+      "net_profit": -10857357220.0,
+      "total_assets": 51656413900.0
+    },
+    {
+      "year": "2023",
+      "sales": 63213111684.0,
+      "operating_profit": 1070684499.0,
+      "net_profit": 2724899265.0,
+      "total_assets": 38738320514.0
+    },
+    {
+      "year": "2024",
+      "sales": 32599438408.0,
+      "operating_profit": -5373025098.0,
+      "net_profit": -3871174346.0,
+      "total_assets": 35202573615.0
+    },
+    {
+      "year": "2025",
+      "sales": 44149955336.0,
+      "operating_profit": -2737967852.0,
+      "net_profit": -4578590606.0,
+      "total_assets": 24322659443.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

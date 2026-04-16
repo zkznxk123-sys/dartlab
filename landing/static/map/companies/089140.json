@@ -1,0 +1,173 @@
+{
+  "ego": {
+    "stockCode": "089140",
+    "corpName": "넥스턴앤롤코리아",
+    "industry": "machinery",
+    "stage": "special",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 704,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "025560",
+      "corpName": "미래산업",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 508
+    },
+    {
+      "stockCode": "131400",
+      "corpName": "이브이첨단소재",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 590
+    },
+    {
+      "stockCode": "145210",
+      "corpName": "다이나믹디자인",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 802
+    }
+  ],
+  "edges": [
+    {
+      "from": "025560",
+      "to": "089140",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "089140",
+      "to": "131400",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "089140",
+      "to": "025560",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "089140",
+      "to": "145210",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 5.9%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 16972440217.0,
+      "operating_profit": -2389556051.0,
+      "net_profit": -4432725121.0,
+      "total_assets": 138948612880.0
+    },
+    {
+      "year": "2022",
+      "sales": 28990439048.0,
+      "operating_profit": -3438169411.0,
+      "net_profit": -4688260552.0,
+      "total_assets": 200256518815.0
+    },
+    {
+      "year": "2023",
+      "sales": 41257657896.0,
+      "operating_profit": 1267041584.0,
+      "net_profit": 9680993019.0,
+      "total_assets": 243994293982.0
+    },
+    {
+      "year": "2024",
+      "sales": 31640413075.0,
+      "operating_profit": -1245982417.0,
+      "net_profit": -13004514136.0,
+      "total_assets": 233036978483.0
+    },
+    {
+      "year": "2025",
+      "sales": 70440930511.0,
+      "operating_profit": 2281825045.0,
+      "net_profit": -2348922332.0,
+      "total_assets": 340909640792.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

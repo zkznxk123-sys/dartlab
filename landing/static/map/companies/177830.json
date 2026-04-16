@@ -1,0 +1,302 @@
+{
+  "ego": {
+    "stockCode": "177830",
+    "corpName": "파버나인",
+    "industry": "electronics",
+    "stage": "set",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 1325,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "069510",
+      "corpName": "에스텍",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 4682
+    },
+    {
+      "stockCode": "217590",
+      "corpName": "티엠씨",
+      "industry": "electrical",
+      "stage": "cable",
+      "revenue": 0
+    },
+    {
+      "stockCode": "162300",
+      "corpName": "신스틸",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 3522
+    },
+    {
+      "stockCode": "099520",
+      "corpName": "DGI",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 252
+    },
+    {
+      "stockCode": "084370",
+      "corpName": "유진테크",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 3503
+    },
+    {
+      "stockCode": "069330",
+      "corpName": "유아이디",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 2
+    }
+  ],
+  "edges": [
+    {
+      "from": "069510",
+      "to": "177830",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "217590",
+      "to": "177830",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "162300",
+      "to": "177830",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "177830",
+      "to": "099520",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "084370",
+      "to": "177830",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "069330",
+      "to": "177830",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 126264806691.0,
+      "operating_profit": 5882203973.0,
+      "net_profit": 6942967003.0,
+      "total_assets": 136879575573.0
+    },
+    {
+      "year": "2022",
+      "sales": 118037938315.0,
+      "operating_profit": 11153346696.0,
+      "net_profit": 0.0,
+      "total_assets": 142639644920.0
+    },
+    {
+      "year": "2023",
+      "sales": 120684709193.0,
+      "operating_profit": 1691733621.0,
+      "net_profit": 145831901.0,
+      "total_assets": 131198650363.0
+    },
+    {
+      "year": "2024",
+      "sales": 132825071817.0,
+      "operating_profit": 8125864374.0,
+      "net_profit": 7033298379.0,
+      "total_assets": 165908944651.0
+    },
+    {
+      "year": "2025",
+      "sales": 132540413436.0,
+      "operating_profit": 2569302163.0,
+      "net_profit": -4184118253.0,
+      "total_assets": 150651302969.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        2
+      ],
+      [
+        "electrical",
+        1
+      ],
+      [
+        "steel",
+        1
+      ],
+      [
+        "semiconductor",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "set",
+        1
+      ],
+      [
+        "cable",
+        1
+      ],
+      [
+        "product",
+        1
+      ],
+      [
+        "equipment",
+        1
+      ],
+      [
+        "display",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "069510",
+      "corpName": "에스텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "217590",
+      "corpName": "티엠씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "162300",
+      "corpName": "신스틸",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "084370",
+      "corpName": "유진테크",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "069330",
+      "corpName": "유아이디",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

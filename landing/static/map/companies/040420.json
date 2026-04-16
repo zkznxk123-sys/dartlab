@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "040420",
+    "corpName": "정상제이엘에스",
+    "industry": "education",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 1031,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000480",
+      "corpName": "시알홀딩스",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 8278
+    }
+  ],
+  "edges": [
+    {
+      "from": "000480",
+      "to": "040420",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 101714282687.0,
+      "operating_profit": 16986218996.0,
+      "net_profit": 13633314404.0,
+      "total_assets": 111549060527.0
+    },
+    {
+      "year": "2022",
+      "sales": 110791763102.0,
+      "operating_profit": 16725943893.0,
+      "net_profit": 13301754187.0,
+      "total_assets": 99682904120.0
+    },
+    {
+      "year": "2023",
+      "sales": 113358989517.0,
+      "operating_profit": 16377319938.0,
+      "net_profit": 13314592399.0,
+      "total_assets": 107464054838.0
+    },
+    {
+      "year": "2024",
+      "sales": 105846169339.0,
+      "operating_profit": 10120657844.0,
+      "net_profit": 7606095746.0,
+      "total_assets": 104591202504.0
+    },
+    {
+      "year": "2025",
+      "sales": 103051215889.0,
+      "operating_profit": 9766490992.0,
+      "net_profit": 6639353826.0,
+      "total_assets": 103209670429.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "016880",
+      "corpName": "웅진",
+      "stage": "general",
+      "revenue": 11507
+    },
+    {
+      "stockCode": "215200",
+      "corpName": "메가스터디교육",
+      "stage": "general",
+      "revenue": 8849
+    },
+    {
+      "stockCode": "019680",
+      "corpName": "대교",
+      "stage": "general",
+      "revenue": 6500
+    },
+    {
+      "stockCode": "067280",
+      "corpName": "멀티캠퍼스",
+      "stage": "general",
+      "revenue": 3308
+    },
+    {
+      "stockCode": "068930",
+      "corpName": "디지털대성",
+      "stage": "general",
+      "revenue": 2538
+    }
+  ]
+}

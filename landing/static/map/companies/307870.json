@@ -1,0 +1,254 @@
+{
+  "ego": {
+    "stockCode": "307870",
+    "corpName": "비투엔",
+    "industry": "consulting",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 146,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002070",
+      "corpName": "비비안",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 2224
+    },
+    {
+      "stockCode": "016670",
+      "corpName": "디모아",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 231
+    },
+    {
+      "stockCode": "025620",
+      "corpName": "차AI헬스케어",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 73
+    },
+    {
+      "stockCode": "078860",
+      "corpName": "스테이지원엔터",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 122
+    },
+    {
+      "stockCode": "001290",
+      "corpName": "상상인증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "038540",
+      "corpName": "상상인",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 4186
+    }
+  ],
+  "edges": [
+    {
+      "from": "002070",
+      "to": "307870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "016670",
+      "to": "307870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "025620",
+      "to": "307870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "078860",
+      "to": "307870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "307870",
+      "to": "001290",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "307870",
+      "to": "038540",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "001290",
+      "to": "307870",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.5%"
+    },
+    {
+      "from": "025620",
+      "to": "307870",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 3.6%"
+    },
+    {
+      "from": "038540",
+      "to": "307870",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 25775165233.0,
+      "operating_profit": 2246853648.0,
+      "net_profit": -1769123281.0,
+      "total_assets": 29476776060.0
+    },
+    {
+      "year": "2022",
+      "sales": 27082999573.0,
+      "operating_profit": -2187641523.0,
+      "net_profit": -2215744889.0,
+      "total_assets": 39690356202.0
+    },
+    {
+      "year": "2023",
+      "sales": 32029523451.0,
+      "operating_profit": -2457973143.0,
+      "net_profit": -12566848725.0,
+      "total_assets": 24749914905.0
+    },
+    {
+      "year": "2024",
+      "sales": 25098141983.0,
+      "operating_profit": -2645179181.0,
+      "net_profit": -6925800390.0,
+      "total_assets": 56705860011.0
+    },
+    {
+      "year": "2025",
+      "sales": 14624545174.0,
+      "operating_profit": -6746466061.0,
+      "net_profit": 0.0,
+      "total_assets": 45587526620.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "003030",
+      "corpName": "세아제강지주",
+      "stage": "general",
+      "revenue": 37596
+    },
+    {
+      "stockCode": "000070",
+      "corpName": "삼양홀딩스",
+      "stage": "general",
+      "revenue": 33483
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "036710",
+      "corpName": "심텍홀딩스",
+      "stage": "general",
+      "revenue": 15281
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "stage": "general",
+      "revenue": 13276
+    }
+  ]
+}

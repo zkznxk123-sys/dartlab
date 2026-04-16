@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "005860",
+    "corpName": "한일사료",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 4549,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "383220",
+      "corpName": "F&F",
+      "industry": "textile",
+      "stage": "apparel",
+      "revenue": 19340
+    }
+  ],
+  "edges": [
+    {
+      "from": "005860",
+      "to": "383220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 355783598582.0,
+      "operating_profit": 13619069878.0,
+      "net_profit": 7213007456.0,
+      "total_assets": 175091150250.0
+    },
+    {
+      "year": "2022",
+      "sales": 408316564865.0,
+      "operating_profit": -8242501275.0,
+      "net_profit": -14191182402.0,
+      "total_assets": 187888569362.0
+    },
+    {
+      "year": "2023",
+      "sales": 396938179132.0,
+      "operating_profit": 1767518597.0,
+      "net_profit": 115269307240.0,
+      "total_assets": 241515900189.0
+    },
+    {
+      "year": "2024",
+      "sales": 430978104202.0,
+      "operating_profit": 3696238401.0,
+      "net_profit": -18407723.0,
+      "total_assets": 207581085972.0
+    },
+    {
+      "year": "2025",
+      "sales": 454852166662.0,
+      "operating_profit": 5861470994.0,
+      "net_profit": 6376868459.0,
+      "total_assets": 209428791267.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

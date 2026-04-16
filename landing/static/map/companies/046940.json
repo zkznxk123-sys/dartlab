@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "046940",
+    "corpName": "우원개발",
+    "industry": "construction",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 3763,
+    "confidence": 0.9,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "034830",
+      "corpName": "한국토지신탁",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 1844
+    }
+  ],
+  "edges": [
+    {
+      "from": "024110",
+      "to": "046940",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "046940",
+      "to": "034830",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 174303666003.0,
+      "operating_profit": 394322033.0,
+      "net_profit": 1180548994.0,
+      "total_assets": 159150747616.0
+    },
+    {
+      "year": "2022",
+      "sales": 196292051694.0,
+      "operating_profit": 577978892.0,
+      "net_profit": 3738368375.0,
+      "total_assets": 165095745565.0
+    },
+    {
+      "year": "2023",
+      "sales": 252508569423.0,
+      "operating_profit": 1357980797.0,
+      "net_profit": 1475092795.0,
+      "total_assets": 191495999217.0
+    },
+    {
+      "year": "2024",
+      "sales": 302842776436.0,
+      "operating_profit": 2826256917.0,
+      "net_profit": 736066386.0,
+      "total_assets": 229136136410.0
+    },
+    {
+      "year": "2025",
+      "sales": 376349352125.0,
+      "operating_profit": 67188905596.0,
+      "net_profit": 47967126385.0,
+      "total_assets": 264149989242.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

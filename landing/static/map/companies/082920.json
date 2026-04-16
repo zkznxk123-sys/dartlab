@@ -1,0 +1,318 @@
+{
+  "ego": {
+    "stockCode": "082920",
+    "corpName": "비츠로셀",
+    "industry": "battery",
+    "stage": "electrolyte",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 2431,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005810",
+      "corpName": "풍산홀딩스",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 184
+    },
+    {
+      "stockCode": "042370",
+      "corpName": "비츠로테크",
+      "industry": "electrical",
+      "stage": "power",
+      "revenue": 4323
+    },
+    {
+      "stockCode": "054220",
+      "corpName": "비츠로시스",
+      "industry": "electrical",
+      "stage": "power",
+      "revenue": 448
+    },
+    {
+      "stockCode": "488900",
+      "corpName": "비츠로넥스텍",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 368
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "industry": "steel",
+      "stage": "processing",
+      "revenue": 50486
+    },
+    {
+      "stockCode": "347000",
+      "corpName": "센코",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 367
+    },
+    {
+      "stockCode": "044780",
+      "corpName": "에이치케이",
+      "industry": "medicalDevice",
+      "stage": "therapeutic",
+      "revenue": 542
+    }
+  ],
+  "edges": [
+    {
+      "from": "082920",
+      "to": "005810",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "042370",
+      "to": "082920",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "082920",
+      "to": "042370",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "054220",
+      "to": "082920",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "082920",
+      "to": "042370",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "082920",
+      "to": "488900",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "082920",
+      "to": "054220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "082920",
+      "to": "103140",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "082920",
+      "to": "347000",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "488900",
+      "to": "082920",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "044780",
+      "to": "082920",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 113249924593.0,
+      "operating_profit": 17422339204.0,
+      "net_profit": 17021473137.0,
+      "total_assets": 206247203936.0
+    },
+    {
+      "year": "2022",
+      "sales": 140980940372.0,
+      "operating_profit": 28825464743.0,
+      "net_profit": 23111882465.0,
+      "total_assets": 237181520633.0
+    },
+    {
+      "year": "2023",
+      "sales": 176220480964.0,
+      "operating_profit": 37690323911.0,
+      "net_profit": 36054568905.0,
+      "total_assets": 256291153047.0
+    },
+    {
+      "year": "2024",
+      "sales": 210779361832.0,
+      "operating_profit": 51910636695.0,
+      "net_profit": 51260348099.0,
+      "total_assets": 317852058044.0
+    },
+    {
+      "year": "2025",
+      "sales": 243082541135.0,
+      "operating_profit": 69267801066.0,
+      "net_profit": 56924763449.0,
+      "total_assets": 370836626050.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "005810",
+      "corpName": "풍산홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "042370",
+      "corpName": "비츠로테크",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "347000",
+      "corpName": "센코",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "007340",
+      "corpName": "DN오토모티브",
+      "stage": "cell",
+      "revenue": 36757
+    },
+    {
+      "stockCode": "066970",
+      "corpName": "엘앤에프",
+      "stage": "cathode",
+      "revenue": 21549
+    },
+    {
+      "stockCode": "004490",
+      "corpName": "세방전지",
+      "stage": "cell",
+      "revenue": 21187
+    },
+    {
+      "stockCode": "005070",
+      "corpName": "코스모신소재",
+      "stage": "cathode",
+      "revenue": 4563
+    },
+    {
+      "stockCode": "348370",
+      "corpName": "엔켐",
+      "stage": "electrolyte",
+      "revenue": 3128
+    }
+  ]
+}

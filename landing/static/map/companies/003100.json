@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "003100",
+    "corpName": "선광",
+    "industry": "logistics",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 1904,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002320",
+      "corpName": "한진",
+      "industry": "logistics",
+      "stage": "general",
+      "revenue": 30649
+    },
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "004080",
+      "corpName": "신흥",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 685
+    }
+  ],
+  "edges": [
+    {
+      "from": "003100",
+      "to": "002320",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "003100",
+      "to": "031210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "004080",
+      "to": "003100",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.4%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 162739217097.0,
+      "operating_profit": 32163554969.0,
+      "net_profit": 24033559913.0,
+      "total_assets": 689325920040.0
+    },
+    {
+      "year": "2022",
+      "sales": 172141436308.0,
+      "operating_profit": 26761774363.0,
+      "net_profit": 14691300994.0,
+      "total_assets": 634632160052.0
+    },
+    {
+      "year": "2023",
+      "sales": 185300554838.0,
+      "operating_profit": 39087432544.0,
+      "net_profit": 29836757952.0,
+      "total_assets": 639428048786.0
+    },
+    {
+      "year": "2024",
+      "sales": 186752030108.0,
+      "operating_profit": 36374328619.0,
+      "net_profit": 28298497727.0,
+      "total_assets": 659569508080.0
+    },
+    {
+      "year": "2025",
+      "sales": 190422002484.0,
+      "operating_profit": 41390125061.0,
+      "net_profit": 39481434625.0,
+      "total_assets": 691288235084.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "086280",
+      "corpName": "현대글로비스",
+      "stage": "general",
+      "revenue": 295664
+    },
+    {
+      "stockCode": "003490",
+      "corpName": "대한항공",
+      "stage": "general",
+      "revenue": 252255
+    },
+    {
+      "stockCode": "028670",
+      "corpName": "팬오션",
+      "stage": "general",
+      "revenue": 54329
+    },
+    {
+      "stockCode": "002320",
+      "corpName": "한진",
+      "stage": "general",
+      "revenue": 30649
+    },
+    {
+      "stockCode": "089860",
+      "corpName": "롯데렌탈",
+      "stage": "",
+      "revenue": 29188
+    }
+  ]
+}

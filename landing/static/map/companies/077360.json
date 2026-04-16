@@ -1,0 +1,313 @@
+{
+  "ego": {
+    "stockCode": "077360",
+    "corpName": "덕산하이메탈",
+    "industry": "semiconductor",
+    "stage": "packaging",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2364,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "036540",
+      "corpName": "SFA반도체",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 3674
+    },
+    {
+      "stockCode": "033170",
+      "corpName": "시그네틱스",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 1030
+    },
+    {
+      "stockCode": "033790",
+      "corpName": "피노",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 2648
+    },
+    {
+      "stockCode": "044990",
+      "corpName": "에이치엔에스하이텍",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 819
+    },
+    {
+      "stockCode": "317330",
+      "corpName": "덕산테코피아",
+      "industry": "semiconductor",
+      "stage": "materials",
+      "revenue": 1121
+    },
+    {
+      "stockCode": "213420",
+      "corpName": "덕산네오룩스",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 3443
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "123010",
+      "corpName": "알엔티엑스",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 384
+    }
+  ],
+  "edges": [
+    {
+      "from": "077360",
+      "to": "036540",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 2042.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "077360",
+      "to": "033170",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "033790",
+      "to": "077360",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "077360",
+      "to": "044990",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "077360",
+      "to": "317330",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "077360",
+      "to": "213420",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "088350",
+      "to": "077360",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "077360",
+      "to": "123010",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "213420",
+      "to": "077360",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "317330",
+      "to": "077360",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 92723328726.0,
+      "operating_profit": 5993408134.0,
+      "net_profit": 31734264931.0,
+      "total_assets": 323669193153.0
+    },
+    {
+      "year": "2022",
+      "sales": 171513497434.0,
+      "operating_profit": -2735426060.0,
+      "net_profit": 6104855689.0,
+      "total_assets": 363538643625.0
+    },
+    {
+      "year": "2023",
+      "sales": 144452975904.0,
+      "operating_profit": -10965930533.0,
+      "net_profit": 5659568458.0,
+      "total_assets": 742135236009.0
+    },
+    {
+      "year": "2024",
+      "sales": 235891931037.0,
+      "operating_profit": 18638671330.0,
+      "net_profit": 31295304204.0,
+      "total_assets": 818487430045.0
+    },
+    {
+      "year": "2025",
+      "sales": 236404536110.0,
+      "operating_profit": 2813023041.0,
+      "net_profit": -106024997636.0,
+      "total_assets": 658964267763.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "036540",
+      "corpName": "SFA반도체",
+      "product": "",
+      "amount": 2042.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "033170",
+      "corpName": "시그네틱스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "044990",
+      "corpName": "에이치엔에스하이텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "123010",
+      "corpName": "알엔티엑스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

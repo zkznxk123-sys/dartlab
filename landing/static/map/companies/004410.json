@@ -1,0 +1,143 @@
+{
+  "ego": {
+    "stockCode": "004410",
+    "corpName": "서울식품공업",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 686,
+    "confidence": 0.9,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001130",
+      "corpName": "대한제분",
+      "industry": "food",
+      "stage": "processing",
+      "revenue": 13752
+    }
+  ],
+  "edges": [
+    {
+      "from": "001130",
+      "to": "004410",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 55297650655.0,
+      "operating_profit": -3630399932.0,
+      "net_profit": -5778364194.0,
+      "total_assets": 72278883781.0
+    },
+    {
+      "year": "2022",
+      "sales": 64349405690.0,
+      "operating_profit": 1310279754.0,
+      "net_profit": 675962890.0,
+      "total_assets": 70853362024.0
+    },
+    {
+      "year": "2023",
+      "sales": 64784789661.0,
+      "operating_profit": 586533680.0,
+      "net_profit": -572589191.0,
+      "total_assets": 70814890787.0
+    },
+    {
+      "year": "2024",
+      "sales": 58588657427.0,
+      "operating_profit": -2232262628.0,
+      "net_profit": -2987007773.0,
+      "total_assets": 66307712853.0
+    },
+    {
+      "year": "2025",
+      "sales": 68603497542.0,
+      "operating_profit": -459735590.0,
+      "net_profit": -1603157075.0,
+      "total_assets": 72849156691.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "food",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "processing",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "001130",
+      "corpName": "대한제분",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

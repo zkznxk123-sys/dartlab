@@ -1,0 +1,135 @@
+{
+  "ego": {
+    "stockCode": "389140",
+    "corpName": "포바이포",
+    "industry": "media",
+    "stage": "content",
+    "role": "서비스",
+    "stream": "upstream",
+    "revenue": 337,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "035900",
+      "corpName": "JYP Ent.",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 8219
+    },
+    {
+      "stockCode": "230360",
+      "corpName": "에코마케팅",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 4488
+    }
+  ],
+  "edges": [
+    {
+      "from": "035900",
+      "to": "389140",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 6.3%"
+    },
+    {
+      "from": "230360",
+      "to": "389140",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 4.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2022",
+      "sales": 16194298353.0,
+      "operating_profit": -10498782236.0,
+      "net_profit": -8771336485.0,
+      "total_assets": 66168527395.0
+    },
+    {
+      "year": "2023",
+      "sales": 33751399462.0,
+      "operating_profit": -16258350170.0,
+      "net_profit": -19416621081.0,
+      "total_assets": 67013711064.0
+    },
+    {
+      "year": "2024",
+      "sales": 33275914511.0,
+      "operating_profit": -13890623243.0,
+      "net_profit": -15357027755.0,
+      "total_assets": 59001944111.0
+    },
+    {
+      "year": "2025",
+      "sales": 33710336199.0,
+      "operating_profit": -7396321550.0,
+      "net_profit": null,
+      "total_assets": 75780348550.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "035760",
+      "corpName": "CJ ENM",
+      "stage": "content",
+      "revenue": 51345
+    },
+    {
+      "stockCode": "030000",
+      "corpName": "제일기획",
+      "stage": "content",
+      "revenue": 45469
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "214320",
+      "corpName": "이노션",
+      "stage": "platform",
+      "revenue": 21460
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ]
+}

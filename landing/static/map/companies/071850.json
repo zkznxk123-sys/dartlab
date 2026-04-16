@@ -1,0 +1,162 @@
+{
+  "ego": {
+    "stockCode": "071850",
+    "corpName": "캐스텍코리아",
+    "industry": "electronics",
+    "stage": "set",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 1553,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 13276
+    },
+    {
+      "stockCode": "162300",
+      "corpName": "신스틸",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 3522
+    }
+  ],
+  "edges": [
+    {
+      "from": "015360",
+      "to": "071850",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "162300",
+      "to": "071850",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 141243567304.0,
+      "operating_profit": -17614992211.0,
+      "net_profit": -15325546707.0,
+      "total_assets": 251690601782.0
+    },
+    {
+      "year": "2022",
+      "sales": 182019080085.0,
+      "operating_profit": -10763713221.0,
+      "net_profit": -6180291122.0,
+      "total_assets": 257878393921.0
+    },
+    {
+      "year": "2023",
+      "sales": 172901541864.0,
+      "operating_profit": -9205389585.0,
+      "net_profit": -16101857829.0,
+      "total_assets": 226932459163.0
+    },
+    {
+      "year": "2024",
+      "sales": 158512372176.0,
+      "operating_profit": -10019542792.0,
+      "net_profit": -9413953869.0,
+      "total_assets": 210147975531.0
+    },
+    {
+      "year": "2025",
+      "sales": 155324721018.0,
+      "operating_profit": -6273778201.0,
+      "net_profit": -21320914893.0,
+      "total_assets": 183718362055.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "product",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "162300",
+      "corpName": "신스틸",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

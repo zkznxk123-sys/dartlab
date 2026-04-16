@@ -1,0 +1,223 @@
+{
+  "ego": {
+    "stockCode": "104540",
+    "corpName": "코렌텍",
+    "industry": "medicalDevice",
+    "stage": "therapeutic",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1004,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "004270",
+      "corpName": "남성",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 775
+    },
+    {
+      "stockCode": "011210",
+      "corpName": "현대위아",
+      "industry": "auto",
+      "stage": "chassis",
+      "revenue": 84816
+    },
+    {
+      "stockCode": "019180",
+      "corpName": "티에이치엔",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 9891
+    },
+    {
+      "stockCode": "018290",
+      "corpName": "브이티",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 4372
+    },
+    {
+      "stockCode": "182360",
+      "corpName": "큐브엔터",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 872
+    }
+  ],
+  "edges": [
+    {
+      "from": "004270",
+      "to": "104540",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "011210",
+      "to": "104540",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "019180",
+      "to": "104540",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "011210",
+      "to": "104540",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 7.2%"
+    },
+    {
+      "from": "018290",
+      "to": "104540",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.2%"
+    },
+    {
+      "from": "019180",
+      "to": "104540",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 3.0%"
+    },
+    {
+      "from": "182360",
+      "to": "104540",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 44629700360.0,
+      "operating_profit": 3778545248.0,
+      "net_profit": 763944031.0,
+      "total_assets": 118903126012.0
+    },
+    {
+      "year": "2022",
+      "sales": 63908978499.0,
+      "operating_profit": 5845001049.0,
+      "net_profit": 2651185656.0,
+      "total_assets": 171816907422.0
+    },
+    {
+      "year": "2023",
+      "sales": 92046040615.0,
+      "operating_profit": 7052267458.0,
+      "net_profit": 4055337426.0,
+      "total_assets": 187127563509.0
+    },
+    {
+      "year": "2024",
+      "sales": 93667301171.0,
+      "operating_profit": 3890853051.0,
+      "net_profit": 0.0,
+      "total_assets": 186272303845.0
+    },
+    {
+      "year": "2025",
+      "sales": 100428537181.0,
+      "operating_profit": 9116352215.0,
+      "net_profit": 6969212084.0,
+      "total_assets": 171927246497.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "011560",
+      "corpName": "세보엠이씨",
+      "stage": "imaging",
+      "revenue": 7158
+    },
+    {
+      "stockCode": "092790",
+      "corpName": "넥스틸",
+      "stage": "imaging",
+      "revenue": 5510
+    },
+    {
+      "stockCode": "215360",
+      "corpName": "우리산업",
+      "stage": "imaging",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "043150",
+      "corpName": "바텍",
+      "stage": "imaging",
+      "revenue": 4264
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "stage": "imaging",
+      "revenue": 3959
+    }
+  ]
+}

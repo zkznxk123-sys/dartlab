@@ -1,0 +1,197 @@
+{
+  "ego": {
+    "stockCode": "004780",
+    "corpName": "대륙제관",
+    "industry": "energy",
+    "stage": "distribution",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 2455,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000320",
+      "corpName": "노루홀딩스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 12393
+    },
+    {
+      "stockCode": "475660",
+      "corpName": "에스켐",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 0
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "090350",
+      "corpName": "노루페인트",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 7711
+    }
+  ],
+  "edges": [
+    {
+      "from": "004780",
+      "to": "000320",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004780",
+      "to": "475660",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004780",
+      "to": "017670",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004780",
+      "to": "090350",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 235940553891.0,
+      "operating_profit": 7615540341.0,
+      "net_profit": 0.0,
+      "total_assets": 175168725411.0
+    },
+    {
+      "year": "2022",
+      "sales": 275979619835.0,
+      "operating_profit": 9675110380.0,
+      "net_profit": 9703258216.0,
+      "total_assets": 185246796458.0
+    },
+    {
+      "year": "2023",
+      "sales": 271101699009.0,
+      "operating_profit": 15623149185.0,
+      "net_profit": 13070229189.0,
+      "total_assets": 195803195827.0
+    },
+    {
+      "year": "2024",
+      "sales": 274659400896.0,
+      "operating_profit": 15817274927.0,
+      "net_profit": 0.0,
+      "total_assets": 205541598642.0
+    },
+    {
+      "year": "2025",
+      "sales": 245468051154.0,
+      "operating_profit": 10302316583.0,
+      "net_profit": 9182251388.0,
+      "total_assets": 210380608892.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "000320",
+      "corpName": "노루홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "090350",
+      "corpName": "노루페인트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "stage": "generation",
+      "revenue": 974293
+    },
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "stage": "distribution",
+      "revenue": 357273
+    },
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "stage": "distribution",
+      "revenue": 52755
+    },
+    {
+      "stockCode": "071320",
+      "corpName": "지역난방공사",
+      "stage": "generation",
+      "revenue": 39982
+    },
+    {
+      "stockCode": "112610",
+      "corpName": "씨에스윈드",
+      "stage": "generation",
+      "revenue": 29316
+    }
+  ]
+}

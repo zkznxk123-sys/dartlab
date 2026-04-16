@@ -1,0 +1,185 @@
+{
+  "ego": {
+    "stockCode": "085910",
+    "corpName": "네오티스",
+    "industry": "auto",
+    "stage": "powertrain",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 687,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005810",
+      "corpName": "풍산홀딩스",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 184
+    },
+    {
+      "stockCode": "121060",
+      "corpName": "유니포인트",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 0
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "industry": "steel",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ],
+  "edges": [
+    {
+      "from": "005810",
+      "to": "085910",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "085910",
+      "to": "121060",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "103140",
+      "to": "085910",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "121060",
+      "to": "085910",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "121060",
+      "to": "085910",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 4.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 65982605251.0,
+      "operating_profit": 9651549182.0,
+      "net_profit": 5791932359.0,
+      "total_assets": 143971657527.0
+    },
+    {
+      "year": "2022",
+      "sales": 80372128697.0,
+      "operating_profit": 11682036856.0,
+      "net_profit": 6717066023.0,
+      "total_assets": 144767104945.0
+    },
+    {
+      "year": "2023",
+      "sales": 58471916067.0,
+      "operating_profit": -741768503.0,
+      "net_profit": -3309148318.0,
+      "total_assets": 131103511284.0
+    },
+    {
+      "year": "2024",
+      "sales": 54287070069.0,
+      "operating_profit": 3178608125.0,
+      "net_profit": 4853619808.0,
+      "total_assets": 125131926926.0
+    },
+    {
+      "year": "2025",
+      "sales": 68676858572.0,
+      "operating_profit": 7780052272.0,
+      "net_profit": 6269427108.0,
+      "total_assets": 128511197520.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

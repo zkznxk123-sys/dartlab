@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "010170",
+    "corpName": "대한광통신",
+    "industry": "textile",
+    "stage": "fiber",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1394,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000240",
+      "corpName": "한국앤컴퍼니",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 14576
+    },
+    {
+      "stockCode": "000480",
+      "corpName": "시알홀딩스",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 8278
+    },
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "industry": "electrical",
+      "stage": "cable",
+      "revenue": 36360
+    }
+  ],
+  "edges": [
+    {
+      "from": "000240",
+      "to": "010170",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000480",
+      "to": "010170",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "010170",
+      "to": "001440",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 156610498147.0,
+      "operating_profit": -27474553119.0,
+      "net_profit": -49114496378.0,
+      "total_assets": 235873845617.0
+    },
+    {
+      "year": "2022",
+      "sales": 190108508492.0,
+      "operating_profit": 3461490495.0,
+      "net_profit": -3084071605.0,
+      "total_assets": 252078532201.0
+    },
+    {
+      "year": "2023",
+      "sales": 180262763737.0,
+      "operating_profit": -23223251446.0,
+      "net_profit": -29456645326.0,
+      "total_assets": 234801808679.0
+    },
+    {
+      "year": "2024",
+      "sales": 152717431829.0,
+      "operating_profit": -29704722792.0,
+      "net_profit": -56038066436.0,
+      "total_assets": 209661318184.0
+    },
+    {
+      "year": "2025",
+      "sales": 139446734970.0,
+      "operating_profit": -21410712591.0,
+      "net_profit": -27972927775.0,
+      "total_assets": 219015700323.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

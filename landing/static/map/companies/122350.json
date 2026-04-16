@@ -1,0 +1,135 @@
+{
+  "ego": {
+    "stockCode": "122350",
+    "corpName": "삼기",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 5705,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "419050",
+      "corpName": "삼기에너지솔루션즈",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 1442
+    }
+  ],
+  "edges": [
+    {
+      "from": "122350",
+      "to": "419050",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "419050",
+      "to": "122350",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 554722753994.0,
+      "operating_profit": -4166898491.0,
+      "net_profit": 0.0,
+      "total_assets": 521387709193.0
+    },
+    {
+      "year": "2022",
+      "sales": 524145243101.0,
+      "operating_profit": 11468310897.0,
+      "net_profit": 0.0,
+      "total_assets": 478981038051.0
+    },
+    {
+      "year": "2023",
+      "sales": 537441450272.0,
+      "operating_profit": 7809072777.0,
+      "net_profit": 8267468161.0,
+      "total_assets": 595066359322.0
+    },
+    {
+      "year": "2024",
+      "sales": 542109881986.0,
+      "operating_profit": 5143132074.0,
+      "net_profit": -3195873591.0,
+      "total_assets": 629576441769.0
+    },
+    {
+      "year": "2025",
+      "sales": 570538736376.0,
+      "operating_profit": 8276856990.0,
+      "net_profit": 0.0,
+      "total_assets": 663256706885.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

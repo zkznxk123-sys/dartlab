@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "290720",
+    "corpName": "푸드나무",
+    "industry": "retail",
+    "stage": "retail",
+    "role": "소매",
+    "stream": "downstream",
+    "revenue": 868,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "300120",
+      "corpName": "라온피플",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 2238
+    }
+  ],
+  "edges": [
+    {
+      "from": "006800",
+      "to": "290720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "088350",
+      "to": "290720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "290720",
+      "to": "300120",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 191195148974.0,
+      "operating_profit": 1493854633.0,
+      "net_profit": 0.0,
+      "total_assets": 70433489706.0
+    },
+    {
+      "year": "2022",
+      "sales": 217202243524.0,
+      "operating_profit": -2085848169.0,
+      "net_profit": -3305044351.0,
+      "total_assets": 105933971544.0
+    },
+    {
+      "year": "2023",
+      "sales": 190692808996.0,
+      "operating_profit": -17795536446.0,
+      "net_profit": -19992768396.0,
+      "total_assets": 115756978260.0
+    },
+    {
+      "year": "2024",
+      "sales": 124128545790.0,
+      "operating_profit": -17426139506.0,
+      "net_profit": -45472723233.0,
+      "total_assets": 108082177660.0
+    },
+    {
+      "year": "2025",
+      "sales": 86805706183.0,
+      "operating_profit": -8152920653.0,
+      "net_profit": 5830375.0,
+      "total_assets": 86485313101.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

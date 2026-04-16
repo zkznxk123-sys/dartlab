@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "026150",
+    "corpName": "특수건설",
+    "industry": "construction",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 1490,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 875
+    }
+  ],
+  "edges": [
+    {
+      "from": "026150",
+      "to": "099220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": null,
+      "operating_profit": -711715450.0,
+      "net_profit": -6811810268.0,
+      "total_assets": 180609010351.0
+    },
+    {
+      "year": "2022",
+      "sales": 0.0,
+      "operating_profit": 2684562756.0,
+      "net_profit": 3827943.0,
+      "total_assets": 183871037331.0
+    },
+    {
+      "year": "2023",
+      "sales": 232863674296.0,
+      "operating_profit": 2490709395.0,
+      "net_profit": -2274301049.0,
+      "total_assets": 197309555526.0
+    },
+    {
+      "year": "2024",
+      "sales": 212529706481.0,
+      "operating_profit": 8752187155.0,
+      "net_profit": 5391687825.0,
+      "total_assets": 218363521306.0
+    },
+    {
+      "year": "2025",
+      "sales": 149021253222.0,
+      "operating_profit": -31645095019.0,
+      "net_profit": -18207454391.0,
+      "total_assets": 195070766176.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

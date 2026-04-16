@@ -1,0 +1,116 @@
+{
+  "ego": {
+    "stockCode": "340440",
+    "corpName": "세림B&G",
+    "industry": "plastic",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 480,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "003530",
+      "corpName": "한화투자증권",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 30946
+    }
+  ],
+  "edges": [
+    {
+      "from": "340440",
+      "to": "003530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 47675469341.0,
+      "operating_profit": 2101378865.0,
+      "net_profit": -3097839200.0,
+      "total_assets": 43861561231.0
+    },
+    {
+      "year": "2022",
+      "sales": 52526153669.0,
+      "operating_profit": 2692107814.0,
+      "net_profit": 2198438365.0,
+      "total_assets": 45794885478.0
+    },
+    {
+      "year": "2023",
+      "sales": 58245452504.0,
+      "operating_profit": 4298983844.0,
+      "net_profit": 3811486156.0,
+      "total_assets": 48602873642.0
+    },
+    {
+      "year": "2025",
+      "sales": 47989768658.0,
+      "operating_profit": 913686463.0,
+      "net_profit": 0.0,
+      "total_assets": 51258562395.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005720",
+      "corpName": "넥센",
+      "stage": "general",
+      "revenue": 35865
+    },
+    {
+      "stockCode": "002350",
+      "corpName": "넥센타이어",
+      "stage": "general",
+      "revenue": 31896
+    },
+    {
+      "stockCode": "013520",
+      "corpName": "화승코퍼레이션",
+      "stage": "general",
+      "revenue": 16398
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "stage": "general",
+      "revenue": 13729
+    },
+    {
+      "stockCode": "004840",
+      "corpName": "DRB동일",
+      "stage": "general",
+      "revenue": 8027
+    }
+  ]
+}

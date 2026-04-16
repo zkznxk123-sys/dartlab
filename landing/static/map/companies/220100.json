@@ -1,0 +1,306 @@
+{
+  "ego": {
+    "stockCode": "220100",
+    "corpName": "퓨쳐켐",
+    "industry": "chemical",
+    "stage": "polymer",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 187,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    },
+    {
+      "stockCode": "155650",
+      "corpName": "와이엠씨",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 1728
+    },
+    {
+      "stockCode": "215380",
+      "corpName": "우정바이오",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 376
+    },
+    {
+      "stockCode": "007530",
+      "corpName": "와이엠",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 1771
+    },
+    {
+      "stockCode": "418550",
+      "corpName": "제이오",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 552
+    }
+  ],
+  "edges": [
+    {
+      "from": "024110",
+      "to": "220100",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "041510",
+      "to": "220100",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "155650",
+      "to": "220100",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "215380",
+      "to": "220100",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "007530",
+      "to": "220100",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "418550",
+      "to": "220100",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 11818366832.0,
+      "operating_profit": -7894243565.0,
+      "net_profit": -3419588897.0,
+      "total_assets": 77136064160.0
+    },
+    {
+      "year": "2022",
+      "sales": 12573624103.0,
+      "operating_profit": -12934275144.0,
+      "net_profit": -14010877367.0,
+      "total_assets": 88716258581.0
+    },
+    {
+      "year": "2023",
+      "sales": 13968016475.0,
+      "operating_profit": -8411501068.0,
+      "net_profit": -6708943347.0,
+      "total_assets": 72833181896.0
+    },
+    {
+      "year": "2024",
+      "sales": 17293266226.0,
+      "operating_profit": -9467489583.0,
+      "net_profit": -9417583147.0,
+      "total_assets": 74421441480.0
+    },
+    {
+      "year": "2025",
+      "sales": 18670511678.0,
+      "operating_profit": -7752938320.0,
+      "net_profit": -11251212302.0,
+      "total_assets": 74530577453.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 5,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 5,
+    "stageDiversity": 5,
+    "topSupplyIndustries": [
+      [
+        "media",
+        1
+      ],
+      [
+        "semiconductor",
+        1
+      ],
+      [
+        "pharma",
+        1
+      ],
+      [
+        "steel",
+        1
+      ],
+      [
+        "consulting",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "agency",
+        1
+      ],
+      [
+        "equipment",
+        1
+      ],
+      [
+        "research",
+        1
+      ],
+      [
+        "product",
+        1
+      ],
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "155650",
+      "corpName": "와이엠씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "215380",
+      "corpName": "우정바이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "007530",
+      "corpName": "와이엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "418550",
+      "corpName": "제이오",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

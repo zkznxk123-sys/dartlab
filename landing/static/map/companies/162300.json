@@ -1,0 +1,152 @@
+{
+  "ego": {
+    "stockCode": "162300",
+    "corpName": "신스틸",
+    "industry": "steel",
+    "stage": "product",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 3522,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "071850",
+      "corpName": "캐스텍코리아",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 1553
+    },
+    {
+      "stockCode": "177830",
+      "corpName": "파버나인",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 1325
+    }
+  ],
+  "edges": [
+    {
+      "from": "162300",
+      "to": "071850",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "162300",
+      "to": "177830",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2022",
+      "sales": 381031986592.0,
+      "operating_profit": 15869285462.0,
+      "net_profit": 5887782591.0,
+      "total_assets": 161576062240.0
+    },
+    {
+      "year": "2023",
+      "sales": 323817908414.0,
+      "operating_profit": 13051719126.0,
+      "net_profit": 0.0,
+      "total_assets": 184968396469.0
+    },
+    {
+      "year": "2024",
+      "sales": 386554918254.0,
+      "operating_profit": 10467207712.0,
+      "net_profit": 0.0,
+      "total_assets": 229702813949.0
+    },
+    {
+      "year": "2025",
+      "sales": 352171696187.0,
+      "operating_profit": 3047366796.0,
+      "net_profit": 0.0,
+      "total_assets": 200339797835.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "071850",
+      "corpName": "캐스텍코리아",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "177830",
+      "corpName": "파버나인",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

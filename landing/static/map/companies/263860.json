@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "263860",
+    "corpName": "지니언스",
+    "industry": "telecom",
+    "stage": "device",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 484,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "033540",
+      "corpName": "파라텍",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "263860",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "033540",
+      "to": "263860",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.6%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 31917740934.0,
+      "operating_profit": 5906832874.0,
+      "net_profit": 0.0,
+      "total_assets": 52703153050.0
+    },
+    {
+      "year": "2022",
+      "sales": 38452577834.0,
+      "operating_profit": 6920292722.0,
+      "net_profit": 7146285721.0,
+      "total_assets": 59692593812.0
+    },
+    {
+      "year": "2023",
+      "sales": 42891621151.0,
+      "operating_profit": 6467031062.0,
+      "net_profit": 6246383767.0,
+      "total_assets": 63643270729.0
+    },
+    {
+      "year": "2024",
+      "sales": 49605420747.0,
+      "operating_profit": 9839923500.0,
+      "net_profit": 0.0,
+      "total_assets": 69299301439.0
+    },
+    {
+      "year": "2025",
+      "sales": 48381253076.0,
+      "operating_profit": 7007064713.0,
+      "net_profit": 0.0,
+      "total_assets": 80399685754.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

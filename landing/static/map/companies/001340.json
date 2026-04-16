@@ -1,0 +1,276 @@
+{
+  "ego": {
+    "stockCode": "001340",
+    "corpName": "PKC",
+    "industry": "chemical",
+    "stage": "specialty",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2721,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "069260",
+      "corpName": "티케이지휴켐스",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 11277
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 44013
+    },
+    {
+      "stockCode": "145990",
+      "corpName": "삼양사",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 25625
+    },
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "industry": "aerospace",
+      "stage": "airframe",
+      "revenue": 747854
+    },
+    {
+      "stockCode": "101390",
+      "corpName": "아이엠",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 918
+    }
+  ],
+  "edges": [
+    {
+      "from": "069260",
+      "to": "001340",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "001680",
+      "to": "001340",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "145990",
+      "to": "001340",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000880",
+      "to": "001340",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001340",
+      "to": "101390",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "Piotroski F 재무 건전 (8/9)",
+    "strengths": [
+      "Piotroski F 재무 건전 (8/9)",
+      "사외이사비율 60% -- 이사회 독립성 양호"
+    ],
+    "weaknesses": [
+      "FCF 적자 — 영업CF보다 투자가 큼",
+      "이익 변동계수 0.55 — 이익 변동성 높음",
+      "Altman Z 부실 경계 (-0.75)"
+    ],
+    "sector": "소재 > 화학",
+    "source": "audit",
+    "createdAt": "1775430966.5356877"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 191117728512.0,
+      "operating_profit": 17929801315.0,
+      "net_profit": 14896324686.0,
+      "total_assets": 359208429757.0
+    },
+    {
+      "year": "2022",
+      "sales": 232725146826.0,
+      "operating_profit": 28274340213.0,
+      "net_profit": 22702656071.0,
+      "total_assets": 404267600510.0
+    },
+    {
+      "year": "2023",
+      "sales": 233521888171.0,
+      "operating_profit": 17738515912.0,
+      "net_profit": 7728814098.0,
+      "total_assets": 426908196303.0
+    },
+    {
+      "year": "2024",
+      "sales": 245228124294.0,
+      "operating_profit": 9748351104.0,
+      "net_profit": 3600645965.0,
+      "total_assets": 464295668847.0
+    },
+    {
+      "year": "2025",
+      "sales": 272137469082.0,
+      "operating_profit": 12150680899.0,
+      "net_profit": 10099767746.0,
+      "total_assets": 606449785297.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "food",
+        2
+      ],
+      [
+        "chemical",
+        1
+      ],
+      [
+        "aerospace",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        2
+      ],
+      [
+        "basic",
+        1
+      ],
+      [
+        "airframe",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "069260",
+      "corpName": "티케이지휴켐스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "145990",
+      "corpName": "삼양사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

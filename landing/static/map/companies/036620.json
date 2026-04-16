@@ -1,0 +1,154 @@
+{
+  "ego": {
+    "stockCode": "036620",
+    "corpName": "감성코퍼레이션",
+    "industry": "textile",
+    "stage": "apparel",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 2502,
+    "confidence": 0.9,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001020",
+      "corpName": "페이퍼코리아",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 2667
+    },
+    {
+      "stockCode": "204610",
+      "corpName": "티쓰리",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 695
+    },
+    {
+      "stockCode": "018290",
+      "corpName": "브이티",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 4372
+    }
+  ],
+  "edges": [
+    {
+      "from": "036620",
+      "to": "001020",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "036620",
+      "to": "204610",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036620",
+      "to": "018290",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 48936589545.0,
+      "operating_profit": 1160109341.0,
+      "net_profit": 281383557.0,
+      "total_assets": 44646889566.0
+    },
+    {
+      "year": "2022",
+      "sales": 117401158387.0,
+      "operating_profit": 16247551642.0,
+      "net_profit": 0.0,
+      "total_assets": 83912249960.0
+    },
+    {
+      "year": "2023",
+      "sales": 177948652720.0,
+      "operating_profit": 32243349866.0,
+      "net_profit": 0.0,
+      "total_assets": 114513745642.0
+    },
+    {
+      "year": "2025",
+      "sales": 250195090117.0,
+      "operating_profit": 44631054064.0,
+      "net_profit": 35417260132.0,
+      "total_assets": null
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

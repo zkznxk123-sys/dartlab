@@ -1,0 +1,154 @@
+{
+  "ego": {
+    "stockCode": "094360",
+    "corpName": "칩스앤미디어",
+    "industry": "semiconductor",
+    "stage": "design",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 285,
+    "confidence": 0.92,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "054450",
+      "corpName": "텔레칩스",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 1928
+    },
+    {
+      "stockCode": "003650",
+      "corpName": "미창석유공업",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 4055
+    }
+  ],
+  "edges": [
+    {
+      "from": "054450",
+      "to": "094360",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "094360",
+      "to": "054450",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "003650",
+      "to": "094360",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 19979567098.0,
+      "operating_profit": 5199382483.0,
+      "net_profit": 6268250917.0,
+      "total_assets": 45938180838.0
+    },
+    {
+      "year": "2022",
+      "sales": 24092742406.0,
+      "operating_profit": 7303027730.0,
+      "net_profit": 9962898287.0,
+      "total_assets": 63075719986.0
+    },
+    {
+      "year": "2023",
+      "sales": 27627400828.0,
+      "operating_profit": 7769441247.0,
+      "net_profit": -26697996137.0,
+      "total_assets": 77989299429.0
+    },
+    {
+      "year": "2024",
+      "sales": 27075424194.0,
+      "operating_profit": 5281327227.0,
+      "net_profit": 0.0,
+      "total_assets": 83980124565.0
+    },
+    {
+      "year": "2025",
+      "sales": 28467135839.0,
+      "operating_profit": 6964476384.0,
+      "net_profit": 5922544212.0,
+      "total_assets": 106303672123.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

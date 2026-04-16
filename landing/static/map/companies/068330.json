@@ -1,0 +1,152 @@
+{
+  "ego": {
+    "stockCode": "068330",
+    "corpName": "일신바이오",
+    "industry": "machinery",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 145,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "142760",
+      "corpName": "모아라이프플러스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 112
+    },
+    {
+      "stockCode": "337840",
+      "corpName": "유엑스엔",
+      "industry": "medicalDevice",
+      "stage": "imaging",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "068330",
+      "to": "142760",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "068330",
+      "to": "337840",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 24378935412.0,
+      "operating_profit": 7337415805.0,
+      "net_profit": null,
+      "total_assets": 56438985785.0
+    },
+    {
+      "year": "2022",
+      "sales": 20433366777.0,
+      "operating_profit": 5139860436.0,
+      "net_profit": 3815053907.0,
+      "total_assets": 58451093732.0
+    },
+    {
+      "year": "2023",
+      "sales": 16437046608.0,
+      "operating_profit": 6214358152.0,
+      "net_profit": 6232490537.0,
+      "total_assets": 60618033893.0
+    },
+    {
+      "year": "2025",
+      "sales": 14530428309.0,
+      "operating_profit": 4546087339.0,
+      "net_profit": 4793275029.0,
+      "total_assets": 68584801254.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "142760",
+      "corpName": "모아라이프플러스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "337840",
+      "corpName": "유엑스엔",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

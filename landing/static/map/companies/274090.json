@@ -1,0 +1,173 @@
+{
+  "ego": {
+    "stockCode": "274090",
+    "corpName": "켄코아에어로스페이스",
+    "industry": "aerospace",
+    "stage": "airframe",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 764,
+    "confidence": 0.68,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005940",
+      "corpName": "NH투자증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "097520",
+      "corpName": "엠씨넥스",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 12792
+    }
+  ],
+  "edges": [
+    {
+      "from": "005940",
+      "to": "274090",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "024110",
+      "to": "274090",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "274090",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "097520",
+      "to": "274090",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 3.5%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 54682087389.0,
+      "operating_profit": -13767636838.0,
+      "net_profit": null,
+      "total_assets": 106611505920.0
+    },
+    {
+      "year": "2022",
+      "sales": 75855078822.0,
+      "operating_profit": 7986393339.0,
+      "net_profit": null,
+      "total_assets": 129746105855.0
+    },
+    {
+      "year": "2023",
+      "sales": 91142703333.0,
+      "operating_profit": 877125128.0,
+      "net_profit": null,
+      "total_assets": 149905857019.0
+    },
+    {
+      "year": "2024",
+      "sales": 86153888057.0,
+      "operating_profit": -5352275654.0,
+      "net_profit": null,
+      "total_assets": 253063585746.0
+    },
+    {
+      "year": "2025",
+      "sales": 76394211868.0,
+      "operating_profit": -9230768983.0,
+      "net_profit": -15473405460.0,
+      "total_assets": 232802780468.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "stage": "airframe",
+      "revenue": 747854
+    },
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "stage": "airframe",
+      "revenue": 267029
+    },
+    {
+      "stockCode": "020560",
+      "corpName": "아시아나항공",
+      "stage": "airline",
+      "revenue": 72668
+    },
+    {
+      "stockCode": "079550",
+      "corpName": "LIG넥스원",
+      "stage": "defense",
+      "revenue": 43069
+    },
+    {
+      "stockCode": "047810",
+      "corpName": "한국항공우주",
+      "stage": "airframe",
+      "revenue": 36964
+    }
+  ]
+}

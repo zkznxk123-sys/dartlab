@@ -1,0 +1,278 @@
+{
+  "ego": {
+    "stockCode": "038870",
+    "corpName": "에코바이오",
+    "industry": "consulting",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 172,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "027410",
+      "corpName": "BGF",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 4695
+    },
+    {
+      "stockCode": "089970",
+      "corpName": "브이엠",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 1444
+    },
+    {
+      "stockCode": "043910",
+      "corpName": "자연과환경",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 373
+    },
+    {
+      "stockCode": "050090",
+      "corpName": "비케이홀딩스",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 74
+    },
+    {
+      "stockCode": "089470",
+      "corpName": "HDC현대EP",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 9696
+    },
+    {
+      "stockCode": "126600",
+      "corpName": "BGF에코머티리얼즈",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 3979
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 90612
+    }
+  ],
+  "edges": [
+    {
+      "from": "027410",
+      "to": "038870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "038870",
+      "to": "027410",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "038870",
+      "to": "089970",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "043910",
+      "to": "038870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "050090",
+      "to": "038870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "089470",
+      "to": "038870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "126600",
+      "to": "038870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "038870",
+      "to": "126600",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "282330",
+      "to": "038870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 16116313166.0,
+      "operating_profit": 823571661.0,
+      "net_profit": 171098390.0,
+      "total_assets": 96695934357.0
+    },
+    {
+      "year": "2022",
+      "sales": 16783759222.0,
+      "operating_profit": -146748552.0,
+      "net_profit": -4701770213.0,
+      "total_assets": 95821560604.0
+    },
+    {
+      "year": "2023",
+      "sales": 15790408546.0,
+      "operating_profit": -2601797272.0,
+      "net_profit": -101655450.0,
+      "total_assets": 109553282161.0
+    },
+    {
+      "year": "2024",
+      "sales": 18020084141.0,
+      "operating_profit": -2361295773.0,
+      "net_profit": -5464340440.0,
+      "total_assets": 118346223804.0
+    },
+    {
+      "year": "2025",
+      "sales": 17239542508.0,
+      "operating_profit": -2661274618.0,
+      "net_profit": -7304588156.0,
+      "total_assets": 107634063774.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "027410",
+      "corpName": "BGF",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "126600",
+      "corpName": "BGF에코머티리얼즈",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "003030",
+      "corpName": "세아제강지주",
+      "stage": "general",
+      "revenue": 37596
+    },
+    {
+      "stockCode": "000070",
+      "corpName": "삼양홀딩스",
+      "stage": "general",
+      "revenue": 33483
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "036710",
+      "corpName": "심텍홀딩스",
+      "stage": "general",
+      "revenue": 15281
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "stage": "general",
+      "revenue": 13276
+    }
+  ]
+}

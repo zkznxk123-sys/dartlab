@@ -1,0 +1,371 @@
+{
+  "ego": {
+    "stockCode": "071200",
+    "corpName": "인피니트헬스케어",
+    "industry": "pharma",
+    "stage": "device",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1024,
+    "confidence": 0.9,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "035610",
+      "corpName": "솔본",
+      "industry": "consulting",
+      "stage": "",
+      "revenue": 1207
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "032620",
+      "corpName": "GC메디아이",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 1977
+    },
+    {
+      "stockCode": "032850",
+      "corpName": "비트컴퓨터",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 360
+    },
+    {
+      "stockCode": "139670",
+      "corpName": "키네마스터",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 123
+    },
+    {
+      "stockCode": "009270",
+      "corpName": "신원",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 10923
+    },
+    {
+      "stockCode": "333620",
+      "corpName": "엔시스",
+      "industry": "electrical",
+      "stage": "motor",
+      "revenue": 488
+    },
+    {
+      "stockCode": "045510",
+      "corpName": "정원엔시스",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 2009
+    }
+  ],
+  "edges": [
+    {
+      "from": "035610",
+      "to": "071200",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "하드웨어 상품",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "하드웨어 상품"
+    },
+    {
+      "from": "000150",
+      "to": "071200",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "032620",
+      "to": "071200",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "032850",
+      "to": "071200",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "035610",
+      "to": "071200",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "071200",
+      "to": "035610",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "071200",
+      "to": "139670",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "009270",
+      "to": "071200",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "333620",
+      "to": "071200",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "045510",
+      "to": "071200",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "139670",
+      "to": "071200",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "000150",
+      "to": "071200",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 78169939464.0,
+      "operating_profit": 7417328410.0,
+      "net_profit": 0.0,
+      "total_assets": 143801876282.0
+    },
+    {
+      "year": "2022",
+      "sales": 88286336638.0,
+      "operating_profit": 7689443407.0,
+      "net_profit": 131568515.0,
+      "total_assets": 149508094345.0
+    },
+    {
+      "year": "2023",
+      "sales": 92018605219.0,
+      "operating_profit": 5773890923.0,
+      "net_profit": 335657719.0,
+      "total_assets": 174926843343.0
+    },
+    {
+      "year": "2024",
+      "sales": 101570186804.0,
+      "operating_profit": 13890615801.0,
+      "net_profit": 0.0,
+      "total_assets": 232448732162.0
+    },
+    {
+      "year": "2025",
+      "sales": 102391971526.0,
+      "operating_profit": 14216873921.0,
+      "net_profit": 26753022576.0,
+      "total_assets": 248792449021.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "consulting",
+        1
+      ],
+      [
+        "retail",
+        1
+      ],
+      [
+        "electrical",
+        1
+      ],
+      [
+        "software",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "wholesale",
+        1
+      ],
+      [
+        "motor",
+        1
+      ],
+      [
+        "solution",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "035610",
+      "corpName": "솔본",
+      "product": "하드웨어 상품",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "009270",
+      "corpName": "신원",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "333620",
+      "corpName": "엔시스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "045510",
+      "corpName": "정원엔시스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

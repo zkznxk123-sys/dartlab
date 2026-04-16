@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "012340",
+    "corpName": "뉴인텍",
+    "industry": "auto",
+    "stage": "powertrain",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 828,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002220",
+      "corpName": "한일철강",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 1964
+    }
+  ],
+  "edges": [
+    {
+      "from": "002220",
+      "to": "012340",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 69071327051.0,
+      "operating_profit": 333741174.0,
+      "net_profit": 355135232.0,
+      "total_assets": 81154360527.0
+    },
+    {
+      "year": "2022",
+      "sales": 75321857688.0,
+      "operating_profit": -8215725104.0,
+      "net_profit": -9632469826.0,
+      "total_assets": 81430747815.0
+    },
+    {
+      "year": "2023",
+      "sales": 79095170753.0,
+      "operating_profit": -11092591218.0,
+      "net_profit": null,
+      "total_assets": 76180706291.0
+    },
+    {
+      "year": "2024",
+      "sales": 79500274284.0,
+      "operating_profit": -5858956128.0,
+      "net_profit": null,
+      "total_assets": 75749063228.0
+    },
+    {
+      "year": "2025",
+      "sales": 82799344609.0,
+      "operating_profit": -7227647056.0,
+      "net_profit": null,
+      "total_assets": 73083870115.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

@@ -1,0 +1,163 @@
+{
+  "ego": {
+    "stockCode": "263600",
+    "corpName": "덕우전자",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1769,
+    "confidence": 0.8,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "011690",
+      "corpName": "와이투솔루션",
+      "industry": "electrical",
+      "stage": "cable",
+      "revenue": 1651
+    }
+  ],
+  "edges": [
+    {
+      "from": "263600",
+      "to": "011070",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "011690",
+      "to": "263600",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "263600",
+      "to": "011690",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 32.7%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 175683369859.0,
+      "operating_profit": 5186045418.0,
+      "net_profit": 4211751553.0,
+      "total_assets": 183846275497.0
+    },
+    {
+      "year": "2022",
+      "sales": 208968711857.0,
+      "operating_profit": 18926504841.0,
+      "net_profit": 13378382191.0,
+      "total_assets": 210420858230.0
+    },
+    {
+      "year": "2023",
+      "sales": 165129193757.0,
+      "operating_profit": -9934811736.0,
+      "net_profit": -8566887248.0,
+      "total_assets": 207069053559.0
+    },
+    {
+      "year": "2024",
+      "sales": 160950428993.0,
+      "operating_profit": -991839128.0,
+      "net_profit": 78405270.0,
+      "total_assets": 209526099156.0
+    },
+    {
+      "year": "2025",
+      "sales": 176946596890.0,
+      "operating_profit": 1578114079.0,
+      "net_profit": 6910726319.0,
+      "total_assets": 236036434496.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

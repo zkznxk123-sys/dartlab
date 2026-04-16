@@ -1,0 +1,180 @@
+{
+  "ego": {
+    "stockCode": "032790",
+    "corpName": "엠젠솔루션",
+    "industry": "telecom",
+    "stage": "service",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 286,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "017900",
+      "corpName": "광전자",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 1327
+    },
+    {
+      "stockCode": "052860",
+      "corpName": "아이앤씨",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 369
+    },
+    {
+      "stockCode": "049180",
+      "corpName": "셀루메드",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 1402
+    },
+    {
+      "stockCode": "084180",
+      "corpName": "수성웹툰",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 928
+    }
+  ],
+  "edges": [
+    {
+      "from": "032790",
+      "to": "017900",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "032790",
+      "to": "052860",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "032790",
+      "to": "049180",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.2%"
+    },
+    {
+      "from": "032790",
+      "to": "084180",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.7%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 72200888518.0,
+      "operating_profit": 121670608.0,
+      "net_profit": 7845512334.0,
+      "total_assets": 75416456116.0
+    },
+    {
+      "year": "2022",
+      "sales": 109791176701.0,
+      "operating_profit": 2912963494.0,
+      "net_profit": -435391170.0,
+      "total_assets": 75957504424.0
+    },
+    {
+      "year": "2023",
+      "sales": 90534369618.0,
+      "operating_profit": -6309133102.0,
+      "net_profit": -21258730102.0,
+      "total_assets": 67289023061.0
+    },
+    {
+      "year": "2024",
+      "sales": 42669219445.0,
+      "operating_profit": -3981821115.0,
+      "net_profit": 3093065588.0,
+      "total_assets": 71423793062.0
+    },
+    {
+      "year": "2025",
+      "sales": 28591100187.0,
+      "operating_profit": -10274069702.0,
+      "net_profit": -16282955318.0,
+      "total_assets": 59847229232.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

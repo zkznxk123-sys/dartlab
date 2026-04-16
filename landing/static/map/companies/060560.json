@@ -1,0 +1,251 @@
+{
+  "ego": {
+    "stockCode": "060560",
+    "corpName": "HC홈센타",
+    "industry": "construction",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 2988,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "006570",
+      "corpName": "대림통상",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 17
+    },
+    {
+      "stockCode": "005750",
+      "corpName": "대림바스",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 3006
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "101390",
+      "corpName": "아이엠",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 918
+    },
+    {
+      "stockCode": "225530",
+      "corpName": "HC보광산업",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 385
+    }
+  ],
+  "edges": [
+    {
+      "from": "006570",
+      "to": "060560",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 831335.0,
+      "ratio": null,
+      "product": "타일",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "타일"
+    },
+    {
+      "from": "005750",
+      "to": "060560",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "060560",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "060560",
+      "to": "031210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "060560",
+      "to": "101390",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "225530",
+      "to": "060560",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 325002404747.0,
+      "operating_profit": 16574191766.0,
+      "net_profit": 9917948388.0,
+      "total_assets": 398080871589.0
+    },
+    {
+      "year": "2022",
+      "sales": 432056654804.0,
+      "operating_profit": 23653111731.0,
+      "net_profit": 18787077341.0,
+      "total_assets": 407110542011.0
+    },
+    {
+      "year": "2023",
+      "sales": 427496922550.0,
+      "operating_profit": 39719633111.0,
+      "net_profit": 8088310263.0,
+      "total_assets": 444759073510.0
+    },
+    {
+      "year": "2024",
+      "sales": 369039055143.0,
+      "operating_profit": 12312167768.0,
+      "net_profit": 4752449381.0,
+      "total_assets": 487785641782.0
+    },
+    {
+      "year": "2025",
+      "sales": 298824352914.0,
+      "operating_profit": -18513534433.0,
+      "net_profit": -20319736938.0,
+      "total_assets": 496363938917.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 831335.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 2,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "buildingMaterials",
+        1
+      ],
+      [
+        "realestate",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        2
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "006570",
+      "corpName": "대림통상",
+      "product": "타일",
+      "amount": 831335.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "005750",
+      "corpName": "대림바스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "122310",
+    "corpName": "제노레이",
+    "industry": "medicalDevice",
+    "stage": "imaging",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1080,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "251630",
+      "corpName": "브이원텍",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 490
+    }
+  ],
+  "edges": [
+    {
+      "from": "122310",
+      "to": "251630",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 74290405220.0,
+      "operating_profit": 14967736890.0,
+      "net_profit": 14322855375.0,
+      "total_assets": 99371985073.0
+    },
+    {
+      "year": "2022",
+      "sales": 82604106563.0,
+      "operating_profit": 14917969338.0,
+      "net_profit": 13900299511.0,
+      "total_assets": 106198126576.0
+    },
+    {
+      "year": "2023",
+      "sales": 97897440573.0,
+      "operating_profit": 12757041199.0,
+      "net_profit": -130225545.0,
+      "total_assets": 124269683998.0
+    },
+    {
+      "year": "2024",
+      "sales": 106981860603.0,
+      "operating_profit": 6509094243.0,
+      "net_profit": -2536540303.0,
+      "total_assets": 123444458454.0
+    },
+    {
+      "year": "2025",
+      "sales": 108042067262.0,
+      "operating_profit": -243289025.0,
+      "net_profit": 628482519.0,
+      "total_assets": 131228150026.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "011560",
+      "corpName": "세보엠이씨",
+      "stage": "imaging",
+      "revenue": 7158
+    },
+    {
+      "stockCode": "092790",
+      "corpName": "넥스틸",
+      "stage": "imaging",
+      "revenue": 5510
+    },
+    {
+      "stockCode": "215360",
+      "corpName": "우리산업",
+      "stage": "imaging",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "043150",
+      "corpName": "바텍",
+      "stage": "imaging",
+      "revenue": 4264
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "stage": "imaging",
+      "revenue": 3959
+    }
+  ]
+}

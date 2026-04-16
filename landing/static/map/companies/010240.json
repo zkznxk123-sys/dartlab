@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "010240",
+    "corpName": "흥국",
+    "industry": "steel",
+    "stage": "processing",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 1370,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "028670",
+      "corpName": "팬오션",
+      "industry": "logistics",
+      "stage": "general",
+      "revenue": 54329
+    }
+  ],
+  "edges": [
+    {
+      "from": "028670",
+      "to": "010240",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 141813793806.0,
+      "operating_profit": 13835638959.0,
+      "net_profit": 0.0,
+      "total_assets": 118380108763.0
+    },
+    {
+      "year": "2022",
+      "sales": 134555280289.0,
+      "operating_profit": 11212790775.0,
+      "net_profit": 8549998817.0,
+      "total_assets": 117631244505.0
+    },
+    {
+      "year": "2023",
+      "sales": 149383250987.0,
+      "operating_profit": 15801950015.0,
+      "net_profit": 13179429229.0,
+      "total_assets": 122271325265.0
+    },
+    {
+      "year": "2024",
+      "sales": 128710756347.0,
+      "operating_profit": 8787500672.0,
+      "net_profit": 0.0,
+      "total_assets": 126303882056.0
+    },
+    {
+      "year": "2025",
+      "sales": 137023822812.0,
+      "operating_profit": 14897684207.0,
+      "net_profit": 12200254265.0,
+      "total_assets": 135628627147.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

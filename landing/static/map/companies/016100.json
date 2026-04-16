@@ -1,0 +1,166 @@
+{
+  "ego": {
+    "stockCode": "016100",
+    "corpName": "리더스코스메틱",
+    "industry": "cosmetics",
+    "stage": "manufacturing",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 683,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "029460",
+      "corpName": "케이씨",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 7973
+    },
+    {
+      "stockCode": "203690",
+      "corpName": "아크솔루션스",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 9
+    }
+  ],
+  "edges": [
+    {
+      "from": "016100",
+      "to": "029460",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "203690",
+      "to": "016100",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "016100",
+      "to": "203690",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.5%"
+    },
+    {
+      "from": "203690",
+      "to": "016100",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.8%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1035382294.0,
+      "operating_profit": -4186161295.0,
+      "net_profit": -3963350815.0,
+      "total_assets": 106770837899.0
+    },
+    {
+      "year": "2022",
+      "sales": 2865972609.0,
+      "operating_profit": 504936506.0,
+      "net_profit": -687437655.0,
+      "total_assets": 79525126783.0
+    },
+    {
+      "year": "2023",
+      "sales": 66362930642.0,
+      "operating_profit": -4311069604.0,
+      "net_profit": 235498942.0,
+      "total_assets": 79982600148.0
+    },
+    {
+      "year": "2024",
+      "sales": 69526112608.0,
+      "operating_profit": -2902749222.0,
+      "net_profit": -3248690872.0,
+      "total_assets": 74742591141.0
+    },
+    {
+      "year": "2025",
+      "sales": 68313820168.0,
+      "operating_profit": -7089531070.0,
+      "net_profit": -8290625842.0,
+      "total_assets": 69627860016.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "stage": "manufacturing",
+      "revenue": 42528
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "278470",
+      "corpName": "에이피알",
+      "stage": "manufacturing",
+      "revenue": 15273
+    },
+    {
+      "stockCode": "257720",
+      "corpName": "실리콘투",
+      "stage": "manufacturing",
+      "revenue": 11163
+    }
+  ]
+}

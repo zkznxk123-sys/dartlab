@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "196700",
+    "corpName": "웹스",
+    "industry": "chemical",
+    "stage": "polymer",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 432,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "054620",
+      "corpName": "APS",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 849
+    }
+  ],
+  "edges": [
+    {
+      "from": "196700",
+      "to": "054620",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 35049221440.0,
+      "operating_profit": 880372304.0,
+      "net_profit": 522237691.0,
+      "total_assets": 69251458258.0
+    },
+    {
+      "year": "2022",
+      "sales": 34028733040.0,
+      "operating_profit": -1099006239.0,
+      "net_profit": -8497971740.0,
+      "total_assets": 61542675441.0
+    },
+    {
+      "year": "2023",
+      "sales": 36231078602.0,
+      "operating_profit": 2566280173.0,
+      "net_profit": 1000973189.0,
+      "total_assets": 67505087396.0
+    },
+    {
+      "year": "2024",
+      "sales": 34072812927.0,
+      "operating_profit": 3088648379.0,
+      "net_profit": 1196158338.0,
+      "total_assets": 70900246047.0
+    },
+    {
+      "year": "2025",
+      "sales": 43174599020.0,
+      "operating_profit": 5549636981.0,
+      "net_profit": 4104554464.0,
+      "total_assets": 73193836539.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

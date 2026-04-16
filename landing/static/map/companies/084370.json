@@ -1,0 +1,235 @@
+{
+  "ego": {
+    "stockCode": "084370",
+    "corpName": "유진테크",
+    "industry": "semiconductor",
+    "stage": "equipment",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 3503,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002880",
+      "corpName": "대유에이텍",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 6334
+    },
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "056080",
+      "corpName": "유진로봇",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 282
+    },
+    {
+      "stockCode": "177830",
+      "corpName": "파버나인",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 1325
+    },
+    {
+      "stockCode": "240600",
+      "corpName": "유진테크놀로지",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 287
+    },
+    {
+      "stockCode": "348350",
+      "corpName": "위드텍",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 578
+    }
+  ],
+  "edges": [
+    {
+      "from": "084370",
+      "to": "002880",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "005830",
+      "to": "084370",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "056080",
+      "to": "084370",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "084370",
+      "to": "177830",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "240600",
+      "to": "084370",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "348350",
+      "to": "084370",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 324575857261.0,
+      "operating_profit": 73911986136.0,
+      "net_profit": 63193771953.0,
+      "total_assets": 382891842028.0
+    },
+    {
+      "year": "2022",
+      "sales": 310632917779.0,
+      "operating_profit": 53640954367.0,
+      "net_profit": 42595162228.0,
+      "total_assets": 434013808798.0
+    },
+    {
+      "year": "2023",
+      "sales": 276533350776.0,
+      "operating_profit": 24325728964.0,
+      "net_profit": 25397015593.0,
+      "total_assets": 436989837327.0
+    },
+    {
+      "year": "2024",
+      "sales": 338067812312.0,
+      "operating_profit": 61177012897.0,
+      "net_profit": 65440277257.0,
+      "total_assets": 539499743575.0
+    },
+    {
+      "year": "2025",
+      "sales": 350324287104.0,
+      "operating_profit": 51671713116.0,
+      "net_profit": 44481997780.0,
+      "total_assets": 580613743719.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "002880",
+      "corpName": "대유에이텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "177830",
+      "corpName": "파버나인",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

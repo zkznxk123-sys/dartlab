@@ -1,0 +1,282 @@
+{
+  "ego": {
+    "stockCode": "038290",
+    "corpName": "마크로젠",
+    "industry": "consulting",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 1953,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "950200",
+      "corpName": "소마젠",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 0
+    },
+    {
+      "stockCode": "394800",
+      "corpName": "쓰리빌리언",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 117
+    },
+    {
+      "stockCode": "314130",
+      "corpName": "지놈앤컴퍼니",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 246
+    },
+    {
+      "stockCode": "086060",
+      "corpName": "진바이오텍",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 908
+    },
+    {
+      "stockCode": "180400",
+      "corpName": "DXVX",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 294
+    },
+    {
+      "stockCode": "338840",
+      "corpName": "와이바이오로직스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 29
+    },
+    {
+      "stockCode": "084650",
+      "corpName": "랩지노믹스",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 882
+    }
+  ],
+  "edges": [
+    {
+      "from": "038290",
+      "to": "950200",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "038290",
+      "to": "394800",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "038290",
+      "to": "314130",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "038290",
+      "to": "086060",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "180400",
+      "to": "038290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "038290",
+      "to": "338840",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "950200",
+      "to": "038290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "038290",
+      "to": "314130",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.6%"
+    },
+    {
+      "from": "038290",
+      "to": "084650",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.8%"
+    },
+    {
+      "from": "084650",
+      "to": "038290",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.9%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 129174635687.0,
+      "operating_profit": 11792982396.0,
+      "net_profit": 1200232562.0,
+      "total_assets": 301176477664.0
+    },
+    {
+      "year": "2022",
+      "sales": 138617489348.0,
+      "operating_profit": 5289492369.0,
+      "net_profit": -22252588245.0,
+      "total_assets": 280125664243.0
+    },
+    {
+      "year": "2023",
+      "sales": 132803131511.0,
+      "operating_profit": -423115234.0,
+      "net_profit": -16813946619.0,
+      "total_assets": 257818021053.0
+    },
+    {
+      "year": "2024",
+      "sales": 135776658229.0,
+      "operating_profit": -6464344515.0,
+      "net_profit": -7603104933.0,
+      "total_assets": 329660011595.0
+    },
+    {
+      "year": "2025",
+      "sales": 195267890603.0,
+      "operating_profit": 181079257.0,
+      "net_profit": -2231690928.0,
+      "total_assets": 351624587019.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "338840",
+      "corpName": "와이바이오로직스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "003030",
+      "corpName": "세아제강지주",
+      "stage": "general",
+      "revenue": 37596
+    },
+    {
+      "stockCode": "000070",
+      "corpName": "삼양홀딩스",
+      "stage": "general",
+      "revenue": 33483
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "036710",
+      "corpName": "심텍홀딩스",
+      "stage": "general",
+      "revenue": 15281
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "stage": "general",
+      "revenue": 13276
+    }
+  ]
+}

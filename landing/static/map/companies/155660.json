@@ -1,0 +1,195 @@
+{
+  "ego": {
+    "stockCode": "155660",
+    "corpName": "DSR",
+    "industry": "textile",
+    "stage": "fiber",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 3024,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "069730",
+      "corpName": "DSR제강",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 2266
+    },
+    {
+      "stockCode": "006650",
+      "corpName": "대한유화",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 33478
+    }
+  ],
+  "edges": [
+    {
+      "from": "069730",
+      "to": "155660",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "155660",
+      "to": "069730",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "006650",
+      "to": "155660",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "155660",
+      "to": "069730",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 272417651710.0,
+      "operating_profit": 13454431587.0,
+      "net_profit": 12538612095.0,
+      "total_assets": 302598631429.0
+    },
+    {
+      "year": "2022",
+      "sales": 367456836231.0,
+      "operating_profit": 35774891408.0,
+      "net_profit": 24547772313.0,
+      "total_assets": 364710386862.0
+    },
+    {
+      "year": "2023",
+      "sales": 291095086618.0,
+      "operating_profit": 24261853627.0,
+      "net_profit": 0.0,
+      "total_assets": 343481015258.0
+    },
+    {
+      "year": "2024",
+      "sales": 299809123352.0,
+      "operating_profit": 15340514051.0,
+      "net_profit": 14512806208.0,
+      "total_assets": 363394228331.0
+    },
+    {
+      "year": "2025",
+      "sales": 302389824368.0,
+      "operating_profit": 19291739606.0,
+      "net_profit": 14961441937.0,
+      "total_assets": 391592277418.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "basic",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "006650",
+      "corpName": "대한유화",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "069730",
+      "corpName": "DSR제강",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

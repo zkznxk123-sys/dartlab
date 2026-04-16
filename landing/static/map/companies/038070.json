@@ -1,0 +1,286 @@
+{
+  "ego": {
+    "stockCode": "038070",
+    "corpName": "서린바이오",
+    "industry": "retail",
+    "stage": "retail",
+    "role": "소매",
+    "stream": "downstream",
+    "revenue": 771,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005950",
+      "corpName": "이수화학",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 16595
+    },
+    {
+      "stockCode": "305090",
+      "corpName": "마이크로디지탈",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 128
+    },
+    {
+      "stockCode": "053030",
+      "corpName": "바이넥스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 1685
+    },
+    {
+      "stockCode": "086890",
+      "corpName": "이수앱지스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 567
+    },
+    {
+      "stockCode": "216400",
+      "corpName": "인바이츠바이오코아",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 166
+    },
+    {
+      "stockCode": "228760",
+      "corpName": "지노믹트리",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 38
+    },
+    {
+      "stockCode": "358570",
+      "corpName": "지아이이노베이션",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 58
+    }
+  ],
+  "edges": [
+    {
+      "from": "038070",
+      "to": "005950",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "038070",
+      "to": "305090",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "038070",
+      "to": "053030",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "038070",
+      "to": "086890",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "038070",
+      "to": "216400",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "038070",
+      "to": "228760",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "038070",
+      "to": "358570",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 80716293235.0,
+      "operating_profit": 7257020455.0,
+      "net_profit": 15768284348.0,
+      "total_assets": 136566037790.0
+    },
+    {
+      "year": "2022",
+      "sales": 102406218547.0,
+      "operating_profit": 8579892853.0,
+      "net_profit": 9541540761.0,
+      "total_assets": 134868764977.0
+    },
+    {
+      "year": "2023",
+      "sales": 89569472309.0,
+      "operating_profit": 2494508388.0,
+      "net_profit": -117545871.0,
+      "total_assets": 114099910024.0
+    },
+    {
+      "year": "2024",
+      "sales": 75410358630.0,
+      "operating_profit": 952670448.0,
+      "net_profit": 3140248205.0,
+      "total_assets": 101524815567.0
+    },
+    {
+      "year": "2025",
+      "sales": 77091299573.0,
+      "operating_profit": 691623464.0,
+      "net_profit": 731975217.0,
+      "total_assets": 118797947934.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "005950",
+      "corpName": "이수화학",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "053030",
+      "corpName": "바이넥스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "086890",
+      "corpName": "이수앱지스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "216400",
+      "corpName": "인바이츠바이오코아",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "228760",
+      "corpName": "지노믹트리",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "358570",
+      "corpName": "지아이이노베이션",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

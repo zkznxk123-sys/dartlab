@@ -1,0 +1,162 @@
+{
+  "ego": {
+    "stockCode": "040910",
+    "corpName": "아이씨디",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1970,
+    "confidence": 0.9,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "004360",
+      "corpName": "세방",
+      "industry": "logistics",
+      "stage": "general",
+      "revenue": 12418
+    },
+    {
+      "stockCode": "036090",
+      "corpName": "위지트",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 4830
+    }
+  ],
+  "edges": [
+    {
+      "from": "004360",
+      "to": "040910",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036090",
+      "to": "040910",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 115769377778.0,
+      "operating_profit": 1710641109.0,
+      "net_profit": 761807004.0,
+      "total_assets": 232848927889.0
+    },
+    {
+      "year": "2022",
+      "sales": 150944906368.0,
+      "operating_profit": -5051610239.0,
+      "net_profit": -5419303169.0,
+      "total_assets": 202500364340.0
+    },
+    {
+      "year": "2023",
+      "sales": 62273750997.0,
+      "operating_profit": -37213580426.0,
+      "net_profit": -37407373008.0,
+      "total_assets": 209531475481.0
+    },
+    {
+      "year": "2024",
+      "sales": 147615670947.0,
+      "operating_profit": -26684100904.0,
+      "net_profit": -28290711622.0,
+      "total_assets": 191149953618.0
+    },
+    {
+      "year": "2025",
+      "sales": 197041477697.0,
+      "operating_profit": 4452297110.0,
+      "net_profit": -1982766035.0,
+      "total_assets": 144397432698.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "display",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "036090",
+      "corpName": "위지트",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

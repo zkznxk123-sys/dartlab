@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "080580",
+    "corpName": "오킨스전자",
+    "industry": "semiconductor",
+    "stage": "test",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 944,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "080580",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 59303792764.0,
+      "operating_profit": 2579711532.0,
+      "net_profit": 0.0,
+      "total_assets": 77388058713.0
+    },
+    {
+      "year": "2022",
+      "sales": 64176500340.0,
+      "operating_profit": 2609217138.0,
+      "net_profit": 0.0,
+      "total_assets": 82559435733.0
+    },
+    {
+      "year": "2023",
+      "sales": 56850074934.0,
+      "operating_profit": 374277956.0,
+      "net_profit": -20909074.0,
+      "total_assets": 91497980344.0
+    },
+    {
+      "year": "2024",
+      "sales": 66679677491.0,
+      "operating_profit": 1904476100.0,
+      "net_profit": 0.0,
+      "total_assets": 87124140122.0
+    },
+    {
+      "year": "2025",
+      "sales": 94373992165.0,
+      "operating_profit": 11086424250.0,
+      "net_profit": 0.0,
+      "total_assets": 95757081811.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

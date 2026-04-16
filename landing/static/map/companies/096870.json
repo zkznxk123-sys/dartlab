@@ -1,0 +1,209 @@
+{
+  "ego": {
+    "stockCode": "096870",
+    "corpName": "엘디티",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 110,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "131290",
+      "corpName": "티에스이",
+      "industry": "semiconductor",
+      "stage": "test",
+      "revenue": 4289
+    },
+    {
+      "stockCode": "219130",
+      "corpName": "타이거일렉",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 0
+    },
+    {
+      "stockCode": "446540",
+      "corpName": "메가터치",
+      "industry": "battery",
+      "stage": "electrolyte",
+      "revenue": 432
+    },
+    {
+      "stockCode": "203690",
+      "corpName": "아크솔루션스",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 9
+    }
+  ],
+  "edges": [
+    {
+      "from": "096870",
+      "to": "131290",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "096870",
+      "to": "219130",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "096870",
+      "to": "446540",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "131290",
+      "to": "096870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "219130",
+      "to": "096870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "446540",
+      "to": "096870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "203690",
+      "to": "096870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 1.2%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 12384959098.0,
+      "operating_profit": 1859542127.0,
+      "net_profit": 2230020762.0,
+      "total_assets": 15068682046.0
+    },
+    {
+      "year": "2022",
+      "sales": 11730311728.0,
+      "operating_profit": 1483920084.0,
+      "net_profit": 1954191788.0,
+      "total_assets": 17182655987.0
+    },
+    {
+      "year": "2023",
+      "sales": 8926707509.0,
+      "operating_profit": -348855996.0,
+      "net_profit": 140473951.0,
+      "total_assets": 18425298867.0
+    },
+    {
+      "year": "2025",
+      "sales": 11045810425.0,
+      "operating_profit": 305927068.0,
+      "net_profit": 1241418502.0,
+      "total_assets": 22518375214.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

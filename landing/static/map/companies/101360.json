@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "101360",
+    "corpName": "에코앤드림",
+    "industry": "semiconductor",
+    "stage": "materials",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1420,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "365340",
+      "corpName": "성일하이텍",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 1946
+    }
+  ],
+  "edges": [
+    {
+      "from": "365340",
+      "to": "101360",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.4%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 77443553598.0,
+      "operating_profit": 7639012152.0,
+      "net_profit": 15850124.0,
+      "total_assets": 120195165706.0
+    },
+    {
+      "year": "2022",
+      "sales": 60522326102.0,
+      "operating_profit": 2252730403.0,
+      "net_profit": 70221458.0,
+      "total_assets": 139449222196.0
+    },
+    {
+      "year": "2023",
+      "sales": 51455287308.0,
+      "operating_profit": -2967415404.0,
+      "net_profit": -10150669449.0,
+      "total_assets": 154242178124.0
+    },
+    {
+      "year": "2024",
+      "sales": 104901418831.0,
+      "operating_profit": 487160660.0,
+      "net_profit": 13546335309.0,
+      "total_assets": 405770507399.0
+    },
+    {
+      "year": "2025",
+      "sales": 141958412396.0,
+      "operating_profit": -610261853.0,
+      "net_profit": -8596919787.0,
+      "total_assets": 464749775946.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

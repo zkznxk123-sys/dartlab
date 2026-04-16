@@ -1,0 +1,207 @@
+{
+  "ego": {
+    "stockCode": "377220",
+    "corpName": "프롬바이오",
+    "industry": "pharma",
+    "stage": "formulation",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 722,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "200130",
+      "corpName": "콜마비앤에이치",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 5749
+    },
+    {
+      "stockCode": "194700",
+      "corpName": "노바렉스",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 4043
+    }
+  ],
+  "edges": [
+    {
+      "from": "192820",
+      "to": "377220",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "200130",
+      "to": "377220",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "194700",
+      "to": "377220",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 135103272421.0,
+      "operating_profit": 11423706218.0,
+      "net_profit": 11282100676.0,
+      "total_assets": 96414432458.0
+    },
+    {
+      "year": "2022",
+      "sales": 99330395890.0,
+      "operating_profit": 897017858.0,
+      "net_profit": 3240521512.0,
+      "total_assets": 93823499528.0
+    },
+    {
+      "year": "2023",
+      "sales": 66723974526.0,
+      "operating_profit": -15420429088.0,
+      "net_profit": -11609207598.0,
+      "total_assets": 97363661285.0
+    },
+    {
+      "year": "2024",
+      "sales": 67181877862.0,
+      "operating_profit": -24269892229.0,
+      "net_profit": -26230402561.0,
+      "total_assets": 81176145780.0
+    },
+    {
+      "year": "2025",
+      "sales": 72162174415.0,
+      "operating_profit": -18602744879.0,
+      "net_profit": -22457152320.0,
+      "total_assets": 65244955356.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "pharma",
+        2
+      ],
+      [
+        "cosmetics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "formulation",
+        2
+      ],
+      [
+        "manufacturing",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "200130",
+      "corpName": "콜마비앤에이치",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "194700",
+      "corpName": "노바렉스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

@@ -1,0 +1,254 @@
+{
+  "ego": {
+    "stockCode": "004920",
+    "corpName": "씨아이테크",
+    "industry": "food",
+    "stage": "distribution",
+    "role": "도매",
+    "stream": "downstream",
+    "revenue": 414,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "029480",
+      "corpName": "광무",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 76
+    },
+    {
+      "stockCode": "051980",
+      "corpName": "중앙첨단소재",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 198
+    },
+    {
+      "stockCode": "042940",
+      "corpName": "상지건설",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 186
+    },
+    {
+      "stockCode": "138360",
+      "corpName": "앤로보틱스",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 234
+    },
+    {
+      "stockCode": "083550",
+      "corpName": "케이엠",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 1354
+    },
+    {
+      "stockCode": "388210",
+      "corpName": "씨엠티엑스",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 1606
+    }
+  ],
+  "edges": [
+    {
+      "from": "004920",
+      "to": "029480",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "004920",
+      "to": "051980",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "004920",
+      "to": "042940",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "004920",
+      "to": "138360",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004920",
+      "to": "083550",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "029480",
+      "to": "004920",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "138360",
+      "to": "004920",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "004920",
+      "to": "388210",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.8%"
+    },
+    {
+      "from": "042940",
+      "to": "004920",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 3.4%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 47230072502.0,
+      "operating_profit": 871731347.0,
+      "net_profit": -6235930125.0,
+      "total_assets": 79538624907.0
+    },
+    {
+      "year": "2022",
+      "sales": 56721432617.0,
+      "operating_profit": 588292963.0,
+      "net_profit": -657667869.0,
+      "total_assets": 94704398209.0
+    },
+    {
+      "year": "2023",
+      "sales": 57050887121.0,
+      "operating_profit": -7112247389.0,
+      "net_profit": -8133912644.0,
+      "total_assets": 90579937958.0
+    },
+    {
+      "year": "2024",
+      "sales": 47436608009.0,
+      "operating_profit": -2049221072.0,
+      "net_profit": -89010303.0,
+      "total_assets": 91803642408.0
+    },
+    {
+      "year": "2025",
+      "sales": 41449800518.0,
+      "operating_profit": 2001735146.0,
+      "net_profit": 14619113907.0,
+      "total_assets": 126953652884.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

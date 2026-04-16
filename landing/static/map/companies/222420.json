@@ -1,0 +1,147 @@
+{
+  "ego": {
+    "stockCode": "222420",
+    "corpName": "쎄노텍",
+    "industry": "buildingMaterials",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 356,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "054210",
+      "corpName": "이랜텍",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 7532
+    }
+  ],
+  "edges": [
+    {
+      "from": "006800",
+      "to": "222420",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "054210",
+      "to": "222420",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "006800",
+      "to": "222420",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 32885094375.0,
+      "operating_profit": 2671761378.0,
+      "net_profit": 1262774331.0,
+      "total_assets": 89616601190.0
+    },
+    {
+      "year": "2022",
+      "sales": 34731413625.0,
+      "operating_profit": 1125897166.0,
+      "net_profit": -72292961.0,
+      "total_assets": 96331529072.0
+    },
+    {
+      "year": "2023",
+      "sales": 31111152868.0,
+      "operating_profit": -1056389909.0,
+      "net_profit": -5354149001.0,
+      "total_assets": 97134968784.0
+    },
+    {
+      "year": "2025",
+      "sales": 35638307740.0,
+      "operating_profit": 3169827293.0,
+      "net_profit": 1348808906.0,
+      "total_assets": 80807849763.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "003300",
+      "corpName": "한일홀딩스",
+      "stage": "general",
+      "revenue": 19305
+    },
+    {
+      "stockCode": "000480",
+      "corpName": "시알홀딩스",
+      "stage": "general",
+      "revenue": 8278
+    },
+    {
+      "stockCode": "462520",
+      "corpName": "조선내화",
+      "stage": "general",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "010040",
+      "corpName": "한국내화",
+      "stage": "general",
+      "revenue": 4063
+    },
+    {
+      "stockCode": "004440",
+      "corpName": "삼일씨엔에스",
+      "stage": "general",
+      "revenue": 2231
+    }
+  ]
+}

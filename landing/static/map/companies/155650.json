@@ -1,0 +1,246 @@
+{
+  "ego": {
+    "stockCode": "155650",
+    "corpName": "와이엠씨",
+    "industry": "semiconductor",
+    "stage": "equipment",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1728,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "058820",
+      "corpName": "CMG제약",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 1052
+    },
+    {
+      "stockCode": "085660",
+      "corpName": "차바이오텍",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 12683
+    },
+    {
+      "stockCode": "118990",
+      "corpName": "모트렉스",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 7023
+    },
+    {
+      "stockCode": "007530",
+      "corpName": "와이엠",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 1771
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "220100",
+      "corpName": "퓨쳐켐",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 187
+    },
+    {
+      "stockCode": "079190",
+      "corpName": "케스피온",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 441
+    }
+  ],
+  "edges": [
+    {
+      "from": "058820",
+      "to": "155650",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "085660",
+      "to": "155650",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "118990",
+      "to": "155650",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "155650",
+      "to": "007530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "155650",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "155650",
+      "to": "220100",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "155650",
+      "to": "079190",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 4.6%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 179111178790.0,
+      "operating_profit": 14041646518.0,
+      "net_profit": 10485889586.0,
+      "total_assets": 123474532526.0
+    },
+    {
+      "year": "2022",
+      "sales": 235381355565.0,
+      "operating_profit": 23075646705.0,
+      "net_profit": 20482792716.0,
+      "total_assets": 142084326659.0
+    },
+    {
+      "year": "2023",
+      "sales": 204633201126.0,
+      "operating_profit": 15769934518.0,
+      "net_profit": 1096687381.0,
+      "total_assets": 169036353812.0
+    },
+    {
+      "year": "2024",
+      "sales": 167730074166.0,
+      "operating_profit": 6896735854.0,
+      "net_profit": 6755182924.0,
+      "total_assets": 172151519524.0
+    },
+    {
+      "year": "2025",
+      "sales": 172777352555.0,
+      "operating_profit": 4574071584.0,
+      "net_profit": 1112866985.0,
+      "total_assets": 179445590286.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "220100",
+      "corpName": "퓨쳐켐",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

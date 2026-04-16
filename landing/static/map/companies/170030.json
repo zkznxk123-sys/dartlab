@@ -1,0 +1,207 @@
+{
+  "ego": {
+    "stockCode": "170030",
+    "corpName": "현대공업",
+    "industry": "auto",
+    "stage": "body",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 3679,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 13713
+    },
+    {
+      "stockCode": "002020",
+      "corpName": "코오롱",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 58861
+    },
+    {
+      "stockCode": "277410",
+      "corpName": "인산가",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 358
+    }
+  ],
+  "edges": [
+    {
+      "from": "101330",
+      "to": "170030",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "002020",
+      "to": "170030",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "170030",
+      "to": "277410",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 249322151465.0,
+      "operating_profit": 13137797469.0,
+      "net_profit": 12610074077.0,
+      "total_assets": 178701194417.0
+    },
+    {
+      "year": "2022",
+      "sales": 278495503526.0,
+      "operating_profit": 15055330506.0,
+      "net_profit": 11402126148.0,
+      "total_assets": 206497120370.0
+    },
+    {
+      "year": "2023",
+      "sales": 307539845202.0,
+      "operating_profit": 15398581275.0,
+      "net_profit": 13113866217.0,
+      "total_assets": 229475260323.0
+    },
+    {
+      "year": "2024",
+      "sales": 326887589851.0,
+      "operating_profit": 10879629207.0,
+      "net_profit": 12881683635.0,
+      "total_assets": 223283544230.0
+    },
+    {
+      "year": "2025",
+      "sales": 367911083613.0,
+      "operating_profit": 12311914178.0,
+      "net_profit": 11845401245.0,
+      "total_assets": 259352541331.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "telecom",
+        1
+      ],
+      [
+        "finance",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "service",
+        1
+      ],
+      [
+        "securities",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002020",
+      "corpName": "코오롱",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "277410",
+      "corpName": "인산가",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

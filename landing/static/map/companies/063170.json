@@ -1,0 +1,192 @@
+{
+  "ego": {
+    "stockCode": "063170",
+    "corpName": "서울옥션",
+    "industry": "retail",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 213,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000370",
+      "corpName": "한화손해보험",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 69295
+    },
+    {
+      "stockCode": "037440",
+      "corpName": "희림",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 2319
+    }
+  ],
+  "edges": [
+    {
+      "from": "000370",
+      "to": "063170",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001450",
+      "to": "063170",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000370",
+      "to": "063170",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "004170",
+      "to": "063170",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 4.8%"
+    },
+    {
+      "from": "063170",
+      "to": "037440",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 79020050511.0,
+      "operating_profit": 19728868607.0,
+      "net_profit": 16044149556.0,
+      "total_assets": 173479144517.0
+    },
+    {
+      "year": "2022",
+      "sales": 55137015987.0,
+      "operating_profit": 7708465822.0,
+      "net_profit": 4542280004.0,
+      "total_assets": 194341492183.0
+    },
+    {
+      "year": "2023",
+      "sales": 44965867806.0,
+      "operating_profit": -3547805936.0,
+      "net_profit": -7969020389.0,
+      "total_assets": 196269256835.0
+    },
+    {
+      "year": "2024",
+      "sales": 20599064531.0,
+      "operating_profit": -3390242787.0,
+      "net_profit": -9469037391.0,
+      "total_assets": 212541686866.0
+    },
+    {
+      "year": "2025",
+      "sales": 21334383653.0,
+      "operating_profit": -3953230030.0,
+      "net_profit": -8773726189.0,
+      "total_assets": 221472332048.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

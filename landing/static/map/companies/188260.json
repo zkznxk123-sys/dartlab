@@ -1,0 +1,75 @@
+{
+  "ego": {
+    "stockCode": "188260",
+    "corpName": "세니젠",
+    "industry": "misc",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 154,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2023",
+      "sales": 22268480095.0,
+      "operating_profit": -6315679376.0,
+      "net_profit": 0.0,
+      "total_assets": 21448446875.0
+    },
+    {
+      "year": "2025",
+      "sales": 15354255261.0,
+      "operating_profit": -4374487146.0,
+      "net_profit": -5820380451.0,
+      "total_assets": 10111820866.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "284740",
+      "corpName": "쿠쿠홈시스",
+      "stage": "",
+      "revenue": 11213
+    },
+    {
+      "stockCode": "026040",
+      "corpName": "제이에스티나",
+      "stage": "",
+      "revenue": 722
+    },
+    {
+      "stockCode": "285490",
+      "corpName": "노바텍",
+      "stage": "",
+      "revenue": 556
+    },
+    {
+      "stockCode": "373200",
+      "corpName": "엑스플러스",
+      "stage": "",
+      "revenue": 101
+    }
+  ]
+}

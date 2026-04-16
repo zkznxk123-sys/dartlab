@@ -1,0 +1,164 @@
+{
+  "ego": {
+    "stockCode": "336570",
+    "corpName": "원텍",
+    "industry": "medicalDevice",
+    "stage": "imaging",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1568,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "318020",
+      "corpName": "포인트모바일",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 872
+    },
+    {
+      "stockCode": "005850",
+      "corpName": "에스엘",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 52399
+    }
+  ],
+  "edges": [
+    {
+      "from": "336570",
+      "to": "318020",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 444680.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "005850",
+      "to": "336570",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2022",
+      "sales": 81508860190.0,
+      "operating_profit": 26755362989.0,
+      "net_profit": 0.0,
+      "total_assets": 73790397093.0
+    },
+    {
+      "year": "2023",
+      "sales": 115628803094.0,
+      "operating_profit": 46037112504.0,
+      "net_profit": 38833153900.0,
+      "total_assets": 153272309945.0
+    },
+    {
+      "year": "2024",
+      "sales": 115254599426.0,
+      "operating_profit": 34789598806.0,
+      "net_profit": 29113410144.0,
+      "total_assets": 177904003003.0
+    },
+    {
+      "year": "2025",
+      "sales": 156838102870.0,
+      "operating_profit": 51685459840.0,
+      "net_profit": 0.0,
+      "total_assets": 217246511788.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "component",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "005850",
+      "corpName": "에스엘",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "318020",
+      "corpName": "포인트모바일",
+      "product": "",
+      "amount": 444680.0,
+      "type": "supplier",
+      "confidence": 0.9
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "011560",
+      "corpName": "세보엠이씨",
+      "stage": "imaging",
+      "revenue": 7158
+    },
+    {
+      "stockCode": "092790",
+      "corpName": "넥스틸",
+      "stage": "imaging",
+      "revenue": 5510
+    },
+    {
+      "stockCode": "215360",
+      "corpName": "우리산업",
+      "stage": "imaging",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "043150",
+      "corpName": "바텍",
+      "stage": "imaging",
+      "revenue": 4264
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "stage": "imaging",
+      "revenue": 3959
+    }
+  ]
+}

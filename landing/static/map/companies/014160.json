@@ -1,0 +1,310 @@
+{
+  "ego": {
+    "stockCode": "014160",
+    "corpName": "대영포장",
+    "industry": "paper",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2837,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "101530",
+      "corpName": "해태제과식품",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 6414
+    },
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 52755
+    },
+    {
+      "stockCode": "016590",
+      "corpName": "신대양제지",
+      "industry": "paper",
+      "stage": "general",
+      "revenue": 6395
+    },
+    {
+      "stockCode": "024830",
+      "corpName": "세원물산",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 2116
+    },
+    {
+      "stockCode": "016880",
+      "corpName": "웅진",
+      "industry": "education",
+      "stage": "general",
+      "revenue": 11507
+    }
+  ],
+  "edges": [
+    {
+      "from": "014160",
+      "to": "101530",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "골판지 외",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "골판지 외"
+    },
+    {
+      "from": "004690",
+      "to": "014160",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "016590",
+      "to": "014160",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "024830",
+      "to": "014160",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "014160",
+      "to": "016590",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "014160",
+      "to": "101530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "016590",
+      "to": "014160",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "014160",
+      "to": "016590",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "014160",
+      "to": "016880",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 310860989722.0,
+      "operating_profit": 12217569129.0,
+      "net_profit": 10049916716.0,
+      "total_assets": 246069403698.0
+    },
+    {
+      "year": "2022",
+      "sales": 302554046399.0,
+      "operating_profit": 11909475247.0,
+      "net_profit": 12852541546.0,
+      "total_assets": 247356883299.0
+    },
+    {
+      "year": "2023",
+      "sales": 283462475670.0,
+      "operating_profit": 11078018260.0,
+      "net_profit": 7925125110.0,
+      "total_assets": 221137778791.0
+    },
+    {
+      "year": "2024",
+      "sales": 280835222931.0,
+      "operating_profit": 923321701.0,
+      "net_profit": -31968504.0,
+      "total_assets": 225080501521.0
+    },
+    {
+      "year": "2025",
+      "sales": 283702207867.0,
+      "operating_profit": 881634489.0,
+      "net_profit": 0.0,
+      "total_assets": 261299982645.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "energy",
+        1
+      ],
+      [
+        "paper",
+        1
+      ],
+      [
+        "auto",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "distribution",
+        1
+      ],
+      [
+        "general",
+        1
+      ],
+      [
+        "oem",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "016590",
+      "corpName": "신대양제지",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "024830",
+      "corpName": "세원물산",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "101530",
+      "corpName": "해태제과식품",
+      "product": "골판지 외",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "213500",
+      "corpName": "한솔제지",
+      "stage": "general",
+      "revenue": 22900
+    },
+    {
+      "stockCode": "079430",
+      "corpName": "현대리바트",
+      "stage": "general",
+      "revenue": 15462
+    },
+    {
+      "stockCode": "009200",
+      "corpName": "무림페이퍼",
+      "stage": "general",
+      "revenue": 12649
+    },
+    {
+      "stockCode": "013890",
+      "corpName": "지누스",
+      "stage": "general",
+      "revenue": 9132
+    },
+    {
+      "stockCode": "002310",
+      "corpName": "아세아제지",
+      "stage": "general",
+      "revenue": 8551
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "ego": {
+    "stockCode": "104040",
+    "corpName": "대성파인텍",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 285,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "131760",
+      "corpName": "파인텍",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 463
+    }
+  ],
+  "edges": [
+    {
+      "from": "104040",
+      "to": "131760",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "131760",
+      "to": "104040",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 32850559765.0,
+      "operating_profit": 1070834765.0,
+      "net_profit": null,
+      "total_assets": 83415841666.0
+    },
+    {
+      "year": "2022",
+      "sales": 27255182909.0,
+      "operating_profit": -2322588214.0,
+      "net_profit": -3086249870.0,
+      "total_assets": 80094472879.0
+    },
+    {
+      "year": "2023",
+      "sales": 29404450802.0,
+      "operating_profit": -2019748251.0,
+      "net_profit": 0.0,
+      "total_assets": 74807678869.0
+    },
+    {
+      "year": "2025",
+      "sales": 28477611667.0,
+      "operating_profit": -7925464915.0,
+      "net_profit": 2015700512.0,
+      "total_assets": 231175219070.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "display",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "131760",
+      "corpName": "파인텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+{
+  "ego": {
+    "stockCode": "117730",
+    "corpName": "티로보틱스",
+    "industry": "machinery",
+    "stage": "special",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 438,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "011690",
+      "corpName": "와이투솔루션",
+      "industry": "electrical",
+      "stage": "cable",
+      "revenue": 1651
+    },
+    {
+      "stockCode": "079950",
+      "corpName": "인베니아",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 184
+    },
+    {
+      "stockCode": "187870",
+      "corpName": "디바이스",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 841
+    }
+  ],
+  "edges": [
+    {
+      "from": "011690",
+      "to": "117730",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "117730",
+      "to": "079950",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "117730",
+      "to": "187870",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 44123037871.0,
+      "operating_profit": -6569915231.0,
+      "net_profit": -297240430.0,
+      "total_assets": 85792704881.0
+    },
+    {
+      "year": "2022",
+      "sales": 56729389196.0,
+      "operating_profit": -2339634861.0,
+      "net_profit": -1312960041.0,
+      "total_assets": 87514857796.0
+    },
+    {
+      "year": "2023",
+      "sales": 66716568313.0,
+      "operating_profit": -8210044979.0,
+      "net_profit": 258864351.0,
+      "total_assets": 132992565807.0
+    },
+    {
+      "year": "2024",
+      "sales": 60705396702.0,
+      "operating_profit": -7001978684.0,
+      "net_profit": -565440041.0,
+      "total_assets": 106972896821.0
+    },
+    {
+      "year": "2025",
+      "sales": 43812661900.0,
+      "operating_profit": -11908451001.0,
+      "net_profit": -43084791733.0,
+      "total_assets": 89361141487.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "079950",
+      "corpName": "인베니아",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

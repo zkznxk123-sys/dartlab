@@ -1,0 +1,260 @@
+{
+  "ego": {
+    "stockCode": "080010",
+    "corpName": "이상네트웍스",
+    "industry": "retail",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 1038,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "025900",
+      "corpName": "동화기업",
+      "industry": "paper",
+      "stage": "general",
+      "revenue": 8296
+    },
+    {
+      "stockCode": "032560",
+      "corpName": "황금에스티",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 3165
+    },
+    {
+      "stockCode": "263770",
+      "corpName": "유에스티",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 580
+    },
+    {
+      "stockCode": "408920",
+      "corpName": "메쎄이상",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 728
+    }
+  ],
+  "edges": [
+    {
+      "from": "025900",
+      "to": "080010",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "032560",
+      "to": "080010",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "032560",
+      "to": "080010",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "080010",
+      "to": "032560",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "080010",
+      "to": "263770",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "080010",
+      "to": "408920",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "263770",
+      "to": "080010",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "408920",
+      "to": "080010",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "025900",
+      "to": "080010",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 57155970394.0,
+      "operating_profit": 10075774846.0,
+      "net_profit": 0.0,
+      "total_assets": 153985512036.0
+    },
+    {
+      "year": "2022",
+      "sales": 69962205388.0,
+      "operating_profit": 13301535533.0,
+      "net_profit": 11918948044.0,
+      "total_assets": 164139313476.0
+    },
+    {
+      "year": "2023",
+      "sales": 82291210125.0,
+      "operating_profit": 15142638295.0,
+      "net_profit": 0.0,
+      "total_assets": 180340469800.0
+    },
+    {
+      "year": "2024",
+      "sales": 97795704809.0,
+      "operating_profit": 20737331918.0,
+      "net_profit": 16612744146.0,
+      "total_assets": 190189538570.0
+    },
+    {
+      "year": "2025",
+      "sales": 103782678478.0,
+      "operating_profit": 22916857559.0,
+      "net_profit": 6027338434.0,
+      "total_assets": 201894373909.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "product",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "032560",
+      "corpName": "황금에스티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

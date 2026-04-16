@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "272110",
+    "corpName": "케이엔제이",
+    "industry": "semiconductor",
+    "stage": "fab",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 844,
+    "confidence": 0.829,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "133750",
+      "corpName": "메가엠디",
+      "industry": "education",
+      "stage": "general",
+      "revenue": 346
+    },
+    {
+      "stockCode": "001630",
+      "corpName": "종근당홀딩스",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 9590
+    }
+  ],
+  "edges": [
+    {
+      "from": "006800",
+      "to": "272110",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "133750",
+      "to": "272110",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001630",
+      "to": "272110",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 0.5%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 46510956665.0,
+      "operating_profit": 4392605776.0,
+      "net_profit": 5523484872.0,
+      "total_assets": 93732842746.0
+    },
+    {
+      "year": "2022",
+      "sales": 62314404181.0,
+      "operating_profit": 13286629491.0,
+      "net_profit": 9954382736.0,
+      "total_assets": 108096557848.0
+    },
+    {
+      "year": "2023",
+      "sales": 61919993102.0,
+      "operating_profit": 12021728068.0,
+      "net_profit": 10761460446.0,
+      "total_assets": 126396880483.0
+    },
+    {
+      "year": "2024",
+      "sales": 62216559100.0,
+      "operating_profit": 14148842880.0,
+      "net_profit": 10770256588.0,
+      "total_assets": 156768549237.0
+    },
+    {
+      "year": "2025",
+      "sales": 84444745007.0,
+      "operating_profit": 22242526961.0,
+      "net_profit": 25559651677.0,
+      "total_assets": 230504256719.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

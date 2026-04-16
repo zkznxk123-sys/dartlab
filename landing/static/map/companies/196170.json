@@ -1,0 +1,272 @@
+{
+  "ego": {
+    "stockCode": "196170",
+    "corpName": "알테오젠",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 2159,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "019570",
+      "corpName": "플루토스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 129
+    },
+    {
+      "stockCode": "053030",
+      "corpName": "바이넥스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 1685
+    },
+    {
+      "stockCode": "001630",
+      "corpName": "종근당홀딩스",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 9590
+    },
+    {
+      "stockCode": "011320",
+      "corpName": "유니크",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 4302
+    },
+    {
+      "stockCode": "066670",
+      "corpName": "디티씨",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 1886
+    },
+    {
+      "stockCode": "348350",
+      "corpName": "위드텍",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 578
+    }
+  ],
+  "edges": [
+    {
+      "from": "019570",
+      "to": "196170",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "053030",
+      "to": "196170",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    },
+    {
+      "from": "001630",
+      "to": "196170",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    },
+    {
+      "from": "011320",
+      "to": "196170",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "019570",
+      "to": "196170",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "066670",
+      "to": "196170",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "348350",
+      "to": "196170",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "[개선/높음] 9년 적자 바이오텍이 라이선스 한 건으로 OPM 49.5%. R&D 회수 시작.",
+    "strengths": [
+      "라이선스 수익화(머크)",
+      "OPM 49.5% 초고마진"
+    ],
+    "weaknesses": [
+      "파이프라인 집중 리스크",
+      "매출 기저 낮음"
+    ],
+    "sector": "",
+    "source": "blog",
+    "createdAt": "1776063775.241581"
+  },
+  "blogPosts": [
+    {
+      "slug": "04-196170-alteogen",
+      "title": "알테오젠 (196170) — 9년 적자 바이오텍이 한 건의 라이선스로 영업이익 +1,069억까지",
+      "description": "8년간 매년 영업적자였던 한국 바이오텍 한 곳이, 2020년 머크와 ALT-B4 라이선스 한 건을 맺었고, 2025년 같은 한 건이 회사 매출을 31배로, 영업이익률을 49.52%로 만들었다. 박순재 대표가 2008년에 창업해서 17년을 기다린 이야기다.",
+      "date": "2026-04-08",
+      "grade": "dCR-AA-",
+      "storyTemplate": "장기 R&D 회수",
+      "verdict": "9년 적자 바이오텍이 라이선스 한 건으로 OPM 49.5%. R&D 회수 시작.",
+      "direction": "개선",
+      "confidence": "높음",
+      "archetype": "성장",
+      "strengths": [
+        "라이선스 수익화(머크)",
+        "OPM 49.5% 초고마진"
+      ],
+      "weaknesses": [
+        "파이프라인 집중 리스크",
+        "매출 기저 낮음"
+      ],
+      "keyMetrics": {
+        "revenue": 0.22,
+        "opm": 49.52,
+        "roe": 0.0,
+        "fcf": 0.12
+      },
+      "thumbnail": "/avatar-chart.png",
+      "ogImage": "/thumbnails/196170-alteogen.webp"
+    }
+  ],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 41123115244.0,
+      "operating_profit": -12795830212.0,
+      "net_profit": -3878733788.0,
+      "total_assets": 260337559420.0
+    },
+    {
+      "year": "2022",
+      "sales": 28806344498.0,
+      "operating_profit": -29373680278.0,
+      "net_profit": -8146003033.0,
+      "total_assets": 245490136097.0
+    },
+    {
+      "year": "2023",
+      "sales": 96522928887.0,
+      "operating_profit": -9736838487.0,
+      "net_profit": 0.0,
+      "total_assets": 256099994583.0
+    },
+    {
+      "year": "2024",
+      "sales": 102854620800.0,
+      "operating_profit": 25403990856.0,
+      "net_profit": 62252318998.0,
+      "total_assets": 409011974213.0
+    },
+    {
+      "year": "2025",
+      "sales": 215858918957.0,
+      "operating_profit": 106900077097.0,
+      "net_profit": 141666024710.0,
+      "total_assets": 698742517170.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

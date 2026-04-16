@@ -1,0 +1,180 @@
+{
+  "ego": {
+    "stockCode": "065170",
+    "corpName": "비엘팜텍",
+    "industry": "retail",
+    "stage": "retail",
+    "role": "소매",
+    "stream": "downstream",
+    "revenue": 65,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "302440",
+      "corpName": "SK바이오사이언스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 6514
+    },
+    {
+      "stockCode": "296160",
+      "corpName": "프로젠",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 0
+    },
+    {
+      "stockCode": "142760",
+      "corpName": "모아라이프플러스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 112
+    },
+    {
+      "stockCode": "086220",
+      "corpName": "광동헬스바이오",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 670
+    }
+  ],
+  "edges": [
+    {
+      "from": "065170",
+      "to": "302440",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "065170",
+      "to": "296160",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "142760",
+      "to": "065170",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "065170",
+      "to": "086220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 9.9%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 84439769622.0,
+      "operating_profit": -3430273625.0,
+      "net_profit": -20211304197.0,
+      "total_assets": 130341440004.0
+    },
+    {
+      "year": "2022",
+      "sales": 80592912885.0,
+      "operating_profit": -2776157739.0,
+      "net_profit": -13903066588.0,
+      "total_assets": 103686508723.0
+    },
+    {
+      "year": "2023",
+      "sales": 24525172959.0,
+      "operating_profit": -6793361869.0,
+      "net_profit": 141624798.0,
+      "total_assets": 44801799975.0
+    },
+    {
+      "year": "2024",
+      "sales": 8805510735.0,
+      "operating_profit": -3215815024.0,
+      "net_profit": -5716866331.0,
+      "total_assets": 36458146420.0
+    },
+    {
+      "year": "2025",
+      "sales": 6505728145.0,
+      "operating_profit": -2824543861.0,
+      "net_profit": -16777503799.0,
+      "total_assets": 18195170801.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

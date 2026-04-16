@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "051390",
+    "corpName": "YW",
+    "industry": "retail",
+    "stage": "wholesale",
+    "role": "도매",
+    "stream": "midstream",
+    "revenue": 165,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "051390",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 15047725520.0,
+      "operating_profit": 3133403052.0,
+      "net_profit": 2652550074.0,
+      "total_assets": 94356387846.0
+    },
+    {
+      "year": "2022",
+      "sales": 20283592154.0,
+      "operating_profit": 3056402006.0,
+      "net_profit": 3028178292.0,
+      "total_assets": 97822722790.0
+    },
+    {
+      "year": "2023",
+      "sales": 36985666180.0,
+      "operating_profit": 6475058909.0,
+      "net_profit": 5339132030.0,
+      "total_assets": 97572343361.0
+    },
+    {
+      "year": "2024",
+      "sales": 16535952409.0,
+      "operating_profit": 5435769480.0,
+      "net_profit": 4267815405.0,
+      "total_assets": 96527287234.0
+    },
+    {
+      "year": "2025",
+      "sales": 16537865424.0,
+      "operating_profit": 5777257381.0,
+      "net_profit": 5078203629.0,
+      "total_assets": 97724134382.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

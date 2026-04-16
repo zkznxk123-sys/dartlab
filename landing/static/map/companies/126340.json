@@ -1,0 +1,228 @@
+{
+  "ego": {
+    "stockCode": "126340",
+    "corpName": "비나텍",
+    "industry": "battery",
+    "stage": "electrolyte",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 822,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "003540",
+      "corpName": "대신증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 50639
+    },
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "095910",
+      "corpName": "에스에너지",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 1024
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "288620",
+      "corpName": "에스퓨얼셀",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 158
+    }
+  ],
+  "edges": [
+    {
+      "from": "003540",
+      "to": "126340",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "066570",
+      "to": "126340",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "126340",
+      "to": "095910",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "126340",
+      "to": "352820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "126340",
+      "to": "288620",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "066570",
+      "to": "126340",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 5.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 48958076351.0,
+      "operating_profit": 5625405971.0,
+      "net_profit": null,
+      "total_assets": 98487932627.0
+    },
+    {
+      "year": "2022",
+      "sales": 70656753558.0,
+      "operating_profit": 9351006048.0,
+      "net_profit": 11670288452.0,
+      "total_assets": 133325362396.0
+    },
+    {
+      "year": "2023",
+      "sales": 54964094324.0,
+      "operating_profit": 3036206471.0,
+      "net_profit": 1976945237.0,
+      "total_assets": 130012544249.0
+    },
+    {
+      "year": "2024",
+      "sales": 59591709951.0,
+      "operating_profit": -8067980363.0,
+      "net_profit": -9667529378.0,
+      "total_assets": 176126234804.0
+    },
+    {
+      "year": "2025",
+      "sales": 82228905359.0,
+      "operating_profit": 1773717709.0,
+      "net_profit": -6997340810.0,
+      "total_assets": 202256288790.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "095910",
+      "corpName": "에스에너지",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "288620",
+      "corpName": "에스퓨얼셀",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "007340",
+      "corpName": "DN오토모티브",
+      "stage": "cell",
+      "revenue": 36757
+    },
+    {
+      "stockCode": "066970",
+      "corpName": "엘앤에프",
+      "stage": "cathode",
+      "revenue": 21549
+    },
+    {
+      "stockCode": "004490",
+      "corpName": "세방전지",
+      "stage": "cell",
+      "revenue": 21187
+    },
+    {
+      "stockCode": "005070",
+      "corpName": "코스모신소재",
+      "stage": "cathode",
+      "revenue": 4563
+    },
+    {
+      "stockCode": "348370",
+      "corpName": "엔켐",
+      "stage": "electrolyte",
+      "revenue": 3128
+    }
+  ]
+}

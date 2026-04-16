@@ -1,0 +1,178 @@
+{
+  "ego": {
+    "stockCode": "007720",
+    "corpName": "소노스퀘어",
+    "industry": "retail",
+    "stage": "retail",
+    "role": "소매",
+    "stream": "downstream",
+    "revenue": 1629,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "004870",
+      "corpName": "티웨이홀딩스",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 7
+    },
+    {
+      "stockCode": "091810",
+      "corpName": "티웨이항공",
+      "industry": "aerospace",
+      "stage": "airline",
+      "revenue": 17982
+    }
+  ],
+  "edges": [
+    {
+      "from": "004870",
+      "to": "007720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "007720",
+      "to": "004870",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "007720",
+      "to": "091810",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "091810",
+      "to": "007720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "007720",
+      "to": "091810",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 9.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 150390721188.0,
+      "operating_profit": -20881940085.0,
+      "net_profit": -22717245224.0,
+      "total_assets": 190514709786.0
+    },
+    {
+      "year": "2022",
+      "sales": 170972649935.0,
+      "operating_profit": -18503823286.0,
+      "net_profit": -17961953753.0,
+      "total_assets": 168960317915.0
+    },
+    {
+      "year": "2023",
+      "sales": 159946400719.0,
+      "operating_profit": -1589433754.0,
+      "net_profit": -48767506.0,
+      "total_assets": 168786753850.0
+    },
+    {
+      "year": "2024",
+      "sales": 133458255008.0,
+      "operating_profit": 656024469.0,
+      "net_profit": -10195549304.0,
+      "total_assets": 146944172764.0
+    },
+    {
+      "year": "2025",
+      "sales": 162871417133.0,
+      "operating_profit": 1396947928.0,
+      "net_profit": -2701367881.0,
+      "total_assets": 126647087699.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

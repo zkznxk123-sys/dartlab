@@ -1,0 +1,268 @@
+{
+  "ego": {
+    "stockCode": "332570",
+    "corpName": "PS일렉트로닉스",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1255,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "263750",
+      "corpName": "펄어비스",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 3656
+    },
+    {
+      "stockCode": "259960",
+      "corpName": "크래프톤",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 33266
+    },
+    {
+      "stockCode": "195870",
+      "corpName": "해성디에스",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 6534
+    },
+    {
+      "stockCode": "056190",
+      "corpName": "에스에프에이",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 16310
+    },
+    {
+      "stockCode": "007810",
+      "corpName": "코리아써키트",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 15097
+    },
+    {
+      "stockCode": "122990",
+      "corpName": "와이솔",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 3212
+    },
+    {
+      "stockCode": "131970",
+      "corpName": "두산테스나",
+      "industry": "semiconductor",
+      "stage": "test",
+      "revenue": 3039
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ],
+  "edges": [
+    {
+      "from": "332570",
+      "to": "263750",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "332570",
+      "to": "259960",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "332570",
+      "to": "195870",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "332570",
+      "to": "056190",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "332570",
+      "to": "007810",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.2%"
+    },
+    {
+      "from": "332570",
+      "to": "122990",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.8%"
+    },
+    {
+      "from": "332570",
+      "to": "131970",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 3.6%"
+    },
+    {
+      "from": "332570",
+      "to": "067310",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "332570",
+      "to": "263750",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 60002097873.0,
+      "operating_profit": 159718992.0,
+      "net_profit": -7631569240.0,
+      "total_assets": 109314064823.0
+    },
+    {
+      "year": "2022",
+      "sales": 51388503167.0,
+      "operating_profit": 4325015868.0,
+      "net_profit": -10107362920.0,
+      "total_assets": 118631662550.0
+    },
+    {
+      "year": "2023",
+      "sales": 68149317459.0,
+      "operating_profit": 6424251685.0,
+      "net_profit": 19292837945.0,
+      "total_assets": 142828187449.0
+    },
+    {
+      "year": "2024",
+      "sales": 122129660010.0,
+      "operating_profit": 10771020985.0,
+      "net_profit": -7833852738.0,
+      "total_assets": 164600371302.0
+    },
+    {
+      "year": "2025",
+      "sales": 125476577087.0,
+      "operating_profit": 3908628660.0,
+      "net_profit": -839153935.0,
+      "total_assets": 231933880383.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

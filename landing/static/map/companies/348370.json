@@ -1,0 +1,235 @@
+{
+  "ego": {
+    "stockCode": "348370",
+    "corpName": "엔켐",
+    "industry": "battery",
+    "stage": "electrolyte",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 3128,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001510",
+      "corpName": "SK증권",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 0
+    },
+    {
+      "stockCode": "029480",
+      "corpName": "광무",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 76
+    },
+    {
+      "stockCode": "051980",
+      "corpName": "중앙첨단소재",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 198
+    },
+    {
+      "stockCode": "065570",
+      "corpName": "삼영이엔씨",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 333
+    },
+    {
+      "stockCode": "003540",
+      "corpName": "대신증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 50639
+    }
+  ],
+  "edges": [
+    {
+      "from": "001510",
+      "to": "348370",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "029480",
+      "to": "348370",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "051980",
+      "to": "348370",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "065570",
+      "to": "348370",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "348370",
+      "to": "029480",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "348370",
+      "to": "051980",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "003540",
+      "to": "348370",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    },
+    {
+      "from": "348370",
+      "to": "051980",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 214329713630.0,
+      "operating_profit": -25966629584.0,
+      "net_profit": -19466739944.0,
+      "total_assets": 407420790290.0
+    },
+    {
+      "year": "2022",
+      "sales": 509792825335.0,
+      "operating_profit": 15362754193.0,
+      "net_profit": 21176264625.0,
+      "total_assets": 680249505789.0
+    },
+    {
+      "year": "2023",
+      "sales": 424691399327.0,
+      "operating_profit": 3047263237.0,
+      "net_profit": -50092754334.0,
+      "total_assets": 862895279401.0
+    },
+    {
+      "year": "2024",
+      "sales": 365708579550.0,
+      "operating_profit": -65334940249.0,
+      "net_profit": -2861844063.0,
+      "total_assets": 1126929828670.0
+    },
+    {
+      "year": "2025",
+      "sales": 312794042228.0,
+      "operating_profit": -78386657935.0,
+      "net_profit": -70567058674.0,
+      "total_assets": 1107549178461.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "007340",
+      "corpName": "DN오토모티브",
+      "stage": "cell",
+      "revenue": 36757
+    },
+    {
+      "stockCode": "066970",
+      "corpName": "엘앤에프",
+      "stage": "cathode",
+      "revenue": 21549
+    },
+    {
+      "stockCode": "004490",
+      "corpName": "세방전지",
+      "stage": "cell",
+      "revenue": 21187
+    },
+    {
+      "stockCode": "005070",
+      "corpName": "코스모신소재",
+      "stage": "cathode",
+      "revenue": 4563
+    },
+    {
+      "stockCode": "064760",
+      "corpName": "티씨케이",
+      "stage": "anode",
+      "revenue": 3013
+    }
+  ]
+}

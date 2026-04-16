@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "307280",
+    "corpName": "원바이오젠",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 352,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "024110",
+      "to": "307280",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 17720824355.0,
+      "operating_profit": 2039702750.0,
+      "net_profit": 0.0,
+      "total_assets": 38043384577.0
+    },
+    {
+      "year": "2022",
+      "sales": 26747721812.0,
+      "operating_profit": 5150275469.0,
+      "net_profit": 3206114141.0,
+      "total_assets": 38932576212.0
+    },
+    {
+      "year": "2023",
+      "sales": 29614740095.0,
+      "operating_profit": 7122657150.0,
+      "net_profit": 463770840.0,
+      "total_assets": 42903485575.0
+    },
+    {
+      "year": "2024",
+      "sales": 30439668570.0,
+      "operating_profit": 6406557277.0,
+      "net_profit": 0.0,
+      "total_assets": 41269318159.0
+    },
+    {
+      "year": "2025",
+      "sales": 35244285942.0,
+      "operating_profit": 7926377772.0,
+      "net_profit": 0.0,
+      "total_assets": 47625399900.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

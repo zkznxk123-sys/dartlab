@@ -1,0 +1,206 @@
+{
+  "ego": {
+    "stockCode": "099430",
+    "corpName": "바이오플러스",
+    "industry": "pharma",
+    "stage": "device",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 909,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "032940",
+      "corpName": "원익",
+      "industry": "semiconductor",
+      "stage": "test",
+      "revenue": 1507
+    },
+    {
+      "stockCode": "182360",
+      "corpName": "큐브엔터",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 872
+    },
+    {
+      "stockCode": "228760",
+      "corpName": "지노믹트리",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 38
+    }
+  ],
+  "edges": [
+    {
+      "from": "032940",
+      "to": "099430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "099430",
+      "to": "182360",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "182360",
+      "to": "099430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "099430",
+      "to": "228760",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "032940",
+      "to": "099430",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "182360",
+      "to": "099430",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 37418198215.0,
+      "operating_profit": 18226355983.0,
+      "net_profit": 10673022989.0,
+      "total_assets": 88461940874.0
+    },
+    {
+      "year": "2022",
+      "sales": 56718818557.0,
+      "operating_profit": 25271435156.0,
+      "net_profit": 20707913444.0,
+      "total_assets": 146518047145.0
+    },
+    {
+      "year": "2023",
+      "sales": 65042901061.0,
+      "operating_profit": 28025617245.0,
+      "net_profit": 25580547164.0,
+      "total_assets": 172806754935.0
+    },
+    {
+      "year": "2024",
+      "sales": 66409594582.0,
+      "operating_profit": 23667463055.0,
+      "net_profit": 3359325278.0,
+      "total_assets": 264298004297.0
+    },
+    {
+      "year": "2025",
+      "sales": 90896012971.0,
+      "operating_profit": 15005249608.0,
+      "net_profit": 19996273240.0,
+      "total_assets": 285040012969.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "228760",
+      "corpName": "지노믹트리",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

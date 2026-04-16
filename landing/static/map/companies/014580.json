@@ -1,0 +1,330 @@
+{
+  "ego": {
+    "stockCode": "014580",
+    "corpName": "태경비케이",
+    "industry": "environment",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 3859,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "006890",
+      "corpName": "태경케미컬",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 613
+    },
+    {
+      "stockCode": "009270",
+      "corpName": "신원",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 10923
+    },
+    {
+      "stockCode": "171120",
+      "corpName": "라이온켐텍",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 1303
+    },
+    {
+      "stockCode": "015890",
+      "corpName": "태경산업",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 7771
+    },
+    {
+      "stockCode": "160550",
+      "corpName": "NEW",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 1427
+    }
+  ],
+  "edges": [
+    {
+      "from": "006890",
+      "to": "014580",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "009270",
+      "to": "014580",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "171120",
+      "to": "014580",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "006890",
+      "to": "014580",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "014580",
+      "to": "006890",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "014580",
+      "to": "015890",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "014580",
+      "to": "171120",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "014580",
+      "to": "160550",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "014580",
+      "to": "015890",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "015890",
+      "to": "014580",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "171120",
+      "to": "014580",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 195157043546.0,
+      "operating_profit": 19603002069.0,
+      "net_profit": 6160631451.0,
+      "total_assets": 332382423528.0
+    },
+    {
+      "year": "2022",
+      "sales": 345051212031.0,
+      "operating_profit": 31945997236.0,
+      "net_profit": 28816693926.0,
+      "total_assets": 361240178636.0
+    },
+    {
+      "year": "2023",
+      "sales": 294162114095.0,
+      "operating_profit": 40076503357.0,
+      "net_profit": 10229109256.0,
+      "total_assets": 378041031409.0
+    },
+    {
+      "year": "2024",
+      "sales": 308594841506.0,
+      "operating_profit": 42222650666.0,
+      "net_profit": 27339491543.0,
+      "total_assets": 385609175182.0
+    },
+    {
+      "year": "2025",
+      "sales": 385942613685.0,
+      "operating_profit": 40782720982.0,
+      "net_profit": 23884557731.0,
+      "total_assets": 626041034698.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 3,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        2
+      ],
+      [
+        "retail",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "wholesale",
+        1
+      ],
+      [
+        "polymer",
+        1
+      ],
+      [
+        "basic",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "009270",
+      "corpName": "신원",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "171120",
+      "corpName": "라이온켐텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "006890",
+      "corpName": "태경케미컬",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "015890",
+      "corpName": "태경산업",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001390",
+      "corpName": "KG케미칼",
+      "stage": "general",
+      "revenue": 91016
+    },
+    {
+      "stockCode": "151860",
+      "corpName": "KG에코솔루션",
+      "stage": "general",
+      "revenue": 75772
+    },
+    {
+      "stockCode": "066980",
+      "corpName": "한성크린텍",
+      "stage": "general",
+      "revenue": 1999
+    },
+    {
+      "stockCode": "060150",
+      "corpName": "인선이엔티",
+      "stage": "general",
+      "revenue": 1872
+    },
+    {
+      "stockCode": "037370",
+      "corpName": "EG",
+      "stage": "general",
+      "revenue": 628
+    }
+  ]
+}

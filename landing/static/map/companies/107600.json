@@ -1,0 +1,128 @@
+{
+  "ego": {
+    "stockCode": "107600",
+    "corpName": "새빗켐",
+    "industry": "environment",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 384,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "307180",
+      "corpName": "아이엘",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 1029
+    },
+    {
+      "stockCode": "123890",
+      "corpName": "한국자산신탁",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 2043
+    }
+  ],
+  "edges": [
+    {
+      "from": "107600",
+      "to": "307180",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "123890",
+      "to": "107600",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2022",
+      "sales": 48126170903.0,
+      "operating_profit": 10199488063.0,
+      "net_profit": 7701034860.0,
+      "total_assets": 89592242518.0
+    },
+    {
+      "year": "2023",
+      "sales": 45990061261.0,
+      "operating_profit": -4902529763.0,
+      "net_profit": -1174895745.0,
+      "total_assets": 98597848516.0
+    },
+    {
+      "year": "2025",
+      "sales": 38390648152.0,
+      "operating_profit": -9419303009.0,
+      "net_profit": -18046897848.0,
+      "total_assets": 82728051469.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001390",
+      "corpName": "KG케미칼",
+      "stage": "general",
+      "revenue": 91016
+    },
+    {
+      "stockCode": "151860",
+      "corpName": "KG에코솔루션",
+      "stage": "general",
+      "revenue": 75772
+    },
+    {
+      "stockCode": "014580",
+      "corpName": "태경비케이",
+      "stage": "general",
+      "revenue": 3859
+    },
+    {
+      "stockCode": "066980",
+      "corpName": "한성크린텍",
+      "stage": "general",
+      "revenue": 1999
+    },
+    {
+      "stockCode": "060150",
+      "corpName": "인선이엔티",
+      "stage": "general",
+      "revenue": 1872
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "ego": {
+    "stockCode": "054450",
+    "corpName": "텔레칩스",
+    "industry": "semiconductor",
+    "stage": "fab",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1928,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "094360",
+      "corpName": "칩스앤미디어",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 285
+    },
+    {
+      "stockCode": "088350",
+      "corpName": "한화생명",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 16391
+    }
+  ],
+  "edges": [
+    {
+      "from": "054450",
+      "to": "094360",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "088350",
+      "to": "054450",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "094360",
+      "to": "054450",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "108320",
+      "to": "054450",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "network",
+      "evidence": "경영참여 지분 10.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 136412498512.0,
+      "operating_profit": 8077364494.0,
+      "net_profit": 7031402158.0,
+      "total_assets": 207258706858.0
+    },
+    {
+      "year": "2022",
+      "sales": 150404311782.0,
+      "operating_profit": 9180253639.0,
+      "net_profit": 45897422695.0,
+      "total_assets": 310172455065.0
+    },
+    {
+      "year": "2023",
+      "sales": 191094718185.0,
+      "operating_profit": 16777001456.0,
+      "net_profit": 62638246233.0,
+      "total_assets": 374790992226.0
+    },
+    {
+      "year": "2024",
+      "sales": 186615513099.0,
+      "operating_profit": 4874251656.0,
+      "net_profit": -38559807022.0,
+      "total_assets": 377882056447.0
+    },
+    {
+      "year": "2025",
+      "sales": 192802105423.0,
+      "operating_profit": -6189468061.0,
+      "net_profit": -61632672813.0,
+      "total_assets": 367539039334.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

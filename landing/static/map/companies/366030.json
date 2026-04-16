@@ -1,0 +1,155 @@
+{
+  "ego": {
+    "stockCode": "366030",
+    "corpName": "공구우먼",
+    "industry": "textile",
+    "stage": "apparel",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 450,
+    "confidence": 0.76,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "307180",
+      "corpName": "아이엘",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 1029
+    }
+  ],
+  "edges": [
+    {
+      "from": "307180",
+      "to": "366030",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "366030",
+      "to": "307180",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 47319807509.0,
+      "operating_profit": 10327067405.0,
+      "net_profit": 8764032889.0,
+      "total_assets": 31550790825.0
+    },
+    {
+      "year": "2022",
+      "sales": 58686880114.0,
+      "operating_profit": 12661735582.0,
+      "net_profit": 0.0,
+      "total_assets": 63198047494.0
+    },
+    {
+      "year": "2023",
+      "sales": 53009477352.0,
+      "operating_profit": 10512863283.0,
+      "net_profit": 0.0,
+      "total_assets": 69576562374.0
+    },
+    {
+      "year": "2024",
+      "sales": 49860402968.0,
+      "operating_profit": 8102118530.0,
+      "net_profit": 7678245446.0,
+      "total_assets": 83478150885.0
+    },
+    {
+      "year": "2025",
+      "sales": 45044252491.0,
+      "operating_profit": 6804511850.0,
+      "net_profit": 48979729.0,
+      "total_assets": 88287822148.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "specialty",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "307180",
+      "corpName": "아이엘",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

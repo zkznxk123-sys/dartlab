@@ -1,0 +1,135 @@
+{
+  "ego": {
+    "stockCode": "036170",
+    "corpName": "에이치엠넥스",
+    "industry": "semiconductor",
+    "stage": "fab",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 317,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "053950",
+      "corpName": "경남제약",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 559
+    },
+    {
+      "stockCode": "050120",
+      "corpName": "ES큐브",
+      "industry": "retail",
+      "stage": "",
+      "revenue": 139
+    }
+  ],
+  "edges": [
+    {
+      "from": "036170",
+      "to": "053950",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "036170",
+      "to": "050120",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 15858694120.0,
+      "operating_profit": 1314347866.0,
+      "net_profit": 1518323648.0,
+      "total_assets": 107975201171.0
+    },
+    {
+      "year": "2022",
+      "sales": 13418819175.0,
+      "operating_profit": -1074633601.0,
+      "net_profit": 4178060330.0,
+      "total_assets": 113328272430.0
+    },
+    {
+      "year": "2023",
+      "sales": 14523739748.0,
+      "operating_profit": 14416773.0,
+      "net_profit": 8203000379.0,
+      "total_assets": 121048443385.0
+    },
+    {
+      "year": "2025",
+      "sales": 31707375183.0,
+      "operating_profit": 2367143405.0,
+      "net_profit": 10910332774.0,
+      "total_assets": 162859122159.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

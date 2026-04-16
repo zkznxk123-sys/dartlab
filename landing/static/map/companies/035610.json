@@ -1,0 +1,187 @@
+{
+  "ego": {
+    "stockCode": "035610",
+    "corpName": "솔본",
+    "industry": "consulting",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 1207,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "071200",
+      "corpName": "인피니트헬스케어",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 1024
+    },
+    {
+      "stockCode": "139670",
+      "corpName": "키네마스터",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 123
+    }
+  ],
+  "edges": [
+    {
+      "from": "035610",
+      "to": "071200",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "하드웨어 상품",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "하드웨어 상품"
+    },
+    {
+      "from": "035610",
+      "to": "071200",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "035610",
+      "to": "139670",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "071200",
+      "to": "035610",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "139670",
+      "to": "035610",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 100199408929.0,
+      "operating_profit": 15663181185.0,
+      "net_profit": 29967230965.0,
+      "total_assets": 256070415241.0
+    },
+    {
+      "year": "2022",
+      "sales": 93816087048.0,
+      "operating_profit": -26845562593.0,
+      "net_profit": -41916606098.0,
+      "total_assets": 220671725870.0
+    },
+    {
+      "year": "2023",
+      "sales": 123382776486.0,
+      "operating_profit": 31759409160.0,
+      "net_profit": 38249378713.0,
+      "total_assets": 275835991994.0
+    },
+    {
+      "year": "2024",
+      "sales": 121901155445.0,
+      "operating_profit": 27340583130.0,
+      "net_profit": 60494621255.0,
+      "total_assets": 351354141871.0
+    },
+    {
+      "year": "2025",
+      "sales": 120651025450.0,
+      "operating_profit": 24620979407.0,
+      "net_profit": 20869284844.0,
+      "total_assets": 374525990937.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "071200",
+      "corpName": "인피니트헬스케어",
+      "product": "하드웨어 상품",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "003030",
+      "corpName": "세아제강지주",
+      "stage": "general",
+      "revenue": 37596
+    },
+    {
+      "stockCode": "000070",
+      "corpName": "삼양홀딩스",
+      "stage": "general",
+      "revenue": 33483
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "036710",
+      "corpName": "심텍홀딩스",
+      "stage": "general",
+      "revenue": 15281
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "stage": "general",
+      "revenue": 13276
+    }
+  ]
+}

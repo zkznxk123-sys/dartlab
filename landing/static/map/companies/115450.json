@@ -1,0 +1,262 @@
+{
+  "ego": {
+    "stockCode": "115450",
+    "corpName": "HLB테라퓨틱스",
+    "industry": "retail",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 696,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "003580",
+      "corpName": "HLB글로벌",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 1003
+    },
+    {
+      "stockCode": "028300",
+      "corpName": "HLB",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 842
+    },
+    {
+      "stockCode": "047920",
+      "corpName": "HLB제약",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 2056
+    },
+    {
+      "stockCode": "067630",
+      "corpName": "HLB생명과학",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 458
+    },
+    {
+      "stockCode": "000910",
+      "corpName": "유니온",
+      "industry": "buildingMaterials",
+      "stage": "general",
+      "revenue": 2024
+    },
+    {
+      "stockCode": "278650",
+      "corpName": "HLB바이오스텝",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 741
+    }
+  ],
+  "edges": [
+    {
+      "from": "003580",
+      "to": "115450",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "028300",
+      "to": "115450",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "047920",
+      "to": "115450",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "067630",
+      "to": "115450",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "000910",
+      "to": "115450",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "115450",
+      "to": "028300",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "278650",
+      "to": "115450",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "003580",
+      "to": "115450",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 3.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 43586410995.0,
+      "operating_profit": -11086954548.0,
+      "net_profit": -17764300601.0,
+      "total_assets": 189711210206.0
+    },
+    {
+      "year": "2022",
+      "sales": 48132199520.0,
+      "operating_profit": -7877142570.0,
+      "net_profit": 0.0,
+      "total_assets": 187643258282.0
+    },
+    {
+      "year": "2023",
+      "sales": 53749062575.0,
+      "operating_profit": -8700260456.0,
+      "net_profit": 0.0,
+      "total_assets": 200794852747.0
+    },
+    {
+      "year": "2024",
+      "sales": 54931940888.0,
+      "operating_profit": -7624366419.0,
+      "net_profit": -22792981786.0,
+      "total_assets": 219793068613.0
+    },
+    {
+      "year": "2025",
+      "sales": 69561353835.0,
+      "operating_profit": -3534298673.0,
+      "net_profit": -9667885416.0,
+      "total_assets": 228655057738.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "buildingMaterials",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "000910",
+      "corpName": "유니온",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

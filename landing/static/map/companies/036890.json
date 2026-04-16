@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "036890",
+    "corpName": "진성티이씨",
+    "industry": "machinery",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 4638,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "035890",
+      "corpName": "서희건설",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 11001
+    }
+  ],
+  "edges": [
+    {
+      "from": "035890",
+      "to": "036890",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 438323707778.0,
+      "operating_profit": 25292627399.0,
+      "net_profit": 17081212132.0,
+      "total_assets": 360754197273.0
+    },
+    {
+      "year": "2022",
+      "sales": 541014045943.0,
+      "operating_profit": 66316216444.0,
+      "net_profit": 45431101147.0,
+      "total_assets": 402668670097.0
+    },
+    {
+      "year": "2023",
+      "sales": 485118584952.0,
+      "operating_profit": 39589010073.0,
+      "net_profit": 28407293510.0,
+      "total_assets": 402862020333.0
+    },
+    {
+      "year": "2024",
+      "sales": 390515286432.0,
+      "operating_profit": 24441981984.0,
+      "net_profit": 20961082240.0,
+      "total_assets": 455354545266.0
+    },
+    {
+      "year": "2025",
+      "sales": 463820413148.0,
+      "operating_profit": 47942987124.0,
+      "net_profit": 0.0,
+      "total_assets": 514178422526.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

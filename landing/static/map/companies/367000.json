@@ -1,0 +1,95 @@
+{
+  "ego": {
+    "stockCode": "367000",
+    "corpName": "플래티어",
+    "industry": "software",
+    "stage": "ai",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 389,
+    "confidence": 0.68,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 41893366448.0,
+      "operating_profit": 4143172785.0,
+      "net_profit": 4173644665.0,
+      "total_assets": 52225410935.0
+    },
+    {
+      "year": "2022",
+      "sales": 49957146722.0,
+      "operating_profit": 3184748987.0,
+      "net_profit": 3964859321.0,
+      "total_assets": 56511097101.0
+    },
+    {
+      "year": "2023",
+      "sales": 33291839469.0,
+      "operating_profit": -4541180978.0,
+      "net_profit": -3235554655.0,
+      "total_assets": 53612411847.0
+    },
+    {
+      "year": "2025",
+      "sales": 38854699341.0,
+      "operating_profit": -4398781277.0,
+      "net_profit": -4291576944.0,
+      "total_assets": 56681937313.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

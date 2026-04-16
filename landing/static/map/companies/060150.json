@@ -1,0 +1,244 @@
+{
+  "ego": {
+    "stockCode": "060150",
+    "corpName": "인선이엔티",
+    "industry": "environment",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 1872,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "010780",
+      "corpName": "아이에스동서",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 12344
+    },
+    {
+      "stockCode": "217590",
+      "corpName": "티엠씨",
+      "industry": "electrical",
+      "stage": "cable",
+      "revenue": 0
+    },
+    {
+      "stockCode": "084680",
+      "corpName": "이월드",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 887
+    },
+    {
+      "stockCode": "200670",
+      "corpName": "휴메딕스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 7
+    },
+    {
+      "stockCode": "006890",
+      "corpName": "태경케미컬",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 613
+    }
+  ],
+  "edges": [
+    {
+      "from": "060150",
+      "to": "010780",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "010780",
+      "to": "060150",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "060150",
+      "to": "010780",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "060150",
+      "to": "217590",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "060150",
+      "to": "084680",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "200670",
+      "to": "060150",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "006890",
+      "to": "060150",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.6%"
+    },
+    {
+      "from": "200670",
+      "to": "060150",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 246411620542.0,
+      "operating_profit": 41852794968.0,
+      "net_profit": 24920312983.0,
+      "total_assets": 493337475178.0
+    },
+    {
+      "year": "2022",
+      "sales": 237616653525.0,
+      "operating_profit": 33230165818.0,
+      "net_profit": 21896167133.0,
+      "total_assets": 550218609958.0
+    },
+    {
+      "year": "2023",
+      "sales": 220959199628.0,
+      "operating_profit": 25808068439.0,
+      "net_profit": 1711848050.0,
+      "total_assets": 544990569309.0
+    },
+    {
+      "year": "2024",
+      "sales": 208849594963.0,
+      "operating_profit": 23179868587.0,
+      "net_profit": -18855881025.0,
+      "total_assets": 495708206499.0
+    },
+    {
+      "year": "2025",
+      "sales": 187154811840.0,
+      "operating_profit": 18228609825.0,
+      "net_profit": 0.0,
+      "total_assets": 464463638442.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "010780",
+      "corpName": "아이에스동서",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001390",
+      "corpName": "KG케미칼",
+      "stage": "general",
+      "revenue": 91016
+    },
+    {
+      "stockCode": "151860",
+      "corpName": "KG에코솔루션",
+      "stage": "general",
+      "revenue": 75772
+    },
+    {
+      "stockCode": "014580",
+      "corpName": "태경비케이",
+      "stage": "general",
+      "revenue": 3859
+    },
+    {
+      "stockCode": "066980",
+      "corpName": "한성크린텍",
+      "stage": "general",
+      "revenue": 1999
+    },
+    {
+      "stockCode": "037370",
+      "corpName": "EG",
+      "stage": "general",
+      "revenue": 628
+    }
+  ]
+}

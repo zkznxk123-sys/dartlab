@@ -1,0 +1,95 @@
+{
+  "ego": {
+    "stockCode": "147830",
+    "corpName": "제룡산업",
+    "industry": "chemical",
+    "stage": "polymer",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 379,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 37415966099.0,
+      "operating_profit": 6802717740.0,
+      "net_profit": 7537423597.0,
+      "total_assets": 73657911969.0
+    },
+    {
+      "year": "2022",
+      "sales": 59307568567.0,
+      "operating_profit": 9608333299.0,
+      "net_profit": 9125141418.0,
+      "total_assets": 82848973976.0
+    },
+    {
+      "year": "2023",
+      "sales": 40895901213.0,
+      "operating_profit": 5561701012.0,
+      "net_profit": 7289384309.0,
+      "total_assets": 81473529114.0
+    },
+    {
+      "year": "2025",
+      "sales": 37923882483.0,
+      "operating_profit": 10572575305.0,
+      "net_profit": 11488403993.0,
+      "total_assets": 96049264525.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

@@ -1,0 +1,356 @@
+{
+  "ego": {
+    "stockCode": "000220",
+    "corpName": "유유제약",
+    "industry": "pharma",
+    "stage": "formulation",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1409,
+    "confidence": 0.9,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "364950",
+      "corpName": "에이아이코리아",
+      "industry": "battery",
+      "stage": "electrolyte",
+      "revenue": 869
+    },
+    {
+      "stockCode": "323280",
+      "corpName": "태성",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 379
+    },
+    {
+      "stockCode": "122990",
+      "corpName": "와이솔",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 3212
+    },
+    {
+      "stockCode": "013570",
+      "corpName": "디와이",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 12448
+    },
+    {
+      "stockCode": "226950",
+      "corpName": "올릭스",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 147
+    }
+  ],
+  "edges": [
+    {
+      "from": "024110",
+      "to": "000220",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "005830",
+      "to": "000220",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "364950",
+      "to": "000220",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "323280",
+      "to": "000220",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "122990",
+      "to": "000220",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "013570",
+      "to": "000220",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000220",
+      "to": "226950",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000220",
+      "to": "226950",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 매출 성장 + 마진 확대 + FCF 양수 / 비용 절감 + 자산 효율화 + ROE 상승.\n매출이 +4.2% 성장하면서 영업이익률이 -0.8%에서 -0.4%로 확대되었다. FCF도 양수를 유지하여 질적 성장이 확인된다.",
+    "strengths": [
+      "매출 성장 + 마진 확대 + FCF 양수",
+      "비용 절감 + 자산 효율화 + ROE 상승",
+      "순현금 상태",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "비용 절감 + 자산 효율화 + ROE 상승**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "비용 절감 + 자산 효율화 + ROE 상승**"
+    ],
+    "weaknesses": [
+      "영업적자 (-0.4%)",
+      "안전마진 -1.1% — 손익분기점 근접",
+      "이익 변동계수 2.61 — 이익 변동성 높음"
+    ],
+    "sector": "건강관리 > 제약과바이오",
+    "source": "audit",
+    "createdAt": "1775430966.5270436"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 115655484997.0,
+      "operating_profit": 1200168223.0,
+      "net_profit": -920289067.0,
+      "total_assets": 192985287597.0
+    },
+    {
+      "year": "2022",
+      "sales": 138881056346.0,
+      "operating_profit": -592113629.0,
+      "net_profit": -4425392926.0,
+      "total_assets": 195205072788.0
+    },
+    {
+      "year": "2023",
+      "sales": 137209588673.0,
+      "operating_profit": 364537115.0,
+      "net_profit": -5540581558.0,
+      "total_assets": 198213526767.0
+    },
+    {
+      "year": "2024",
+      "sales": 133147218082.0,
+      "operating_profit": 11697341742.0,
+      "net_profit": 10289303485.0,
+      "total_assets": 207687399005.0
+    },
+    {
+      "year": "2025",
+      "sales": 140884666972.0,
+      "operating_profit": 11019185739.0,
+      "net_profit": 9116733726.0,
+      "total_assets": 207223189486.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 6,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 3,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        3
+      ],
+      [
+        "finance",
+        2
+      ],
+      [
+        "battery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "component",
+        3
+      ],
+      [
+        "bank",
+        1
+      ],
+      [
+        "insurance",
+        1
+      ],
+      [
+        "electrolyte",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "364950",
+      "corpName": "에이아이코리아",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "323280",
+      "corpName": "태성",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "122990",
+      "corpName": "와이솔",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "013570",
+      "corpName": "디와이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

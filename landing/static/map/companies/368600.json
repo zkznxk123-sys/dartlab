@@ -1,0 +1,95 @@
+{
+  "ego": {
+    "stockCode": "368600",
+    "corpName": "아이씨에이치",
+    "industry": "telecom",
+    "stage": "infra",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 469,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2022",
+      "sales": 22820911963.0,
+      "operating_profit": -7640252962.0,
+      "net_profit": 0.0,
+      "total_assets": 82302546332.0
+    },
+    {
+      "year": "2023",
+      "sales": 43192695143.0,
+      "operating_profit": -10061095197.0,
+      "net_profit": 0.0,
+      "total_assets": 119453404297.0
+    },
+    {
+      "year": "2024",
+      "sales": 64567994093.0,
+      "operating_profit": -3229834130.0,
+      "net_profit": -12840924349.0,
+      "total_assets": 110139977759.0
+    },
+    {
+      "year": "2025",
+      "sales": 46852015447.0,
+      "operating_profit": -14492170343.0,
+      "net_profit": -24703783684.0,
+      "total_assets": 95000307242.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

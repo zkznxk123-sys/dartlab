@@ -1,0 +1,166 @@
+{
+  "ego": {
+    "stockCode": "221840",
+    "corpName": "하이즈항공",
+    "industry": "aerospace",
+    "stage": "airframe",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 846,
+    "confidence": 0.9,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "124560",
+      "corpName": "태웅로직스",
+      "industry": "logistics",
+      "stage": "general",
+      "revenue": 11173
+    },
+    {
+      "stockCode": "007330",
+      "corpName": "푸른저축은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "124560",
+      "to": "221840",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "221840",
+      "to": "124560",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "007330",
+      "to": "221840",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 0.0%"
+    },
+    {
+      "from": "221840",
+      "to": "124560",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 5.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 62580189936.0,
+      "operating_profit": -12096156652.0,
+      "net_profit": -17086612403.0,
+      "total_assets": 152207448159.0
+    },
+    {
+      "year": "2022",
+      "sales": 58776316282.0,
+      "operating_profit": -8448934751.0,
+      "net_profit": -12314293308.0,
+      "total_assets": 136821527479.0
+    },
+    {
+      "year": "2023",
+      "sales": 80764375263.0,
+      "operating_profit": -4542965438.0,
+      "net_profit": 452292989.0,
+      "total_assets": 123275428186.0
+    },
+    {
+      "year": "2024",
+      "sales": 86545570784.0,
+      "operating_profit": -2233544512.0,
+      "net_profit": 307950865.0,
+      "total_assets": 113780919807.0
+    },
+    {
+      "year": "2025",
+      "sales": 84621119162.0,
+      "operating_profit": 4601007049.0,
+      "net_profit": 0.0,
+      "total_assets": 116731303663.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "stage": "airframe",
+      "revenue": 747854
+    },
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "stage": "airframe",
+      "revenue": 267029
+    },
+    {
+      "stockCode": "020560",
+      "corpName": "아시아나항공",
+      "stage": "airline",
+      "revenue": 72668
+    },
+    {
+      "stockCode": "079550",
+      "corpName": "LIG넥스원",
+      "stage": "defense",
+      "revenue": 43069
+    },
+    {
+      "stockCode": "047810",
+      "corpName": "한국항공우주",
+      "stage": "airframe",
+      "revenue": 36964
+    }
+  ]
+}

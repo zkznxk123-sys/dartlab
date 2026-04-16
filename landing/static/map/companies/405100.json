@@ -1,0 +1,116 @@
+{
+  "ego": {
+    "stockCode": "405100",
+    "corpName": "큐알티",
+    "industry": "consulting",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 689,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 292830
+    }
+  ],
+  "edges": [
+    {
+      "from": "006800",
+      "to": "405100",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2022",
+      "sales": 59628906235.0,
+      "operating_profit": 10285825829.0,
+      "net_profit": 6433583076.0,
+      "total_assets": 149211297139.0
+    },
+    {
+      "year": "2023",
+      "sales": 53256955744.0,
+      "operating_profit": 752199915.0,
+      "net_profit": 0.0,
+      "total_assets": 141787733651.0
+    },
+    {
+      "year": "2024",
+      "sales": 65250660837.0,
+      "operating_profit": 4767436351.0,
+      "net_profit": 0.0,
+      "total_assets": 136320462065.0
+    },
+    {
+      "year": "2025",
+      "sales": 68861373936.0,
+      "operating_profit": 4782984898.0,
+      "net_profit": 2893787827.0,
+      "total_assets": 155516690333.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "003030",
+      "corpName": "세아제강지주",
+      "stage": "general",
+      "revenue": 37596
+    },
+    {
+      "stockCode": "000070",
+      "corpName": "삼양홀딩스",
+      "stage": "general",
+      "revenue": 33483
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "036710",
+      "corpName": "심텍홀딩스",
+      "stage": "general",
+      "revenue": 15281
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "stage": "general",
+      "revenue": 13276
+    }
+  ]
+}

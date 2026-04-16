@@ -1,0 +1,102 @@
+{
+  "ego": {
+    "stockCode": "099390",
+    "corpName": "브레인즈컴퍼니",
+    "industry": "software",
+    "stage": "platform",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 251,
+    "confidence": 0.6,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": null,
+      "operating_profit": 5308435625.0,
+      "net_profit": 4939541329.0,
+      "total_assets": 44841719616.0
+    },
+    {
+      "year": "2022",
+      "sales": null,
+      "operating_profit": 4782130107.0,
+      "net_profit": 5039200998.0,
+      "total_assets": 47240089978.0
+    },
+    {
+      "year": "2023",
+      "sales": 25819289874.0,
+      "operating_profit": 3338149750.0,
+      "net_profit": 5088493669.0,
+      "total_assets": 55873725705.0
+    },
+    {
+      "year": "2024",
+      "sales": 26585842652.0,
+      "operating_profit": 3600013187.0,
+      "net_profit": 4804427374.0,
+      "total_assets": 55794955235.0
+    },
+    {
+      "year": "2025",
+      "sales": 25086446300.0,
+      "operating_profit": 2110371551.0,
+      "net_profit": 4557849663.0,
+      "total_assets": 60140928223.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

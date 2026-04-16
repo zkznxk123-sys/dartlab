@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "128540",
+    "corpName": "에코캡",
+    "industry": "electrical",
+    "stage": "cable",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1518,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "128540",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 85383961430.0,
+      "operating_profit": -12265497789.0,
+      "net_profit": -8560269583.0,
+      "total_assets": 114542583908.0
+    },
+    {
+      "year": "2022",
+      "sales": 121663336913.0,
+      "operating_profit": -1924041613.0,
+      "net_profit": -3223590387.0,
+      "total_assets": 153774476953.0
+    },
+    {
+      "year": "2023",
+      "sales": 135901878758.0,
+      "operating_profit": 3950847298.0,
+      "net_profit": 2078833952.0,
+      "total_assets": 158636175927.0
+    },
+    {
+      "year": "2024",
+      "sales": 138529396394.0,
+      "operating_profit": 19597268599.0,
+      "net_profit": 20304775566.0,
+      "total_assets": 191155913448.0
+    },
+    {
+      "year": "2025",
+      "sales": 151845506167.0,
+      "operating_profit": -3158109336.0,
+      "net_profit": -2461825276.0,
+      "total_assets": 166545853600.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "010120",
+      "corpName": "엘에스일렉트릭",
+      "stage": "power",
+      "revenue": 49658
+    },
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "stage": "cable",
+      "revenue": 36360
+    },
+    {
+      "stockCode": "015860",
+      "corpName": "일진홀딩스",
+      "stage": "power",
+      "revenue": 22827
+    },
+    {
+      "stockCode": "103590",
+      "corpName": "일진전기",
+      "stage": "power",
+      "revenue": 20446
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "stage": "cable",
+      "revenue": 6245
+    }
+  ]
+}

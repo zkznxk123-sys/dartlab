@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "049720",
+    "corpName": "고려신용정보",
+    "industry": "consulting",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 1780,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "052860",
+      "corpName": "아이앤씨",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 369
+    }
+  ],
+  "edges": [
+    {
+      "from": "049720",
+      "to": "052860",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 145222360868.0,
+      "operating_profit": 12459467876.0,
+      "net_profit": 9850961632.0,
+      "total_assets": 81429843156.0
+    },
+    {
+      "year": "2022",
+      "sales": 146766810274.0,
+      "operating_profit": 11990816137.0,
+      "net_profit": 10592337133.0,
+      "total_assets": 87235451720.0
+    },
+    {
+      "year": "2023",
+      "sales": 158214357320.0,
+      "operating_profit": 13070357375.0,
+      "net_profit": 11769759879.0,
+      "total_assets": 91177164935.0
+    },
+    {
+      "year": "2024",
+      "sales": 171309350127.0,
+      "operating_profit": 15310219206.0,
+      "net_profit": 13237106504.0,
+      "total_assets": 97364746237.0
+    },
+    {
+      "year": "2025",
+      "sales": 178029909590.0,
+      "operating_profit": 16740742506.0,
+      "net_profit": 13261619930.0,
+      "total_assets": 114247802662.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "003030",
+      "corpName": "세아제강지주",
+      "stage": "general",
+      "revenue": 37596
+    },
+    {
+      "stockCode": "000070",
+      "corpName": "삼양홀딩스",
+      "stage": "general",
+      "revenue": 33483
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "036710",
+      "corpName": "심텍홀딩스",
+      "stage": "general",
+      "revenue": 15281
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "stage": "general",
+      "revenue": 13276
+    }
+  ]
+}

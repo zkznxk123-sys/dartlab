@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "039840",
+    "corpName": "디오",
+    "industry": "media",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 1641,
+    "confidence": 0.95,
+    "source": "override"
+  },
+  "neighbors": [
+    {
+      "stockCode": "034310",
+      "corpName": "NICE",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 32426
+    },
+    {
+      "stockCode": "100790",
+      "corpName": "미래에셋벤처투자",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "034310",
+      "to": "039840",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "100790",
+      "to": "039840",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 150037237084.0,
+      "operating_profit": 34800123350.0,
+      "net_profit": -133630463.0,
+      "total_assets": 348168957784.0
+    },
+    {
+      "year": "2022",
+      "sales": 131306346755.0,
+      "operating_profit": -4405388586.0,
+      "net_profit": -20107713587.0,
+      "total_assets": 330318355541.0
+    },
+    {
+      "year": "2023",
+      "sales": 155817892643.0,
+      "operating_profit": 20896358522.0,
+      "net_profit": -692336255.0,
+      "total_assets": 367632887514.0
+    },
+    {
+      "year": "2024",
+      "sales": 119649873058.0,
+      "operating_profit": -40735380810.0,
+      "net_profit": -41320154654.0,
+      "total_assets": 343330045518.0
+    },
+    {
+      "year": "2025",
+      "sales": 164077830292.0,
+      "operating_profit": 10104797840.0,
+      "net_profit": 0.0,
+      "total_assets": 328467730338.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "035760",
+      "corpName": "CJ ENM",
+      "stage": "content",
+      "revenue": 51345
+    },
+    {
+      "stockCode": "030000",
+      "corpName": "제일기획",
+      "stage": "content",
+      "revenue": 45469
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "214320",
+      "corpName": "이노션",
+      "stage": "platform",
+      "revenue": 21460
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ]
+}

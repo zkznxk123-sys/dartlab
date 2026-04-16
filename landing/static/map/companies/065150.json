@@ -1,0 +1,204 @@
+{
+  "ego": {
+    "stockCode": "065150",
+    "corpName": "대산F&B",
+    "industry": "leisure",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 1109,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "139050",
+      "corpName": "BF랩스",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 149
+    },
+    {
+      "stockCode": "082210",
+      "corpName": "옵트론텍",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 1957
+    },
+    {
+      "stockCode": "013570",
+      "corpName": "디와이",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 12448
+    },
+    {
+      "stockCode": "219550",
+      "corpName": "디와이디",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 449
+    }
+  ],
+  "edges": [
+    {
+      "from": "065150",
+      "to": "139050",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "065150",
+      "to": "082210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "065150",
+      "to": "013570",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "065150",
+      "to": "219550",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "065150",
+      "to": "219550",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "065150",
+      "to": "082210",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.5%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 104305802113.0,
+      "operating_profit": -894487828.0,
+      "net_profit": 10405961248.0,
+      "total_assets": 68216630997.0
+    },
+    {
+      "year": "2022",
+      "sales": 150035748696.0,
+      "operating_profit": -5371300392.0,
+      "net_profit": -265319218.0,
+      "total_assets": 73967255832.0
+    },
+    {
+      "year": "2023",
+      "sales": 128819482459000.0,
+      "operating_profit": -634869097000.0,
+      "net_profit": -8080143052000.0,
+      "total_assets": 56717158975000.0
+    },
+    {
+      "year": "2024",
+      "sales": 102878853186.0,
+      "operating_profit": -820612174.0,
+      "net_profit": -12108460870.0,
+      "total_assets": 38453173974.0
+    },
+    {
+      "year": "2025",
+      "sales": 110864610083.0,
+      "operating_profit": 4554449774.0,
+      "net_profit": 8315318465.0,
+      "total_assets": 37466437775.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "008770",
+      "corpName": "호텔신라",
+      "stage": "general",
+      "revenue": 40683
+    },
+    {
+      "stockCode": "035250",
+      "corpName": "강원랜드",
+      "stage": "general",
+      "revenue": 14767
+    },
+    {
+      "stockCode": "034230",
+      "corpName": "파라다이스",
+      "stage": "general",
+      "revenue": 11499
+    },
+    {
+      "stockCode": "215000",
+      "corpName": "골프존",
+      "stage": "general",
+      "revenue": 4833
+    },
+    {
+      "stockCode": "114090",
+      "corpName": "GKL",
+      "stage": "general",
+      "revenue": 4229
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "024120",
+    "corpName": "KB오토시스",
+    "industry": "auto",
+    "stage": "oem",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 2150,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ],
+  "edges": [
+    {
+      "from": "024120",
+      "to": "041510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 130124357015.0,
+      "operating_profit": -5122507760.0,
+      "net_profit": -405411162.0,
+      "total_assets": 159976832407.0
+    },
+    {
+      "year": "2022",
+      "sales": 178041889332.0,
+      "operating_profit": 2437247196.0,
+      "net_profit": 1101359982.0,
+      "total_assets": 204416068254.0
+    },
+    {
+      "year": "2023",
+      "sales": 203726077936.0,
+      "operating_profit": 4044593163.0,
+      "net_profit": 1062706995.0,
+      "total_assets": 224905238746.0
+    },
+    {
+      "year": "2024",
+      "sales": 210230561356.0,
+      "operating_profit": 4634464789.0,
+      "net_profit": 0.0,
+      "total_assets": 240702309757.0
+    },
+    {
+      "year": "2025",
+      "sales": 214995786079.0,
+      "operating_profit": 8530895852.0,
+      "net_profit": 0.0,
+      "total_assets": 256608157960.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "ego": {
+    "stockCode": "095610",
+    "corpName": "테스",
+    "industry": "semiconductor",
+    "stage": "equipment",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 3511,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "232680",
+      "corpName": "라온로보틱스",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 538
+    },
+    {
+      "stockCode": "206950",
+      "corpName": "볼빅",
+      "industry": "leisure",
+      "stage": "general",
+      "revenue": 0
+    },
+    {
+      "stockCode": "001630",
+      "corpName": "종근당홀딩스",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 9590
+    }
+  ],
+  "edges": [
+    {
+      "from": "232680",
+      "to": "095610",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 38837.0,
+      "ratio": null,
+      "product": "플랫폼 (Platform)",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "플랫폼 (Platform)"
+    },
+    {
+      "from": "095610",
+      "to": "206950",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001630",
+      "to": "095610",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 375194330803.0,
+      "operating_profit": 62184554759.0,
+      "net_profit": 73988020802.0,
+      "total_assets": 336944738958.0
+    },
+    {
+      "year": "2022",
+      "sales": 357991682573.0,
+      "operating_profit": 55898658621.0,
+      "net_profit": 46766672131.0,
+      "total_assets": 336518156052.0
+    },
+    {
+      "year": "2023",
+      "sales": 146938072263.0,
+      "operating_profit": -5861866998.0,
+      "net_profit": 1565979353.0,
+      "total_assets": 321829824257.0
+    },
+    {
+      "year": "2024",
+      "sales": 240077826420.0,
+      "operating_profit": 38473734786.0,
+      "net_profit": 42653657309.0,
+      "total_assets": 381186883677.0
+    },
+    {
+      "year": "2025",
+      "sales": 351115732341.0,
+      "operating_profit": 57838170556.0,
+      "net_profit": 0.0,
+      "total_assets": 487468886334.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 1,
+    "totalSupplyAmount": 38837.0,
+    "hhi": 10000.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 100.0,
+    "top3Ratio": 100.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "machinery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "special",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "232680",
+      "corpName": "라온로보틱스",
+      "product": "플랫폼 (Platform)",
+      "amount": 38837.0,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

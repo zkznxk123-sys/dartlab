@@ -1,0 +1,185 @@
+{
+  "ego": {
+    "stockCode": "036190",
+    "corpName": "금화피에스시",
+    "industry": "construction",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 4234,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "224760",
+      "corpName": "엔에스컴퍼니",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 0
+    },
+    {
+      "stockCode": "051600",
+      "corpName": "한전KPS",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 15765
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "036190",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "036190",
+      "to": "224760",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "051600",
+      "to": "036190",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "224760",
+      "to": "036190",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "224760",
+      "to": "036190",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 4.2%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 238745391815.0,
+      "operating_profit": 25617281491.0,
+      "net_profit": 23129568714.0,
+      "total_assets": 307749137524.0
+    },
+    {
+      "year": "2022",
+      "sales": 248347893901.0,
+      "operating_profit": 27900351420.0,
+      "net_profit": 0.0,
+      "total_assets": 400011075715.0
+    },
+    {
+      "year": "2023",
+      "sales": 337610294221.0,
+      "operating_profit": 43458261238.0,
+      "net_profit": 0.0,
+      "total_assets": 430472934672.0
+    },
+    {
+      "year": "2024",
+      "sales": 340226854764.0,
+      "operating_profit": 36198289191.0,
+      "net_profit": 40039278761.0,
+      "total_assets": 461784662209.0
+    },
+    {
+      "year": "2025",
+      "sales": 423433500797.0,
+      "operating_profit": 43801481164.0,
+      "net_profit": -44.0,
+      "total_assets": 490634810673.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

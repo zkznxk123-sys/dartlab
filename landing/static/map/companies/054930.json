@@ -1,0 +1,95 @@
+{
+  "ego": {
+    "stockCode": "054930",
+    "corpName": "유신",
+    "industry": "construction",
+    "stage": "engineering",
+    "role": "서비스",
+    "stream": "upstream",
+    "revenue": 3855,
+    "confidence": 0.9,
+    "source": "product"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 262235681971.0,
+      "operating_profit": 7991487391.0,
+      "net_profit": 12105576518.0,
+      "total_assets": 220466486589.0
+    },
+    {
+      "year": "2022",
+      "sales": 303961301436.0,
+      "operating_profit": 20901452578.0,
+      "net_profit": 18323521091.0,
+      "total_assets": 218295008313.0
+    },
+    {
+      "year": "2023",
+      "sales": 341055308847.0,
+      "operating_profit": 18309702869.0,
+      "net_profit": 20095002637.0,
+      "total_assets": 236936562356.0
+    },
+    {
+      "year": "2025",
+      "sales": 385502385861.0,
+      "operating_profit": 9243765481.0,
+      "net_profit": 10520353724.0,
+      "total_assets": 339201356210.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

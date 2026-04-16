@@ -1,0 +1,289 @@
+{
+  "ego": {
+    "stockCode": "061040",
+    "corpName": "알에프텍",
+    "industry": "telecom",
+    "stage": "service",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 2660,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "004710",
+      "corpName": "한솔테크닉스",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 12524
+    },
+    {
+      "stockCode": "024090",
+      "corpName": "디씨엠",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 2271
+    },
+    {
+      "stockCode": "025620",
+      "corpName": "차AI헬스케어",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 73
+    },
+    {
+      "stockCode": "058450",
+      "corpName": "한주에이알티",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 63
+    },
+    {
+      "stockCode": "232530",
+      "corpName": "이엠티",
+      "industry": "semiconductor",
+      "stage": "materials",
+      "revenue": 0
+    },
+    {
+      "stockCode": "143540",
+      "corpName": "영우디에스피",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 805
+    },
+    {
+      "stockCode": "064090",
+      "corpName": "인크레더블버즈",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 72
+    },
+    {
+      "stockCode": "351870",
+      "corpName": "차이커뮤니케이션",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 665
+    }
+  ],
+  "edges": [
+    {
+      "from": "061040",
+      "to": "004710",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 1701.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "024090",
+      "to": "061040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "025620",
+      "to": "061040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "058450",
+      "to": "061040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "061040",
+      "to": "058450",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "061040",
+      "to": "232530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "061040",
+      "to": "143540",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "064090",
+      "to": "061040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "351870",
+      "to": "061040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "024090",
+      "to": "061040",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 325824061418.0,
+      "operating_profit": 12322173772.0,
+      "net_profit": 17562916114.0,
+      "total_assets": 272645586969.0
+    },
+    {
+      "year": "2022",
+      "sales": 360554334131.0,
+      "operating_profit": 20936852313.0,
+      "net_profit": 12008711592.0,
+      "total_assets": 377353267192.0
+    },
+    {
+      "year": "2023",
+      "sales": 314378116170.0,
+      "operating_profit": 5039500595.0,
+      "net_profit": null,
+      "total_assets": 425653364333.0
+    },
+    {
+      "year": "2024",
+      "sales": 358323498458.0,
+      "operating_profit": 1811663755.0,
+      "net_profit": -18281532687.0,
+      "total_assets": 456606521480.0
+    },
+    {
+      "year": "2025",
+      "sales": 266007649510.0,
+      "operating_profit": -25187617236.0,
+      "net_profit": -30470680477.0,
+      "total_assets": 407430424081.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "004710",
+      "corpName": "한솔테크닉스",
+      "product": "",
+      "amount": 1701.0,
+      "type": "supplier",
+      "confidence": 0.9
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

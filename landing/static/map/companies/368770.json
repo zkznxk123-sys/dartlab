@@ -1,0 +1,128 @@
+{
+  "ego": {
+    "stockCode": "368770",
+    "corpName": "파이버프로",
+    "industry": "machinery",
+    "stage": "precision",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 435,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "041190",
+      "corpName": "우리기술투자",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 1629
+    }
+  ],
+  "edges": [
+    {
+      "from": "041190",
+      "to": "368770",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "041190",
+      "to": "368770",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2022",
+      "sales": 18829443327.0,
+      "operating_profit": 3418167444.0,
+      "net_profit": -1731270003.0,
+      "total_assets": 39702377410.0
+    },
+    {
+      "year": "2023",
+      "sales": 19386431576.0,
+      "operating_profit": 2616602601.0,
+      "net_profit": 2851494746.0,
+      "total_assets": 40704009174.0
+    },
+    {
+      "year": "2024",
+      "sales": 32943669332.0,
+      "operating_profit": 7206689949.0,
+      "net_profit": 7152320255.0,
+      "total_assets": 49861488962.0
+    },
+    {
+      "year": "2025",
+      "sales": 43472321309.0,
+      "operating_profit": 10117199890.0,
+      "net_profit": 9309096266.0,
+      "total_assets": 60717374739.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "ego": {
+    "stockCode": "420570",
+    "corpName": "제이투케이바이오",
+    "industry": "cosmetics",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 330,
+    "confidence": 0.8,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "006840",
+      "corpName": "AK홀딩스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 32357
+    },
+    {
+      "stockCode": "018250",
+      "corpName": "애경산업",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 6545
+    },
+    {
+      "stockCode": "038530",
+      "corpName": "케이바이오",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 873
+    }
+  ],
+  "edges": [
+    {
+      "from": "420570",
+      "to": "006840",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 11039.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "420570",
+      "to": "018250",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 11039.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "420570",
+      "to": "038530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2023",
+      "sales": 28472272288.0,
+      "operating_profit": 5606828782.0,
+      "net_profit": -45516259.0,
+      "total_assets": 22015240650.0
+    },
+    {
+      "year": "2024",
+      "sales": 33129185725.0,
+      "operating_profit": 3626063517.0,
+      "net_profit": -1652583838.0,
+      "total_assets": 35966420026.0
+    },
+    {
+      "year": "2025",
+      "sales": 32966351938.0,
+      "operating_profit": 2919837694.0,
+      "net_profit": 2672839617.0,
+      "total_assets": 38064178260.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "006840",
+      "corpName": "AK홀딩스",
+      "product": "",
+      "amount": 11039.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "018250",
+      "corpName": "애경산업",
+      "product": "",
+      "amount": 11039.0,
+      "type": "supplier",
+      "confidence": 0.9
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "stage": "manufacturing",
+      "revenue": 42528
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "278470",
+      "corpName": "에이피알",
+      "stage": "manufacturing",
+      "revenue": 15273
+    },
+    {
+      "stockCode": "257720",
+      "corpName": "실리콘투",
+      "stage": "manufacturing",
+      "revenue": 11163
+    }
+  ]
+}

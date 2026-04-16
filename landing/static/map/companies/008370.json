@@ -1,0 +1,143 @@
+{
+  "ego": {
+    "stockCode": "008370",
+    "corpName": "원풍",
+    "industry": "plastic",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 876,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 459322
+    }
+  ],
+  "edges": [
+    {
+      "from": "051910",
+      "to": "008370",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 88917969888.0,
+      "operating_profit": 3932778355.0,
+      "net_profit": 0.0,
+      "total_assets": 93898946926.0
+    },
+    {
+      "year": "2022",
+      "sales": 89490584326.0,
+      "operating_profit": 7758203186.0,
+      "net_profit": 8500037909.0,
+      "total_assets": 93369711176.0
+    },
+    {
+      "year": "2023",
+      "sales": 73785384649.0,
+      "operating_profit": 4553856379.0,
+      "net_profit": 6730910232.0,
+      "total_assets": 96227950225.0
+    },
+    {
+      "year": "2024",
+      "sales": 79609134649.0,
+      "operating_profit": 4547912675.0,
+      "net_profit": 7106011150.0,
+      "total_assets": 98313590517.0
+    },
+    {
+      "year": "2025",
+      "sales": 87635177741.0,
+      "operating_profit": 6596349826.0,
+      "net_profit": 0.0,
+      "total_assets": 98559108690.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "polymer",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005720",
+      "corpName": "넥센",
+      "stage": "general",
+      "revenue": 35865
+    },
+    {
+      "stockCode": "002350",
+      "corpName": "넥센타이어",
+      "stage": "general",
+      "revenue": 31896
+    },
+    {
+      "stockCode": "013520",
+      "corpName": "화승코퍼레이션",
+      "stage": "general",
+      "revenue": 16398
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "stage": "general",
+      "revenue": 13729
+    },
+    {
+      "stockCode": "004840",
+      "corpName": "DRB동일",
+      "stage": "general",
+      "revenue": 8027
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "137080",
+    "corpName": "나래나노텍",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 545,
+    "confidence": 0.9,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 258101
+    }
+  ],
+  "edges": [
+    {
+      "from": "034220",
+      "to": "137080",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 135152540052.0,
+      "operating_profit": 23123056534.0,
+      "net_profit": 17471980263.0,
+      "total_assets": 149521763255.0
+    },
+    {
+      "year": "2022",
+      "sales": 88040460887.0,
+      "operating_profit": 1956020616.0,
+      "net_profit": 2521937374.0,
+      "total_assets": 185444923380.0
+    },
+    {
+      "year": "2023",
+      "sales": 52925517541.0,
+      "operating_profit": -14991082577.0,
+      "net_profit": -13283478372.0,
+      "total_assets": 173053090583.0
+    },
+    {
+      "year": "2024",
+      "sales": 40425966058.0,
+      "operating_profit": -22108083244.0,
+      "net_profit": -17141317761.0,
+      "total_assets": 173431902910.0
+    },
+    {
+      "year": "2025",
+      "sales": 54497281414.0,
+      "operating_profit": -8838370335.0,
+      "net_profit": 39961132181.0,
+      "total_assets": 198749734811.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

@@ -1,0 +1,178 @@
+{
+  "ego": {
+    "stockCode": "131220",
+    "corpName": "대한과학",
+    "industry": "retail",
+    "stage": "wholesale",
+    "role": "도매",
+    "stream": "midstream",
+    "revenue": 811,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "450950",
+      "corpName": "아스테라시스",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 379
+    },
+    {
+      "stockCode": "228760",
+      "corpName": "지노믹트리",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 38
+    },
+    {
+      "stockCode": "337840",
+      "corpName": "유엑스엔",
+      "industry": "medicalDevice",
+      "stage": "imaging",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "131220",
+      "to": "450950",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "131220",
+      "to": "228760",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "131220",
+      "to": "337840",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 66280825526.0,
+      "operating_profit": 5864721294.0,
+      "net_profit": 5015014629.0,
+      "total_assets": 54919854759.0
+    },
+    {
+      "year": "2022",
+      "sales": 72279688057.0,
+      "operating_profit": 7224466955.0,
+      "net_profit": 1540477014.0,
+      "total_assets": 59452771880.0
+    },
+    {
+      "year": "2023",
+      "sales": 73702238899.0,
+      "operating_profit": 6167121379.0,
+      "net_profit": 1376604558.0,
+      "total_assets": 63996496016.0
+    },
+    {
+      "year": "2024",
+      "sales": 71694370061.0,
+      "operating_profit": 4225309258.0,
+      "net_profit": 3925682769.0,
+      "total_assets": 67813733551.0
+    },
+    {
+      "year": "2025",
+      "sales": 81117767870.0,
+      "operating_profit": 5530676716.0,
+      "net_profit": 3281324679.0,
+      "total_assets": 72225298002.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "228760",
+      "corpName": "지노믹트리",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "337840",
+      "corpName": "유엑스엔",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

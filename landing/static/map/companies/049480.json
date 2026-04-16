@@ -1,0 +1,167 @@
+{
+  "ego": {
+    "stockCode": "049480",
+    "corpName": "오픈베이스",
+    "industry": "telecom",
+    "stage": "device",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 2331,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "263800",
+      "corpName": "데이타솔루션",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 1038
+    }
+  ],
+  "edges": [
+    {
+      "from": "263800",
+      "to": "049480",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "049480",
+      "to": "263800",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "263800",
+      "to": "049480",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 175900047481.0,
+      "operating_profit": 5402347945.0,
+      "net_profit": 5048176015.0,
+      "total_assets": 160797586248.0
+    },
+    {
+      "year": "2022",
+      "sales": 193094510460.0,
+      "operating_profit": 7980311392.0,
+      "net_profit": 6002883022.0,
+      "total_assets": 150742888465.0
+    },
+    {
+      "year": "2023",
+      "sales": 204046578956.0,
+      "operating_profit": 6605459348.0,
+      "net_profit": 5206370604.0,
+      "total_assets": 170701575094.0
+    },
+    {
+      "year": "2024",
+      "sales": 226290328234.0,
+      "operating_profit": 6662223972.0,
+      "net_profit": 7583826193.0,
+      "total_assets": 173117157411.0
+    },
+    {
+      "year": "2025",
+      "sales": 233127039094.0,
+      "operating_profit": 7921212000.0,
+      "net_profit": 7255315586.0,
+      "total_assets": 179831104085.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "software",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "solution",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "263800",
+      "corpName": "데이타솔루션",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

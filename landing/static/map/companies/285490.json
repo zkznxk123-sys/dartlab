@@ -1,0 +1,164 @@
+{
+  "ego": {
+    "stockCode": "285490",
+    "corpName": "노바텍",
+    "industry": "misc",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 556,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "016800",
+      "corpName": "퍼시스",
+      "industry": "paper",
+      "stage": "general",
+      "revenue": 3582
+    },
+    {
+      "stockCode": "035810",
+      "corpName": "이지홀딩스",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 33889
+    },
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 974293
+    }
+  ],
+  "edges": [
+    {
+      "from": "285490",
+      "to": "016800",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "035810",
+      "to": "285490",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "285490",
+      "to": "015760",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 90500181369.0,
+      "operating_profit": 32949401572.0,
+      "net_profit": 40550724819.0,
+      "total_assets": 139482862166.0
+    },
+    {
+      "year": "2022",
+      "sales": 110494315651.0,
+      "operating_profit": 26470752477.0,
+      "net_profit": 16602852140.0,
+      "total_assets": 145602337751.0
+    },
+    {
+      "year": "2023",
+      "sales": 92421026753.0,
+      "operating_profit": 25608083180.0,
+      "net_profit": 29641335472.0,
+      "total_assets": 169245887588.0
+    },
+    {
+      "year": "2024",
+      "sales": 65812403810.0,
+      "operating_profit": 12611340935.0,
+      "net_profit": 17319594437.0,
+      "total_assets": 183390239460.0
+    },
+    {
+      "year": "2025",
+      "sales": 55589851496.0,
+      "operating_profit": 6700053223.0,
+      "net_profit": 17714157896.0,
+      "total_assets": 173989291355.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "016800",
+      "corpName": "퍼시스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "284740",
+      "corpName": "쿠쿠홈시스",
+      "stage": "",
+      "revenue": 11213
+    },
+    {
+      "stockCode": "026040",
+      "corpName": "제이에스티나",
+      "stage": "",
+      "revenue": 722
+    },
+    {
+      "stockCode": "188260",
+      "corpName": "세니젠",
+      "stage": "",
+      "revenue": 154
+    },
+    {
+      "stockCode": "373200",
+      "corpName": "엑스플러스",
+      "stage": "",
+      "revenue": 101
+    }
+  ]
+}

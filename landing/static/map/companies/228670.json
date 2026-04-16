@@ -1,0 +1,305 @@
+{
+  "ego": {
+    "stockCode": "228670",
+    "corpName": "레이",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1113,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "100120",
+      "corpName": "뷰웍스",
+      "industry": "medicalDevice",
+      "stage": "imaging",
+      "revenue": 2393
+    },
+    {
+      "stockCode": "012750",
+      "corpName": "에스원",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 28894
+    },
+    {
+      "stockCode": "049950",
+      "corpName": "미래컴퍼니",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 409
+    },
+    {
+      "stockCode": "319660",
+      "corpName": "피에스케이",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 4572
+    },
+    {
+      "stockCode": "000370",
+      "corpName": "한화손해보험",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "001630",
+      "corpName": "종근당홀딩스",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 9590
+    },
+    {
+      "stockCode": "458870",
+      "corpName": "씨어스테크놀로지",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 482
+    },
+    {
+      "stockCode": "318060",
+      "corpName": "그래피",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 205
+    }
+  ],
+  "edges": [
+    {
+      "from": "100120",
+      "to": "228670",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "012750",
+      "to": "228670",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    },
+    {
+      "from": "049950",
+      "to": "228670",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "319660",
+      "to": "228670",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000370",
+      "to": "228670",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "001630",
+      "to": "228670",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "049950",
+      "to": "228670",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "228670",
+      "to": "458870",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.8%"
+    },
+    {
+      "from": "228670",
+      "to": "318060",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 6.2%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 90336176999.0,
+      "operating_profit": 3387415384.0,
+      "net_profit": 57207561.0,
+      "total_assets": 177307910503.0
+    },
+    {
+      "year": "2022",
+      "sales": 128997854042.0,
+      "operating_profit": 16205769609.0,
+      "net_profit": 0.0,
+      "total_assets": 222195980437.0
+    },
+    {
+      "year": "2023",
+      "sales": 145881865235.0,
+      "operating_profit": 6118370428.0,
+      "net_profit": 0.0,
+      "total_assets": 259552372855.0
+    },
+    {
+      "year": "2024",
+      "sales": 79842593595.0,
+      "operating_profit": -44253559054.0,
+      "net_profit": -60426549232.0,
+      "total_assets": 204215176234.0
+    },
+    {
+      "year": "2025",
+      "sales": 111322950252.0,
+      "operating_profit": -9787646631.0,
+      "net_profit": 0.0,
+      "total_assets": 192240432312.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "medicalDevice",
+        1
+      ],
+      [
+        "semiconductor",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "imaging",
+        1
+      ],
+      [
+        "equipment",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "100120",
+      "corpName": "뷰웍스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "319660",
+      "corpName": "피에스케이",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

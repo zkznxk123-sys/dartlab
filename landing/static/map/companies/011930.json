@@ -1,0 +1,271 @@
+{
+  "ego": {
+    "stockCode": "011930",
+    "corpName": "신성이엔지",
+    "industry": "energy",
+    "stage": "generation",
+    "role": "서비스",
+    "stream": "upstream",
+    "revenue": 5675,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024880",
+      "corpName": "케이피에프",
+      "industry": "steel",
+      "stage": "processing",
+      "revenue": 7439
+    },
+    {
+      "stockCode": "032820",
+      "corpName": "우리기술",
+      "industry": "electrical",
+      "stage": "power",
+      "revenue": 871
+    },
+    {
+      "stockCode": "041190",
+      "corpName": "우리기술투자",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 1629
+    },
+    {
+      "stockCode": "017040",
+      "corpName": "광명전기",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 959
+    },
+    {
+      "stockCode": "160980",
+      "corpName": "싸이맥스",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 1644
+    },
+    {
+      "stockCode": "334970",
+      "corpName": "프레스티지바이오로직스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 89
+    }
+  ],
+  "edges": [
+    {
+      "from": "011930",
+      "to": "024880",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "011930",
+      "to": "032820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "011930",
+      "to": "041190",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "011930",
+      "to": "017040",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "041190",
+      "to": "011930",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "011930",
+      "to": "160980",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "334970",
+      "to": "011930",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "011930",
+      "to": "041190",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 9.0%"
+    },
+    {
+      "from": "041190",
+      "to": "011930",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.7%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 454523692263.0,
+      "operating_profit": 2386598711.0,
+      "net_profit": -15861729544.0,
+      "total_assets": 476656365404.0
+    },
+    {
+      "year": "2022",
+      "sales": 664143679914.0,
+      "operating_profit": 21021027961.0,
+      "net_profit": 0.0,
+      "total_assets": 577555245278.0
+    },
+    {
+      "year": "2023",
+      "sales": 576519652360.0,
+      "operating_profit": 7357387392.0,
+      "net_profit": 15258873765.0,
+      "total_assets": 587747541244.0
+    },
+    {
+      "year": "2024",
+      "sales": 582301298381.0,
+      "operating_profit": 4991741264.0,
+      "net_profit": -13960189121.0,
+      "total_assets": 605269638823.0
+    },
+    {
+      "year": "2025",
+      "sales": 567454391304.0,
+      "operating_profit": 1281312264.0,
+      "net_profit": -8194539332.0,
+      "total_assets": 600686182250.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "017040",
+      "corpName": "광명전기",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "160980",
+      "corpName": "싸이맥스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "stage": "generation",
+      "revenue": 974293
+    },
+    {
+      "stockCode": "036460",
+      "corpName": "한국가스공사",
+      "stage": "distribution",
+      "revenue": 357273
+    },
+    {
+      "stockCode": "004690",
+      "corpName": "삼천리",
+      "stage": "distribution",
+      "revenue": 52755
+    },
+    {
+      "stockCode": "071320",
+      "corpName": "지역난방공사",
+      "stage": "generation",
+      "revenue": 39982
+    },
+    {
+      "stockCode": "112610",
+      "corpName": "씨에스윈드",
+      "stage": "generation",
+      "revenue": 29316
+    }
+  ]
+}

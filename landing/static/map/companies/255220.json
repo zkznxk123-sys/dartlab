@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "255220",
+    "corpName": "SG",
+    "industry": "buildingMaterials",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1022,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001380",
+      "corpName": "SG글로벌",
+      "industry": "auto",
+      "stage": "body",
+      "revenue": 935
+    },
+    {
+      "stockCode": "004060",
+      "corpName": "SG세계물산",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 1323
+    },
+    {
+      "stockCode": "040610",
+      "corpName": "SG&G",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 477
+    }
+  ],
+  "edges": [
+    {
+      "from": "001380",
+      "to": "255220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "004060",
+      "to": "255220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "040610",
+      "to": "255220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 70102082504.0,
+      "operating_profit": -2256574838.0,
+      "net_profit": -12866975662.0,
+      "total_assets": 229802255134.0
+    },
+    {
+      "year": "2022",
+      "sales": 89858217245.0,
+      "operating_profit": 566173407.0,
+      "net_profit": null,
+      "total_assets": 193477668717.0
+    },
+    {
+      "year": "2023",
+      "sales": 80921130313.0,
+      "operating_profit": -13468746819.0,
+      "net_profit": null,
+      "total_assets": 188059707751.0
+    },
+    {
+      "year": "2024",
+      "sales": 118940081051.0,
+      "operating_profit": -6068240269.0,
+      "net_profit": null,
+      "total_assets": 232832735266.0
+    },
+    {
+      "year": "2025",
+      "sales": 102246199563.0,
+      "operating_profit": 752259599.0,
+      "net_profit": null,
+      "total_assets": 224392841651.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "003300",
+      "corpName": "한일홀딩스",
+      "stage": "general",
+      "revenue": 19305
+    },
+    {
+      "stockCode": "000480",
+      "corpName": "시알홀딩스",
+      "stage": "general",
+      "revenue": 8278
+    },
+    {
+      "stockCode": "462520",
+      "corpName": "조선내화",
+      "stage": "general",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "010040",
+      "corpName": "한국내화",
+      "stage": "general",
+      "revenue": 4063
+    },
+    {
+      "stockCode": "004440",
+      "corpName": "삼일씨엔에스",
+      "stage": "general",
+      "revenue": 2231
+    }
+  ]
+}

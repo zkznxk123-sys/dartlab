@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "187660",
+    "corpName": "페니트리움바이오",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 93,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "048410",
+      "corpName": "현대바이오",
+      "industry": "cosmetics",
+      "stage": "raw",
+      "revenue": 35
+    },
+    {
+      "stockCode": "250060",
+      "corpName": "모비스",
+      "industry": "auto",
+      "stage": "powertrain",
+      "revenue": 51
+    }
+  ],
+  "edges": [
+    {
+      "from": "187660",
+      "to": "048410",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "187660",
+      "to": "250060",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 13977771687.0,
+      "operating_profit": 2090550559.0,
+      "net_profit": 1726994313.0,
+      "total_assets": 38364724338.0
+    },
+    {
+      "year": "2022",
+      "sales": 14882555787.0,
+      "operating_profit": -754740449.0,
+      "net_profit": 266502935.0,
+      "total_assets": -3723279478.0
+    },
+    {
+      "year": "2023",
+      "sales": 13790195699.0,
+      "operating_profit": -3464613885.0,
+      "net_profit": -2970313225.0,
+      "total_assets": 44214193727.0
+    },
+    {
+      "year": "2024",
+      "sales": 9744986676.0,
+      "operating_profit": -15932446161.0,
+      "net_profit": -20260475756.0,
+      "total_assets": 28526620627.0
+    },
+    {
+      "year": "2025",
+      "sales": 9273012798.0,
+      "operating_profit": -7376237084.0,
+      "net_profit": null,
+      "total_assets": 32792161625.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "ego": {
+    "stockCode": "314930",
+    "corpName": "바이오다인",
+    "industry": "medicalDevice",
+    "stage": "diagnostic",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 70,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "003540",
+      "corpName": "대신증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 50639
+    }
+  ],
+  "edges": [
+    {
+      "from": "003540",
+      "to": "314930",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003540",
+      "to": "314930",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3763250582.0,
+      "operating_profit": -2342503882.0,
+      "net_profit": -10856918511.0,
+      "total_assets": 45822781427.0
+    },
+    {
+      "year": "2022",
+      "sales": 12210425936.0,
+      "operating_profit": 6683364320.0,
+      "net_profit": 0.0,
+      "total_assets": 45414187190.0
+    },
+    {
+      "year": "2023",
+      "sales": 4088693758.0,
+      "operating_profit": -2050797880.0,
+      "net_profit": -991761827.0,
+      "total_assets": 43986038943.0
+    },
+    {
+      "year": "2025",
+      "sales": 7027675925.0,
+      "operating_profit": 652257064.0,
+      "net_profit": 0.0,
+      "total_assets": 44939881971.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "011560",
+      "corpName": "세보엠이씨",
+      "stage": "imaging",
+      "revenue": 7158
+    },
+    {
+      "stockCode": "092790",
+      "corpName": "넥스틸",
+      "stage": "imaging",
+      "revenue": 5510
+    },
+    {
+      "stockCode": "215360",
+      "corpName": "우리산업",
+      "stage": "imaging",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "043150",
+      "corpName": "바텍",
+      "stage": "imaging",
+      "revenue": 4264
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "stage": "imaging",
+      "revenue": 3959
+    }
+  ]
+}

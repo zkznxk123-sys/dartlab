@@ -1,0 +1,303 @@
+{
+  "ego": {
+    "stockCode": "356680",
+    "corpName": "엑스게이트",
+    "industry": "software",
+    "stage": "solution",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 481,
+    "confidence": 0.6,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "054620",
+      "corpName": "APS",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 849
+    },
+    {
+      "stockCode": "391710",
+      "corpName": "코닉오토메이션",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 301
+    },
+    {
+      "stockCode": "078070",
+      "corpName": "유비쿼스홀딩스",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 1557
+    },
+    {
+      "stockCode": "079940",
+      "corpName": "가비아",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 3357
+    },
+    {
+      "stockCode": "093320",
+      "corpName": "케이아이엔엑스",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 1592
+    },
+    {
+      "stockCode": "136540",
+      "corpName": "윈스테크넷",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 986
+    },
+    {
+      "stockCode": "443670",
+      "corpName": "에스피소프트",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 545
+    },
+    {
+      "stockCode": "418250",
+      "corpName": "시큐레터",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 12
+    }
+  ],
+  "edges": [
+    {
+      "from": "356680",
+      "to": "054620",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 9569.0,
+      "ratio": 55.0,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "356680",
+      "to": "391710",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 9569.0,
+      "ratio": 55.0,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "078070",
+      "to": "356680",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "079940",
+      "to": "356680",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "093320",
+      "to": "356680",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "136540",
+      "to": "356680",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "356680",
+      "to": "079940",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "356680",
+      "to": "093320",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "356680",
+      "to": "443670",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "356680",
+      "to": "418250",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "443670",
+      "to": "356680",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2022",
+      "sales": 38299253515.0,
+      "operating_profit": 5417930052.0,
+      "net_profit": 0.0,
+      "total_assets": 34707345530.0
+    },
+    {
+      "year": "2023",
+      "sales": 42820685714.0,
+      "operating_profit": 4102235426.0,
+      "net_profit": 294783793.0,
+      "total_assets": 49995588576.0
+    },
+    {
+      "year": "2025",
+      "sales": 48135693935.0,
+      "operating_profit": 3753096506.0,
+      "net_profit": 3874151374.0,
+      "total_assets": 68335898274.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "054620",
+      "corpName": "APS",
+      "product": "",
+      "amount": 9569.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "391710",
+      "corpName": "코닉오토메이션",
+      "product": "",
+      "amount": 9569.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "418250",
+      "corpName": "시큐레터",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

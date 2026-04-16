@@ -1,0 +1,281 @@
+{
+  "ego": {
+    "stockCode": "267320",
+    "corpName": "나인테크",
+    "industry": "machinery",
+    "stage": "precision",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 824,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "030610",
+      "corpName": "교보증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 45068
+    },
+    {
+      "stockCode": "434190",
+      "corpName": "탈로스",
+      "industry": "battery",
+      "stage": "cathode",
+      "revenue": 0
+    },
+    {
+      "stockCode": "469750",
+      "corpName": "아이비젼웍스",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 230
+    },
+    {
+      "stockCode": "364950",
+      "corpName": "에이아이코리아",
+      "industry": "battery",
+      "stage": "electrolyte",
+      "revenue": 869
+    },
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "092790",
+      "corpName": "넥스틸",
+      "industry": "medicalDevice",
+      "stage": "imaging",
+      "revenue": 5510
+    },
+    {
+      "stockCode": "348210",
+      "corpName": "넥스틴",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 466
+    }
+  ],
+  "edges": [
+    {
+      "from": "030610",
+      "to": "267320",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "434190",
+      "to": "267320",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "267320",
+      "to": "434190",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "267320",
+      "to": "469750",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "030610",
+      "to": "267320",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "267320",
+      "to": "364950",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 0.4%"
+    },
+    {
+      "from": "267320",
+      "to": "005930",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "267320",
+      "to": "092790",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "267320",
+      "to": "348210",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 63080213450.0,
+      "operating_profit": -7633905148.0,
+      "net_profit": -5897271116.0,
+      "total_assets": 81905514589.0
+    },
+    {
+      "year": "2022",
+      "sales": 88818411489.0,
+      "operating_profit": 5224708721.0,
+      "net_profit": 418221195.0,
+      "total_assets": 143578752995.0
+    },
+    {
+      "year": "2023",
+      "sales": 123048379274.0,
+      "operating_profit": -3097720350.0,
+      "net_profit": 8873519173.0,
+      "total_assets": 258870919980.0
+    },
+    {
+      "year": "2024",
+      "sales": 197219777077.0,
+      "operating_profit": 4629401862.0,
+      "net_profit": -5717041409.0,
+      "total_assets": 186009369448.0
+    },
+    {
+      "year": "2025",
+      "sales": 82368729078.0,
+      "operating_profit": -8923627485.0,
+      "net_profit": -17422714499.0,
+      "total_assets": 178483494012.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "battery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "cathode",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "434190",
+      "corpName": "탈로스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

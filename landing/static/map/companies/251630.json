@@ -1,0 +1,173 @@
+{
+  "ego": {
+    "stockCode": "251630",
+    "corpName": "브이원텍",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 490,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "122310",
+      "corpName": "제노레이",
+      "industry": "medicalDevice",
+      "stage": "imaging",
+      "revenue": 1080
+    },
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "216080",
+      "corpName": "제테마",
+      "industry": "pharma",
+      "stage": "api",
+      "revenue": 769
+    }
+  ],
+  "edges": [
+    {
+      "from": "122310",
+      "to": "251630",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "251630",
+      "to": "031210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "251630",
+      "to": "216080",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "251630",
+      "to": "216080",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.4%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 51090254379.0,
+      "operating_profit": 4964161472.0,
+      "net_profit": 10644025969.0,
+      "total_assets": 132415968818.0
+    },
+    {
+      "year": "2022",
+      "sales": 59783165596.0,
+      "operating_profit": 38008892.0,
+      "net_profit": -3991332055.0,
+      "total_assets": 175413390124.0
+    },
+    {
+      "year": "2023",
+      "sales": 81783667519.0,
+      "operating_profit": 1976702270.0,
+      "net_profit": -3535929929.0,
+      "total_assets": 203989398531.0
+    },
+    {
+      "year": "2024",
+      "sales": 72731874427.0,
+      "operating_profit": -4360100575.0,
+      "net_profit": -3212531452.0,
+      "total_assets": 198247841034.0
+    },
+    {
+      "year": "2025",
+      "sales": 49002332510.0,
+      "operating_profit": -12829010735.0,
+      "net_profit": -14860827000.0,
+      "total_assets": 205440024059.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

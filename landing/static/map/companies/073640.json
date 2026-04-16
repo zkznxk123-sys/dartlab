@@ -1,0 +1,173 @@
+{
+  "ego": {
+    "stockCode": "073640",
+    "corpName": "테라사이언스",
+    "industry": "machinery",
+    "stage": "special",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 141,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "340360",
+      "corpName": "다보링크",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 632
+    },
+    {
+      "stockCode": "063760",
+      "corpName": "이엘피",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 273
+    },
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "073640",
+      "to": "340360",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "073640",
+      "to": "063760",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "073640",
+      "to": "031210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "340360",
+      "to": "073640",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 21990446549.0,
+      "operating_profit": -2123959766.0,
+      "net_profit": -3207957741.0,
+      "total_assets": 97713186473.0
+    },
+    {
+      "year": "2022",
+      "sales": 22809072889.0,
+      "operating_profit": -918874962.0,
+      "net_profit": 28782101373.0,
+      "total_assets": 108476142324.0
+    },
+    {
+      "year": "2023",
+      "sales": 23076476627.0,
+      "operating_profit": -3467292394.0,
+      "net_profit": -2361285512.0,
+      "total_assets": 94453512980.0
+    },
+    {
+      "year": "2024",
+      "sales": 17272994116.0,
+      "operating_profit": -9475216577.0,
+      "net_profit": -10015245493.0,
+      "total_assets": 78502700730.0
+    },
+    {
+      "year": "2025",
+      "sales": 14134317596.0,
+      "operating_profit": -10140123497.0,
+      "net_profit": -17243640695.0,
+      "total_assets": 56310304518.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

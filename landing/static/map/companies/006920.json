@@ -1,0 +1,132 @@
+{
+  "ego": {
+    "stockCode": "006920",
+    "corpName": "모헨즈",
+    "industry": "construction",
+    "stage": "material",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 812,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "007680",
+      "corpName": "대원",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 1121
+    }
+  ],
+  "edges": [
+    {
+      "from": "006920",
+      "to": "007680",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 72814044111.0,
+      "operating_profit": 975681046.0,
+      "net_profit": 91870683.0,
+      "total_assets": 50427381590.0
+    },
+    {
+      "year": "2022",
+      "sales": 90123541702.0,
+      "operating_profit": 3561139120.0,
+      "net_profit": 1867089453.0,
+      "total_assets": 56171310065.0
+    },
+    {
+      "year": "2023",
+      "sales": 111406314393.0,
+      "operating_profit": 12140843614.0,
+      "net_profit": 8269776212.0,
+      "total_assets": 68799934958.0
+    },
+    {
+      "year": "2024",
+      "sales": 100477953541.0,
+      "operating_profit": 2730347492.0,
+      "net_profit": 2047974314.0,
+      "total_assets": 68906078612.0
+    },
+    {
+      "year": "2025",
+      "sales": 81161016764.0,
+      "operating_profit": -2959160872.0,
+      "net_profit": -3504529410.0,
+      "total_assets": 59790459998.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "007680",
+      "corpName": "대원",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

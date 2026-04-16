@@ -1,0 +1,278 @@
+{
+  "ego": {
+    "stockCode": "123700",
+    "corpName": "에스제이엠",
+    "industry": "auto",
+    "stage": "powertrain",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2014,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "025530",
+      "corpName": "에스제이엠홀딩스",
+      "industry": "retail",
+      "stage": "",
+      "revenue": 2062
+    },
+    {
+      "stockCode": "033530",
+      "corpName": "SJG세종",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 18969
+    },
+    {
+      "stockCode": "033790",
+      "corpName": "피노",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 2648
+    },
+    {
+      "stockCode": "075580",
+      "corpName": "세진중공업",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 4027
+    },
+    {
+      "stockCode": "099410",
+      "corpName": "동방선기",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 419
+    },
+    {
+      "stockCode": "099220",
+      "corpName": "SDN",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 875
+    },
+    {
+      "stockCode": "333430",
+      "corpName": "일승",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 507
+    }
+  ],
+  "edges": [
+    {
+      "from": "025530",
+      "to": "123700",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "123700",
+      "to": "033530",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "123700",
+      "to": "033790",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "033790",
+      "to": "123700",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "075580",
+      "to": "123700",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "099410",
+      "to": "123700",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "123700",
+      "to": "099220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "123700",
+      "to": "025530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "333430",
+      "to": "123700",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 145725719462.0,
+      "operating_profit": 7737908992.0,
+      "net_profit": 4750202488.0,
+      "total_assets": 241265788213.0
+    },
+    {
+      "year": "2022",
+      "sales": 180237704926.0,
+      "operating_profit": 7087029001.0,
+      "net_profit": 4700617935.0,
+      "total_assets": 243275367790.0
+    },
+    {
+      "year": "2023",
+      "sales": 198880157404.0,
+      "operating_profit": 13231441622.0,
+      "net_profit": 0.0,
+      "total_assets": 251634548809.0
+    },
+    {
+      "year": "2024",
+      "sales": 201912429709.0,
+      "operating_profit": 14237606905.0,
+      "net_profit": 0.0,
+      "total_assets": 285110877176.0
+    },
+    {
+      "year": "2025",
+      "sales": 201415058405.0,
+      "operating_profit": 11315146331.0,
+      "net_profit": 10709658436.0,
+      "total_assets": 285846523155.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "033530",
+      "corpName": "SJG세종",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "033790",
+      "corpName": "피노",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

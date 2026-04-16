@@ -1,0 +1,143 @@
+{
+  "ego": {
+    "stockCode": "007610",
+    "corpName": "선도전기",
+    "industry": "electrical",
+    "stage": "power",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 382,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "091120",
+      "corpName": "이엠텍",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2051
+    }
+  ],
+  "edges": [
+    {
+      "from": "091120",
+      "to": "007610",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 69200326702.0,
+      "operating_profit": -23452460106.0,
+      "net_profit": 0.0,
+      "total_assets": 146217074947.0
+    },
+    {
+      "year": "2022",
+      "sales": 64020094129.0,
+      "operating_profit": -11292685179.0,
+      "net_profit": -289172137.0,
+      "total_assets": 113976352843.0
+    },
+    {
+      "year": "2023",
+      "sales": 41641878386.0,
+      "operating_profit": -7214331618.0,
+      "net_profit": -16640943009.0,
+      "total_assets": 92323070165.0
+    },
+    {
+      "year": "2024",
+      "sales": 23984030522.0,
+      "operating_profit": -5748394178.0,
+      "net_profit": -11285636.0,
+      "total_assets": 86471435747.0
+    },
+    {
+      "year": "2025",
+      "sales": 38170718483.0,
+      "operating_profit": 1248969765.0,
+      "net_profit": -13878819.0,
+      "total_assets": 73687545160.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "component",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "091120",
+      "corpName": "이엠텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "010120",
+      "corpName": "엘에스일렉트릭",
+      "stage": "power",
+      "revenue": 49658
+    },
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "stage": "cable",
+      "revenue": 36360
+    },
+    {
+      "stockCode": "015860",
+      "corpName": "일진홀딩스",
+      "stage": "power",
+      "revenue": 22827
+    },
+    {
+      "stockCode": "103590",
+      "corpName": "일진전기",
+      "stage": "power",
+      "revenue": 20446
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "stage": "cable",
+      "revenue": 6245
+    }
+  ]
+}

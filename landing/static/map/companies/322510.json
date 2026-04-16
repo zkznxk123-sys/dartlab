@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "322510",
+    "corpName": "제이엘케이",
+    "industry": "software",
+    "stage": "platform",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 33,
+    "confidence": 0.8,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "180640",
+      "corpName": "한진칼",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 2984
+    },
+    {
+      "stockCode": "038530",
+      "corpName": "케이바이오",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 873
+    }
+  ],
+  "edges": [
+    {
+      "from": "180640",
+      "to": "322510",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "322510",
+      "to": "038530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3786050431.0,
+      "operating_profit": -7424304196.0,
+      "net_profit": -7673644240.0,
+      "total_assets": 40448268095.0
+    },
+    {
+      "year": "2022",
+      "sales": 3415330726.0,
+      "operating_profit": -8627804401.0,
+      "net_profit": -9310493816.0,
+      "total_assets": 36330798017.0
+    },
+    {
+      "year": "2023",
+      "sales": 2488983756.0,
+      "operating_profit": -7147568952.0,
+      "net_profit": -7306037907.0,
+      "total_assets": 33154820031.0
+    },
+    {
+      "year": "2024",
+      "sales": 1427510483.0,
+      "operating_profit": -12731677700.0,
+      "net_profit": 5743539.0,
+      "total_assets": 74593068999.0
+    },
+    {
+      "year": "2025",
+      "sales": 3339486486.0,
+      "operating_profit": -13202037178.0,
+      "net_profit": -330369.0,
+      "total_assets": 74430726861.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

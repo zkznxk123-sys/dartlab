@@ -1,0 +1,136 @@
+{
+  "ego": {
+    "stockCode": "154030",
+    "corpName": "아시아종묘",
+    "industry": "agriculture",
+    "stage": "general",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 35,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "030210",
+      "corpName": "다올투자증권",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 0
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "030210",
+      "to": "154030",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "154030",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "VI. 이사회 등 회사의 기관 및 계열회사에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 24378112827.0,
+      "operating_profit": 2214149155.0,
+      "net_profit": 16666542.0,
+      "total_assets": 42641433649.0
+    },
+    {
+      "year": "2022",
+      "sales": 24047390439.0,
+      "operating_profit": -1595951716.0,
+      "net_profit": -604854448.0,
+      "total_assets": 43525280100.0
+    },
+    {
+      "year": "2023",
+      "sales": 26395658878.0,
+      "operating_profit": -545738261.0,
+      "net_profit": -2450871656.0,
+      "total_assets": 42436154164.0
+    },
+    {
+      "year": "2024",
+      "sales": 24593549936.0,
+      "operating_profit": -1124665061.0,
+      "net_profit": -633857412.0,
+      "total_assets": 41075803079.0
+    },
+    {
+      "year": "2025",
+      "sales": 3516111982.0,
+      "operating_profit": -988696610.0,
+      "net_profit": -1366381026.0,
+      "total_assets": 41500037930.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "014710",
+      "corpName": "사조씨푸드",
+      "stage": "general",
+      "revenue": 2380
+    },
+    {
+      "stockCode": "030720",
+      "corpName": "동원수산",
+      "stage": "general",
+      "revenue": 1726
+    },
+    {
+      "stockCode": "054050",
+      "corpName": "농우바이오",
+      "stage": "general",
+      "revenue": 1588
+    },
+    {
+      "stockCode": "475460",
+      "corpName": "미트박스",
+      "stage": "general",
+      "revenue": 1356
+    }
+  ]
+}

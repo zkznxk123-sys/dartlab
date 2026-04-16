@@ -1,0 +1,125 @@
+{
+  "ego": {
+    "stockCode": "189860",
+    "corpName": "서전기전",
+    "industry": "electrical",
+    "stage": "power",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 681,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "002460",
+      "corpName": "HS화성",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 6595
+    }
+  ],
+  "edges": [
+    {
+      "from": "189860",
+      "to": "002460",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 13679.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 52454376545.0,
+      "operating_profit": -2598895109.0,
+      "net_profit": -2432245078.0,
+      "total_assets": 50633082378.0
+    },
+    {
+      "year": "2022",
+      "sales": 50680231233.0,
+      "operating_profit": -2909881446.0,
+      "net_profit": -3192919905.0,
+      "total_assets": 51009813439.0
+    },
+    {
+      "year": "2023",
+      "sales": 43256177267.0,
+      "operating_profit": -3459108384.0,
+      "net_profit": -3742368393.0,
+      "total_assets": 54600470561.0
+    },
+    {
+      "year": "2025",
+      "sales": 68106757182.0,
+      "operating_profit": -8800092301.0,
+      "net_profit": 6938627021.0,
+      "total_assets": 68881898419.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "002460",
+      "corpName": "HS화성",
+      "product": "",
+      "amount": 13679.0,
+      "type": "supplier",
+      "confidence": 0.9
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "010120",
+      "corpName": "엘에스일렉트릭",
+      "stage": "power",
+      "revenue": 49658
+    },
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "stage": "cable",
+      "revenue": 36360
+    },
+    {
+      "stockCode": "015860",
+      "corpName": "일진홀딩스",
+      "stage": "power",
+      "revenue": 22827
+    },
+    {
+      "stockCode": "103590",
+      "corpName": "일진전기",
+      "stage": "power",
+      "revenue": 20446
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "stage": "cable",
+      "revenue": 6245
+    }
+  ]
+}

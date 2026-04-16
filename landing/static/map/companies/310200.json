@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "310200",
+    "corpName": "애니플러스",
+    "industry": "telecom",
+    "stage": "service",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 1503,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "122450",
+      "corpName": "KX",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 3461
+    }
+  ],
+  "edges": [
+    {
+      "from": "122450",
+      "to": "310200",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 1.5%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 49036805412.0,
+      "operating_profit": 13009415839.0,
+      "net_profit": 21299407030.0,
+      "total_assets": 101344429359.0
+    },
+    {
+      "year": "2022",
+      "sales": 58131424584.0,
+      "operating_profit": 9626892101.0,
+      "net_profit": 5446041060.0,
+      "total_assets": 141531814054.0
+    },
+    {
+      "year": "2023",
+      "sales": 111346904329.0,
+      "operating_profit": 22862982635.0,
+      "net_profit": 10393572993.0,
+      "total_assets": 199639542919.0
+    },
+    {
+      "year": "2024",
+      "sales": 130975963475.0,
+      "operating_profit": 25139081598.0,
+      "net_profit": 18029079938.0,
+      "total_assets": 255587888312.0
+    },
+    {
+      "year": "2025",
+      "sales": 150299705151.0,
+      "operating_profit": 22683638558.0,
+      "net_profit": 14044673132.0,
+      "total_assets": 271345115964.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

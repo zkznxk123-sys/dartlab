@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "207760",
+    "corpName": "미스터블루",
+    "industry": "media",
+    "stage": "content",
+    "role": "서비스",
+    "stream": "upstream",
+    "revenue": 675,
+    "confidence": 0.9,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "016610",
+      "corpName": "DB증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 19220
+    }
+  ],
+  "edges": [
+    {
+      "from": "016610",
+      "to": "207760",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 61454693996.0,
+      "operating_profit": 6768263034.0,
+      "net_profit": 2571738.0,
+      "total_assets": 80743568438.0
+    },
+    {
+      "year": "2022",
+      "sales": 77157401313.0,
+      "operating_profit": 7440975335.0,
+      "net_profit": 3135273021.0,
+      "total_assets": 136410230389.0
+    },
+    {
+      "year": "2023",
+      "sales": 74126065820.0,
+      "operating_profit": 694659937.0,
+      "net_profit": -11224623451.0,
+      "total_assets": 115163036613.0
+    },
+    {
+      "year": "2024",
+      "sales": 70341804726.0,
+      "operating_profit": -13552961926.0,
+      "net_profit": -16637527066.0,
+      "total_assets": 94852623352.0
+    },
+    {
+      "year": "2025",
+      "sales": 67463445141.0,
+      "operating_profit": -2457410069.0,
+      "net_profit": -2562209.0,
+      "total_assets": 66711853974.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "035760",
+      "corpName": "CJ ENM",
+      "stage": "content",
+      "revenue": 51345
+    },
+    {
+      "stockCode": "030000",
+      "corpName": "제일기획",
+      "stage": "content",
+      "revenue": 45469
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "214320",
+      "corpName": "이노션",
+      "stage": "platform",
+      "revenue": 21460
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ]
+}

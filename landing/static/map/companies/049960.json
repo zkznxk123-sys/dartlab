@@ -1,0 +1,151 @@
+{
+  "ego": {
+    "stockCode": "049960",
+    "corpName": "쎌바이오텍",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 531,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "017810",
+      "corpName": "풀무원",
+      "industry": "shipbuilding",
+      "stage": "shipping",
+      "revenue": 33802
+    },
+    {
+      "stockCode": "270870",
+      "corpName": "뉴트리",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 1011
+    }
+  ],
+  "edges": [
+    {
+      "from": "049960",
+      "to": "017810",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "049960",
+      "to": "270870",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 46873312425.0,
+      "operating_profit": 7256551585.0,
+      "net_profit": 10383409717.0,
+      "total_assets": 112876709778.0
+    },
+    {
+      "year": "2022",
+      "sales": 50525748850.0,
+      "operating_profit": 6051491931.0,
+      "net_profit": 8280650359.0,
+      "total_assets": 115838640670.0
+    },
+    {
+      "year": "2023",
+      "sales": 53787388529.0,
+      "operating_profit": 2195388266.0,
+      "net_profit": 6303719062.0,
+      "total_assets": 117640674312.0
+    },
+    {
+      "year": "2024",
+      "sales": 49912668669.0,
+      "operating_profit": 6795969136.0,
+      "net_profit": 15126719646.0,
+      "total_assets": 130397880695.0
+    },
+    {
+      "year": "2025",
+      "sales": 53125673480.0,
+      "operating_profit": 7913762782.0,
+      "net_profit": 10125185361.0,
+      "total_assets": 136572393107.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "017810",
+      "corpName": "풀무원",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

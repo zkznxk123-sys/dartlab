@@ -1,0 +1,151 @@
+{
+  "ego": {
+    "stockCode": "005670",
+    "corpName": "푸드웰",
+    "industry": "food",
+    "stage": "processing",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 3203,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "007530",
+      "corpName": "와이엠",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 1771
+    },
+    {
+      "stockCode": "217480",
+      "corpName": "에스디생명공학",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 301
+    }
+  ],
+  "edges": [
+    {
+      "from": "005670",
+      "to": "007530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "005670",
+      "to": "217480",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 151830364670.0,
+      "operating_profit": 6091672921.0,
+      "net_profit": 7659310890.0,
+      "total_assets": 153153208353.0
+    },
+    {
+      "year": "2022",
+      "sales": 7676502927.0,
+      "operating_profit": 6061317355.0,
+      "net_profit": 576333604.0,
+      "total_assets": 206903375017.0
+    },
+    {
+      "year": "2023",
+      "sales": 228487093117.0,
+      "operating_profit": 8286725452.0,
+      "net_profit": 6330204865.0,
+      "total_assets": 220507295795.0
+    },
+    {
+      "year": "2024",
+      "sales": 272990916857.0,
+      "operating_profit": 13926410674.0,
+      "net_profit": 7301568230.0,
+      "total_assets": 236512472211.0
+    },
+    {
+      "year": "2025",
+      "sales": 320327563488.0,
+      "operating_profit": 18353038542.0,
+      "net_profit": 10023040890.0,
+      "total_assets": 238033339321.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "217480",
+      "corpName": "에스디생명공학",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "080220",
+    "corpName": "제주반도체",
+    "industry": "semiconductor",
+    "stage": "fab",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 3022,
+    "confidence": 0.822,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "124560",
+      "corpName": "태웅로직스",
+      "industry": "logistics",
+      "stage": "general",
+      "revenue": 11173
+    }
+  ],
+  "edges": [
+    {
+      "from": "080220",
+      "to": "005930",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "124560",
+      "to": "080220",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 193314675877.0,
+      "operating_profit": 20058390951.0,
+      "net_profit": 12571639477.0,
+      "total_assets": 167955041096.0
+    },
+    {
+      "year": "2022",
+      "sales": 175023554084.0,
+      "operating_profit": 28216098130.0,
+      "net_profit": 24331810672.0,
+      "total_assets": 175998872672.0
+    },
+    {
+      "year": "2023",
+      "sales": 145899793599.0,
+      "operating_profit": 17838425308.0,
+      "net_profit": 16919765330.0,
+      "total_assets": 198673382796.0
+    },
+    {
+      "year": "2024",
+      "sales": 162349945455.0,
+      "operating_profit": 9581360274.0,
+      "net_profit": 19405207353.0,
+      "total_assets": 225427601825.0
+    },
+    {
+      "year": "2025",
+      "sales": 302230571186.0,
+      "operating_profit": 35873972312.0,
+      "net_profit": 39499088944.0,
+      "total_assets": 335988104339.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

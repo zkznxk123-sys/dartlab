@@ -1,0 +1,154 @@
+{
+  "ego": {
+    "stockCode": "196490",
+    "corpName": "디에이테크놀로지",
+    "industry": "machinery",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 333,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005010",
+      "corpName": "휴스틸",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 6125
+    },
+    {
+      "stockCode": "033640",
+      "corpName": "네패스",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 5214
+    }
+  ],
+  "edges": [
+    {
+      "from": "005010",
+      "to": "196490",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "196490",
+      "to": "033640",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "196490",
+      "to": "005010",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 45400415835.0,
+      "operating_profit": -12713483050.0,
+      "net_profit": null,
+      "total_assets": 148383494374.0
+    },
+    {
+      "year": "2022",
+      "sales": 53205792749.0,
+      "operating_profit": -17723435553.0,
+      "net_profit": -24695008421.0,
+      "total_assets": 131393124358.0
+    },
+    {
+      "year": "2023",
+      "sales": 89534954324.0,
+      "operating_profit": -44459455735.0,
+      "net_profit": -53417979441.0,
+      "total_assets": 150124404623.0
+    },
+    {
+      "year": "2024",
+      "sales": 43289271846.0,
+      "operating_profit": -22564569836.0,
+      "net_profit": -63786526859.0,
+      "total_assets": 58471901617.0
+    },
+    {
+      "year": "2025",
+      "sales": 33322099931.0,
+      "operating_profit": -6461214449.0,
+      "net_profit": -8651483041.0,
+      "total_assets": 38920061959.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

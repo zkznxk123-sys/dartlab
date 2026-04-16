@@ -1,0 +1,116 @@
+{
+  "ego": {
+    "stockCode": "417840",
+    "corpName": "저스템",
+    "industry": "machinery",
+    "stage": "special",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 483,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 292830
+    }
+  ],
+  "edges": [
+    {
+      "from": "006800",
+      "to": "417840",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2022",
+      "sales": 46098648348.0,
+      "operating_profit": 7144355552.0,
+      "net_profit": 6322186147.0,
+      "total_assets": 70484462580.0
+    },
+    {
+      "year": "2023",
+      "sales": 35933632867.0,
+      "operating_profit": 311430074.0,
+      "net_profit": -3385195420.0,
+      "total_assets": 82554759945.0
+    },
+    {
+      "year": "2024",
+      "sales": 38700592846.0,
+      "operating_profit": -4609030122.0,
+      "net_profit": -2161590464.0,
+      "total_assets": 79526301035.0
+    },
+    {
+      "year": "2025",
+      "sales": 48288744108.0,
+      "operating_profit": 4634798643.0,
+      "net_profit": 3469683342.0,
+      "total_assets": 87468723819.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

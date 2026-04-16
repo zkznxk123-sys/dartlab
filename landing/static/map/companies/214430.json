@@ -1,0 +1,135 @@
+{
+  "ego": {
+    "stockCode": "214430",
+    "corpName": "아이쓰리시스템",
+    "industry": "machinery",
+    "stage": "precision",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1243,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "065450",
+      "corpName": "빅텍",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 830
+    },
+    {
+      "stockCode": "082210",
+      "corpName": "옵트론텍",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 1957
+    }
+  ],
+  "edges": [
+    {
+      "from": "065450",
+      "to": "214430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "082210",
+      "to": "214430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 79723131606.0,
+      "operating_profit": 1410841017.0,
+      "net_profit": 3357324317.0,
+      "total_assets": 107674147733.0
+    },
+    {
+      "year": "2022",
+      "sales": 83845591819.0,
+      "operating_profit": 5686971942.0,
+      "net_profit": 6183187601.0,
+      "total_assets": 113325990425.0
+    },
+    {
+      "year": "2023",
+      "sales": 121539205459.0,
+      "operating_profit": 12204489179.0,
+      "net_profit": 12561262924.0,
+      "total_assets": 131191933136.0
+    },
+    {
+      "year": "2025",
+      "sales": 124275749815.0,
+      "operating_profit": 16458043794.0,
+      "net_profit": 18783320910.0,
+      "total_assets": 189547523513.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

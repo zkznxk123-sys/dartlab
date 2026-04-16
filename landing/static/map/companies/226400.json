@@ -1,0 +1,256 @@
+{
+  "ego": {
+    "stockCode": "226400",
+    "corpName": "오스테오닉",
+    "industry": "medicalDevice",
+    "stage": "therapeutic",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 454,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "100790",
+      "corpName": "미래에셋벤처투자",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "260870",
+      "corpName": "SK시그넷",
+      "industry": "software",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "266350",
+      "corpName": "팡스카이",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 20
+    },
+    {
+      "stockCode": "021080",
+      "corpName": "에이티넘인베스트",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 706
+    },
+    {
+      "stockCode": "140610",
+      "corpName": "엔솔바이오사이언스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 0
+    },
+    {
+      "stockCode": "260660",
+      "corpName": "알리코제약",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 2012
+    },
+    {
+      "stockCode": "150900",
+      "corpName": "파수",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 467
+    },
+    {
+      "stockCode": "452200",
+      "corpName": "민테크",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 210
+    }
+  ],
+  "edges": [
+    {
+      "from": "100790",
+      "to": "226400",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    },
+    {
+      "from": "226400",
+      "to": "260870",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "226400",
+      "to": "266350",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "226400",
+      "to": "021080",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "226400",
+      "to": "140610",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "226400",
+      "to": "260660",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "226400",
+      "to": "150900",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "226400",
+      "to": "452200",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 15597796412.0,
+      "operating_profit": 579411976.0,
+      "net_profit": -2851720328.0,
+      "total_assets": 64170418083.0
+    },
+    {
+      "year": "2022",
+      "sales": 19838547123.0,
+      "operating_profit": 2526176814.0,
+      "net_profit": 835529711.0,
+      "total_assets": 61525196561.0
+    },
+    {
+      "year": "2023",
+      "sales": 27798503886.0,
+      "operating_profit": 4842541601.0,
+      "net_profit": 3657727000.0,
+      "total_assets": 71739369303.0
+    },
+    {
+      "year": "2024",
+      "sales": 34234509043.0,
+      "operating_profit": 6885710035.0,
+      "net_profit": 5649607026.0,
+      "total_assets": 89920353491.0
+    },
+    {
+      "year": "2025",
+      "sales": 45393099435.0,
+      "operating_profit": 8863962789.0,
+      "net_profit": 7498732160.0,
+      "total_assets": 100428294354.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "011560",
+      "corpName": "세보엠이씨",
+      "stage": "imaging",
+      "revenue": 7158
+    },
+    {
+      "stockCode": "092790",
+      "corpName": "넥스틸",
+      "stage": "imaging",
+      "revenue": 5510
+    },
+    {
+      "stockCode": "215360",
+      "corpName": "우리산업",
+      "stage": "imaging",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "043150",
+      "corpName": "바텍",
+      "stage": "imaging",
+      "revenue": 4264
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "stage": "imaging",
+      "revenue": 3959
+    }
+  ]
+}

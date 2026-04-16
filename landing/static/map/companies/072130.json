@@ -1,0 +1,257 @@
+{
+  "ego": {
+    "stockCode": "072130",
+    "corpName": "유엔젤",
+    "industry": "telecom",
+    "stage": "service",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 616,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "012750",
+      "corpName": "에스원",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 28894
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "068790",
+      "corpName": "DMS",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 1555
+    },
+    {
+      "stockCode": "080160",
+      "corpName": "모두투어",
+      "industry": "logistics",
+      "stage": "",
+      "revenue": 2104
+    },
+    {
+      "stockCode": "094940",
+      "corpName": "푸른기술",
+      "industry": "electronics",
+      "stage": "module",
+      "revenue": 348
+    },
+    {
+      "stockCode": "110790",
+      "corpName": "크리스에프앤씨",
+      "industry": "leisure",
+      "stage": "general",
+      "revenue": 3119
+    },
+    {
+      "stockCode": "203650",
+      "corpName": "드림시큐리티",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 3189
+    }
+  ],
+  "edges": [
+    {
+      "from": "012750",
+      "to": "072130",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "072130",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "068790",
+      "to": "072130",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.4%"
+    },
+    {
+      "from": "080160",
+      "to": "072130",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 0.9%"
+    },
+    {
+      "from": "094940",
+      "to": "072130",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.4%"
+    },
+    {
+      "from": "110790",
+      "to": "072130",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.6%"
+    },
+    {
+      "from": "203650",
+      "to": "072130",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 3.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 29681809011.0,
+      "operating_profit": 3147724544.0,
+      "net_profit": 14680581717.0,
+      "total_assets": 61716673610.0
+    },
+    {
+      "year": "2022",
+      "sales": 30044902862.0,
+      "operating_profit": 845798193.0,
+      "net_profit": 616275.0,
+      "total_assets": 61023631583.0
+    },
+    {
+      "year": "2023",
+      "sales": 36639038647.0,
+      "operating_profit": -1777259096.0,
+      "net_profit": 1436086547.0,
+      "total_assets": 62948969391.0
+    },
+    {
+      "year": "2024",
+      "sales": 53045913656.0,
+      "operating_profit": 788654456.0,
+      "net_profit": 0.0,
+      "total_assets": 71306113634.0
+    },
+    {
+      "year": "2025",
+      "sales": 61566608489.0,
+      "operating_profit": 3419832610.0,
+      "net_profit": 3179106.0,
+      "total_assets": 77650240722.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "set",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "012750",
+      "corpName": "에스원",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

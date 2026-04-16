@@ -1,0 +1,135 @@
+{
+  "ego": {
+    "stockCode": "294630",
+    "corpName": "서남",
+    "industry": "steel",
+    "stage": "product",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 34,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "017800",
+      "corpName": "현대엘리베이터",
+      "industry": "shipbuilding",
+      "stage": "shipping",
+      "revenue": 24674
+    },
+    {
+      "stockCode": "114630",
+      "corpName": "폴라리스우노",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 1018
+    }
+  ],
+  "edges": [
+    {
+      "from": "017800",
+      "to": "294630",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.7%"
+    },
+    {
+      "from": "114630",
+      "to": "294630",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.2%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1137169357.0,
+      "operating_profit": -3633006882.0,
+      "net_profit": -3996088702.0,
+      "total_assets": 21664227525.0
+    },
+    {
+      "year": "2022",
+      "sales": 6364610272.0,
+      "operating_profit": -2400302378.0,
+      "net_profit": -2115205777.0,
+      "total_assets": 17662675180.0
+    },
+    {
+      "year": "2023",
+      "sales": 6390911562.0,
+      "operating_profit": -3093888012.0,
+      "net_profit": -11253726653.0,
+      "total_assets": 15433548002.0
+    },
+    {
+      "year": "2025",
+      "sales": 3386486863.0,
+      "operating_profit": -3857862253.0,
+      "net_profit": -3975023682.0,
+      "total_assets": 16595675557.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

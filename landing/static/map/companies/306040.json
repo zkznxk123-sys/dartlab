@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "306040",
+    "corpName": "에스제이그룹",
+    "industry": "textile",
+    "stage": "apparel",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 1634,
+    "confidence": 0.9,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "024110",
+      "to": "306040",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 149730739502.0,
+      "operating_profit": 29111359438.0,
+      "net_profit": 23155284104.0,
+      "total_assets": 160520954344.0
+    },
+    {
+      "year": "2022",
+      "sales": 197862796824.0,
+      "operating_profit": 35813067965.0,
+      "net_profit": 29064443959.0,
+      "total_assets": 196519315864.0
+    },
+    {
+      "year": "2023",
+      "sales": 203710082691.0,
+      "operating_profit": 15427643757.0,
+      "net_profit": 13120609692.0,
+      "total_assets": 204779124685.0
+    },
+    {
+      "year": "2024",
+      "sales": 181794949391.0,
+      "operating_profit": -3238016403.0,
+      "net_profit": -2781369300.0,
+      "total_assets": 222157000869.0
+    },
+    {
+      "year": "2025",
+      "sales": 163414115546.0,
+      "operating_profit": -15862622237.0,
+      "net_profit": -10701104859.0,
+      "total_assets": 215495019815.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

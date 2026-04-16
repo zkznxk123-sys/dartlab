@@ -1,0 +1,151 @@
+{
+  "ego": {
+    "stockCode": "090470",
+    "corpName": "제이스텍",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 307,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "044990",
+      "corpName": "에이치엔에스하이텍",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 819
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "090470",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "090470",
+      "to": "044990",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 81838114605.0,
+      "operating_profit": -1484326586.0,
+      "net_profit": 0.0,
+      "total_assets": 160531308666.0
+    },
+    {
+      "year": "2022",
+      "sales": 143939697377.0,
+      "operating_profit": 37493691695.0,
+      "net_profit": 250706994.0,
+      "total_assets": 190313507626.0
+    },
+    {
+      "year": "2023",
+      "sales": 72087353783.0,
+      "operating_profit": -371089927.0,
+      "net_profit": 0.0,
+      "total_assets": 180258657095.0
+    },
+    {
+      "year": "2024",
+      "sales": 63632960537.0,
+      "operating_profit": -5783174958.0,
+      "net_profit": 0.0,
+      "total_assets": 185504546530.0
+    },
+    {
+      "year": "2025",
+      "sales": 30661005588.0,
+      "operating_profit": -23665752868.0,
+      "net_profit": 0.0,
+      "total_assets": 177177604418.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "044990",
+      "corpName": "에이치엔에스하이텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

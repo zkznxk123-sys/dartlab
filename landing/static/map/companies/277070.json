@@ -1,0 +1,180 @@
+{
+  "ego": {
+    "stockCode": "277070",
+    "corpName": "린드먼아시아",
+    "industry": "chemical",
+    "stage": "polymer",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 74,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "030520",
+      "corpName": "한글과컴퓨터",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 3267
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "248070",
+      "corpName": "솔루엠",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 17002
+    },
+    {
+      "stockCode": "032820",
+      "corpName": "우리기술",
+      "industry": "electrical",
+      "stage": "power",
+      "revenue": 871
+    }
+  ],
+  "edges": [
+    {
+      "from": "030520",
+      "to": "277070",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033780",
+      "to": "277070",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "248070",
+      "to": "277070",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "277070",
+      "to": "032820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 3330672511.0,
+      "operating_profit": 7224482314.0,
+      "net_profit": 5289776838.0,
+      "total_assets": 64205186284.0
+    },
+    {
+      "year": "2022",
+      "sales": 2109890268.0,
+      "operating_profit": 4437147060.0,
+      "net_profit": 3494825279.0,
+      "total_assets": 66147713319.0
+    },
+    {
+      "year": "2023",
+      "sales": 9667503356.0,
+      "operating_profit": 3400246788.0,
+      "net_profit": 3677471296.0,
+      "total_assets": 66806039400.0
+    },
+    {
+      "year": "2024",
+      "sales": 9094055307.0,
+      "operating_profit": 4209661938.0,
+      "net_profit": 3360735403.0,
+      "total_assets": 69980790186.0
+    },
+    {
+      "year": "2025",
+      "sales": 7432097638.0,
+      "operating_profit": 3602841246.0,
+      "net_profit": null,
+      "total_assets": 65832015076.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

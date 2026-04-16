@@ -1,0 +1,186 @@
+{
+  "ego": {
+    "stockCode": "102120",
+    "corpName": "어보브반도체",
+    "industry": "semiconductor",
+    "stage": "fab",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2441,
+    "confidence": 0.829,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "052860",
+      "corpName": "아이앤씨",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 369
+    },
+    {
+      "stockCode": "097800",
+      "corpName": "윈팩",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 755
+    }
+  ],
+  "edges": [
+    {
+      "from": "052860",
+      "to": "102120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "097800",
+      "to": "102120",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "097800",
+      "to": "102120",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "102120",
+      "to": "097800",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 231427957.0,
+      "operating_profit": 17622418239.0,
+      "net_profit": 13707442319.0,
+      "total_assets": 134011924288.0
+    },
+    {
+      "year": "2022",
+      "sales": 240489807240.0,
+      "operating_profit": 25825288073.0,
+      "net_profit": 12654577621.0,
+      "total_assets": 331531563148.0
+    },
+    {
+      "year": "2023",
+      "sales": 229344752370.0,
+      "operating_profit": -14643077325.0,
+      "net_profit": -33443728959.0,
+      "total_assets": 288316792095.0
+    },
+    {
+      "year": "2024",
+      "sales": 232116611005.0,
+      "operating_profit": -5100374191.0,
+      "net_profit": 2650749891.0,
+      "total_assets": 293039972870.0
+    },
+    {
+      "year": "2025",
+      "sales": 244123643799.0,
+      "operating_profit": 10148185090.0,
+      "net_profit": 1959422969.0,
+      "total_assets": 286055183481.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "semiconductor",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "packaging",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "097800",
+      "corpName": "윈팩",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

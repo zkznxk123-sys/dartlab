@@ -1,0 +1,231 @@
+{
+  "ego": {
+    "stockCode": "060280",
+    "corpName": "큐렉소",
+    "industry": "retail",
+    "stage": "wholesale",
+    "role": "도매",
+    "stream": "midstream",
+    "revenue": 745,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "industry": "shipbuilding",
+      "stage": "shipping",
+      "revenue": 299332
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "048910",
+      "corpName": "대원미디어",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 3428
+    },
+    {
+      "stockCode": "053290",
+      "corpName": "NE능률",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 76
+    },
+    {
+      "stockCode": "348340",
+      "corpName": "뉴로메카",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 190
+    },
+    {
+      "stockCode": "290650",
+      "corpName": "엘앤씨바이오",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 855
+    }
+  ],
+  "edges": [
+    {
+      "from": "009540",
+      "to": "060280",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "037460",
+      "to": "060280",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "048910",
+      "to": "060280",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "053290",
+      "to": "060280",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "348340",
+      "to": "060280",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "290650",
+      "to": "060280",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "network",
+      "evidence": "경영참여 지분 14.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 42794971254.0,
+      "operating_profit": -1817085895.0,
+      "net_profit": -2341879864.0,
+      "total_assets": 61305978464.0
+    },
+    {
+      "year": "2022",
+      "sales": 64990650977.0,
+      "operating_profit": 1110696832.0,
+      "net_profit": -3040884942.0,
+      "total_assets": 98397868065.0
+    },
+    {
+      "year": "2023",
+      "sales": 72882216212.0,
+      "operating_profit": 1135441826.0,
+      "net_profit": -4856019331.0,
+      "total_assets": 107369633384.0
+    },
+    {
+      "year": "2025",
+      "sales": 74531816400.0,
+      "operating_profit": 2361804478.0,
+      "net_profit": 2771488547.0,
+      "total_assets": 101137762292.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "machinery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "special",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "348340",
+      "corpName": "뉴로메카",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

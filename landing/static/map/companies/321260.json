@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "321260",
+    "corpName": "프로이천",
+    "industry": "semiconductor",
+    "stage": "fab",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 315,
+    "confidence": 0.7,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "023410",
+      "corpName": "유진기업",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 13327
+    }
+  ],
+  "edges": [
+    {
+      "from": "321260",
+      "to": "023410",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 34750746631.0,
+      "operating_profit": 2006212586.0,
+      "net_profit": -358162488.0,
+      "total_assets": 32153846529.0
+    },
+    {
+      "year": "2022",
+      "sales": 38191882053.0,
+      "operating_profit": 3070109980.0,
+      "net_profit": 4556759578.0,
+      "total_assets": 36574289891.0
+    },
+    {
+      "year": "2023",
+      "sales": 33363102492.0,
+      "operating_profit": 1468893907.0,
+      "net_profit": 3447951116.0,
+      "total_assets": 43855006467.0
+    },
+    {
+      "year": "2024",
+      "sales": 36028044979.0,
+      "operating_profit": 1177001330.0,
+      "net_profit": 5601382311.0,
+      "total_assets": 46147129946.0
+    },
+    {
+      "year": "2025",
+      "sales": 31533846355.0,
+      "operating_profit": 2771555590.0,
+      "net_profit": 3916817486.0,
+      "total_assets": 48173604707.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

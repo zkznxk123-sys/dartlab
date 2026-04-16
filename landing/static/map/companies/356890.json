@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "356890",
+    "corpName": "싸이버원",
+    "industry": "consulting",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 337,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "070300",
+      "corpName": "엑스큐어",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 185
+    }
+  ],
+  "edges": [
+    {
+      "from": "356890",
+      "to": "070300",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 22185766040.0,
+      "operating_profit": 1690299644.0,
+      "net_profit": 1973891113.0,
+      "total_assets": 30157557116.0
+    },
+    {
+      "year": "2022",
+      "sales": 22753888786.0,
+      "operating_profit": 1868663188.0,
+      "net_profit": 2087240063.0,
+      "total_assets": 32625851694.0
+    },
+    {
+      "year": "2023",
+      "sales": 24675744970.0,
+      "operating_profit": 1276134767.0,
+      "net_profit": 1996166111.0,
+      "total_assets": 44502556212.0
+    },
+    {
+      "year": "2024",
+      "sales": 47855112752.0,
+      "operating_profit": 11331960375.0,
+      "net_profit": 9836190603.0,
+      "total_assets": 56330195131.0
+    },
+    {
+      "year": "2025",
+      "sales": 33726070959.0,
+      "operating_profit": 414314485.0,
+      "net_profit": -1269215199.0,
+      "total_assets": 52460568366.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "003030",
+      "corpName": "세아제강지주",
+      "stage": "general",
+      "revenue": 37596
+    },
+    {
+      "stockCode": "000070",
+      "corpName": "삼양홀딩스",
+      "stage": "general",
+      "revenue": 33483
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "036710",
+      "corpName": "심텍홀딩스",
+      "stage": "general",
+      "revenue": 15281
+    },
+    {
+      "stockCode": "015360",
+      "corpName": "INVENI",
+      "stage": "general",
+      "revenue": 13276
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "250930",
+    "corpName": "예선테크",
+    "industry": "plastic",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 379,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001510",
+      "corpName": "SK증권",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 0
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 258101
+    }
+  ],
+  "edges": [
+    {
+      "from": "001510",
+      "to": "250930",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "250930",
+      "to": "034220",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 65923294481.0,
+      "operating_profit": -1608098947.0,
+      "net_profit": 0.0,
+      "total_assets": 74550727443.0
+    },
+    {
+      "year": "2022",
+      "sales": 53167628119.0,
+      "operating_profit": -8014902290.0,
+      "net_profit": 0.0,
+      "total_assets": 63179308312.0
+    },
+    {
+      "year": "2023",
+      "sales": 44115964461.0,
+      "operating_profit": -8799246731.0,
+      "net_profit": -10208095978.0,
+      "total_assets": 54206728922.0
+    },
+    {
+      "year": "2024",
+      "sales": 43613399679.0,
+      "operating_profit": -3239922015.0,
+      "net_profit": -5968714963.0,
+      "total_assets": 53321526341.0
+    },
+    {
+      "year": "2025",
+      "sales": 37875754485.0,
+      "operating_profit": -813445364.0,
+      "net_profit": -755547757.0,
+      "total_assets": 51086423348.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005720",
+      "corpName": "넥센",
+      "stage": "general",
+      "revenue": 35865
+    },
+    {
+      "stockCode": "002350",
+      "corpName": "넥센타이어",
+      "stage": "general",
+      "revenue": 31896
+    },
+    {
+      "stockCode": "013520",
+      "corpName": "화승코퍼레이션",
+      "stage": "general",
+      "revenue": 16398
+    },
+    {
+      "stockCode": "014820",
+      "corpName": "동원시스템즈",
+      "stage": "general",
+      "revenue": 13729
+    },
+    {
+      "stockCode": "004840",
+      "corpName": "DRB동일",
+      "stage": "general",
+      "revenue": 8027
+    }
+  ]
+}

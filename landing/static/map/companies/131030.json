@@ -1,0 +1,149 @@
+{
+  "ego": {
+    "stockCode": "131030",
+    "corpName": "옵투스제약",
+    "industry": "pharma",
+    "stage": "formulation",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 872,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000250",
+      "corpName": "삼천당제약",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 2318
+    }
+  ],
+  "edges": [
+    {
+      "from": "131030",
+      "to": "000250",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "000250",
+      "to": "131030",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "131030",
+      "to": "000250",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 57316372205.0,
+      "operating_profit": 10471810794.0,
+      "net_profit": 9891511278.0,
+      "total_assets": 140038412843.0
+    },
+    {
+      "year": "2022",
+      "sales": 58657537976.0,
+      "operating_profit": 5258041794.0,
+      "net_profit": 5011989964.0,
+      "total_assets": 136240302553.0
+    },
+    {
+      "year": "2023",
+      "sales": 72426447150.0,
+      "operating_profit": 8186594736.0,
+      "net_profit": 10760361468.0,
+      "total_assets": 149460342555.0
+    },
+    {
+      "year": "2025",
+      "sales": 87161378628.0,
+      "operating_profit": 8875109028.0,
+      "net_profit": 11357810363.0,
+      "total_assets": 191056547070.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "000250",
+      "corpName": "삼천당제약",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

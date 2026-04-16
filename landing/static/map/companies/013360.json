@@ -1,0 +1,154 @@
+{
+  "ego": {
+    "stockCode": "013360",
+    "corpName": "일성건설",
+    "industry": "construction",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 4527,
+    "confidence": 0.76,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    },
+    {
+      "stockCode": "044180",
+      "corpName": "KD",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 278
+    }
+  ],
+  "edges": [
+    {
+      "from": "013360",
+      "to": "041510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "044180",
+      "to": "013360",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "044180",
+      "to": "013360",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 416181928384.0,
+      "operating_profit": 10807385076.0,
+      "net_profit": 5660650837.0,
+      "total_assets": 379287373622.0
+    },
+    {
+      "year": "2022",
+      "sales": 462601614581.0,
+      "operating_profit": 2722459268.0,
+      "net_profit": 7417819938.0,
+      "total_assets": 413301997330.0
+    },
+    {
+      "year": "2023",
+      "sales": 607714578447.0,
+      "operating_profit": 7265982402.0,
+      "net_profit": 4080701894.0,
+      "total_assets": 409313432509.0
+    },
+    {
+      "year": "2024",
+      "sales": 500384072213.0,
+      "operating_profit": -43590135455.0,
+      "net_profit": -57538919207.0,
+      "total_assets": 370420153245.0
+    },
+    {
+      "year": "2025",
+      "sales": 452672899287.0,
+      "operating_profit": 10376102597.0,
+      "net_profit": 3747844150.0,
+      "total_assets": 379058455895.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "ego": {
+    "stockCode": "012170",
+    "corpName": "아센디오",
+    "industry": "media",
+    "stage": "content",
+    "role": "서비스",
+    "stream": "upstream",
+    "revenue": 59,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "110020",
+      "corpName": "전진바이오팜",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 137
+    },
+    {
+      "stockCode": "127710",
+      "corpName": "아시아경제",
+      "industry": "media",
+      "stage": "platform",
+      "revenue": 731
+    },
+    {
+      "stockCode": "001200",
+      "corpName": "유진증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 16941
+    }
+  ],
+  "edges": [
+    {
+      "from": "012170",
+      "to": "110020",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "012170",
+      "to": "127710",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001200",
+      "to": "012170",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타"
+    },
+    {
+      "from": "012170",
+      "to": "110020",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 21574441958.0,
+      "operating_profit": -3557150999.0,
+      "net_profit": 0.0,
+      "total_assets": 68072817657.0
+    },
+    {
+      "year": "2022",
+      "sales": 18582454837.0,
+      "operating_profit": -8969913874.0,
+      "net_profit": 0.0,
+      "total_assets": 73158525417.0
+    },
+    {
+      "year": "2023",
+      "sales": 6883461279.0,
+      "operating_profit": -10352386041.0,
+      "net_profit": -25921087032.0,
+      "total_assets": 48534629654.0
+    },
+    {
+      "year": "2024",
+      "sales": 13465653938.0,
+      "operating_profit": -4121526339.0,
+      "net_profit": -7849399002.0,
+      "total_assets": 23296368270.0
+    },
+    {
+      "year": "2025",
+      "sales": 5921928326.0,
+      "operating_profit": -4324824897.0,
+      "net_profit": -13803059662.0,
+      "total_assets": 10908493362.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "035760",
+      "corpName": "CJ ENM",
+      "stage": "content",
+      "revenue": 51345
+    },
+    {
+      "stockCode": "030000",
+      "corpName": "제일기획",
+      "stage": "content",
+      "revenue": 45469
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "214320",
+      "corpName": "이노션",
+      "stage": "platform",
+      "revenue": 21460
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ]
+}

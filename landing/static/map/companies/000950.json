@@ -1,0 +1,180 @@
+{
+  "ego": {
+    "stockCode": "000950",
+    "corpName": "전방",
+    "industry": "textile",
+    "stage": "fiber",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 408,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000540",
+      "corpName": "흥국화재",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "000050",
+      "corpName": "경방",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 4125
+    },
+    {
+      "stockCode": "105630",
+      "corpName": "한세실업",
+      "industry": "textile",
+      "stage": "apparel",
+      "revenue": 19418
+    },
+    {
+      "stockCode": "003200",
+      "corpName": "일신방직",
+      "industry": "textile",
+      "stage": "fiber",
+      "revenue": 5172
+    }
+  ],
+  "edges": [
+    {
+      "from": "000950",
+      "to": "000540",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000950",
+      "to": "000050",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000950",
+      "to": "105630",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000950",
+      "to": "003200",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 133745227330.0,
+      "operating_profit": 7360077995.0,
+      "net_profit": 159907246.0,
+      "total_assets": 383313469255.0
+    },
+    {
+      "year": "2022",
+      "sales": 124914049101.0,
+      "operating_profit": -35045943284.0,
+      "net_profit": 67453344175.0,
+      "total_assets": 304781348634.0
+    },
+    {
+      "year": "2023",
+      "sales": 94772410649.0,
+      "operating_profit": -32548106506.0,
+      "net_profit": -19193789810.0,
+      "total_assets": 236979137636.0
+    },
+    {
+      "year": "2024",
+      "sales": 57235842614.0,
+      "operating_profit": -8482983755.0,
+      "net_profit": 8913315702.0,
+      "total_assets": 231974001581.0
+    },
+    {
+      "year": "2025",
+      "sales": 40776455996.0,
+      "operating_profit": -7314924674.0,
+      "net_profit": 29808576772.0,
+      "total_assets": 237363693514.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

@@ -1,0 +1,216 @@
+{
+  "ego": {
+    "stockCode": "086060",
+    "corpName": "진바이오텍",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 908,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "038290",
+      "corpName": "마크로젠",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 1953
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "204840",
+      "corpName": "지엘팜텍",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 353
+    },
+    {
+      "stockCode": "153710",
+      "corpName": "옵티팜",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 223
+    },
+    {
+      "stockCode": "289170",
+      "corpName": "바이오텐",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "038290",
+      "to": "086060",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "086060",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "086060",
+      "to": "204840",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "086060",
+      "to": "153710",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "086060",
+      "to": "289170",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 62813558554.0,
+      "operating_profit": -208147487.0,
+      "net_profit": -484399552.0,
+      "total_assets": 60367780610.0
+    },
+    {
+      "year": "2022",
+      "sales": 82758506105.0,
+      "operating_profit": 1670481016.0,
+      "net_profit": 1523305044.0,
+      "total_assets": 64040931590.0
+    },
+    {
+      "year": "2023",
+      "sales": 79476916086.0,
+      "operating_profit": 3952505473.0,
+      "net_profit": 2591395931.0,
+      "total_assets": 66016892586.0
+    },
+    {
+      "year": "2024",
+      "sales": 82959224586.0,
+      "operating_profit": 3843590214.0,
+      "net_profit": 2865233580.0,
+      "total_assets": 71988255076.0
+    },
+    {
+      "year": "2025",
+      "sales": 90788971774.0,
+      "operating_profit": 3922055781.0,
+      "net_profit": 3788812150.0,
+      "total_assets": 75633719033.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "153710",
+      "corpName": "옵티팜",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "289170",
+      "corpName": "바이오텐",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

@@ -1,0 +1,317 @@
+{
+  "ego": {
+    "stockCode": "095270",
+    "corpName": "웨이브일렉트로",
+    "industry": "telecom",
+    "stage": "infra",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 805,
+    "confidence": 0.8,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "065770",
+      "corpName": "CS",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 20
+    },
+    {
+      "stockCode": "178320",
+      "corpName": "서진시스템",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 10663
+    },
+    {
+      "stockCode": "093520",
+      "corpName": "매커스",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 2272
+    },
+    {
+      "stockCode": "363250",
+      "corpName": "진시스템",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 4
+    },
+    {
+      "stockCode": "217590",
+      "corpName": "티엠씨",
+      "industry": "electrical",
+      "stage": "cable",
+      "revenue": 0
+    },
+    {
+      "stockCode": "299170",
+      "corpName": "더블유에스아이",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 517
+    },
+    {
+      "stockCode": "038540",
+      "corpName": "상상인",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 4186
+    }
+  ],
+  "edges": [
+    {
+      "from": "095270",
+      "to": "065770",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "178320",
+      "to": "095270",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "093520",
+      "to": "095270",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "363250",
+      "to": "095270",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "217590",
+      "to": "095270",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "095270",
+      "to": "299170",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "038540",
+      "to": "095270",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 47468344901.0,
+      "operating_profit": 1005900498.0,
+      "net_profit": 60477854320.0,
+      "total_assets": 98196416211.0
+    },
+    {
+      "year": "2022",
+      "sales": 59176828811.0,
+      "operating_profit": -5936607966.0,
+      "net_profit": -1269299636.0,
+      "total_assets": 95928773699.0
+    },
+    {
+      "year": "2023",
+      "sales": 77983771830.0,
+      "operating_profit": 2351681126.0,
+      "net_profit": 610224448.0,
+      "total_assets": 83809203650.0
+    },
+    {
+      "year": "2024",
+      "sales": 78043596827.0,
+      "operating_profit": 1852688009.0,
+      "net_profit": -82474126.0,
+      "total_assets": 86910815427.0
+    },
+    {
+      "year": "2025",
+      "sales": 80532556275.0,
+      "operating_profit": -1641658533.0,
+      "net_profit": -358969303.0,
+      "total_assets": 102940100562.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 4,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        1
+      ],
+      [
+        "semiconductor",
+        1
+      ],
+      [
+        "software",
+        1
+      ],
+      [
+        "electrical",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "component",
+        1
+      ],
+      [
+        "fab",
+        1
+      ],
+      [
+        "platform",
+        1
+      ],
+      [
+        "cable",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "178320",
+      "corpName": "서진시스템",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "093520",
+      "corpName": "매커스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "363250",
+      "corpName": "진시스템",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "217590",
+      "corpName": "티엠씨",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "065770",
+      "corpName": "CS",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

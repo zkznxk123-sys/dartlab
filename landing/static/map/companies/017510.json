@@ -1,0 +1,143 @@
+{
+  "ego": {
+    "stockCode": "017510",
+    "corpName": "세명전기",
+    "industry": "textile",
+    "stage": "fiber",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 323,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "industry": "energy",
+      "stage": "generation",
+      "revenue": 974293
+    }
+  ],
+  "edges": [
+    {
+      "from": "015760",
+      "to": "017510",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 15029594450.0,
+      "operating_profit": 1616527636.0,
+      "net_profit": 2327485635.0,
+      "total_assets": 82642799831.0
+    },
+    {
+      "year": "2022",
+      "sales": 13966161594.0,
+      "operating_profit": 1022697460.0,
+      "net_profit": 2253654261.0,
+      "total_assets": 82985274706.0
+    },
+    {
+      "year": "2023",
+      "sales": 11835001413.0,
+      "operating_profit": 1351879736.0,
+      "net_profit": 1306545862.0,
+      "total_assets": 83331735609.0
+    },
+    {
+      "year": "2024",
+      "sales": 14431484950.0,
+      "operating_profit": 3029673182.0,
+      "net_profit": 4685278134.0,
+      "total_assets": 88459708061.0
+    },
+    {
+      "year": "2025",
+      "sales": 32333208200.0,
+      "operating_profit": 14815685792.0,
+      "net_profit": 12764239500.0,
+      "total_assets": 106780487966.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "energy",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "generation",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "015760",
+      "corpName": "한국전력공사",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

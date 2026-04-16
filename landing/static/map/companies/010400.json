@@ -1,0 +1,102 @@
+{
+  "ego": {
+    "stockCode": "010400",
+    "corpName": "우진아이엔에스",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1645,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 89474130717.0,
+      "operating_profit": -6727170261.0,
+      "net_profit": 0.0,
+      "total_assets": 114656381311.0
+    },
+    {
+      "year": "2022",
+      "sales": 84045560461.0,
+      "operating_profit": -5607320231.0,
+      "net_profit": 0.0,
+      "total_assets": 111631385016.0
+    },
+    {
+      "year": "2023",
+      "sales": 100168756319.0,
+      "operating_profit": -3316488890.0,
+      "net_profit": 1936083379.0,
+      "total_assets": 113497686732.0
+    },
+    {
+      "year": "2024",
+      "sales": 137588161973.0,
+      "operating_profit": -17859652097.0,
+      "net_profit": -22168838641.0,
+      "total_assets": 91715586046.0
+    },
+    {
+      "year": "2025",
+      "sales": 164457886988.0,
+      "operating_profit": 4978351418.0,
+      "net_profit": 7593754874.0,
+      "total_assets": 106265692040.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

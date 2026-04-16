@@ -1,0 +1,180 @@
+{
+  "ego": {
+    "stockCode": "089230",
+    "corpName": "THE E&M",
+    "industry": "telecom",
+    "stage": "service",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 123,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "177350",
+      "corpName": "베셀",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 166
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "196450",
+      "corpName": "코아시아씨엠",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 2582
+    },
+    {
+      "stockCode": "052420",
+      "corpName": "오성첨단소재",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 1657
+    }
+  ],
+  "edges": [
+    {
+      "from": "089230",
+      "to": "177350",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "089230",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "196450",
+      "to": "089230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "089230",
+      "to": "052420",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 3.2%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 56350436255.0,
+      "operating_profit": 3527300569.0,
+      "net_profit": -10834800090.0,
+      "total_assets": 144497105087.0
+    },
+    {
+      "year": "2022",
+      "sales": 46601511930.0,
+      "operating_profit": -2309018889.0,
+      "net_profit": 0.0,
+      "total_assets": 104139483470.0
+    },
+    {
+      "year": "2023",
+      "sales": 31702033259.0,
+      "operating_profit": -7717794327.0,
+      "net_profit": 0.0,
+      "total_assets": 84674762963.0
+    },
+    {
+      "year": "2024",
+      "sales": 22196259181.0,
+      "operating_profit": -7472181005.0,
+      "net_profit": 0.0,
+      "total_assets": 77617082470.0
+    },
+    {
+      "year": "2025",
+      "sales": 12340921889.0,
+      "operating_profit": -8575907256.0,
+      "net_profit": 0.0,
+      "total_assets": 118073459255.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

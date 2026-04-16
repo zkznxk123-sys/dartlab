@@ -1,0 +1,235 @@
+{
+  "ego": {
+    "stockCode": "291230",
+    "corpName": "엔피",
+    "industry": "textile",
+    "stage": "apparel",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 272,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "063080",
+      "corpName": "컴투스홀딩스",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 992
+    },
+    {
+      "stockCode": "078340",
+      "corpName": "컴투스",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 6964
+    },
+    {
+      "stockCode": "200350",
+      "corpName": "아티스트스튜디오",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 146
+    },
+    {
+      "stockCode": "299900",
+      "corpName": "위지윅스튜디오",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 1020
+    },
+    {
+      "stockCode": "004250",
+      "corpName": "엔피씨",
+      "industry": "auto",
+      "stage": "body",
+      "revenue": 4503
+    }
+  ],
+  "edges": [
+    {
+      "from": "063080",
+      "to": "291230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "078340",
+      "to": "291230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "200350",
+      "to": "291230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "291230",
+      "to": "299900",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "291230",
+      "to": "004250",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "291230",
+      "to": "063080",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "291230",
+      "to": "078340",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "299900",
+      "to": "291230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 24871771373.0,
+      "operating_profit": 905658242.0,
+      "net_profit": -10813025613.0,
+      "total_assets": 60235920072.0
+    },
+    {
+      "year": "2022",
+      "sales": 39844510664.0,
+      "operating_profit": -959581925.0,
+      "net_profit": 0.0,
+      "total_assets": 54602180892.0
+    },
+    {
+      "year": "2023",
+      "sales": 35334979955.0,
+      "operating_profit": -3695829980.0,
+      "net_profit": 0.0,
+      "total_assets": 54530748279.0
+    },
+    {
+      "year": "2024",
+      "sales": 29559888710.0,
+      "operating_profit": -4146171578.0,
+      "net_profit": -175210802.0,
+      "total_assets": 52234516817.0
+    },
+    {
+      "year": "2025",
+      "sales": 27230566516.0,
+      "operating_profit": -3047747525.0,
+      "net_profit": -3835962954.0,
+      "total_assets": 47404932422.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

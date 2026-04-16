@@ -1,0 +1,143 @@
+{
+  "ego": {
+    "stockCode": "053060",
+    "corpName": "세동",
+    "industry": "semiconductor",
+    "stage": "packaging",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1894,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "452400",
+      "corpName": "이닉스",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 1226
+    }
+  ],
+  "edges": [
+    {
+      "from": "452400",
+      "to": "053060",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "ETF FLIM",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "ETF FLIM"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 132638578763.0,
+      "operating_profit": 2467843643.0,
+      "net_profit": -695009880.0,
+      "total_assets": 110449307531.0
+    },
+    {
+      "year": "2022",
+      "sales": 156051328239.0,
+      "operating_profit": 12446970777.0,
+      "net_profit": 12369585016.0,
+      "total_assets": 109635182602.0
+    },
+    {
+      "year": "2023",
+      "sales": 169895212565.0,
+      "operating_profit": 12554831007.0,
+      "net_profit": 9802166185.0,
+      "total_assets": 117868912085.0
+    },
+    {
+      "year": "2024",
+      "sales": 171088252415.0,
+      "operating_profit": 10712273142.0,
+      "net_profit": -1152315260.0,
+      "total_assets": 108643527911.0
+    },
+    {
+      "year": "2025",
+      "sales": 189439770060.0,
+      "operating_profit": 9102838003.0,
+      "net_profit": 5881714294.0,
+      "total_assets": 134390153086.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "semiconductor",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "packaging",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "452400",
+      "corpName": "이닉스",
+      "product": "ETF FLIM",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.9,
+      "source": "docs_table"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

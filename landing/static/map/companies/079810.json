@@ -1,0 +1,256 @@
+{
+  "ego": {
+    "stockCode": "079810",
+    "corpName": "디이엔티",
+    "industry": "electrical",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 740,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "054620",
+      "corpName": "APS",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 849
+    },
+    {
+      "stockCode": "348210",
+      "corpName": "넥스틴",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 466
+    },
+    {
+      "stockCode": "265520",
+      "corpName": "AP시스템",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 4601
+    },
+    {
+      "stockCode": "391710",
+      "corpName": "코닉오토메이션",
+      "industry": "machinery",
+      "stage": "special",
+      "revenue": 301
+    },
+    {
+      "stockCode": "307180",
+      "corpName": "아이엘",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 1029
+    }
+  ],
+  "edges": [
+    {
+      "from": "054620",
+      "to": "079810",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "079810",
+      "to": "054620",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "079810",
+      "to": "348210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "079810",
+      "to": "265520",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "079810",
+      "to": "391710",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "265520",
+      "to": "079810",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "079810",
+      "to": "307180",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "348210",
+      "to": "079810",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "391710",
+      "to": "079810",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 42257960103.0,
+      "operating_profit": 1191452041.0,
+      "net_profit": 909175117.0,
+      "total_assets": 59867352195.0
+    },
+    {
+      "year": "2022",
+      "sales": 50156594629.0,
+      "operating_profit": -4537959489.0,
+      "net_profit": -5573784693.0,
+      "total_assets": 89051966276.0
+    },
+    {
+      "year": "2023",
+      "sales": 127353695998.0,
+      "operating_profit": 1747811023.0,
+      "net_profit": -268322.0,
+      "total_assets": 234586903230.0
+    },
+    {
+      "year": "2024",
+      "sales": 146374220970.0,
+      "operating_profit": 5356271874.0,
+      "net_profit": 18199973047.0,
+      "total_assets": 237535661992.0
+    },
+    {
+      "year": "2025",
+      "sales": 73985134062.0,
+      "operating_profit": 2549522798.0,
+      "net_profit": 3108.0,
+      "total_assets": 220491796266.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "307180",
+      "corpName": "아이엘",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "010120",
+      "corpName": "엘에스일렉트릭",
+      "stage": "power",
+      "revenue": 49658
+    },
+    {
+      "stockCode": "001440",
+      "corpName": "대한전선",
+      "stage": "cable",
+      "revenue": 36360
+    },
+    {
+      "stockCode": "015860",
+      "corpName": "일진홀딩스",
+      "stage": "power",
+      "revenue": 22827
+    },
+    {
+      "stockCode": "103590",
+      "corpName": "일진전기",
+      "stage": "power",
+      "revenue": 20446
+    },
+    {
+      "stockCode": "006340",
+      "corpName": "대원전선",
+      "stage": "cable",
+      "revenue": 6245
+    }
+  ]
+}

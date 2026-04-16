@@ -1,0 +1,173 @@
+{
+  "ego": {
+    "stockCode": "094970",
+    "corpName": "제이엠티",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2002,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "033050",
+      "corpName": "제이엠아이",
+      "industry": "chemical",
+      "stage": "",
+      "revenue": 898
+    },
+    {
+      "stockCode": "232530",
+      "corpName": "이엠티",
+      "industry": "semiconductor",
+      "stage": "materials",
+      "revenue": 0
+    },
+    {
+      "stockCode": "425420",
+      "corpName": "티에프이",
+      "industry": "semiconductor",
+      "stage": "test",
+      "revenue": 1117
+    }
+  ],
+  "edges": [
+    {
+      "from": "033050",
+      "to": "094970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "094970",
+      "to": "232530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "094970",
+      "to": "033050",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "425420",
+      "to": "094970",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 79362860146.0,
+      "operating_profit": 16342447294.0,
+      "net_profit": 15174250451.0,
+      "total_assets": 125070084342.0
+    },
+    {
+      "year": "2022",
+      "sales": 90599833501.0,
+      "operating_profit": 20006878222.0,
+      "net_profit": 29418678178.0,
+      "total_assets": 138331343220.0
+    },
+    {
+      "year": "2023",
+      "sales": 122737483734.0,
+      "operating_profit": 14826526543.0,
+      "net_profit": 23247725390.0,
+      "total_assets": 221792517965.0
+    },
+    {
+      "year": "2024",
+      "sales": 164020138293.0,
+      "operating_profit": 5283739326.0,
+      "net_profit": 8905848010.0,
+      "total_assets": 245709917958.0
+    },
+    {
+      "year": "2025",
+      "sales": 200224698801.0,
+      "operating_profit": 13141453551.0,
+      "net_profit": 14262137616.0,
+      "total_assets": 269999778329.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

@@ -1,0 +1,387 @@
+{
+  "ego": {
+    "stockCode": "299900",
+    "corpName": "위지윅스튜디오",
+    "industry": "media",
+    "stage": "content",
+    "role": "서비스",
+    "stream": "upstream",
+    "revenue": 1020,
+    "confidence": 0.7,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "063080",
+      "corpName": "컴투스홀딩스",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 992
+    },
+    {
+      "stockCode": "078340",
+      "corpName": "컴투스",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 6964
+    },
+    {
+      "stockCode": "200350",
+      "corpName": "아티스트스튜디오",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 146
+    },
+    {
+      "stockCode": "291230",
+      "corpName": "엔피",
+      "industry": "textile",
+      "stage": "apparel",
+      "revenue": 272
+    },
+    {
+      "stockCode": "004250",
+      "corpName": "엔피씨",
+      "industry": "auto",
+      "stage": "body",
+      "revenue": 4503
+    },
+    {
+      "stockCode": "432430",
+      "corpName": "와이랩",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 371
+    },
+    {
+      "stockCode": "241840",
+      "corpName": "에이스토리",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 118
+    },
+    {
+      "stockCode": "361570",
+      "corpName": "알비더블유",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 465
+    },
+    {
+      "stockCode": "108860",
+      "corpName": "셀바스AI",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 1148
+    },
+    {
+      "stockCode": "321820",
+      "corpName": "아티스트컴퍼니",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 467
+    }
+  ],
+  "edges": [
+    {
+      "from": "063080",
+      "to": "299900",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "078340",
+      "to": "299900",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "200350",
+      "to": "299900",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "299900",
+      "to": "200350",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "291230",
+      "to": "299900",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "299900",
+      "to": "063080",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "299900",
+      "to": "078340",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "299900",
+      "to": "291230",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "299900",
+      "to": "004250",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "299900",
+      "to": "432430",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "299900",
+      "to": "241840",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "078340",
+      "to": "299900",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 38.1%"
+    },
+    {
+      "from": "299900",
+      "to": "361570",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 9.8%"
+    },
+    {
+      "from": "299900",
+      "to": "108860",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "299900",
+      "to": "321820",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.9%"
+    },
+    {
+      "from": "299900",
+      "to": "200350",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.6%"
+    },
+    {
+      "from": "361570",
+      "to": "299900",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 0.3%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 120283764981.0,
+      "operating_profit": -3954732702.0,
+      "net_profit": -18272273530.0,
+      "total_assets": 370469443510.0
+    },
+    {
+      "year": "2022",
+      "sales": 186344639061.0,
+      "operating_profit": -24913262401.0,
+      "net_profit": -12295797893.0,
+      "total_assets": 386550617429.0
+    },
+    {
+      "year": "2023",
+      "sales": 147335163984.0,
+      "operating_profit": -20281322515.0,
+      "net_profit": -4232986260.0,
+      "total_assets": 337160026663.0
+    },
+    {
+      "year": "2024",
+      "sales": 80432665935.0,
+      "operating_profit": -11816014440.0,
+      "net_profit": -54683820431.0,
+      "total_assets": 293502455885.0
+    },
+    {
+      "year": "2025",
+      "sales": 101995172098.0,
+      "operating_profit": -9556606628.0,
+      "net_profit": -41781737653.0,
+      "total_assets": 242562329443.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "200350",
+      "corpName": "아티스트스튜디오",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "035760",
+      "corpName": "CJ ENM",
+      "stage": "content",
+      "revenue": 51345
+    },
+    {
+      "stockCode": "030000",
+      "corpName": "제일기획",
+      "stage": "content",
+      "revenue": 45469
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "214320",
+      "corpName": "이노션",
+      "stage": "platform",
+      "revenue": 21460
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ]
+}

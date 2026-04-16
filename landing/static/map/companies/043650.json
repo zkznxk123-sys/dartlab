@@ -1,0 +1,162 @@
+{
+  "ego": {
+    "stockCode": "043650",
+    "corpName": "국순당",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 675,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "008870",
+      "corpName": "금비",
+      "industry": "construction",
+      "stage": "material",
+      "revenue": 580
+    },
+    {
+      "stockCode": "005850",
+      "corpName": "에스엘",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 52399
+    }
+  ],
+  "edges": [
+    {
+      "from": "008870",
+      "to": "043650",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "043650",
+      "to": "005850",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 65221439846.0,
+      "operating_profit": 8467426184.0,
+      "net_profit": 21549453714.0,
+      "total_assets": 267165465177.0
+    },
+    {
+      "year": "2022",
+      "sales": 74619184834.0,
+      "operating_profit": 9145079697.0,
+      "net_profit": 71891660.0,
+      "total_assets": 253846231021.0
+    },
+    {
+      "year": "2023",
+      "sales": 70483966911.0,
+      "operating_profit": 4464546772.0,
+      "net_profit": 21849171.0,
+      "total_assets": 244796010519.0
+    },
+    {
+      "year": "2024",
+      "sales": 68818650537.0,
+      "operating_profit": -2278660878.0,
+      "net_profit": 1348643011.0,
+      "total_assets": 256323191806.0
+    },
+    {
+      "year": "2025",
+      "sales": 67498883797.0,
+      "operating_profit": -831886128.0,
+      "net_profit": 0.0,
+      "total_assets": 258361185371.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "construction",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "material",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "008870",
+      "corpName": "금비",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

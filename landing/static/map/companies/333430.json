@@ -1,0 +1,263 @@
+{
+  "ego": {
+    "stockCode": "333430",
+    "corpName": "일승",
+    "industry": "shipbuilding",
+    "stage": "build",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 507,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "071970",
+      "corpName": "HD현대마린엔진",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 4024
+    },
+    {
+      "stockCode": "075580",
+      "corpName": "세진중공업",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 4027
+    },
+    {
+      "stockCode": "099410",
+      "corpName": "동방선기",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 419
+    },
+    {
+      "stockCode": "469610",
+      "corpName": "이노테크",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 757
+    },
+    {
+      "stockCode": "123700",
+      "corpName": "에스제이엠",
+      "industry": "auto",
+      "stage": "powertrain",
+      "revenue": 2014
+    },
+    {
+      "stockCode": "443060",
+      "corpName": "HD현대마린솔루션",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 19827
+    }
+  ],
+  "edges": [
+    {
+      "from": "071970",
+      "to": "333430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "075580",
+      "to": "333430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "099410",
+      "to": "333430",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "333430",
+      "to": "099410",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "333430",
+      "to": "075580",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "333430",
+      "to": "099410",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "333430",
+      "to": "469610",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "333430",
+      "to": "123700",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "333430",
+      "to": "443060",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 41895287923.0,
+      "operating_profit": 2849924561.0,
+      "net_profit": 0.0,
+      "total_assets": 84968318654.0
+    },
+    {
+      "year": "2022",
+      "sales": 65037011303.0,
+      "operating_profit": 3228784445.0,
+      "net_profit": 3380072695.0,
+      "total_assets": 103933912318.0
+    },
+    {
+      "year": "2023",
+      "sales": 52971603874.0,
+      "operating_profit": 5293353311.0,
+      "net_profit": 7677487731.0,
+      "total_assets": 104615615499.0
+    },
+    {
+      "year": "2024",
+      "sales": 51793219831.0,
+      "operating_profit": 6913731124.0,
+      "net_profit": 6518274761.0,
+      "total_assets": 115543389151.0
+    },
+    {
+      "year": "2025",
+      "sales": 50673752132.0,
+      "operating_profit": 10863172422.0,
+      "net_profit": 0.0,
+      "total_assets": 129139810179.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "099410",
+      "corpName": "동방선기",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "stage": "build",
+      "revenue": 712594
+    },
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "stage": "shipping",
+      "revenue": 299332
+    },
+    {
+      "stockCode": "329180",
+      "corpName": "HD현대중공업",
+      "stage": "build",
+      "revenue": 175806
+    },
+    {
+      "stockCode": "018260",
+      "corpName": "삼성에스디에스",
+      "stage": "shipping",
+      "revenue": 139299
+    },
+    {
+      "stockCode": "042660",
+      "corpName": "한화오션",
+      "stage": "build",
+      "revenue": 127835
+    }
+  ]
+}

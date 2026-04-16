@@ -1,0 +1,154 @@
+{
+  "ego": {
+    "stockCode": "006880",
+    "corpName": "신송홀딩스",
+    "industry": "retail",
+    "stage": "retail",
+    "role": "소매",
+    "stream": "downstream",
+    "revenue": 1878,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "009290",
+      "corpName": "광동제약",
+      "industry": "food",
+      "stage": "processing",
+      "revenue": 16595
+    },
+    {
+      "stockCode": "251270",
+      "corpName": "넷마블",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "006880",
+      "to": "009290",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "006880",
+      "to": "251270",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "009290",
+      "to": "006880",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 186444266263.0,
+      "operating_profit": 6867678554.0,
+      "net_profit": 7420973021.0,
+      "total_assets": 248190231392.0
+    },
+    {
+      "year": "2022",
+      "sales": 209403828091.0,
+      "operating_profit": 8574416656.0,
+      "net_profit": 78955378.0,
+      "total_assets": 242350721393.0
+    },
+    {
+      "year": "2023",
+      "sales": 193419654722.0,
+      "operating_profit": 8381489448.0,
+      "net_profit": 8831541142.0,
+      "total_assets": 242937272679.0
+    },
+    {
+      "year": "2024",
+      "sales": 164580506815.0,
+      "operating_profit": 8401885993.0,
+      "net_profit": 5495211137.0,
+      "total_assets": 254881524377.0
+    },
+    {
+      "year": "2025",
+      "sales": 187759398480.0,
+      "operating_profit": 10311259918.0,
+      "net_profit": 3539082936.0,
+      "total_assets": 274528083479.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

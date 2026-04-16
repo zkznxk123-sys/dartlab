@@ -1,0 +1,237 @@
+{
+  "ego": {
+    "stockCode": "067290",
+    "corpName": "JW신약",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 810,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001060",
+      "corpName": "JW중외제약",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 7753
+    },
+    {
+      "stockCode": "234080",
+      "corpName": "JW생명과학",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 2578
+    },
+    {
+      "stockCode": "096760",
+      "corpName": "JW홀딩스",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 9696
+    },
+    {
+      "stockCode": "264900",
+      "corpName": "크라운제과",
+      "industry": "food",
+      "stage": "raw",
+      "revenue": 4448
+    }
+  ],
+  "edges": [
+    {
+      "from": "001060",
+      "to": "067290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "067290",
+      "to": "234080",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "067290",
+      "to": "096760",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "067290",
+      "to": "001060",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "067290",
+      "to": "096760",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "096760",
+      "to": "067290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "234080",
+      "to": "067290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "264900",
+      "to": "067290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 100966106272.0,
+      "operating_profit": 3426120278.0,
+      "net_profit": 837181610.0,
+      "total_assets": 92004196463.0
+    },
+    {
+      "year": "2022",
+      "sales": 102710439010.0,
+      "operating_profit": 4287385271.0,
+      "net_profit": 1378413531.0,
+      "total_assets": 94093947351.0
+    },
+    {
+      "year": "2023",
+      "sales": 104234950412.0,
+      "operating_profit": 5627697721.0,
+      "net_profit": -44845041.0,
+      "total_assets": 65618557729.0
+    },
+    {
+      "year": "2024",
+      "sales": 93013748432.0,
+      "operating_profit": 9952528451.0,
+      "net_profit": -4566434.0,
+      "total_assets": 63035402938.0
+    },
+    {
+      "year": "2025",
+      "sales": 81043717132.0,
+      "operating_profit": 7455451177.0,
+      "net_profit": 15656730846.0,
+      "total_assets": 58241070091.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "096760",
+      "corpName": "JW홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

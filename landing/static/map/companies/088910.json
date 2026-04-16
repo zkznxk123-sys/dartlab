@@ -1,0 +1,132 @@
+{
+  "ego": {
+    "stockCode": "088910",
+    "corpName": "동우팜투테이블",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 3255,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "195500",
+      "corpName": "마니커에프앤지",
+      "industry": "food",
+      "stage": "processing",
+      "revenue": 1068
+    }
+  ],
+  "edges": [
+    {
+      "from": "088910",
+      "to": "195500",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 295684933081.0,
+      "operating_profit": 1866745132.0,
+      "net_profit": -10920304587.0,
+      "total_assets": 265150893665.0
+    },
+    {
+      "year": "2022",
+      "sales": 336847473051.0,
+      "operating_profit": 11931138087.0,
+      "net_profit": 16146271979.0,
+      "total_assets": 287176830329.0
+    },
+    {
+      "year": "2023",
+      "sales": 349164108766.0,
+      "operating_profit": 21126989607.0,
+      "net_profit": 26412957543.0,
+      "total_assets": 291226871083.0
+    },
+    {
+      "year": "2024",
+      "sales": 303120132139.0,
+      "operating_profit": -4309798679.0,
+      "net_profit": -7759554922.0,
+      "total_assets": 268165422929.0
+    },
+    {
+      "year": "2025",
+      "sales": 325457698211.0,
+      "operating_profit": 13151439758.0,
+      "net_profit": 28288207394.0,
+      "total_assets": 282187804378.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "195500",
+      "corpName": "마니커에프앤지",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

@@ -1,0 +1,252 @@
+{
+  "ego": {
+    "stockCode": "011230",
+    "corpName": "삼화전자공업",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 296,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001820",
+      "corpName": "삼화콘덴서공업",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2945
+    },
+    {
+      "stockCode": "009470",
+      "corpName": "삼화전기",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2301
+    },
+    {
+      "stockCode": "043590",
+      "corpName": "웰킵스하이텍",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 214
+    },
+    {
+      "stockCode": "463480",
+      "corpName": "모티브링크",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 674
+    },
+    {
+      "stockCode": "066670",
+      "corpName": "디티씨",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 1886
+    }
+  ],
+  "edges": [
+    {
+      "from": "001820",
+      "to": "011230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "009470",
+      "to": "011230",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "011230",
+      "to": "001820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "011230",
+      "to": "009470",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "011230",
+      "to": "043590",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "011230",
+      "to": "463480",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "009470",
+      "to": "011230",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 7.7%"
+    },
+    {
+      "from": "066670",
+      "to": "011230",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 44342176391.0,
+      "operating_profit": -3986875661.0,
+      "net_profit": -3926677702.0,
+      "total_assets": 66900329255.0
+    },
+    {
+      "year": "2022",
+      "sales": 48326219525.0,
+      "operating_profit": -4295416659.0,
+      "net_profit": -5887658788.0,
+      "total_assets": 68742292985.0
+    },
+    {
+      "year": "2023",
+      "sales": 41906999638.0,
+      "operating_profit": -5003290248.0,
+      "net_profit": -6371619997.0,
+      "total_assets": 73014231901.0
+    },
+    {
+      "year": "2024",
+      "sales": 33397439064.0,
+      "operating_profit": -7272936114.0,
+      "net_profit": -7745577691.0,
+      "total_assets": 70192709528.0
+    },
+    {
+      "year": "2025",
+      "sales": 29632415122.0,
+      "operating_profit": -7775962013.0,
+      "net_profit": 0.0,
+      "total_assets": 75421002916.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "043590",
+      "corpName": "웰킵스하이텍",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "463480",
+      "corpName": "모티브링크",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

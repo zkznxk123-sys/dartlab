@@ -1,0 +1,147 @@
+{
+  "ego": {
+    "stockCode": "269620",
+    "corpName": "시스웍",
+    "industry": "auto",
+    "stage": "powertrain",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 110,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "030350",
+      "corpName": "드래곤플라이",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 159
+    }
+  ],
+  "edges": [
+    {
+      "from": "030350",
+      "to": "269620",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "269620",
+      "to": "030350",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "269620",
+      "to": "030350",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 4.6%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 16969391158.0,
+      "operating_profit": -10585702065.0,
+      "net_profit": 0.0,
+      "total_assets": 93583385443.0
+    },
+    {
+      "year": "2022",
+      "sales": 26538567314.0,
+      "operating_profit": -12991640213.0,
+      "net_profit": -575024541.0,
+      "total_assets": 31958502143.0
+    },
+    {
+      "year": "2023",
+      "sales": 14496957782.0,
+      "operating_profit": -2995920216.0,
+      "net_profit": -6103683789.0,
+      "total_assets": 29047080220.0
+    },
+    {
+      "year": "2024",
+      "sales": 12863193552.0,
+      "operating_profit": -1840730986.0,
+      "net_profit": -9370898283.0,
+      "total_assets": 22499351116.0
+    },
+    {
+      "year": "2025",
+      "sales": 11033617511.0,
+      "operating_profit": -2569907083.0,
+      "net_profit": -5121272297.0,
+      "total_assets": 19660847175.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

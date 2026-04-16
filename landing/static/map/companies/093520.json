@@ -1,0 +1,159 @@
+{
+  "ego": {
+    "stockCode": "093520",
+    "corpName": "매커스",
+    "industry": "semiconductor",
+    "stage": "fab",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2272,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "095270",
+      "corpName": "웨이브일렉트로",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 805
+    },
+    {
+      "stockCode": "232140",
+      "corpName": "와이씨",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 2726
+    }
+  ],
+  "edges": [
+    {
+      "from": "093520",
+      "to": "095270",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "093520",
+      "to": "232140",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 140726734643.0,
+      "operating_profit": 26018645884.0,
+      "net_profit": 45456731.0,
+      "total_assets": 144971115200.0
+    },
+    {
+      "year": "2022",
+      "sales": 193763490633.0,
+      "operating_profit": 31451798059.0,
+      "net_profit": 22132988491.0,
+      "total_assets": 286558825773.0
+    },
+    {
+      "year": "2023",
+      "sales": 175414376276.0,
+      "operating_profit": 26349934797.0,
+      "net_profit": 20350760929.0,
+      "total_assets": 293692253534.0
+    },
+    {
+      "year": "2024",
+      "sales": 199579464477.0,
+      "operating_profit": 26887736693.0,
+      "net_profit": 197522719.0,
+      "total_assets": 409214585201.0
+    },
+    {
+      "year": "2025",
+      "sales": 227242162080.0,
+      "operating_profit": 29095487131.0,
+      "net_profit": 23115557867.0,
+      "total_assets": 235046173943.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "095270",
+      "corpName": "웨이브일렉트로",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "232140",
+      "corpName": "와이씨",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

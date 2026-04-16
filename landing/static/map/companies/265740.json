@@ -1,0 +1,225 @@
+{
+  "ego": {
+    "stockCode": "265740",
+    "corpName": "엔에프씨",
+    "industry": "cosmetics",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 716,
+    "confidence": 0.8,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "industry": "electronics",
+      "stage": "",
+      "revenue": 63555
+    },
+    {
+      "stockCode": "060230",
+      "corpName": "제이케이시냅스",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 619
+    },
+    {
+      "stockCode": "142760",
+      "corpName": "모아라이프플러스",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 112
+    },
+    {
+      "stockCode": "336370",
+      "corpName": "솔루스첨단소재",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 6161
+    },
+    {
+      "stockCode": "460870",
+      "corpName": "에스엠씨지",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 558
+    }
+  ],
+  "edges": [
+    {
+      "from": "265740",
+      "to": "051900",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 1049.0,
+      "ratio": null,
+      "product": "스쿠알란, 알부틴, Macadamia Oil 등",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "스쿠알란, 알부틴, Macadamia Oil 등"
+    },
+    {
+      "from": "060230",
+      "to": "265740",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "265740",
+      "to": "142760",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "265740",
+      "to": "336370",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "265740",
+      "to": "460870",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 40414881817.0,
+      "operating_profit": 5763958052.0,
+      "net_profit": 6144235431.0,
+      "total_assets": 68311169573.0
+    },
+    {
+      "year": "2022",
+      "sales": 31478132683.0,
+      "operating_profit": 2272220164.0,
+      "net_profit": 1872126783.0,
+      "total_assets": 73414055149.0
+    },
+    {
+      "year": "2023",
+      "sales": 42868677215.0,
+      "operating_profit": 4067734269.0,
+      "net_profit": 3676430578.0,
+      "total_assets": 80632075919.0
+    },
+    {
+      "year": "2025",
+      "sales": 71621774017.0,
+      "operating_profit": 12518073298.0,
+      "net_profit": 10060020246.0,
+      "total_assets": 92053691375.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "product": "스쿠알란, 알부틴, Macadamia Oil 등",
+      "amount": 1049.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "142760",
+      "corpName": "모아라이프플러스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "336370",
+      "corpName": "솔루스첨단소재",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "460870",
+      "corpName": "에스엠씨지",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "stage": "manufacturing",
+      "revenue": 42528
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "278470",
+      "corpName": "에이피알",
+      "stage": "manufacturing",
+      "revenue": 15273
+    },
+    {
+      "stockCode": "257720",
+      "corpName": "실리콘투",
+      "stage": "manufacturing",
+      "revenue": 11163
+    }
+  ]
+}

@@ -1,0 +1,163 @@
+{
+  "ego": {
+    "stockCode": "011500",
+    "corpName": "한농화성",
+    "industry": "cosmetics",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 2145,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "023450",
+      "corpName": "동남합성",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 57
+    },
+    {
+      "stockCode": "089010",
+      "corpName": "켐트로닉스",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 6375
+    }
+  ],
+  "edges": [
+    {
+      "from": "023450",
+      "to": "011500",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "011500",
+      "to": "089010",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "023450",
+      "to": "011500",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 268796630490.0,
+      "operating_profit": 19543792841.0,
+      "net_profit": 19695591321.0,
+      "total_assets": 216969690984.0
+    },
+    {
+      "year": "2022",
+      "sales": 239432889248.0,
+      "operating_profit": 4544911205.0,
+      "net_profit": 8571221426.0,
+      "total_assets": 225415182824.0
+    },
+    {
+      "year": "2023",
+      "sales": 212395970159.0,
+      "operating_profit": -2427541808.0,
+      "net_profit": 0.0,
+      "total_assets": 237369526405.0
+    },
+    {
+      "year": "2024",
+      "sales": 247473264569.0,
+      "operating_profit": 6085620165.0,
+      "net_profit": 0.0,
+      "total_assets": 232946140726.0
+    },
+    {
+      "year": "2025",
+      "sales": 214492954042.0,
+      "operating_profit": 3577198138.0,
+      "net_profit": 3865665421.0,
+      "total_assets": 238342326227.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "089010",
+      "corpName": "켐트로닉스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "stage": "manufacturing",
+      "revenue": 42528
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "278470",
+      "corpName": "에이피알",
+      "stage": "manufacturing",
+      "revenue": 15273
+    },
+    {
+      "stockCode": "257720",
+      "corpName": "실리콘투",
+      "stage": "manufacturing",
+      "revenue": 11163
+    }
+  ]
+}

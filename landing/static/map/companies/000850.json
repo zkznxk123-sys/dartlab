@@ -1,0 +1,242 @@
+{
+  "ego": {
+    "stockCode": "000850",
+    "corpName": "화천기공",
+    "industry": "machinery",
+    "stage": "special",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2218,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "010660",
+      "corpName": "화천기계",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2145
+    },
+    {
+      "stockCode": "100660",
+      "corpName": "서암기계공업",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 465
+    },
+    {
+      "stockCode": "064850",
+      "corpName": "에프앤가이드",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 354
+    },
+    {
+      "stockCode": "105840",
+      "corpName": "우진",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 1504
+    }
+  ],
+  "edges": [
+    {
+      "from": "000850",
+      "to": "010660",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000850",
+      "to": "100660",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000850",
+      "to": "064850",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "010660",
+      "to": "000850",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "064850",
+      "to": "000850",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "100660",
+      "to": "000850",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "000850",
+      "to": "105840",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "핵심 위험: 매출 하락 -> 마진 압박 -> 현금 악화.\n매출이 -10.3% 감소하며 영업이익률이 -0.2%에서 -3.3%로 하락했다. 영업현금흐름도 동반 감소하여 수익-현금 순환이 약화되고 있다.",
+    "strengths": [
+      "내부유보 비중 81% — 자기 힘으로 성장",
+      "순현금 상태",
+      "부채비율 24% -- 매우 안정",
+      "DCF 안전마진 56% -- 저평가 가능",
+      "종합 판정: 저평가"
+    ],
+    "weaknesses": [
+      "매출 하락 -> 마진 압박 -> 현금 악화",
+      "매출 고집중 (HHI 7,953) -- 단일 부문 의존",
+      "매출 3기 연속 역성장 (최근 -10.3%)"
+    ],
+    "sector": "산업재 > 기계",
+    "source": "audit",
+    "createdAt": "1775430966.5310457"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 203972289491.0,
+      "operating_profit": 3322539254.0,
+      "net_profit": 9313607545.0,
+      "total_assets": 425436857316.0
+    },
+    {
+      "year": "2022",
+      "sales": 244093710786.0,
+      "operating_profit": 8182884639.0,
+      "net_profit": 37485626338.0,
+      "total_assets": 474032615936.0
+    },
+    {
+      "year": "2023",
+      "sales": 225720429438.0,
+      "operating_profit": 4560057509.0,
+      "net_profit": 10563122927.0,
+      "total_assets": 463885406068.0
+    },
+    {
+      "year": "2024",
+      "sales": 222200718833.0,
+      "operating_profit": -741138094.0,
+      "net_profit": 8654343281.0,
+      "total_assets": 428809811685.0
+    },
+    {
+      "year": "2025",
+      "sales": 221755533963.0,
+      "operating_profit": 4216907667.0,
+      "net_profit": 11380353753.0,
+      "total_assets": 420411492511.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "105840",
+      "corpName": "우진",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

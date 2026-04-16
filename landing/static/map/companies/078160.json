@@ -1,0 +1,281 @@
+{
+  "ego": {
+    "stockCode": "078160",
+    "corpName": "메디포스트",
+    "industry": "finance",
+    "stage": "bank",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 737,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "048530",
+      "corpName": "인트론바이오",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 57
+    },
+    {
+      "stockCode": "140430",
+      "corpName": "카티스",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 279
+    },
+    {
+      "stockCode": "039130",
+      "corpName": "하나투어",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 5869
+    },
+    {
+      "stockCode": "084650",
+      "corpName": "랩지노믹스",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 882
+    },
+    {
+      "stockCode": "069620",
+      "corpName": "대웅제약",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 15709
+    },
+    {
+      "stockCode": "336370",
+      "corpName": "솔루스첨단소재",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 6161
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "078160",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "048530",
+      "to": "078160",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "140430",
+      "to": "078160",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "078160",
+      "to": "039130",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "078160",
+      "to": "048530",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "078160",
+      "to": "084650",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "078160",
+      "to": "069620",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "336370",
+      "to": "078160",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "078160",
+      "to": "048530",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.2%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 54856207358.0,
+      "operating_profit": -5210702255.0,
+      "net_profit": -283158926.0,
+      "total_assets": 254093738594.0
+    },
+    {
+      "year": "2022",
+      "sales": 64200627638.0,
+      "operating_profit": -17416421411.0,
+      "net_profit": 2105569273.0,
+      "total_assets": 397790902987.0
+    },
+    {
+      "year": "2023",
+      "sales": 68642987374.0,
+      "operating_profit": -25130694461.0,
+      "net_profit": -889382205.0,
+      "total_assets": 449392586059.0
+    },
+    {
+      "year": "2024",
+      "sales": 70657028379.0,
+      "operating_profit": -48544476121.0,
+      "net_profit": -62524995362.0,
+      "total_assets": 414287470351.0
+    },
+    {
+      "year": "2025",
+      "sales": 73656891468.0,
+      "operating_profit": -67983786233.0,
+      "net_profit": -85991476572.0,
+      "total_assets": 431550932707.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "software",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "ai",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "140430",
+      "corpName": "카티스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
+  ]
+}

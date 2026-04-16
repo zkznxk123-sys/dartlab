@@ -1,0 +1,235 @@
+{
+  "ego": {
+    "stockCode": "025870",
+    "corpName": "신라에스지",
+    "industry": "food",
+    "stage": "distribution",
+    "role": "도매",
+    "stream": "downstream",
+    "revenue": 700,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001000",
+      "corpName": "신라섬유",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 36
+    },
+    {
+      "stockCode": "004970",
+      "corpName": "신라교역",
+      "industry": "auto",
+      "stage": "chassis",
+      "revenue": 4547
+    },
+    {
+      "stockCode": "012620",
+      "corpName": "원일특강",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 3981
+    },
+    {
+      "stockCode": "002600",
+      "corpName": "조흥",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 4882
+    },
+    {
+      "stockCode": "260970",
+      "corpName": "에스앤디",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 1509
+    }
+  ],
+  "edges": [
+    {
+      "from": "001000",
+      "to": "025870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "004970",
+      "to": "025870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "012620",
+      "to": "025870",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "025870",
+      "to": "012620",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "025870",
+      "to": "001000",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "025870",
+      "to": "002600",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "025870",
+      "to": "004970",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "025870",
+      "to": "260970",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 71298676479.0,
+      "operating_profit": 2238199821.0,
+      "net_profit": 1429373212.0,
+      "total_assets": 44802196556.0
+    },
+    {
+      "year": "2022",
+      "sales": 73421934268.0,
+      "operating_profit": 2252248416.0,
+      "net_profit": 1134077562.0,
+      "total_assets": 47854971381.0
+    },
+    {
+      "year": "2023",
+      "sales": 88377059730.0,
+      "operating_profit": 1688008975.0,
+      "net_profit": 297908852.0,
+      "total_assets": 49373769176.0
+    },
+    {
+      "year": "2024",
+      "sales": 85618791494.0,
+      "operating_profit": 1148170505.0,
+      "net_profit": 0.0,
+      "total_assets": 45863612729.0
+    },
+    {
+      "year": "2025",
+      "sales": 70037103949.0,
+      "operating_profit": -1555191664.0,
+      "net_profit": -3337527258.0,
+      "total_assets": 45148124244.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "ego": {
+    "stockCode": "102370",
+    "corpName": "케이옥션",
+    "industry": "retail",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 123,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "003160",
+      "corpName": "디아이",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 4323
+    },
+    {
+      "stockCode": "259960",
+      "corpName": "크래프톤",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 33266
+    },
+    {
+      "stockCode": "001720",
+      "corpName": "신영증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "102370",
+      "to": "003160",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "259960",
+      "to": "102370",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "001720",
+      "to": "102370",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.5%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 38300247393.0,
+      "operating_profit": 13627268160.0,
+      "net_profit": 10492541949.0,
+      "total_assets": 95157154051.0
+    },
+    {
+      "year": "2022",
+      "sales": 27716194318.0,
+      "operating_profit": 5819678380.0,
+      "net_profit": 4027200837.0,
+      "total_assets": 217552065168.0
+    },
+    {
+      "year": "2023",
+      "sales": 12154926530.0,
+      "operating_profit": -4203376952.0,
+      "net_profit": -5059398987.0,
+      "total_assets": 206350140163.0
+    },
+    {
+      "year": "2024",
+      "sales": 19457159438.0,
+      "operating_profit": -4755565170.0,
+      "net_profit": -7087667686.0,
+      "total_assets": 201120693958.0
+    },
+    {
+      "year": "2025",
+      "sales": 12286945631.0,
+      "operating_profit": -4065280171.0,
+      "net_profit": -6373903180.0,
+      "total_assets": 195157091864.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "ego": {
+    "stockCode": "021080",
+    "corpName": "에이티넘인베스트",
+    "industry": "finance",
+    "stage": "securities",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 706,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "016710",
+      "corpName": "대성홀딩스",
+      "industry": "realestate",
+      "stage": "general",
+      "revenue": 12226
+    },
+    {
+      "stockCode": "226400",
+      "corpName": "오스테오닉",
+      "industry": "medicalDevice",
+      "stage": "therapeutic",
+      "revenue": 454
+    }
+  ],
+  "edges": [
+    {
+      "from": "021080",
+      "to": "016710",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "226400",
+      "to": "021080",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 117619456870.0,
+      "operating_profit": 83214680545.0,
+      "net_profit": 65995111502.0,
+      "total_assets": 198803388250.0
+    },
+    {
+      "year": "2022",
+      "sales": 100987678722.0,
+      "operating_profit": 35151287454.0,
+      "net_profit": 0.0,
+      "total_assets": 194596379755.0
+    },
+    {
+      "year": "2023",
+      "sales": 135789250846.0,
+      "operating_profit": 24779485522.0,
+      "net_profit": 20080843033.0,
+      "total_assets": 222732014137.0
+    },
+    {
+      "year": "2024",
+      "sales": 51724939670.0,
+      "operating_profit": 13503630205.0,
+      "net_profit": 10844311939.0,
+      "total_assets": 216849340833.0
+    },
+    {
+      "year": "2025",
+      "sales": 70561999146.0,
+      "operating_profit": 31977878918.0,
+      "net_profit": 25094943255.0,
+      "total_assets": 225161419251.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "016710",
+      "corpName": "대성홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
+  ]
+}

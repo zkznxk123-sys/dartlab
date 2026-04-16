@@ -1,0 +1,159 @@
+{
+  "ego": {
+    "stockCode": "221980",
+    "corpName": "케이디켐",
+    "industry": "chemical",
+    "stage": "polymer",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 0,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "014680",
+      "corpName": "한솔케미칼",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 8840
+    },
+    {
+      "stockCode": "055490",
+      "corpName": "테이팩스",
+      "industry": "plastic",
+      "stage": "general",
+      "revenue": 1411
+    }
+  ],
+  "edges": [
+    {
+      "from": "221980",
+      "to": "014680",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "221980",
+      "to": "055490",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 54057340865.0,
+      "operating_profit": 6845630804.0,
+      "net_profit": 0.0,
+      "total_assets": 107925931555.0
+    },
+    {
+      "year": "2022",
+      "sales": 22067344699.0,
+      "operating_profit": 5697277366.0,
+      "net_profit": 0.0,
+      "total_assets": 122225680178.0
+    },
+    {
+      "year": "2023",
+      "sales": 59145786358.0,
+      "operating_profit": 6252594408.0,
+      "net_profit": 0.0,
+      "total_assets": 123449471887.0
+    },
+    {
+      "year": "2024",
+      "sales": 17363508174.0,
+      "operating_profit": 7468869804.0,
+      "net_profit": 5386914490.0,
+      "total_assets": 131933824881.0
+    },
+    {
+      "year": "2025",
+      "sales": null,
+      "operating_profit": 6968496197.0,
+      "net_profit": null,
+      "total_assets": 128056414328.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "014680",
+      "corpName": "한솔케미칼",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "055490",
+      "corpName": "테이팩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

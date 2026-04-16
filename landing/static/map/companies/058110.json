@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "058110",
+    "corpName": "멕아이씨에스",
+    "industry": "medicalDevice",
+    "stage": "imaging",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 113,
+    "confidence": 0.867,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "067010",
+      "corpName": "이씨에스",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 216
+    }
+  ],
+  "edges": [
+    {
+      "from": "058110",
+      "to": "067010",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 49296023356.0,
+      "operating_profit": 10642513600.0,
+      "net_profit": 9479351373.0,
+      "total_assets": 96737738586.0
+    },
+    {
+      "year": "2022",
+      "sales": 28753861806.0,
+      "operating_profit": -1768562776.0,
+      "net_profit": -2834727675.0,
+      "total_assets": 86759212485.0
+    },
+    {
+      "year": "2023",
+      "sales": 13261391997.0,
+      "operating_profit": -13873749795.0,
+      "net_profit": 0.0,
+      "total_assets": 68684126003.0
+    },
+    {
+      "year": "2024",
+      "sales": 11369004636.0,
+      "operating_profit": -9492066504.0,
+      "net_profit": -10290328994.0,
+      "total_assets": 59449795128.0
+    },
+    {
+      "year": "2025",
+      "sales": 11287751059.0,
+      "operating_profit": -2787134562.0,
+      "net_profit": -2539506441.0,
+      "total_assets": 56220578392.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "011560",
+      "corpName": "세보엠이씨",
+      "stage": "imaging",
+      "revenue": 7158
+    },
+    {
+      "stockCode": "092790",
+      "corpName": "넥스틸",
+      "stage": "imaging",
+      "revenue": 5510
+    },
+    {
+      "stockCode": "215360",
+      "corpName": "우리산업",
+      "stage": "imaging",
+      "revenue": 5320
+    },
+    {
+      "stockCode": "043150",
+      "corpName": "바텍",
+      "stage": "imaging",
+      "revenue": 4264
+    },
+    {
+      "stockCode": "036030",
+      "corpName": "케이티알파",
+      "stage": "imaging",
+      "revenue": 3959
+    }
+  ]
+}

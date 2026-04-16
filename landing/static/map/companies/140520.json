@@ -1,0 +1,162 @@
+{
+  "ego": {
+    "stockCode": "140520",
+    "corpName": "대창스틸",
+    "industry": "steel",
+    "stage": "product",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 3986,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "232530",
+      "corpName": "이엠티",
+      "industry": "semiconductor",
+      "stage": "materials",
+      "revenue": 0
+    },
+    {
+      "stockCode": "039240",
+      "corpName": "경남스틸",
+      "industry": "steel",
+      "stage": "product",
+      "revenue": 3571
+    }
+  ],
+  "edges": [
+    {
+      "from": "232530",
+      "to": "140520",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "140520",
+      "to": "039240",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 296203272275.0,
+      "operating_profit": 9855834276.0,
+      "net_profit": 14078354511.0,
+      "total_assets": 265163299715.0
+    },
+    {
+      "year": "2022",
+      "sales": 398516324784.0,
+      "operating_profit": 5069913564.0,
+      "net_profit": 55736607648.0,
+      "total_assets": 239910503918.0
+    },
+    {
+      "year": "2023",
+      "sales": 419753133733.0,
+      "operating_profit": 5729081726.0,
+      "net_profit": 2110280841.0,
+      "total_assets": 258462819217.0
+    },
+    {
+      "year": "2024",
+      "sales": 402449365609.0,
+      "operating_profit": 2965845039.0,
+      "net_profit": 763448315.0,
+      "total_assets": 262223701831.0
+    },
+    {
+      "year": "2025",
+      "sales": 398574191699.0,
+      "operating_profit": 3355298284.0,
+      "net_profit": 0.0,
+      "total_assets": 253883692901.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "semiconductor",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "materials",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "232530",
+      "corpName": "이엠티",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

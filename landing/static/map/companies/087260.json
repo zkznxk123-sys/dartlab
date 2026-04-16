@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "087260",
+    "corpName": "모바일어플라이언스",
+    "industry": "auto",
+    "stage": "electronics",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 349,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "077500",
+      "corpName": "유니퀘스트",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 7300
+    }
+  ],
+  "edges": [
+    {
+      "from": "024110",
+      "to": "087260",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "077500",
+      "to": "087260",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 47775376076.0,
+      "operating_profit": 2293411481.0,
+      "net_profit": 2501196424.0,
+      "total_assets": 81041372808.0
+    },
+    {
+      "year": "2022",
+      "sales": 52471269387.0,
+      "operating_profit": -717208120.0,
+      "net_profit": 2110183010.0,
+      "total_assets": 72058139965.0
+    },
+    {
+      "year": "2023",
+      "sales": 49804458554.0,
+      "operating_profit": 452468274.0,
+      "net_profit": 2110182819.0,
+      "total_assets": 81115251731.0
+    },
+    {
+      "year": "2024",
+      "sales": 40480792130.0,
+      "operating_profit": 972394952.0,
+      "net_profit": 1400703090.0,
+      "total_assets": 79232634935.0
+    },
+    {
+      "year": "2025",
+      "sales": 34943028825.0,
+      "operating_profit": -895803759.0,
+      "net_profit": -565352331.0,
+      "total_assets": 61059027472.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "ego": {
+    "stockCode": "121890",
+    "corpName": "에스디시스템",
+    "industry": "telecom",
+    "stage": "device",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 288,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "114190",
+      "corpName": "강원에너지",
+      "industry": "construction",
+      "stage": "general",
+      "revenue": 2123
+    }
+  ],
+  "edges": [
+    {
+      "from": "114190",
+      "to": "121890",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 21417406015.0,
+      "operating_profit": 1670521438.0,
+      "net_profit": 2408783097.0,
+      "total_assets": 14230200528.0
+    },
+    {
+      "year": "2022",
+      "sales": 22496607372.0,
+      "operating_profit": -730035431.0,
+      "net_profit": -602631970.0,
+      "total_assets": 13338530392.0
+    },
+    {
+      "year": "2023",
+      "sales": 21295259282.0,
+      "operating_profit": 1026101676.0,
+      "net_profit": 2637243723.0,
+      "total_assets": 14611073392.0
+    },
+    {
+      "year": "2025",
+      "sales": 28793598189.0,
+      "operating_profit": 1101090892.0,
+      "net_profit": 0.0,
+      "total_assets": 20151089281.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

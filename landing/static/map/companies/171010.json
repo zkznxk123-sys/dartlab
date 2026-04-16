@@ -1,0 +1,163 @@
+{
+  "ego": {
+    "stockCode": "171010",
+    "corpName": "램테크놀러지",
+    "industry": "chemical",
+    "stage": "specialty",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 427,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "100790",
+      "corpName": "미래에셋벤처투자",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    },
+    {
+      "stockCode": "357550",
+      "corpName": "석경에이티",
+      "industry": "chemical",
+      "stage": "specialty",
+      "revenue": 175
+    }
+  ],
+  "edges": [
+    {
+      "from": "100790",
+      "to": "171010",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "171010",
+      "to": "357550",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "100790",
+      "to": "171010",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 48582859654.0,
+      "operating_profit": 4472505756.0,
+      "net_profit": 3160788432.0,
+      "total_assets": 69813448318.0
+    },
+    {
+      "year": "2022",
+      "sales": 67022778731.0,
+      "operating_profit": 6904440941.0,
+      "net_profit": 6059215871.0,
+      "total_assets": 82721891654.0
+    },
+    {
+      "year": "2023",
+      "sales": 42975926481.0,
+      "operating_profit": -2952414219.0,
+      "net_profit": -2869461764.0,
+      "total_assets": 92398700468.0
+    },
+    {
+      "year": "2024",
+      "sales": 44501337692.0,
+      "operating_profit": -1652887365.0,
+      "net_profit": -2556801309.0,
+      "total_assets": 104412607248.0
+    },
+    {
+      "year": "2025",
+      "sales": 42682293992.0,
+      "operating_profit": -954464956.0,
+      "net_profit": -8366143548.0,
+      "total_assets": 102310587744.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "357550",
+      "corpName": "석경에이티",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

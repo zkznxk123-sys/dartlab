@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "046310",
+    "corpName": "백금T&A",
+    "industry": "aerospace",
+    "stage": "defense",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1489,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "318020",
+      "corpName": "포인트모바일",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 872
+    }
+  ],
+  "edges": [
+    {
+      "from": "046310",
+      "to": "318020",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 156463304257.0,
+      "operating_profit": 9952773877.0,
+      "net_profit": 0.0,
+      "total_assets": 103285948178.0
+    },
+    {
+      "year": "2022",
+      "sales": 147603183932.0,
+      "operating_profit": 15339889216.0,
+      "net_profit": 0.0,
+      "total_assets": 119050331684.0
+    },
+    {
+      "year": "2023",
+      "sales": 170733617690.0,
+      "operating_profit": 17094548304.0,
+      "net_profit": 18683426462.0,
+      "total_assets": 139344947875.0
+    },
+    {
+      "year": "2024",
+      "sales": 152492730341.0,
+      "operating_profit": 12733328552.0,
+      "net_profit": 13252934554.0,
+      "total_assets": 132448341513.0
+    },
+    {
+      "year": "2025",
+      "sales": 148922256530.0,
+      "operating_profit": 6790460254.0,
+      "net_profit": 0.0,
+      "total_assets": 126288878155.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "000880",
+      "corpName": "한화",
+      "stage": "airframe",
+      "revenue": 747854
+    },
+    {
+      "stockCode": "012450",
+      "corpName": "한화에어로스페이스",
+      "stage": "airframe",
+      "revenue": 267029
+    },
+    {
+      "stockCode": "020560",
+      "corpName": "아시아나항공",
+      "stage": "airline",
+      "revenue": 72668
+    },
+    {
+      "stockCode": "079550",
+      "corpName": "LIG넥스원",
+      "stage": "defense",
+      "revenue": 43069
+    },
+    {
+      "stockCode": "047810",
+      "corpName": "한국항공우주",
+      "stage": "airframe",
+      "revenue": 36964
+    }
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "ego": {
+    "stockCode": "030720",
+    "corpName": "동원수산",
+    "industry": "agriculture",
+    "stage": "general",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1726,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000370",
+      "corpName": "한화손해보험",
+      "industry": "aerospace",
+      "stage": "",
+      "revenue": 0
+    },
+    {
+      "stockCode": "005830",
+      "corpName": "DB손해보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "160550",
+      "corpName": "NEW",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 1427
+    }
+  ],
+  "edges": [
+    {
+      "from": "000370",
+      "to": "030720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "005830",
+      "to": "030720",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "160550",
+      "to": "030720",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "030720",
+      "to": "160550",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "000370",
+      "to": "030720",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 144619089023.0,
+      "operating_profit": 6227066287.0,
+      "net_profit": null,
+      "total_assets": 100942001219.0
+    },
+    {
+      "year": "2022",
+      "sales": 177038840956.0,
+      "operating_profit": 5800643290.0,
+      "net_profit": 6065991650.0,
+      "total_assets": 121789602384.0
+    },
+    {
+      "year": "2023",
+      "sales": 141944902184.0,
+      "operating_profit": -19400162561.0,
+      "net_profit": -17617266387.0,
+      "total_assets": 114611865652.0
+    },
+    {
+      "year": "2024",
+      "sales": 183650399305.0,
+      "operating_profit": 5324047839.0,
+      "net_profit": 5208294274.0,
+      "total_assets": 108869307630.0
+    },
+    {
+      "year": "2025",
+      "sales": 172592224421.0,
+      "operating_profit": 8826336971.0,
+      "net_profit": 7745692706.0,
+      "total_assets": 134836196404.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "finance",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "securities",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "160550",
+      "corpName": "NEW",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "014710",
+      "corpName": "사조씨푸드",
+      "stage": "general",
+      "revenue": 2380
+    },
+    {
+      "stockCode": "054050",
+      "corpName": "농우바이오",
+      "stage": "general",
+      "revenue": 1588
+    },
+    {
+      "stockCode": "475460",
+      "corpName": "미트박스",
+      "stage": "general",
+      "revenue": 1356
+    },
+    {
+      "stockCode": "154030",
+      "corpName": "아시아종묘",
+      "stage": "general",
+      "revenue": 35
+    }
+  ]
+}

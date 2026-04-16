@@ -1,0 +1,95 @@
+{
+  "ego": {
+    "stockCode": "088790",
+    "corpName": "진도",
+    "industry": "retail",
+    "stage": "retail",
+    "role": "소매",
+    "stream": "downstream",
+    "revenue": 476,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 58961462990.0,
+      "operating_profit": 3775884191.0,
+      "net_profit": 3568236830.0,
+      "total_assets": 136444645101.0
+    },
+    {
+      "year": "2022",
+      "sales": 63417016273.0,
+      "operating_profit": 6093797742.0,
+      "net_profit": 4571584441.0,
+      "total_assets": 129200779871.0
+    },
+    {
+      "year": "2023",
+      "sales": 56370619279.0,
+      "operating_profit": 3761675112.0,
+      "net_profit": 4390520650.0,
+      "total_assets": 124296633811.0
+    },
+    {
+      "year": "2025",
+      "sales": 47608077683.0,
+      "operating_profit": 3983320538.0,
+      "net_profit": null,
+      "total_assets": 140105635533.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "139480",
+      "corpName": "이마트",
+      "stage": "retail",
+      "revenue": 289704
+    },
+    {
+      "stockCode": "032190",
+      "corpName": "다우데이타",
+      "stage": "",
+      "revenue": 180520
+    },
+    {
+      "stockCode": "007070",
+      "corpName": "GS리테일",
+      "stage": "retail",
+      "revenue": 119574
+    },
+    {
+      "stockCode": "282330",
+      "corpName": "BGF리테일",
+      "stage": "retail",
+      "revenue": 90612
+    },
+    {
+      "stockCode": "004170",
+      "corpName": "신세계",
+      "stage": "retail",
+      "revenue": 69295
+    }
+  ]
+}

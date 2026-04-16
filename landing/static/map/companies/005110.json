@@ -1,0 +1,142 @@
+{
+  "ego": {
+    "stockCode": "005110",
+    "corpName": "한창",
+    "industry": "telecom",
+    "stage": "infra",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 80,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "038540",
+      "corpName": "상상인",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 4186
+    },
+    {
+      "stockCode": "043090",
+      "corpName": "더테크놀로지",
+      "industry": "medicalDevice",
+      "stage": "imaging",
+      "revenue": 126
+    }
+  ],
+  "edges": [
+    {
+      "from": "005110",
+      "to": "038540",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "043090",
+      "to": "005110",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 16796488466.0,
+      "operating_profit": -4720153512.0,
+      "net_profit": -6610825511.0,
+      "total_assets": 134278397974.0
+    },
+    {
+      "year": "2022",
+      "sales": 524075431.0,
+      "operating_profit": 9846444821.0,
+      "net_profit": -1870954346.0,
+      "total_assets": 113480993232.0
+    },
+    {
+      "year": "2023",
+      "sales": 287826614.0,
+      "operating_profit": 238216782.0,
+      "net_profit": -5112236927.0,
+      "total_assets": 90310467877.0
+    },
+    {
+      "year": "2024",
+      "sales": 3089124038.0,
+      "operating_profit": -9443656317.0,
+      "net_profit": -16269331210.0,
+      "total_assets": 70208203490.0
+    },
+    {
+      "year": "2025",
+      "sales": 8044626288.0,
+      "operating_profit": -7776013960.0,
+      "net_profit": 61110643142.0,
+      "total_assets": 56548380942.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "017670",
+      "corpName": "SK텔레콤",
+      "stage": "service",
+      "revenue": 170992
+    },
+    {
+      "stockCode": "032640",
+      "corpName": "LG유플러스",
+      "stage": "device",
+      "revenue": 154517
+    },
+    {
+      "stockCode": "037460",
+      "corpName": "삼지전자",
+      "stage": "infra",
+      "revenue": 42911
+    },
+    {
+      "stockCode": "101330",
+      "corpName": "모베이스",
+      "stage": "service",
+      "revenue": 13713
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "ego": {
+    "stockCode": "192390",
+    "corpName": "윈하이텍",
+    "industry": "construction",
+    "stage": "material",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 751,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 310629
+    }
+  ],
+  "edges": [
+    {
+      "from": "192390",
+      "to": "000720",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 94497839269.0,
+      "operating_profit": 1908078664.0,
+      "net_profit": null,
+      "total_assets": 119199766708.0
+    },
+    {
+      "year": "2022",
+      "sales": 116775846633.0,
+      "operating_profit": 9730008059.0,
+      "net_profit": 6291865220.0,
+      "total_assets": 145976606762.0
+    },
+    {
+      "year": "2023",
+      "sales": 153794945013.0,
+      "operating_profit": 18361474569.0,
+      "net_profit": 6536889264.0,
+      "total_assets": 146429397837.0
+    },
+    {
+      "year": "2024",
+      "sales": 112165957180.0,
+      "operating_profit": 11032093461.0,
+      "net_profit": 7773737996.0,
+      "total_assets": 141481800420.0
+    },
+    {
+      "year": "2025",
+      "sales": 75147762488.0,
+      "operating_profit": -3934799771.0,
+      "net_profit": -6689547573.0,
+      "total_assets": 152864432326.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

@@ -1,0 +1,175 @@
+{
+  "ego": {
+    "stockCode": "043590",
+    "corpName": "웰킵스하이텍",
+    "industry": "semiconductor",
+    "stage": "design",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 214,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "045660",
+      "corpName": "에이텍",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 1602
+    },
+    {
+      "stockCode": "011230",
+      "corpName": "삼화전자공업",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 296
+    }
+  ],
+  "edges": [
+    {
+      "from": "045660",
+      "to": "043590",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "011230",
+      "to": "043590",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 33132709863.0,
+      "operating_profit": 2062052139.0,
+      "net_profit": 6305886341.0,
+      "total_assets": 33354014790.0
+    },
+    {
+      "year": "2022",
+      "sales": 20896933146.0,
+      "operating_profit": -159772668.0,
+      "net_profit": -739440279.0,
+      "total_assets": 36429581717.0
+    },
+    {
+      "year": "2023",
+      "sales": 20230592910.0,
+      "operating_profit": 293147974.0,
+      "net_profit": 9122489288.0,
+      "total_assets": 46082687599.0
+    },
+    {
+      "year": "2024",
+      "sales": 29840103941.0,
+      "operating_profit": -9955365178.0,
+      "net_profit": -9826749444.0,
+      "total_assets": 57796786445.0
+    },
+    {
+      "year": "2025",
+      "sales": 21353066604.0,
+      "operating_profit": -2101093803.0,
+      "net_profit": -3237904381.0,
+      "total_assets": 56409494545.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "electronics",
+        2
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "display",
+        1
+      ],
+      [
+        "component",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "045660",
+      "corpName": "에이텍",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "011230",
+      "corpName": "삼화전자공업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

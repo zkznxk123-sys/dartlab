@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "098460",
+    "corpName": "고영",
+    "industry": "machinery",
+    "stage": "special",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 2326,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "001450",
+      "to": "098460",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 0.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 247301342081.0,
+      "operating_profit": 41351274821.0,
+      "net_profit": 39586268577.0,
+      "total_assets": 368329267167.0
+    },
+    {
+      "year": "2022",
+      "sales": 275359587202.0,
+      "operating_profit": 44258682098.0,
+      "net_profit": 39283548838.0,
+      "total_assets": 391686493023.0
+    },
+    {
+      "year": "2023",
+      "sales": 225630691398.0,
+      "operating_profit": 20372226090.0,
+      "net_profit": 21925959777.0,
+      "total_assets": 367212257805.0
+    },
+    {
+      "year": "2024",
+      "sales": 202538127214.0,
+      "operating_profit": 3322352718.0,
+      "net_profit": 0.0,
+      "total_assets": 377932270492.0
+    },
+    {
+      "year": "2025",
+      "sales": 232647218656.0,
+      "operating_profit": 17342338477.0,
+      "net_profit": 14756087568.0,
+      "total_assets": null
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

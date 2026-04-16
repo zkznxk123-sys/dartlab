@@ -1,0 +1,102 @@
+{
+  "ego": {
+    "stockCode": "128660",
+    "corpName": "피제이메탈",
+    "industry": "steel",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 3490,
+    "confidence": 0.3,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 246172067096.0,
+      "operating_profit": 25184273971.0,
+      "net_profit": 18350248383.0,
+      "total_assets": 84174316761.0
+    },
+    {
+      "year": "2022",
+      "sales": 269048598652.0,
+      "operating_profit": 10373344511.0,
+      "net_profit": 5782322160.0,
+      "total_assets": 113095308881.0
+    },
+    {
+      "year": "2023",
+      "sales": 229349317992.0,
+      "operating_profit": 6013093241.0,
+      "net_profit": 13387158971.0,
+      "total_assets": 134241156542.0
+    },
+    {
+      "year": "2024",
+      "sales": 254485502212.0,
+      "operating_profit": 9170810482.0,
+      "net_profit": -1770576688.0,
+      "total_assets": 130800225227.0
+    },
+    {
+      "year": "2025",
+      "sales": 348957303218.0,
+      "operating_profit": 12226661140.0,
+      "net_profit": 0.0,
+      "total_assets": 164420004711.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

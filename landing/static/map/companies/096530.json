@@ -1,0 +1,181 @@
+{
+  "ego": {
+    "stockCode": "096530",
+    "corpName": "씨젠",
+    "industry": "pharma",
+    "stage": "device",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 4742,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "900290",
+      "corpName": "GRT",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 15
+    },
+    {
+      "stockCode": "001630",
+      "corpName": "종근당홀딩스",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 9590
+    },
+    {
+      "stockCode": "214370",
+      "corpName": "케어젠",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 728
+    }
+  ],
+  "edges": [
+    {
+      "from": "900290",
+      "to": "096530",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "4. 생산설비(연구설비)에 관한 사항(상세)"
+    },
+    {
+      "from": "001630",
+      "to": "096530",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "214370",
+      "to": "096530",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 1370833012026.0,
+      "operating_profit": 666658312398.0,
+      "net_profit": 536558868442.0,
+      "total_assets": 1489718580570.0
+    },
+    {
+      "year": "2022",
+      "sales": 853561091243.0,
+      "operating_profit": 196492262649.0,
+      "net_profit": 182138620711.0,
+      "total_assets": 1390777557476.0
+    },
+    {
+      "year": "2023",
+      "sales": 367375048980.0,
+      "operating_profit": -30053478765.0,
+      "net_profit": 733203514.0,
+      "total_assets": 1251451913635.0
+    },
+    {
+      "year": "2024",
+      "sales": 414251733221.0,
+      "operating_profit": -16479248127.0,
+      "net_profit": 0.0,
+      "total_assets": 1205279005666.0
+    },
+    {
+      "year": "2025",
+      "sales": 474231586051.0,
+      "operating_profit": 34549810779.0,
+      "net_profit": 48274770369.0,
+      "total_assets": 1235797418831.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "machinery",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "precision",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "900290",
+      "corpName": "GRT",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

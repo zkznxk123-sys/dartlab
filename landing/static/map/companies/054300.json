@@ -1,0 +1,95 @@
+{
+  "ego": {
+    "stockCode": "054300",
+    "corpName": "팬스타엔터프라이즈",
+    "industry": "machinery",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 672,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 9189353217.0,
+      "operating_profit": 1050960045.0,
+      "net_profit": 2246714072.0,
+      "total_assets": 81200734762.0
+    },
+    {
+      "year": "2022",
+      "sales": 66992658446.0,
+      "operating_profit": 1949019175.0,
+      "net_profit": 536922363.0,
+      "total_assets": 91602764392.0
+    },
+    {
+      "year": "2023",
+      "sales": 69113153048.0,
+      "operating_profit": 1627809942.0,
+      "net_profit": 275201691.0,
+      "total_assets": 95675924417.0
+    },
+    {
+      "year": "2025",
+      "sales": 67161013598.0,
+      "operating_profit": -2792354525.0,
+      "net_profit": -1574633226.0,
+      "total_assets": 148949295149.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

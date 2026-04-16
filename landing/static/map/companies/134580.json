@@ -1,0 +1,173 @@
+{
+  "ego": {
+    "stockCode": "134580",
+    "corpName": "탑코미디어",
+    "industry": "media",
+    "stage": "content",
+    "role": "서비스",
+    "stream": "upstream",
+    "revenue": 486,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "032980",
+      "corpName": "바이온",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 206
+    },
+    {
+      "stockCode": "064240",
+      "corpName": "홈캐스트",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 980
+    },
+    {
+      "stockCode": "020120",
+      "corpName": "키다리스튜디오",
+      "industry": "media",
+      "stage": "content",
+      "revenue": 2175
+    }
+  ],
+  "edges": [
+    {
+      "from": "134580",
+      "to": "032980",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "134580",
+      "to": "064240",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "020120",
+      "to": "134580",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 0.6%"
+    },
+    {
+      "from": "064240",
+      "to": "134580",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 7.2%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 22256958341.0,
+      "operating_profit": -4826955807.0,
+      "net_profit": -3893845588.0,
+      "total_assets": 55294572757.0
+    },
+    {
+      "year": "2022",
+      "sales": 22615183360.0,
+      "operating_profit": 341102831.0,
+      "net_profit": -3028958668.0,
+      "total_assets": 58867894045.0
+    },
+    {
+      "year": "2023",
+      "sales": 19178342271.0,
+      "operating_profit": -2653050366.0,
+      "net_profit": -11865220642.0,
+      "total_assets": 41870851622.0
+    },
+    {
+      "year": "2024",
+      "sales": 23340259807.0,
+      "operating_profit": -3726430593.0,
+      "net_profit": -4723548955.0,
+      "total_assets": 38557960524.0
+    },
+    {
+      "year": "2025",
+      "sales": 48604543452.0,
+      "operating_profit": 3670011557.0,
+      "net_profit": -2324402052.0,
+      "total_assets": 60367477963.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "035760",
+      "corpName": "CJ ENM",
+      "stage": "content",
+      "revenue": 51345
+    },
+    {
+      "stockCode": "030000",
+      "corpName": "제일기획",
+      "stage": "content",
+      "revenue": 45469
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "214320",
+      "corpName": "이노션",
+      "stage": "platform",
+      "revenue": 21460
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ]
+}

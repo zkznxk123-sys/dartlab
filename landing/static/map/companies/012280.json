@@ -1,0 +1,143 @@
+{
+  "ego": {
+    "stockCode": "012280",
+    "corpName": "영화금속",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 3514,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 227332
+    }
+  ],
+  "edges": [
+    {
+      "from": "004020",
+      "to": "012280",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 235523771275.0,
+      "operating_profit": -16352615533.0,
+      "net_profit": -18521148795.0,
+      "total_assets": 211560372817.0
+    },
+    {
+      "year": "2022",
+      "sales": 284850842623.0,
+      "operating_profit": -1121315071.0,
+      "net_profit": 469416270.0,
+      "total_assets": 220738936358.0
+    },
+    {
+      "year": "2023",
+      "sales": 292311699831.0,
+      "operating_profit": 9395601425.0,
+      "net_profit": 7535978187.0,
+      "total_assets": 210002658451.0
+    },
+    {
+      "year": "2024",
+      "sales": 301699111405.0,
+      "operating_profit": 9880071656.0,
+      "net_profit": 8654294939.0,
+      "total_assets": 216774804117.0
+    },
+    {
+      "year": "2025",
+      "sales": 351423851427.0,
+      "operating_profit": 15225526956.0,
+      "net_profit": 0.0,
+      "total_assets": 236092067182.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

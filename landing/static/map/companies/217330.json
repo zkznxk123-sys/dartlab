@@ -1,0 +1,230 @@
+{
+  "ego": {
+    "stockCode": "217330",
+    "corpName": "싸이토젠",
+    "industry": "software",
+    "stage": "platform",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 261,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "095500",
+      "corpName": "미래나노텍",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 5385
+    },
+    {
+      "stockCode": "950130",
+      "corpName": "엑세스바이오",
+      "industry": "pharma",
+      "stage": "device",
+      "revenue": 0
+    },
+    {
+      "stockCode": "054180",
+      "corpName": "메디콕스",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 282
+    },
+    {
+      "stockCode": "060230",
+      "corpName": "제이케이시냅스",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 619
+    },
+    {
+      "stockCode": "066700",
+      "corpName": "테라젠이텍스",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 2716
+    },
+    {
+      "stockCode": "192410",
+      "corpName": "오늘이엔엠",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 167
+    }
+  ],
+  "edges": [
+    {
+      "from": "095500",
+      "to": "217330",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "950130",
+      "to": "217330",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "054180",
+      "to": "217330",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.8%"
+    },
+    {
+      "from": "060230",
+      "to": "217330",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 3.4%"
+    },
+    {
+      "from": "066700",
+      "to": "217330",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 3.0%"
+    },
+    {
+      "from": "095500",
+      "to": "217330",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "192410",
+      "to": "217330",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 3.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 347845637.0,
+      "operating_profit": -12860919794.0,
+      "net_profit": -10870612221.0,
+      "total_assets": 55527739574.0
+    },
+    {
+      "year": "2022",
+      "sales": 760777445.0,
+      "operating_profit": -11497462671.0,
+      "net_profit": -18771226009.0,
+      "total_assets": 41220347999.0
+    },
+    {
+      "year": "2023",
+      "sales": 3184360751.0,
+      "operating_profit": -11791605783.0,
+      "net_profit": -15769500591.0,
+      "total_assets": 74450069700.0
+    },
+    {
+      "year": "2024",
+      "sales": 10910643036.0,
+      "operating_profit": -10665601019.0,
+      "net_profit": -17116101889.0,
+      "total_assets": 72478061994.0
+    },
+    {
+      "year": "2025",
+      "sales": 26054851084.0,
+      "operating_profit": -8163323622.0,
+      "net_profit": -12339826935.0,
+      "total_assets": 62240155860.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "ego": {
+    "stockCode": "138610",
+    "corpName": "나이벡",
+    "industry": "pharma",
+    "stage": "research",
+    "role": "연구",
+    "stream": "upstream",
+    "revenue": 327,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 13625370978.0,
+      "operating_profit": -2108202529.0,
+      "net_profit": -5739766946.0,
+      "total_assets": 53277317200.0
+    },
+    {
+      "year": "2022",
+      "sales": 21670439547.0,
+      "operating_profit": 645669182.0,
+      "net_profit": -3765862625.0,
+      "total_assets": 70988007618.0
+    },
+    {
+      "year": "2023",
+      "sales": 15703946248.0,
+      "operating_profit": -2230481871.0,
+      "net_profit": -6284177530.0,
+      "total_assets": 66802267300.0
+    },
+    {
+      "year": "2025",
+      "sales": 32718793376.0,
+      "operating_profit": 5025830136.0,
+      "net_profit": 4641985404.0,
+      "total_assets": 63002101804.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "207940",
+      "corpName": "삼성바이오로직스",
+      "stage": "research",
+      "revenue": 45570
+    },
+    {
+      "stockCode": "068270",
+      "corpName": "셀트리온",
+      "stage": "research",
+      "revenue": 41625
+    },
+    {
+      "stockCode": "005250",
+      "corpName": "녹십자홀딩스",
+      "stage": "research",
+      "revenue": 24515
+    },
+    {
+      "stockCode": "000100",
+      "corpName": "유한양행",
+      "stage": "api",
+      "revenue": 21866
+    },
+    {
+      "stockCode": "003090",
+      "corpName": "대웅",
+      "stage": "formulation",
+      "revenue": 20684
+    }
+  ]
+}

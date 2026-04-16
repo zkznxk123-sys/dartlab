@@ -1,0 +1,247 @@
+{
+  "ego": {
+    "stockCode": "060260",
+    "corpName": "뉴보텍",
+    "industry": "chemical",
+    "stage": "polymer",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 435,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "033640",
+      "corpName": "네패스",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 5214
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "industry": "semiconductor",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "452400",
+      "corpName": "이닉스",
+      "industry": "semiconductor",
+      "stage": "packaging",
+      "revenue": 1226
+    }
+  ],
+  "edges": [
+    {
+      "from": "051910",
+      "to": "060260",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 7544.0,
+      "ratio": 75.0,
+      "product": "PVC RESIN",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "상하수도사업부문 PVC RESIN"
+    },
+    {
+      "from": "033640",
+      "to": "060260",
+      "direction": "in",
+      "type": "supplier",
+      "amount": 289.0,
+      "ratio": 40.0,
+      "product": "토트",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "재활용사업부문 토트"
+    },
+    {
+      "from": "000660",
+      "to": "060260",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "452400",
+      "to": "060260",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 46970620099.0,
+      "operating_profit": -2501242237.0,
+      "net_profit": -8092851405.0,
+      "total_assets": 53479598464.0
+    },
+    {
+      "year": "2022",
+      "sales": 45983827244.0,
+      "operating_profit": 714798738.0,
+      "net_profit": -2701200357.0,
+      "total_assets": 52378383416.0
+    },
+    {
+      "year": "2023",
+      "sales": 48892913831.0,
+      "operating_profit": -703531470.0,
+      "net_profit": -4757267441.0,
+      "total_assets": 47289232792.0
+    },
+    {
+      "year": "2024",
+      "sales": 43364851572.0,
+      "operating_profit": 2638884305.0,
+      "net_profit": 1295013172.0,
+      "total_assets": 51209695755.0
+    },
+    {
+      "year": "2025",
+      "sales": 43479893003.0,
+      "operating_profit": 1298999718.0,
+      "net_profit": 1879198151.0,
+      "total_assets": 55638476714.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 2,
+    "totalSupplyAmount": 7833.0,
+    "hhi": 9289.0,
+    "hhiRisk": "집중",
+    "top1Ratio": 96.3,
+    "top3Ratio": 100.0,
+    "industryDiversity": 3,
+    "stageDiversity": 4,
+    "topSupplyIndustries": [
+      [
+        "semiconductor",
+        2
+      ],
+      [
+        "chemical",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "polymer",
+        1
+      ],
+      [
+        "display",
+        1
+      ],
+      [
+        "fab",
+        1
+      ],
+      [
+        "packaging",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "product": "PVC RESIN",
+      "amount": 7544.0,
+      "ratio": 75.0,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "033640",
+      "corpName": "네패스",
+      "product": "토트",
+      "amount": 289.0,
+      "ratio": 40.0,
+      "confidence": 0.9,
+      "source": "docs_table"
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "452400",
+      "corpName": "이닉스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+{
+  "ego": {
+    "stockCode": "053800",
+    "corpName": "안랩",
+    "industry": "software",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 2677,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "121060",
+      "corpName": "유니포인트",
+      "industry": "construction",
+      "stage": "engineering",
+      "revenue": 0
+    },
+    {
+      "stockCode": "0015S0",
+      "corpName": "페스카로",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 0
+    },
+    {
+      "stockCode": "434480",
+      "corpName": "모니터랩",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 192
+    }
+  ],
+  "edges": [
+    {
+      "from": "053800",
+      "to": "121060",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "053800",
+      "to": "0015S0",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 3.3%"
+    },
+    {
+      "from": "053800",
+      "to": "434480",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 5.9%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 207272160249.0,
+      "operating_profit": 22930036754.0,
+      "net_profit": 42162431416.0,
+      "total_assets": 338208336825.0
+    },
+    {
+      "year": "2022",
+      "sales": 227975280500.0,
+      "operating_profit": 26987237453.0,
+      "net_profit": 14174781497.0,
+      "total_assets": 345012452317.0
+    },
+    {
+      "year": "2023",
+      "sales": 239201057076.0,
+      "operating_profit": 26422531585.0,
+      "net_profit": 35827276209.0,
+      "total_assets": 375384295785.0
+    },
+    {
+      "year": "2024",
+      "sales": 260569413451.0,
+      "operating_profit": 27682476881.0,
+      "net_profit": 32395312129.0,
+      "total_assets": 464664131084.0
+    },
+    {
+      "year": "2025",
+      "sales": 267656916942.0,
+      "operating_profit": 33276653034.0,
+      "net_profit": 0.0,
+      "total_assets": 487574291112.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "121060",
+      "corpName": "유니포인트",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

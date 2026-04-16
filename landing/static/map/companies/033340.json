@@ -1,0 +1,199 @@
+{
+  "ego": {
+    "stockCode": "033340",
+    "corpName": "좋은사람들",
+    "industry": "textile",
+    "stage": "apparel",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 726,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "004360",
+      "corpName": "세방",
+      "industry": "logistics",
+      "stage": "general",
+      "revenue": 12418
+    },
+    {
+      "stockCode": "006490",
+      "corpName": "인스코비",
+      "industry": "retail",
+      "stage": "retail",
+      "revenue": 1056
+    },
+    {
+      "stockCode": "033270",
+      "corpName": "유나이티드",
+      "industry": "pharma",
+      "stage": "research",
+      "revenue": 2888
+    },
+    {
+      "stockCode": "038110",
+      "corpName": "에코플라스틱",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 25620
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "industry": "semiconductor",
+      "stage": "test",
+      "revenue": 29419
+    }
+  ],
+  "edges": [
+    {
+      "from": "004360",
+      "to": "033340",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "006490",
+      "to": "033340",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033340",
+      "to": "033270",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "038110",
+      "to": "033340",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "122690",
+      "to": "033340",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 90096812952.0,
+      "operating_profit": -12490479416.0,
+      "net_profit": -38973376782.0,
+      "total_assets": 82053501646.0
+    },
+    {
+      "year": "2022",
+      "sales": 80470105663.0,
+      "operating_profit": -4314766827.0,
+      "net_profit": -6233028839.0,
+      "total_assets": 73931547023.0
+    },
+    {
+      "year": "2023",
+      "sales": 82568061629.0,
+      "operating_profit": 1288396956.0,
+      "net_profit": 2779833091.0,
+      "total_assets": 77079138754.0
+    },
+    {
+      "year": "2024",
+      "sales": 90184220097.0,
+      "operating_profit": 1297148979.0,
+      "net_profit": 340681081.0,
+      "total_assets": 80836869755.0
+    },
+    {
+      "year": "2025",
+      "sales": 72599453889.0,
+      "operating_profit": -6083580532.0,
+      "net_profit": -13727597471.0,
+      "total_assets": 84896797514.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

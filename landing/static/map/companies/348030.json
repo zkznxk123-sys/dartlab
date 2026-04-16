@@ -1,0 +1,159 @@
+{
+  "ego": {
+    "stockCode": "348030",
+    "corpName": "모비릭스",
+    "industry": "software",
+    "stage": "game",
+    "role": "서비스",
+    "stream": "downstream",
+    "revenue": 397,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "095660",
+      "corpName": "네오위즈",
+      "industry": "software",
+      "stage": "game",
+      "revenue": 4327
+    }
+  ],
+  "edges": [
+    {
+      "from": "095660",
+      "to": "348030",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "348030",
+      "to": "095660",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "095660",
+      "to": "348030",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 9.9%"
+    },
+    {
+      "from": "348030",
+      "to": "095660",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.5%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 56717885751.0,
+      "operating_profit": 10029995281.0,
+      "net_profit": 0.0,
+      "total_assets": 80493596690.0
+    },
+    {
+      "year": "2022",
+      "sales": 70925689520.0,
+      "operating_profit": 5324161544.0,
+      "net_profit": 0.0,
+      "total_assets": 86481871240.0
+    },
+    {
+      "year": "2023",
+      "sales": 90794664557.0,
+      "operating_profit": -1524499350.0,
+      "net_profit": 0.0,
+      "total_assets": 78873133997.0
+    },
+    {
+      "year": "2024",
+      "sales": 56000833353.0,
+      "operating_profit": -9307921050.0,
+      "net_profit": 0.0,
+      "total_assets": 63319751411.0
+    },
+    {
+      "year": "2025",
+      "sales": 39684702560.0,
+      "operating_profit": -8922905730.0,
+      "net_profit": null,
+      "total_assets": 52123313199.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "034730",
+      "corpName": "SK",
+      "stage": "solution",
+      "revenue": 1227033
+    },
+    {
+      "stockCode": "035420",
+      "corpName": "NAVER",
+      "stage": "platform",
+      "revenue": 120350
+    },
+    {
+      "stockCode": "006120",
+      "corpName": "SK디스커버리",
+      "stage": "platform",
+      "revenue": 101640
+    },
+    {
+      "stockCode": "124500",
+      "corpName": "아이티센글로벌",
+      "stage": "solution",
+      "revenue": 88708
+    },
+    {
+      "stockCode": "035720",
+      "corpName": "카카오",
+      "stage": "platform",
+      "revenue": 80991
+    }
+  ]
+}

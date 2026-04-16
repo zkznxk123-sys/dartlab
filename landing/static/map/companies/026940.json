@@ -1,0 +1,152 @@
+{
+  "ego": {
+    "stockCode": "026940",
+    "corpName": "부국철강",
+    "industry": "steel",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1799,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "000300",
+      "corpName": "DH오토넥스",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 402
+    },
+    {
+      "stockCode": "290120",
+      "corpName": "DH오토리드",
+      "industry": "auto",
+      "stage": "chassis",
+      "revenue": 3556
+    }
+  ],
+  "edges": [
+    {
+      "from": "026940",
+      "to": "000300",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "026940",
+      "to": "290120",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 195734222688.0,
+      "operating_profit": 8055575084.0,
+      "net_profit": 0.0,
+      "total_assets": 150684042688.0
+    },
+    {
+      "year": "2022",
+      "sales": 209727335869.0,
+      "operating_profit": 5922305967.0,
+      "net_profit": 7102655812.0,
+      "total_assets": 153622003905.0
+    },
+    {
+      "year": "2023",
+      "sales": 191434539427.0,
+      "operating_profit": 2416388602.0,
+      "net_profit": 3624750827.0,
+      "total_assets": 156095854681.0
+    },
+    {
+      "year": "2025",
+      "sales": 179910680270.0,
+      "operating_profit": 262298378.0,
+      "net_profit": 2150579102.0,
+      "total_assets": 152062864116.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "000300",
+      "corpName": "DH오토넥스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "290120",
+      "corpName": "DH오토리드",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

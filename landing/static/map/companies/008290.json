@@ -1,0 +1,159 @@
+{
+  "ego": {
+    "stockCode": "008290",
+    "corpName": "원풍물산",
+    "industry": "textile",
+    "stage": "apparel",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 169,
+    "confidence": 0.733,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "078590",
+      "corpName": "휴림에이텍",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 644
+    },
+    {
+      "stockCode": "100250",
+      "corpName": "진양홀딩스",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 2798
+    }
+  ],
+  "edges": [
+    {
+      "from": "008290",
+      "to": "078590",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": 28.0,
+      "product": "원단류(원재료)",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "자동차내장CARPET 외 원단류(원재료)"
+    },
+    {
+      "from": "008290",
+      "to": "100250",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 30870988865.0,
+      "operating_profit": -1292420141.0,
+      "net_profit": -9328854968.0,
+      "total_assets": 39684289972.0
+    },
+    {
+      "year": "2022",
+      "sales": 33300032711.0,
+      "operating_profit": 210181442.0,
+      "net_profit": -3507733198.0,
+      "total_assets": 33088296547.0
+    },
+    {
+      "year": "2023",
+      "sales": 28937832608.0,
+      "operating_profit": -1916462598.0,
+      "net_profit": 0.0,
+      "total_assets": 33444831395.0
+    },
+    {
+      "year": "2024",
+      "sales": 22721808986.0,
+      "operating_profit": -4699113271.0,
+      "net_profit": 0.0,
+      "total_assets": 52346111760.0
+    },
+    {
+      "year": "2025",
+      "sales": 16935208093.0,
+      "operating_profit": -7199478124.0,
+      "net_profit": -7575315076.0,
+      "total_assets": 19815736437.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "078590",
+      "corpName": "휴림에이텍",
+      "product": "원단류(원재료)",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "100250",
+      "corpName": "진양홀딩스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "001120",
+      "corpName": "LX인터내셔널",
+      "stage": "apparel",
+      "revenue": 167063
+    },
+    {
+      "stockCode": "023530",
+      "corpName": "롯데쇼핑",
+      "stage": "apparel",
+      "revenue": 137384
+    },
+    {
+      "stockCode": "009970",
+      "corpName": "영원무역홀딩스",
+      "stage": "fiber",
+      "revenue": 48950
+    },
+    {
+      "stockCode": "111770",
+      "corpName": "영원무역",
+      "stage": "apparel",
+      "revenue": 40636
+    },
+    {
+      "stockCode": "016450",
+      "corpName": "한세예스24홀딩스",
+      "stage": "apparel",
+      "revenue": 34098
+    }
+  ]
+}

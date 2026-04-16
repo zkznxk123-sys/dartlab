@@ -1,0 +1,171 @@
+{
+  "ego": {
+    "stockCode": "119500",
+    "corpName": "포메탈",
+    "industry": "electronics",
+    "stage": "component",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 511,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "008830",
+      "corpName": "대동기어",
+      "industry": "auto",
+      "stage": "powertrain",
+      "revenue": 2209
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "126640",
+      "corpName": "화신정공",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 3789
+    }
+  ],
+  "edges": [
+    {
+      "from": "119500",
+      "to": "008830",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "119500",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "119500",
+      "to": "126640",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 695543555.0,
+      "operating_profit": 2108558142.0,
+      "net_profit": 2012075543.0,
+      "total_assets": 64475165973.0
+    },
+    {
+      "year": "2022",
+      "sales": 1422301300.0,
+      "operating_profit": 2017778037.0,
+      "net_profit": 1726543563.0,
+      "total_assets": 67145285586.0
+    },
+    {
+      "year": "2023",
+      "sales": 67681751093.0,
+      "operating_profit": 2143509737.0,
+      "net_profit": 1909472645.0,
+      "total_assets": 65547374272.0
+    },
+    {
+      "year": "2025",
+      "sales": 51114697557.0,
+      "operating_profit": 1939868287.0,
+      "net_profit": 2158443277.0,
+      "total_assets": 62159351160.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "008830",
+      "corpName": "대동기어",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "126640",
+      "corpName": "화신정공",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

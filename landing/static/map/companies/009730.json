@@ -1,0 +1,95 @@
+{
+  "ego": {
+    "stockCode": "009730",
+    "corpName": "이렘",
+    "industry": "steel",
+    "stage": "product",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 0,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 45603510039.0,
+      "operating_profit": 1054013417.0,
+      "net_profit": -2513258569.0,
+      "total_assets": 36481931799.0
+    },
+    {
+      "year": "2022",
+      "sales": 66612579112.0,
+      "operating_profit": 1987489985.0,
+      "net_profit": 2915877037.0,
+      "total_assets": 45517291415.0
+    },
+    {
+      "year": "2023",
+      "sales": 76780298502.0,
+      "operating_profit": 979218394.0,
+      "net_profit": 95378578.0,
+      "total_assets": 61128754888.0
+    },
+    {
+      "year": "2024",
+      "sales": 109831999855.0,
+      "operating_profit": -4723456766.0,
+      "net_profit": -14898026363.0,
+      "total_assets": 130328701520.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

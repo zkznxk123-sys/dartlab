@@ -1,0 +1,286 @@
+{
+  "ego": {
+    "stockCode": "003720",
+    "corpName": "삼영",
+    "industry": "chemical",
+    "stage": "polymer",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1532,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "248070",
+      "corpName": "솔루엠",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 17002
+    },
+    {
+      "stockCode": "006650",
+      "corpName": "대한유화",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 33478
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "industry": "steel",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "industry": "chemical",
+      "stage": "basic",
+      "revenue": 184830
+    }
+  ],
+  "edges": [
+    {
+      "from": "003720",
+      "to": "248070",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 93312.0,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": ""
+    },
+    {
+      "from": "006650",
+      "to": "003720",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "051910",
+      "to": "003720",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "004020",
+      "to": "003720",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "011170",
+      "to": "003720",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": {
+    "narrative": "긍정 신호: 매출 성장 + 마진 확대 + FCF 양수.\n매출이 +33.0% 성장하면서 영업이익률이 6.3%에서 11.1%로 확대되었다. FCF도 양수를 유지하여 질적 성장이 확인된다.",
+    "strengths": [
+      "매출 성장 + 마진 확대 + FCF 양수",
+      "매출 고성장 (33.0%)",
+      "ROE 상위 1% (17.0%)",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**",
+      "매출 성장 + 마진 확대 + FCF 양수**"
+    ],
+    "weaknesses": [
+      "매출 중간 집중 (HHI 4,074)",
+      "영업레버리지(DOL) 4.0 — 매출 변동에 이익 민감",
+      "이익 변동계수 2.31 — 이익 변동성 높음"
+    ],
+    "sector": "소재 > 화학",
+    "source": "audit",
+    "createdAt": "1775430966.5517104"
+  },
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 133269776206.0,
+      "operating_profit": 2591808229.0,
+      "net_profit": 150625790.0,
+      "total_assets": 117674615660.0
+    },
+    {
+      "year": "2022",
+      "sales": 147748013490.0,
+      "operating_profit": 1039299015.0,
+      "net_profit": -1614994662.0,
+      "total_assets": 135833316129.0
+    },
+    {
+      "year": "2023",
+      "sales": 122586707813.0,
+      "operating_profit": 6029549093.0,
+      "net_profit": 18914809850.0,
+      "total_assets": 132156558539.0
+    },
+    {
+      "year": "2024",
+      "sales": 126040086242.0,
+      "operating_profit": 9101817091.0,
+      "net_profit": 8349434746.0,
+      "total_assets": 136049880807.0
+    },
+    {
+      "year": "2025",
+      "sales": 153208300579.0,
+      "operating_profit": 14921182578.0,
+      "net_profit": null,
+      "total_assets": 198418692922.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 4,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 3,
+    "topSupplyIndustries": [
+      [
+        "chemical",
+        3
+      ],
+      [
+        "steel",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "basic",
+        2
+      ],
+      [
+        "polymer",
+        1
+      ],
+      [
+        "raw",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "006650",
+      "corpName": "대한유화",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "011170",
+      "corpName": "롯데케미칼",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "248070",
+      "corpName": "솔루엠",
+      "product": "",
+      "amount": 93312.0,
+      "type": "supplier",
+      "confidence": 0.9
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

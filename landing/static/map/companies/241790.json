@@ -1,0 +1,154 @@
+{
+  "ego": {
+    "stockCode": "241790",
+    "corpName": "티이엠씨씨엔에스",
+    "industry": "semiconductor",
+    "stage": "equipment",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 1680,
+    "confidence": 0.8,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "425040",
+      "corpName": "티이엠씨",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 2797
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ],
+  "edges": [
+    {
+      "from": "241790",
+      "to": "425040",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "241790",
+      "to": "041510",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "425040",
+      "to": "241790",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 93940248864.0,
+      "operating_profit": 16021902302.0,
+      "net_profit": 1310372865.0,
+      "total_assets": 115282253644.0
+    },
+    {
+      "year": "2022",
+      "sales": 164969267191.0,
+      "operating_profit": 22791281609.0,
+      "net_profit": 15783984267.0,
+      "total_assets": 137616844227.0
+    },
+    {
+      "year": "2023",
+      "sales": 140336756639.0,
+      "operating_profit": 13324269282.0,
+      "net_profit": 11996857605.0,
+      "total_assets": 191391453954.0
+    },
+    {
+      "year": "2024",
+      "sales": 193531706663.0,
+      "operating_profit": 5924767490.0,
+      "net_profit": 8737451309.0,
+      "total_assets": 161130623437.0
+    },
+    {
+      "year": "2025",
+      "sales": 168040555596.0,
+      "operating_profit": 8997572785.0,
+      "net_profit": 4261418654.0,
+      "total_assets": 168074903539.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005930",
+      "corpName": "삼성전자",
+      "stage": "fab",
+      "revenue": 3336059
+    },
+    {
+      "stockCode": "000660",
+      "corpName": "SK하이닉스",
+      "stage": "fab",
+      "revenue": 971467
+    },
+    {
+      "stockCode": "122690",
+      "corpName": "서진오토모티브",
+      "stage": "test",
+      "revenue": 29419
+    },
+    {
+      "stockCode": "108320",
+      "corpName": "LX세미콘",
+      "stage": "design",
+      "revenue": 16391
+    },
+    {
+      "stockCode": "067310",
+      "corpName": "하나마이크론",
+      "stage": "packaging",
+      "revenue": 15344
+    }
+  ]
+}

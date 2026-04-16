@@ -1,0 +1,135 @@
+{
+  "ego": {
+    "stockCode": "045520",
+    "corpName": "크린앤사이언스",
+    "industry": "machinery",
+    "stage": "special",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 861,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "073570",
+      "corpName": "리튬포어스",
+      "industry": "misc",
+      "stage": "",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "073570",
+      "to": "045520",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "073570",
+      "to": "045520",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 121656086161.0,
+      "operating_profit": -2686239221.0,
+      "net_profit": -7253056154.0,
+      "total_assets": 117743645089.0
+    },
+    {
+      "year": "2022",
+      "sales": 86034564156.0,
+      "operating_profit": -10900237959.0,
+      "net_profit": -16301374461.0,
+      "total_assets": 94521738248.0
+    },
+    {
+      "year": "2023",
+      "sales": 92497051974.0,
+      "operating_profit": 938086282.0,
+      "net_profit": 0.0,
+      "total_assets": 94166974531.0
+    },
+    {
+      "year": "2024",
+      "sales": 84623447939.0,
+      "operating_profit": -848927534.0,
+      "net_profit": -7406581178.0,
+      "total_assets": 82397429489.0
+    },
+    {
+      "year": "2025",
+      "sales": 86098327172.0,
+      "operating_profit": -965305263.0,
+      "net_profit": 0.0,
+      "total_assets": 74852053246.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

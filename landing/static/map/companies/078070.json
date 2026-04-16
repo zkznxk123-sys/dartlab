@@ -1,0 +1,224 @@
+{
+  "ego": {
+    "stockCode": "078070",
+    "corpName": "유비쿼스홀딩스",
+    "industry": "realestate",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 1557,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "264450",
+      "corpName": "유비쿼스",
+      "industry": "telecom",
+      "stage": "device",
+      "revenue": 1164
+    },
+    {
+      "stockCode": "356680",
+      "corpName": "엑스게이트",
+      "industry": "software",
+      "stage": "solution",
+      "revenue": 481
+    },
+    {
+      "stockCode": "050890",
+      "corpName": "쏠리드",
+      "industry": "telecom",
+      "stage": "infra",
+      "revenue": 2948
+    },
+    {
+      "stockCode": "053610",
+      "corpName": "프로텍",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 2305
+    }
+  ],
+  "edges": [
+    {
+      "from": "264450",
+      "to": "078070",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "078070",
+      "to": "264450",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "078070",
+      "to": "356680",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "264450",
+      "to": "078070",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "050890",
+      "to": "078070",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 2.3%"
+    },
+    {
+      "from": "053610",
+      "to": "078070",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.0%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 150995968469.0,
+      "operating_profit": 32924692468.0,
+      "net_profit": 20054576173.0,
+      "total_assets": 352382557034.0
+    },
+    {
+      "year": "2022",
+      "sales": 151583235829.0,
+      "operating_profit": 27409294612.0,
+      "net_profit": 26781128940.0,
+      "total_assets": 364915089051.0
+    },
+    {
+      "year": "2023",
+      "sales": 171599705010.0,
+      "operating_profit": 32598433001.0,
+      "net_profit": 13991138353.0,
+      "total_assets": 391504528409.0
+    },
+    {
+      "year": "2024",
+      "sales": 125649459355.0,
+      "operating_profit": 14347890468.0,
+      "net_profit": 0.0,
+      "total_assets": 387718616568.0
+    },
+    {
+      "year": "2025",
+      "sales": 155662304600.0,
+      "operating_profit": 30605437419.0,
+      "net_profit": 0.0,
+      "total_assets": 417187552636.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "telecom",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "device",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "264450",
+      "corpName": "유비쿼스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "023590",
+      "corpName": "다우기술",
+      "stage": "general",
+      "revenue": 174950
+    },
+    {
+      "stockCode": "005440",
+      "corpName": "현대지에프홀딩스",
+      "stage": "general",
+      "revenue": 80916
+    },
+    {
+      "stockCode": "058650",
+      "corpName": "세아홀딩스",
+      "stage": "general",
+      "revenue": 66111
+    },
+    {
+      "stockCode": "034810",
+      "corpName": "해성산업",
+      "stage": "general",
+      "revenue": 22601
+    },
+    {
+      "stockCode": "002990",
+      "corpName": "금호건설",
+      "stage": "general",
+      "revenue": 20185
+    }
+  ]
+}

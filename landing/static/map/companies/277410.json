@@ -1,0 +1,343 @@
+{
+  "ego": {
+    "stockCode": "277410",
+    "corpName": "인산가",
+    "industry": "food",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 358,
+    "confidence": 0.6,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "industry": "media",
+      "stage": "agency",
+      "revenue": 11749
+    },
+    {
+      "stockCode": "200130",
+      "corpName": "콜마비앤에이치",
+      "industry": "pharma",
+      "stage": "formulation",
+      "revenue": 5749
+    },
+    {
+      "stockCode": "170030",
+      "corpName": "현대공업",
+      "industry": "auto",
+      "stage": "body",
+      "revenue": 3679
+    },
+    {
+      "stockCode": "009450",
+      "corpName": "경동나비엔",
+      "industry": "energy",
+      "stage": "distribution",
+      "revenue": 15022
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "industry": "consulting",
+      "stage": "general",
+      "revenue": 18845
+    },
+    {
+      "stockCode": "254120",
+      "corpName": "자비스",
+      "industry": "machinery",
+      "stage": "precision",
+      "revenue": 279
+    },
+    {
+      "stockCode": "016920",
+      "corpName": "카스",
+      "industry": "retail",
+      "stage": "wholesale",
+      "revenue": 1611
+    }
+  ],
+  "edges": [
+    {
+      "from": "041510",
+      "to": "277410",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "200130",
+      "to": "277410",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "170030",
+      "to": "277410",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "009450",
+      "to": "277410",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "002030",
+      "to": "277410",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "254120",
+      "to": "277410",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "4. 생산설비 변동사항(상세)"
+    },
+    {
+      "from": "016920",
+      "to": "277410",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "4. 생산설비 변동사항(상세)"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 38307595796.0,
+      "operating_profit": 8228512942.0,
+      "net_profit": 6326990393.0,
+      "total_assets": 88163758531.0
+    },
+    {
+      "year": "2022",
+      "sales": 33537795922.0,
+      "operating_profit": 4704571278.0,
+      "net_profit": 3797771198.0,
+      "total_assets": 87568349586.0
+    },
+    {
+      "year": "2023",
+      "sales": 37300346743.0,
+      "operating_profit": 5741488659.0,
+      "net_profit": 2963313.0,
+      "total_assets": 91041815550.0
+    },
+    {
+      "year": "2024",
+      "sales": 32484223840.0,
+      "operating_profit": 813707507.0,
+      "net_profit": 885653783.0,
+      "total_assets": 101751409522.0
+    },
+    {
+      "year": "2025",
+      "sales": 35804215193.0,
+      "operating_profit": 2306043998.0,
+      "net_profit": 637112217.0,
+      "total_assets": 114121833052.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 7,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 7,
+    "stageDiversity": 7,
+    "topSupplyIndustries": [
+      [
+        "media",
+        1
+      ],
+      [
+        "pharma",
+        1
+      ],
+      [
+        "auto",
+        1
+      ],
+      [
+        "energy",
+        1
+      ],
+      [
+        "consulting",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "agency",
+        1
+      ],
+      [
+        "formulation",
+        1
+      ],
+      [
+        "body",
+        1
+      ],
+      [
+        "distribution",
+        1
+      ],
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "200130",
+      "corpName": "콜마비앤에이치",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "170030",
+      "corpName": "현대공업",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "009450",
+      "corpName": "경동나비엔",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "002030",
+      "corpName": "아세아",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "254120",
+      "corpName": "자비스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "016920",
+      "corpName": "카스",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "001040",
+      "corpName": "CJ",
+      "stage": "raw",
+      "revenue": 450188
+    },
+    {
+      "stockCode": "097950",
+      "corpName": "CJ제일제당",
+      "stage": "raw",
+      "revenue": 273426
+    },
+    {
+      "stockCode": "000120",
+      "corpName": "CJ대한통운",
+      "stage": "",
+      "revenue": 122847
+    },
+    {
+      "stockCode": "033780",
+      "corpName": "케이티앤지",
+      "stage": "raw",
+      "revenue": 65797
+    },
+    {
+      "stockCode": "001680",
+      "corpName": "대상",
+      "stage": "raw",
+      "revenue": 44013
+    }
+  ]
+}

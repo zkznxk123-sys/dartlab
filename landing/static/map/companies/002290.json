@@ -1,0 +1,135 @@
+{
+  "ego": {
+    "stockCode": "002290",
+    "corpName": "삼일기업공사",
+    "industry": "construction",
+    "stage": "general",
+    "role": "서비스",
+    "stream": "midstream",
+    "revenue": 852,
+    "confidence": 0.9,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "003470",
+      "corpName": "유안타증권",
+      "industry": "finance",
+      "stage": "securities",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "003470",
+      "to": "002290",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "003470",
+      "to": "002290",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 5.6%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 73803536671.0,
+      "operating_profit": 3310404047.0,
+      "net_profit": 2948494240.0,
+      "total_assets": 73241914981.0
+    },
+    {
+      "year": "2022",
+      "sales": 63621775713.0,
+      "operating_profit": 2165696619.0,
+      "net_profit": 2494624571.0,
+      "total_assets": 73922641919.0
+    },
+    {
+      "year": "2023",
+      "sales": 78639206759.0,
+      "operating_profit": 3104213935.0,
+      "net_profit": 3839135431.0,
+      "total_assets": 76897352397.0
+    },
+    {
+      "year": "2024",
+      "sales": 112650084355.0,
+      "operating_profit": 5653268035.0,
+      "net_profit": 5844472345.0,
+      "total_assets": 86065246337.0
+    },
+    {
+      "year": "2025",
+      "sales": 85177109801.0,
+      "operating_profit": 7394157183.0,
+      "net_profit": 6838447857.0,
+      "total_assets": 97803648974.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "028260",
+      "corpName": "삼성물산",
+      "stage": "general",
+      "revenue": 407422
+    },
+    {
+      "stockCode": "000720",
+      "corpName": "현대건설",
+      "stage": "engineering",
+      "revenue": 310629
+    },
+    {
+      "stockCode": "028050",
+      "corpName": "삼성E&A",
+      "stage": "general",
+      "revenue": 90288
+    },
+    {
+      "stockCode": "047040",
+      "corpName": "대우건설",
+      "stage": "general",
+      "revenue": 80546
+    },
+    {
+      "stockCode": "011760",
+      "corpName": "현대코퍼레이션",
+      "stage": "general",
+      "revenue": 75543
+    }
+  ]
+}

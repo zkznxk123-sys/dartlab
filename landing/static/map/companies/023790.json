@@ -1,0 +1,205 @@
+{
+  "ego": {
+    "stockCode": "023790",
+    "corpName": "동일스틸럭스",
+    "industry": "steel",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 240,
+    "confidence": 0.6,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "133820",
+      "corpName": "화인베스틸",
+      "industry": "shipbuilding",
+      "stage": "build",
+      "revenue": 1862
+    }
+  ],
+  "edges": [
+    {
+      "from": "023790",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "023790",
+      "to": "031210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "023790",
+      "to": "133820",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "133820",
+      "to": "023790",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "133820",
+      "to": "023790",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 34359397512.0,
+      "operating_profit": 4349764137.0,
+      "net_profit": -25109527090.0,
+      "total_assets": 99399691955.0
+    },
+    {
+      "year": "2022",
+      "sales": 32221196756.0,
+      "operating_profit": 901676894.0,
+      "net_profit": null,
+      "total_assets": 96025381320.0
+    },
+    {
+      "year": "2023",
+      "sales": 21471427299.0,
+      "operating_profit": -3313257599.0,
+      "net_profit": null,
+      "total_assets": 73280949374.0
+    },
+    {
+      "year": "2024",
+      "sales": 16633409791.0,
+      "operating_profit": -1800645491.0,
+      "net_profit": null,
+      "total_assets": 71562643725.0
+    },
+    {
+      "year": "2025",
+      "sales": 24045379541.0,
+      "operating_profit": -2608399408.0,
+      "net_profit": null,
+      "total_assets": 74803061045.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "shipbuilding",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "build",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "133820",
+      "corpName": "화인베스틸",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

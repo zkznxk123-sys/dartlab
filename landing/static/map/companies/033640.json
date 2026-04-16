@@ -1,0 +1,327 @@
+{
+  "ego": {
+    "stockCode": "033640",
+    "corpName": "네패스",
+    "industry": "electronics",
+    "stage": "display",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 5214,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "060260",
+      "corpName": "뉴보텍",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 435
+    },
+    {
+      "stockCode": "001450",
+      "corpName": "현대해상",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    },
+    {
+      "stockCode": "330860",
+      "corpName": "네패스아크",
+      "industry": "semiconductor",
+      "stage": "test",
+      "revenue": 1141
+    },
+    {
+      "stockCode": "068790",
+      "corpName": "DMS",
+      "industry": "electronics",
+      "stage": "display",
+      "revenue": 1555
+    },
+    {
+      "stockCode": "196490",
+      "corpName": "디에이테크놀로지",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 333
+    },
+    {
+      "stockCode": "464500",
+      "corpName": "아이언디바이스",
+      "industry": "semiconductor",
+      "stage": "design",
+      "revenue": 101
+    }
+  ],
+  "edges": [
+    {
+      "from": "033640",
+      "to": "060260",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 289.0,
+      "ratio": 40.0,
+      "product": "토트",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "재활용사업부문 토트"
+    },
+    {
+      "from": "001450",
+      "to": "033640",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "024110",
+      "to": "033640",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "330860",
+      "to": "033640",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "068790",
+      "to": "033640",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "033640",
+      "to": "330860",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "196490",
+      "to": "033640",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "330860",
+      "to": "033640",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "033640",
+      "to": "464500",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "001450",
+      "to": "033640",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 418366537537.0,
+      "operating_profit": -16401042931.0,
+      "net_profit": -39680238659.0,
+      "total_assets": 1104860554018.0
+    },
+    {
+      "year": "2022",
+      "sales": 588039209962.0,
+      "operating_profit": -6714005791.0,
+      "net_profit": 94546157588.0,
+      "total_assets": 1131933359194.0
+    },
+    {
+      "year": "2023",
+      "sales": 480111639417.0,
+      "operating_profit": -70002734472.0,
+      "net_profit": 0.0,
+      "total_assets": 963118457710.0
+    },
+    {
+      "year": "2024",
+      "sales": 464331506206.0,
+      "operating_profit": 3401796348.0,
+      "net_profit": -79400160862.0,
+      "total_assets": 710112535938.0
+    },
+    {
+      "year": "2025",
+      "sales": 521439287008.0,
+      "operating_profit": 23761125843.0,
+      "net_profit": 20158821632.0,
+      "total_assets": 696198458357.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 2,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 2,
+    "stageDiversity": 2,
+    "topSupplyIndustries": [
+      [
+        "semiconductor",
+        1
+      ],
+      [
+        "electronics",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "test",
+        1
+      ],
+      [
+        "display",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "330860",
+      "corpName": "네패스아크",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    },
+    {
+      "stockCode": "068790",
+      "corpName": "DMS",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "060260",
+      "corpName": "뉴보텍",
+      "product": "토트",
+      "amount": 289.0,
+      "type": "supplier",
+      "confidence": 0.9
+    },
+    {
+      "stockCode": "464500",
+      "corpName": "아이언디바이스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "066570",
+      "corpName": "LG전자",
+      "stage": "display",
+      "revenue": 892009
+    },
+    {
+      "stockCode": "034220",
+      "corpName": "LG디스플레이",
+      "stage": "display",
+      "revenue": 258101
+    },
+    {
+      "stockCode": "011070",
+      "corpName": "LG이노텍",
+      "stage": "component",
+      "revenue": 218966
+    },
+    {
+      "stockCode": "009150",
+      "corpName": "삼성전기",
+      "stage": "module",
+      "revenue": 113145
+    },
+    {
+      "stockCode": "051900",
+      "corpName": "LG생활건강",
+      "stage": "",
+      "revenue": 63555
+    }
+  ]
+}

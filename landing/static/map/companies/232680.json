@@ -1,0 +1,176 @@
+{
+  "ego": {
+    "stockCode": "232680",
+    "corpName": "라온로보틱스",
+    "industry": "machinery",
+    "stage": "special",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 538,
+    "confidence": 0.7,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "095610",
+      "corpName": "테스",
+      "industry": "semiconductor",
+      "stage": "equipment",
+      "revenue": 3511
+    },
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "232680",
+      "to": "095610",
+      "direction": "out",
+      "type": "supplier",
+      "amount": 38837.0,
+      "ratio": null,
+      "product": "플랫폼 (Platform)",
+      "confidence": 0.9,
+      "source": "docs_table",
+      "evidence": "플랫폼 (Platform)"
+    },
+    {
+      "from": "024110",
+      "to": "232680",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "232680",
+      "to": "024110",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 36858184806.0,
+      "operating_profit": 5246324711.0,
+      "net_profit": 5868228651.0,
+      "total_assets": 38861482029.0
+    },
+    {
+      "year": "2022",
+      "sales": 59431713088.0,
+      "operating_profit": 8943114313.0,
+      "net_profit": 7475268384.0,
+      "total_assets": 46306301779.0
+    },
+    {
+      "year": "2023",
+      "sales": 34544095895.0,
+      "operating_profit": 1981864494.0,
+      "net_profit": 2318370303.0,
+      "total_assets": 46364619452.0
+    },
+    {
+      "year": "2025",
+      "sales": 53842351768.0,
+      "operating_profit": 3949991226.0,
+      "net_profit": 3691284355.0,
+      "total_assets": 66916034813.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "finance",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "bank",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "024110",
+      "corpName": "기업은행",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [
+    {
+      "stockCode": "095610",
+      "corpName": "테스",
+      "product": "플랫폼 (Platform)",
+      "amount": 38837.0,
+      "type": "supplier",
+      "confidence": 0.9
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "006260",
+      "corpName": "LS",
+      "stage": "special",
+      "revenue": 318700
+    },
+    {
+      "stockCode": "000150",
+      "corpName": "두산",
+      "stage": "general",
+      "revenue": 197841
+    },
+    {
+      "stockCode": "034020",
+      "corpName": "두산에너빌리티",
+      "stage": "general",
+      "revenue": 170579
+    },
+    {
+      "stockCode": "000680",
+      "corpName": "LS네트웍스",
+      "stage": "",
+      "revenue": 26152
+    },
+    {
+      "stockCode": "229640",
+      "corpName": "LS에코에너지",
+      "stage": "",
+      "revenue": 9601
+    }
+  ]
+}

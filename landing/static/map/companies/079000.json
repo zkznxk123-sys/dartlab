@@ -1,0 +1,95 @@
+{
+  "ego": {
+    "stockCode": "079000",
+    "corpName": "와토스코리아",
+    "industry": "finance",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 141,
+    "confidence": 0.95,
+    "source": "override"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 20027004133.0,
+      "operating_profit": 404889549.0,
+      "net_profit": 1421423465.0,
+      "total_assets": 78529178634.0
+    },
+    {
+      "year": "2022",
+      "sales": 19511073058.0,
+      "operating_profit": 136819436.0,
+      "net_profit": 5312081247.0,
+      "total_assets": 82815764333.0
+    },
+    {
+      "year": "2023",
+      "sales": 17677716367.0,
+      "operating_profit": -90314143.0,
+      "net_profit": 2666638908.0,
+      "total_assets": 83417387521.0
+    },
+    {
+      "year": "2025",
+      "sales": 14125847378.0,
+      "operating_profit": -4315807274.0,
+      "net_profit": -2741730099.0,
+      "total_assets": 76011775880.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "006800",
+      "corpName": "미래에셋증권",
+      "stage": "securities",
+      "revenue": 292830
+    },
+    {
+      "stockCode": "039490",
+      "corpName": "키움증권",
+      "stage": "securities",
+      "revenue": 171217
+    },
+    {
+      "stockCode": "004990",
+      "corpName": "롯데지주",
+      "stage": "securities",
+      "revenue": 155396
+    },
+    {
+      "stockCode": "003380",
+      "corpName": "하림지주",
+      "stage": "securities",
+      "revenue": 132149
+    },
+    {
+      "stockCode": "017940",
+      "corpName": "E1",
+      "stage": "securities",
+      "revenue": 103925
+    }
+  ]
+}

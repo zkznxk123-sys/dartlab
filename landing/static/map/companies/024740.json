@@ -1,0 +1,159 @@
+{
+  "ego": {
+    "stockCode": "024740",
+    "corpName": "한일단조",
+    "industry": "steel",
+    "stage": "processing",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 1266,
+    "confidence": 1.0,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "005030",
+      "corpName": "부산주공",
+      "industry": "auto",
+      "stage": "powertrain",
+      "revenue": 1954
+    },
+    {
+      "stockCode": "126640",
+      "corpName": "화신정공",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 3789
+    }
+  ],
+  "edges": [
+    {
+      "from": "024740",
+      "to": "005030",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "024740",
+      "to": "126640",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 152471478934.0,
+      "operating_profit": -3353121692.0,
+      "net_profit": -8675809923.0,
+      "total_assets": 224005894093.0
+    },
+    {
+      "year": "2022",
+      "sales": 177364538405.0,
+      "operating_profit": 14579806106.0,
+      "net_profit": 7213556464.0,
+      "total_assets": 258205621470.0
+    },
+    {
+      "year": "2023",
+      "sales": 178166776876.0,
+      "operating_profit": 15168146222.0,
+      "net_profit": 7759017223.0,
+      "total_assets": 257607226354.0
+    },
+    {
+      "year": "2024",
+      "sales": 139379274208.0,
+      "operating_profit": 8288832921.0,
+      "net_profit": 6685577427.0,
+      "total_assets": 264965637648.0
+    },
+    {
+      "year": "2025",
+      "sales": 126595207214.0,
+      "operating_profit": 3519821207.0,
+      "net_profit": 1866767149.0,
+      "total_assets": 254277906955.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "005030",
+      "corpName": "부산주공",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    },
+    {
+      "stockCode": "126640",
+      "corpName": "화신정공",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "005490",
+      "corpName": "POSCO홀딩스",
+      "stage": "product",
+      "revenue": 690949
+    },
+    {
+      "stockCode": "047050",
+      "corpName": "포스코인터내셔널",
+      "stage": "raw",
+      "revenue": 323736
+    },
+    {
+      "stockCode": "004020",
+      "corpName": "현대제철",
+      "stage": "raw",
+      "revenue": 227332
+    },
+    {
+      "stockCode": "010130",
+      "corpName": "고려아연",
+      "stage": "raw",
+      "revenue": 165879
+    },
+    {
+      "stockCode": "103140",
+      "corpName": "풍산",
+      "stage": "processing",
+      "revenue": 50486
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "ego": {
+    "stockCode": "086710",
+    "corpName": "선진뷰티사이언스",
+    "industry": "cosmetics",
+    "stage": "raw",
+    "role": "제조",
+    "stream": "upstream",
+    "revenue": 808,
+    "confidence": 0.8,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "007330",
+      "corpName": "푸른저축은행",
+      "industry": "finance",
+      "stage": "bank",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "007330",
+      "to": "086710",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "기타 지분 0.1%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 48702984011.0,
+      "operating_profit": 3701978012.0,
+      "net_profit": 1623454779.0,
+      "total_assets": 107617710896.0
+    },
+    {
+      "year": "2022",
+      "sales": 64332226652.0,
+      "operating_profit": 5320882252.0,
+      "net_profit": 20104595647.0,
+      "total_assets": 135571042903.0
+    },
+    {
+      "year": "2023",
+      "sales": 72622359560.0,
+      "operating_profit": 9043651973.0,
+      "net_profit": 6668125849.0,
+      "total_assets": 125771952147.0
+    },
+    {
+      "year": "2024",
+      "sales": 79372060433.0,
+      "operating_profit": 10639844772.0,
+      "net_profit": 1311889908.0,
+      "total_assets": 154084421819.0
+    },
+    {
+      "year": "2025",
+      "sales": 80766128193.0,
+      "operating_profit": 6059554129.0,
+      "net_profit": 5961092046.0,
+      "total_assets": 173848768961.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "090430",
+      "corpName": "아모레퍼시픽",
+      "stage": "manufacturing",
+      "revenue": 42528
+    },
+    {
+      "stockCode": "161890",
+      "corpName": "한국콜마",
+      "stage": "manufacturing",
+      "revenue": 27224
+    },
+    {
+      "stockCode": "192820",
+      "corpName": "코스맥스",
+      "stage": "manufacturing",
+      "revenue": 23988
+    },
+    {
+      "stockCode": "278470",
+      "corpName": "에이피알",
+      "stage": "manufacturing",
+      "revenue": 15273
+    },
+    {
+      "stockCode": "257720",
+      "corpName": "실리콘투",
+      "stage": "manufacturing",
+      "revenue": 11163
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "ego": {
+    "stockCode": "121850",
+    "corpName": "코이즈",
+    "industry": "chemical",
+    "stage": "polymer",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 127,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [],
+  "edges": [],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 16187125981.0,
+      "operating_profit": -9411009382.0,
+      "net_profit": -13361589070.0,
+      "total_assets": 26403772158.0
+    },
+    {
+      "year": "2022",
+      "sales": 9702666379.0,
+      "operating_profit": -7209998290.0,
+      "net_profit": -8978718383.0,
+      "total_assets": 40516610454.0
+    },
+    {
+      "year": "2023",
+      "sales": 16392594426.0,
+      "operating_profit": -4103033489.0,
+      "net_profit": -4436056343.0,
+      "total_assets": 33651182518.0
+    },
+    {
+      "year": "2024",
+      "sales": 20734142258.0,
+      "operating_profit": -3174240764.0,
+      "net_profit": -2652560855.0,
+      "total_assets": 28735455381.0
+    },
+    {
+      "year": "2025",
+      "sales": 12650752843.0,
+      "operating_profit": -8073868251.0,
+      "net_profit": -11044267248.0,
+      "total_assets": 21854992854.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "096770",
+      "corpName": "SK이노베이션",
+      "stage": "basic",
+      "revenue": 802961
+    },
+    {
+      "stockCode": "051910",
+      "corpName": "LG화학",
+      "stage": "polymer",
+      "revenue": 459322
+    },
+    {
+      "stockCode": "010950",
+      "corpName": "S-Oil",
+      "stage": "basic",
+      "revenue": 342470
+    },
+    {
+      "stockCode": "078930",
+      "corpName": "GS",
+      "stage": "basic",
+      "revenue": 251841
+    },
+    {
+      "stockCode": "373220",
+      "corpName": "LG에너지솔루션",
+      "stage": "polymer",
+      "revenue": 236718
+    }
+  ]
+}

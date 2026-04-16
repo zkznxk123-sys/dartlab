@@ -1,0 +1,135 @@
+{
+  "ego": {
+    "stockCode": "265560",
+    "corpName": "영화테크",
+    "industry": "auto",
+    "stage": "oem",
+    "role": "제조",
+    "stream": "downstream",
+    "revenue": 1086,
+    "confidence": 0.8,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "025540",
+      "corpName": "한국단자공업",
+      "industry": "electronics",
+      "stage": "set",
+      "revenue": 14428
+    }
+  ],
+  "edges": [
+    {
+      "from": "025540",
+      "to": "265560",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "025540",
+      "to": "265560",
+      "direction": "in",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 9.3%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 40624175326.0,
+      "operating_profit": 2319856022.0,
+      "net_profit": 2553550846.0,
+      "total_assets": 64577327010.0
+    },
+    {
+      "year": "2022",
+      "sales": 47944605467.0,
+      "operating_profit": 1905675069.0,
+      "net_profit": 4825350646.0,
+      "total_assets": 81305213288.0
+    },
+    {
+      "year": "2023",
+      "sales": 64920252518.0,
+      "operating_profit": 5013561602.0,
+      "net_profit": 6098020491.0,
+      "total_assets": 86401120350.0
+    },
+    {
+      "year": "2024",
+      "sales": 94827257434.0,
+      "operating_profit": 15387822768.0,
+      "net_profit": 14023169268.0,
+      "total_assets": 107071735945.0
+    },
+    {
+      "year": "2025",
+      "sales": 108613630588.0,
+      "operating_profit": 18042145824.0,
+      "net_profit": 19041489175.0,
+      "total_assets": 118435399289.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "005380",
+      "corpName": "현대자동차",
+      "stage": "oem",
+      "revenue": 1862545
+    },
+    {
+      "stockCode": "000270",
+      "corpName": "기아",
+      "stage": "oem",
+      "revenue": 1141409
+    },
+    {
+      "stockCode": "012330",
+      "corpName": "현대모비스",
+      "stage": "oem",
+      "revenue": 611181
+    },
+    {
+      "stockCode": "161390",
+      "corpName": "한국타이어앤테크놀로지",
+      "stage": "oem",
+      "revenue": 212023
+    },
+    {
+      "stockCode": "018880",
+      "corpName": "한온시스템",
+      "stage": "oem",
+      "revenue": 108837
+    }
+  ]
+}

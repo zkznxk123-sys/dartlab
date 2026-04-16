@@ -1,0 +1,154 @@
+{
+  "ego": {
+    "stockCode": "134060",
+    "corpName": "이퓨쳐",
+    "industry": "media",
+    "stage": "content",
+    "role": "서비스",
+    "stream": "upstream",
+    "revenue": 111,
+    "confidence": 0.5,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "049470",
+      "corpName": "비트플래닛",
+      "industry": "software",
+      "stage": "ai",
+      "revenue": 248
+    },
+    {
+      "stockCode": "030200",
+      "corpName": "케이티",
+      "industry": "telecom",
+      "stage": "service",
+      "revenue": 282442
+    },
+    {
+      "stockCode": "002450",
+      "corpName": "삼익악기",
+      "industry": "food",
+      "stage": "distribution",
+      "revenue": 2244
+    }
+  ],
+  "edges": [
+    {
+      "from": "049470",
+      "to": "134060",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "134060",
+      "to": "030200",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "134060",
+      "to": "002450",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 10845632526.0,
+      "operating_profit": 1366551312.0,
+      "net_profit": 1700442772.0,
+      "total_assets": 22744375754.0
+    },
+    {
+      "year": "2022",
+      "sales": 11104511185.0,
+      "operating_profit": 1824142922.0,
+      "net_profit": 2859073644.0,
+      "total_assets": 24408347614.0
+    },
+    {
+      "year": "2023",
+      "sales": 10499382224.0,
+      "operating_profit": 1001035378.0,
+      "net_profit": 1383158021.0,
+      "total_assets": 26167451777.0
+    },
+    {
+      "year": "2025",
+      "sales": 11142499752.0,
+      "operating_profit": 882887664.0,
+      "net_profit": 1231552955.0,
+      "total_assets": 27983690378.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "035760",
+      "corpName": "CJ ENM",
+      "stage": "content",
+      "revenue": 51345
+    },
+    {
+      "stockCode": "030000",
+      "corpName": "제일기획",
+      "stage": "content",
+      "revenue": 45469
+    },
+    {
+      "stockCode": "352820",
+      "corpName": "하이브",
+      "stage": "content",
+      "revenue": 26499
+    },
+    {
+      "stockCode": "214320",
+      "corpName": "이노션",
+      "stage": "platform",
+      "revenue": 21460
+    },
+    {
+      "stockCode": "041510",
+      "corpName": "에스엠",
+      "stage": "agency",
+      "revenue": 11749
+    }
+  ]
+}

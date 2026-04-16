@@ -1,0 +1,225 @@
+{
+  "ego": {
+    "stockCode": "123750",
+    "corpName": "알톤",
+    "industry": "railroad",
+    "stage": "",
+    "role": "",
+    "stream": "",
+    "revenue": 322,
+    "confidence": 0.7,
+    "source": "kindlist"
+  },
+  "neighbors": [
+    {
+      "stockCode": "088390",
+      "corpName": "이녹스",
+      "industry": "railroad",
+      "stage": "",
+      "revenue": 591
+    },
+    {
+      "stockCode": "272290",
+      "corpName": "이녹스첨단소재",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 4396
+    },
+    {
+      "stockCode": "090150",
+      "corpName": "아이윈",
+      "industry": "auto",
+      "stage": "oem",
+      "revenue": 1159
+    },
+    {
+      "stockCode": "031210",
+      "corpName": "서울보증보험",
+      "industry": "finance",
+      "stage": "insurance",
+      "revenue": 0
+    }
+  ],
+  "edges": [
+    {
+      "from": "123750",
+      "to": "088390",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "088390",
+      "to": "123750",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "123750",
+      "to": "088390",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "123750",
+      "to": "272290",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "123750",
+      "to": "090150",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "123750",
+      "to": "031210",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "272290",
+      "to": "123750",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 49991547253.0,
+      "operating_profit": 4943252151.0,
+      "net_profit": 4846031663.0,
+      "total_assets": 45537692772.0
+    },
+    {
+      "year": "2022",
+      "sales": 51317871455.0,
+      "operating_profit": 2086327179.0,
+      "net_profit": -706951049.0,
+      "total_assets": 41625256637.0
+    },
+    {
+      "year": "2023",
+      "sales": 42402825314.0,
+      "operating_profit": 649776075.0,
+      "net_profit": -362890743.0,
+      "total_assets": 44657528926.0
+    },
+    {
+      "year": "2024",
+      "sales": 28185286202.0,
+      "operating_profit": -5488953443.0,
+      "net_profit": -6348134763.0,
+      "total_assets": 30666544430.0
+    },
+    {
+      "year": "2025",
+      "sales": 32159264764.0,
+      "operating_profit": 227286318.0,
+      "net_profit": 211835292.0,
+      "total_assets": 29374312261.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "088390",
+      "corpName": "이녹스",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "064350",
+      "corpName": "현대로템",
+      "stage": "general",
+      "revenue": 58390
+    },
+    {
+      "stockCode": "045390",
+      "corpName": "대아티아이",
+      "stage": "general",
+      "revenue": 1532
+    },
+    {
+      "stockCode": "271940",
+      "corpName": "일진하이솔루스",
+      "stage": "general",
+      "revenue": 816
+    },
+    {
+      "stockCode": "088390",
+      "corpName": "이녹스",
+      "stage": "",
+      "revenue": 591
+    },
+    {
+      "stockCode": "115500",
+      "corpName": "케이씨에스",
+      "stage": "general",
+      "revenue": 249
+    }
+  ]
+}

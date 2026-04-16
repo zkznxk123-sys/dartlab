@@ -1,0 +1,156 @@
+{
+  "ego": {
+    "stockCode": "017650",
+    "corpName": "대림제지",
+    "industry": "paper",
+    "stage": "general",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 1688,
+    "confidence": 1.0,
+    "source": "product"
+  },
+  "neighbors": [
+    {
+      "stockCode": "023600",
+      "corpName": "삼보판지",
+      "industry": "paper",
+      "stage": "general",
+      "revenue": 5399
+    }
+  ],
+  "edges": [
+    {
+      "from": "017650",
+      "to": "023600",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "X. 대주주 등과의 거래내용"
+    },
+    {
+      "from": "017650",
+      "to": "023600",
+      "direction": "out",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "023600",
+      "to": "017650",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 181256328710.0,
+      "operating_profit": 26119679266.0,
+      "net_profit": 21523802124.0,
+      "total_assets": 263784808708.0
+    },
+    {
+      "year": "2022",
+      "sales": 187353234547.0,
+      "operating_profit": 29197579672.0,
+      "net_profit": 24416419932.0,
+      "total_assets": 297462081268.0
+    },
+    {
+      "year": "2023",
+      "sales": 164383300566.0,
+      "operating_profit": 21826803766.0,
+      "net_profit": 18797086089.0,
+      "total_assets": 312771409400.0
+    },
+    {
+      "year": "2024",
+      "sales": 166263916267.0,
+      "operating_profit": 9834883741.0,
+      "net_profit": 13227141032.0,
+      "total_assets": 317364317281.0
+    },
+    {
+      "year": "2025",
+      "sales": 168837382045.0,
+      "operating_profit": 5280796436.0,
+      "net_profit": 6397679040.0,
+      "total_assets": 328274455479.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 0,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 0,
+    "stageDiversity": 0,
+    "topSupplyIndustries": [],
+    "topSupplyStages": []
+  },
+  "suppliers": [],
+  "customers": [
+    {
+      "stockCode": "023600",
+      "corpName": "삼보판지",
+      "product": "",
+      "amount": null,
+      "type": "supplier",
+      "confidence": 0.7
+    }
+  ],
+  "peers": [
+    {
+      "stockCode": "213500",
+      "corpName": "한솔제지",
+      "stage": "general",
+      "revenue": 22900
+    },
+    {
+      "stockCode": "079430",
+      "corpName": "현대리바트",
+      "stage": "general",
+      "revenue": 15462
+    },
+    {
+      "stockCode": "009200",
+      "corpName": "무림페이퍼",
+      "stage": "general",
+      "revenue": 12649
+    },
+    {
+      "stockCode": "013890",
+      "corpName": "지누스",
+      "stage": "general",
+      "revenue": 9132
+    },
+    {
+      "stockCode": "002310",
+      "corpName": "아세아제지",
+      "stage": "general",
+      "revenue": 8551
+    }
+  ]
+}

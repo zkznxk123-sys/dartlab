@@ -1,0 +1,238 @@
+{
+  "ego": {
+    "stockCode": "054180",
+    "corpName": "메디콕스",
+    "industry": "shipbuilding",
+    "stage": "build",
+    "role": "제조",
+    "stream": "midstream",
+    "revenue": 282,
+    "confidence": 0.6,
+    "source": "docs"
+  },
+  "neighbors": [
+    {
+      "stockCode": "064350",
+      "corpName": "현대로템",
+      "industry": "railroad",
+      "stage": "general",
+      "revenue": 58390
+    },
+    {
+      "stockCode": "032980",
+      "corpName": "바이온",
+      "industry": "electronics",
+      "stage": "component",
+      "revenue": 206
+    },
+    {
+      "stockCode": "060230",
+      "corpName": "제이케이시냅스",
+      "industry": "chemical",
+      "stage": "polymer",
+      "revenue": 619
+    },
+    {
+      "stockCode": "033540",
+      "corpName": "파라텍",
+      "industry": "machinery",
+      "stage": "general",
+      "revenue": 0
+    },
+    {
+      "stockCode": "227610",
+      "corpName": "아우딘퓨쳐스",
+      "industry": "cosmetics",
+      "stage": "manufacturing",
+      "revenue": 424
+    },
+    {
+      "stockCode": "217330",
+      "corpName": "싸이토젠",
+      "industry": "software",
+      "stage": "platform",
+      "revenue": 261
+    }
+  ],
+  "edges": [
+    {
+      "from": "064350",
+      "to": "054180",
+      "direction": "in",
+      "type": "supplier",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.7,
+      "source": "docs",
+      "evidence": "3. 원재료 및 생산설비"
+    },
+    {
+      "from": "054180",
+      "to": "032980",
+      "direction": "out",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "IX. 계열회사 등에 관한 사항"
+    },
+    {
+      "from": "060230",
+      "to": "054180",
+      "direction": "in",
+      "type": "affiliate",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.5,
+      "source": "docs",
+      "evidence": "2. 계열회사 현황(상세)"
+    },
+    {
+      "from": "054180",
+      "to": "033540",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자"
+    },
+    {
+      "from": "054180",
+      "to": "227610",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 10.0%"
+    },
+    {
+      "from": "054180",
+      "to": "217330",
+      "direction": "out",
+      "type": "investor",
+      "amount": null,
+      "ratio": null,
+      "product": "",
+      "confidence": 0.6,
+      "source": "network",
+      "evidence": "단순투자 지분 1.8%"
+    }
+  ],
+  "aiInsight": null,
+  "blogPosts": [],
+  "financials5y": [
+    {
+      "year": "2021",
+      "sales": 17449008689.0,
+      "operating_profit": -9346566522.0,
+      "net_profit": -23937681036.0,
+      "total_assets": 102479249660.0
+    },
+    {
+      "year": "2022",
+      "sales": 21817103875.0,
+      "operating_profit": -12331973970.0,
+      "net_profit": -42618622800.0,
+      "total_assets": 110434129068.0
+    },
+    {
+      "year": "2023",
+      "sales": 26875194687.0,
+      "operating_profit": -10658205039.0,
+      "net_profit": -34426666729.0,
+      "total_assets": 97759538581.0
+    },
+    {
+      "year": "2024",
+      "sales": 30611173608.0,
+      "operating_profit": -10045784844.0,
+      "net_profit": -21434919775.0,
+      "total_assets": 81419165352.0
+    },
+    {
+      "year": "2025",
+      "sales": 28160961888.0,
+      "operating_profit": -5746736518.0,
+      "net_profit": -11895346336.0,
+      "total_assets": 68254632291.0
+    }
+  ],
+  "supplyInsights": {
+    "supplierCount": 1,
+    "customerCount": 0,
+    "preciseEdgeCount": 0,
+    "totalSupplyAmount": 0,
+    "hhi": 0.0,
+    "hhiRisk": "데이터 부족",
+    "top1Ratio": 0.0,
+    "top3Ratio": 0.0,
+    "industryDiversity": 1,
+    "stageDiversity": 1,
+    "topSupplyIndustries": [
+      [
+        "railroad",
+        1
+      ]
+    ],
+    "topSupplyStages": [
+      [
+        "general",
+        1
+      ]
+    ]
+  },
+  "suppliers": [
+    {
+      "stockCode": "064350",
+      "corpName": "현대로템",
+      "product": "",
+      "amount": null,
+      "ratio": null,
+      "confidence": 0.7,
+      "source": "docs"
+    }
+  ],
+  "customers": [],
+  "peers": [
+    {
+      "stockCode": "267250",
+      "corpName": "HD현대",
+      "stage": "build",
+      "revenue": 712594
+    },
+    {
+      "stockCode": "009540",
+      "corpName": "HD한국조선해양",
+      "stage": "shipping",
+      "revenue": 299332
+    },
+    {
+      "stockCode": "329180",
+      "corpName": "HD현대중공업",
+      "stage": "build",
+      "revenue": 175806
+    },
+    {
+      "stockCode": "018260",
+      "corpName": "삼성에스디에스",
+      "stage": "shipping",
+      "revenue": 139299
+    },
+    {
+      "stockCode": "042660",
+      "corpName": "한화오션",
+      "stage": "build",
+      "revenue": 127835
+    }
+  ]
+}
