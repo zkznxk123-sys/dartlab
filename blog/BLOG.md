@@ -593,14 +593,45 @@ import YouTube from '$lib/components/YouTube.svelte';
 
 ### 썸네일 (og:image) — 회사분석보고서만
 
-- 배경: FLUX 또는 유사 (종목 특성)
-- 합성: Pillow 로 텍스트 + dartlab 아바타
-- 사이즈: 1200x630, WebP (quality 85~90)
-- 좌상단 종목명 (종목코드) #EA4647, 우상단 dartlab 배지, 중앙 제목 2줄 (52px shadow), 부제 1줄 (22px), 우하단 avatar-analyze.png (120x120), 최하단 빨간 4px 바
-- 저장 2곳:
-  1. `blog/05-company-reports/{folder}/assets/thumbnail.webp`
-  2. `landing/static/thumbnails/{code}-{slug}.webp`
-- frontmatter `thumbnail: /thumbnails/{code}-{slug}.webp`
+**[최우선] 풀블리드 이미지 + 좌측 그라데이션 + 흰 제목 오버레이 (MNST 스타일 고정)**
+
+MNST(36) 이후 썸네일이 2분할(좌 텍스트 박스 / 우 이미지)로 회귀해서 일관성이 깨졌다. **다시는 2분할 금지**. 모든 썸네일은 이미지가 캔버스 전체(1200×630)를 덮고, 그 위에 어두운 그라데이션 + 흰 제목 텍스트가 **오버레이**된다.
+
+- 배경: FLUX 이미지가 캔버스 전체 채움 (비율 유지 crop, 좌우 텍스트 박스 없음)
+- 전체 어두운 필터 `(10,14,26,70)` + 좌측 가로 그라데이션 `alpha = 200*(1-x/900)`
+- 합성: Pillow. 레퍼런스 스크립트 [gen_thumbnails.py](scripts/blog/gen_thumbnails.py)
+- 사이즈: 1200×630, WebP (quality 90)
+- 텍스트 레이어:
+  - 좌상단 `{회사명 (종목코드)}` malgun.ttf 24px `#94a3b8`
+  - 우상단 `dartlab` malgunbd.ttf 22px `#f1f5f9`
+  - 중앙 좌측 제목 2줄 malgunbd.ttf 58px 흰색, y=190부터 80px 간격
+  - 제목 아래 부제 1줄 malgun.ttf 22px `#94a3b8`
+  - 우하단 `avatar-chart.png` 160×160
+- 저장 경로: `landing/static/thumbnails/{code}-{slug}.webp` 1곳만
+- frontmatter: `thumbnail: /avatar-chart.png` (리스트 아바타), `ogImage: /thumbnails/{code}-{slug}.webp`
+
+**금지 패턴**:
+- 좌측 반 = 텍스트 박스 / 우측 반 = 이미지 의 2분할 레이아웃
+- 이미지가 캔버스 일부만 차지하고 여백에 단색 박스 깔린 형태
+- 제목 텍스트가 별도의 반투명 박스/카드에 들어간 형태
+
+**참조 기준작**: MNST(36). 현재 META(37)/TSLA(38)/하이브(39)/IONQ(40) 4건은 이 규칙 위반이라 재생성 대기.
+
+### [최우선] 썸네일 원본 배경 보관 규칙
+
+**FLUX로 생성한 썸네일 원본 배경은 항상 `blog/{category}/{folder}/assets/{NN}-thumbnail-bg.webp` 로 보관한다.** 이게 없으면 레이아웃을 바꿔야 할 때마다 FLUX 재호출로 돈·시간 낭비.
+
+- 최종 합성 썸네일: `landing/static/thumbnails/{code}-{slug}.webp` (덮어쓰기 OK)
+- 원본 FLUX 배경: `blog/.../assets/{NN}-thumbnail-bg.webp` (덮어쓰기 금지)
+- `gen_thumbnails.py` 같은 재생성 스크립트는 **반드시 assets/ 의 원본 배경을 읽어서** 합성
+- 원본 배경 파일명은 반드시 `{NN}-thumbnail-bg.webp` (다른 이름 금지)
+
+**원본이 없는 글은 썸네일 재생성 불가능** → 2026-04-16 META/TSLA/하이브/IONQ 사고 직접 원인. MNST(36)는 원본을 남겨 재생성 가능, 37~40 은 원본 없어서 FLUX 재호출 필요.
+
+**Phase 3 체크리스트 (썸네일 생성 시)**:
+1. FLUX 로 배경 생성 → `assets/{NN}-thumbnail-bg.webp` 로 먼저 저장
+2. `gen_thumbnails.py` 스타일로 합성 → `landing/static/thumbnails/{code}-{slug}.webp`
+3. 둘 다 커밋. 원본 배경 커밋 누락 시 차단.
 
 ### 검증 체크리스트
 
@@ -760,6 +791,18 @@ URL : /blog/skhynix  ← 숫자와 종목코드 제거
 | 4 | 외부 보도 인용으로 공시 섹션 대체 | BusinessWire/CNBC 기사 URL = 공시 원문 아님 | 공시 원문(10-K/사업보고서/IR 발표) URL 분리 |
 
 → 정정 후 말미 구조는 **3개 독립 H2 고정**: `## 검증표` · `## 공시 / Filings` · `## 재무제표 — 최근 5개년`. MNST(36) 참조.
+
+### 2026-04-16 META/TSLA/하이브/IONQ 썸네일 2분할 회귀 4건
+
+MNST(36) 까지는 풀블리드 이미지 + 좌측 그라데이션 + 흰 제목 오버레이 스타일로 통일돼 있었는데, 37~40 4건에서 "좌측 텍스트 박스 / 우측 이미지" 2분할 레이아웃으로 회귀.
+
+| # | 증상 | 원인 | 정정 |
+|---|---|---|---|
+| 1 | 이미지가 캔버스 전체를 덮지 않고 우측 반만 차지 | 2분할 레이아웃 재등장 | 풀블리드로 재생성 (gen_thumbnails.py 스펙) |
+| 2 | 제목 텍스트가 별도 단색 박스/카드 위에 놓임 | "텍스트 가독성" 이유로 박스 추가 | 좌측 가로 그라데이션 오버레이로 가독성 확보 |
+| 3 | 썸네일이 글마다 스타일이 제각각 | 매번 즉흥 레이아웃 | MNST 기준작 + gen_thumbnails.py 템플릿 공유 |
+
+→ **썸네일 스펙은 §6 썸네일 섹션 + gen_thumbnails.py 단일 템플릿 고정**. 즉흥 레이아웃 금지.
 
 새 거짓 발견 시 즉시 등록 — 미래 글에서 같은 실수 차단.
 
