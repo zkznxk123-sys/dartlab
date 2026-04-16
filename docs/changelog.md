@@ -11,6 +11,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.14] - 2026-04-16
+
+### Added
+
+- 가치평가 엔진 고도화 (multi-stage DCF, 청산가치, 상대가치 생존확률 보정)
+- 생애주기 5단계 자동 판정 + 스토리 일관성 검증
+- 국가/섹터 리스크 프리미엄 자동 산출
+- EDGAR bulk 수집 엔진 + freshness 체크
+- AI tool schema enum 자동화 완성 (show.freq / search.scope / review.type)
+
+### Changed
+
+- ai/runtime/core.py 책임 분리 (797→419줄: prompts + postResponse 분할)
+- industry/compat shim → sector.py + __init__ 공개 (25곳 직접 import)
+- assumptions 공통 utility buildAssumptions (4엔진 통합)
+- 랜딩 CTA: Windows 런처 내세움 + Live Demo 제거
+
+### Removed
+
+- ai/superfeature 전체, _builtin.py, analyze_full, presets.py, _MODULE_CORE 수동 whitelist
+
+### Fixed
+
+- 대형 기업 메모리 보호 (pinned prefix 확장)
+- analyze → runAsk rename 누락 1건
+
 ## [0.9.13] - 2026-04-15
 
 ### Added

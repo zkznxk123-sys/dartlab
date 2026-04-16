@@ -1,6 +1,6 @@
 # dartlab Capabilities
 
-> v0.9.13 기준 자동 생성. 직접 수정 금지.  
+> v0.9.14 기준 자동 생성. 직접 수정 금지.  
 > `uv run python scripts/build/generateSpec.py`로 재생성.
 
 
@@ -576,7 +576,7 @@ us.market                    # "US"
 
 ### Company 메서드/프로퍼티
 
-DartCompany에서 동적 추출 (52개).
+DartCompany에서 동적 추출 (53개).
 
 | 이름 | 종류 | 설명 |
 |------|------|------|
@@ -602,11 +602,12 @@ DartCompany에서 동적 추출 (52개).
 | `keywordTrend` | method | 공시 텍스트 키워드 빈도 추이 (topic x period x keyword). |
 | `listing` | method | KRX 전체 상장법인 목록 (KIND 기준). |
 | `liveFilings` | method | OpenDART 기준 실시간 공시 목록 조회. |
+| `macro` | method | 시장 매크로 분석 — 회사 컨텍스트에서 자국 시장으로 자동 위임 (Phase 8 A2). |
 | `market` | property | 시장 코드 (DART 제공자는 항상 KR). |
 | `network` | method | 관계 네트워크 (지분출자 + 그룹 계열사 지도). |
 | `news` | method | 최근 뉴스 수집. |
 | `priority` | method | 낮을수록 먼저 시도. DART=10 (기본 provider). |
-| `quant` | method | 주가 기술적 분석 — self-discovery 패턴. |
+| `quant` | property | 주가 기술적 분석 — dual access (Phase 8 A3, 4엔진 통일). |
 | `rank` | property | 전체 시장 + 섹터 내 규모 순위 (매출/자산/성장률). |
 | `rawDocs` | property | 공시 문서 원본 parquet 전체 (가공 전). |
 | `rawFinance` | property | 재무제표 원본 parquet 전체 (가공 전). |

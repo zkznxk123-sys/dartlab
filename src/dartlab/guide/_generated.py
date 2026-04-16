@@ -173,6 +173,10 @@ CAPABILITIES: dict[str, dict] = {
         "seeAlso": "disclosure: 과거 전체 공시 이력 조회\nreadFiling: 공시 원문 텍스트 읽기\nwatch: 공시 변화 중요도 스코어링",
         "summary": "OpenDART 기준 실시간 공시 목록 조회."
     },
+    "Company.macro": {
+        "kind": "method",
+        "summary": "시장 매크로 분석 — 회사 컨텍스트에서 자국 시장으로 자동 위임 (Phase 8 A2)."
+    },
     "Company.market": {
         "kind": "property",
         "seeAlso": "currency: 통화 코드",
@@ -201,8 +205,8 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "낮을수록 먼저 시도. DART=10 (기본 provider)."
     },
     "Company.quant": {
-        "kind": "method",
-        "summary": "주가 기술적 분석 — self-discovery 패턴."
+        "kind": "property",
+        "summary": "주가 기술적 분석 — dual access (Phase 8 A3, 4엔진 통일)."
     },
     "Company.rank": {
         "aicontext": "시장/섹터 내 상대 위치 파악 — 피어 비교 분석의 기초\nsizeClass로 대형/중형/소형주 분류",

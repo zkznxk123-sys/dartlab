@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.14] - 2026-04-16
+
+### Added
+
+- **가치평가 엔진 고도화**: multi-stage DCF, 청산가치 모델, 상대가치 생존확률 보정. 적정가 계산 정교화 + 시나리오 민감도 확장.
+- **생애주기 5단계 자동 판정**: 기업의 현재 생애주기를 데이터 기반으로 자동 판별. 성장/성숙/턴어라운드 등 단계별 가정 차별화.
+- **스토리 일관성 검증**: 가정(성장률 ↔ 재투자율 ↔ 마진) 간 교차 모순 자동 감지. AI 가 비현실적 가정 조합을 식별 가능.
+- **국가/섹터 리스크 프리미엄**: 자동 산출 + 시장 내재 자본비용 역산 (Gordon 역산). peer 기반 beta 보정.
+- **EDGAR bulk 수집 엔진**: companyfacts / dataset 단위 배치 다운로드 + freshness 체크. CI 파이프라인 연동.
+- **AI tool schema enum 자동화 완성**: `show.freq` / `search.scope` / `review.type` 하드코딩 제거 → 엔진 상수에서 자동 수집. 축 추가 시 tool 파일 수정 불필요.
+
+### Changed
+
+- **`ai/runtime/core.py` 책임 분리** (797 → 419줄): 시스템 프롬프트 → `runtime/prompts.py` (340줄), post-response 훅 → `runtime/postResponse.py` (72줄). orchestrator 만 core 에 유지.
+- **`industry/compat.py` → `industry/sector.py` + `__init__` re-export**: "compat" shim 제거 → 25 소비자 직접 import (`from dartlab.industry import Sector, ...`). 330줄 shim → 0.
+- **assumptions 공통 utility `core/overrides.buildAssumptions`**: 4 엔진 (analysis/credit/macro/quant) 에 흩어진 assumption 수집 로직 단일 함수로 통합. 확장 키 전체 자동 포함.
+- **post-response 훅 playbook 단일화**: `_updateInsightFromResponse` + regex 상수 → `context/playbook.py::saveInsightFromResponse` 이동. curate 와 한 위치 관리.
+- **credit 엔진 4엔진 통일 `_AxisEntry` 패턴 적용**: 기존 plain dict → 구조화 `@dataclass(frozen=True)`. 가이드 DataFrame 표준 컬럼 통일.
+- **랜딩 CTA 재정렬**: "Try in Colab" 메인 → "Windows 런처 — 0 setup" 으로 교체. "Live Demo" 제거 (HF Spaces 미사용). Numbers 카드 숫자 줄바뀜 fix.
+
+### Removed
+
+- `ai/superfeature/` 전체 (480줄 dead code — `getSuperMaster` 호출 0건)
+- `ai/runtime/standalone.py::analyze_full` (사용처 0)
+- `ai/tools/_builtin.py` (수동 AITool 생성 → `_autoDiscover` 자동 등록 대체)
+- `review/presets.py` (deprecated re-export shim)
+- `core/engines_DEV.md` (dev 문서 src 안 잔재)
+- pyproject.toml `Demo` URL (HF Spaces → `Desktop` Windows 런처로 교체)
+- `_MODULE_CORE` 수동 whitelist (`_splitKwargs` → 시그니처 자동 추출로 대체)
+- `_aggregateAssumptions` / `_buildCreditAssumptions` 엔진별 중복 (→ `buildAssumptions` 통합)
+
+### Fixed
+
+- **대형 기업 메모리 보호**: `core/memory.py` pinned prefix 확장 — 대형 종목 (한국전력 등) 에서 메모리 압박 시 dualAccess accessor evict → 다음 select/show KeyError 방지.
+- **`analyze` → `runAsk` rename 누락** (`scorecard.py::calcScorecard`) — CI 10건 실패 원인 1곳 수정.
+
 ## [0.9.13] - 2026-04-15
 
 ### Added
