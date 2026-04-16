@@ -715,3 +715,163 @@ def buildCirculationSummary(threads: list[NarrativeThread]) -> str:
         summary += "\n" + "\n".join(details)
 
     return summary
+
+
+def buildCausalWeights(company, blockMap: dict) -> list[dict]:
+    """6막 인과 가중치 — 각 막 전환의 정량적 영향도.
+
+    Returns
+    -------
+    list[dict]
+        from_act, to_act : str — "수익구조"→"수익성" 등
+        metric_from, metric_to : str — 원인/결과 지표명
+        delta_from, delta_to : float | None — 변화량
+        weight : float — 전파 강도 (|delta_to / delta_from|, 0~∞)
+        direction : "amplify" | "dampen" | "neutral"
+    """
+    try:
+        ratios = company._finance.ratios
+    except (AttributeError, ValueError):
+        return []
+
+    def _r(name):
+        return getattr(ratios, name, None)
+
+    try:
+        rs = company._finance.ratioSeries
+        if not rs:
+            return []
+        data, _ = rs
+    except (AttributeError, ValueError):
+        return []
+
+    def _delta(seriesData, cat, key):
+        vals = seriesData.get(cat, {}).get(key, [])
+        valid = [v for v in vals if v is not None]
+        if len(valid) < 2:
+            return None
+        return valid[0] - valid[1]
+
+    chains = []
+
+    # 1→2: 매출 성장 → 마진 변화 (operating leverage)
+    rev_yoy = _delta(data, "GROWTH", "revenueYoy")
+    opm_delta = _delta(data, "RATIO", "operatingMargin")
+    if rev_yoy is not None and opm_delta is not None:
+        w = abs(opm_delta / rev_yoy) if rev_yoy != 0 else 0
+        chains.append({
+            "from_act": "수익구조", "to_act": "수익성",
+            "metric_from": "매출YoY", "metric_to": "영업마진Δ",
+            "delta_from": round(rev_yoy, 2), "delta_to": round(opm_delta, 2),
+            "weight": round(w, 3),
+            "direction": "amplify" if w > 1 else ("dampen" if w < 0.5 else "neutral"),
+        })
+
+    # 2→3: 마진 → FCF 전환
+    opm = _r("operatingMargin")
+    ocf_ni = None
+    ni = _r("netIncomeTTM")
+    ocf = _r("operatingCashflowTTM")
+    if ni and ni != 0 and ocf:
+        ocf_ni = ocf / ni
+    if opm_delta is not None and ocf_ni is not None:
+        chains.append({
+            "from_act": "수익성", "to_act": "현금흐름",
+            "metric_from": "영업마진Δ", "metric_to": "OCF/NI",
+            "delta_from": round(opm_delta, 2), "delta_to": round(ocf_ni, 2),
+            "weight": round(ocf_ni, 3) if ocf_ni else 0,
+            "direction": "amplify" if (ocf_ni or 0) > 1.2 else ("dampen" if (ocf_ni or 0) < 0.8 else "neutral"),
+        })
+
+    # 3→4: 현금흐름 → 부채 변화
+    fcf = _r("fcf") or _r("fcfTTM")
+    dr_delta = _delta(data, "RATIO", "debtRatio")
+    if fcf is not None and dr_delta is not None:
+        chains.append({
+            "from_act": "현금흐름", "to_act": "자금조달",
+            "metric_from": "FCF부호", "metric_to": "부채비율Δ",
+            "delta_from": 1 if fcf > 0 else -1, "delta_to": round(dr_delta, 2),
+            "weight": abs(dr_delta),
+            "direction": "amplify" if (fcf < 0 and dr_delta > 0) else "dampen",
+        })
+
+    # 4→5: 부채 → 재투자
+    roic = _r("roic")
+    roic_delta = _delta(data, "RATIO", "roic") if data.get("RATIO", {}).get("roic") else None
+    if dr_delta is not None and roic_delta is not None:
+        chains.append({
+            "from_act": "자금조달", "to_act": "자산배치",
+            "metric_from": "부채비율Δ", "metric_to": "ROICΔ",
+            "delta_from": round(dr_delta, 2), "delta_to": round(roic_delta, 2),
+            "weight": abs(roic_delta / dr_delta) if dr_delta != 0 else 0,
+            "direction": "amplify" if (dr_delta > 5 and roic_delta < 0) else "neutral",
+        })
+
+    # 5→6: ROIC → 가치 함의
+    wacc_est = _r("waccEstimate")
+    if roic is not None and wacc_est:
+        spread = roic - wacc_est
+        chains.append({
+            "from_act": "자산배치", "to_act": "가치평가",
+            "metric_from": "ROIC", "metric_to": "ROIC-WACC spread",
+            "delta_from": round(roic, 2), "delta_to": round(spread, 2),
+            "weight": abs(spread),
+            "direction": "amplify" if spread > 3 else ("dampen" if spread < -2 else "neutral"),
+        })
+
+    return chains
+
+
+def buildValuationImpact(causalChains: list[dict]) -> dict:
+    """인과 체인에서 valuation override 힌트 도출.
+
+    Returns
+    -------
+    dict
+        terminalGrowthAdj : float — 터미널 성장률 조정 %p (음수=하향)
+        waccAdj : float — WACC 조정 %p (양수=리스크 가산)
+        narrative : str — 조정 근거 한 문장
+        overrides : dict — AI가 그대로 주입 가능한 override 키
+    """
+    tg_adj = 0.0
+    wacc_adj = 0.0
+    reasons = []
+
+    for ch in causalChains:
+        d = ch.get("direction", "neutral")
+        fr, to = ch.get("from_act", ""), ch.get("to_act", "")
+
+        if to == "수익성" and d == "dampen":
+            tg_adj -= 0.3
+            reasons.append(f"매출→마진 dampen ({ch.get('delta_to', 0):+.1f}%p)")
+        elif to == "수익성" and d == "amplify" and (ch.get("delta_to") or 0) < 0:
+            tg_adj -= 0.5
+            reasons.append(f"마진 급락 amplify ({ch.get('delta_to', 0):+.1f}%p)")
+
+        if to == "자금조달" and (ch.get("delta_to") or 0) > 5:
+            wacc_adj += 0.3
+            reasons.append(f"부채비율 급등 +{ch.get('delta_to', 0):.1f}%p")
+
+        if to == "가치평가":
+            spread = ch.get("delta_to", 0)
+            if spread < -2:
+                tg_adj -= 0.5
+                wacc_adj += 0.5
+                reasons.append(f"ROIC-WACC spread {spread:+.1f}%p (가치 파괴)")
+            elif spread > 5:
+                tg_adj += 0.2
+                reasons.append(f"ROIC-WACC spread {spread:+.1f}%p (초과수익 지속)")
+
+    tg_adj = round(max(min(tg_adj, 1.0), -2.0), 2)
+    wacc_adj = round(max(min(wacc_adj, 2.0), -1.0), 2)
+
+    narrative = "; ".join(reasons) if reasons else "인과 체인 neutral — 조정 불필요"
+    return {
+        "terminalGrowthAdj": tg_adj,
+        "waccAdj": wacc_adj,
+        "narrative": narrative,
+        "overrides": {
+            "terminalGrowthRate": f"{tg_adj:+.2f}%p",
+            "wacc": f"{wacc_adj:+.2f}%p",
+        },
+    }
