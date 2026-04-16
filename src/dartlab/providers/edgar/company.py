@@ -684,6 +684,53 @@ class Company:
         from dartlab.review.narrativeDiff import computeImpact
         return computeImpact(self, claims=claims)
 
+    # ── Phase 11 A1: EDGAR 상장사 검색 (DART sync) ──
+
+    @staticmethod
+    def listing(*, forceRefresh: bool = False) -> pl.DataFrame:
+        """NASDAQ/NYSE 상장 기업 목록 (EDGAR universe).
+
+        forceRefresh 는 DartCompany.listing 과 시그니처 동기 — 현재 EDGAR 는 자동 캐시.
+        """
+        from dartlab.core.dataLoader import loadEdgarListedUniverse
+        universe = loadEdgarListedUniverse()
+        return universe.select([
+            pl.col("ticker").alias("종목코드"),
+            pl.col("title").alias("회사명"),
+            pl.col("exchange").alias("시장구분"),
+            pl.col("cik"),
+        ])
+
+    @staticmethod
+    def search(keyword: str) -> pl.DataFrame:
+        """ticker / 회사명 검색. 대소무시 부분 매칭."""
+        from dartlab.core.dataLoader import loadEdgarListedUniverse
+        kw = keyword.strip()
+        if not kw:
+            return loadEdgarListedUniverse().head(0).select([
+                pl.col("ticker").alias("종목코드"),
+                pl.col("title").alias("회사명"),
+                pl.col("exchange").alias("시장구분"),
+                pl.col("cik"),
+            ])
+        kw_upper = kw.upper()
+        universe = loadEdgarListedUniverse()
+        # ticker 매칭 (정확 우선)
+        hit = universe.filter(pl.col("ticker") == kw_upper)
+        if hit.height == 0:
+            hit = universe.filter(pl.col("ticker").str.contains(kw_upper, literal=True))
+        if hit.height == 0:
+            # 회사명 매칭 (대소무시)
+            hit = universe.filter(
+                pl.col("title").str.to_lowercase().str.contains(kw.lower(), literal=True)
+            )
+        return hit.select([
+            pl.col("ticker").alias("종목코드"),
+            pl.col("title").alias("회사명"),
+            pl.col("exchange").alias("시장구분"),
+            pl.col("cik"),
+        ])
+
     def view(self, *, port: int = 8400) -> None:
         """브라우저에서 공시 뷰어를 열어 sections/index를 시각화.
 

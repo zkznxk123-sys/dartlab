@@ -173,12 +173,31 @@ def searchName(keyword: str):
             "예: dartlab.searchName('삼성전자') 또는 dartlab.searchName('AAPL')"
         )
     if any("\uac00" <= ch <= "\ud7a3" for ch in keyword):
-        return _DartEngineCompany.search(keyword)
+        kr_result = _DartEngineCompany.search(keyword)
+        # Phase 11 A3: 한글 alias → EDGAR 재검색 (예: "인텔" → "Intel")
+        try:
+            from dartlab.core.finance.nameAliases import resolveEnglishAlias
+            from dartlab.providers.edgar.company import Company as _US
+
+            en = resolveEnglishAlias(keyword)
+            if en:
+                us_result = _US.search(en)
+                if us_result.height > 0:
+                    # KR + US 합치기
+                    if kr_result.height > 0:
+                        import polars as _pl
+                        return _pl.concat([kr_result, us_result], how="diagonal_relaxed")
+                    return us_result
+        except (ImportError, AttributeError, NotImplementedError):
+            pass
+        return kr_result
     if keyword.isascii() and keyword.isalpha():
         try:
             from dartlab.providers.edgar.company import Company as _US
 
-            return _US.search(keyword)
+            us_result = _US.search(keyword)
+            if us_result.height > 0:
+                return us_result
         except (ImportError, AttributeError, NotImplementedError):
             pass
     return _DartEngineCompany.search(keyword)
