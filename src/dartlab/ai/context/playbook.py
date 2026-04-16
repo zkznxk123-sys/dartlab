@@ -1,5 +1,8 @@
 """ACE Curator/Reflector — dartlab 결정론 구현.
 
+역할 (Phase 16 C3): **WRITE 전용** — 신규 bullet 저장/learning (delta merge).
+조회/READ 경로는 `ai/insights.py` (pastInsight/sectorInsights).
+
 논문: arxiv.org/abs/2510.04618 (ICLR 2026, Stanford+UCB+SambaNova)
 
 ACE 3 컴포넌트 매핑:

@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 _PROVIDER_MAP: dict[str, str] = {
     "openai": "dartlab.ai.providers.openai_compat.OpenAICompatProvider",
+    "claude": "dartlab.ai.providers.claude.ClaudeProvider",
     "ollama": "dartlab.ai.providers.ollama.OllamaProvider",
     "custom": "dartlab.ai.providers.openai_compat.OpenAICompatProvider",
     "codex": "dartlab.ai.providers.codex.CodexProvider",

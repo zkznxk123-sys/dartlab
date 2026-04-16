@@ -156,6 +156,7 @@ class TestProviderRegistry:
 
         assert set(available_providers()) == {
             "openai",
+            "claude",
             "ollama",
             "custom",
             "codex",

@@ -1,5 +1,8 @@
 """KnowledgeDB 경험 자산 조회 — 모듈 레벨 함수.
 
+역할 (Phase 16 C3): **READ 전용** — 종목/섹터별 과거 판단 조회.
+저장/갱신 경로는 `ai/context/playbook.py` (WRITE: delta merge).
+
 dartlab.pastInsight(stockCode) / dartlab.sectorInsights(sector) 로 노출.
 AI tool 자동 등록 경로 (`_autoDiscover`) 가 dartlab.__all__ 순회 시 자동 포함.
 
