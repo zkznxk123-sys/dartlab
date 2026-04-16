@@ -11,7 +11,7 @@ CAPABILITIES: dict[str, dict] = {
     "Company": {
         "aicontext": "개별 종목 분석의 시작점. explore/finance/analysis 수퍼툴이 이 객체를 소비.\n\"삼성전자 분석해줘\" → Company(\"005930\") 생성 → briefing → LLM 해석.",
         "capabilities": "종목코드 (\"005930\"), 회사명 (\"삼성전자\"), 영문 ticker (\"AAPL\") 모두 지원\ncanHandle() 체인: provider priority 순 자동 라우팅 (DART → EDGAR)\n새 국가 추가 시 이 파일 수정 불필요 — provider 패키지만 추가\n핵심 인터페이스: show(topic) / index / trace(topic) / diff()\nnamespace: docs (원문) / finance (숫자) / report (정형공시) / profile (merge)\n바로가기: BS/IS/CF/CIS, ratios, ratioSeries, timeseries\n메타: sections, topics, filings(), market, currency",
-        "guide": "\"삼성전자 재무제표\" -> c = Company(\"005930\"); c.IS\n\"사업 개요 보여줘\" -> c.show(\"businessOverview\")\n\"어떤 데이터 있어?\" -> c.index 또는 c.topics\n\"출처 추적\" -> c.trace(\"revenue\")\n\"기간 변화\" -> c.diff()\n\"종합평가\" -> c.analysis(\"financial\", \"종합평가\")\n\"리뷰 보고서\" -> c.review()\n\"Apple 분석\" -> Company(\"AAPL\") (자동 EDGAR 라우팅)",
+        "guide": "\"삼성전자 재무제표\" -> c = Company(\"005930\"); c.show(\"IS\")\n\"사업 개요 보여줘\" -> c.show(\"businessOverview\")\n\"어떤 데이터 있어?\" -> c.index 또는 c.topics\n\"출처 추적\" -> c.trace(\"revenue\")\n\"기간 변화\" -> c.diff()\n\"종합평가\" -> c.analysis(\"financial\", \"종합평가\")\n\"리뷰 보고서\" -> c.review()\n\"Apple 분석\" -> Company(\"AAPL\") (자동 EDGAR 라우팅)",
         "kind": "function",
         "requires": "DART: 사전 다운로드 데이터 (dartlab.downloadAll() 또는 자동 다운로드).\nEDGAR: 인터넷 연결 (On-demand 수집).",
         "seeAlso": "search: 종목 검색 (종목코드 모를 때)\nscan: 전종목 횡단분석 (기업 비교)\nanalysis: 14축 전략분석\ngather: 주가/수급/거시 데이터",
@@ -51,6 +51,10 @@ CAPABILITIES: dict[str, dict] = {
         "requires": "데이터: DART 정기보고서 (자동 수집)",
         "seeAlso": "show: c.show(\"dividend\")로 docs 기반 배당 상세\nsceMatrix: 자본변동표 (배당/자사주가 자본에 미치는 영향)\ndebt: 부채 구조 (자본 정책의 다른 면)",
         "summary": "주주환원 분석 (배당, 자사주, 총환원율)."
+    },
+    "Company.causalWeights": {
+        "kind": "method",
+        "summary": "6막 인과 가중치 (Phase 9 B2)."
     },
     "Company.codeName": {
         "kind": "method",
@@ -181,6 +185,10 @@ CAPABILITIES: dict[str, dict] = {
         "kind": "property",
         "seeAlso": "currency: 통화 코드",
         "summary": "시장 코드 (DART 제공자는 항상 KR)."
+    },
+    "Company.narrativeDiff": {
+        "kind": "method",
+        "summary": "claim 제거 시 dFV 변화 히트맵 (Phase 10 G3)."
     },
     "Company.network": {
         "aicontext": "그룹 계열사/출자 구조 파악 — 지배구조 분석의 기초 데이터\n순환출자 탐지로 거버넌스 리스크 감지",
@@ -323,6 +331,10 @@ CAPABILITIES: dict[str, dict] = {
         "kind": "method",
         "summary": "로컬에 보유한 전체 종목 인덱스."
     },
+    "Company.storyTree": {
+        "kind": "method",
+        "summary": "possible/plausible/probable 3 trajectory DCF (Phase 10 G2)."
+    },
     "Company.table": {
         "aicontext": "docs 원문 테이블을 구조화하여 정량 분석에 활용\nnumeric=True로 금액 문자열을 수치화하면 계산 가능",
         "capabilities": "docs 원문의 markdown table을 Polars DataFrame으로 변환\nsubtopic 지정으로 특정 표만 추출\nnumeric 모드로 금액 문자열을 float 변환\nperiod 필터로 특정 기간 컬럼만 선택",
@@ -367,6 +379,10 @@ CAPABILITIES: dict[str, dict] = {
         "capabilities": "calcStoryPrecedents (scan peer + KnowledgeDB insights)\ncalcPlausibilityBand (섹터 피어 분포 percentile)\ncalcValuationSins (정합성 규칙 위반)\noverrides 로 AI 개입 (lifeCyclePhase, terminalGrowth 등)",
         "kind": "method",
         "summary": "Damodaran 스토리 검증 — Possible / Plausible / Probable 3 테스트 통합."
+    },
+    "Company.valuationImpact": {
+        "kind": "method",
+        "summary": "인과 체인에서 DCF override 힌트 도출 (Phase 9 B3)."
     },
     "Company.view": {
         "aicontext": "시각적 탐색 인터페이스 — 사용자가 브라우저에서 직접 데이터 탐색",

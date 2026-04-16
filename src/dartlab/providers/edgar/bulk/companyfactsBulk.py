@@ -174,6 +174,7 @@ def convertBulkToParquets(
     outDir: Path | None = None,
     onlyCiks: set[str] | None = None,
     progress: bool = True,
+    force: bool = False,
 ) -> dict[str, int]:
     """companyfacts.zip → `data/edgar/finance/{cik}.parquet` 일괄 생성.
 
@@ -187,10 +188,14 @@ def convertBulkToParquets(
         지정된 cik(0-padded 10자리)만 변환. 테스트/샘플용.
     progress : bool
         tqdm 진행률.
+    force : bool
+        True 면 stamp 무시하고 항상 재변환 (CI 강제 리빌드 용).
+        기본 False: zip mtime 이 `companyfacts.converted` 스탬프보다 최신이거나
+        스탬프 없을 때만 변환 (3분+/16,600 CIK 중복 작업 회피).
 
     Returns
     -------
-    dict {"converted": N, "skipped": M, "failed": K}
+    dict {"converted": N, "skipped": M, "failed": K, "stampSkipped": bool}
     """
     if zipPath is None:
         zipPath = downloadCompanyfactsBulk(progress=progress)
@@ -199,6 +204,18 @@ def convertBulkToParquets(
 
     target = outDir or _financeDir()
     target.mkdir(parents=True, exist_ok=True)
+
+    # stamp 기반 skip — zip 미갱신 + 이전 변환 완료 이력 있으면 skip.
+    # onlyCiks 지정 시 stamp 무시 (샘플 변환 목적).
+    stamp = zipPath.parent / "companyfacts.converted"
+    if (
+        not force
+        and onlyCiks is None
+        and stamp.exists()
+        and zipPath.stat().st_mtime <= stamp.stat().st_mtime
+    ):
+        _log.info("companyfacts.zip 변환 최신 상태 (stamp=%s) — skip", stamp)
+        return {"converted": 0, "skipped": 0, "failed": 0, "stampSkipped": True}
 
     converted = 0
     skipped = 0
@@ -240,8 +257,9 @@ def convertBulkToParquets(
         if bar is not None:
             bar.close()
 
-    # 변환 완료 시각 기록 (다운스트림 스크립트 용)
-    stamp = _bulkDir() / "companyfacts.converted"
+    # 변환 완료 시각 기록 (다운스트림 스크립트 용).
+    # skip 가드가 이 파일 mtime 을 zip mtime 과 비교하므로 touch 이후 작성.
+    stamp = zipPath.parent / "companyfacts.converted"
     stamp.write_text(
         datetime.now(timezone.utc).isoformat(timespec="seconds"), encoding="utf-8"
     )
@@ -252,7 +270,12 @@ def convertBulkToParquets(
         skipped,
         failed,
     )
-    return {"converted": converted, "skipped": skipped, "failed": failed}
+    return {
+        "converted": converted,
+        "skipped": skipped,
+        "failed": failed,
+        "stampSkipped": False,
+    }
 
 
 # ── 진행률/이벤트 헬퍼 ─────────────────────────────────────────────────

@@ -343,11 +343,27 @@ workflow_run trigger → Data Prebuild (DART) 자동 실행
 | dataSync | `hf-dataset-push` | false (대기) |
 | dataPrebuild | `hf-dataset-push` | false (대기) |
 | edgarSync | `hf-dataset-push` | false (대기) |
+| kindlist | `hf-dataset-push` | false (대기) |
 | dataAudit | `data-audit` | true (새 감사로 대체) |
 
-**설계 근거**: 모든 HF push 워크플로우를 단일 `hf-dataset-push` 그룹에 묶어 **직렬 실행** —
-HF sliding-window rate limit(1000 req/5min) 에서 429 회피. 동시 실행되면 여러 워크플로우의
-preupload 요청이 합산되어 한도 터짐.
+**설계 근거**: HF push 하는 모든 워크플로우 (dataSync/dataPrebuild/edgarSync/kindlist) 를
+단일 `hf-dataset-push` 그룹에 묶어 **직렬 실행** — HF sliding-window rate limit(1000 req/5min)
+에서 429 회피. 동시 실행되면 여러 워크플로우의 preupload 요청이 합산되어 한도 터짐.
+
+### Collect state 경로 분기 (pending.txt 경쟁 회피)
+
+dataSync.yml 의 `sync-finance-report` 와 `sync-docs` Job 이 병렬 실행되므로,
+`_collect_state/` 하위 파일을 scope 별로 분리:
+
+| Job | env `SYNC_STATE_SCOPE` | 경로 | cache key |
+|-----|------------------------|------|-----------|
+| sync-finance-report | `fr` | `data/dart/_collect_state/fr/` | `dartlab-collect-state-fr-{run_id}` |
+| sync-docs | `docs` | `data/dart/_collect_state/docs/` | `dartlab-collect-state-docs-{run_id}` |
+
+- `syncRecent.py::_stateDir()` 및 `batch.py` 내부 state 저장 로직이 env 기반 분기
+- `skipped_docs_rcept.txt` 는 Job 공용이라 base 경로 유지 (읽기만 해서 경쟁 없음)
+- `docs_failures.json` 은 scope 별 저장 (docs job 전용), 7일 이내 자동 재시도
+- `failures.json` (DART batch) 은 syncRecent 시작부에서 pendingCodes 에 merge 되어 재시도
 
 ## 수집 엔진
 

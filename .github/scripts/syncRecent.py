@@ -74,11 +74,28 @@ def _cloneCategory(category: str, dataDir: str, targetCodes: set[str]) -> int:
     return existing
 
 
+def _stateDir(dataDir: str) -> Path:
+    """카테고리별 collect state 경로.
+
+    병렬 Job (sync-finance-report / sync-docs) 간 pending.txt/failures.json
+    동시 쓰기 경쟁 회피 — env ``SYNC_STATE_SCOPE`` 로 subdir 분리.
+
+    - fr: `data/dart/_collect_state/fr/` (finance+report)
+    - docs: `data/dart/_collect_state/docs/`
+    - scope 없으면 기존 단일 경로 (로컬 실행 호환)
+    """
+    base = Path(dataDir) / "dart" / "_collect_state"
+    scope = os.environ.get("SYNC_STATE_SCOPE", "").strip()
+    return base / scope if scope else base
+
+
 def _loadDocsSkipped(dataDir: str) -> set[str]:
     """document.xml status 014 (파일 없음) 받은 rcept_no 영구 스킵 리스트.
 
     DART 시스템에 document.xml이 존재하지 않는 보고서가 있다 (정정류 외에도
     원본 보고서 일부). 매 run마다 시도하면 키 낭비 → 한 번 014 받으면 영구 스킵.
+
+    skipped 는 **모든 Job 공용** 이라 scope 구분 없이 base 경로 사용.
     """
     p = Path(dataDir) / "dart" / "_collect_state" / "skipped_docs_rcept.txt"
     if not p.exists():
@@ -95,6 +112,64 @@ def _appendDocsSkipped(dataDir: str, rcepts: set[str]) -> None:
     merged = existing | rcepts
     p.write_text("\n".join(sorted(merged)), encoding="utf-8")
     print(f"[syncRecent] docs 영구 스킵 리스트 갱신: +{len(rcepts)}, 총 {len(merged)}")
+
+
+def _appendDocsFailures(dataDir: str, entries: list) -> None:
+    """docs 수집 실패 (status 014 제외) 기록 — 다음 run 7일 이내 재시도 대상.
+
+    포맷: {timestamp: iso, entries: [[stockCode, rceptNo, reason], ...]}
+    7일 이상 묵은 항목은 자동 제거 (영구 실패로 간주).
+    """
+    if not entries:
+        return
+    import json
+    from datetime import datetime, timedelta, timezone
+
+    p = _stateDir(dataDir) / "docs_failures.json"
+    p.parent.mkdir(parents=True, exist_ok=True)
+
+    existing: list[dict] = []
+    if p.exists():
+        try:
+            existing = json.loads(p.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            existing = []
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+    fresh = [
+        r for r in existing
+        if r.get("ts") and datetime.fromisoformat(r["ts"]) > cutoff
+    ]
+
+    ts = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    for stockCode, rceptNo, reason in entries:
+        fresh.append({"ts": ts, "stockCode": stockCode, "rceptNo": rceptNo, "reason": reason})
+
+    p.write_text(json.dumps(fresh, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[syncRecent] docs 실패 기록: +{len(entries)}, 총 {len(fresh)}건 (7일 이내)")
+
+
+def _loadRecentDocsFailures(dataDir: str) -> set[str]:
+    """최근 7일 이내 실패한 rcept_no 세트 — 다음 run 에서 우선 재시도.
+
+    skipped_docs_rcept 와 달리 **재시도 가능** 항목 (일시적 네트워크·타임아웃 등).
+    """
+    import json
+    from datetime import datetime, timedelta, timezone
+
+    p = _stateDir(dataDir) / "docs_failures.json"
+    if not p.exists():
+        return set()
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return set()
+    cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+    return {
+        r["rceptNo"]
+        for r in data
+        if r.get("ts") and datetime.fromisoformat(r["ts"]) > cutoff and r.get("rceptNo")
+    }
 
 
 def _existingRceptNos(directory: Path, stockCode: str) -> set[str]:
@@ -349,6 +424,8 @@ async def _collectDocsDirect(
     failCount = [0]
     stockSections: dict[str, list[dict]] = {}  # stockCode → sections
     skippedRcepts: set[str] = set()  # status 014 → 영구 스킵 후보
+    # 실패 추적: (stockCode, rceptNo, reason) — status 014 제외 (이미 skipped 경로)
+    failEntries: list[tuple[str, str, str]] = []
 
     sem = asyncio.Semaphore(4)  # 동시 4개 다운로드 (API 한도 소진 속도 조절)
 
@@ -368,13 +445,15 @@ async def _collectDocsDirect(
 
         try:
             raw = await client.getBytes("document.xml", {"rcept_no": rceptNo})
-        except Exception:
+        except Exception as exc:
             failCount[0] += 1
+            failEntries.append((stockCode, rceptNo, f"fetch_error:{type(exc).__name__}"))
             doneCount[0] += 1
             return
 
         if raw is None:
             failCount[0] += 1
+            failEntries.append((stockCode, rceptNo, "empty_response"))
             doneCount[0] += 1
             return
 
@@ -394,12 +473,14 @@ async def _collectDocsDirect(
             zf = zipfile.ZipFile(io.BytesIO(raw))
         except zipfile.BadZipFile:
             failCount[0] += 1
+            failEntries.append((stockCode, rceptNo, "bad_zip"))
             doneCount[0] += 1
             return
 
         names = zf.namelist()
         if not names:
             failCount[0] += 1
+            failEntries.append((stockCode, rceptNo, "empty_zip"))
             doneCount[0] += 1
             return
 
@@ -449,6 +530,7 @@ async def _collectDocsDirect(
                 await asyncio.wait_for(_fetchOne(stockCode, row), timeout=120)
             except asyncio.TimeoutError:
                 failCount[0] += 1
+                failEntries.append((stockCode, row.get("rcept_no", ""), "timeout"))
                 doneCount[0] += 1
                 print(f"[syncRecent] docs 타임아웃: {stockCode} {row.get('rcept_no', '?')}")
 
@@ -459,6 +541,10 @@ async def _collectDocsDirect(
     # status 014 받은 rcept_no 영구 스킵 리스트에 누적
     if skippedRcepts:
         _appendDocsSkipped(dataDir, skippedRcepts)
+
+    # docs 실패 기록 (status 014 제외) — 다음 run 에서 7일 이내 재시도 대상
+    if failEntries:
+        _appendDocsFailures(dataDir, failEntries)
 
     # 종목별 parquet 저장
     results: dict[str, int] = {}
@@ -509,8 +595,13 @@ def main():
 
     print(f"[syncRecent] lookback={lookbackDays}일, categories={categories}, dataDir={dataDir}")
 
-    # 0단계: 이전 실행에서 잘린 종목 (pending.txt) 우선 회수
-    pendingPath = Path(dataDir) / "dart" / "_collect_state" / "pending.txt"
+    # 0단계: 이전 실행에서 잘린/실패 종목 우선 회수
+    # pending.txt: API 한도 초과로 큐에 남은 종목
+    # failures.json: 네트워크·파싱 등 에러로 실패한 종목 (자동 재시도)
+    stateDir = _stateDir(dataDir)
+    pendingPath = stateDir / "pending.txt"
+    failuresPath = stateDir / "failures.json"
+
     pendingCodes: set[str] = set()
     if pendingPath.exists():
         pendingCodes = set(
@@ -518,6 +609,19 @@ def main():
         )
         if pendingCodes:
             print(f"[syncRecent] 이전 실행 pending: {len(pendingCodes)}개 종목 우선 처리")
+
+    if failuresPath.exists():
+        try:
+            import json as _json
+            prevFailures = _json.loads(failuresPath.read_text(encoding="utf-8"))
+            if isinstance(prevFailures, dict):
+                retryCodes = set(prevFailures.keys())
+                newToRetry = retryCodes - pendingCodes
+                if newToRetry:
+                    pendingCodes |= newToRetry
+                    print(f"[syncRecent] 이전 실행 failures: {len(newToRetry)}개 종목 재시도 추가")
+        except (OSError, ValueError):
+            pass
 
     # 1단계: 새 보고서가 있는 종목 발견
     targetCodes, targetFilings = _discoverNewFilings(keys, lookbackDays, dataDir)

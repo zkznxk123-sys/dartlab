@@ -4,11 +4,11 @@
 
     from dartlab.providers.dart.company import Company
 
-    c = Company("005930")       # 한국 (DART)
-    c = Company("삼성전자")      # 한국 (회사명)
-    c.BS                        # 재무상태표 DataFrame
-    c.ratios                    # 재무비율
-    c.insights                  # 인사이트 등급
+    c = Company("005930")         # 한국 (DART)
+    c = Company("삼성전자")        # 한국 (회사명)
+    c.show("BS")                  # 재무상태표 DataFrame (BS/IS/CF/CIS)
+    c.ratios                      # 재무비율
+    c.insights                    # 인사이트 등급
 """
 
 from __future__ import annotations

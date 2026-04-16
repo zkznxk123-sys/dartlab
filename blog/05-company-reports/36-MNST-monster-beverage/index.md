@@ -10,6 +10,7 @@ exchange: "NASDAQ"
 storyTemplate: "현금부자"
 thumbnail: /avatar-chart.png
 ogImage: "/thumbnails/MNST-monster-beverage.webp"
+youtubeId: "JRcq9GXfifg"
 description: "1992년 남아공 변호사 두 명이 $14.6M에 인수한 파산 주스 회사. 30년 뒤 매출 $7.5B, 자사주 매입 $8.3B, 배당은 0원. 그런데도 공장 설비 투자는 매출의 2~3%에 묶여있다. 코카콜라가 $2.15B에 지분 16.7%를 사고 자사 에너지 브랜드를 넘긴 이유를 재무제표에서 찾았다."
 tags:
   - Monster Beverage
@@ -38,10 +39,13 @@ ai:
 ---
 
 <script>
+import YouTube from '$lib/components/YouTube.svelte';
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
 import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 </script>
+
+<YouTube id="JRcq9GXfifg" title="Monster Beverage — 매출 2.5배인데 CAPEX는 그대로, 코카콜라가 지분 산 회사" />
 
 > **현금부자** | 음료 > 에너지드링크 | 2026-04-15 dartlab 실측
 

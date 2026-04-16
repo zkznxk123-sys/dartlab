@@ -72,7 +72,7 @@ def printRepr(corpName: str, stockCode: str, nProps: int, nNotes: int):
 
     t = Text()
     t.append("재무제표  ", style=_TM)
-    t.append("c.BS  c.IS  c.CF", style=_TX)
+    t.append('c.show("BS" | "IS" | "CF")', style=_TX)
     info.append(t)
 
     t = Text()
@@ -129,11 +129,11 @@ def printGuide(corpName: str, stockCode: str, properties: list, noteKeys: list, 
 
     console.print(Text("\n 재무제표", style=f"bold {_TX}"))
     t = Text()
-    t.append("   c.BS", style=_PR)
+    t.append('   c.show("BS")', style=_PR)
     t.append("  재무상태표   ", style=_TM)
-    t.append("c.IS", style=_PR)
+    t.append('c.show("IS")', style=_PR)
     t.append("  손익계산서   ", style=_TM)
-    t.append("c.CF", style=_PR)
+    t.append('c.show("CF")', style=_PR)
     t.append("  현금흐름표", style=_TM)
     console.print(t)
 

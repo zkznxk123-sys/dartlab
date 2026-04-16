@@ -21,7 +21,7 @@ tags:
   - EDGAR
   - 전자공시
   - DCF
-thumbnail: /thumbnails/TSLA-tesla.webp
+thumbnail: /avatar-chart.png
 ogImage: /thumbnails/TSLA-tesla.webp
 ai:
   verdict: "자동차 사업은 Decline 진입. EVA 마이너스 $4.2B. 시총 $1T는 자동차가 아니라 로보택시/FSD/Optimus 내러티브의 가격."

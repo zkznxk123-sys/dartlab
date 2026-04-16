@@ -39,26 +39,44 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      # workflow_run 컨텍스트는 소스 workflow 의 run_id 를 모름 → restore-keys 접두사 매칭으로
+      # 최신 dataSync 캐시 찾는다. key 는 의도적으로 miss 시켜 fallback 강제.
       - name: Restore finance cache
+        id: finance-cache
         uses: actions/cache/restore@v5
         with:
           path: data/dart/finance
-          key: dartlab-data-finance-
+          key: dartlab-data-finance-prebuild-never-match
           restore-keys: dartlab-data-finance-
 
       - name: Restore report cache
+        id: report-cache
         uses: actions/cache/restore@v5
         with:
           path: data/dart/report
-          key: dartlab-data-report-
+          key: dartlab-data-report-prebuild-never-match
           restore-keys: dartlab-data-report-
 
       - name: Restore docs cache
+        id: docs-cache
         uses: actions/cache/restore@v5
         with:
           path: data/dart/docs
-          key: dartlab-data-docs-
+          key: dartlab-data-docs-prebuild-never-match
           restore-keys: dartlab-data-docs-
+
+      - name: Verify cache hits
+        run: |
+          for cat in finance report docs; do
+            cat_var="$(echo $cat | tr a-z A-Z)"
+            var="${cat_var}_CACHE_MATCHED_KEY"
+            # actions/cache/restore 는 matched key 를 outputs.cache-matched-key 로 노출
+            echo "[$cat] matched=$(eval echo \${CACHE_MATCHED_${cat_var}:-MISS})"
+          done
+        env:
+          CACHE_MATCHED_FINANCE: ${{ steps.finance-cache.outputs.cache-matched-key }}
+          CACHE_MATCHED_REPORT: ${{ steps.report-cache.outputs.cache-matched-key }}
+          CACHE_MATCHED_DOCS: ${{ steps.docs-cache.outputs.cache-matched-key }}
 
       - name: Build DART scan prebuilds + upload
         run: uv run python .github/scripts/prebuildData.py

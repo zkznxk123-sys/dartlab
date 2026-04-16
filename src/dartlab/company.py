@@ -53,7 +53,7 @@ def Company(codeOrName: str) -> CompanyProtocol:
         "삼성전자 분석해줘" → Company("005930") 생성 → briefing → LLM 해석.
 
     Guide:
-        - "삼성전자 재무제표" -> c = Company("005930"); c.IS
+        - "삼성전자 재무제표" -> c = Company("005930"); c.show("IS")
         - "사업 개요 보여줘" -> c.show("businessOverview")
         - "어떤 데이터 있어?" -> c.index 또는 c.topics
         - "출처 추적" -> c.trace("revenue")

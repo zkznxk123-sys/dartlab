@@ -446,13 +446,12 @@ def _ensureEdgarFinanceFromBulk(
     )
 
     zipPath = downloadCompanyfactsBulk(force=False)  # ETag + TTL 기반 재사용
-    convertedStamp = zipPath.parent / "companyfacts.converted"
-    zipFresher = (
-        not convertedStamp.exists()
-        or zipPath.stat().st_mtime > convertedStamp.stat().st_mtime
-    )
-    if not path.exists() or (refresh and zipFresher):
-        convertBulkToParquets(zipPath=zipPath)
+    # convertBulkToParquets 자체가 zip mtime vs stamp 비교로 skip 가드.
+    # 최초 로드 (path 없음) 는 stamp 가드 우회하기 위해 force=True.
+    if not path.exists():
+        convertBulkToParquets(zipPath=zipPath, force=True)
+    elif refresh:
+        convertBulkToParquets(zipPath=zipPath)  # stamp 비교 → 필요시만 재변환
     if not path.exists():
         raise FileNotFoundError(
             f"{stockCode} (CIK={path.stem}) EDGAR finance parquet 생성 실패 — "

@@ -21,7 +21,7 @@ tags:
   - CAPEX
   - EDGAR
   - 전자공시
-thumbnail: /thumbnails/META-meta-platforms.webp
+thumbnail: /avatar-chart.png
 ogImage: /thumbnails/META-meta-platforms.webp
 ai:
   verdict: "광고 플랫폼의 구조적 82% 마진이 AI CAPEX $70B와 Reality Labs 적자를 동시에 감내하는 투자 여력을 만든다."

@@ -859,9 +859,15 @@ def batchCollect(
                 break
 
         if pending or failures:
+            import os
+
             from dartlab import config as _cfg
 
-            stateDir = Path(_cfg.dataDir) / "dart" / "_collect_state"
+            # 병렬 Job (sync-finance-report / sync-docs) 간 동시 쓰기 경쟁 회피 —
+            # env SYNC_STATE_SCOPE 로 하위 디렉토리 분리 (fr / docs).
+            baseDir = Path(_cfg.dataDir) / "dart" / "_collect_state"
+            scope = os.environ.get("SYNC_STATE_SCOPE", "").strip()
+            stateDir = baseDir / scope if scope else baseDir
             stateDir.mkdir(parents=True, exist_ok=True)
             if pending:
                 (stateDir / "pending.txt").write_text("\n".join(pending), encoding="utf-8")

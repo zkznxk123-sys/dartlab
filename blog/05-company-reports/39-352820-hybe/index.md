@@ -21,7 +21,7 @@ tags:
   - NewJeans
   - 멀티레이블
   - 전자공시
-thumbnail: /thumbnails/352820-hybe.webp
+thumbnail: /avatar-chart.png
 ogImage: /thumbnails/352820-hybe.webp
 ai:
   verdict: "BTS 공백 2년을 공연·레이블 다각화로 매출 사상 최대까지 끌어올렸지만, 북미 매니지먼트 손상차손 2,000억과 영업레버리지 붕괴가 이익을 지웠다. 2026 BTS 복귀가 구조적 이익 회복을 증명하는 해."

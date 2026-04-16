@@ -385,9 +385,8 @@ class Company:
         c.finance.CF           # 연도별 현금흐름표
         c.finance.CIS          # 연도별 포괄손익계산서
         c.finance.ratioSeries  # 재무비율 시계열
-        c.BS                   # finance.BS 바로가기
         c.sections             # docs.sections 바로가기
-        c.show(topic)          # 통합 조회 → DataFrame | None
+        c.show(topic)          # 통합 조회 → DataFrame | None (BS/IS/CF/CIS + docs)
     """
 
     @staticmethod

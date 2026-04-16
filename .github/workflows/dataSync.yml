@@ -87,12 +87,12 @@ jobs:
           key: dartlab-data-docs-${{ github.run_id }}
           restore-keys: dartlab-data-docs-
 
-      - name: Restore collect state (pending.txt)
+      - name: Restore collect state (pending.txt) — fr scope
         uses: actions/cache/restore@v5
         with:
-          path: data/dart/_collect_state
-          key: dartlab-collect-state-${{ github.run_id }}
-          restore-keys: dartlab-collect-state-
+          path: data/dart/_collect_state/fr
+          key: dartlab-collect-state-fr-${{ github.run_id }}
+          restore-keys: dartlab-collect-state-fr-
 
       - name: Sync recent (finance + report)
         run: uv run python .github/scripts/syncRecent.py
@@ -100,6 +100,7 @@ jobs:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
           SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '60' }}
           SYNC_CATEGORIES: finance,report
+          SYNC_STATE_SCOPE: fr  # 병렬 Job pending.txt 경쟁 회피
 
       - name: Upload to HuggingFace (finance)
         if: hashFiles('dist/changed_finance.txt') != ''
@@ -138,11 +139,11 @@ jobs:
           path: data/dart/report
           key: dartlab-data-report-${{ github.run_id }}
 
-      - name: Save collect state
+      - name: Save collect state — fr scope
         uses: actions/cache/save@v5
         with:
-          path: data/dart/_collect_state
-          key: dartlab-collect-state-${{ github.run_id }}
+          path: data/dart/_collect_state/fr
+          key: dartlab-collect-state-fr-${{ github.run_id }}
 
   # ── Job 2: docs (느림, 별도 타임아웃) ──
   sync-docs:
@@ -169,12 +170,20 @@ jobs:
           key: dartlab-data-docs-${{ github.run_id }}
           restore-keys: dartlab-data-docs-
 
+      - name: Restore collect state (pending.txt) — docs scope
+        uses: actions/cache/restore@v5
+        with:
+          path: data/dart/_collect_state/docs
+          key: dartlab-collect-state-docs-${{ github.run_id }}
+          restore-keys: dartlab-collect-state-docs-
+
       - name: Sync recent (docs)
         run: uv run python .github/scripts/syncRecent.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
           SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '60' }}
           SYNC_CATEGORIES: docs
+          SYNC_STATE_SCOPE: docs
 
       - name: Upload to HuggingFace (docs)
         if: hashFiles('dist/changed_docs.txt') != ''
@@ -194,6 +203,12 @@ jobs:
         with:
           path: data/dart/docs
           key: dartlab-data-docs-${{ github.run_id }}
+
+      - name: Save collect state — docs scope
+        uses: actions/cache/save@v5
+        with:
+          path: data/dart/_collect_state/docs
+          key: dartlab-collect-state-docs-${{ github.run_id }}
 
   # ── Job 3 (workflow_dispatch full 전용): 88분기 차집합 (heavy) ──
   full-collect:

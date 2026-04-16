@@ -57,7 +57,7 @@ namespace: docs (원문) / finance (숫자) / report (정형공시) / profile (m
 EDGAR: 인터넷 연결 (On-demand 수집).
 **AIContext:** 개별 종목 분석의 시작점. explore/finance/analysis 수퍼툴이 이 객체를 소비.
 "삼성전자 분석해줘" → Company("005930") 생성 → briefing → LLM 해석.
-**Guide:** "삼성전자 재무제표" -> c = Company("005930"); c.IS
+**Guide:** "삼성전자 재무제표" -> c = Company("005930"); c.show("IS")
 "사업 개요 보여줘" -> c.show("businessOverview")
 "어떤 데이터 있어?" -> c.index 또는 c.topics
 "출처 추적" -> c.trace("revenue")
@@ -476,7 +476,7 @@ us.market                    # "US"
 
 ### Company 메서드/프로퍼티
 
-DartCompany에서 동적 추출 (53개).
+DartCompany에서 동적 추출 (57개).
 
 | 이름 | 종류 | 설명 |
 |------|------|------|
@@ -485,6 +485,7 @@ DartCompany에서 동적 추출 (53개).
 | `audit` | method | 감사 리스크 종합 분석. |
 | `canHandle` | method | DART 종목코드(6자) 또는 한글 회사명이면 처리 가능. |
 | `capital` | method | 주주환원 분석 (배당, 자사주, 총환원율). |
+| `causalWeights` | method | 6막 인과 가중치 (Phase 9 B2). |
 | `codeName` | method | 종목코드 → 회사명 변환. |
 | `contextSlices` | property | LLM 투입용 context slice DataFrame. |
 | `credit` | property | 독립 신용평가 — dual access. |
@@ -504,6 +505,7 @@ DartCompany에서 동적 추출 (53개).
 | `liveFilings` | method | OpenDART 기준 실시간 공시 목록 조회. |
 | `macro` | method | 시장 매크로 분석 — 회사 컨텍스트에서 자국 시장으로 자동 위임 (Phase 8 A2). |
 | `market` | property | 시장 코드 (DART 제공자는 항상 KR). |
+| `narrativeDiff` | method | claim 제거 시 dFV 변화 히트맵 (Phase 10 G3). |
 | `network` | method | 관계 네트워크 (지분출자 + 그룹 계열사 지도). |
 | `news` | method | 최근 뉴스 수집. |
 | `priority` | method | 낮을수록 먼저 시도. DART=10 (기본 provider). |
@@ -524,12 +526,14 @@ DartCompany에서 동적 추출 (53개).
 | `show` | property | topic 의 데이터를 반환 — 사용자 단일 진입점 (api-contract dual access). |
 | `sources` | property | docs/finance/report 3개 source의 가용 현황 요약. |
 | `status` | method | 로컬에 보유한 전체 종목 인덱스. |
+| `storyTree` | method | possible/plausible/probable 3 trajectory DCF (Phase 10 G2). |
 | `table` | method | subtopic wide 셀의 markdown table을 구조화 DataFrame으로 파싱. |
 | `topicSummaries` | method | 토픽별 요약 dict — AI가 경로 탐색에 사용. |
 | `topics` | property | topic별 요약 DataFrame -- 전체 데이터 지도. |
 | `trace` | method | topic 데이터의 출처(docs/finance/report)와 선택 근거 추적. |
 | `update` | method | 누락된 최신 공시를 증분 수집. |
 | `validateStory` | method | Damodaran 스토리 검증 — Possible / Plausible / Probable 3 테스트 통합. |
+| `valuationImpact` | method | 인과 체인에서 DCF override 힌트 도출 (Phase 9 B3). |
 | `view` | method | 브라우저에서 공시 뷰어를 엽니다. |
 | `watch` | method | 공시 변화 감지 — 중요도 스코어링 기반 변화 요약. |
 | `workforce` | method | 인력/급여 분석 (직원수, 평균급여, 근속연수). |
