@@ -36,18 +36,6 @@ export const categoryDefinitions = [
 			'DartLab은 공시를 검색 결과가 아니라 판단의 중심으로 읽습니다. 사업보고서, 감사 문구, 지배구조, 위험 신호를 실제 투자 해석으로 연결합니다.'
 	},
 	{
-		id: 'corporate-analysis',
-		slug: 'corporate-analysis',
-		folder: '03-corporate-analysis',
-		label: '실전기업분석',
-		description: '수익 구조, 자금 구조, 투자 효율까지 기업 전체를 읽는 분석 프레임워크입니다.',
-		seoTitle: '실전기업분석 | 수익 구조부터 투자 효율까지',
-		seoDescription:
-			'DartLab 실전기업분석 카테고리. 수익 구조, 비용 구조, 현금흐름, 부문별 이익률, 집중도 분석을 실제 기업 데이터로 정리합니다.',
-		brandMessage:
-			'DartLab은 재무제표 숫자 나열이 아니라, 이 회사가 무엇으로 돈을 벌고 구조가 얼마나 튼튼한지 판단하는 분석 흐름을 만듭니다.'
-	},
-	{
 		id: 'credit-reports',
 		slug: 'credit-reports',
 		folder: '04-credit-reports',
@@ -158,14 +146,6 @@ export const seriesDefinitions = {
 		seoTitle: '공시 데이터 파이프라인 | OpenDART와 공시 수집 설계',
 		seoDescription: 'DartLab 공시 데이터 파이프라인 시리즈. OpenDART, corp_code, XBRL, 원문 데이터를 실제 수집 구조로 연결합니다.',
 		brandMessage: 'DartLab은 공시를 읽는 법을 넘어서, 반복 가능한 수집기와 분석 파이프라인으로 연결하는 방법까지 다룹니다.'
-	},
-	'corporate-analysis': {
-		id: 'corporate-analysis',
-		label: '실전기업분석',
-		description: '수익 구조, 자금 구조, 자산 구조, 투자 효율까지 기업 전체를 읽는 분석 프레임워크 시리즈입니다.',
-		seoTitle: '기업 분석 실전 | 수익 구조부터 투자 효율까지 읽는 법',
-		seoDescription: 'DartLab 기업 분석 실전 시리즈. 수익 구조, 비용 구조, 현금흐름, 부문별 이익률을 실제 기업 데이터로 분석합니다.',
-		brandMessage: 'DartLab은 재무제표 숫자를 나열하는 것이 아니라, 이 회사가 무엇으로 돈을 벌고 구조가 얼마나 튼튼한지를 판단합니다.'
 	},
 	'dartlab-news': {
 		id: 'dartlab-news',

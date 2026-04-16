@@ -2,9 +2,9 @@
 title: 이 회사는 무엇으로 돈을 버는가 — 수익 구조 읽기
 date: 2026-03-26
 description: 기업 분석의 출발점은 '얼마 버는가'가 아니라 '무엇으로 버는가'다. 부문별 매출·이익 구성, 매출 성장 분석, 집중도를 읽어 수익 구조의 강도를 판단하는 프레임워크를 정리한다.
-category: corporate-analysis
-series: corporate-analysis
-seriesOrder: 1
+category: reading-disclosures
+series: financial-context
+seriesOrder: 10
 thumbnail: /avatar-chart.png
 ---
 

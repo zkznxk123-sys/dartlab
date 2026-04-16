@@ -29,7 +29,7 @@
 
 ## 카테고리
 
-### 01 공시 읽기 (40편)
+### 01 공시 읽기 (43편)
 
 | # | slug | 시리즈 |
 |---|------|--------|
@@ -73,6 +73,9 @@
 | 38 | corp-code-to-filing-pipeline | data-pipeline |
 | 39 | data-quality-validation | data-pipeline |
 | 40 | dart-edgar-unified-structure | data-pipeline |
+| 41 | revenue-structure-how-to-read | financial-context |
+| 42 | asset-structure-how-to-read | financial-context |
+| 43 | cashflow-how-to-read | financial-context |
 
 ### 02 DartLab 소식 (6편, 사용자 관리)
 
@@ -84,14 +87,6 @@
 | 04 | company-one-stock-code |
 | 05 | search-without-embeddings |
 | 06 | magic-formula-korea |
-
-### 03 실전기업분석 (3편, 사용자 관리)
-
-| # | slug |
-|---|------|
-| 01 | revenue-structure-how-to-read |
-| 02 | asset-structure-how-to-read |
-| 03 | cashflow-how-to-read |
 
 ### 04 신용분석 보고서 (프로그래매틱, publisher.py 관리)
 

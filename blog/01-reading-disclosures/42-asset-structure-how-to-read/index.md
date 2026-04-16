@@ -2,9 +2,9 @@
 title: 자산 구조 분석 — BS를 영업/비영업으로 재분류하면 보이는 것들
 date: 2026-03-27
 description: 대차대조표를 유동/비유동이 아니라 영업/비영업으로 나누면 사업의 실체가 드러난다. NOA, CCC, CAPEX 패턴, 자산회전율까지 — 조달한 돈이 어디에 묶여 있는지 읽는 프레임워크를 정리한다.
-category: corporate-analysis
-series: corporate-analysis
-seriesOrder: 2
+category: reading-disclosures
+series: financial-context
+seriesOrder: 11
 thumbnail: /avatar-chart.png
 ---
 
@@ -202,15 +202,13 @@ eff = calcAssetEfficiency(c)   # 자산회전율
 
 ## 시리즈 안내
 
-이 글은 **실전기업분석** 시리즈 4편이다. 같은 프레임워크를 순서대로 적용한다.
+이 글은 **숫자 뒤 맥락 읽기** 시리즈의 한 편이다. 같은 프레임워크를 구조별로 적용한다.
 
-- 1편: [수익 구조 읽기](/blog/revenue-structure-how-to-read) — 무엇으로 돈을 버는가
-- 2편: [삼성SDI 수익 구조](/blog/revenue-structure-how-to-read) — 프레임워크 적용 사례
-- 3편: [삼성SDI 자금 구조](/blog/revenue-structure-how-to-read) — 돈을 어디서 가져오는가
-- **4편: 자산 구조 읽기** — 조달한 돈이 어디에 묶여 있는가 (이 글)
-- 5편: [현금흐름 읽기](/blog/cashflow-how-to-read) — 실제로 현금은 어떻게 흘렀는가
+- [수익 구조 읽기](/blog/revenue-structure-how-to-read) — 무엇으로 돈을 버는가
+- **자산 구조 읽기** — 조달한 돈이 어디에 묶여 있는가 (이 글)
+- [현금흐름 읽기](/blog/cashflow-how-to-read) — 실제로 현금은 어떻게 흘렀는가
 
-수익 구조에서 "무엇으로 버는가"를, 자금 구조에서 "돈을 어디서 가져오는가"를 봤다. 이 글에서는 "가져온 돈이 어디에 얼마나 묶여 있는가"를 봤다. 다음은 "그래서 현금은 실제로 얼마나 남는가"를 본다.
+수익 구조에서 "무엇으로 버는가"를 봤다면, 이 글에서는 "돈이 어디에 얼마나 묶여 있는가"를 본다. 다음은 "그래서 현금은 실제로 얼마나 남는가"를 본다.
 
 ---
 

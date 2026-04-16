@@ -2,9 +2,9 @@
 title: 현금흐름 분석 — 손익계산서 이익과 현금흐름표 현금은 왜 다른가
 date: 2026-03-27
 description: 손익계산서에서 이익이 나도 현금이 없을 수 있다. 현금흐름 3구간, 6가지 CF 패턴, FCF, 영업CF/순이익 비율까지 — 실제로 현금이 어떻게 흘렀는지 읽는 프레임워크를 정리한다.
-category: corporate-analysis
-series: corporate-analysis
-seriesOrder: 3
+category: reading-disclosures
+series: financial-context
+seriesOrder: 12
 thumbnail: /avatar-chart.png
 ---
 
@@ -169,15 +169,13 @@ flags = calcCashFlowFlags(c)        # 경고 신호
 
 ## 시리즈 안내
 
-이 글은 **실전기업분석** 시리즈 5편이다. 같은 프레임워크를 순서대로 적용한다.
+이 글은 **숫자 뒤 맥락 읽기** 시리즈의 한 편이다. 같은 프레임워크를 구조별로 적용한다.
 
-- 1편: [수익 구조 읽기](/blog/revenue-structure-how-to-read) — 무엇으로 돈을 버는가
-- 2편: [삼성SDI 수익 구조](/blog/revenue-structure-how-to-read) — 프레임워크 적용 사례
-- 3편: [삼성SDI 자금 구조](/blog/revenue-structure-how-to-read) — 돈을 어디서 가져오는가
-- 4편: [자산 구조 읽기](/blog/asset-structure-how-to-read) — 조달한 돈이 어디에 묶여 있는가
-- **5편: 현금흐름 읽기** — 실제로 현금은 어떻게 흘렀는가 (이 글)
+- [수익 구조 읽기](/blog/revenue-structure-how-to-read) — 무엇으로 돈을 버는가
+- [자산 구조 읽기](/blog/asset-structure-how-to-read) — 조달한 돈이 어디에 묶여 있는가
+- **현금흐름 읽기** — 실제로 현금은 어떻게 흘렀는가 (이 글)
 
-수익 구조에서 "무엇으로 버는가"를, 자금 구조에서 "돈을 어디서 가져오는가"를, 자산 구조에서 "어디에 묶여 있는가"를 봤다. 이 글에서는 "그래서 현금은 실제로 남는가"를 봤다. 네 편을 이어 읽으면 사업보고서의 재무 4표(BS/IS/CF/자본변동표)를 관통하는 하나의 이야기가 완성된다.
+수익 구조에서 "무엇으로 버는가"를, 자산 구조에서 "돈이 어디에 묶여 있는가"를 봤다. 이 글에서는 "그래서 현금은 실제로 남는가"를 봤다. 세 편을 이어 읽으면 재무 3표(IS/BS/CF)를 관통하는 하나의 이야기가 완성된다.
 
 ---
 

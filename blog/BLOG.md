@@ -27,7 +27,6 @@ dartlab 블로그는 **재무제표의 "왜?"를 풀어내는 엔진**이다.
 |---|---|---|---|
 | 공시 읽기 | `01-reading-disclosures` | DART, EDGAR, 사업보고서, 감사, 재무제표, 지배구조 | 운영자 |
 | DartLab 소식 | `02-dartlab-news` | 설치, 기능, 업데이트 | 사용자 직접 |
-| 실전기업분석 | `03-corporate-analysis` | 분석 프레임워크 | 사용자 직접 |
 | 신용분석 보고서 | `04-credit-reports` | **프로그래매틱 생성** — `publisher.py` 관리, `_registry.json` 매핑 | 자동 |
 | 기업분석 보고서 | `05-company-reports` | 6막 재무 서사, audit 완료 후 발간 | audit + 블로그 + 영상 한 세트 |
 | 경제분석 보고서 | `06-macro-reports` | **월별 자동 발간** — GitHub Actions `macroReport.yml` | 자동 |
@@ -52,7 +51,7 @@ blog/
 title: 글 제목 (60자 이하, 검색형 질문 또는 판단 문장)
 date: YYYY-MM-DD
 description: 1문장 설명 (160자 이하, 검색 스니펫 노출)
-category: reading-disclosures | dartlab-news | corporate-analysis | credit-reports | company-reports | macro-reports
+category: reading-disclosures | dartlab-news | credit-reports | company-reports | macro-reports
 series: 시리즈 id
 seriesOrder: 숫자
 thumbnail: /avatar-*.png
@@ -96,7 +95,6 @@ ai:
 | `financial-context` | 숫자 뒤 맥락 읽기 | 숫자만 보면 놓치는 해석 |
 | `capital-and-earnings` | 자본·이익의 질 | CAPEX, 운전자본, 현금흐름 |
 | `data-pipeline` | 공시 데이터 파이프라인 | 수집 구조 설계 |
-| `corporate-analysis` | 실전기업분석 | 기업 전체 분석 프레임 |
 | `dartlab-news` | DartLab 소식 | 설치, 기능, 업데이트 |
 
 ---
