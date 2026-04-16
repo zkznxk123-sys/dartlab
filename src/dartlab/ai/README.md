@@ -259,6 +259,7 @@ uv run python -X utf8 scripts/audit/aiAudit.py --provider gemini
 
 | Provider | 모델 |
 |---|---|
+| `claude` | Claude 4.6 (Opus/Sonnet/Haiku) |
 | `gemini` | Gemini 2.5 Pro/Flash |
 | `groq` | LLaMA 3.3 70B |
 | `cerebras` | LLaMA 3.3 70B |
@@ -271,6 +272,7 @@ uv run python -X utf8 scripts/audit/aiAudit.py --provider gemini
 |---|---|:---:|
 | `openai` | API key | O |
 | `ollama` | 로컬 | 모델 의존 |
+| `codex` | ChatGPT CLI | O |
 
 **벤치마크 숫자로 기본 모델을 정하지 않는다.** 각 모델로 dartlab AI audit 실행 → P/T/C/V 등급 비교.
 
