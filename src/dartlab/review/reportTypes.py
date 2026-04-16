@@ -38,7 +38,7 @@ REPORT_TYPES: dict[str, ReportType] = {
         key="executive",
         label="경영 요약",
         description="의사결정자용 3분컷 — 결론/수익/현금/가치",
-        sectionOrder=("종합평가", "수익구조", "현금흐름", "가치평가"),
+        sectionOrder=("종합평가", "수익구조", "현금흐름", "가치평가", "storyValidation"),
         emphasize=frozenset({"scorecard", "valuationSynthesis", "cashFlowOverview"}),
         focusQuestions=(
             "한 문장 결론은?",
@@ -52,7 +52,7 @@ REPORT_TYPES: dict[str, ReportType] = {
         key="credit",
         label="신용분석",
         description="채권/여신 심사 — 안정성/현금/자금조달/7축등급",
-        sectionOrder=("안정성", "현금흐름", "자금조달", "효율성", "신용평가"),
+        sectionOrder=("안정성", "현금흐름", "자금조달", "효율성", "신용평가", "storyValidation"),
         emphasize=frozenset(
             {"leverageTrend", "distressScore", "coverageTrend", "cashFlowOverview", "creditScore", "creditNarrative"}
         ),
@@ -68,7 +68,7 @@ REPORT_TYPES: dict[str, ReportType] = {
         key="valuation",
         label="가치평가 집중",
         description="가치투자자용 — DCF/상대가치/매출전망",
-        sectionOrder=("가치평가", "수익성", "성장성", "매출전망", "자본배분", "안정성"),
+        sectionOrder=("가치평가", "수익성", "성장성", "매출전망", "자본배분", "안정성", "storyValidation"),
         emphasize=frozenset({"valuationSynthesis", "dcfValuation", "relativeValuation", "revenueForecast"}),
         focusQuestions=(
             "적정 가치는 얼마인가?",
@@ -82,7 +82,7 @@ REPORT_TYPES: dict[str, ReportType] = {
         key="growth",
         label="성장 스토리",
         description="성장투자자용 — CAGR/마진확장/투자효율",
-        sectionOrder=("수익구조", "성장성", "매출전망", "수익성", "투자효율", "효율성", "자본배분"),
+        sectionOrder=("수익구조", "성장성", "매출전망", "수익성", "투자효율", "효율성", "자본배분", "storyValidation"),
         emphasize=frozenset({"growthTrend", "cagrComparison", "revenueForecast", "roicTree", "reinvestment"}),
         focusQuestions=(
             "성장의 원천은 무엇인가?",
@@ -96,7 +96,7 @@ REPORT_TYPES: dict[str, ReportType] = {
         key="crisis",
         label="위기 진단",
         description="위험 진단 — 부실/레버리지/유동성/턴어라운드",
-        sectionOrder=("매크로", "안정성", "자금조달", "현금흐름", "이익품질", "신용평가", "종합평가"),
+        sectionOrder=("매크로", "안정성", "자금조달", "현금흐름", "이익품질", "신용평가", "종합평가", "storyValidation"),
         emphasize=frozenset(
             {"leverageTrend", "distressScore", "coverageTrend", "cashQuality", "cashFlowOverview", "creditScore"}
         ),
@@ -112,7 +112,7 @@ REPORT_TYPES: dict[str, ReportType] = {
         key="audit",
         label="감사 관점",
         description="감사/포렌식 — 이익품질/재무정합성/공시변화",
-        sectionOrder=("이익품질", "재무정합성", "안정성", "지배구조", "공시변화"),
+        sectionOrder=("이익품질", "재무정합성", "안정성", "지배구조", "공시변화", "storyValidation"),
         emphasize=frozenset(
             {"cashQuality", "accrualAnalysis", "fundamentalDivergence", "governanceSummary", "disclosureChange"}
         ),
@@ -129,7 +129,7 @@ REPORT_TYPES: dict[str, ReportType] = {
         key="dividend",
         label="배당·주주환원",
         description="인컴 투자자용 — 배당지속성/FCF커버리지/총환원",
-        sectionOrder=("수익구조", "현금흐름", "자본배분", "자금조달", "안정성"),
+        sectionOrder=("수익구조", "현금흐름", "자본배분", "자금조달", "안정성", "storyValidation"),
         emphasize=frozenset(
             {
                 "dividendPolicy",
@@ -152,7 +152,7 @@ REPORT_TYPES: dict[str, ReportType] = {
         key="governance",
         label="경영진·지배구조",
         description="거버넌스 리스크 — 임원보수/외부이사 독립성/지분구조",
-        sectionOrder=("지배구조", "자본배분", "공시변화", "종합평가"),
+        sectionOrder=("지배구조", "자본배분", "공시변화", "종합평가", "storyValidation"),
         emphasize=frozenset(
             {
                 "governanceSummary",
@@ -174,7 +174,7 @@ REPORT_TYPES: dict[str, ReportType] = {
         key="macro",
         label="매크로 사이클 위치",
         description="탑다운 투자자용 — 사이클 + 역사적 팩트로 이 기업의 위치",
-        sectionOrder=("매크로", "시장분석", "매출전망", "가치평가"),
+        sectionOrder=("매크로", "시장분석", "매출전망", "가치평가", "storyValidation"),
         emphasize=frozenset(
             {
                 "macroCycle",
@@ -196,7 +196,7 @@ REPORT_TYPES: dict[str, ReportType] = {
         key="thesis",
         label="AI 논제 검증",
         description="사용자 가설 → 증거 수집 → 찬반 정리",
-        sectionOrder=("thesisReport",),  # 신규 섹션
+        sectionOrder=("thesisReport","storyValidation",),  # 신규 섹션
         emphasize=frozenset({"thesisStatement", "evidenceFor", "evidenceAgainst", "verdict"}),
         focusQuestions=(),
         detail=True,
