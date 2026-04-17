@@ -33,7 +33,7 @@ _SIMPLE: dict[str, str] = {
     # downloadAll (HuggingFace snapshot_download)
     "download_all:hf_start": "{label} \u2014 HuggingFace ({repo}/{dir}) 전체 다운로드 시작...",
     "download_all:hf_retry": "\u26a0 다운로드 재시도 ({attempt}/{maxRetries})... {error}",
-    "download_all:hf_done": "\u2713 {label} 전체 다운로드 완료 \u2014 {count}종목 \u2192 {dataDir}",
+    "download_all:hf_done": "\u2713 {label} 전체 다운로드 완료 \u2014 {count} \u2192 {dataDir}",
     # collect (투채널 자동 수집)
     "collect:start": "{stockCode} ({label}) \u2192 로컬에 없음. DART API로 수집 중... ({keyCount}키 {mode})",
     "collect:done": "\u2713 {label} 수집 완료 ({sizeStr})",

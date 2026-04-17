@@ -18,15 +18,7 @@ _MAX_YEARS = 8
 _MAX_QUARTERS = 5
 
 
-def _getFirst(data: dict, keys: list[str], col: str) -> float:
-    """여러 항목 중 값이 있는 첫 번째를 반환 (fallback 체인)."""
-    for k in keys:
-        row = data.get(k, {})
-        v = row.get(col) if row else None
-        if v is not None and v != 0:
-            return v
-    return 0
-
+from dartlab.core.finance.safe import getFirst as _getFirst  # noqa: E402
 
 from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
 

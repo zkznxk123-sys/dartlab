@@ -583,8 +583,10 @@ def downloadAll(category: str = "docs", *, forceUpdate: bool = False) -> None:
         )
 
     globPattern = "**/*.parquet" if category == "scan" else "*.parquet"
-    count = len(list(dataDir.glob(globPattern)))
-    emit("download_all:hf_done", label=label, count=count, dataDir=str(dataDir))
+    fileCount = len(list(dataDir.glob(globPattern)))
+    # scan은 테마별 parquet (안에 전종목 포함) → 파일 수 ≠ 종목 수
+    countLabel = f"{fileCount}파일" if category == "scan" else f"{fileCount}종목"
+    emit("download_all:hf_done", label=label, count=countLabel, dataDir=str(dataDir))
 
 
 def download(stockCode: str) -> None:

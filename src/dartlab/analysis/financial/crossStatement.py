@@ -17,13 +17,7 @@ _MAX_YEARS = 8
 # ── 유틸 ──
 
 
-def _getFirst(data: dict, keys: list[str], col: str) -> float:
-    for k in keys:
-        row = data.get(k, {})
-        v = row.get(col) if row else None
-        if v is not None and v != 0:
-            return v
-    return 0
+from dartlab.core.finance.safe import getFirst as _getFirst  # SSOT
 
 
 # ── IS-CF 괴리 ──
