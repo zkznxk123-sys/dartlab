@@ -1,10 +1,8 @@
-"""Dalio/R&R 흡수 Phase 2 — subPhase, regimeVariant, caseMatch, 48Match, rrCrisisDB 회귀.
-"""
+"""Dalio/R&R 흡수 Phase 2 — subPhase, regimeVariant, caseMatch, 48Match, rrCrisisDB 회귀."""
 
 from __future__ import annotations
 
 import pytest
-
 
 # ── C3: dalioSubPhase ───────────────────────────────────────
 
@@ -14,9 +12,7 @@ def test_beautifulDeleveragingSubPhase_moneyPrinting():
     from dartlab.core.finance.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
 
     # m2 YoY 12% + 실질금리 -1% → moneyPrinting
-    sp = beautifulDeleveragingSubPhase(
-        realRate=-1.0, m2GrowthYoy=12.0, debtServiceYoY=-1.0, npl=2.0, hySpread=400
-    )
+    sp = beautifulDeleveragingSubPhase(realRate=-1.0, m2GrowthYoy=12.0, debtServiceYoY=-1.0, npl=2.0, hySpread=400)
     assert sp == "moneyPrinting"
 
 
@@ -24,9 +20,7 @@ def test_beautifulDeleveragingSubPhase_moneyPrinting():
 def test_beautifulDeleveragingSubPhase_defaultRestructuring():
     from dartlab.core.finance.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
 
-    sp = beautifulDeleveragingSubPhase(
-        realRate=1.0, m2GrowthYoy=5.0, debtServiceYoY=0.0, npl=8.0, hySpread=900
-    )
+    sp = beautifulDeleveragingSubPhase(realRate=1.0, m2GrowthYoy=5.0, debtServiceYoY=0.0, npl=8.0, hySpread=900)
     assert sp == "defaultRestructuring"
 
 
@@ -35,7 +29,11 @@ def test_beautifulDeleveragingSubPhase_wealthTransfer():
     from dartlab.core.finance.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
 
     sp = beautifulDeleveragingSubPhase(
-        realRate=0.5, m2GrowthYoy=5.0, debtServiceYoY=-0.5, npl=2.0, hySpread=300,
+        realRate=0.5,
+        m2GrowthYoy=5.0,
+        debtServiceYoY=-0.5,
+        npl=2.0,
+        hySpread=300,
         fiscalDeficitPctGdp=8.0,
     )
     assert sp == "wealthTransfer"
@@ -46,7 +44,11 @@ def test_beautifulDeleveragingSubPhase_austerity():
     from dartlab.core.finance.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
 
     sp = beautifulDeleveragingSubPhase(
-        realRate=2.5, m2GrowthYoy=3.0, debtServiceYoY=1.0, npl=1.5, hySpread=300,
+        realRate=2.5,
+        m2GrowthYoy=3.0,
+        debtServiceYoY=1.0,
+        npl=1.5,
+        hySpread=300,
         fiscalDeficitPctGdp=3.0,
     )
     assert sp == "austerity"
@@ -64,9 +66,7 @@ def test_beautifulDeleveragingSubPhase_insufficient_signals():
 def test_dalioRegimeVariant_deflationary_foreign_debt():
     from dartlab.core.finance.crisisDetector import _dalioRegimeVariant as dalioRegimeVariant
 
-    v = dalioRegimeVariant(
-        fxFlexibility="pegged", reserveCurrency=False, realRate=3.0, foreignDebtPct=40
-    )
+    v = dalioRegimeVariant(fxFlexibility="pegged", reserveCurrency=False, realRate=3.0, foreignDebtPct=40)
     assert v == "deflationary"
 
 
@@ -74,9 +74,7 @@ def test_dalioRegimeVariant_deflationary_foreign_debt():
 def test_dalioRegimeVariant_inflationary_reserve_currency():
     from dartlab.core.finance.crisisDetector import _dalioRegimeVariant as dalioRegimeVariant
 
-    v = dalioRegimeVariant(
-        fxFlexibility="flexible", reserveCurrency=True, realRate=-3.0
-    )
+    v = dalioRegimeVariant(fxFlexibility="flexible", reserveCurrency=True, realRate=-3.0)
     assert v == "inflationary"
 
 
@@ -86,7 +84,11 @@ def test_dalioDebtCyclePhase_emits_subPhase():
     from dartlab.core.finance.crisisDetector import dalioDebtCyclePhase
 
     r = dalioDebtCyclePhase(
-        totalDebtToGdp=240, debtServiceYoY=-2.0, creditGap=2.0, realRate=-1.0, gdpGrowth=2.0,
+        totalDebtToGdp=240,
+        debtServiceYoY=-2.0,
+        creditGap=2.0,
+        realRate=-1.0,
+        gdpGrowth=2.0,
         m2GrowthYoy=12.0,
     )
     assert r.phase == "beautifulDeleveraging"
@@ -99,7 +101,11 @@ def test_dalioDebtCyclePhase_no_subphase_outside_deleveraging():
     from dartlab.core.finance.crisisDetector import dalioDebtCyclePhase
 
     r = dalioDebtCyclePhase(
-        totalDebtToGdp=150, debtServiceYoY=4, creditGap=-3, realRate=6, gdpGrowth=-2,
+        totalDebtToGdp=150,
+        debtServiceYoY=4,
+        creditGap=-3,
+        realRate=6,
+        gdpGrowth=-2,
         m2GrowthYoy=3.0,  # subPhase 활성 조건 아님
     )
     assert r.phase == "deflationaryDepression"
@@ -113,10 +119,15 @@ def test_dalioDebtCyclePhase_no_subphase_outside_deleveraging():
 def test_matchDalioDetailCase_2008_matches_subprime():
     from dartlab.core.finance.dalioCaseMatch import matchDalioDetailCase
 
-    r = matchDalioDetailCase({
-        "totalDebtToGdp": 370, "creditGap": -2, "realRate": 1.0,
-        "gdpGrowth": -0.3, "debtServiceYoY": 3.0,
-    })
+    r = matchDalioDetailCase(
+        {
+            "totalDebtToGdp": 370,
+            "creditGap": -2,
+            "realRate": 1.0,
+            "gdpGrowth": -0.3,
+            "debtServiceYoY": 3.0,
+        }
+    )
     assert r["matches"]
     assert "Subprime" in r["matches"][0]["caseLabel"]
 
@@ -134,10 +145,15 @@ def test_matchDalioDetailCase_empty_state():
 def test_matchDalioDetailCase_returns_nextStage():
     from dartlab.core.finance.dalioCaseMatch import matchDalioDetailCase
 
-    r = matchDalioDetailCase({
-        "totalDebtToGdp": 340, "creditGap": 10, "realRate": 2.5,
-        "gdpGrowth": 2.0, "debtServiceYoY": 0.5,
-    })
+    r = matchDalioDetailCase(
+        {
+            "totalDebtToGdp": 340,
+            "creditGap": 10,
+            "realRate": 2.5,
+            "gdpGrowth": 2.0,
+            "debtServiceYoY": 0.5,
+        }
+    )
     top = r["matches"][0]
     # 2007 topBubble → nextStage = 2008 deflationaryDepression
     assert top["nextStage"] is not None
@@ -150,10 +166,14 @@ def test_matchDalioDetailCase_returns_nextStage():
 def test_match48Cases_dominant_deflationary():
     from dartlab.core.finance.dalio48Match import match48Cases
 
-    r = match48Cases({
-        "peakDebtToGdp": 350, "peakCreditGap": 12,
-        "troughRealRate": 0.5, "troughGdpGrowth": -2.8,
-    })
+    r = match48Cases(
+        {
+            "peakDebtToGdp": 350,
+            "peakCreditGap": 12,
+            "troughRealRate": 0.5,
+            "troughGdpGrowth": -2.8,
+        }
+    )
     assert r["dominantArchetype"] == "deflationary"
     assert r["matches"]
 
@@ -162,10 +182,14 @@ def test_match48Cases_dominant_deflationary():
 def test_match48Cases_hyperinflation_recognized():
     from dartlab.core.finance.dalio48Match import match48Cases
 
-    r = match48Cases({
-        "peakDebtToGdp": 280, "peakCreditGap": 25,
-        "troughRealRate": -80, "troughGdpGrowth": -15,
-    })
+    r = match48Cases(
+        {
+            "peakDebtToGdp": 280,
+            "peakCreditGap": 25,
+            "troughRealRate": -80,
+            "troughGdpGrowth": -15,
+        }
+    )
     # Weimar / Zimbabwe / Venezuela 중 하나 상위
     assert r["matches"][0]["archetype"] == "inflationary"
 
@@ -178,8 +202,12 @@ def test_classifyCrisisType_triple_kr_1997():
     from dartlab.core.finance.rrCrisisDB import classifyCrisisType
 
     r = classifyCrisisType(
-        hySpread=1200, npl=8, fxDepreciationYoy=45, inflationYoy=7,
-        sovereignSpread=600, gdpGrowth=-5,
+        hySpread=1200,
+        npl=8,
+        fxDepreciationYoy=45,
+        inflationYoy=7,
+        sovereignSpread=600,
+        gdpGrowth=-5,
     )
     assert "banking" in r["activeTypes"]
     assert "currency" in r["activeTypes"]

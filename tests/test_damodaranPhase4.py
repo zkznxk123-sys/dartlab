@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import pytest
 
-
 # ── G11 BoundedCache accessor pin ──────────────────────
 
 
@@ -18,8 +17,7 @@ def test_boundedCache_accessor_pinned():
     from dartlab.core.memory import BoundedCache
 
     cache = BoundedCache()
-    for key in ("_showAccessor", "_selectAccessor", "_reviewAccessor",
-                "_creditAccessor", "_analysisAccessor"):
+    for key in ("_showAccessor", "_selectAccessor", "_reviewAccessor", "_creditAccessor", "_analysisAccessor"):
         assert cache._is_pinned(key), f"{key} not pinned"
 
 

@@ -7,7 +7,6 @@ import pytest
 from dartlab.review.builders import chainPositionBlock
 from dartlab.review.catalog import getBlockMeta
 
-
 pytestmark = pytest.mark.unit
 
 

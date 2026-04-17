@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import pytest
 
-
 # ── L0 — dalioDebtCyclePhase 역사 케이스 ──────────────────────
 
 
@@ -15,9 +14,7 @@ import pytest
 def test_dalioDebtCyclePhase_1982_volcker():
     from dartlab.core.finance.crisisDetector import dalioDebtCyclePhase
 
-    r = dalioDebtCyclePhase(
-        totalDebtToGdp=150, debtServiceYoY=4.0, creditGap=-3.0, realRate=6.0, gdpGrowth=-2.0
-    )
+    r = dalioDebtCyclePhase(totalDebtToGdp=150, debtServiceYoY=4.0, creditGap=-3.0, realRate=6.0, gdpGrowth=-2.0)
     assert r.phase == "deflationaryDepression"
     assert r.phaseLabel == "디플레이션 공황"
 
@@ -26,9 +23,7 @@ def test_dalioDebtCyclePhase_1982_volcker():
 def test_dalioDebtCyclePhase_2007_housing():
     from dartlab.core.finance.crisisDetector import dalioDebtCyclePhase
 
-    r = dalioDebtCyclePhase(
-        totalDebtToGdp=240, debtServiceYoY=5.0, creditGap=10.0, realRate=0.5, gdpGrowth=2.0
-    )
+    r = dalioDebtCyclePhase(totalDebtToGdp=240, debtServiceYoY=5.0, creditGap=10.0, realRate=0.5, gdpGrowth=2.0)
     assert r.phase == "topBubble"
 
 
@@ -36,9 +31,7 @@ def test_dalioDebtCyclePhase_2007_housing():
 def test_dalioDebtCyclePhase_2013_beautiful():
     from dartlab.core.finance.crisisDetector import dalioDebtCyclePhase
 
-    r = dalioDebtCyclePhase(
-        totalDebtToGdp=240, debtServiceYoY=-2.0, creditGap=2.0, realRate=-1.0, gdpGrowth=2.0
-    )
+    r = dalioDebtCyclePhase(totalDebtToGdp=240, debtServiceYoY=-2.0, creditGap=2.0, realRate=-1.0, gdpGrowth=2.0)
     assert r.phase == "beautifulDeleveraging"
 
 
@@ -46,9 +39,7 @@ def test_dalioDebtCyclePhase_2013_beautiful():
 def test_dalioDebtCyclePhase_1975_reflationary():
     from dartlab.core.finance.crisisDetector import dalioDebtCyclePhase
 
-    r = dalioDebtCyclePhase(
-        totalDebtToGdp=130, debtServiceYoY=2.0, creditGap=5.0, realRate=-3.0, gdpGrowth=-0.5
-    )
+    r = dalioDebtCyclePhase(totalDebtToGdp=130, debtServiceYoY=2.0, creditGap=5.0, realRate=-3.0, gdpGrowth=-0.5)
     assert r.phase == "reflationary"
 
 
@@ -69,9 +60,7 @@ def test_dalioDebtCyclePhase_missing_inputs_default():
 def test_dalioPolicyLeverStatus_all_maxed():
     from dartlab.core.finance.crisisDetector import dalioPolicyLeverStatus
 
-    r = dalioPolicyLeverStatus(
-        policyRate=0.1, publicDebtToGdp=150, creditGap=10, fxFlexibility="pegged"
-    )
+    r = dalioPolicyLeverStatus(policyRate=0.1, publicDebtToGdp=150, creditGap=10, fxFlexibility="pegged")
     assert r.monetary == "maxed"
     assert r.fiscal == "maxed"
     assert r.credit == "maxed"
@@ -83,9 +72,7 @@ def test_dalioPolicyLeverStatus_all_maxed():
 def test_dalioPolicyLeverStatus_all_spare():
     from dartlab.core.finance.crisisDetector import dalioPolicyLeverStatus
 
-    r = dalioPolicyLeverStatus(
-        policyRate=5.0, publicDebtToGdp=50, creditGap=0, fxFlexibility="flexible"
-    )
+    r = dalioPolicyLeverStatus(policyRate=5.0, publicDebtToGdp=50, creditGap=0, fxFlexibility="flexible")
     assert r.monetary == "spare"
     assert r.fiscal == "spare"
     assert r.credit == "spare"
@@ -97,9 +84,7 @@ def test_dalioPolicyLeverStatus_all_spare():
 def test_dalioPolicyLeverStatus_partial_mix():
     from dartlab.core.finance.crisisDetector import dalioPolicyLeverStatus
 
-    r = dalioPolicyLeverStatus(
-        policyRate=1.5, publicDebtToGdp=100, creditGap=5, fxFlexibility="managed"
-    )
+    r = dalioPolicyLeverStatus(policyRate=1.5, publicDebtToGdp=100, creditGap=5, fxFlexibility="managed")
     assert r.monetary == "partial"
     assert r.fiscal == "partial"
     assert r.credit == "partial"

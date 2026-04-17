@@ -17,7 +17,6 @@ from pathlib import Path
 import polars as pl
 import pytest
 
-
 pytestmark = pytest.mark.unit
 
 
@@ -64,9 +63,7 @@ def test_companyfacts_zip_convert(tmp_path: Path) -> None:
         zf.writestr("CIK0001234567.json", json.dumps(payload))
 
     outDir = tmp_path / "finance"
-    result = convertBulkToParquets(
-        zipPath=zipPath, outDir=outDir, progress=False
-    )
+    result = convertBulkToParquets(zipPath=zipPath, outDir=outDir, progress=False)
     assert result["converted"] == 1
     assert result["skipped"] == 0
     assert result["failed"] == 0

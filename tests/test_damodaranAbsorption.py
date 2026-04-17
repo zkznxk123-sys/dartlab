@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import pytest
 
-
 # ── L0 SSOT ─────────────────────────────────────────────
 
 
@@ -180,10 +179,12 @@ def test_detectExtremeFlags_lifecycle_conflict():
     """생애주기 decline 인데 CAGR > 15% 면 lifecycle_conflict flag."""
     from dartlab.core.overrides import detectExtremeFlags
 
-    flags = detectExtremeFlags({
-        "lifeCyclePhase": "decline",
-        "revenueCAGR": 20.0,
-    })
+    flags = detectExtremeFlags(
+        {
+            "lifeCyclePhase": "decline",
+            "revenueCAGR": 20.0,
+        }
+    )
     keys = [f["flag"] for f in flags]
     assert "lifecycle_conflict" in keys
 

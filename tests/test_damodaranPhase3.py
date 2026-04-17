@@ -10,7 +10,6 @@ import math
 
 import pytest
 
-
 # ── G5 Implied ERP ─────────────────────────────────────
 
 
@@ -23,8 +22,15 @@ def test_impliedERP_returns_loadDamodaranERP_schema():
     ref = loadDamodaranERP(countryCode="US")
     r = calcImpliedERP(country="US", useCache=False)
     # 핵심 키 동일
-    for key in ("countryCode", "matureMarketERP", "countryRiskPremium",
-                "totalERP", "riskFreeRate", "source", "asOfDate"):
+    for key in (
+        "countryCode",
+        "matureMarketERP",
+        "countryRiskPremium",
+        "totalERP",
+        "riskFreeRate",
+        "source",
+        "asOfDate",
+    ):
         assert key in r, f"missing {key} in impliedERP"
         assert key in ref, f"missing {key} in loadDamodaranERP"
 
@@ -210,11 +216,13 @@ def test_detectExtremeFlags_control_synergy_double_count():
     """Control + Synergy > standalone × 0.5 → control_synergy_double_count flag."""
     from dartlab.core.overrides import detectExtremeFlags
 
-    flags = detectExtremeFlags({
-        "controlPremium": 60_000,
-        "synergy": 50_000,
-        "standaloneValue": 100_000,
-    })
+    flags = detectExtremeFlags(
+        {
+            "controlPremium": 60_000,
+            "synergy": 50_000,
+            "standaloneValue": 100_000,
+        }
+    )
     keys = [f["flag"] for f in flags]
     assert "control_synergy_double_count" in keys
 
@@ -224,9 +232,11 @@ def test_detectExtremeFlags_implied_far_from_historical():
     """Implied ERP 가 historical 대비 ±3%p 초과 → flag."""
     from dartlab.core.overrides import detectExtremeFlags
 
-    flags = detectExtremeFlags({
-        "impliedERP": 8.5,
-        "historicalERP": 4.6,
-    })
+    flags = detectExtremeFlags(
+        {
+            "impliedERP": 8.5,
+            "historicalERP": 4.6,
+        }
+    )
     keys = [f["flag"] for f in flags]
     assert "implied_far_from_historical" in keys

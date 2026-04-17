@@ -8,7 +8,6 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-
 # ── L0 SSOT — 상관계수 ──────────────────────────────────────────
 
 
@@ -47,7 +46,7 @@ def test_spearmanCorr_monotone():
 
     # 비선형이지만 단조 증가 → Spearman = 1
     x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
-    y = x ** 3
+    y = x**3
     assert abs(spearmanCorr(x, y) - 1.0) < 1e-9
 
 

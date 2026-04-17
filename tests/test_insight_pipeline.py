@@ -76,7 +76,8 @@ def _make_series() -> tuple[dict, list[str], dict, list[str]]:
 
 def test_analyze_returns_result():
     """mock 데이터로 analyze() 호출 시 AnalysisResult 반환."""
-    from dartlab.analysis.financial.insight import AnalysisResult, analyzeFinancial as analyze
+    from dartlab.analysis.financial.insight import AnalysisResult
+    from dartlab.analysis.financial.insight import analyzeFinancial as analyze
 
     qSeries, qPeriods, aSeries, aYears = _make_series()
     result = analyze(

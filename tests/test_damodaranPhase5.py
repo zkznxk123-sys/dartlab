@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import pytest
 
-
 # ── G16 Normalized Earnings ────────────────────────────
 
 
@@ -109,10 +108,12 @@ def test_valuationSins_narrate_includes_rationale():
     """narrate 에 Damodaran rationale + override 힌트 포함."""
     from dartlab.review.narrate import narrateValuationSins
 
-    result = narrateValuationSins({
-        "flags": [{"key": "roic_wacc_persist", "severity": "warn", "reason": "ROIC/WACC 4.5x"}],
-        "severity": "warn",
-    })
+    result = narrateValuationSins(
+        {
+            "flags": [{"key": "roic_wacc_persist", "severity": "warn", "reason": "ROIC/WACC 4.5x"}],
+            "severity": "warn",
+        }
+    )
     assert "Damodaran" in result
     assert "overrides" in result.lower()
 
@@ -122,8 +123,10 @@ def test_valuationSins_narrate_g_vs_rf():
     """g_vs_rf 위반 시 'Damodaran 상한 권고' 포함."""
     from dartlab.review.narrate import narrateValuationSins
 
-    result = narrateValuationSins({
-        "flags": [{"key": "g_vs_rf", "severity": "warn", "reason": "tg 5% > rf 3.4%"}],
-        "severity": "warn",
-    })
+    result = narrateValuationSins(
+        {
+            "flags": [{"key": "g_vs_rf", "severity": "warn", "reason": "tg 5% > rf 3.4%"}],
+            "severity": "warn",
+        }
+    )
     assert "rf" in result.lower() or "무위험" in result
