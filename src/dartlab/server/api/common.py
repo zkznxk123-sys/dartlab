@@ -42,10 +42,10 @@ def guideDetail(exc: BaseException, *, feature: str | None = None) -> str:
     """sanitize_error + guide 안내 포함. Server API 에러 응답 표준."""
     detail = sanitize_error(exc)
     try:
-        from dartlab.guide.integration import inferFeature
+        from dartlab.core.integration import inferFeature
 
         resolvedFeature = feature or inferFeature(exc)  # type: ignore[arg-type]
-        from dartlab.guide import guide
+        from dartlab.core.desk import guide
 
         guideMsg = guide.handleError(exc, feature=resolvedFeature)  # type: ignore[arg-type]
         if guideMsg and guideMsg != f"오류: {exc}":

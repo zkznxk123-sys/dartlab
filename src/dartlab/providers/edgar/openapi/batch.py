@@ -309,7 +309,7 @@ def batchCollectEdgar(
     """
     import time as _time
 
-    from dartlab.guide.messaging import emit
+    from dartlab.core.messaging import emit
 
     cats = categories or ["finance", "docs"]
     numWorkers = min(maxWorkers or _MAX_WORKERS, _MAX_WORKERS)
@@ -495,7 +495,7 @@ def batchCollectEdgarAll(
     else:
         targetTickers = allTickers
 
-    from dartlab.guide.messaging import emit
+    from dartlab.core.messaging import emit
 
     if not targetTickers:
         emit("edgar:bulk_empty")

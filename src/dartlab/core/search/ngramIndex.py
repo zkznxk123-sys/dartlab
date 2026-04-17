@@ -666,7 +666,7 @@ def pullStemIndex(*, token: str | None = None, force: bool = False) -> Path:
     from huggingface_hub import snapshot_download
 
     from dartlab.core.dataConfig import HF_REPO
-    from dartlab.guide.messaging import emit
+    from dartlab.core.messaging import emit
 
     outDir = _stemIndexDir()
     hfDir = DATA_RELEASES["stemIndex"]["dir"]

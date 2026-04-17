@@ -4,7 +4,7 @@
 
 Public API::
 
-    from dartlab.guide.messaging import emit, progress, format as fmt
+    from dartlab.core.messaging import emit, progress, format as fmt
 
     emit("download:start", stockCode="005930", label="DART 공시 문서 데이터")
     emit("error:no_data", stockCode="005930", raise_as=ValueError)
@@ -346,7 +346,7 @@ def suggest(funcName: str) -> str | None:
         안내 문자열 또는 매칭 없으면 None.
     """
     try:
-        from dartlab.guide._generated import CAPABILITIES
+        from dartlab.core._generated import CAPABILITIES
     except ImportError:
         return None
 

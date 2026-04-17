@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dartlab.guide.providers import _PROVIDERS
+from dartlab.core.ai.providers import _PROVIDERS
 
 _PROVIDER_ALIAS: dict[str, str] = {
     "chatgpt": "oauth-codex",

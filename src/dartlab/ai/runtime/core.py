@@ -96,7 +96,7 @@ def _classify_error(e: Exception) -> dict[str, str]:
 def _enrich_with_guide(result: dict[str, str], error: Exception | None = None) -> dict[str, str]:
     """에러에 guide 안내 데스크 메시지를 추가."""
     try:
-        from dartlab.guide import guide
+        from dartlab.core.desk import guide
 
         guideMsg = guide.handleError(
             error or RuntimeError(result.get("error", "")),
@@ -106,7 +106,7 @@ def _enrich_with_guide(result: dict[str, str], error: Exception | None = None) -
     except ImportError:
         if result.get("action") in ("config", "install", "login", "relogin"):
             try:
-                from dartlab.guide.aiSetup import no_provider_message
+                from dartlab.core.ai.aiSetup import no_provider_message
 
                 result["guide"] = no_provider_message()
             except ImportError:

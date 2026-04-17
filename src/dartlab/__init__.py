@@ -475,7 +475,7 @@ def _setup_oauth_interactive():
 
 def _setup_apikey_interactive(provider: str):
     """API 키 기반 provider 인터랙티브 설정."""
-    from dartlab.guide.providers import _PROVIDERS
+    from dartlab.core.ai.providers import _PROVIDERS
 
     spec = _PROVIDERS.get(provider)
     if spec is None or not spec.env_key:
@@ -484,7 +484,7 @@ def _setup_apikey_interactive(provider: str):
         print(provider_guide(provider))
         return
 
-    from dartlab.guide.env import promptAndSave
+    from dartlab.core.env import promptAndSave
 
     promptAndSave(
         spec.env_key,

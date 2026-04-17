@@ -20,7 +20,7 @@ def _ensureScanData() -> Path:
     없으면 다운로드, TTL 초과면 백그라운드 갱신 시도.
     """
     from dartlab.core.dataLoader import _dataDir
-    from dartlab.guide.messaging import emit
+    from dartlab.core.messaging import emit
 
     scanDir = Path(_dataDir("scan"))
 

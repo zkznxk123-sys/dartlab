@@ -69,7 +69,7 @@ def nextSteps(company: Any) -> list[str]:
 def onScanRequested(axis: str) -> str | None:
     """스캔 호출 시 안내. 데이터 부족하면 안내 반환."""
     try:
-        from dartlab.guide import guide
+        from dartlab.core.desk import guide
 
         result = guide.checkReady("scan")
         if not result.ok:
@@ -148,7 +148,7 @@ def onKeyRequired(service: str) -> str:
 
     # 2) AI provider (gemini, groq, cerebras 등)
     try:
-        from dartlab.guide.providers import _PROVIDERS
+        from dartlab.core.ai.providers import _PROVIDERS
 
         spec = _PROVIDERS.get(service)
         if spec and spec.auth_kind == "api_key" and spec.env_key:
@@ -293,7 +293,7 @@ def promptKeyIfMissing(service: str) -> str | None:
         # 대화형 입력 시도
         print(onKeyRequired(service))
         try:
-            from dartlab.guide.env import promptAndSave
+            from dartlab.core.env import promptAndSave
 
             return promptAndSave(envKey, label=req["label"], guide=req["signupUrl"])
         except (EOFError, KeyboardInterrupt):
@@ -301,7 +301,7 @@ def promptKeyIfMissing(service: str) -> str | None:
 
     # AI provider
     try:
-        from dartlab.guide.providers import _PROVIDERS
+        from dartlab.core.ai.providers import _PROVIDERS
 
         spec = _PROVIDERS.get(service)
         if spec and spec.auth_kind == "api_key" and spec.env_key:
@@ -310,7 +310,7 @@ def promptKeyIfMissing(service: str) -> str | None:
                 return existing
             print(onKeyRequired(service))
             try:
-                from dartlab.guide.env import promptAndSave
+                from dartlab.core.env import promptAndSave
 
                 return promptAndSave(spec.env_key, label=spec.label, guide=spec.signupUrl or "")
             except (EOFError, KeyboardInterrupt):

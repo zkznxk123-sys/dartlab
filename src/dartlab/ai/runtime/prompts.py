@@ -75,7 +75,7 @@ def buildCapabilitiesReference() -> str:
     AI가 dartlab의 전체 API를 알 수 있게 한다.
     """
     try:
-        from dartlab.guide._generated import CAPABILITIES
+        from dartlab.core._generated import CAPABILITIES
     except ImportError:
         return ""
 

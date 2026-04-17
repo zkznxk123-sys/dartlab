@@ -35,7 +35,7 @@ def _runReview(args) -> int:
     try:
         company = dartlab.Company(args.company)
     except (ValueError, FileNotFoundError, OSError, RuntimeError) as exc:
-        from dartlab.guide.integration import wrapError
+        from dartlab.core.integration import wrapError
 
         raise CLIError(wrapError(exc, stockCode=args.company)) from exc
 
@@ -52,7 +52,7 @@ def _runReviewer(args) -> int:
     try:
         company = dartlab.Company(args.company)
     except (ValueError, FileNotFoundError, OSError, RuntimeError) as exc:
-        from dartlab.guide.integration import wrapError
+        from dartlab.core.integration import wrapError
 
         raise CLIError(wrapError(exc, stockCode=args.company)) from exc
 

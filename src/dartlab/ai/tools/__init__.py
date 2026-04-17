@@ -118,7 +118,7 @@ def _autoDiscover() -> dict[str, tuple[str, str]]:
 
 def buildTools() -> list[AITool]:
     """CAPABILITIES + inspect.signature → [AITool]. 매 호출 시 신선."""
-    from dartlab.guide._generated import CAPABILITIES
+    from dartlab.core._generated import CAPABILITIES
 
     tools: list[AITool] = []
     registry = _autoDiscover()

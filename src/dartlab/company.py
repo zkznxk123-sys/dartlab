@@ -122,7 +122,7 @@ def Company(codeOrName: str) -> CompanyProtocol:
 
     cause = f" (원인: {firstError})" if firstError else ""
     try:
-        from dartlab.guide.messaging import format as gfmt
+        from dartlab.core.messaging import format as gfmt
 
         raise ValueError(gfmt("error:no_data", stockCode=codeOrName))
     except (ImportError, KeyError):

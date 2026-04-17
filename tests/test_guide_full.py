@@ -19,28 +19,28 @@ pytestmark = pytest.mark.unit
 
 class TestMessaging:
     def test_format_simple_message(self):
-        from dartlab.guide.messaging import format
+        from dartlab.core.messaging import format
 
         text = format("download:start", stockCode="005930", label="DART 공시 문서 데이터")
         assert "005930" in text
         assert "자동 다운로드" in text
 
     def test_format_done_message(self):
-        from dartlab.guide.messaging import format
+        from dartlab.core.messaging import format
 
         text = format("download:done", label="finance", sizeStr="12MB")
         assert "완료" in text
         assert "12MB" in text
 
     def test_format_structured_message(self):
-        from dartlab.guide.messaging import format
+        from dartlab.core.messaging import format
 
         text = format("error:no_data", stockCode="005930")
         assert "005930" in text
         assert "찾을 수 없습니다" in text
 
     def test_emit_prints_hint(self, capsys):
-        from dartlab.guide.messaging import emit
+        from dartlab.core.messaging import emit
 
         emit("hint:no_finance", stockCode="005930", prop="BS")
         captured = capsys.readouterr()
@@ -48,13 +48,13 @@ class TestMessaging:
         assert "005930" in captured.out
 
     def test_emit_raises_when_requested(self):
-        from dartlab.guide.messaging import emit
+        from dartlab.core.messaging import emit
 
         with pytest.raises(ValueError, match="005930"):
             emit("error:no_data", stockCode="005930", raise_as=ValueError)
 
     def test_progress_silent_when_not_verbose(self, capsys):
-        from dartlab.guide.messaging import _ctx, progress
+        from dartlab.core.messaging import _ctx, progress
 
         # Ensure verbose is off
         original = _ctx._verbose
@@ -67,7 +67,7 @@ class TestMessaging:
             _ctx._verbose = original
 
     def test_context_reset(self):
-        from dartlab.guide.messaging import _ctx
+        from dartlab.core.messaging import _ctx
 
         _ctx._dart_key = True
         _ctx._verbose = True
@@ -81,7 +81,7 @@ class TestMessaging:
 
 class TestHints:
     def test_on_company_created_no_hints(self):
-        from dartlab.guide.hints import onCompanyCreated
+        from dartlab.core.hints import onCompanyCreated
 
         company = MagicMock()
         company._hasDocs = True
@@ -94,7 +94,7 @@ class TestHints:
         assert hints == []
 
     def test_on_company_created_missing_finance(self):
-        from dartlab.guide.hints import onCompanyCreated
+        from dartlab.core.hints import onCompanyCreated
 
         company = MagicMock()
         company._hasDocs = True
@@ -107,7 +107,7 @@ class TestHints:
         assert any("finance" in h for h in hints)
 
     def test_on_company_created_stale_data(self):
-        from dartlab.guide.hints import onCompanyCreated
+        from dartlab.core.hints import onCompanyCreated
 
         company = MagicMock()
         company._hasDocs = True
@@ -123,7 +123,7 @@ class TestHints:
         assert any("120일" in h for h in hints)
 
     def test_next_steps_with_finance(self):
-        from dartlab.guide.hints import nextSteps
+        from dartlab.core.hints import nextSteps
 
         company = MagicMock()
         company._hasFinanceParquet = True
@@ -134,7 +134,7 @@ class TestHints:
         assert any("show" in s for s in steps)
 
     def test_next_steps_without_finance(self):
-        from dartlab.guide.hints import nextSteps
+        from dartlab.core.hints import nextSteps
 
         company = MagicMock()
         company._hasFinanceParquet = False
@@ -146,13 +146,13 @@ class TestHints:
         assert any("show" in s for s in steps)
 
     def test_on_analysis_requested_with_axis(self):
-        from dartlab.guide.hints import onAnalysisRequested
+        from dartlab.core.hints import onAnalysisRequested
 
         result = onAnalysisRequested("수익성")
         assert result is None
 
     def test_on_analysis_requested_without_axis(self):
-        from dartlab.guide.hints import onAnalysisRequested
+        from dartlab.core.hints import onAnalysisRequested
 
         result = onAnalysisRequested(None)
         assert result is not None
@@ -164,14 +164,14 @@ class TestHints:
 
 class TestCapabilities:
     def test_capability_kind_constants(self):
-        from dartlab.guide.capabilities import CapabilityKind
+        from dartlab.core.capabilities import CapabilityKind
 
         assert CapabilityKind.DATA == "data"
         assert CapabilityKind.ANALYSIS == "analysis"
         assert CapabilityKind.WORKFLOW == "workflow"
 
     def test_widget_spec_to_payload(self):
-        from dartlab.guide.capabilities import WidgetSpec
+        from dartlab.core.capabilities import WidgetSpec
 
         ws = WidgetSpec(widget="chart", props={"type": "line"}, key="c1", title="매출")
         payload = ws.to_payload()
@@ -181,7 +181,7 @@ class TestCapabilities:
         assert payload["title"] == "매출"
 
     def test_widget_spec_minimal(self):
-        from dartlab.guide.capabilities import WidgetSpec
+        from dartlab.core.capabilities import WidgetSpec
 
         ws = WidgetSpec(widget="table")
         payload = ws.to_payload()
@@ -189,7 +189,7 @@ class TestCapabilities:
         assert payload["widget"] == "table"
 
     def test_view_spec_to_payload(self):
-        from dartlab.guide.capabilities import ViewSpec, WidgetSpec
+        from dartlab.core.capabilities import ViewSpec, WidgetSpec
 
         vs = ViewSpec(
             layout="grid",
@@ -202,7 +202,7 @@ class TestCapabilities:
         assert payload["title"] == "테스트"
 
     def test_view_spec_single_widget(self):
-        from dartlab.guide.capabilities import ViewSpec
+        from dartlab.core.capabilities import ViewSpec
 
         vs = ViewSpec.single_widget("table", {"data": []}, key="t1", view_title="뷰")
         payload = vs.to_payload()
@@ -211,7 +211,7 @@ class TestCapabilities:
         assert payload["title"] == "뷰"
 
     def test_ui_action_navigate(self):
-        from dartlab.guide.capabilities import UiAction
+        from dartlab.core.capabilities import UiAction
 
         action = UiAction.navigate(view="viewer", topic="IS", period="2023")
         payload = action.to_payload()
@@ -220,7 +220,7 @@ class TestCapabilities:
         assert payload["topic"] == "IS"
 
     def test_ui_action_toast(self):
-        from dartlab.guide.capabilities import UiAction
+        from dartlab.core.capabilities import UiAction
 
         action = UiAction.toast("테스트 알림", level="warning")
         payload = action.to_payload()
@@ -229,7 +229,7 @@ class TestCapabilities:
         assert payload["level"] == "warning"
 
     def test_ui_action_select_company(self):
-        from dartlab.guide.capabilities import UiAction
+        from dartlab.core.capabilities import UiAction
 
         action = UiAction.select_company("005930", "삼성전자", "KOSPI")
         payload = action.to_payload()
@@ -238,7 +238,7 @@ class TestCapabilities:
         assert payload["corpName"] == "삼성전자"
 
     def test_ui_action_layout(self):
-        from dartlab.guide.capabilities import UiAction
+        from dartlab.core.capabilities import UiAction
 
         action = UiAction.layout("sidebar", "open")
         payload = action.to_payload()
@@ -246,7 +246,7 @@ class TestCapabilities:
         assert payload["target"] == "sidebar"
 
     def test_capability_spec_to_dict(self):
-        from dartlab.guide.capabilities import CapabilitySpec
+        from dartlab.core.capabilities import CapabilitySpec
 
         spec = CapabilitySpec(
             id="test",
@@ -259,7 +259,7 @@ class TestCapabilities:
         assert d["label"] == "테스트"
 
     def test_build_capability_summary(self):
-        from dartlab.guide.capabilities import CapabilitySpec, build_capability_summary
+        from dartlab.core.capabilities import CapabilitySpec, build_capability_summary
 
         specs = [
             CapabilitySpec(id="a", label="A", description="", input_schema={}, kind="data"),
@@ -278,7 +278,7 @@ class TestGuideDesk:
     # checkReady/checkReadyAll/require — readiness.py 삭제로 테스트 제거 (Phase 20)
 
     def test_what_can_i_do_with_question(self):
-        from dartlab.guide.desk import GuideDesk
+        from dartlab.core.desk import GuideDesk
 
         desk = GuideDesk()
         result = desk.whatCanIDo("재무 분석")

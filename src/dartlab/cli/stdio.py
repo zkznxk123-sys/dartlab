@@ -200,7 +200,7 @@ def _handleSetProvider(msg: dict[str, Any]) -> None:
     # API 키가 왔으면 저장
     if provider and apiKey:
         try:
-            from dartlab.guide.credentials import CredentialManager
+            from dartlab.core.credentials import CredentialManager
 
             CredentialManager().saveKey(f"{provider}_api_key", apiKey)
         except Exception as exc:  # noqa: BLE001
@@ -210,7 +210,7 @@ def _handleSetProvider(msg: dict[str, Any]) -> None:
     # provider 인증 확인
     if provider and not apiKey:
         try:
-            from dartlab.guide.providers import get_provider_spec
+            from dartlab.core.ai.providers import get_provider_spec
 
             spec = get_provider_spec(provider)
             if spec:
@@ -220,7 +220,7 @@ def _handleSetProvider(msg: dict[str, Any]) -> None:
                     return
                 # API 키 provider → 키 없으면 needCredential
                 if spec.auth_kind == "api_key":
-                    from dartlab.guide.credentials import CredentialManager
+                    from dartlab.core.credentials import CredentialManager
 
                     cred = CredentialManager().getCredential(f"{provider}_api_key")
                     if not cred.configured:
