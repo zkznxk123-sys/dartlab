@@ -151,16 +151,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "016380",
-        "viaName": "KG스틸",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001390",
-        "corpName": "KG케미칼",
+        "stockCode": "151860",
+        "corpName": "KG에코솔루션",
         "industry": "environment",
         "viaCode": "016380",
         "viaName": "KG스틸",
@@ -175,9 +167,65 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "005960",
+        "corpName": "동부건설",
+        "industry": "aerospace",
+        "viaCode": "016380",
+        "viaName": "KG스틸",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001390",
+        "corpName": "KG케미칼",
+        "industry": "environment",
+        "viaCode": "016380",
+        "viaName": "KG스틸",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "041510",
         "corpName": "에스엠",
         "industry": "media",
+        "viaCode": "016380",
+        "viaName": "KG스틸",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "016380",
+        "viaName": "KG스틸",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
+        "viaCode": "016380",
+        "viaName": "KG스틸",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "046440",
+        "corpName": "KG모빌리언스",
+        "industry": "finance",
+        "viaCode": "016380",
+        "viaName": "KG스틸",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "016380",
+        "viaName": "KG스틸",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044480",
+        "corpName": "빌리언스",
+        "industry": "plastic",
         "viaCode": "016380",
         "viaName": "KG스틸",
         "hopDistance": 2
@@ -194,54 +242,6 @@
         "stockCode": "005850",
         "corpName": "에스엘",
         "industry": "electronics",
-        "viaCode": "016380",
-        "viaName": "KG스틸",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004020",
-        "corpName": "현대제철",
-        "industry": "steel",
-        "viaCode": "016380",
-        "viaName": "KG스틸",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005960",
-        "corpName": "동부건설",
-        "industry": "aerospace",
-        "viaCode": "016380",
-        "viaName": "KG스틸",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "044480",
-        "corpName": "빌리언스",
-        "industry": "plastic",
-        "viaCode": "016380",
-        "viaName": "KG스틸",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "046440",
-        "corpName": "KG모빌리언스",
-        "industry": "finance",
-        "viaCode": "016380",
-        "viaName": "KG스틸",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "109610",
-        "corpName": "에스와이",
-        "industry": "electronics",
-        "viaCode": "016380",
-        "viaName": "KG스틸",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "151860",
-        "corpName": "KG에코솔루션",
-        "industry": "environment",
         "viaCode": "016380",
         "viaName": "KG스틸",
         "hopDistance": 2

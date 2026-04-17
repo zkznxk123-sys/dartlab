@@ -214,43 +214,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "003230",
-        "viaName": "삼양식품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037230",
-        "corpName": "한국팩키지",
-        "industry": "paper",
-        "viaCode": "027970",
-        "viaName": "한국제지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "453340",
-        "corpName": "현대그린푸드",
-        "industry": "retail",
-        "viaCode": "003230",
-        "viaName": "삼양식품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005740",
-        "corpName": "크라운해태홀딩스",
+        "stockCode": "004370",
+        "corpName": "농심",
         "industry": "food",
-        "viaCode": "027970",
-        "viaName": "한국제지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034810",
-        "corpName": "해성산업",
-        "industry": "realestate",
-        "viaCode": "027970",
-        "viaName": "한국제지",
+        "viaCode": "003230",
+        "viaName": "삼양식품",
         "hopDistance": 2
       },
       {
@@ -262,11 +230,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "011780",
-        "corpName": "금호석유화학",
-        "industry": "chemical",
-        "viaCode": "027970",
-        "viaName": "한국제지",
+        "stockCode": "286940",
+        "corpName": "롯데이노베이트",
+        "industry": "software",
+        "viaCode": "003230",
+        "viaName": "삼양식품",
         "hopDistance": 2
       },
       {
@@ -278,22 +246,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002200",
-        "corpName": "한국수출포장공업",
-        "industry": "paper",
-        "viaCode": "027970",
-        "viaName": "한국제지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006740",
-        "corpName": "블루산업개발",
-        "industry": "paper",
-        "viaCode": "027970",
-        "viaName": "한국제지",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "016880",
         "corpName": "웅진",
         "industry": "education",
@@ -302,56 +254,24 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002310",
-        "corpName": "아세아제지",
-        "industry": "paper",
-        "viaCode": "003230",
-        "viaName": "삼양식품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "264900",
-        "corpName": "크라운제과",
-        "industry": "food",
-        "viaCode": "027970",
-        "viaName": "한국제지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "145990",
-        "corpName": "삼양사",
-        "industry": "food",
-        "viaCode": "003230",
-        "viaName": "삼양식품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009580",
-        "corpName": "무림P&P",
+        "stockCode": "078130",
+        "corpName": "국일제지",
         "industry": "paper",
         "viaCode": "027970",
         "viaName": "한국제지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "003230",
+        "viaName": "삼양식품",
         "hopDistance": 2
       },
       {
         "stockCode": "031210",
         "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "003230",
-        "viaName": "삼양식품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024830",
-        "corpName": "세원물산",
-        "industry": "auto",
-        "viaCode": "014160",
-        "viaName": "대영포장",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012630",
-        "corpName": "HDC",
         "industry": "finance",
         "viaCode": "003230",
         "viaName": "삼양식품",
@@ -366,17 +286,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005440",
-        "corpName": "현대지에프홀딩스",
-        "industry": "realestate",
-        "viaCode": "003230",
-        "viaName": "삼양식품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "195870",
-        "corpName": "해성디에스",
-        "industry": "semiconductor",
+        "stockCode": "005740",
+        "corpName": "크라운해태홀딩스",
+        "industry": "food",
         "viaCode": "027970",
         "viaName": "한국제지",
         "hopDistance": 2
@@ -390,17 +302,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "286940",
-        "corpName": "롯데이노베이트",
-        "industry": "software",
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
         "viaCode": "003230",
         "viaName": "삼양식품",
         "hopDistance": 2
       },
       {
-        "stockCode": "001630",
-        "corpName": "종근당홀딩스",
-        "industry": "pharma",
+        "stockCode": "006740",
+        "corpName": "블루산업개발",
+        "industry": "paper",
+        "viaCode": "027970",
+        "viaName": "한국제지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034810",
+        "corpName": "해성산업",
+        "industry": "realestate",
+        "viaCode": "027970",
+        "viaName": "한국제지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037230",
+        "corpName": "한국팩키지",
+        "industry": "paper",
+        "viaCode": "027970",
+        "viaName": "한국제지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005440",
+        "corpName": "현대지에프홀딩스",
+        "industry": "realestate",
+        "viaCode": "003230",
+        "viaName": "삼양식품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "145990",
+        "corpName": "삼양사",
+        "industry": "food",
         "viaCode": "003230",
         "viaName": "삼양식품",
         "hopDistance": 2
@@ -414,17 +358,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "078130",
-        "corpName": "국일제지",
-        "industry": "paper",
+        "stockCode": "011780",
+        "corpName": "금호석유화학",
+        "industry": "chemical",
         "viaCode": "027970",
         "viaName": "한국제지",
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
+        "stockCode": "002310",
+        "corpName": "아세아제지",
+        "industry": "paper",
         "viaCode": "003230",
         "viaName": "삼양식품",
         "hopDistance": 2
@@ -438,9 +382,65 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004370",
-        "corpName": "농심",
+        "stockCode": "453340",
+        "corpName": "현대그린푸드",
+        "industry": "retail",
+        "viaCode": "003230",
+        "viaName": "삼양식품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "195870",
+        "corpName": "해성디에스",
+        "industry": "semiconductor",
+        "viaCode": "027970",
+        "viaName": "한국제지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024830",
+        "corpName": "세원물산",
+        "industry": "auto",
+        "viaCode": "014160",
+        "viaName": "대영포장",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009580",
+        "corpName": "무림P&P",
+        "industry": "paper",
+        "viaCode": "027970",
+        "viaName": "한국제지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012630",
+        "corpName": "HDC",
+        "industry": "finance",
+        "viaCode": "003230",
+        "viaName": "삼양식품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "264900",
+        "corpName": "크라운제과",
         "industry": "food",
+        "viaCode": "027970",
+        "viaName": "한국제지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002200",
+        "corpName": "한국수출포장공업",
+        "industry": "paper",
+        "viaCode": "027970",
+        "viaName": "한국제지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "003230",
         "viaName": "삼양식품",
         "hopDistance": 2

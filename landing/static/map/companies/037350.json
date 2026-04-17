@@ -162,11 +162,75 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "000990",
+        "viaName": "DB하이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "228850",
+        "corpName": "레이언스",
+        "industry": "medicalDevice",
+        "viaCode": "000990",
+        "viaName": "DB하이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039420",
+        "corpName": "케이엘넷",
+        "industry": "telecom",
+        "viaCode": "039440",
+        "viaName": "에스티아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038010",
+        "corpName": "제일테크노스",
+        "industry": "semiconductor",
+        "viaCode": "000990",
+        "viaName": "DB하이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "102260",
+        "corpName": "동성케미컬",
+        "industry": "chemical",
+        "viaCode": "039440",
+        "viaName": "에스티아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016610",
+        "corpName": "DB증권",
         "industry": "finance",
         "viaCode": "000990",
         "viaName": "DB하이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012030",
+        "corpName": "DB",
+        "industry": "semiconductor",
+        "viaCode": "000990",
+        "viaName": "DB하이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348350",
+        "corpName": "위드텍",
+        "industry": "electronics",
+        "viaCode": "000990",
+        "viaName": "DB하이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033500",
+        "corpName": "동성화인텍",
+        "industry": "chemical",
+        "viaCode": "039440",
+        "viaName": "에스티아이",
         "hopDistance": 2
       },
       {
@@ -186,72 +250,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "102260",
-        "corpName": "동성케미컬",
-        "industry": "chemical",
-        "viaCode": "039440",
-        "viaName": "에스티아이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
-        "viaCode": "000990",
-        "viaName": "DB하이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038010",
-        "corpName": "제일테크노스",
-        "industry": "semiconductor",
-        "viaCode": "000990",
-        "viaName": "DB하이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "228850",
-        "corpName": "레이언스",
-        "industry": "medicalDevice",
-        "viaCode": "000990",
-        "viaName": "DB하이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012030",
-        "corpName": "DB",
-        "industry": "semiconductor",
-        "viaCode": "000990",
-        "viaName": "DB하이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033500",
-        "corpName": "동성화인텍",
-        "industry": "chemical",
-        "viaCode": "039440",
-        "viaName": "에스티아이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "348350",
-        "corpName": "위드텍",
-        "industry": "electronics",
-        "viaCode": "000990",
-        "viaName": "DB하이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039420",
-        "corpName": "케이엘넷",
-        "industry": "telecom",
-        "viaCode": "039440",
-        "viaName": "에스티아이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016610",
-        "corpName": "DB증권",
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
         "industry": "finance",
         "viaCode": "000990",
         "viaName": "DB하이텍",

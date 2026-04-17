@@ -154,73 +154,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "009410",
-        "corpName": "태영건설",
-        "industry": "construction",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004910",
-        "corpName": "조광페인트",
-        "industry": "food",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "015750",
-        "corpName": "성우하이텍",
-        "industry": "auto",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005720",
-        "corpName": "넥센",
-        "industry": "plastic",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009780",
-        "corpName": "엠에스씨",
-        "industry": "food",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "002350",
         "corpName": "넥센타이어",
         "industry": "plastic",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011390",
-        "corpName": "부산산업",
-        "industry": "construction",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
         "viaCode": "058400",
         "viaName": "KNN",
         "hopDistance": 2
@@ -242,25 +178,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000970",
-        "corpName": "한국주철관공업",
-        "industry": "steel",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "192410",
-        "corpName": "오늘이엔엠",
-        "industry": "telecom",
-        "viaCode": "023760",
-        "viaName": "한국캐피탈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034120",
-        "corpName": "SBS",
-        "industry": "electronics",
+        "stockCode": "031310",
+        "corpName": "아이즈비전",
+        "industry": "chemical",
         "viaCode": "058400",
         "viaName": "KNN",
         "hopDistance": 2
@@ -274,9 +194,89 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "031310",
-        "corpName": "아이즈비전",
-        "industry": "chemical",
+        "stockCode": "192410",
+        "corpName": "오늘이엔엠",
+        "industry": "telecom",
+        "viaCode": "023760",
+        "viaName": "한국캐피탈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004910",
+        "corpName": "조광페인트",
+        "industry": "food",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005720",
+        "corpName": "넥센",
+        "industry": "plastic",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009410",
+        "corpName": "태영건설",
+        "industry": "construction",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011390",
+        "corpName": "부산산업",
+        "industry": "construction",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000970",
+        "corpName": "한국주철관공업",
+        "industry": "steel",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015750",
+        "corpName": "성우하이텍",
+        "industry": "auto",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034120",
+        "corpName": "SBS",
+        "industry": "electronics",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009780",
+        "corpName": "엠에스씨",
+        "industry": "food",
         "viaCode": "058400",
         "viaName": "KNN",
         "hopDistance": 2

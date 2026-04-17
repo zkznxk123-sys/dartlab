@@ -226,6 +226,31 @@ def buildCompanyEgograph(stockCode: str) -> dict:
     }
 
 
+def _loadInsiderMetrics() -> dict[str, dict]:
+    """scan/insider 에서 전 종목 소유구조 로드.
+
+    Returns
+    -------
+    dict[str, dict]
+        stockCode → {"holderPct", "holderChange", "treasuryShares", "stability"}
+    """
+    from dartlab.scan.insider import scanInsider
+
+    metrics: dict[str, dict] = {}
+    try:
+        df = scanInsider()
+        for r in df.iter_rows(named=True):
+            code = r["stockCode"]
+            metrics[code] = {
+                "holderPct": r.get("holderPct"),
+                "holderChange": r.get("holderChange"),
+                "stability": r.get("stability") or "",
+            }
+    except Exception as e:
+        print(f"  ⚠ insider 로드 실패: {e}")
+    return metrics
+
+
 def _loadScanMetrics() -> dict[str, dict]:
     """scan 엔진에서 전 종목 재무 지표를 한 번 로드하여 stockCode→dict 매핑 반환.
 
@@ -288,6 +313,7 @@ def _roundOrNone(v, digits: int = 1):
 def buildEcosystem(
     scanMetrics: dict[str, dict] | None = None,
     yoyDeltas: dict[str, dict] | None = None,
+    insiderMetrics: dict[str, dict] | None = None,
 ) -> dict:
     """전체 생태계 한 파일 — Cosmograph용 (nodes + links).
 
@@ -300,6 +326,8 @@ def buildEcosystem(
         scanMetrics = _loadScanMetrics()
     if yoyDeltas is None:
         yoyDeltas = {}
+    if insiderMetrics is None:
+        insiderMetrics = {}
 
     # 산업별 색상 팔레트 (34개)
     palette = [
@@ -375,6 +403,7 @@ def buildEcosystem(
         rank, share = industryRanks.get(n.industry, {}).get(n.stockCode, (0, 0.0))
         m = scanMetrics.get(n.stockCode, {})
         d = yoyDeltas.get(n.stockCode, {})
+        ins = insiderMetrics.get(n.stockCode, {})
         nodeList.append(
             {
                 "id": n.stockCode,
@@ -406,6 +435,10 @@ def buildEcosystem(
                 "debtRatioDelta": d.get("debtRatioDelta"),
                 "revenueYoyPct": d.get("revenueYoyPct"),
                 "deltaYear": d.get("asOfYear"),
+                # insider 소유구조
+                "holderPct": _roundOrNone(ins.get("holderPct")),
+                "holderChange": _roundOrNone(ins.get("holderChange")),
+                "stability": ins.get("stability") or "",
                 "size": rev_log,
                 "color": ind_color.get(n.industry, "#9ca3af"),
             }
@@ -831,6 +864,11 @@ def main() -> None:
     scanMetrics = _loadScanMetrics()
     print(f"  - scan 커버: {len(scanMetrics)}종목")
 
+    # insider 소유구조
+    print("[Insider] 소유구조 로드 중 (holderPct + stability)...")
+    insiderMetrics = _loadInsiderMetrics()
+    print(f"  - insider 커버: {len(insiderMetrics)}종목")
+
     # YoY delta 사전 계산 (전년 대비 변화)
     print("[Delta] YoY 재무 변화 계산 중...")
     from dartlab.industry.build.delta import computeYoyDelta
@@ -840,7 +878,7 @@ def main() -> None:
 
     # 생태계 (Cosmograph용)
     print("[Ecosystem] ecosystem.json 생성...")
-    eco = buildEcosystem(scanMetrics, yoyDeltas)
+    eco = buildEcosystem(scanMetrics, yoyDeltas, insiderMetrics)
     (OUT_DIR / "ecosystem.json").write_text(json.dumps(eco, ensure_ascii=False), encoding="utf-8")
     print(f"  - {len(eco['nodes'])} 노드, {len(eco['links'])} 엣지, {len(eco['industries'])} 산업")
 

@@ -422,41 +422,65 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "092780",
-        "corpName": "DYP",
-        "industry": "auto",
-        "viaCode": "013570",
-        "viaName": "디와이",
+        "stockCode": "082640",
+        "corpName": "동양생명",
+        "industry": "finance",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
         "hopDistance": 2
       },
       {
-        "stockCode": "068790",
-        "corpName": "DMS",
+        "stockCode": "016880",
+        "corpName": "웅진",
+        "industry": "education",
+        "viaCode": "002760",
+        "viaName": "보락",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033270",
+        "corpName": "유나이티드",
+        "industry": "pharma",
+        "viaCode": "001790",
+        "viaName": "대한제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033310",
+        "corpName": "엠투엔",
         "industry": "electronics",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "377460",
-        "corpName": "위니아에이드",
-        "industry": "shipbuilding",
         "viaCode": "013570",
         "viaName": "디와이",
         "hopDistance": 2
       },
       {
-        "stockCode": "032830",
-        "corpName": "삼성생명",
-        "industry": "finance",
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
         "viaCode": "097950",
         "viaName": "CJ제일제당",
         "hopDistance": 2
       },
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
+        "stockCode": "003540",
+        "corpName": "대신증권",
         "industry": "finance",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "253450",
+        "corpName": "스튜디오드래곤",
+        "industry": "media",
         "viaCode": "097950",
         "viaName": "CJ제일제당",
         "hopDistance": 2
@@ -470,35 +494,99 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "042940",
-        "corpName": "상지건설",
-        "industry": "construction",
+        "stockCode": "068790",
+        "corpName": "DMS",
+        "industry": "electronics",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067570",
+        "corpName": "엔브이에이치코리아",
+        "industry": "electronics",
         "viaCode": "013570",
         "viaName": "디와이",
         "hopDistance": 2
       },
       {
-        "stockCode": "011150",
-        "corpName": "CJ씨푸드",
+        "stockCode": "100090",
+        "corpName": "SK오션플랜트",
+        "industry": "software",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006120",
+        "corpName": "SK디스커버리",
+        "industry": "software",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267250",
+        "corpName": "HD현대",
+        "industry": "shipbuilding",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009190",
+        "corpName": "대양금속",
+        "industry": "steel",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001800",
+        "corpName": "오리온홀딩스",
+        "industry": "food",
+        "viaCode": "005740",
+        "viaName": "크라운해태홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "216050",
+        "corpName": "인크로스",
+        "industry": "media",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001680",
+        "corpName": "대상",
         "industry": "food",
         "viaCode": "097950",
         "viaName": "CJ제일제당",
         "hopDistance": 2
       },
       {
-        "stockCode": "014710",
-        "corpName": "사조씨푸드",
-        "industry": "agriculture",
+        "stockCode": "094280",
+        "corpName": "효성 ITX",
+        "industry": "chemical",
         "viaCode": "008040",
         "viaName": "사조동아원",
         "hopDistance": 2
       },
       {
-        "stockCode": "0120G0",
-        "corpName": "삼양바이오팜",
-        "industry": "pharma",
+        "stockCode": "007310",
+        "corpName": "오뚜기",
+        "industry": "food",
         "viaCode": "001790",
         "viaName": "대한제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001470",
+        "corpName": "삼부토건",
+        "industry": "construction",
+        "viaCode": "013570",
+        "viaName": "디와이",
         "hopDistance": 2
       },
       {
@@ -510,19 +598,67 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003540",
-        "corpName": "대신증권",
-        "industry": "finance",
+        "stockCode": "067390",
+        "corpName": "아스트",
+        "industry": "aerospace",
         "viaCode": "013570",
         "viaName": "디와이",
         "hopDistance": 2
       },
       {
-        "stockCode": "083550",
-        "corpName": "케이엠",
+        "stockCode": "307180",
+        "corpName": "아이엘",
         "industry": "chemical",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035810",
+        "corpName": "이지홀딩스",
+        "industry": "food",
         "viaCode": "001790",
         "viaName": "대한제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003960",
+        "corpName": "사조대림",
+        "industry": "food",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "311690",
+        "corpName": "CJ 바이오사이언스",
+        "industry": "food",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007160",
+        "corpName": "사조산업",
+        "industry": "realestate",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
         "hopDistance": 2
       },
       {
@@ -534,33 +670,217 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "065150",
-        "corpName": "대산F&B",
-        "industry": "leisure",
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
         "viaCode": "013570",
         "viaName": "디와이",
         "hopDistance": 2
       },
       {
-        "stockCode": "016590",
-        "corpName": "신대양제지",
-        "industry": "paper",
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001740",
+        "corpName": "SK네트웍스",
+        "industry": "software",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053980",
+        "corpName": "오상자이엘",
+        "industry": "software",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002680",
+        "corpName": "한탑",
+        "industry": "food",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004690",
+        "corpName": "삼천리",
+        "industry": "energy",
         "viaCode": "014160",
         "viaName": "대영포장",
         "hopDistance": 2
       },
       {
-        "stockCode": "232140",
-        "corpName": "와이씨",
-        "industry": "semiconductor",
+        "stockCode": "039860",
+        "corpName": "나노엔텍",
+        "industry": "pharma",
         "viaCode": "013570",
         "viaName": "디와이",
         "hopDistance": 2
       },
       {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
+        "stockCode": "418550",
+        "corpName": "제이오",
+        "industry": "consulting",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "077970",
+        "corpName": "STX엔진",
+        "industry": "auto",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161890",
+        "corpName": "한국콜마",
+        "industry": "cosmetics",
+        "viaCode": "001790",
+        "viaName": "대한제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032080",
+        "corpName": "아즈텍WB",
+        "industry": "textile",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035890",
+        "corpName": "서희건설",
+        "industry": "realestate",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "072710",
+        "corpName": "농심홀딩스",
+        "industry": "food",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024720",
+        "corpName": "콜마홀딩스",
+        "industry": "retail",
+        "viaCode": "001790",
+        "viaName": "대한제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "241690",
+        "corpName": "유니테크노",
+        "industry": "electronics",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "326030",
+        "corpName": "에스케이바이오팜",
+        "industry": "pharma",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035760",
+        "corpName": "CJ ENM",
+        "industry": "media",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023410",
+        "corpName": "유진기업",
+        "industry": "construction",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005440",
+        "corpName": "현대지에프홀딩스",
+        "industry": "realestate",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "310870",
+        "corpName": "디와이씨",
+        "industry": "electronics",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092780",
+        "corpName": "DYP",
+        "industry": "auto",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001020",
+        "corpName": "페이퍼코리아",
+        "industry": "construction",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
         "viaCode": "097950",
         "viaName": "CJ제일제당",
         "hopDistance": 2
@@ -574,8 +894,152 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "208140",
-        "corpName": "정다운",
+        "stockCode": "001040",
+        "corpName": "CJ",
+        "industry": "food",
+        "viaCode": "001790",
+        "viaName": "대한제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023530",
+        "corpName": "롯데쇼핑",
+        "industry": "textile",
+        "viaCode": "001790",
+        "viaName": "대한제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "0120G0",
+        "corpName": "삼양바이오팜",
+        "industry": "pharma",
+        "viaCode": "001790",
+        "viaName": "대한제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000070",
+        "corpName": "삼양홀딩스",
+        "industry": "consulting",
+        "viaCode": "001790",
+        "viaName": "대한제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "128940",
+        "corpName": "한미약품",
+        "industry": "pharma",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079960",
+        "corpName": "동양이엔피",
+        "industry": "electronics",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031440",
+        "corpName": "신세계푸드",
+        "industry": "retail",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019550",
+        "corpName": "SBI인베스트먼트",
+        "industry": "finance",
+        "viaCode": "001790",
+        "viaName": "대한제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014710",
+        "corpName": "사조씨푸드",
+        "industry": "agriculture",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004990",
+        "corpName": "롯데지주",
+        "industry": "finance",
+        "viaCode": "001790",
+        "viaName": "대한제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "402340",
+        "corpName": "SK스퀘어",
+        "industry": "software",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012700",
+        "corpName": "리드코프",
+        "industry": "retail",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004370",
+        "corpName": "농심",
+        "industry": "food",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036540",
+        "corpName": "SFA반도체",
+        "industry": "semiconductor",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067290",
+        "corpName": "JW신약",
+        "industry": "pharma",
+        "viaCode": "264900",
+        "viaName": "크라운제과",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051900",
+        "corpName": "LG생활건강",
+        "industry": "electronics",
+        "viaCode": "264900",
+        "viaName": "크라운제과",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
+        "industry": "chemical",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "222080",
+        "corpName": "씨아이에스",
+        "industry": "machinery",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "280360",
+        "corpName": "롯데웰푸드",
         "industry": "food",
         "viaCode": "001790",
         "viaName": "대한제당",
@@ -590,9 +1054,137 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "016090",
-        "corpName": "대현",
-        "industry": "retail",
+        "stockCode": "210540",
+        "corpName": "디와이파워",
+        "industry": "machinery",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "042940",
+        "corpName": "상지건설",
+        "industry": "construction",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "361610",
+        "corpName": "SK아이이테크놀로지",
+        "industry": "software",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066700",
+        "corpName": "테라젠이텍스",
+        "industry": "electronics",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "145990",
+        "corpName": "삼양사",
+        "industry": "food",
+        "viaCode": "001790",
+        "viaName": "대한제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060380",
+        "corpName": "동양에스텍",
+        "industry": "steel",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079160",
+        "corpName": "CJ CGV",
+        "industry": "food",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005380",
+        "corpName": "현대자동차",
+        "industry": "auto",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "302440",
+        "corpName": "SK바이오사이언스",
+        "industry": "pharma",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "093190",
+        "corpName": "빅솔론",
+        "industry": "electronics",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "232140",
+        "corpName": "와이씨",
+        "industry": "semiconductor",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044180",
+        "corpName": "KD",
+        "industry": "construction",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002880",
+        "corpName": "대유에이텍",
+        "industry": "electronics",
+        "viaCode": "013570",
+        "viaName": "디와이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032830",
+        "corpName": "삼성생명",
+        "industry": "finance",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "097950",
+        "viaName": "CJ제일제당",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051500",
+        "corpName": "CJ프레시웨이",
+        "industry": "food",
         "viaCode": "097950",
         "viaName": "CJ제일제당",
         "hopDistance": 2
@@ -606,105 +1198,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "017810",
-        "corpName": "풀무원",
-        "industry": "shipbuilding",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "307180",
-        "corpName": "아이엘",
-        "industry": "chemical",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039860",
-        "corpName": "나노엔텍",
-        "industry": "pharma",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005440",
-        "corpName": "현대지에프홀딩스",
-        "industry": "realestate",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000660",
-        "corpName": "SK하이닉스",
-        "industry": "semiconductor",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089790",
-        "corpName": "제이티",
-        "industry": "semiconductor",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "027740",
-        "corpName": "마니커",
-        "industry": "realestate",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001740",
-        "corpName": "SK네트웍스",
-        "industry": "software",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "079960",
-        "corpName": "동양이엔피",
-        "industry": "electronics",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "027970",
-        "corpName": "한국제지",
-        "industry": "paper",
-        "viaCode": "264900",
-        "viaName": "크라운제과",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "051900",
-        "corpName": "LG생활건강",
-        "industry": "electronics",
-        "viaCode": "264900",
-        "viaName": "크라운제과",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "311690",
-        "corpName": "CJ 바이오사이언스",
-        "industry": "food",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "217590",
-        "corpName": "티엠씨",
-        "industry": "electrical",
+        "stockCode": "065150",
+        "corpName": "대산F&B",
+        "industry": "leisure",
         "viaCode": "013570",
         "viaName": "디와이",
         "hopDistance": 2
@@ -713,502 +1209,6 @@
         "stockCode": "000270",
         "corpName": "기아",
         "industry": "auto",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267250",
-        "corpName": "HD현대",
-        "industry": "shipbuilding",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012700",
-        "corpName": "리드코프",
-        "industry": "retail",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067570",
-        "corpName": "엔브이에이치코리아",
-        "industry": "electronics",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "264900",
-        "viaName": "크라운제과",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "475150",
-        "corpName": "SK이터닉스",
-        "industry": "software",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007820",
-        "corpName": "에스엠코어",
-        "industry": "machinery",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007310",
-        "corpName": "오뚜기",
-        "industry": "food",
-        "viaCode": "001790",
-        "viaName": "대한제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "261520",
-        "corpName": "이지스",
-        "industry": "software",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "023410",
-        "corpName": "유진기업",
-        "industry": "construction",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036540",
-        "corpName": "SFA반도체",
-        "industry": "semiconductor",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039490",
-        "corpName": "키움증권",
-        "industry": "finance",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "326030",
-        "corpName": "에스케이바이오팜",
-        "industry": "pharma",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "096770",
-        "corpName": "SK이노베이션",
-        "industry": "chemical",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032080",
-        "corpName": "아즈텍WB",
-        "industry": "textile",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "100090",
-        "corpName": "SK오션플랜트",
-        "industry": "software",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067290",
-        "corpName": "JW신약",
-        "industry": "pharma",
-        "viaCode": "264900",
-        "viaName": "크라운제과",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033270",
-        "corpName": "유나이티드",
-        "industry": "pharma",
-        "viaCode": "001790",
-        "viaName": "대한제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "418550",
-        "corpName": "제이오",
-        "industry": "consulting",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "361610",
-        "corpName": "SK아이이테크놀로지",
-        "industry": "software",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003960",
-        "corpName": "사조대림",
-        "industry": "food",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082640",
-        "corpName": "동양생명",
-        "industry": "finance",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "079160",
-        "corpName": "CJ CGV",
-        "industry": "food",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "475560",
-        "corpName": "더본코리아",
-        "industry": "food",
-        "viaCode": "001790",
-        "viaName": "대한제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000070",
-        "corpName": "삼양홀딩스",
-        "industry": "consulting",
-        "viaCode": "001790",
-        "viaName": "대한제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005300",
-        "corpName": "롯데칠성음료",
-        "industry": "food",
-        "viaCode": "001790",
-        "viaName": "대한제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024830",
-        "corpName": "세원물산",
-        "industry": "auto",
-        "viaCode": "014160",
-        "viaName": "대영포장",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "139480",
-        "corpName": "이마트",
-        "industry": "retail",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "072710",
-        "corpName": "농심홀딩스",
-        "industry": "food",
-        "viaCode": "005740",
-        "viaName": "크라운해태홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "219550",
-        "corpName": "디와이디",
-        "industry": "cosmetics",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060380",
-        "corpName": "동양에스텍",
-        "industry": "steel",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "056190",
-        "corpName": "에스에프에이",
-        "industry": "electronics",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054620",
-        "corpName": "APS",
-        "industry": "telecom",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007340",
-        "corpName": "DN오토모티브",
-        "industry": "battery",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053980",
-        "corpName": "오상자이엘",
-        "industry": "software",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095570",
-        "corpName": "AJ네트웍스",
-        "industry": "construction",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "161890",
-        "corpName": "한국콜마",
-        "industry": "cosmetics",
-        "viaCode": "001790",
-        "viaName": "대한제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "310870",
-        "corpName": "디와이씨",
-        "industry": "electronics",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "253450",
-        "corpName": "스튜디오드래곤",
-        "industry": "media",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000720",
-        "corpName": "현대건설",
-        "industry": "construction",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "216050",
-        "corpName": "인크로스",
-        "industry": "media",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "241690",
-        "corpName": "유니테크노",
-        "industry": "electronics",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024720",
-        "corpName": "콜마홀딩스",
-        "industry": "retail",
-        "viaCode": "001790",
-        "viaName": "대한제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "353810",
-        "corpName": "이지바이오",
-        "industry": "chemical",
-        "viaCode": "001790",
-        "viaName": "대한제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "023530",
-        "corpName": "롯데쇼핑",
-        "industry": "textile",
-        "viaCode": "001790",
-        "viaName": "대한제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "278990",
-        "corpName": "EMB",
-        "industry": "battery",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "094280",
-        "corpName": "효성 ITX",
-        "industry": "chemical",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002680",
-        "corpName": "한탑",
-        "industry": "food",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "271560",
-        "corpName": "오리온",
-        "industry": "food",
-        "viaCode": "005740",
-        "viaName": "크라운해태홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004690",
-        "corpName": "삼천리",
-        "industry": "energy",
-        "viaCode": "014160",
-        "viaName": "대영포장",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001040",
-        "corpName": "CJ",
-        "industry": "food",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "128940",
-        "corpName": "한미약품",
-        "industry": "pharma",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000120",
-        "corpName": "CJ대한통운",
-        "industry": "food",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017670",
-        "corpName": "SK텔레콤",
-        "industry": "telecom",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "077970",
-        "corpName": "STX엔진",
-        "industry": "auto",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035810",
-        "corpName": "이지홀딩스",
-        "industry": "food",
-        "viaCode": "001790",
-        "viaName": "대한제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009190",
-        "corpName": "대양금속",
-        "industry": "steel",
-        "viaCode": "013570",
-        "viaName": "디와이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035760",
-        "corpName": "CJ ENM",
-        "industry": "media",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007330",
-        "corpName": "푸른저축은행",
-        "industry": "finance",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "348150",
-        "corpName": "고바이오랩",
-        "industry": "pharma",
-        "viaCode": "097950",
-        "viaName": "CJ제일제당",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "044180",
-        "corpName": "KD",
-        "industry": "construction",
         "viaCode": "013570",
         "viaName": "디와이",
         "hopDistance": 2
