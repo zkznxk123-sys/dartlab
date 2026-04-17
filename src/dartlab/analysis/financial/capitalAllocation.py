@@ -64,7 +64,6 @@ def calcDividendPolicy(company, *, basePeriod: str | None = None) -> dict | None
     if not yCols:
         return None
 
-
     history = []
     consecutiveYears = 0
     countingConsecutive = True
@@ -156,7 +155,6 @@ def calcShareholderReturn(company, *, basePeriod: str | None = None) -> dict | N
     if not yCols:
         return None
 
-
     history = []
     for col in yCols:
         divPaid = abs(_getF2(divRow, col))
@@ -230,7 +228,6 @@ def calcReinvestment(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
-
 
     history = []
     for col in yCols:
@@ -312,7 +309,6 @@ def calcFcfUsage(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
-
 
     history = []
     for col in yCols:

@@ -90,11 +90,13 @@ def decomposeMarginChange(
     drivers = []
     for factor, contrib in drivers_raw:
         share = (abs(contrib) / abs_total * 100) if abs_total > 0 else 0
-        drivers.append({
-            "factor": factor,
-            "contribution_pp": round(contrib, 2),
-            "share_pct": round(share, 1),
-        })
+        drivers.append(
+            {
+                "factor": factor,
+                "contribution_pp": round(contrib, 2),
+                "share_pct": round(share, 1),
+            }
+        )
 
     return {
         "marginT": round(margin_t, 2),
@@ -167,11 +169,13 @@ def decomposeRoicChange(
     drivers = []
     for factor, contrib in drivers_raw:
         share = (abs(contrib) / abs_total * 100) if abs_total > 0 else 0
-        drivers.append({
-            "factor": factor,
-            "contribution_pp": round(contrib, 2),
-            "share_pct": round(share, 1),
-        })
+        drivers.append(
+            {
+                "factor": factor,
+                "contribution_pp": round(contrib, 2),
+                "share_pct": round(share, 1),
+            }
+        )
 
     return {
         "roicT": round(roicT, 2),
@@ -236,11 +240,13 @@ def decomposeFcfChange(
     drivers = []
     for factor, contrib in drivers_raw:
         share = (abs(contrib) / abs_total * 100) if abs_total > 0 else 0
-        drivers.append({
-            "factor": factor,
-            "contribution_amt": float(contrib),
-            "share_pct": round(share, 1),
-        })
+        drivers.append(
+            {
+                "factor": factor,
+                "contribution_amt": float(contrib),
+                "share_pct": round(share, 1),
+            }
+        )
 
     return {
         "fcfT": float(fcfT),

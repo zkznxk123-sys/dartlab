@@ -61,7 +61,7 @@ def calcBankExcessReturn(
     if g_dec >= ke_dec:
         old_g = g_dec * 100
         g_dec = max(0.01, ke_dec - 0.02)
-        warnings.append(f"영구성장률 {old_g:.1f}% ≥ Ke {ke_dec*100:.1f}% → {g_dec*100:.1f}%로 보정")
+        warnings.append(f"영구성장률 {old_g:.1f}% ≥ Ke {ke_dec * 100:.1f}% → {g_dec * 100:.1f}%로 보정")
 
     # Excess Return = (ROE - Ke) × Book Equity
     annual_excess = (roe_dec - ke_dec) * bookEquity

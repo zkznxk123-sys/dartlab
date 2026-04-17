@@ -124,6 +124,7 @@ def _getFinancials5y(stockCode: str) -> list[dict]:
 
         # 최근 10년 자동 계산 (현재 연도 기준)
         from datetime import datetime
+
         thisYear = datetime.now().year
         years = [str(y) for y in range(thisYear - 9, thisYear + 1)]
 

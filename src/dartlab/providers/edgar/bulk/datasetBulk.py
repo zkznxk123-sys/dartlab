@@ -40,10 +40,7 @@ from dartlab.providers.edgar.bulk.freshness import (
 _log = logging.getLogger(__name__)
 
 _BASE_URL = "https://www.sec.gov/files/dera/data/financial-statement-data-sets"
-_LANDING_URL = (
-    "https://www.sec.gov/data-research/sec-markets-data/"
-    "financial-statement-data-sets"
-)
+_LANDING_URL = "https://www.sec.gov/data-research/sec-markets-data/financial-statement-data-sets"
 _UA = "dartlab eddmpython@gmail.com"
 
 _DEFAULT_TIMEOUT = httpx.Timeout(60.0, read=None, write=60.0, connect=30.0)
@@ -154,9 +151,7 @@ def downloadQuarterlyDataset(
         if head.status_code == 404:
             return None
         if head.status_code >= 400:
-            _log.warning(
-                "dataset %sq%s status=%s — 스킵", year, quarter, head.status_code
-            )
+            _log.warning("dataset %sq%s status=%s — 스킵", year, quarter, head.status_code)
             return None
 
         remoteEtag = head.headers.get("ETag", "").strip('"')
@@ -173,9 +168,7 @@ def downloadQuarterlyDataset(
             touchBulkFreshness(tag, etag=remoteEtag)
             return zipPath
 
-        _log.info(
-            "dataset %sq%s 다운로드 (%.1f MB)", year, quarter, remoteLen / 1024 / 1024
-        )
+        _log.info("dataset %sq%s 다운로드 (%.1f MB)", year, quarter, remoteLen / 1024 / 1024)
         tmpPath = zipPath.with_suffix(".zip.tmp")
         with client.stream("GET", url, follow_redirects=True) as resp:
             resp.raise_for_status()
@@ -295,9 +288,7 @@ def _parseSub(zipPath: Path) -> pl.DataFrame:
         df = df.with_columns(pl.col("cik").str.zfill(10).alias("cik"))
     if "filed" in df.columns:
         # YYYYMMDD 문자열 → date (strict=False, 실패시 null)
-        df = df.with_columns(
-            pl.col("filed").str.to_date("%Y%m%d", strict=False).alias("filed")
-        )
+        df = df.with_columns(pl.col("filed").str.to_date("%Y%m%d", strict=False).alias("filed"))
     return df
 
 

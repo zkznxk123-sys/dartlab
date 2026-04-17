@@ -69,7 +69,7 @@ def _detectByRollingZ(
     chronological = list(reversed(valid))
 
     for i in range(windowSize, n):
-        window_vals = [v for _, v in chronological[max(0, i - windowSize): i]]
+        window_vals = [v for _, v in chronological[max(0, i - windowSize) : i]]
         if len(window_vals) < 2:
             continue
         baseline = mean(window_vals)
@@ -87,14 +87,16 @@ def _detectByRollingZ(
                 if abs(z) < 1.5:
                     continue
         magnitude = _magnitude(abs(delta_pct))
-        points.append({
-            "period": current_period,
-            "before": round(baseline, 2),
-            "after": round(current_val, 2),
-            "deltaPct": round(delta_pct, 1),
-            "direction": "up" if delta_pct > 0 else "down",
-            "magnitude": magnitude,
-        })
+        points.append(
+            {
+                "period": current_period,
+                "before": round(baseline, 2),
+                "after": round(current_val, 2),
+                "deltaPct": round(delta_pct, 1),
+                "direction": "up" if delta_pct > 0 else "down",
+                "magnitude": magnitude,
+            }
+        )
     # 최신순 정렬
     points.sort(key=lambda p: p["period"], reverse=True)
     return points
@@ -122,26 +124,30 @@ def _detectByCusum(
         if cusum_pos > threshold:
             before = mean(vals[:i]) if i > 0 else val
             delta_pct = (val - before) / abs(before) * 100 if before != 0 else 0
-            points.append({
-                "period": period,
-                "before": round(before, 2),
-                "after": round(val, 2),
-                "deltaPct": round(delta_pct, 1),
-                "direction": "up",
-                "magnitude": _magnitude(abs(delta_pct)),
-            })
+            points.append(
+                {
+                    "period": period,
+                    "before": round(before, 2),
+                    "after": round(val, 2),
+                    "deltaPct": round(delta_pct, 1),
+                    "direction": "up",
+                    "magnitude": _magnitude(abs(delta_pct)),
+                }
+            )
             cusum_pos = 0  # reset
         elif cusum_neg < -threshold:
             before = mean(vals[:i]) if i > 0 else val
             delta_pct = (val - before) / abs(before) * 100 if before != 0 else 0
-            points.append({
-                "period": period,
-                "before": round(before, 2),
-                "after": round(val, 2),
-                "deltaPct": round(delta_pct, 1),
-                "direction": "down",
-                "magnitude": _magnitude(abs(delta_pct)),
-            })
+            points.append(
+                {
+                    "period": period,
+                    "before": round(before, 2),
+                    "after": round(val, 2),
+                    "deltaPct": round(delta_pct, 1),
+                    "direction": "down",
+                    "magnitude": _magnitude(abs(delta_pct)),
+                }
+            )
             cusum_neg = 0
     points.sort(key=lambda p: p["period"], reverse=True)
     return points
@@ -171,7 +177,8 @@ def injectTurningPoints(
         series = [h.get(seriesKey) for h in history]
         periods = [h.get(periodKey) for h in history]
         return detectTurningPoints(
-            series, periods,
+            series,
+            periods,
             minDeltaPct=minDeltaPct,
             method=method,
             windowSize=windowSize,

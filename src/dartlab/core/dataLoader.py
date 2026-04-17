@@ -353,9 +353,7 @@ def loadData(
             refresh=refresh,
         )
     else:
-        _ensureLocalParquet(
-            stockCode, path, category, shouldRefresh=_shouldRefreshDart(path, refresh)
-        )
+        _ensureLocalParquet(stockCode, path, category, shouldRefresh=_shouldRefreshDart(path, refresh))
     # lazy scan: sinceYear 필터 또는 컬럼 프로젝션이 있으면 scan_parquet 사용
     yearColCandidates = ("year", "bsns_year")
     useLazy = sinceYear is not None or columns is not None
@@ -382,9 +380,7 @@ def loadData(
     return _normalizeLoadedFrame(df, category)
 
 
-def _ensureLocalParquet(
-    stockCode: str, path: Path, category: str, *, shouldRefresh: bool
-) -> None:
+def _ensureLocalParquet(stockCode: str, path: Path, category: str, *, shouldRefresh: bool) -> None:
     """카테고리별 로컬 parquet 보장 (최초 로드 + refresh 통합 라우터).
 
     - ``edgar`` → SEC 벌크 (companyfacts.zip) 자동 다운로드·변환, HF 미러링 없음
@@ -414,9 +410,7 @@ def _downloadFromHf(stockCode: str, path: Path, category: str) -> None:
     except (URLError, socket.timeout, OSError) as e:
         if path.exists():
             path.unlink()
-        raise RuntimeError(
-            gfmt("error:download_failed", stockCode=stockCode, label=label, error=str(e))
-        ) from e
+        raise RuntimeError(gfmt("error:download_failed", stockCode=stockCode, label=label, error=str(e))) from e
     except ValueError:
         if path.exists():
             path.unlink()
@@ -427,9 +421,7 @@ def _downloadFromHf(stockCode: str, path: Path, category: str) -> None:
     emit("download:done_short", sizeStr=sizeStr)
 
 
-def _ensureEdgarFinanceFromBulk(
-    stockCode: str, path: Path, *, refresh: bool = False
-) -> None:
+def _ensureEdgarFinanceFromBulk(stockCode: str, path: Path, *, refresh: bool = False) -> None:
     """EDGAR finance {cik}.parquet 을 SEC 벌크에서 보장.
 
     dartlab 은 ``companyfacts.zip`` (SEC daily, ~1.37GB) 을 사용자 PC 에 받아서

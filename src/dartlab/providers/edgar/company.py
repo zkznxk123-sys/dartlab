@@ -659,6 +659,7 @@ class Company:
     def macro(self, axis=None, target=None, *, overrides: dict | None = None, **kwargs):
         """시장 매크로 분석 — EDGAR 회사는 US 시장 위임 (Phase 8 A2)."""
         from dartlab.macro import Macro
+
         return Macro()(axis, target, market="US", overrides=overrides, **kwargs)
 
     # ── Phase 10 H2: review 2차 가공 직접 노출 ──
@@ -666,21 +667,25 @@ class Company:
     def causalWeights(self) -> list[dict]:
         """6막 인과 가중치 (Phase 9 B2)."""
         from dartlab.review.narrative import buildCausalWeights
+
         return buildCausalWeights(self, {})
 
     def valuationImpact(self) -> dict:
         """인과 체인 → DCF override 힌트 (Phase 9 B3)."""
         from dartlab.review.narrative import buildCausalWeights, buildValuationImpact
+
         return buildValuationImpact(buildCausalWeights(self, {}))
 
     def storyTree(self, *, basePeriod: str | None = None) -> dict:
         """3 trajectory DCF (Phase 10 G2)."""
         from dartlab.review.storyTree import buildStoryTree
+
         return buildStoryTree(self, basePeriod=basePeriod)
 
     def narrativeDiff(self, *, claims: list[str] | None = None) -> list[dict]:
         """claim 제거 시 dFV 변화 (Phase 10 G3)."""
         from dartlab.review.narrativeDiff import computeImpact
+
         return computeImpact(self, claims=claims)
 
     # ── Phase 11 A1: EDGAR 상장사 검색 (DART sync) ──
@@ -692,26 +697,36 @@ class Company:
         forceRefresh 는 DartCompany.listing 과 시그니처 동기 — 현재 EDGAR 는 자동 캐시.
         """
         from dartlab.core.dataLoader import loadEdgarListedUniverse
+
         universe = loadEdgarListedUniverse()
-        return universe.select([
-            pl.col("ticker").alias("종목코드"),
-            pl.col("title").alias("회사명"),
-            pl.col("exchange").alias("시장구분"),
-            pl.col("cik"),
-        ])
+        return universe.select(
+            [
+                pl.col("ticker").alias("종목코드"),
+                pl.col("title").alias("회사명"),
+                pl.col("exchange").alias("시장구분"),
+                pl.col("cik"),
+            ]
+        )
 
     @staticmethod
     def search(keyword: str) -> pl.DataFrame:
         """ticker / 회사명 검색. 대소무시 부분 매칭."""
         from dartlab.core.dataLoader import loadEdgarListedUniverse
+
         kw = keyword.strip()
         if not kw:
-            return loadEdgarListedUniverse().head(0).select([
-                pl.col("ticker").alias("종목코드"),
-                pl.col("title").alias("회사명"),
-                pl.col("exchange").alias("시장구분"),
-                pl.col("cik"),
-            ])
+            return (
+                loadEdgarListedUniverse()
+                .head(0)
+                .select(
+                    [
+                        pl.col("ticker").alias("종목코드"),
+                        pl.col("title").alias("회사명"),
+                        pl.col("exchange").alias("시장구분"),
+                        pl.col("cik"),
+                    ]
+                )
+            )
         kw_upper = kw.upper()
         universe = loadEdgarListedUniverse()
         # ticker 매칭 (정확 우선)
@@ -720,15 +735,15 @@ class Company:
             hit = universe.filter(pl.col("ticker").str.contains(kw_upper, literal=True))
         if hit.height == 0:
             # 회사명 매칭 (대소무시)
-            hit = universe.filter(
-                pl.col("title").str.to_lowercase().str.contains(kw.lower(), literal=True)
-            )
-        return hit.select([
-            pl.col("ticker").alias("종목코드"),
-            pl.col("title").alias("회사명"),
-            pl.col("exchange").alias("시장구분"),
-            pl.col("cik"),
-        ])
+            hit = universe.filter(pl.col("title").str.to_lowercase().str.contains(kw.lower(), literal=True))
+        return hit.select(
+            [
+                pl.col("ticker").alias("종목코드"),
+                pl.col("title").alias("회사명"),
+                pl.col("exchange").alias("시장구분"),
+                pl.col("cik"),
+            ]
+        )
 
     def view(self, *, port: int = 8400) -> None:
         """브라우저에서 공시 뷰어를 열어 sections/index를 시각화.

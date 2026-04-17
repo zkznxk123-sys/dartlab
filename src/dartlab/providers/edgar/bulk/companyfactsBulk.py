@@ -208,12 +208,7 @@ def convertBulkToParquets(
     # stamp 기반 skip — zip 미갱신 + 이전 변환 완료 이력 있으면 skip.
     # onlyCiks 지정 시 stamp 무시 (샘플 변환 목적).
     stamp = zipPath.parent / "companyfacts.converted"
-    if (
-        not force
-        and onlyCiks is None
-        and stamp.exists()
-        and zipPath.stat().st_mtime <= stamp.stat().st_mtime
-    ):
+    if not force and onlyCiks is None and stamp.exists() and zipPath.stat().st_mtime <= stamp.stat().st_mtime:
         _log.info("companyfacts.zip 변환 최신 상태 (stamp=%s) — skip", stamp)
         return {"converted": 0, "skipped": 0, "failed": 0, "stampSkipped": True}
 
@@ -260,9 +255,7 @@ def convertBulkToParquets(
     # 변환 완료 시각 기록 (다운스트림 스크립트 용).
     # skip 가드가 이 파일 mtime 을 zip mtime 과 비교하므로 touch 이후 작성.
     stamp = zipPath.parent / "companyfacts.converted"
-    stamp.write_text(
-        datetime.now(timezone.utc).isoformat(timespec="seconds"), encoding="utf-8"
-    )
+    stamp.write_text(datetime.now(timezone.utc).isoformat(timespec="seconds"), encoding="utf-8")
 
     _log.info(
         "companyfacts.zip → parquet 변환 완료: converted=%d skipped=%d failed=%d",
@@ -347,9 +340,7 @@ def _emitConvertStart(totalCiks: int) -> None:
         pass
 
 
-def _emitConvertDone(
-    *, converted: int, skipped: int, failed: int, elapsedSec: float
-) -> None:
+def _emitConvertDone(*, converted: int, skipped: int, failed: int, elapsedSec: float) -> None:
     try:
         from dartlab.guide.messaging import emit
 

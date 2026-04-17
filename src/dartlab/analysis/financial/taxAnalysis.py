@@ -126,6 +126,7 @@ def calcTaxCashConversion(company, *, basePeriod: str | None = None) -> dict | N
 
     # Phase 15 A1: Q4 함정 제거 — annualSumFlow 로 4분기 합산 (Q4 fallback 대응)
     from dartlab.core.finance.flow import annualSumFlow
+
     allIsPeriods = set(isPeriods)
     cfPeriods = cfParsed[1] if cfParsed else []
     allCfPeriods = set(cfPeriods) if cfPeriods else set()

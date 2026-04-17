@@ -91,7 +91,9 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("concentration", "매출 집중도", "수익구조", "HHI 기반 매출 편중도"),
     BlockMeta("revenueQuality", "매출 품질", "수익구조", "영업CF/순이익, 총이익률 추세"),
     BlockMeta("revenueFlags", "수익구조 플래그", "수익구조", "수익 관련 경고/기회 신호"),
-    BlockMeta("storyPrecedents", "유사 경로 선례", "수익구조", "Damodaran Possible Test — 같은 phase 기업 + 블로그 경험"),
+    BlockMeta(
+        "storyPrecedents", "유사 경로 선례", "수익구조", "Damodaran Possible Test — 같은 phase 기업 + 블로그 경험"
+    ),
     # ── 자금조달 ──
     BlockMeta("fundingSources", "자금 원천 구성", "자금조달", "내부유보/주주자본/금융차입/영업조달 비중"),
     BlockMeta("capitalOverview", "자본 구조 개요", "자금조달", "자기자본/부채 비율과 구성"),
@@ -228,7 +230,12 @@ _BLOCKS: list[BlockMeta] = [
     BlockMeta("historicalRatios", "과거 구조 비율", "매출전망", "Pro-Forma 기반 과거 재무 비율"),
     BlockMeta("forecastFlags", "매출전망 플래그", "매출전망", "예측 관련 경고/제한 사항"),
     BlockMeta("calibrationReport", "예측 정확도 검증", "매출전망", "과거 예측의 확률 캘리브레이션 (Brier Score)"),
-    BlockMeta("plausibilityBand", "가정 타당성 대역", "매출전망", "섹터 피어 분포 대비 현재 forecast percentile (Plausible Test)"),
+    BlockMeta(
+        "plausibilityBand",
+        "가정 타당성 대역",
+        "매출전망",
+        "섹터 피어 분포 대비 현재 forecast percentile (Plausible Test)",
+    ),
     # ── 시장분석 ──
     BlockMeta("technicalVerdict", "기술적 종합 판단", "시장분석", "강세/중립/약세 판정, RSI, ADX, SMA/BB 위치"),
     BlockMeta("technicalSignals", "매매 신호", "시장분석", "골든크로스/RSI/MACD/볼린저 신호 최근 20일"),
@@ -271,7 +278,12 @@ _BLOCKS: list[BlockMeta] = [
     # ── 업종별 KPI (조건부 inject) ─��
     BlockMeta("sectorKpi", "업종 특수 KPI", "종합평가", "업종별 핵심 지표 — 건설/반도체/게임/제약 자동 감지"),
     # ── 산업 밸류체인 (L2 industry 엔진) ──
-    BlockMeta("chainPosition", "산업 밸류체인 내 위치", "비교분석", "전 상장사 2,665사 중 이 회사가 속한 산업·공정·역할·스트림 + 같은 공정 피어"),
+    BlockMeta(
+        "chainPosition",
+        "산업 밸류체인 내 위치",
+        "비교분석",
+        "전 상장사 2,665사 중 이 회사가 속한 산업·공정·역할·스트림 + 같은 공정 피어",
+    ),
     # ── 개선 시나리오 (How축) ──
     BlockMeta("improvementLevers", "개선 레버 순위", "improvementPlan", "영향도 × 난이도별 개선 경로"),
     BlockMeta("gradeUpgradePath", "신용등급 상향 경로", "improvementPlan", "dCR 한 노치 상향에 필요한 것"),

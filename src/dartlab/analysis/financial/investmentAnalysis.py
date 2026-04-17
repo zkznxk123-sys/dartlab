@@ -160,7 +160,6 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     if len(yCols) < 2:
         return None
 
-
     history = []
     for i, col in enumerate(yCols[:-1]):
         yCols[i + 1] if i + 1 < len(yCols) else None
@@ -257,12 +256,18 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
             turnover_t1 = prev_d.get("assetTurnover")
             tax_t = cur.get("effectiveTaxRate")
             tax_t1 = prev.get("effectiveTaxRate")
-            if all(isinstance(v, (int, float)) for v in (roic_t, roic_t1, margin_t, margin_t1, turnover_t, turnover_t1)):
+            if all(
+                isinstance(v, (int, float)) for v in (roic_t, roic_t1, margin_t, margin_t1, turnover_t, turnover_t1)
+            ):
                 attribution = decomposeRoicChange(
-                    roicT=roic_t, roicT1=roic_t1,
-                    marginT=margin_t, marginT1=margin_t1,
-                    turnoverT=turnover_t, turnoverT1=turnover_t1,
-                    taxT=tax_t, taxT1=tax_t1,
+                    roicT=roic_t,
+                    roicT1=roic_t1,
+                    marginT=margin_t,
+                    marginT1=margin_t1,
+                    turnoverT=turnover_t,
+                    turnoverT1=turnover_t1,
+                    taxT=tax_t,
+                    taxT1=tax_t1,
                 )
                 cur["drivers"] = attribution.get("drivers") or []
                 cur["driversExplained"] = attribution.get("explainedPct")
@@ -271,7 +276,12 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
 
     # Phase 8 A5
     from dartlab.core.finance.turningPoint import injectTurningPoints
-    return {"history": history, "turningPoints": injectTurningPoints(history, seriesKey="roic", minDeltaPct=30.0)} if history else None
+
+    return (
+        {"history": history, "turningPoints": injectTurningPoints(history, seriesKey="roic", minDeltaPct=30.0)}
+        if history
+        else None
+    )
 
 
 # ── 투자 강도 ──
@@ -322,7 +332,6 @@ def calcInvestmentIntensity(company, *, basePeriod: str | None = None) -> dict |
     yCols = annualColsFromPeriods(isPeriods, maxYears=_MAX_YEARS, basePeriod=basePeriod)
     if not yCols:
         return None
-
 
     history = []
     for col in yCols:
@@ -408,7 +417,6 @@ def calcEvaTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(isPeriods, maxYears=_MAX_YEARS, basePeriod=basePeriod)
     if not yCols:
         return None
-
 
     history = []
     for col in yCols:

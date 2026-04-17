@@ -86,14 +86,16 @@ def computeHop2() -> dict[str, dict]:
             via_node = nodeByCode.get(hop2_via[far_code])
             if not far_node:
                 continue
-            hop2_neighbors.append({
-                "stockCode": far_code,
-                "corpName": far_node.corpName,
-                "industry": far_node.industry,
-                "viaCode": hop2_via[far_code],
-                "viaName": via_node.corpName if via_node else "",
-                "hopDistance": 2,
-            })
+            hop2_neighbors.append(
+                {
+                    "stockCode": far_code,
+                    "corpName": far_node.corpName,
+                    "industry": far_node.industry,
+                    "viaCode": hop2_via[far_code],
+                    "viaName": via_node.corpName if via_node else "",
+                    "hopDistance": 2,
+                }
+            )
 
         # 핵심 엣지: 이 회사에서 2 hop 경로에 있는 amount 있는 엣지 상위
         # 단순화: 1-hop 엣지 중 amount 있는 Top N + 그 이웃의 또다른 amount 엣지 Top
@@ -102,16 +104,18 @@ def computeHop2() -> dict[str, dict]:
             key = tuple(sorted([code, partner]))
             for e in edgeDetail.get(key, []):
                 if e.amount:
-                    edge_candidates.append({
-                        "from": e.fromCode,
-                        "to": e.toCode,
-                        "type": e.edgeType,
-                        "amount": e.amount,
-                        "ratio": e.ratio,
-                        "product": e.product,
-                        "hop": 1,
-                        "source": e.source,
-                    })
+                    edge_candidates.append(
+                        {
+                            "from": e.fromCode,
+                            "to": e.toCode,
+                            "type": e.edgeType,
+                            "amount": e.amount,
+                            "ratio": e.ratio,
+                            "product": e.product,
+                            "hop": 1,
+                            "source": e.source,
+                        }
+                    )
         edge_candidates.sort(key=lambda x: x["amount"] or 0, reverse=True)
 
         if not isHub:
@@ -123,16 +127,18 @@ def computeHop2() -> dict[str, dict]:
                     key = tuple(sorted([partner, grand]))
                     for e in edgeDetail.get(key, []):
                         if e.amount:
-                            edge_candidates.append({
-                                "from": e.fromCode,
-                                "to": e.toCode,
-                                "type": e.edgeType,
-                                "amount": e.amount,
-                                "ratio": e.ratio,
-                                "product": e.product,
-                                "hop": 2,
-                                "source": e.source,
-                            })
+                            edge_candidates.append(
+                                {
+                                    "from": e.fromCode,
+                                    "to": e.toCode,
+                                    "type": e.edgeType,
+                                    "amount": e.amount,
+                                    "ratio": e.ratio,
+                                    "product": e.product,
+                                    "hop": 2,
+                                    "source": e.source,
+                                }
+                            )
             edge_candidates.sort(key=lambda x: x["amount"] or 0, reverse=True)
 
         out[code] = {

@@ -22,10 +22,10 @@ _SIG_KEYS = ["totalDebtToGdp", "creditGap", "realRate", "gdpGrowth", "debtServic
 # 각 키의 정규화 스케일 (평균적 변동 폭)
 _SCALE = {
     "totalDebtToGdp": 100.0,  # 100%
-    "creditGap": 10.0,        # 10 %p
-    "realRate": 5.0,          # 5 %
-    "gdpGrowth": 5.0,         # 5 %
-    "debtServiceYoY": 3.0,    # 3 %p
+    "creditGap": 10.0,  # 10 %p
+    "realRate": 5.0,  # 5 %
+    "gdpGrowth": 5.0,  # 5 %
+    "debtServiceYoY": 3.0,  # 3 %p
 }
 
 
@@ -41,10 +41,7 @@ def _loadCases() -> dict:
 
 def _vectorize(state: dict[str, Any]) -> list[float | None]:
     """상태 → (정규화된) 시그니처 벡터."""
-    return [
-        (state[k] / _SCALE[k]) if (k in state and state[k] is not None) else None
-        for k in _SIG_KEYS
-    ]
+    return [(state[k] / _SCALE[k]) if (k in state and state[k] is not None) else None for k in _SIG_KEYS]
 
 
 def _cosineSim(a: list[float | None], b: list[float | None]) -> float:
@@ -96,21 +93,25 @@ def matchDalioDetailCase(
             v_st = _vectorize(st)
             sim = _cosineSim(v_curr, v_st)
             next_stage = stages[i + 1] if i + 1 < len(stages) else None
-            candidates.append({
-                "caseId": case["id"],
-                "caseLabel": case["label"],
-                "year": st.get("year"),
-                "phase": st.get("phase"),
-                "similarity": round(sim, 4),
-                "note": st.get("note", ""),
-                "nextStage": {
-                    "year": next_stage.get("year"),
-                    "phase": next_stage.get("phase"),
-                    "note": next_stage.get("note"),
-                } if next_stage else None,
-                "_caseRegime": case.get("regimeVariant"),
-                "_caseOutcome": case.get("outcome"),
-            })
+            candidates.append(
+                {
+                    "caseId": case["id"],
+                    "caseLabel": case["label"],
+                    "year": st.get("year"),
+                    "phase": st.get("phase"),
+                    "similarity": round(sim, 4),
+                    "note": st.get("note", ""),
+                    "nextStage": {
+                        "year": next_stage.get("year"),
+                        "phase": next_stage.get("phase"),
+                        "note": next_stage.get("note"),
+                    }
+                    if next_stage
+                    else None,
+                    "_caseRegime": case.get("regimeVariant"),
+                    "_caseOutcome": case.get("outcome"),
+                }
+            )
 
     candidates.sort(key=lambda x: x["similarity"], reverse=True)
     top = candidates[:topK]

@@ -186,6 +186,7 @@ def searchName(keyword: str):
                     # KR + US 합치기
                     if kr_result.height > 0:
                         import polars as _pl
+
                         return _pl.concat([kr_result, us_result], how="diagonal_relaxed")
                     return us_result
         except (ImportError, AttributeError, NotImplementedError):

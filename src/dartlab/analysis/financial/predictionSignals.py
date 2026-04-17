@@ -122,6 +122,7 @@ def calcEarningsMomentum(company, *, basePeriod: str | None = None) -> dict | No
 
     # Phase 15 A1: Q4 함정 제거 — IS/CF flow 는 annualSumFlow (주석 실제 이행). BS 는 stock → 직접.
     from dartlab.core.finance.flow import annualSumFlow
+
     allIsPeriods = set(isPeriods)
     allCfPeriods = set(cfPeriods)
 

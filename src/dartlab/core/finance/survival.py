@@ -69,10 +69,22 @@ def calcSurvivalWeight(
         source = "chs_probability"
     elif chsFeatures:
         try:
-            result = calcCHS(**{k: chsFeatures.get(k) for k in (
-                "netIncome", "totalLiabilities", "cash", "totalAssets", "marketCap",
-                "equityVolatility", "marketTotal", "excessReturn", "stockPrice",
-            )})
+            result = calcCHS(
+                **{
+                    k: chsFeatures.get(k)
+                    for k in (
+                        "netIncome",
+                        "totalLiabilities",
+                        "cash",
+                        "totalAssets",
+                        "marketCap",
+                        "equityVolatility",
+                        "marketTotal",
+                        "excessReturn",
+                        "stockPrice",
+                    )
+                }
+            )
         except TypeError:
             result = None
         if isinstance(result, CHSResult):

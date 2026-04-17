@@ -660,9 +660,9 @@ def _findMissingQuarters(tagDf: pl.DataFrame, result: pl.DataFrame) -> pl.DataFr
     expected = tagFy.join(seenFp, on=["tag", "fy"], how="semi")
     expectedPeriods = pl.concat(
         [
-            expected.with_columns(
-                (pl.col("fy").cast(pl.Utf8) + pl.lit(f"-{q}")).alias("period")
-            ).select("tag", "period")
+            expected.with_columns((pl.col("fy").cast(pl.Utf8) + pl.lit(f"-{q}")).alias("period")).select(
+                "tag", "period"
+            )
             for q in ("Q1", "Q2", "Q3")
         ]
     ).unique()
@@ -688,9 +688,7 @@ def _ytdDeaccumulate(tagDf: pl.DataFrame, missingPeriods: pl.DataFrame) -> pl.Da
     tagDf = _computeDurationDays(tagDf) if "duration_days" not in tagDf.columns else tagDf
 
     ytdRows = tagDf.filter(pl.col("duration_days").is_not_null() & (pl.col("duration_days") > 100))
-    standaloneRows = tagDf.filter(
-        pl.col("duration_days").is_not_null() & (pl.col("duration_days") <= 100)
-    )
+    standaloneRows = tagDf.filter(pl.col("duration_days").is_not_null() & (pl.col("duration_days") <= 100))
 
     revTags = EdgarMapper.getTagsForSnakeIds(["sales", "revenue"])
     rows = []
@@ -707,9 +705,7 @@ def _ytdDeaccumulate(tagDf: pl.DataFrame, missingPeriods: pl.DataFrame) -> pl.Da
 
         if fp == "Q1":
             # 우선 Q2_YTD - Q2_standalone
-            q2Ytd = _firstVal(
-                ytdRows.filter((pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q2"))
-            )
+            q2Ytd = _firstVal(ytdRows.filter((pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q2")))
             q2Stand = _firstVal(
                 standaloneRows.filter((pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q2"))
             )
@@ -722,9 +718,7 @@ def _ytdDeaccumulate(tagDf: pl.DataFrame, missingPeriods: pl.DataFrame) -> pl.Da
                     ytdRows.filter((pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q3"))
                 )
                 q3Stand = _firstVal(
-                    standaloneRows.filter(
-                        (pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q3")
-                    )
+                    standaloneRows.filter((pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q3"))
                 )
                 if q3Ytd is not None and q2Stand is not None and q3Stand is not None:
                     standalone = q3Ytd - q2Stand - q3Stand
@@ -734,17 +728,17 @@ def _ytdDeaccumulate(tagDf: pl.DataFrame, missingPeriods: pl.DataFrame) -> pl.Da
                 rows.append({"tag": tag, "period": period, "val": standalone})
             continue
 
-        candidates = ytdRows.filter(
-            (pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == fp)
-        ).sort(["end", "filed"], descending=[True, True])
+        candidates = ytdRows.filter((pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == fp)).sort(
+            ["end", "filed"], descending=[True, True]
+        )
         if candidates.height == 0:
             continue
         ytdVal = candidates.row(0, named=True)["val"]
 
         if fp == "Q2":
-            q1Rows = tagDf.filter(
-                (pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q1")
-            ).sort("filed", descending=True)
+            q1Rows = tagDf.filter((pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q1")).sort(
+                "filed", descending=True
+            )
             if q1Rows.height > 0:
                 q1Val = q1Rows.row(0, named=True)["val"]
                 if q1Val is not None and ytdVal is not None:
@@ -754,9 +748,9 @@ def _ytdDeaccumulate(tagDf: pl.DataFrame, missingPeriods: pl.DataFrame) -> pl.Da
                     rows.append({"tag": tag, "period": period, "val": standalone})
 
         elif fp == "Q3":
-            q2YtdRows = ytdRows.filter(
-                (pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q2")
-            ).sort(["end", "filed"], descending=[True, True])
+            q2YtdRows = ytdRows.filter((pl.col("tag") == tag) & (pl.col("fy") == fyInt) & (pl.col("fp") == "Q2")).sort(
+                ["end", "filed"], descending=[True, True]
+            )
             if q2YtdRows.height > 0:
                 q2YtdVal = q2YtdRows.row(0, named=True)["val"]
                 if q2YtdVal is not None and ytdVal is not None:

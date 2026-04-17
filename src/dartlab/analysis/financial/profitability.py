@@ -161,9 +161,12 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
                 sga_t1 = prev.get("sga")
                 if all(isinstance(v, (int, float)) for v in (rev_t, rev_t1, cogs_t, cogs_t1, sga_t, sga_t1)):
                     attribution = decomposeMarginChange(
-                        revenueT=rev_t, revenueT1=rev_t1,
-                        cogsT=cogs_t, cogsT1=cogs_t1,
-                        sgaT=sga_t, sgaT1=sga_t1,
+                        revenueT=rev_t,
+                        revenueT1=rev_t1,
+                        cogsT=cogs_t,
+                        cogsT1=cogs_t1,
+                        sgaT=sga_t,
+                        sgaT1=sga_t1,
                     )
                     cur["drivers"] = attribution.get("drivers") or []
                     cur["driversExplained"] = attribution.get("explainedPct")
@@ -172,6 +175,7 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
 
     # Phase 8 A5: turningPoints 헬퍼 1줄
     from dartlab.core.finance.turningPoint import injectTurningPoints
+
     result["turningPoints"] = injectTurningPoints(history, seriesKey="operatingMargin", minDeltaPct=25.0)
 
     # R22-2: AI 가 표 만들 때 핵심 컬럼을 빠뜨리지 않도록 명시.
@@ -580,7 +584,6 @@ def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict |
     if len(yCols) < 2:
         return None
 
-
     history = []
     for col in yCols:
         # NOPAT = 영업이익 × (1 - 유효세율)
@@ -723,7 +726,6 @@ def calcRoicTree(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(isPeriods, basePeriod, _MAX_YEARS)
     if not yCols:
         return None
-
 
     history = []
     for col in yCols:

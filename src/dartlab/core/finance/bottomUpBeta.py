@@ -214,11 +214,13 @@ def _extractKrPeers(sector: str, limit: int) -> list[dict[str, Any]]:
         de = debt / eq
         if de > 5.0 or de < 0:  # 자본잠식/극단값 제외
             continue
-        peers.append({
-            "code": sc,
-            "betaLevered": sector_beta,  # 섹터 β (수익률 회귀 미구현 — 향후 개선)
-            "de": round(de, 3),
-        })
+        peers.append(
+            {
+                "code": sc,
+                "betaLevered": sector_beta,  # 섹터 β (수익률 회귀 미구현 — 향후 개선)
+                "de": round(de, 3),
+            }
+        )
 
     return peers
 

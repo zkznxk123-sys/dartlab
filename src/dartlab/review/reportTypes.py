@@ -96,7 +96,16 @@ REPORT_TYPES: dict[str, ReportType] = {
         key="crisis",
         label="위기 진단",
         description="위험 진단 — 부실/레버리지/유동성/턴어라운드",
-        sectionOrder=("매크로", "안정성", "자금조달", "현금흐름", "이익품질", "신용평가", "종합평가", "storyValidation"),
+        sectionOrder=(
+            "매크로",
+            "안정성",
+            "자금조달",
+            "현금흐름",
+            "이익품질",
+            "신용평가",
+            "종합평가",
+            "storyValidation",
+        ),
         emphasize=frozenset(
             {"leverageTrend", "distressScore", "coverageTrend", "cashQuality", "cashFlowOverview", "creditScore"}
         ),
@@ -196,7 +205,10 @@ REPORT_TYPES: dict[str, ReportType] = {
         key="thesis",
         label="AI 논제 검증",
         description="사용자 가설 → 증거 수집 → 찬반 정리",
-        sectionOrder=("thesisReport","storyValidation",),  # 신규 섹션
+        sectionOrder=(
+            "thesisReport",
+            "storyValidation",
+        ),  # 신규 섹션
         emphasize=frozenset({"thesisStatement", "evidenceFor", "evidenceAgainst", "verdict"}),
         focusQuestions=(),
         detail=True,

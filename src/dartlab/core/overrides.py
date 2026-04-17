@@ -315,108 +315,134 @@ def detectExtremeFlags(assumptions: dict | None) -> list[dict]:
     wacc = assumptions.get("wacc")
     if isinstance(wacc, (int, float)):
         if wacc > 15.0:
-            flags.append({
-                "flag": "wacc_extreme_high",
-                "reason": f"WACC {wacc:.1f}% 는 대형주에 과도 — 정상 범위 초과",
-                "suggestedRetry": {"wacc": 9.0},
-            })
+            flags.append(
+                {
+                    "flag": "wacc_extreme_high",
+                    "reason": f"WACC {wacc:.1f}% 는 대형주에 과도 — 정상 범위 초과",
+                    "suggestedRetry": {"wacc": 9.0},
+                }
+            )
         elif wacc < 6.0:
-            flags.append({
-                "flag": "wacc_extreme_low",
-                "reason": f"WACC {wacc:.1f}% 는 지나치게 공격적 — 리스크 과소평가 가능",
-                "suggestedRetry": {"wacc": 9.0},
-            })
+            flags.append(
+                {
+                    "flag": "wacc_extreme_low",
+                    "reason": f"WACC {wacc:.1f}% 는 지나치게 공격적 — 리스크 과소평가 가능",
+                    "suggestedRetry": {"wacc": 9.0},
+                }
+            )
 
     # Kd (타인자본비용) — 회사채 수준 대비 과도
     kd = assumptions.get("kd")
     if isinstance(kd, (int, float)) and kd > 12.0:
-        flags.append({
-            "flag": "kd_high",
-            "reason": f"타인자본비용 Kd {kd:.1f}% 는 회사채 시장 대비 비현실적",
-            "suggestedRetry": {"wacc": 9.0},
-        })
+        flags.append(
+            {
+                "flag": "kd_high",
+                "reason": f"타인자본비용 Kd {kd:.1f}% 는 회사채 시장 대비 비현실적",
+                "suggestedRetry": {"wacc": 9.0},
+            }
+        )
 
     # 영구성장률
     tg = assumptions.get("terminalGrowth")
     if isinstance(tg, (int, float)):
         if tg > 4.0:
-            flags.append({
-                "flag": "tg_extreme_high",
-                "reason": f"영구성장률 {tg:.1f}% 는 장기 GDP 성장률 초과 — 구조적 과대",
-                "suggestedRetry": {"terminalGrowth": 2.5},
-            })
+            flags.append(
+                {
+                    "flag": "tg_extreme_high",
+                    "reason": f"영구성장률 {tg:.1f}% 는 장기 GDP 성장률 초과 — 구조적 과대",
+                    "suggestedRetry": {"terminalGrowth": 2.5},
+                }
+            )
         elif tg <= 0:
-            flags.append({
-                "flag": "tg_negative",
-                "reason": f"영구성장률 {tg:.1f}% 음수 — 소멸 가정",
-                "suggestedRetry": {"terminalGrowth": 2.0},
-            })
+            flags.append(
+                {
+                    "flag": "tg_negative",
+                    "reason": f"영구성장률 {tg:.1f}% 음수 — 소멸 가정",
+                    "suggestedRetry": {"terminalGrowth": 2.0},
+                }
+            )
 
     # 부채비율
     debt = assumptions.get("debtRatio")
     if isinstance(debt, (int, float)):
         if debt > 200.0:
-            flags.append({
-                "flag": "debt_high",
-                "reason": f"부채비율 {debt:.0f}% 는 경계 수준 — 스트레스 시나리오 점검 필요",
-                "suggestedRetry": {"debtRatio": debt * 1.3, "scenarioStress": "severe"},
-            })
+            flags.append(
+                {
+                    "flag": "debt_high",
+                    "reason": f"부채비율 {debt:.0f}% 는 경계 수준 — 스트레스 시나리오 점검 필요",
+                    "suggestedRetry": {"debtRatio": debt * 1.3, "scenarioStress": "severe"},
+                }
+            )
 
     # 이자보상배율
     icr = assumptions.get("interestCoverage")
     if isinstance(icr, (int, float)) and icr < 1.5:
-        flags.append({
-            "flag": "icr_weak",
-            "reason": f"이자보상배율 {icr:.2f}x — 영업이익으로 이자도 못 버는 경계",
-            "suggestedRetry": {"interestCoverage": max(icr * 0.7, 0.5), "scenarioStress": "severe"},
-        })
+        flags.append(
+            {
+                "flag": "icr_weak",
+                "reason": f"이자보상배율 {icr:.2f}x — 영업이익으로 이자도 못 버는 경계",
+                "suggestedRetry": {"interestCoverage": max(icr * 0.7, 0.5), "scenarioStress": "severe"},
+            }
+        )
 
     # 매크로 사이클
     phase = assumptions.get("cyclePhase")
     if phase in ("contraction", "trough"):
-        flags.append({
-            "flag": "macro_stress",
-            "reason": f"매크로 사이클 {phase} — 스트레스 시나리오 비교 권장",
-            "suggestedRetry": {"cyclePhase": "contraction"},
-        })
+        flags.append(
+            {
+                "flag": "macro_stress",
+                "reason": f"매크로 사이클 {phase} — 스트레스 시나리오 비교 권장",
+                "suggestedRetry": {"cyclePhase": "contraction"},
+            }
+        )
 
     # ── 생애주기 ↔ 성장 지표 모순 검사 (Damodaran Corporate Life Cycle) ──
     lc_phase = assumptions.get("lifeCyclePhase")
     cagr = assumptions.get("revenueCAGR")
     if lc_phase == "decline" and isinstance(cagr, (int, float)) and cagr > 15.0:
-        flags.append({
-            "flag": "lifecycle_conflict",
-            "reason": f"생애주기 decline 판정인데 매출 CAGR {cagr:.1f}% — turnaround 재진입 가능성",
-            "suggestedRetry": {"lifeCyclePhase": "turnaround"},
-        })
+        flags.append(
+            {
+                "flag": "lifecycle_conflict",
+                "reason": f"생애주기 decline 판정인데 매출 CAGR {cagr:.1f}% — turnaround 재진입 가능성",
+                "suggestedRetry": {"lifeCyclePhase": "turnaround"},
+            }
+        )
     elif lc_phase == "matureStable" and isinstance(cagr, (int, float)) and cagr > 20.0:
-        flags.append({
-            "flag": "lifecycle_conflict",
-            "reason": f"matureStable 판정인데 CAGR {cagr:.1f}% — highGrowth 재평가",
-            "suggestedRetry": {"lifeCyclePhase": "highGrowth"},
-        })
+        flags.append(
+            {
+                "flag": "lifecycle_conflict",
+                "reason": f"matureStable 판정인데 CAGR {cagr:.1f}% — highGrowth 재평가",
+                "suggestedRetry": {"lifeCyclePhase": "highGrowth"},
+            }
+        )
     elif lc_phase in ("earlyGrowth", "highGrowth") and isinstance(cagr, (int, float)) and cagr < 0:
-        flags.append({
-            "flag": "lifecycle_conflict",
-            "reason": f"{lc_phase} 판정인데 CAGR {cagr:.1f}% — 구조조정 가능성",
-            "suggestedRetry": {"lifeCyclePhase": "turnaround"},
-        })
+        flags.append(
+            {
+                "flag": "lifecycle_conflict",
+                "reason": f"{lc_phase} 판정인데 CAGR {cagr:.1f}% — 구조조정 가능성",
+                "suggestedRetry": {"lifeCyclePhase": "turnaround"},
+            }
+        )
 
     # pSurvival 하한 검증 — AI 가 자의적으로 0.1 등 극단값 주입 방지
     p_surv = assumptions.get("pSurvival")
     if isinstance(p_surv, (int, float)):
         if p_surv < 0.30:
-            flags.append({
-                "flag": "survival_extreme_low",
-                "reason": f"pSurvival {p_surv:.2f} 는 사실상 청산 가정 — liquidation 모델 직접 선택 권장",
-                "suggestedRetry": {"primaryModel": "liquidation"},
-            })
+            flags.append(
+                {
+                    "flag": "survival_extreme_low",
+                    "reason": f"pSurvival {p_surv:.2f} 는 사실상 청산 가정 — liquidation 모델 직접 선택 권장",
+                    "suggestedRetry": {"primaryModel": "liquidation"},
+                }
+            )
         elif p_surv > 1.0:
-            flags.append({
-                "flag": "survival_invalid",
-                "reason": f"pSurvival {p_surv:.2f} > 1 (확률 범위 초과)",
-                "suggestedRetry": {"pSurvival": 0.99},
-            })
+            flags.append(
+                {
+                    "flag": "survival_invalid",
+                    "reason": f"pSurvival {p_surv:.2f} > 1 (확률 범위 초과)",
+                    "suggestedRetry": {"pSurvival": 0.99},
+                }
+            )
 
     # ── Phase 3 규칙 ──
     # Implied ERP 가 historical 과 ±3%p 초과 이탈
@@ -424,34 +450,44 @@ def detectExtremeFlags(assumptions: dict | None) -> list[dict]:
     historical = assumptions.get("historicalERP")
     if isinstance(implied, (int, float)) and isinstance(historical, (int, float)):
         if abs(implied - historical) > 3.0:
-            flags.append({
-                "flag": "implied_far_from_historical",
-                "reason": f"Implied ERP {implied:.1f}% vs historical {historical:.1f}% — 시장 과열/공포 가능성",
-                "suggestedRetry": {"impliedERP": False},
-            })
+            flags.append(
+                {
+                    "flag": "implied_far_from_historical",
+                    "reason": f"Implied ERP {implied:.1f}% vs historical {historical:.1f}% — 시장 과열/공포 가능성",
+                    "suggestedRetry": {"impliedERP": False},
+                }
+            )
 
     # Bottom-up beta peer 부족
     peer_count = assumptions.get("peerCount")
     if isinstance(peer_count, int) and peer_count < 5:
-        flags.append({
-            "flag": "peer_count_low",
-            "reason": f"Bottom-up beta peer {peer_count}개 — 섹터 기본값 사용 권장",
-            "suggestedRetry": {"bottomUpBeta": False},
-        })
+        flags.append(
+            {
+                "flag": "peer_count_low",
+                "reason": f"Bottom-up beta peer {peer_count}개 — 섹터 기본값 사용 권장",
+                "suggestedRetry": {"bottomUpBeta": False},
+            }
+        )
 
     # Control + Synergy 이중계산 위험
     control_premium = assumptions.get("controlPremium")
     synergy = assumptions.get("synergy")
     standalone = assumptions.get("standaloneValue")
-    if (isinstance(control_premium, (int, float)) and isinstance(synergy, (int, float))
-            and isinstance(standalone, (int, float)) and standalone > 0):
+    if (
+        isinstance(control_premium, (int, float))
+        and isinstance(synergy, (int, float))
+        and isinstance(standalone, (int, float))
+        and standalone > 0
+    ):
         total_extra = control_premium + synergy
         if total_extra > standalone * 0.5:
-            flags.append({
-                "flag": "control_synergy_double_count",
-                "reason": f"Control premium + Synergy = {total_extra:,.0f} 이 standalone × 50% 초과 — 이중계산 의심",
-                "suggestedRetry": {"synergyType": "cost"},  # 최소 시너지로 축소
-            })
+            flags.append(
+                {
+                    "flag": "control_synergy_double_count",
+                    "reason": f"Control premium + Synergy = {total_extra:,.0f} 이 standalone × 50% 초과 — 이중계산 의심",
+                    "suggestedRetry": {"synergyType": "cost"},  # 최소 시너지로 축소
+                }
+            )
 
     return flags
 

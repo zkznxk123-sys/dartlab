@@ -75,9 +75,7 @@ def inspectBulkFreshness(tag: str) -> BulkFreshness:
         if checked.tzinfo is None:
             checked = checked.replace(tzinfo=timezone.utc)
         age = (datetime.now(timezone.utc) - checked).total_seconds() / 3600.0
-        return BulkFreshness(
-            tag=tag, exists=True, etag=etag, lastChecked=checked, ageHours=age
-        )
+        return BulkFreshness(tag=tag, exists=True, etag=etag, lastChecked=checked, ageHours=age)
     except (ValueError, OSError) as exc:
         _log.warning("freshness 파일 %s 파싱 실패: %s", p, exc)
         return BulkFreshness(tag=tag, exists=False, etag=etag, lastChecked=None, ageHours=None)

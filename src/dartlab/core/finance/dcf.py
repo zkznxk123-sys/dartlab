@@ -302,12 +302,14 @@ def multiStageDcf(
             pv_year = current / ((1 + r) ** global_year)
             phase_pv += pv_year
             pv_explicit += pv_year
-        phases_info.append({
-            "years": ph_years,
-            "rate": ph_rate,
-            "pv": phase_pv,
-            "endFcf": current,
-        })
+        phases_info.append(
+            {
+                "years": ph_years,
+                "rate": ph_rate,
+                "pv": phase_pv,
+                "endFcf": current,
+            }
+        )
 
     # Terminal
     fcf_next = projections[-1] * (1 + gs)
@@ -321,7 +323,7 @@ def multiStageDcf(
     per_share = equity_value / shares if shares and shares > 0 else None
 
     if tv_share > 0.80:
-        warnings.append(f"Terminal Value 비중 {tv_share*100:.0f}% 과도 — explicit 구간 신뢰도 낮음")
+        warnings.append(f"Terminal Value 비중 {tv_share * 100:.0f}% 과도 — explicit 구간 신뢰도 낮음")
 
     return {
         "baseFcf": baseFcf,
@@ -378,12 +380,12 @@ def twoStageDcf(
 # 자산별 회수율 차등 적용. 청산 절차에서 무형/재고가 가장 손실 큼.
 
 _LIQUIDATION_RECOVERY = {
-    "cash": 1.00,          # 현금성자산
-    "receivables": 0.70,   # 매출채권
-    "inventory": 0.50,     # 재고자산
-    "tangible": 0.60,      # 유형자산
-    "intangible": 0.10,    # 무형자산 (영업권 포함)
-    "other": 0.40,         # 기타자산 fallback
+    "cash": 1.00,  # 현금성자산
+    "receivables": 0.70,  # 매출채권
+    "inventory": 0.50,  # 재고자산
+    "tangible": 0.60,  # 유형자산
+    "intangible": 0.10,  # 무형자산 (영업권 포함)
+    "other": 0.40,  # 기타자산 fallback
 }
 
 

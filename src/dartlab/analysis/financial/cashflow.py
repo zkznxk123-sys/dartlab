@@ -96,7 +96,6 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
     if not yCols:
         return None
 
-
     history = []
     for col in yCols:
         ocf = _getF(ocfRow, col)
@@ -127,12 +126,16 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
         for i in range(len(history) - 1):
             cur = history[i]
             prev = history[i + 1]
-            if all(isinstance(cur.get(k), (int, float)) for k in ("fcf", "ocf", "capex")) and \
-               all(isinstance(prev.get(k), (int, float)) for k in ("fcf", "ocf", "capex")):
+            if all(isinstance(cur.get(k), (int, float)) for k in ("fcf", "ocf", "capex")) and all(
+                isinstance(prev.get(k), (int, float)) for k in ("fcf", "ocf", "capex")
+            ):
                 attr = decomposeFcfChange(
-                    fcfT=cur["fcf"], fcfT1=prev["fcf"],
-                    ocfT=cur["ocf"], ocfT1=prev["ocf"],
-                    capexT=cur["capex"], capexT1=prev["capex"],
+                    fcfT=cur["fcf"],
+                    fcfT1=prev["fcf"],
+                    ocfT=cur["ocf"],
+                    ocfT1=prev["ocf"],
+                    capexT=cur["capex"],
+                    capexT1=prev["capex"],
                 )
                 cur["fcfDrivers"] = attr.get("drivers") or []
     except (ImportError, AttributeError, TypeError, ValueError):
@@ -140,6 +143,7 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
 
     # Phase 8 A5
     from dartlab.core.finance.turningPoint import injectTurningPoints
+
     return {"history": history, "turningPoints": injectTurningPoints(history, seriesKey="fcf", minDeltaPct=40.0)}
 
 
@@ -179,7 +183,6 @@ def calcCashQuality(company, *, basePeriod: str | None = None) -> dict | None:
     yCols = annualColsFromPeriods(cfPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
-
 
     history = []
     for col in yCols:
@@ -319,7 +322,6 @@ def calcOcfDecomposition(company, *, basePeriod: str | None = None) -> dict | No
     yCols = annualColsFromPeriods(cfPeriods, basePeriod, 9)
     if len(yCols) < 2:
         return None
-
 
     history = []
     for i in range(len(yCols) - 1):

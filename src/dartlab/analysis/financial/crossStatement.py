@@ -62,7 +62,6 @@ def calcIsCfDivergence(company, *, basePeriod: str | None = None) -> dict | None
     if not yCols:
         return None
 
-
     history = []
     for col in yCols:
         ni = _getF(niRow, col)
@@ -142,7 +141,6 @@ def calcIsBsDivergence(company, *, basePeriod: str | None = None) -> dict | None
     yCols = annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
-
 
     history = []
     for i, col in enumerate(yCols):
@@ -390,7 +388,6 @@ def calcArticulationCheck(company, *, basePeriod: str | None = None) -> dict | N
     yCols = annualColsFromPeriods(bsPeriods, basePeriod, _MAX_YEARS + 1)
     if len(yCols) < 2:
         return None
-
 
     history = []
     for i in range(len(yCols) - 1):

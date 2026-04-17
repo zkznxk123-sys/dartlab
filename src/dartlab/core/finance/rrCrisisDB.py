@@ -73,12 +73,7 @@ def classifyCrisisType(
         signals.append(f"국채 스프레드 {sovereignSpread:.0f}bp — sovereign debt crisis")
 
     # stagflation: inflation > 5 + gdpGrowth < 1
-    if (
-        inflationYoy is not None
-        and gdpGrowth is not None
-        and inflationYoy > 5.0
-        and gdpGrowth < 1.0
-    ):
+    if inflationYoy is not None and gdpGrowth is not None and inflationYoy > 5.0 and gdpGrowth < 1.0:
         active.append("stagflation")
         signals.append(f"CPI {inflationYoy:+.1f}% + GDP {gdpGrowth:+.1f}% — stagflation")
 
@@ -135,16 +130,18 @@ def matchRrHistorical(
         if overlap == 0:
             continue
         bonus = 1 if (country and c.get("country") == country) else 0
-        scored.append({
-            "id": c["id"],
-            "country": c.get("country"),
-            "year": c.get("year"),
-            "endYear": c.get("endYear"),
-            "types": c.get("types", []),
-            "severity": c.get("severity"),
-            "note": c.get("note"),
-            "score": overlap + bonus,
-        })
+        scored.append(
+            {
+                "id": c["id"],
+                "country": c.get("country"),
+                "year": c.get("year"),
+                "endYear": c.get("endYear"),
+                "types": c.get("types", []),
+                "severity": c.get("severity"),
+                "note": c.get("note"),
+                "score": overlap + bonus,
+            }
+        )
 
     scored.sort(key=lambda x: (-x["score"], x["year"]))
     top = scored[:topK]

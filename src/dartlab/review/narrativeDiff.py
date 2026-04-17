@@ -19,9 +19,9 @@ _CLAIM_NEUTRAL_OVERRIDES: dict[str, dict] = {
     "사이클호전": {"terminalGrowth": 2.0},
     "경쟁우위지속": {"wacc": 10.0},
     "부채감축": {"terminalGrowth": 2.0},
-    "낮은WACC": {"wacc": 12.0},                # 높은 WACC 로 중립화
+    "낮은WACC": {"wacc": 12.0},  # 높은 WACC 로 중립화
     "높은터미널성장": {"terminalGrowth": 1.5},  # 터미널 낮춤
-    "생존확률": {"pSurvival": 0.5},             # 중립 생존 확률
+    "생존확률": {"pSurvival": 0.5},  # 중립 생존 확률
 }
 
 
@@ -75,27 +75,31 @@ def computeImpact(
             neutral_dfv = None
 
         if neutral_dfv is None:
-            results.append({
-                "claim": claim,
-                "dFV_neutral": None,
-                "delta_abs": None,
-                "delta_pct": None,
-                "contribution": None,
-                "error": "neutral DCF 실패",
-            })
+            results.append(
+                {
+                    "claim": claim,
+                    "dFV_neutral": None,
+                    "delta_abs": None,
+                    "delta_pct": None,
+                    "contribution": None,
+                    "error": "neutral DCF 실패",
+                }
+            )
             continue
 
         delta_abs = baseline - neutral_dfv
         delta_pct = delta_abs / baseline * 100 if baseline else 0
         contribution = delta_pct  # = 이 claim 이 baseline 에 기여한 %
 
-        results.append({
-            "claim": claim,
-            "dFV_neutral": neutral_dfv,
-            "delta_abs": round(delta_abs, 0),
-            "delta_pct": round(delta_pct, 2),
-            "contribution": round(contribution, 2),
-        })
+        results.append(
+            {
+                "claim": claim,
+                "dFV_neutral": neutral_dfv,
+                "delta_abs": round(delta_abs, 0),
+                "delta_pct": round(delta_pct, 2),
+                "contribution": round(contribution, 2),
+            }
+        )
 
     # 기여도 절대값 내림차순
     results.sort(key=lambda r: abs(r.get("contribution") or 0), reverse=True)

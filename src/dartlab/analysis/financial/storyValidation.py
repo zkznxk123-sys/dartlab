@@ -41,6 +41,7 @@ def calcStoryPrecedents(
     # Phase 4 G15b: scan 프리빌드 없으면 강제 다운로드 회피 — AI timeout 방지
     if skipIfScanMissing:
         from pathlib import Path
+
         scan_path = Path("data/dart/scan/finance.parquet")
         if not scan_path.exists():
             return {
@@ -82,17 +83,19 @@ def calcStoryPrecedents(
             for rec in records:
                 if rec.stock_code == stockCode:
                     continue  # 자기 자신 제외
-                precedents.append({
-                    "stockCode": rec.stock_code,
-                    "name": rec.stock_code,
-                    "narrative": (rec.narrative or "")[:200],
-                    "outcome": None,
-                    "similarity": None,
-                    "strengths": rec.strengths[:3] if rec.strengths else [],
-                    "weaknesses": rec.weaknesses[:3] if rec.weaknesses else [],
-                    "source": rec.source,
-                    "createdAt": rec.created_at,
-                })
+                precedents.append(
+                    {
+                        "stockCode": rec.stock_code,
+                        "name": rec.stock_code,
+                        "narrative": (rec.narrative or "")[:200],
+                        "outcome": None,
+                        "similarity": None,
+                        "strengths": rec.strengths[:3] if rec.strengths else [],
+                        "weaknesses": rec.weaknesses[:3] if rec.weaknesses else [],
+                        "source": rec.source,
+                        "createdAt": rec.created_at,
+                    }
+                )
             if records:
                 sources.append("knowledge_db")
         except (ImportError, AttributeError, OSError, ValueError):
@@ -158,7 +161,16 @@ def _findPhaseMatchingPeers(stockCode: str, phase: str, *, limit: int = 5) -> li
 
     try:
         lf = pl.scan_parquet(str(path))
-        needed = ["stockCode", "bsns_year", "sj_div", "account_nm", "thstrm_amount", "frmtrm_amount", "fs_nm", "reprt_nm"]
+        needed = [
+            "stockCode",
+            "bsns_year",
+            "sj_div",
+            "account_nm",
+            "thstrm_amount",
+            "frmtrm_amount",
+            "fs_nm",
+            "reprt_nm",
+        ]
         avail = lf.collect_schema().names()
         cols = [c for c in needed if c in avail]
         snap = (
@@ -214,14 +226,16 @@ def _findPhaseMatchingPeers(stockCode: str, phase: str, *, limit: int = 5) -> li
         if "marginMax" in sig and (margin is None or margin > sig["marginMax"]):
             continue
 
-        matches.append({
-            "stockCode": sc,
-            "name": sc,
-            "narrative": f"YoY {yoy:.1f}%, 영업마진 {margin:.1f}%" if margin is not None else f"YoY {yoy:.1f}%",
-            "outcome": None,
-            "similarity": None,
-            "source": "scan_phase_match",
-        })
+        matches.append(
+            {
+                "stockCode": sc,
+                "name": sc,
+                "narrative": f"YoY {yoy:.1f}%, 영업마진 {margin:.1f}%" if margin is not None else f"YoY {yoy:.1f}%",
+                "outcome": None,
+                "similarity": None,
+                "source": "scan_phase_match",
+            }
+        )
         if len(matches) >= limit:
             break
     return matches
@@ -285,7 +299,16 @@ def calcPlausibilityBand(
         path = scan_dir / "finance.parquet"
         if path.exists():
             lf = pl.scan_parquet(str(path))
-            needed = ["stockCode", "bsns_year", "sj_div", "account_nm", "thstrm_amount", "frmtrm_amount", "fs_nm", "reprt_nm"]
+            needed = [
+                "stockCode",
+                "bsns_year",
+                "sj_div",
+                "account_nm",
+                "thstrm_amount",
+                "frmtrm_amount",
+                "fs_nm",
+                "reprt_nm",
+            ]
             avail = lf.collect_schema().names()
             cols = [c for c in needed if c in avail]
             snap = (
@@ -420,7 +443,9 @@ def calcValuationSins(
                         waccPct = r["history"][0].get("waccEstimate")
                 m = calcMarginTrend(company, basePeriod=basePeriod)
                 if m and m.get("history"):
-                    operatingMarginPct = operatingMarginPct if operatingMarginPct is not None else m["history"][0].get("operatingMargin")
+                    operatingMarginPct = (
+                        operatingMarginPct if operatingMarginPct is not None else m["history"][0].get("operatingMargin")
+                    )
             except (ImportError, AttributeError, ValueError, TypeError):
                 pass
 
@@ -437,43 +462,51 @@ def calcValuationSins(
 
     # consistency 결과를 flags 에 흡수
     for f in consistency.get("flags", []):
-        flags.append({
-            "key": f.get("rule"),
-            "severity": f.get("severity"),
-            "reason": f.get("message"),
-            "suggestedRetry": None,
-        })
+        flags.append(
+            {
+                "key": f.get("rule"),
+                "severity": f.get("severity"),
+                "reason": f.get("message"),
+                "suggestedRetry": None,
+            }
+        )
 
     # 추가 규칙 — 경쟁 수렴 (ROIC > WACC × 3 지속 가정)
     if roicPct is not None and waccPct is not None and waccPct > 0:
         ratio = roicPct / waccPct
         if ratio > 3.0:
-            flags.append({
-                "key": "roic_wacc_persist",
-                "severity": "warn",
-                "reason": f"ROIC {roicPct:.1f}% / WACC {waccPct:.1f}% = {ratio:.1f}x — 장기 경쟁 수렴 가정 위반",
-                "suggestedRetry": {"terminalGrowth": 2.0},
-            })
+            flags.append(
+                {
+                    "key": "roic_wacc_persist",
+                    "severity": "warn",
+                    "reason": f"ROIC {roicPct:.1f}% / WACC {waccPct:.1f}% = {ratio:.1f}x — 장기 경쟁 수렴 가정 위반",
+                    "suggestedRetry": {"terminalGrowth": 2.0},
+                }
+            )
 
     # 마진 상한 (peer p95 × 1.5 초과)
     if peerStats and operatingMarginPct is not None:
         p95 = peerStats.get("marginP75") or peerStats.get("marginMedian")
         if isinstance(p95, (int, float)) and p95 > 0 and operatingMarginPct > p95 * 1.5:
-            flags.append({
-                "key": "margin_ceiling",
-                "severity": "warn",
-                "reason": f"영업마진 {operatingMarginPct:.1f}% 가 업종 상위 기준치 {p95:.1f}% 의 1.5배 초과",
-                "suggestedRetry": None,
-            })
+            flags.append(
+                {
+                    "key": "margin_ceiling",
+                    "severity": "warn",
+                    "reason": f"영업마진 {operatingMarginPct:.1f}% 가 업종 상위 기준치 {p95:.1f}% 의 1.5배 초과",
+                    "suggestedRetry": None,
+                }
+            )
 
     # 스토리 ↔ 숫자 갭 (storyTemplate 없이 valuation 실행)
     if valuation and not valuation.get("companyType"):
-        flags.append({
-            "key": "story_numbers_gap",
-            "severity": "info",
-            "reason": "기업유형 미판정 — 서사 없는 숫자, Damodaran 원칙 위반",
-            "suggestedRetry": None,
-        })
+        flags.append(
+            {
+                "key": "story_numbers_gap",
+                "severity": "info",
+                "reason": "기업유형 미판정 — 서사 없는 숫자, Damodaran 원칙 위반",
+                "suggestedRetry": None,
+            }
+        )
 
     # Control + Synergy 이중계산 — Damodaran Dark Side Ch.17
     if valuation:
@@ -482,15 +515,17 @@ def calcValuationSins(
         sq = valuation.get("dFV") or valuation.get("statusQuoValue")
         if isinstance(cp, (int, float)) and isinstance(syn, (int, float)) and isinstance(sq, (int, float)) and sq > 0:
             if (cp + syn) > sq * 0.5:
-                flags.append({
-                    "key": "control_synergy_overlap",
-                    "severity": "critical",
-                    "reason": (
-                        f"Control premium {cp:,.0f} + Synergy {syn:,.0f} = {cp+syn:,.0f}"
-                        f" 이 standalone {sq:,.0f} × 50% 초과 — 이중계산 위험"
-                    ),
-                    "suggestedRetry": None,
-                })
+                flags.append(
+                    {
+                        "key": "control_synergy_overlap",
+                        "severity": "critical",
+                        "reason": (
+                            f"Control premium {cp:,.0f} + Synergy {syn:,.0f} = {cp + syn:,.0f}"
+                            f" 이 standalone {sq:,.0f} × 50% 초과 — 이중계산 위험"
+                        ),
+                        "suggestedRetry": None,
+                    }
+                )
 
     severity = "info"
     order = {"info": 0, "warn": 1, "critical": 2}

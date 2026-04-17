@@ -18,18 +18,21 @@ from typing import Any
 _MODEL_SENSITIVITY: dict[str, set[str]] = {
     "dcf": {"wacc", "terminalGrowth", "growthRates", "countryCode"},
     "dcf2stage": {
-        "wacc", "terminalGrowth", "growthRates",
-        "marginPath", "reinvestmentPath", "countryCode",
+        "wacc",
+        "terminalGrowth",
+        "growthRates",
+        "marginPath",
+        "reinvestmentPath",
+        "countryCode",
     },
     "ddm": {"terminalGrowth"},
     "rim": {"wacc", "countryCode"},
-    "relative": set(),           # PER/PBR — override 무감각
+    "relative": set(),  # PER/PBR — override 무감각
     "relativeSurvival": set(),
     "liquidation": {"liquidationValue", "liquidationDiscount"},
 }
 
-_SELECTOR_IGNORE = {"primaryModel", "lifeCyclePhase", "companyType",
-                    "pSurvival", "impliedERP", "bottomUpBeta"}
+_SELECTOR_IGNORE = {"primaryModel", "lifeCyclePhase", "companyType", "pSurvival", "impliedERP", "bottomUpBeta"}
 
 
 def _selectPrimaryWithOverrides(
@@ -307,11 +310,22 @@ def calcDFV(
         out["consistencyScore"] = consistency.get("score")
         out["consistencySeverity"] = consistency.get("severity")
     if ov:
-        out["overrideApplied"] = {k: v for k, v in ov.items() if k in (
-            "wacc", "terminalGrowth", "primaryModel", "lifeCyclePhase",
-            "pSurvival", "liquidationValue", "liquidationDiscount",
-            "countryCode", "countryRiskPremium",
-        )}
+        out["overrideApplied"] = {
+            k: v
+            for k, v in ov.items()
+            if k
+            in (
+                "wacc",
+                "terminalGrowth",
+                "primaryModel",
+                "lifeCyclePhase",
+                "pSurvival",
+                "liquidationValue",
+                "liquidationDiscount",
+                "countryCode",
+                "countryRiskPremium",
+            )
+        }
     # Phase 12 A1: 투명성 — primary 자동 전환 기록
     if _primary_switch_reason:
         out.setdefault("overrideApplied", {})["primaryAutoSwitch"] = _primary_switch_reason
@@ -620,11 +634,11 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
     # lifeCycle 별 phase 구성 (Damodaran 권고) — Phase 5 G17: highGrowth 10년 확장 (Ch.12)
     phase_config: dict[str, tuple[list[int], list[float]]] = {
         "earlyGrowth": ([5, 3, 2], [high_g, high_g * 0.5, high_g * 0.2]),
-        "highGrowth":  ([5, 3, 2], [high_g, high_g * 0.7, high_g * 0.4]),  # 7→10년
-        "matureGrowth":([4],       [min(high_g, 8.0)]),   # cap 8%
-        "matureStable":([3],       [min(high_g, 3.0)]),   # cap 3% (GDP 근접)
-        "decline":     ([2],       [min(high_g, -2.0) if high_g < 0 else min(high_g, 0.0)]),
-        "turnaround":  ([5],       [high_g]),
+        "highGrowth": ([5, 3, 2], [high_g, high_g * 0.7, high_g * 0.4]),  # 7→10년
+        "matureGrowth": ([4], [min(high_g, 8.0)]),  # cap 8%
+        "matureStable": ([3], [min(high_g, 3.0)]),  # cap 3% (GDP 근접)
+        "decline": ([2], [min(high_g, -2.0) if high_g < 0 else min(high_g, 0.0)]),
+        "turnaround": ([5], [high_g]),
     }
     years_vec, rates_vec = phase_config.get(life_phase or "", ([5], [high_g]))
 
@@ -645,12 +659,12 @@ def _calcTwoStageDcf(company: Any, life_phase: str | None, overrides: dict) -> d
     erp = loadDamodaranERP(countryCode=country, currency=currency)
     rf = erp["riskFreeRate"]
     tg_by_phase = {
-        "earlyGrowth":  max(2.0, rf - 0.5),
-        "highGrowth":   max(2.0, rf - 1.0),
+        "earlyGrowth": max(2.0, rf - 0.5),
+        "highGrowth": max(2.0, rf - 1.0),
         "matureGrowth": max(2.0, rf - 1.5),
         "matureStable": max(1.5, rf - 2.0),  # GDP 추종 (Damodaran 권고)
-        "decline":      0.5,
-        "turnaround":   max(2.0, rf - 1.0),
+        "decline": 0.5,
+        "turnaround": max(2.0, rf - 1.0),
     }
     tg_default = tg_by_phase.get(life_phase or "", max(1.0, rf - 1.0))
     terminal_g = applyOverride(tg_default, "terminalGrowth", overrides)

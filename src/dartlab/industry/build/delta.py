@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 def _extract_by_ids(row_sub: pl.DataFrame, id_list, nm_list) -> float | None:
     """단일 연도 subset 에서 계정값 추출 (scan extractAccount 재사용)."""
     from dartlab.scan._helpers import extractAccount
+
     return extractAccount(row_sub, list(id_list), list(nm_list))
 
 
@@ -60,6 +61,7 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
         _TA_IDS,
         _TA_NMS,
     )
+
     # 부채 계정 — scan.debt 에서 재사용 (없으면 fallback)
     try:
         from dartlab.scan.debt.risk import _LIABILITY_IDS, _LIABILITY_NMS  # type: ignore
@@ -129,6 +131,7 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
         from dartlab.scan.profitability import (
             _REVENUE_NMS as R_NMS,
         )
+
         rev = _extract_by_ids(sub, R_IDS, R_NMS)
         op = _extract_by_ids(sub, OP_IDS, OP_NMS)
         ni = _extract_by_ids(sub, NI_IDS, NI_NMS)

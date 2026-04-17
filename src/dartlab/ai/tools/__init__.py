@@ -347,7 +347,7 @@ def _enumFromCapabilities(toolName: str, paramName: str, caps: dict) -> list[str
     # axis 파라미터 → 엔진 자체 공간의 축 entry 수집 (scan/macro/gather 공통)
     if paramName == "axis" and toolName in ("scan", "macro", "gather"):
         prefix = f"{toolName}."
-        return sorted(k[len(prefix):] for k in caps if k.startswith(prefix))
+        return sorted(k[len(prefix) :] for k in caps if k.startswith(prefix))
     # 특수 해석기 — (toolName, paramName) → resolver
     resolver = _ENUM_RESOLVERS.get((toolName, paramName))
     if resolver:
@@ -360,26 +360,31 @@ def _enumFromCapabilities(toolName: str, paramName: str, caps: dict) -> list[str
 
 def _resolveShowFreq() -> list[str]:
     from dartlab.core.show import SHOW_FREQS
+
     return list(SHOW_FREQS)
 
 
 def _resolveSearchScope() -> list[str]:
     from dartlab.core.search import SEARCH_SCOPES
+
     return list(SEARCH_SCOPES)
 
 
 def _resolveAnalysisAxis() -> list[str]:
     from dartlab.analysis.financial import _AXIS_REGISTRY as _AR
+
     return sorted(_AR.keys())
 
 
 def _resolveCreditAxis() -> list[str]:
     from dartlab.credit import _CREDIT_AXES  # type: ignore[attr-defined]
+
     return list(_CREDIT_AXES.keys())
 
 
 def _resolveReviewType() -> list[str]:
     from dartlab.review.reportTypes import REPORT_TYPES
+
     return sorted(REPORT_TYPES.keys())
 
 
@@ -527,7 +532,17 @@ def _firstDocLine(obj: Any) -> str:
     return doc.split("\n", 1)[0].strip() if doc else ""
 
 
-_DOCSTRING_SECTIONS = {"Args:", "Parameters:", "Returns:", "Raises:", "Notes:", "Examples:", "See Also:", "반환:", "인자:"}
+_DOCSTRING_SECTIONS = {
+    "Args:",
+    "Parameters:",
+    "Returns:",
+    "Raises:",
+    "Notes:",
+    "Examples:",
+    "See Also:",
+    "반환:",
+    "인자:",
+}
 
 
 def _mergeDescWithReturns(summary: str, callable_: Any, fallback_name: str) -> str:

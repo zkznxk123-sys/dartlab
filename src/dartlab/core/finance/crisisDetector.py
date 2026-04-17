@@ -732,10 +732,7 @@ def _beautifulDeleveragingSubPhase(
     fiscalDeficitPctGdp: float | None = None,
 ) -> str | None:
     """Beautiful Deleveraging 내부 4단계 판정."""
-    available = sum(
-        x is not None
-        for x in [realRate, m2GrowthYoy, debtServiceYoY, npl, hySpread, fiscalDeficitPctGdp]
-    )
+    available = sum(x is not None for x in [realRate, m2GrowthYoy, debtServiceYoY, npl, hySpread, fiscalDeficitPctGdp])
     if available < 3:
         return None
     # 2. defaultRestructuring — 신용시장 극한 스트레스 우선

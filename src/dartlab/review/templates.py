@@ -788,4 +788,3 @@ from dartlab.core.finance.companyType import (  # noqa: F401
     detectTemplate,
     detectTemplates,
 )
-

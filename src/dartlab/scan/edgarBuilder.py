@@ -110,11 +110,7 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
             from datetime import datetime as _dt
 
             maxFy = _dt.utcnow().year + 1
-            annual = df.filter(
-                (pl.col("form") == "10-K")
-                & (pl.col("fy") >= sinceYear)
-                & (pl.col("fy") <= maxFy)
-            )
+            annual = df.filter((pl.col("form") == "10-K") & (pl.col("fy") >= sinceYear) & (pl.col("fy") <= maxFy))
             if annual.is_empty():
                 continue
 
@@ -125,9 +121,7 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
             # 10-K 는 비교재무제표로 과거 2~3년 데이터를 같은 fy 라벨로 포함한다.
             # 해당 fy 의 **standalone 연간 값만** 선택 — end date 가 fy 연도의 +/- 1 년
             # 범위에 들고 연간(duration ≥ 300일) 또는 frame=CY{latestFy} 인 행.
-            latest = latest.with_columns(
-                (pl.col("end") - pl.col("start")).dt.total_days().alias("_dur")
-            )
+            latest = latest.with_columns((pl.col("end") - pl.col("start")).dt.total_days().alias("_dur"))
             fyAnnual = latest.filter(
                 (pl.col("_dur").is_null() | (pl.col("_dur") > 300))
                 & (

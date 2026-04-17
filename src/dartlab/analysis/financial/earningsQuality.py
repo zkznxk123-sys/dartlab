@@ -66,7 +66,6 @@ def calcAccrualAnalysis(company, *, basePeriod: str | None = None) -> dict | Non
     if not yCols:
         return None
 
-
     history = []
     for col in yCols:
         ni = _getF(niRow, col)
@@ -136,7 +135,6 @@ def calcEarningsPersistence(company, *, basePeriod: str | None = None) -> dict |
     yCols = annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS)
     if not yCols:
         return None
-
 
     history = []
     opValues = []
@@ -237,7 +235,6 @@ def calcBeneishTimeline(company, *, basePeriod: str | None = None) -> dict | Non
     yCols = annualColsFromPeriods(isPeriods, basePeriod=basePeriod, maxYears=_MAX_YEARS + 1)  # 전년 대비 필요 → 1년 더
     if len(yCols) < 2:
         return None
-
 
     history = []
     for i in range(len(yCols) - 1):
@@ -574,7 +571,6 @@ def calcNonOperatingBreakdown(company, *, basePeriod: str | None = None) -> dict
     if not yCols:
         return None
 
-
     history = []
     for col in yCols:
         op = _getF4(opRow, col)
@@ -790,9 +786,12 @@ def calcQualityAnomalies(company, *, basePeriod: str | None = None) -> dict | No
     ocf_t = _ga(cf_data, t, "operating_cashflow")
 
     quality = calcEarningsQualityFlags(
-        salesT=sales_t or 0, salesT1=sales_t1 or 0,
-        receivablesT=receivables_t or 0, receivablesT1=receivables_t1 or 0,
-        netIncomeT=ni_t or 0, ocfT=ocf_t or 0,
+        salesT=sales_t or 0,
+        salesT1=sales_t1 or 0,
+        receivablesT=receivables_t or 0,
+        receivablesT1=receivables_t1 or 0,
+        netIncomeT=ni_t or 0,
+        ocfT=ocf_t or 0,
         totalAssetsT=assets_t or 0,
         goodwillT=goodwill_t,
     )
@@ -800,16 +799,24 @@ def calcQualityAnomalies(company, *, basePeriod: str | None = None) -> dict | No
     beneish = None
     if all(v is not None for v in (sales_t, sales_t1, cogs_t, cogs_t1, sga_t, sga_t1, assets_t, assets_t1)):
         beneish = calcBeneishMScore(
-            salesT=sales_t, salesT1=sales_t1,
-            receivablesT=receivables_t or 0, receivablesT1=receivables_t1 or 0,
-            cogsT=cogs_t, cogsT1=cogs_t1,
-            sgaT=sga_t, sgaT1=sga_t1,
-            grossPropertyT=ppe_t or 0, grossPropertyT1=ppe_t1 or 0,
-            totalAssetsT=assets_t, totalAssetsT1=assets_t1,
-            netIncomeT=ni_t or 0, ocfT=ocf_t or 0,
+            salesT=sales_t,
+            salesT1=sales_t1,
+            receivablesT=receivables_t or 0,
+            receivablesT1=receivables_t1 or 0,
+            cogsT=cogs_t,
+            cogsT1=cogs_t1,
+            sgaT=sga_t,
+            sgaT1=sga_t1,
+            grossPropertyT=ppe_t or 0,
+            grossPropertyT1=ppe_t1 or 0,
+            totalAssetsT=assets_t,
+            totalAssetsT1=assets_t1,
+            netIncomeT=ni_t or 0,
+            ocfT=ocf_t or 0,
             leverageT=(liabilities_t / assets_t) if assets_t else 0,
             leverageT1=(liabilities_t1 / assets_t1) if assets_t1 else 0,
-            depreciationT=0, depreciationT1=0,
+            depreciationT=0,
+            depreciationT1=0,
         )
 
     # docs 활용 — 감사보고서 키워드

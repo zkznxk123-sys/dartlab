@@ -167,7 +167,9 @@ def _gatherSignals(company: Any, *, basePeriod: str | None) -> dict | None:
 
         div = calcDividendPolicy(company, basePeriod=basePeriod)
         if div:
-            payouts = [h.get("payoutRatio") for h in div.get("history", []) if isinstance(h.get("payoutRatio"), (int, float))]
+            payouts = [
+                h.get("payoutRatio") for h in div.get("history", []) if isinstance(h.get("payoutRatio"), (int, float))
+            ]
             if payouts:
                 dividend_payout = float(mean(payouts))
     except (ImportError, AttributeError, ValueError, TypeError):
@@ -229,9 +231,13 @@ def _classify(signals: dict, *, growth_adj: float = 0.0) -> tuple[str, float, li
 
     # G20.3: matureStable 엄격화 — CAGR<5 AND payout≥40 AND fcf streak≥3 AND spread 작음
     # 모든 조건 충족 시에만 (이전: 일부 충족도 흡수 → matureGrowth/turnaround 사각지대)
-    if (isinstance(cagr, (int, float)) and cagr <= 5 + growth_adj
-            and payout >= 40 and fcf_streak >= 3
-            and (spread is None or abs(spread) < 3.0)):
+    if (
+        isinstance(cagr, (int, float))
+        and cagr <= 5 + growth_adj
+        and payout >= 40
+        and fcf_streak >= 3
+        and (spread is None or abs(spread) < 3.0)
+    ):
         return "matureStable", 0.85, _buildHistory(signals)
 
     # G20.4: earlyGrowth — 고성장 + 음수 마진 + FCF 음수

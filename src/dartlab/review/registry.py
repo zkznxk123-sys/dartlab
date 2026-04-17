@@ -8,18 +8,33 @@ from dartlab.review.templates import TEMPLATE_ORDER, TEMPLATES
 from dartlab.review.utils import isTerminal
 
 # Phase 4 G15a: buildBlocks preset — 전체 호출 113초/7.9GB 회피
-_MINIMAL_KEYS: frozenset[str] = frozenset({
-    "profile", "segmentComposition", "revenueGrowth",
-    "marginTrend", "cashFlowOverview", "cashQuality",
-    "leverageTrend", "assetStructure",
-    "dFV", "lifeCycleStage", "valuationSins",
-})
+_MINIMAL_KEYS: frozenset[str] = frozenset(
+    {
+        "profile",
+        "segmentComposition",
+        "revenueGrowth",
+        "marginTrend",
+        "cashFlowOverview",
+        "cashQuality",
+        "leverageTrend",
+        "assetStructure",
+        "dFV",
+        "lifeCycleStage",
+        "valuationSins",
+    }
+)
 
-_STANDARD_KEYS: frozenset[str] = _MINIMAL_KEYS | frozenset({
-    "concentration", "growthTrend", "roicTimeline",
-    "distressScore", "valuationSynthesis", "plausibilityBand",
-    # storyPrecedents 제외 (scan 271MB 다운로드 회피 — preset="full" 에서만)
-})
+_STANDARD_KEYS: frozenset[str] = _MINIMAL_KEYS | frozenset(
+    {
+        "concentration",
+        "growthTrend",
+        "roicTimeline",
+        "distressScore",
+        "valuationSynthesis",
+        "plausibilityBand",
+        # storyPrecedents 제외 (scan 271MB 다운로드 회피 — preset="full" 에서만)
+    }
+)
 
 
 def buildBlocks(
@@ -834,7 +849,9 @@ def buildBlocks(
         from dartlab.review.builders import storyPrecedentsBlock
 
         if _need("storyPrecedents"):
-            b["storyPrecedents"] = _safe(lambda: storyPrecedentsBlock(calcStoryPrecedents(company, basePeriod=basePeriod)))
+            b["storyPrecedents"] = _safe(
+                lambda: storyPrecedentsBlock(calcStoryPrecedents(company, basePeriod=basePeriod))
+            )
 
     # ── Damodaran 흡수 — 매출전망 plausibilityBand ──
     if keys is None or "plausibilityBand" in keys:
@@ -842,7 +859,9 @@ def buildBlocks(
         from dartlab.review.builders import plausibilityBandBlock
 
         if _need("plausibilityBand"):
-            b["plausibilityBand"] = _safe(lambda: plausibilityBandBlock(calcPlausibilityBand(company, basePeriod=basePeriod)))
+            b["plausibilityBand"] = _safe(
+                lambda: plausibilityBandBlock(calcPlausibilityBand(company, basePeriod=basePeriod))
+            )
 
     # ── 5부: 비재무 심화 ──
     if keys is None or keys & {

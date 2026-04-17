@@ -147,10 +147,7 @@ def _computeSigma(company: Any) -> float | None:
         m = calcMarginTrend(company)
         if not m or not m.get("history"):
             return None
-        margins = [
-            h.get("operatingMargin") for h in m["history"]
-            if isinstance(h.get("operatingMargin"), (int, float))
-        ]
+        margins = [h.get("operatingMargin") for h in m["history"] if isinstance(h.get("operatingMargin"), (int, float))]
         if len(margins) < 3:
             return None
         sigma = pstdev(margins) / 100.0  # % → decimal

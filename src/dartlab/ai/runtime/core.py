@@ -173,10 +173,9 @@ def _buildHistoryMessages(
     compressed = compress_history(light_history)
     return build_history_messages(compressed)
 
+
 # 시스템 프롬프트 조립 + 범주 블록 → runtime/prompts.py
 # post-response 훅 → runtime/postResponse.py
-
-
 
 
 # ── 통합 오케스트레이터 ──────────────────────────────────

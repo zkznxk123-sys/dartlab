@@ -4632,7 +4632,10 @@ class Company:
         if isinstance(result, dict):
             from dartlab.core.overrides import buildAssumptions
 
-            enriched = {**result, **{k: v for k, v in merged.items() if k in ("window", "threshold", "period", "benchmark")}}
+            enriched = {
+                **result,
+                **{k: v for k, v in merged.items() if k in ("window", "threshold", "period", "benchmark")},
+            }
             assumptions = buildAssumptions(enriched, engine="quant", overrides=clean)
             if assumptions:
                 result.setdefault("assumptions", assumptions)
@@ -4654,6 +4657,7 @@ class Company:
             - "2008 시나리오" → c.macro("시나리오", "2008 금융위기")
         """
         from dartlab.macro import Macro
+
         return Macro()(axis, target, market="KR", overrides=overrides, **kwargs)
 
     # ── Phase 10 H2: review 2차 가공 직접 노출 (AI tool 자동 수집 대상) ──
@@ -4669,6 +4673,7 @@ class Company:
             list[dict] — from_act/to_act/metric_from/metric_to/delta_from/delta_to/weight/direction
         """
         from dartlab.review.narrative import buildCausalWeights
+
         return buildCausalWeights(self, {})
 
     def valuationImpact(self) -> dict:
@@ -4682,6 +4687,7 @@ class Company:
             dict — terminalGrowthAdj/waccAdj/narrative/overrides
         """
         from dartlab.review.narrative import buildCausalWeights, buildValuationImpact
+
         chains = buildCausalWeights(self, {})
         return buildValuationImpact(chains)
 
@@ -4696,6 +4702,7 @@ class Company:
             dict — possible/plausible/probable + summary {min/max/spread/spreadPct/mean}
         """
         from dartlab.review.storyTree import buildStoryTree
+
         return buildStoryTree(self, basePeriod=basePeriod)
 
     def narrativeDiff(self, *, claims: list[str] | None = None) -> list[dict]:
@@ -4709,6 +4716,7 @@ class Company:
             list[dict] — claim/dFV_neutral/delta_abs/delta_pct/contribution
         """
         from dartlab.review.narrativeDiff import computeImpact
+
         return computeImpact(self, claims=claims)
 
     def industry(self) -> dict | None:

@@ -66,12 +66,14 @@ def calcSotpNav(
                     unlisted += 1
                 book_value = float(book_raw)
                 affiliate_book_sum += book_value
-                affiliates.append({
-                    "name": name.replace("(비상장)", "").strip(),
-                    "shareRatio": ratio,
-                    "bookValue": book_value,
-                    "listingFlag": listing_flag,
-                })
+                affiliates.append(
+                    {
+                        "name": name.replace("(비상장)", "").strip(),
+                        "shareRatio": ratio,
+                        "bookValue": book_value,
+                        "listingFlag": listing_flag,
+                    }
+                )
     except (AttributeError, KeyError, TypeError, ValueError):
         return None
 
@@ -120,7 +122,7 @@ def calcSotpNav(
                         sanity_cap = estimated_mc * 3.0  # 시가총액 × 3 (50% discount 환원)
                         if adjusted_nav > sanity_cap:
                             warnings.append(
-                                f"NAV {adjusted_nav/1e12:.0f}조 → 시가총액 × 3 cap {sanity_cap/1e12:.0f}조 적용 "
+                                f"NAV {adjusted_nav / 1e12:.0f}조 → 시가총액 × 3 cap {sanity_cap / 1e12:.0f}조 적용 "
                                 f"(DART investedCompany 중복/단위 보정)"
                             )
                             adjusted_nav = sanity_cap

@@ -194,10 +194,7 @@ _INTENT_TO_MANDATORY: dict[str, str] = {
         "필수 조합: analysis(axis='수익구조') + analysis(axis='성장성')"
         " + 필요 시 gather(axis='news')."
     ),
-    "act2_profit": (
-        "분석 유형: 수익성 · "
-        "필수 조합: analysis(axis='수익성') + analysis(axis='비용구조')."
-    ),
+    "act2_profit": ("분석 유형: 수익성 · 필수 조합: analysis(axis='수익성') + analysis(axis='비용구조')."),
     "act3_cash": (
         "분석 유형: 현금흐름/이익품질 · "
         "필수 조합: analysis(axis='현금흐름') + analysis(axis='이익품질') + 필요 시 show(topic='CF')."
@@ -206,23 +203,11 @@ _INTENT_TO_MANDATORY: dict[str, str] = {
         "분석 유형: 안정성/신용 · "
         "필수 조합: credit() + analysis(axis='안정성'). 시나리오 질문이면 credit(overrides={...})."
     ),
-    "act5_capital": (
-        "분석 유형: 자본배분/배당 · "
-        "필수 조합: analysis(axis='자본배분') + show(topic='dividend')."
-    ),
+    "act5_capital": ("분석 유형: 자본배분/배당 · 필수 조합: analysis(axis='자본배분') + show(topic='dividend')."),
     # act6_outlook 은 hasCompany 에 따라 분기 — buildCategoryBlock 에서 직접 처리
-    "compare": (
-        "분석 유형: 시장 비교/랭킹 · "
-        "필수 조합: scan(axis=...) 먼저 → 상위 종목 analysis 심층."
-    ),
-    "act_all": (
-        "분석 유형: 종합 · "
-        "필수 조합: 6막 순서 (수익구조 → 수익성 → 현금흐름 → 안정성 → 자본배분 → 전망)."
-    ),
-    "concept": (
-        "분석 유형: 개념/사용법 · "
-        "필수 조합: 없음 (CAPABILITIES 참조)."
-    ),
+    "compare": ("분석 유형: 시장 비교/랭킹 · 필수 조합: scan(axis=...) 먼저 → 상위 종목 analysis 심층."),
+    "act_all": ("분석 유형: 종합 · 필수 조합: 6막 순서 (수익구조 → 수익성 → 현금흐름 → 안정성 → 자본배분 → 전망)."),
+    "concept": ("분석 유형: 개념/사용법 · 필수 조합: 없음 (CAPABILITIES 참조)."),
 }
 
 

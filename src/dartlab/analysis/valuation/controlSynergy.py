@@ -178,8 +178,8 @@ def calcSynergyValue(
 
     # Synergy multiplier — 유형별
     synergy_mult = {
-        "cost": 0.05,       # 5% combined uplift
-        "revenue": 0.08,    # 8%
+        "cost": 0.05,  # 5% combined uplift
+        "revenue": 0.08,  # 8%
         "financial": 0.03,  # 3%
     }.get(synergyType.lower(), 0.05)
 
@@ -251,8 +251,7 @@ def _estimateNetDebt(company: Any) -> float | None:
             return 0.0
 
         return (
-            _g("shortterm_borrowings") + _g("longterm_borrowings") + _g("debentures")
-            - _g("cash_and_cash_equivalents")
+            _g("shortterm_borrowings") + _g("longterm_borrowings") + _g("debentures") - _g("cash_and_cash_equivalents")
         )
     except (ImportError, AttributeError, KeyError, TypeError, ValueError):
         return None

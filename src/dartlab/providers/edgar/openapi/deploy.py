@@ -77,8 +77,7 @@ def deployEdgarToHF(
     for cat in cats:
         if cat in _BULK_ORIGIN_CATEGORIES:
             print(
-                f"[deploy] '{cat}' 는 SEC 벌크가 원본이라 HF 미러링 정책상 제외 "
-                f"(사용자 PC 에서 자동 다운로드). 스킵."
+                f"[deploy] '{cat}' 는 SEC 벌크가 원본이라 HF 미러링 정책상 제외 (사용자 PC 에서 자동 다운로드). 스킵."
             )
             continue
         configKey = _CATEGORY_MAP.get(cat, cat)

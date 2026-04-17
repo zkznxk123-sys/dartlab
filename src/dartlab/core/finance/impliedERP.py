@@ -178,7 +178,16 @@ def _aggregateFinanceSnapshot() -> dict[str, Any] | None:
             return None
 
         lf = pl.scan_parquet(str(path))
-        needed = ["stockCode", "bsns_year", "sj_div", "account_nm", "thstrm_amount", "frmtrm_amount", "fs_nm", "reprt_nm"]
+        needed = [
+            "stockCode",
+            "bsns_year",
+            "sj_div",
+            "account_nm",
+            "thstrm_amount",
+            "frmtrm_amount",
+            "fs_nm",
+            "reprt_nm",
+        ]
         avail = lf.collect_schema().names()
         cols = [c for c in needed if c in avail]
         snap = (

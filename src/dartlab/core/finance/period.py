@@ -211,14 +211,8 @@ def buildFiscalToCalendarMap(rawFacts) -> dict[str, str]:
         durExpr = (pl.col("end") - pl.col("start")).dt.total_days()
         baseFilter = baseFilter.with_columns(durExpr.alias("_dur"))
         # FY 만 duration >= 300 강제. Q 는 duration 무관 (BS instant 포함).
-        baseFilter = baseFilter.filter(
-            (pl.col("fp") != "FY") | ((pl.col("fp") == "FY") & (pl.col("_dur") >= 300))
-        )
-    allRows = (
-        baseFilter.select("fy", "fp", "end")
-        .unique()
-        .collect()
-    )
+        baseFilter = baseFilter.filter((pl.col("fp") != "FY") | ((pl.col("fp") == "FY") & (pl.col("_dur") >= 300)))
+    allRows = baseFilter.select("fy", "fp", "end").unique().collect()
     if allRows.is_empty():
         return {}
 

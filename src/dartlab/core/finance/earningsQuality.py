@@ -203,32 +203,38 @@ def calcEarningsQualityFlags(
     # 카테고리 1: 분식 의심 — Sloan accrual 만 (Beneish 는 별도 호출)
     sloan = calcSloanAccruals(netIncomeT, ocfT, totalAssetsT)
     if sloan["quintile"] == "Q1":
-        flags.append({
-            "category": "분식 의심",
-            "severity": "high",
-            "evidence": f"Sloan 발생액 {sloan['accrualRatio']*100:.1f}% — Q1 quintile",
-            "damodaranRef": "Investment Valuation Ch.4 Earnings Quality",
-        })
+        flags.append(
+            {
+                "category": "분식 의심",
+                "severity": "high",
+                "evidence": f"Sloan 발생액 {sloan['accrualRatio'] * 100:.1f}% — Q1 quintile",
+                "damodaranRef": "Investment Valuation Ch.4 Earnings Quality",
+            }
+        )
         score -= 25
     elif sloan["quintile"] == "Q2":
-        flags.append({
-            "category": "분식 의심",
-            "severity": "medium",
-            "evidence": f"Sloan 발생액 {sloan['accrualRatio']*100:.1f}% — Q2",
-            "damodaranRef": "Sloan 1996",
-        })
+        flags.append(
+            {
+                "category": "분식 의심",
+                "severity": "medium",
+                "evidence": f"Sloan 발생액 {sloan['accrualRatio'] * 100:.1f}% — Q2",
+                "damodaranRef": "Sloan 1996",
+            }
+        )
         score -= 10
 
     # 카테고리 2: 일회성 거래 (영업외/영업이익 > 0.3)
     if nonOperatingIncomeT is not None and operatingIncomeT and operatingIncomeT > 0:
         ratio = abs(nonOperatingIncomeT) / abs(operatingIncomeT)
         if ratio > 0.3:
-            flags.append({
-                "category": "일회성 거래",
-                "severity": "medium",
-                "evidence": f"영업외/영업이익 {ratio*100:.0f}% — 일회성 비중 큼",
-                "damodaranRef": "Damodaran Normalized Earnings Ch.22",
-            })
+            flags.append(
+                {
+                    "category": "일회성 거래",
+                    "severity": "medium",
+                    "evidence": f"영업외/영업이익 {ratio * 100:.0f}% — 일회성 비중 큼",
+                    "damodaranRef": "Damodaran Normalized Earnings Ch.22",
+                }
+            )
             score -= 15
 
     # 카테고리 3: 매출채권 급증 (DSO 전기 +20%)
@@ -238,43 +244,51 @@ def calcEarningsQualityFlags(
         if dso_t1 > 0:
             dso_change_pct = (dso_t - dso_t1) / dso_t1 * 100
             if dso_change_pct > 20:
-                flags.append({
-                    "category": "매출채권 급증",
-                    "severity": "high",
-                    "evidence": f"DSO {dso_t1:.0f}일 → {dso_t:.0f}일 (+{dso_change_pct:.0f}%) — 매출 인식 공격적 의심",
-                    "damodaranRef": "Aggressive Revenue Recognition (Ch.4)",
-                })
+                flags.append(
+                    {
+                        "category": "매출채권 급증",
+                        "severity": "high",
+                        "evidence": f"DSO {dso_t1:.0f}일 → {dso_t:.0f}일 (+{dso_change_pct:.0f}%) — 매출 인식 공격적 의심",
+                        "damodaranRef": "Aggressive Revenue Recognition (Ch.4)",
+                    }
+                )
                 score -= 20
 
     # 카테고리 4: 자본 우회 (자본거래 > 영업CF)
     if capitalCfT is not None and ocfT and abs(ocfT) > 0:
         if abs(capitalCfT) > abs(ocfT):
-            flags.append({
-                "category": "자본 우회",
-                "severity": "medium",
-                "evidence": f"자본거래 {capitalCfT/1e9:.0f}B vs 영업CF {ocfT/1e9:.0f}B — 외부 자본 의존",
-                "damodaranRef": "Off-balance financing (Ch.4)",
-            })
+            flags.append(
+                {
+                    "category": "자본 우회",
+                    "severity": "medium",
+                    "evidence": f"자본거래 {capitalCfT / 1e9:.0f}B vs 영업CF {ocfT / 1e9:.0f}B — 외부 자본 의존",
+                    "damodaranRef": "Off-balance financing (Ch.4)",
+                }
+            )
             score -= 10
 
     # 카테고리 5: 영업권/총자산 > 30%
     if goodwillT is not None and totalAssetsT > 0:
         gw_ratio = goodwillT / totalAssetsT * 100
         if gw_ratio > 30:
-            flags.append({
-                "category": "영업권 과대",
-                "severity": "high",
-                "evidence": f"영업권/총자산 {gw_ratio:.0f}% — 손상 가능성",
-                "damodaranRef": "Goodwill Impairment Risk (Ch.4)",
-            })
+            flags.append(
+                {
+                    "category": "영업권 과대",
+                    "severity": "high",
+                    "evidence": f"영업권/총자산 {gw_ratio:.0f}% — 손상 가능성",
+                    "damodaranRef": "Goodwill Impairment Risk (Ch.4)",
+                }
+            )
             score -= 20
         elif gw_ratio > 15:
-            flags.append({
-                "category": "영업권 과대",
-                "severity": "low",
-                "evidence": f"영업권/총자산 {gw_ratio:.0f}%",
-                "damodaranRef": "Goodwill watch zone",
-            })
+            flags.append(
+                {
+                    "category": "영업권 과대",
+                    "severity": "low",
+                    "evidence": f"영업권/총자산 {gw_ratio:.0f}%",
+                    "damodaranRef": "Goodwill watch zone",
+                }
+            )
             score -= 5
 
     score = max(0, min(100, score))
@@ -312,10 +326,12 @@ def detectAuditFlags(auditOpinionText: str) -> list[dict]:
 
     for kw, sev, desc in keyword_severity:
         if kw in text:
-            flags.append({
-                "keyword": kw,
-                "severity": sev,
-                "description": desc,
-            })
+            flags.append(
+                {
+                    "keyword": kw,
+                    "severity": sev,
+                    "description": desc,
+                }
+            )
 
     return flags

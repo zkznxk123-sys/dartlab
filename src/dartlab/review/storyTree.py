@@ -15,13 +15,13 @@ from typing import Any
 _TRAJECTORY_OVERRIDES: dict[str, dict] = {
     "possible": {
         # 낙관 시나리오 — 서사의 최대 잠재력
-        "terminalGrowth": 4.0,   # 명목 GDP 근접 (dFV 키: terminalGrowth)
+        "terminalGrowth": 4.0,  # 명목 GDP 근접 (dFV 키: terminalGrowth)
         "growthRates": [12.0, 12.0, 10.0],  # 3-phase 고성장 지속
         "_label": "낙관 궤적",
         "_narrative": "서사가 성립하는 최대 잠재력. 업황 호전 + 점유율 확대 + 마진 유지.",
     },
     "plausible": {
-        "terminalGrowth": 2.5,   # 한국 잠재성장률
+        "terminalGrowth": 2.5,  # 한국 잠재성장률
         "growthRates": [6.0, 5.0, 4.0],
         "_label": "중도 궤적",
         "_narrative": "산업 평균으로 회귀. 경쟁 정상화 + 성장 둔화 + 마진 약간 하락.",

@@ -117,11 +117,8 @@ def binomialOption(
     disc = math.exp(-r * dt)
 
     # 만기 payoff
-    prices = [S * (u ** (steps - i)) * (d ** i) for i in range(steps + 1)]
-    values = [
-        max(0.0, px - K) if kind == "call" else max(0.0, K - px)
-        for px in prices
-    ]
+    prices = [S * (u ** (steps - i)) * (d**i) for i in range(steps + 1)]
+    values = [max(0.0, px - K) if kind == "call" else max(0.0, K - px) for px in prices]
 
     # 뒤로 할인
     for step in range(steps - 1, -1, -1):
@@ -129,7 +126,7 @@ def binomialOption(
         for i in range(step + 1):
             v = disc * (p * values[i] + (1 - p) * values[i + 1])
             if american:
-                px = S * (u ** (step - i)) * (d ** i)
+                px = S * (u ** (step - i)) * (d**i)
                 intrinsic = max(0.0, px - K) if kind == "call" else max(0.0, K - px)
                 v = max(v, intrinsic)
             new_values.append(v)

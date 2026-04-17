@@ -144,6 +144,7 @@ def calcLeverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
 
     # Phase 8 A5
     from dartlab.core.finance.turningPoint import injectTurningPoints
+
     result["turningPoints"] = injectTurningPoints(history, seriesKey="debtRatio", minDeltaPct=25.0)
 
     # notes enrichment — 차입금 구성 + 리스부채

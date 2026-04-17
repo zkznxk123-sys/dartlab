@@ -37,10 +37,7 @@ def _loadCases() -> list[dict]:
 
 
 def _vec(d: dict) -> list[float | None]:
-    return [
-        (d[k] / _SCALE[k]) if (k in d and d[k] is not None) else None
-        for k in _SIG_KEYS
-    ]
+    return [(d[k] / _SCALE[k]) if (k in d and d[k] is not None) else None for k in _SIG_KEYS]
 
 
 def _euclideanDist(a: list[float | None], b: list[float | None]) -> float:
@@ -86,15 +83,17 @@ def match48Cases(
     scored: list[dict] = []
     for c in cases:
         dist = _euclideanDist(v_curr, _vec(c))
-        scored.append({
-            "caseId": c["id"],
-            "label": f"{c['country']} {c['startYear']}-{c['endYear']}",
-            "country": c["country"],
-            "archetype": c["archetype"],
-            "outcome": c["outcome"],
-            "distance": round(dist, 4),
-            "reserveCurrency": c.get("reserveCurrency", False),
-        })
+        scored.append(
+            {
+                "caseId": c["id"],
+                "label": f"{c['country']} {c['startYear']}-{c['endYear']}",
+                "country": c["country"],
+                "archetype": c["archetype"],
+                "outcome": c["outcome"],
+                "distance": round(dist, 4),
+                "reserveCurrency": c.get("reserveCurrency", False),
+            }
+        )
 
     scored.sort(key=lambda x: x["distance"])
     top = scored[:topK]

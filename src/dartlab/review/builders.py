@@ -5450,11 +5450,13 @@ def storyPrecedentsBlock(data: dict) -> list:
     if precedents:
         rows = []
         for p in precedents[:5]:
-            rows.append({
-                "종목": p.get("name") or p.get("stockCode") or "-",
-                "서사": (p.get("narrative") or "")[:80],
-                "출처": p.get("source") or "-",
-            })
+            rows.append(
+                {
+                    "종목": p.get("name") or p.get("stockCode") or "-",
+                    "서사": (p.get("narrative") or "")[:80],
+                    "출처": p.get("source") or "-",
+                }
+            )
         if rows:
             blocks.append(TableBlock("", pl.DataFrame(rows)))
 

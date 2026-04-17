@@ -12,89 +12,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-# ── 1. readiness (ReadinessResult, ReadyStatus) ──
-
-
-class TestReadiness:
-    def test_ready_status_ok(self):
-        from dartlab.guide.readiness import ReadinessResult, ReadyStatus
-
-        result = ReadinessResult(feature="test", status=ReadyStatus.READY)
-        assert result.ok is True
-
-    def test_partial_is_ok(self):
-        from dartlab.guide.readiness import ReadinessResult, ReadyStatus
-
-        result = ReadinessResult(feature="test", status=ReadyStatus.PARTIAL)
-        assert result.ok is True
-
-    def test_not_ready_is_not_ok(self):
-        from dartlab.guide.readiness import ReadinessIssue, ReadinessResult, ReadyStatus
-
-        issue = ReadinessIssue(
-            kind="missing_data",
-            message="finance 데이터 없음",
-            fixAction="dartlab.downloadAll('finance')",
-        )
-        result = ReadinessResult(
-            feature="finance",
-            status=ReadyStatus.NOT_READY,
-            issues=[issue],
-        )
-        assert result.ok is False
-
-    def test_guide_text_for_not_ready(self):
-        from dartlab.guide.readiness import ReadinessIssue, ReadinessResult, ReadyStatus
-
-        issue = ReadinessIssue(
-            kind="missing",
-            message="데이터 없음",
-            fixAction="collect 실행",
-        )
-        result = ReadinessResult(
-            feature="data",
-            status=ReadyStatus.NOT_READY,
-            issues=[issue],
-        )
-        text = result.guideText()
-        assert "[data]" in text
-        assert "사용 불가" in text
-        assert "데이터 없음" in text
-        assert "collect 실행" in text
-
-    def test_guide_text_for_ready(self):
-        from dartlab.guide.readiness import ReadinessResult, ReadyStatus
-
-        result = ReadinessResult(feature="ai", status=ReadyStatus.READY)
-        text = result.guideText()
-        assert "사용 가능" in text
-
-    def test_unknown_status_is_not_ok(self):
-        from dartlab.guide.readiness import ReadinessResult, ReadyStatus
-
-        result = ReadinessResult(feature="x", status=ReadyStatus.UNKNOWN)
-        assert result.ok is False
-
-    def test_list_features(self):
-        from dartlab.guide.readiness import listFeatures
-
-        features = listFeatures()
-        assert isinstance(features, list)
-        # Built-in checkers registered
-        assert "data" in features
-
-    def test_get_checker_returns_callable(self):
-        from dartlab.guide.readiness import getChecker
-
-        checker = getChecker("data")
-        assert checker is not None
-        assert callable(checker)
-
-    def test_get_checker_returns_none_for_unknown(self):
-        from dartlab.guide.readiness import getChecker
-
-        assert getChecker("nonexistent_feature_xyz") is None
-
+# ── 1. readiness — 삭제됨 (Phase 20: readiness.py 제거) ──
 
 # ── 2. messaging (emit, format, progress) ──
 
@@ -357,39 +275,7 @@ class TestCapabilities:
 
 
 class TestGuideDesk:
-    def test_check_ready_unknown_feature(self):
-        from dartlab.guide.desk import GuideDesk
-        from dartlab.guide.readiness import ReadyStatus
-
-        desk = GuideDesk()
-        result = desk.checkReady("nonexistent_feature_xyz")
-        assert result.status == ReadyStatus.UNKNOWN
-
-    def test_check_ready_all(self):
-        from dartlab.guide.desk import GuideDesk
-
-        desk = GuideDesk()
-        results = desk.checkReadyAll(["data", "nonexistent"])
-        assert "data" in results
-        assert "nonexistent" in results
-
-    def test_require_raises_on_not_ready(self):
-        from dartlab.guide.desk import GuideDesk
-
-        desk = GuideDesk()
-        # "data" checker exists; with no data dir, it should fail
-        # but we just test the plumbing -- if it doesn't raise, it means ready
-        # We mock instead
-        with patch.object(desk, "checkReady") as mock_check:
-            from dartlab.guide.readiness import ReadinessIssue, ReadinessResult, ReadyStatus
-
-            mock_check.return_value = ReadinessResult(
-                feature="test",
-                status=ReadyStatus.NOT_READY,
-                issues=[ReadinessIssue(kind="x", message="msg", fixAction="fix")],
-            )
-            with pytest.raises(RuntimeError, match="사용 불가"):
-                desk.require("test")
+    # checkReady/checkReadyAll/require — readiness.py 삭제로 테스트 제거 (Phase 20)
 
     def test_what_can_i_do_with_question(self):
         from dartlab.guide.desk import GuideDesk

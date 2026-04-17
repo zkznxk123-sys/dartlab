@@ -341,8 +341,8 @@ def _avgRank(a: np.ndarray) -> np.ndarray:
         while j + 1 < n and sorted_a[j + 1] == sorted_a[i]:
             j += 1
         if j > i:
-            avg = (ranks[order[i:j + 1]]).mean()
-            ranks[order[i:j + 1]] = avg
+            avg = (ranks[order[i : j + 1]]).mean()
+            ranks[order[i : j + 1]] = avg
         i = j + 1
     return ranks
 
@@ -395,7 +395,7 @@ def rollingTimeSeriesZscore(series: np.ndarray, window: int) -> np.ndarray:
     if window < 2 or n < window:
         return out
     for i in range(window - 1, n):
-        chunk = s[i - window + 1:i + 1]
+        chunk = s[i - window + 1 : i + 1]
         chunk = chunk[~np.isnan(chunk)]
         if chunk.size < 2:
             continue
@@ -470,7 +470,10 @@ def factorDecayRate(icSeries: np.ndarray) -> dict:
 
 
 def breadthFromFrequency(
-    *, rebalancesPerYear: int, nStocks: int, independenceRatio: float = 1.0,
+    *,
+    rebalancesPerYear: int,
+    nStocks: int,
+    independenceRatio: float = 1.0,
 ) -> int:
     """Grinold Fundamental Law 의 breadth (N) 자동 추정.
 

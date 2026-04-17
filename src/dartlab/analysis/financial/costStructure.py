@@ -121,7 +121,6 @@ def calcOperatingLeverage(company, *, basePeriod: str | None = None) -> dict | N
     if not yCols:
         return None
 
-
     history = []
     for i, col in enumerate(yCols):
         rev = _getF2(revRow, col)
@@ -194,7 +193,6 @@ def calcBreakevenEstimate(company, *, basePeriod: str | None = None) -> dict | N
     yCols = annualColsFromPeriods(isPeriods, basePeriod, _MAX_YEARS)
     if not yCols:
         return None
-
 
     history = []
     for col in yCols:

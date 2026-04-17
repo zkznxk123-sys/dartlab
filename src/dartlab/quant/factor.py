@@ -115,7 +115,10 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
 
     # Grinold Ch.7 — systematic / residual risk 분해
     riskDecomp = decomposeRisk(
-        returns=y, factorExposures=betas, factorReturns=X, annualize=True,
+        returns=y,
+        factorExposures=betas,
+        factorReturns=X,
+        annualize=True,
     )
     # residual α series IR (연환산 포함)
     resAlpha = residualAlphaIR(residuals) if residuals is not None else None

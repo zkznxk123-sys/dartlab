@@ -1102,6 +1102,7 @@ class Analysis:
             latest = resolveLatestPeriod(list(periods_pool)) if periods_pool else None
             if latest or basePeriod:
                 import datetime as _dt
+
                 results["dataAsOf"] = {
                     "latestPeriod": latest or basePeriod,
                     "retrievedAt": _dt.datetime.now().date().isoformat(),

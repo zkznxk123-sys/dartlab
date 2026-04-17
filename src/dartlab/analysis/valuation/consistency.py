@@ -109,9 +109,13 @@ def calcCashFlowConsistency(
         growthRatePct = growthRatePct if growthRatePct is not None else valuation.get("growthRatePct")
         terminalGrowthPct = terminalGrowthPct if terminalGrowthPct is not None else valuation.get("terminalGrowth")
         terminalValueShare = terminalValueShare if terminalValueShare is not None else valuation.get("tvShare")
-        primaryModel = primaryModel if primaryModel is not None else valuation.get("primary") or valuation.get("primaryModel")
+        primaryModel = (
+            primaryModel if primaryModel is not None else valuation.get("primary") or valuation.get("primaryModel")
+        )
         modelsUsed = modelsUsed if modelsUsed is not None else len(valuation.get("allMethods") or [])
-        waccPct = waccPct if waccPct is not None else valuation.get("wacc") or (valuation.get("details") or {}).get("wacc")
+        waccPct = (
+            waccPct if waccPct is not None else valuation.get("wacc") or (valuation.get("details") or {}).get("wacc")
+        )
 
     erp = loadDamodaranERP(countryCode=country, currency=currency)
     rf_pct = erp["riskFreeRate"]
@@ -125,13 +129,15 @@ def calcCashFlowConsistency(
     if isinstance(terminalGrowthPct, (int, float)):
         if terminalGrowthPct > rf_pct + 0.5:
             checks["terminalGrowthBounded"] = False
-            flags.append({
-                "rule": "g_vs_rf",
-                "severity": _SEV_WARN,
-                "message": f"영구성장률 {terminalGrowthPct:.1f}% 가 무위험수익률 {rf_pct:.1f}% 초과 — 장기 GDP 초과는 불가능 가정",
-                "observed": terminalGrowthPct,
-                "expected": rf_pct,
-            })
+            flags.append(
+                {
+                    "rule": "g_vs_rf",
+                    "severity": _SEV_WARN,
+                    "message": f"영구성장률 {terminalGrowthPct:.1f}% 가 무위험수익률 {rf_pct:.1f}% 초과 — 장기 GDP 초과는 불가능 가정",
+                    "observed": terminalGrowthPct,
+                    "expected": rf_pct,
+                }
+            )
 
     # 규칙 2: Growth Equation — g = reinvest × ROIC
     checks["growthReinvestmentMatch"] = None
@@ -143,13 +149,15 @@ def calcCashFlowConsistency(
             gap = abs(observed - implied)
             checks["growthReinvestmentMatch"] = gap < 0.10
             if gap >= 0.10:
-                flags.append({
-                    "rule": "reinvest_identity",
-                    "severity": _SEV_CRITICAL,
-                    "message": f"g={growthRatePct:.1f}% 와 ROIC={roicPct:.1f}% 에서 필요 재투자율은 {implied*100:.0f}% 이나 {reinvestmentRatePct:.0f}% 가정 — 수학 위반",
-                    "observed": reinvestmentRatePct,
-                    "expected": round(implied * 100, 1),
-                })
+                flags.append(
+                    {
+                        "rule": "reinvest_identity",
+                        "severity": _SEV_CRITICAL,
+                        "message": f"g={growthRatePct:.1f}% 와 ROIC={roicPct:.1f}% 에서 필요 재투자율은 {implied * 100:.0f}% 이나 {reinvestmentRatePct:.0f}% 가정 — 수학 위반",
+                        "observed": reinvestmentRatePct,
+                        "expected": round(implied * 100, 1),
+                    }
+                )
         elif implied is not None:
             checks["impliedReinvestRate"] = round(implied, 4)
 
@@ -165,23 +173,27 @@ def calcCashFlowConsistency(
     # 규칙 4: Terminal Value 비중
     checks["terminalValueShare"] = terminalValueShare
     if isinstance(terminalValueShare, (int, float)) and terminalValueShare > 0.75:
-        flags.append({
-            "rule": "tv_weight",
-            "severity": _SEV_WARN,
-            "message": f"Terminal Value 비중 {terminalValueShare*100:.0f}% — explicit forecast 구간 신뢰도 낮음",
-            "observed": round(terminalValueShare, 3),
-            "expected": 0.75,
-        })
+        flags.append(
+            {
+                "rule": "tv_weight",
+                "severity": _SEV_WARN,
+                "message": f"Terminal Value 비중 {terminalValueShare * 100:.0f}% — explicit forecast 구간 신뢰도 낮음",
+                "observed": round(terminalValueShare, 3),
+                "expected": 0.75,
+            }
+        )
 
     # 규칙 5: 단일 모델 의존
     if isinstance(modelsUsed, int) and modelsUsed <= 1:
-        flags.append({
-            "rule": "single_model",
-            "severity": _SEV_INFO,
-            "message": "단일 방법론만 사용 — 삼각검증 부재",
-            "observed": modelsUsed,
-            "expected": 2,
-        })
+        flags.append(
+            {
+                "rule": "single_model",
+                "severity": _SEV_INFO,
+                "message": "단일 방법론만 사용 — 삼각검증 부재",
+                "observed": modelsUsed,
+                "expected": 2,
+            }
+        )
 
     # 규칙 6: 유효세율 vs marginal tax
     checks["taxRateConsistency"] = True
@@ -189,24 +201,28 @@ def calcCashFlowConsistency(
         gap = abs(effectiveTaxRatePct - marginal_tax)
         if gap > 5.0:
             checks["taxRateConsistency"] = False
-            flags.append({
-                "rule": "tax_consistency",
-                "severity": _SEV_INFO,
-                "message": f"유효세율 {effectiveTaxRatePct:.1f}% vs 한계세율 {marginal_tax:.1f}% — terminal 구간 세율 점검",
-                "observed": effectiveTaxRatePct,
-                "expected": marginal_tax,
-            })
+            flags.append(
+                {
+                    "rule": "tax_consistency",
+                    "severity": _SEV_INFO,
+                    "message": f"유효세율 {effectiveTaxRatePct:.1f}% vs 한계세율 {marginal_tax:.1f}% — terminal 구간 세율 점검",
+                    "observed": effectiveTaxRatePct,
+                    "expected": marginal_tax,
+                }
+            )
 
     # 규칙 7: 성장 과다 낙관 (Damodaran 7 Sins 1번)
     if isinstance(growthRatePct, (int, float)) and isinstance(terminalGrowthPct, (int, float)):
         if growthRatePct > 30 and terminalGrowthPct > rf_pct:
-            flags.append({
-                "rule": "growth_optimism",
-                "severity": _SEV_WARN,
-                "message": f"explicit 구간 {growthRatePct:.0f}% + terminal {terminalGrowthPct:.1f}% — 성장 가정 연쇄 과대",
-                "observed": {"explicit": growthRatePct, "terminal": terminalGrowthPct},
-                "expected": {"explicit": "< 30%", "terminal": f"< {rf_pct:.1f}%"},
-            })
+            flags.append(
+                {
+                    "rule": "growth_optimism",
+                    "severity": _SEV_WARN,
+                    "message": f"explicit 구간 {growthRatePct:.0f}% + terminal {terminalGrowthPct:.1f}% — 성장 가정 연쇄 과대",
+                    "observed": {"explicit": growthRatePct, "terminal": terminalGrowthPct},
+                    "expected": {"explicit": "< 30%", "terminal": f"< {rf_pct:.1f}%"},
+                }
+            )
 
     severity = _SEV_INFO
     for f in flags:
