@@ -10,12 +10,6 @@ from typing import Any
 from dartlab.guide.capabilities import build_capability_summary
 from dartlab.guide.credentials import CredentialManager, EnvironmentSnapshot
 from dartlab.guide.messaging import suggest
-from dartlab.guide.readiness import (
-    ReadinessResult,
-    ReadyStatus,
-    getChecker,
-    listFeatures,
-)
 from dartlab.guide.search import formatSearchResults, searchCapabilities
 
 
@@ -39,44 +33,6 @@ class GuideDesk:
 
     # EDGAR에서 미지원 또는 제한적인 feature
     _EDGAR_LIMITED_FEATURES = {"governance", "workforce", "network", "signal", "disclosureRisk"}
-
-    def checkReady(self, feature: str, **kwargs: Any) -> ReadinessResult:
-        """기능 준비 상태 점검.
-
-        Args:
-            feature: "data", "ai", "finance", "valuation", "dart_key" 등.
-            **kwargs: 기능별 파라미터 (stockCode, provider 등).
-
-        Returns:
-            ReadinessResult — status, issues, guideText() 포함.
-        """
-        # EDGAR market 감지 — 미지원 feature 사전 안내
-        stockCode = kwargs.get("stockCode", "")
-        if stockCode and not str(stockCode).isdigit() and feature in self._EDGAR_LIMITED_FEATURES:
-            return ReadinessResult(
-                feature=feature,
-                status=ReadyStatus.PARTIAL,
-                issues=[f"US(EDGAR) 기업에서 '{feature}'은 현재 미지원 또는 제한적입니다."],
-            )
-
-        checker = getChecker(feature)
-        if checker is None:
-            return ReadinessResult(
-                feature=feature,
-                status=ReadyStatus.UNKNOWN,
-                issues=[],
-            )
-        return checker(**kwargs)
-
-    def checkReadyAll(self, features: list[str], **kwargs: Any) -> dict[str, ReadinessResult]:
-        """여러 기능을 한 번에 점검."""
-        return {f: self.checkReady(f, **kwargs) for f in features}
-
-    def require(self, feature: str, **kwargs: Any) -> None:
-        """기능이 준비되지 않으면 RuntimeError + 안내 메시지."""
-        result = self.checkReady(feature, **kwargs)
-        if not result.ok:
-            raise RuntimeError(result.guideText())
 
     # ── 2. 능력 질의 ──
 
@@ -150,15 +106,9 @@ class GuideDesk:
     def handleError(self, error: Exception, *, feature: str | None = None) -> str:
         """에러를 사용자 친화적 안내 메시지로 변환.
 
-        readiness 기반 안내 → 에러 타입별 구체적 분류 → 일반 폴백 순으로 처리.
+        에러 타입별 구체적 분류 → 일반 폴백 순으로 처리.
         """
-        # 1) readiness 기반 안내 (feature가 주어졌고, 준비 안 됐을 때)
-        if feature:
-            result = self.checkReady(feature)
-            if not result.ok:
-                return result.guideText()
-
-        # 2) 에러 타입별 구체적 분류
+        # 에러 타입별 구체적 분류
         errType = type(error).__name__
         errStr = str(error)
         errLow = errStr.lower()
@@ -245,16 +195,9 @@ class GuideDesk:
         if feature:
             return (
                 f"[{feature}] {errType}: {errStr}\n"
-                f"  dartlab.guide.checkReady('{feature}') 로 준비 상태를 확인하거나, "
-                f"dartlab.guide.whatCanIDo('{feature}') 로 사용 가능한 기능을 확인하세요."
+                f"  dartlab.guide.whatCanIDo('{feature}') 로 사용 가능한 기능을 확인하세요."
             )
         return f"{errType}: {errStr}"
-
-    # ── 6. 메타 ──
-
-    def listFeatures(self) -> list[str]:
-        """등록된 모든 checker feature 목록."""
-        return listFeatures()
 
 
 # ── 싱글턴 ──
