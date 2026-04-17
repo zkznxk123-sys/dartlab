@@ -55,7 +55,7 @@ def runPostResponse(
     try:
         from dartlab.ai.context.intent import classifyIntent
         from dartlab.ai.context.playbook import curate
-        from dartlab.ai.memory.summarizer import extractGrade
+        from dartlab.ai.persistence.summarizer import extractGrade
 
         _intent = classifyIntent(question, hasCompany=company is not None).intent.value
         _sector = ""

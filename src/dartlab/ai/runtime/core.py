@@ -129,15 +129,6 @@ def _resolveAnalysisConfig(
     """Config 해석 — free provider chain, get_config, merge overrides."""
     from dartlab.ai import get_config
 
-    if provider == "free":
-        from dartlab.ai.providers.fallback import buildFreeChain
-
-        free_chain = buildFreeChain()
-        if free_chain:
-            provider = free_chain[0]
-        else:
-            provider = None
-
     config_ = get_config(role=role)
 
     # LLMConfig 필드만 통과 — deprecated 파라미터(use_tools 등)가 kwargs로
