@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.15] - 2026-04-18
+
+### Changed
+
+- **AI 근본 재작업 — docstring → CAPABILITIES 자동 전파 파이프라인 완성**: 37개 AI tool 전부 Returns 구조 포함. CAPABILITIES returns 0→77건. `_generated.py` 39KB→66KB (+27KB 정보 증가). AI 가 dartlab 의 모든 tool 반환 구조를 호출 전에 앎.
+- **generateSpec.py 파서 강화**: NumPy style Returns 인식, property→`_Impl` fallback, `_CallableModule`→원본 class `__call__` fallback. docstring 에 Returns 쓰면 자동 수집.
+- **tool description 자동 생성 (`_toolDescription` + `_parseDocstringArgs`)**: docstring Args/Returns 섹션을 tool schema description 에 자동 포함. enum 규제 없이 AI 가 파라미터 목적/제약을 description 으로 이해.
+- **시스템 프롬프트 returns 주입**: `buildCapabilitiesReference()` 가 각 tool 의 Returns 핵심 3줄을 시스템 프롬프트에 자동 포함.
+
+### Removed
+
+- **`_reference` 폴더 전체 삭제** (-49파일, -22,828줄): dart/finance/_reference + edgar/finance/_reference. import 0건 확정. 역사는 git log 유지.
+- **`fallback.py` 삭제**: FallbackChain 외부 import 0건 (미사용).
+- **`EdgarCompany.reviewer()` 삭제**: README §12 폐기 목록 명시. P1 변종 진입점 위반.
+- **`readiness.py` + 관련 테스트 삭제**: guide 엔진 축소. checkReady/whatCanIDo/listFeatures 편의 함수 제거.
+- **`memory/` 폴더 → `persistence/` 통합**: 불필요한 계층 제거. store.py/summarizer.py 이동.
+
+### Fixed
+
+- **`pastInsight` tool schema 빈 스키마 버그**: `_buildSchema` 가 module kind 의 stockCode 를 skip → schema 에 stockCode 미노출 → AI 빈 인자 호출. kind-aware skip 으로 수정.
+- **`show scope='annual'` 오용**: description 에 "scope=연결/별도 회계범위, freq=기간단위" 명시로 AI 혼동 방지 (enum 규제 대신 description 품질).
+- **P4 "강제 하한 금지" 위반 수정**: "분석당 tool 4~7회가 정상" / "최소 4개 축" / "먼저 회수하라" 제거.
+- **`storyValidation.py` Polars None 비교 경고**: stockCode None 필터 추가.
+- **analysis/financial `_getFirst` 2곳 → `safe.getFirst` SSOT 통합**.
+- **`_enumFromCapabilities` 조건 nesting → dict dispatch 리팩터링**.
+- **KnowledgeDB 접근 중복 패턴 → `_get_db()` 유틸 추출** (5곳 적용).
+
 ## [0.9.14] - 2026-04-16
 
 ### Added

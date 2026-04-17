@@ -11,6 +11,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.15] - 2026-04-18
+
+### Changed
+
+- **AI 근본 재작업 — docstring → CAPABILITIES 자동 전파 파이프라인 완성**: 37개 AI tool 전부 Returns 구조 포함. CAPABILITIES returns 0→77건. AI 가 dartlab 의 모든 tool 반환 구조를 호출 전에 앎.
+- **generateSpec.py 파서 강화**: NumPy style Returns 인식, property→_Impl fallback, _CallableModule→원본 class __call__ fallback.
+- **tool description 자동 생성**: docstring Args/Returns → tool schema description 자동 포함. enum 규제 없이 AI 가 description 으로 이해.
+
+### Removed
+
+- **`_reference` 폴더 전체 삭제** (-49파일, -22,828줄)
+- **`fallback.py` / `EdgarCompany.reviewer()` / `readiness.py`** 삭제
+- **`memory/` → `persistence/` 통합**
+
+### Fixed
+
+- **`pastInsight` tool schema 빈 스키마 버그** 수정
+- **P4 "강제 하한 금지" 위반** 수정 (4~7회/최소 4개 축/먼저 회수)
+- **analysis/financial `_getFirst` 2곳 → `safe.getFirst` SSOT 통합**
+
 ## [0.9.14] - 2026-04-16
 
 ### Added
