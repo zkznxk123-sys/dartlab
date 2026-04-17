@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - **미사용 레퍼런스/실험 코드 삭제** (-49파일, -22,828줄): `_reference` 폴더 전체. 기존 기능에 영향 없음.
-- **미사용 모듈 삭제**: `fallback.py`(미사용 rate-limit 체인), `readiness.py`(미사용 준비 상태 체크), `EdgarCompany.reviewer()`(폐기된 변종 진입점).
+- **미사용 모듈 삭제**: `fallback.py`(미사용 rate-limit 체인), `readiness.py`(미사용 준비 상태 체크), `EDGAR `reviewer()` 메서드`(폐기된 변종 진입점).
 - **guide 엔진 축소**: `checkReady`/`whatCanIDo`/`listFeatures` 등 미사용 편의 함수 제거. `handleError` 만 유지.
 
 ### Fixed

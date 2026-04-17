@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - **미사용 레퍼런스/실험 코드 삭제** (-49파일, -22,828줄)
-- **미사용 모듈 삭제**: `fallback.py`, `readiness.py`, `EdgarCompany.reviewer()`
+- **미사용 모듈 삭제**: `fallback.py`, `readiness.py`, `EDGAR `reviewer()` 메서드`
 
 ### Fixed
 
