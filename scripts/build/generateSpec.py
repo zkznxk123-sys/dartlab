@@ -1363,17 +1363,40 @@ def _generateCapabilitiesPy() -> str:
         kind = "class" if inspect.isclass(obj) else "function" if callable(obj) else "module"
         doc = inspect.getdoc(obj)
         # callable class/module 의 __call__ docstring 이 더 풍부하면 fallback
-        # _CallableModule 은 내부 _instance 의 class __call__ 탐색
+        # _CallableModule 패턴 (scan/macro/quant): 내부 class __call__ 탐색
         if hasattr(obj, "__call__") and not inspect.isfunction(obj):
-            candidates = [
-                inspect.getdoc(getattr(type(obj), "__call__", None)),
-            ]
-            # _CallableModule 패턴: obj._instance 가 실제 class
-            inst = getattr(obj, "_instance", None)
-            if inst is not None:
-                candidates.append(inspect.getdoc(getattr(type(inst), "__call__", None)))
+            _CALLABLE_MODULE_MAP = {
+                "scan": ("dartlab.scan", "Scan"),
+                "macro": ("dartlab.macro", "Macro"),
+                "quant": ("dartlab.quant", "Quant"),
+                "topdown": ("dartlab.topdown", None),  # 함수 직접 참조
+            }
+            candidates = [inspect.getdoc(getattr(type(obj), "__call__", None))]
+            if name in _CALLABLE_MODULE_MAP:
+                mod_path, cls_name = _CALLABLE_MODULE_MAP[name]
+                try:
+                    import importlib as _importlib
+                    mod = _importlib.import_module(mod_path)
+                    if cls_name:
+                        cls = getattr(mod, cls_name, None)
+                        if cls:
+                            candidates.append(inspect.getdoc(getattr(cls, "__call__", None)))
+                    else:
+                        # 함수 직접 참조 (topdown 등)
+                        fn = getattr(mod, name, None)
+                        if fn and callable(fn):
+                            candidates.append(inspect.getdoc(fn))
+                except ImportError:
+                    pass
             for callDoc in candidates:
-                if callDoc and len(callDoc) > len(doc or ""):
+                if not callDoc:
+                    continue
+                # Returns 있는 __call__ 우선 (모듈 docstring 이 길어도 Returns 없으면 교체)
+                docHasReturns = "Returns" in (doc or "")
+                callHasReturns = "Returns" in callDoc
+                if callHasReturns and not docHasReturns:
+                    doc = callDoc
+                elif len(callDoc) > len(doc or ""):
                     doc = callDoc
         summary = doc.split("\n")[0].strip() if doc else ""
         sections = _parseDocstringSections(doc)

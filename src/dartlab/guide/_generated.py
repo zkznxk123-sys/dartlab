@@ -733,8 +733,10 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "목록 조회 단일 진입점."
     },
     "macro": {
+        "args": "axis: 분석 축. None이면 가이드.\ntarget: 2번째 인자 (시나리오 이름 등).\nmacro(\"시나리오\", \"2008 금융위기\") 형태.\nmarket: \"US\" | \"KR\"\noverrides: AI/사용자가 매크로 시나리오 강제. 키: cyclePhase/rateScenario/\nfxScenario/liquidityScenario. 상세: core/overrides.py.\n**kwargs: 축별 추가 파라미터",
         "kind": "function",
-        "summary": "시장 레벨 매크로 분석 엔진 — 6막 인과 서사."
+        "returns": "pl.DataFrame | dict\naxis=None (가이드): DataFrame (axis/label/description/example/group 컬럼)\naxis 지정: dict — 축별 분석 결과.\ncycle: {phase, label, confidence, indicators[{name, value, signal}]}\nsummary: {indicators[], narrative}\nrates/liquidity/trade/...: {지표별 dict, narrative}\n_summary (autoEnrich 자동) — 핵심 요약 + [엔진가정].",
+        "summary": "매크로 분석 실행."
     },
     "macro.assets": {
         "capabilities": "5대 자산 심층 해석 + Cu/Au + BEI 4분면",
@@ -808,12 +810,15 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "특정 회사의 과거 분석 서사 조회."
     },
     "quant": {
+        "args": "axis: 분석 축 (None이면 가이드). 종목코드도 가능 (하위호환).\nstockCode: 종목코드/ticker 또는 종목 리스트.\n**kwargs: 축별 추가 파라미터.",
         "kind": "function",
-        "summary": "종목 레벨 정량분석 엔진 — 30축 7그룹."
+        "returns": "가이드 DataFrame, 분석 결과 dict, 또는 DataFrame.",
+        "summary": "정량분석 실행."
     },
     "scan": {
         "kind": "function",
-        "summary": "시장 전체 횡단분석 통합 엔트리포인트."
+        "returns": "pl.DataFrame\naxis=None (가이드):\naxis : str — 축 이름\nlabel : str — 한글 레이블\ndescription : str — 설명\nexample : str — 사용 예시\naxis=\"profitability\":\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n영업이익률 : float — 영업이익률 (%)\n순이익률 : float — 순이익률 (%)\nROE : float — 자기자본이익률 (%)\nROA : float — 총자산이익률 (%)\n등급 : str — 수익성 등급\naxis=\"account\" (target=\"매출액\"):\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n2024, 2023, ... : float — 연도별 값 (원 단위)\naxis=\"ratio\" (target=\"roe\"):\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n2024, 2023, ... : float — 연도별 비율값 (%, 배)\n기타 축: 종목코드 + 종목명 + 축별 지표 컬럼",
+        "summary": "축(axis)별 전종목 횡단분석."
     },
     "scan.account": {
         "capabilities": "전종목 단일 계정 시계열 (매출액, 영업이익 등)",
@@ -953,8 +958,10 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "AI provider 설정 안내 + 인터랙티브 설정."
     },
     "topdown": {
+        "args": "market: \"KR\" | \"US\"\nsectors: 특정 섹터만 지정. None이면 사이클 국면 자동 매핑.\ntopN: 섹터당 추천 종목 수\nas_of: 백테스트용 기준일",
         "kind": "function",
-        "summary": "`dartlab.topdown(...)` 를 callable로 노출."
+        "returns": "dict: {\n\"cycle\": {phase, label, confidence, ...},\n\"transition\": {...} | None,\n\"recommendedSectors\": [...],\n\"screens\": {sector: [{stockCode, name, signals, ...}, ...]},\n\"narrative\": \"사이클 → 섹터 → 종목 인과 사슬 문장\"\n}",
+        "summary": "탑다운 분석 — 시장 → 섹터 → 종목."
     },
     "verbose": {
         "kind": "module",
