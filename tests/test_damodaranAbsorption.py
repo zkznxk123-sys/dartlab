@@ -10,7 +10,7 @@ import pytest
 # ── L0 SSOT ─────────────────────────────────────────────
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_decomposeRoic_identity():
     """ROIC = margin × turnover × (1-tax) — 재구성 일치."""
     from dartlab.core.finance.calc import decomposeRoic
@@ -31,7 +31,7 @@ def test_decomposeRoic_identity():
     assert abs(r["excessReturnAbs"] - 3_000_000_000) < 1.0
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_decomposeRoic_rejects_bad_input():
     from dartlab.core.finance.calc import decomposeRoic
 
@@ -40,7 +40,7 @@ def test_decomposeRoic_rejects_bad_input():
     assert decomposeRoic(10, 100, -1, 0.2, 10) is None
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_reinvestmentIdentity():
     from dartlab.core.finance.calc import reinvestmentIdentity
 
@@ -49,7 +49,7 @@ def test_reinvestmentIdentity():
     assert abs(r["impliedReinvestRate"] - 0.5) < 0.001
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_riskPremiums_fallback():
     from dartlab.core.finance.riskPremiums import listSupportedCountries, loadDamodaranERP
 
@@ -68,7 +68,7 @@ def test_riskPremiums_fallback():
     assert us["countryRiskPremium"] == 0.0  # AAA 국가
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_riskPremiums_currency_to_country():
     from dartlab.core.finance.riskPremiums import resolveCountryCode
 
@@ -79,7 +79,7 @@ def test_riskPremiums_currency_to_country():
     assert resolveCountryCode(currency="KRW", country="US") == "US"
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_survivalWeight_safe_zone():
     from dartlab.core.finance.survival import applySurvivalWeight, calcSurvivalWeight
 
@@ -91,7 +91,7 @@ def test_survivalWeight_safe_zone():
     assert abs(w["adjustedValue"] - 100_000) < 5000
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_survivalWeight_distress_zone():
     from dartlab.core.finance.survival import applySurvivalWeight, calcSurvivalWeight
 
@@ -102,7 +102,7 @@ def test_survivalWeight_distress_zone():
     assert w["adjustedValue"] < 100_000
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_twoStageDcf_explicit_plus_terminal():
     from dartlab.core.finance.dcf import twoStageDcf
 
@@ -122,7 +122,7 @@ def test_twoStageDcf_explicit_plus_terminal():
     assert r["perShare"] is not None
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_twoStageDcf_enforces_tg_lt_wacc():
     """영구성장률이 WACC 이상이면 자동 보정."""
     from dartlab.core.finance.dcf import twoStageDcf
@@ -138,7 +138,7 @@ def test_twoStageDcf_enforces_tg_lt_wacc():
     assert any("보정" in w or "영구성장" in w for w in r["warnings"])
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_liquidationValuation_recovery_rates():
     from dartlab.core.finance.dcf import liquidationValuation
 
@@ -163,7 +163,7 @@ def test_liquidationValuation_recovery_rates():
 # ── L0 overrides ─────────────────────────────────────────
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_overrides_validation():
     from dartlab.core.overrides import VALUATION_KEYS
 
@@ -174,7 +174,7 @@ def test_overrides_validation():
     assert "liquidationDiscount" in VALUATION_KEYS
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_detectExtremeFlags_lifecycle_conflict():
     """생애주기 decline 인데 CAGR > 15% 면 lifecycle_conflict flag."""
     from dartlab.core.overrides import detectExtremeFlags
@@ -189,7 +189,7 @@ def test_detectExtremeFlags_lifecycle_conflict():
     assert "lifecycle_conflict" in keys
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_detectExtremeFlags_survival_extreme_low():
     from dartlab.core.overrides import detectExtremeFlags
 
@@ -201,7 +201,7 @@ def test_detectExtremeFlags_survival_extreme_low():
 # ── L2 consistency ───────────────────────────────────────
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_consistency_tg_vs_rf():
     """영구성장률 > 무위험수익률 → g_vs_rf 경고."""
     from dartlab.analysis.valuation.consistency import calcCashFlowConsistency
@@ -214,7 +214,7 @@ def test_consistency_tg_vs_rf():
     assert "g_vs_rf" in rules
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_consistency_tv_weight():
     from dartlab.analysis.valuation.consistency import calcCashFlowConsistency
 
@@ -223,7 +223,7 @@ def test_consistency_tv_weight():
     assert "tv_weight" in rules
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_consistency_single_model():
     from dartlab.analysis.valuation.consistency import calcCashFlowConsistency
 

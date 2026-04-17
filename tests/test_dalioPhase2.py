@@ -7,7 +7,7 @@ import pytest
 # ── C3: dalioSubPhase ───────────────────────────────────────
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_beautifulDeleveragingSubPhase_moneyPrinting():
     from dartlab.core.finance.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
 
@@ -16,7 +16,7 @@ def test_beautifulDeleveragingSubPhase_moneyPrinting():
     assert sp == "moneyPrinting"
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_beautifulDeleveragingSubPhase_defaultRestructuring():
     from dartlab.core.finance.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
 
@@ -24,7 +24,7 @@ def test_beautifulDeleveragingSubPhase_defaultRestructuring():
     assert sp == "defaultRestructuring"
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_beautifulDeleveragingSubPhase_wealthTransfer():
     from dartlab.core.finance.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
 
@@ -39,7 +39,7 @@ def test_beautifulDeleveragingSubPhase_wealthTransfer():
     assert sp == "wealthTransfer"
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_beautifulDeleveragingSubPhase_austerity():
     from dartlab.core.finance.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
 
@@ -54,7 +54,7 @@ def test_beautifulDeleveragingSubPhase_austerity():
     assert sp == "austerity"
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_beautifulDeleveragingSubPhase_insufficient_signals():
     from dartlab.core.finance.crisisDetector import _beautifulDeleveragingSubPhase as beautifulDeleveragingSubPhase
 
@@ -62,7 +62,7 @@ def test_beautifulDeleveragingSubPhase_insufficient_signals():
     assert sp is None
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_dalioRegimeVariant_deflationary_foreign_debt():
     from dartlab.core.finance.crisisDetector import _dalioRegimeVariant as dalioRegimeVariant
 
@@ -70,7 +70,7 @@ def test_dalioRegimeVariant_deflationary_foreign_debt():
     assert v == "deflationary"
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_dalioRegimeVariant_inflationary_reserve_currency():
     from dartlab.core.finance.crisisDetector import _dalioRegimeVariant as dalioRegimeVariant
 
@@ -78,7 +78,7 @@ def test_dalioRegimeVariant_inflationary_reserve_currency():
     assert v == "inflationary"
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_dalioDebtCyclePhase_emits_subPhase():
     """beautifulDeleveraging 진단 시 subPhase 활성."""
     from dartlab.core.finance.crisisDetector import dalioDebtCyclePhase
@@ -96,7 +96,7 @@ def test_dalioDebtCyclePhase_emits_subPhase():
     assert r.subPhaseLabel == "화폐발행"
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_dalioDebtCyclePhase_no_subphase_outside_deleveraging():
     from dartlab.core.finance.crisisDetector import dalioDebtCyclePhase
 
@@ -115,7 +115,7 @@ def test_dalioDebtCyclePhase_no_subphase_outside_deleveraging():
 # ── C4: dalioCaseMatch ─────────────────────────────────────
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_matchDalioDetailCase_2008_matches_subprime():
     from dartlab.core.finance.dalioCaseMatch import matchDalioDetailCase
 
@@ -132,7 +132,7 @@ def test_matchDalioDetailCase_2008_matches_subprime():
     assert "Subprime" in r["matches"][0]["caseLabel"]
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_matchDalioDetailCase_empty_state():
     from dartlab.core.finance.dalioCaseMatch import matchDalioDetailCase
 
@@ -141,7 +141,7 @@ def test_matchDalioDetailCase_empty_state():
     assert isinstance(r["matches"], list)
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_matchDalioDetailCase_returns_nextStage():
     from dartlab.core.finance.dalioCaseMatch import matchDalioDetailCase
 
@@ -162,7 +162,7 @@ def test_matchDalioDetailCase_returns_nextStage():
 # ── C5: dalio48Match ───────────────────────────────────────
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_match48Cases_dominant_deflationary():
     from dartlab.core.finance.dalio48Match import match48Cases
 
@@ -178,7 +178,7 @@ def test_match48Cases_dominant_deflationary():
     assert r["matches"]
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_match48Cases_hyperinflation_recognized():
     from dartlab.core.finance.dalio48Match import match48Cases
 
@@ -197,7 +197,7 @@ def test_match48Cases_hyperinflation_recognized():
 # ── C6: rrCrisisDB ─────────────────────────────────────────
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_classifyCrisisType_triple_kr_1997():
     from dartlab.core.finance.rrCrisisDB import classifyCrisisType
 
@@ -215,7 +215,7 @@ def test_classifyCrisisType_triple_kr_1997():
     assert r["isTripleCrisis"]
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_classifyCrisisType_stagflation():
     from dartlab.core.finance.rrCrisisDB import classifyCrisisType
 
@@ -223,7 +223,7 @@ def test_classifyCrisisType_stagflation():
     assert "stagflation" in r["activeTypes"]
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_classifyCrisisType_empty_normal():
     from dartlab.core.finance.rrCrisisDB import classifyCrisisType
 
@@ -232,7 +232,7 @@ def test_classifyCrisisType_empty_normal():
     assert r["dominantType"] is None
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_matchRrHistorical_kr_1997_bonus():
     from dartlab.core.finance.rrCrisisDB import matchRrHistorical
 
@@ -244,7 +244,7 @@ def test_matchRrHistorical_kr_1997_bonus():
     assert top["score"] >= 4
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_matchRrHistorical_no_types():
     from dartlab.core.finance.rrCrisisDB import matchRrHistorical
 
@@ -255,7 +255,7 @@ def test_matchRrHistorical_no_types():
 # ── macro/crisis.py — analyze_crisis 결과 dict 회귀 (kwargs 없이도 Dalio 블록 존재) ──
 
 
-@pytest.mark.unit
+@pytest.mark.requires_data
 def test_analyze_crisis_emits_dalio_keys(monkeypatch):
     """analyze_crisis 가 데이터 없어도 dict 구조 반환 (키 존재)."""
     import dartlab.macro.crisis as crisis_mod

@@ -11,7 +11,7 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.requires_data
 
 # ── SelectResult mock ──
 
