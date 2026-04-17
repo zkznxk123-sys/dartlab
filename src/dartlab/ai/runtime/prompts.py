@@ -92,6 +92,11 @@ def buildCapabilitiesReference() -> str:
         guide_lines = guide.strip().split("\n")[:3]
         for gl in guide_lines:
             lines.append(f"  {gl}")
+        returns = cap.get("returns", "")
+        if returns:
+            # 시스템 프롬프트 토큰 절약: 핵심 3줄만
+            ret_lines = returns.strip().split("\n")[:3]
+            lines.append(f"  Returns: {' '.join(l.strip() for l in ret_lines)}")
         lines.append("")
 
     return "\n".join(lines)

@@ -91,9 +91,12 @@ def _parseDocstringSections(doc: str | None) -> dict[str, str]:
 
     for line in doc.split("\n"):
         stripped = line.strip()
-        # "SectionName:" 패턴 (줄 전체가 "단어:" 또는 "단어::" 형태)
+        # NumPy style 구분선 ("-------") — 이전 섹션 헤더의 일부이므로 skip
+        if stripped and all(c == "-" for c in stripped):
+            continue
+        # "SectionName:" (Google) 또는 "SectionName" 단독 줄 (NumPy) 매칭
         candidate = stripped.rstrip(":").lower()
-        if stripped.endswith(":") and candidate in knownSections:
+        if candidate in knownSections and (stripped.endswith(":") or candidate == stripped.lower()):
             # 이전 섹션 저장
             if currentKey is not None:
                 result[currentKey] = "\n".join(currentLines).strip()
@@ -1362,16 +1365,9 @@ def _generateCapabilitiesPy() -> str:
         summary = doc.split("\n")[0].strip() if doc else ""
         sections = _parseDocstringSections(doc)
         entry: dict[str, str] = {"summary": summary, "kind": kind}
-        if cap := sections.get("capabilities"):
-            entry["capabilities"] = cap
-        if req := sections.get("requires"):
-            entry["requires"] = req
-        if ctx := sections.get("aicontext"):
-            entry["aicontext"] = ctx
-        if guide := sections.get("guide"):
-            entry["guide"] = guide
-        if seeAlso := sections.get("seealso"):
-            entry["seeAlso"] = seeAlso
+        for key in ("capabilities", "requires", "aicontext", "guide", "seealso", "returns", "args", "example"):
+            if val := sections.get(key):
+                entry[key if key != "seealso" else "seeAlso"] = val
         entries[name] = entry
 
     # 2) Company 공개 메서드/프로퍼티
@@ -1398,16 +1394,9 @@ def _generateCapabilitiesPy() -> str:
         summary = doc.split("\n")[0].strip()
         sections = _parseDocstringSections(doc)
         entry = {"summary": summary, "kind": kind}
-        if cap := sections.get("capabilities"):
-            entry["capabilities"] = cap
-        if req := sections.get("requires"):
-            entry["requires"] = req
-        if ctx := sections.get("aicontext"):
-            entry["aicontext"] = ctx
-        if guide := sections.get("guide"):
-            entry["guide"] = guide
-        if seeAlso := sections.get("seealso"):
-            entry["seeAlso"] = seeAlso
+        for key in ("capabilities", "requires", "aicontext", "guide", "seealso", "returns", "args", "example"):
+            if val := sections.get(key):
+                entry[key if key != "seealso" else "seeAlso"] = val
         entries[f"Company.{memberName}"] = entry
 
     # 3~6) 각 엔진의 _AXIS_REGISTRY AST 파싱 — scan/macro/gather 통합
