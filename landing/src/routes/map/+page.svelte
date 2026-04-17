@@ -247,14 +247,15 @@
 		} catch {
 			detail = null;
 		}
-		// 초기 배치: 화면 중앙 기준 계단식 오프셋
-		const offset = floatingCards.length * 36;
+		// 초기 배치: 우측 상단 기준 계단식 (Bloomberg 스타일)
+		const n_open = floatingCards.length;
 		const vw = typeof window !== 'undefined' ? window.innerWidth : 1400;
 		const vh = typeof window !== 'undefined' ? window.innerHeight : 900;
 		const w = 420;
-		const h = Math.min(720, vh - 100);
-		const x = Math.max(40, Math.min(vw - w - 40, vw * 0.3 + offset));
-		const y = Math.max(40, 80 + offset);
+		const h = Math.min(680, vh - 80);
+		// 첫 카드 우측 상단. 이후 좌측 아래로 계단
+		const x = Math.max(40, vw - w - 20 - n_open * 30);
+		const y = Math.max(40, 60 + n_open * 30);
 		floatingZTop += 1;
 		floatingCards = [...floatingCards, { id: stockCode, node, detail, x, y, w, h, z: floatingZTop }];
 
@@ -275,6 +276,8 @@
 		floatingCards = floatingCards.map((c) =>
 			c.id === stockCode ? { ...c, z: floatingZTop } : c
 		);
+		// 이미 열린 카드에 shake 피드백은 FloatingCard CSS 의 .shaking 으로 제어
+		// detachCard 에서 existing 감지 시 이미 focusFloating 호출됨
 	}
 
 	function moveFloating(stockCode: string, x: number, y: number) {
@@ -486,6 +489,9 @@
 		selectedNode = null;
 	}
 
+	// ── 모바일 감지 ──
+	let isMobile = $state(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
 	// ── 노드 클릭 ──
 	function handleNodeClick(node: any) {
 		if (!node) {
@@ -498,8 +504,14 @@
 			enterIndustry(node.industry);
 			return;
 		}
-		selectedNode = node;
-		loadCompanyDetail(node.id);
+		if (isMobile) {
+			// 모바일: 기존 고정 패널 (detail-panel)
+			selectedNode = node;
+			loadCompanyDetail(node.id);
+		} else {
+			// 데스크톱: 즉시 FloatingCard
+			detachCard(node.id);
+		}
 	}
 
 	// ── URL 쿼리 처리 (외부 진입: /map?focus=005930) ──
@@ -509,22 +521,27 @@
 		const focus = page.url.searchParams.get('focus');
 		const cmp = page.url.searchParams.get('compare');
 		if (focus) {
-			const n = nodeFinderById(focus);
-			if (n) {
-				selectedNode = n;
-				loadCompanyDetail(focus);
+			if (isMobile) {
+				const n = nodeFinderById(focus);
+				if (n) { selectedNode = n; loadCompanyDetail(focus); }
+			} else {
+				detachCard(focus);
 			}
 		}
 		if (cmp) {
 			const [a, b] = cmp.split(',');
 			if (a) {
-				const na = nodeFinderById(a);
-				if (na) {
-					selectedNode = na;
-					loadCompanyDetail(a);
+				if (isMobile) {
+					const na = nodeFinderById(a);
+					if (na) { selectedNode = na; loadCompanyDetail(a); }
+				} else {
+					detachCard(a);
 				}
 			}
-			if (b) addToCompare(b);
+			if (b) {
+				if (isMobile) { addToCompare(b); }
+				else { detachCard(b); }
+			}
 		}
 		urlHandled = true;
 
@@ -1049,7 +1066,7 @@
 
 
 	<!-- 오른쪽 상세: CompanyCard (회사 카드) -->
-	{#if selectedNode && !selectedNode.isIndustry}
+	{#if selectedNode && !selectedNode.isIndustry && isMobile}
 		<aside class="detail-panel" class:wide={comparing}>
 			<div class="card-slot">
 				<CompanyCard

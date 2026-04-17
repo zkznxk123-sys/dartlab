@@ -160,6 +160,16 @@
 
 	let hhiInfo = $derived(hhiBucket(supplyInsights?.hhi));
 
+	async function shareCard() {
+		const url = `${typeof window !== 'undefined' ? window.location.origin : ''}${base}/map?focus=${node.id}`;
+		const text = `${node.label} (${node.id}) | ROE ${node.roe ?? '-'}% · 매출 ${fmtKor(node.revenue)} — dartlab 산업지도`;
+		if (typeof navigator !== 'undefined' && navigator.share) {
+			try { await navigator.share({ title: node.label, text, url }); } catch { /* cancelled */ }
+		} else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+			await navigator.clipboard.writeText(`${text}\n${url}`);
+		}
+	}
+
 	function issueUrl(): string {
 		const title = encodeURIComponent(`[map] ${node?.label || ''} (${node?.id || ''}) 분류 신고`);
 		const body = encodeURIComponent(
@@ -205,7 +215,12 @@
 			</div>
 		{:else if aiInsight?.strengths?.[0]}
 			<div class="t1-verdict">
-				💪 {aiInsight.strengths[0]}
+				{aiInsight.strengths[0]}
+			</div>
+		{:else}
+			{@const normRoe = normalize(node.roe, 'roe')}
+			<div class="t1-verdict auto">
+				{#if node.roe !== null && node.roe !== undefined}ROE {pct(node.roe)}{#if normRoe} (상위 {(100 - normRoe.percentile).toFixed(0)}%){/if}{/if}{#if node.revenueYoyPct !== null && node.revenueYoyPct !== undefined} · 매출 YoY {node.revenueYoyPct > 0 ? '+' : ''}{node.revenueYoyPct.toFixed(1)}%{/if}{#if node.debtGrade} · {node.debtGrade}{/if}
 			</div>
 		{/if}
 		<div class="t1-grid">
@@ -550,18 +565,36 @@
 		</div>
 	{/if}
 
+	<!-- 비슷한 3사 추천 -->
+	{#if detail?.peers?.length}
+		<div class="section peers-rec">
+			<h3>비슷한 회사</h3>
+			<div class="peers-list">
+				{#each detail.peers.slice(0, 3) as p (p.stockCode)}
+					<button class="peer-chip" onclick={() => onDetach?.(p.stockCode) || onAddCompare?.(p.stockCode)}>
+						<span class="peer-name">{p.corpName}</span>
+						{#if p.revenue}<span class="peer-rev">{fmtKor(p.revenue * 1e8, '')}</span>{/if}
+					</button>
+				{/each}
+			</div>
+		</div>
+	{/if}
+
 	<!-- 액션 버튼 -->
 	<div class="actions">
+		<button class="action share-btn" onclick={shareCard} title="이 회사 정보 공유">
+			🔗 공유
+		</button>
 		<button class="action primary" disabled={compareDisabled} onclick={() => onAddCompare?.(node.id)}>
-			+ 비교에 추가
+			+ 비교
 		</button>
 		{#if onDetach && !detached}
-			<button class="action ghost detach-btn" onclick={() => onDetach?.(node.id)} title="카드를 떠있는 윈도우로 분리">
-				🗔 띄우기
+			<button class="action ghost" onclick={() => onDetach?.(node.id)} title="새 창으로 열기">
+				🗔 새 창
 			</button>
 		{/if}
 		<a class="action ghost" href={issueUrl()} target="_blank" rel="noopener">
-			🐛 분류 신고
+			🐛 신고
 		</a>
 	</div>
 
@@ -581,7 +614,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0;
-		padding: 16px 16px 80px;
+		padding: 10px 12px 60px;
 		color: #f1f5f9;
 		position: relative;
 	}
@@ -608,7 +641,7 @@
 	}
 	.head h2 {
 		margin: 0;
-		font-size: 20px;
+		font-size: 16px;
 		color: #f1f5f9;
 	}
 	.code {
@@ -666,6 +699,11 @@
 		border-bottom: 1px dashed rgba(96, 165, 250, 0.2);
 		font-weight: 500;
 	}
+	.t1-verdict.auto {
+		color: #cbd5e1;
+		font-size: 12px;
+		font-family: monospace;
+	}
 	.t1-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
@@ -693,8 +731,8 @@
 	}
 
 	.section {
-		margin-top: 16px;
-		padding-top: 16px;
+		margin-top: 10px;
+		padding-top: 10px;
 		border-top: 1px solid #1e2433;
 	}
 	.section:first-of-type {
@@ -718,7 +756,11 @@
 		text-transform: none;
 	}
 
-	.fin-grid,
+	.fin-grid {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 4px;
+	}
 	.sup-grid {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
@@ -1166,6 +1208,48 @@
 		color: #f1f5f9;
 		border-color: #334155;
 	}
+	/* 비슷한 회사 추천 */
+	.peers-rec h3 {
+		margin-bottom: 6px;
+	}
+	.peers-list {
+		display: flex;
+		gap: 4px;
+		flex-wrap: wrap;
+	}
+	.peer-chip {
+		display: inline-flex;
+		gap: 4px;
+		align-items: center;
+		padding: 4px 10px;
+		background: #050811;
+		border: 1px solid #1e2433;
+		border-radius: 6px;
+		color: #60a5fa;
+		font-size: 11px;
+		cursor: pointer;
+	}
+	.peer-chip:hover {
+		background: rgba(96, 165, 250, 0.08);
+		border-color: #334155;
+	}
+	.peer-rev {
+		color: #64748b;
+		font-family: monospace;
+		font-size: 10px;
+	}
+
+	/* 공유 */
+	.action.share-btn {
+		background: rgba(96, 165, 250, 0.12);
+		color: #60a5fa;
+		border: 1px solid rgba(96, 165, 250, 0.3);
+	}
+	.action.share-btn:hover {
+		background: rgba(96, 165, 250, 0.22);
+		color: #f1f5f9;
+	}
+
 	.disclaimer {
 		margin-top: 16px;
 		padding-top: 12px;

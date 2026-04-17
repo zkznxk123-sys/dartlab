@@ -14,7 +14,7 @@
 		periodLabel?: string;
 	}
 
-	let { labels, series, width = 280, height = 80, periodLabel = '' }: Props = $props();
+	let { labels, series, width = 280, height = 56, periodLabel = '' }: Props = $props();
 
 	const PAD = { l: 4, r: 4, t: 8, b: 14 };
 

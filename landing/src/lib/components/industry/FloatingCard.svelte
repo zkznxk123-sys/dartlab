@@ -45,6 +45,26 @@
 	let rootEl: HTMLDivElement | null = $state(null);
 	let dragging = $state(false);
 	let dragStart = { mx: 0, my: 0, x: 0, y: 0 };
+	let shaking = $state(false);
+	let showHint = $state(false);
+
+	// 첫 사용 힌트 (1회만)
+	$effect(() => {
+		if (typeof localStorage === 'undefined') return;
+		if (!localStorage.getItem('dartlab.fc.hint.done')) {
+			showHint = true;
+			setTimeout(() => {
+				showHint = false;
+				localStorage.setItem('dartlab.fc.hint.done', '1');
+			}, 4000);
+		}
+	});
+
+	/** 이미 열린 카드에 focus 시 흔들림 효과 */
+	export function shake() {
+		shaking = true;
+		setTimeout(() => (shaking = false), 300);
+	}
 
 	function onHeaderMouseDown(e: MouseEvent) {
 		// 닫기 버튼 등 내부 인터랙션은 제외
@@ -96,6 +116,7 @@
 	bind:this={rootEl}
 	class="fc"
 	class:dragging
+	class:shaking
 	style:left="{x}px"
 	style:top="{y}px"
 	style:width="{w}px"
@@ -103,6 +124,7 @@
 	style:z-index={z}
 	onmousedown={() => onFocus?.()}
 	role="dialog"
+	tabindex="-1"
 	aria-label={title}
 >
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -120,13 +142,45 @@
 	<div class="fc-body">
 		{#if children}{@render children()}{/if}
 	</div>
+	{#if showHint}
+		<div class="fc-hint">드래그로 이동 · 모서리로 크기 조절</div>
+	{/if}
 	<div class="fc-id">#{id}</div>
 </div>
 
 <style>
+	@keyframes fc-shake {
+		0%, 100% { transform: translateX(0); }
+		25% { transform: translateX(-6px); }
+		50% { transform: translateX(6px); }
+		75% { transform: translateX(-3px); }
+	}
+	.fc.shaking {
+		animation: fc-shake 0.3s ease;
+	}
+	.fc-hint {
+		position: absolute;
+		bottom: 28px;
+		left: 50%;
+		transform: translateX(-50%);
+		padding: 6px 12px;
+		background: rgba(96, 165, 250, 0.9);
+		color: #050811;
+		font-size: 11px;
+		font-weight: 600;
+		border-radius: 6px;
+		white-space: nowrap;
+		pointer-events: none;
+		z-index: 2;
+		animation: fadeout 4s forwards;
+	}
+	@keyframes fadeout {
+		0%, 70% { opacity: 1; }
+		100% { opacity: 0; }
+	}
 	.fc {
 		position: fixed;
-		min-width: 340px;
+		min-width: 380px;
 		min-height: 280px;
 		max-width: 90vw;
 		max-height: 90vh;
