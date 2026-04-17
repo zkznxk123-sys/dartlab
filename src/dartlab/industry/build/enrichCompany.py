@@ -17,7 +17,21 @@ _BLOG_DIR = Path(__file__).resolve().parents[4] / "blog" / "05-company-reports"
 
 
 def _parseFrontmatter(md_text: str) -> dict:
-    """마크다운 frontmatter 파싱 (YAML 간단 버전)."""
+    """마크다운 파일의 YAML frontmatter 를 dict 로 파싱.
+
+    ``---`` 로 감싼 YAML 블록을 추출하여 safe_load 한다.
+    blog/05-company-reports 의 포스트에서 verdict/direction/archetype 등을 읽는 데 사용.
+
+    Parameters
+    ----------
+    md_text : str
+        마크다운 전체 텍스트.
+
+    Returns
+    -------
+    dict
+        YAML 파싱 결과. frontmatter 없거나 파싱 실패 시 빈 dict.
+    """
     import yaml
 
     m = re.match(r"^---\n(.*?)\n---", md_text, re.DOTALL)
@@ -85,7 +99,27 @@ def _loadBlogIndex() -> dict[str, list[dict]]:
 
 
 def _getAIInsight(stockCode: str) -> dict | None:
-    """KnowledgeDB에서 AI 인사이트 조회."""
+    """KnowledgeDB 에서 과거 AI 분석 인사이트 조회.
+
+    dartlab.ask() 실행 시 축적된 회사별 분석 결과(narrative, strengths,
+    weaknesses)를 SQLite DB 에서 읽어온다.
+
+    Parameters
+    ----------
+    stockCode : str
+        6자리 종목코드.
+
+    Returns
+    -------
+    dict | None
+        narrative : str — AI 분석 서술 (500~1000자)
+        strengths : list[str] — 강점 (최대 4개)
+        weaknesses : list[str] — 약점 (최대 4개)
+        sector : str — 섹터명
+        source : str — 분석 소스 (모델명)
+        createdAt : str — 생성 일시
+        인사이트 없으면 None.
+    """
     try:
         from dartlab.ai.persistence.knowledge_db import KnowledgeDB
 

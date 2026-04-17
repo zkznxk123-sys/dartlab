@@ -302,6 +302,23 @@ def _loadScanMetrics() -> dict[str, dict]:
 
 
 def _roundOrNone(v, digits: int = 1):
+    """숫자를 반올림하되 None/파싱불가 시 None 반환.
+
+    scan 엔진의 float/str 혼재 값을 ecosystem.json 에 주입할 때
+    안전하게 float 변환 + 반올림.
+
+    Parameters
+    ----------
+    v : Any
+        변환 대상. None, str("12.3"), float 모두 수용.
+    digits : int
+        소수점 자릿수. 기본 1.
+
+    Returns
+    -------
+    float | None
+        반올림된 값. 변환 불가 시 None.
+    """
     if v is None:
         return None
     try:

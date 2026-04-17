@@ -33,7 +33,25 @@ logger = logging.getLogger(__name__)
 
 
 def _extract_by_ids(row_sub: pl.DataFrame, id_list, nm_list) -> float | None:
-    """단일 연도 subset 에서 계정값 추출 (scan extractAccount 재사용)."""
+    """단일 연도 subset 에서 특정 계정의 금액 추출.
+
+    scan._helpers.extractAccount 를 래핑하여 account_id 또는 account_nm 으로
+    매칭되는 행의 thstrm_amount 를 반환한다.
+
+    Parameters
+    ----------
+    row_sub : pl.DataFrame
+        단일 연도 · 단일 종목의 재무 데이터 subset.
+    id_list : set[str] | list[str]
+        매칭할 account_id 목록 (예: _REVENUE_IDS).
+    nm_list : set[str] | list[str]
+        매칭할 account_nm 목록 (예: _REVENUE_NMS).
+
+    Returns
+    -------
+    float | None
+        매칭된 계정의 금액 (원). 없으면 None.
+    """
     from dartlab.scan._helpers import extractAccount
 
     return extractAccount(row_sub, list(id_list), list(nm_list))
