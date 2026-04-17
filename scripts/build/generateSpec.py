@@ -1362,6 +1362,19 @@ def _generateCapabilitiesPy() -> str:
             continue
         kind = "class" if inspect.isclass(obj) else "function" if callable(obj) else "module"
         doc = inspect.getdoc(obj)
+        # callable class/module 의 __call__ docstring 이 더 풍부하면 fallback
+        # _CallableModule 은 내부 _instance 의 class __call__ 탐색
+        if hasattr(obj, "__call__") and not inspect.isfunction(obj):
+            candidates = [
+                inspect.getdoc(getattr(type(obj), "__call__", None)),
+            ]
+            # _CallableModule 패턴: obj._instance 가 실제 class
+            inst = getattr(obj, "_instance", None)
+            if inst is not None:
+                candidates.append(inspect.getdoc(getattr(type(inst), "__call__", None)))
+            for callDoc in candidates:
+                if callDoc and len(callDoc) > len(doc or ""):
+                    doc = callDoc
         summary = doc.split("\n")[0].strip() if doc else ""
         sections = _parseDocstringSections(doc)
         entry: dict[str, str] = {"summary": summary, "kind": kind}
@@ -1386,6 +1399,10 @@ def _generateCapabilitiesPy() -> str:
             prop = inspect.getattr_static(DartCompany, memberName)
             if prop.fget:
                 doc = inspect.getdoc(prop.fget)
+            # property fget docstring 이 빈약하면 _{name}Impl fallback (9섹션 규칙)
+            implDoc = inspect.getdoc(getattr(DartCompany, f"_{memberName}Impl", None))
+            if implDoc and len(implDoc) > (len(doc or "")):
+                doc = implDoc
         else:
             doc = inspect.getdoc(obj)
         if doc is None:

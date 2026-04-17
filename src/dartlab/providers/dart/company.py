@@ -358,6 +358,12 @@ class Company:
 
         각 docs topic의 최신 기간 첫 텍스트에서 200자 요약을 추출한다.
         finance topic은 고정 설명을 반환한다.
+
+        Returns
+        -------
+        dict[str, str]
+            키 = topic 이름 (예: "BS", "IS", "dividend", "companyOverview")
+            값 = 200자 요약 텍스트
         """
         cacheKey = "_topicSummaries"
         if cacheKey in self._cache:
@@ -2879,7 +2885,16 @@ class Company:
             **kwargs: 축별 추가 옵션.
 
         Returns:
-            pl.DataFrame — 축별 분석 결과. axis=None이면 가이드 DataFrame.
+            pl.DataFrame | dict — axis=None이면 가이드 DataFrame (axis/label/description/example/group/items).
+            axis 지정 시 dict:
+                {calcName} : dict — 축별 계산 결과
+                    history : list[dict] — 시계열 ({period, ...지표})
+                    displayHints : dict — core 컬럼 목록
+                    turningPoints : list — 전환점 (있으면)
+                {calcName}Flags : list[str] — 경고 플래그
+                dataAsOf : dict — latestPeriod, retrievedAt
+            _summary (autoEnrich 자동 주입) — 핵심 지표 요약 + [엔진가정] 블록.
+            assumptions — 엔진 가정 (overrides 재호출용).
 
         Requires:
             데이터: finance (자동 다운로드)
@@ -3662,7 +3677,16 @@ class Company:
 
     @property
     def facts(self) -> pl.DataFrame | None:
-        """topic × period 형태의 통합 facts 테이블 (sections + finance + report merge)."""
+        """topic × period 형태의 통합 facts 테이블 (sections + finance + report merge).
+
+        Returns
+        -------
+        pl.DataFrame | None
+            topic : str — 데이터 소스 topic
+            period : str — 기간 (예: "2025Q4")
+            value : str — 해당 topic/period 의 텍스트 또는 숫자 요약
+            데이터 없으면 None.
+        """
         return self._profileAccessor.facts
 
     @property
@@ -4616,6 +4640,12 @@ class Company:
 
     def macro(self, axis=None, target=None, *, overrides: dict | None = None, **kwargs):
         """시장 매크로 (6막 인과 — 사이클/재고/기업/정책/유동성/심리/시나리오). KR 자동 위임.
+
+        Returns
+        -------
+        pl.DataFrame | dict
+            axis=None: 가이드 DataFrame (axis/label/description/example/group).
+            axis 지정: dict — 축별 매크로 분석 결과 (indicators, narrative 포함).
 
         Guide:
             - "매크로" → c.macro()

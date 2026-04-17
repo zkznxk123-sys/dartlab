@@ -209,7 +209,13 @@ def _getSearchCache() -> dict[str, object]:
 
 
 def codeToName(stockCode: str) -> str | None:
-    """종목코드 → 회사명."""
+    """종목코드 → 회사명.
+
+    Returns
+    -------
+    str | None
+        회사명. 못 찾으면 None.
+    """
     df = getKindList()
     match = df.filter(pl.col("종목코드") == stockCode)
     if match.height == 0:
@@ -218,7 +224,13 @@ def codeToName(stockCode: str) -> str | None:
 
 
 def nameToCode(corpName: str) -> str | None:
-    """회사명 → 종목코드. 정확히 일치하는 첫 번째 결과."""
+    """회사명 → 종목코드. 정확히 일치하는 첫 번째 결과.
+
+    Returns
+    -------
+    str | None
+        6자리 종목코드. 못 찾으면 None.
+    """
     df = getKindList()
     match = df.filter(pl.col("회사명") == corpName)
     if match.height == 0:

@@ -21,9 +21,16 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "종목코드/회사명/ticker → 적절한 Company 인스턴스 생성."
     },
     "Company.analysis": {
-        "guide": "\"분석해줘\" → c.analysis() (가이드 반환)\n\"수익성\" → c.analysis(\"financial\", \"수익성\")\n\"가치평가\" → c.analysis(\"valuation\", \"가치평가\")\n\"override 재계산\" → c.analysis(\"가치평가\", overrides={\"wacc\": 9.0})\n\n실제 동작은 ``_analysisImpl`` 참조.",
+        "aicontext": "ask()/chat()에서 분석 결과를 컨텍스트로 주입\nreview/reviewer가 내부적으로 analysis 결과를 소비",
+        "args": "axis: 그룹 이름 (\"financial\", \"valuation\", \"forecast\") 또는 축 이름. None이면 가이드 반환.\nsub: 그룹 내 하위 축 이름 (\"수익성\", \"가치평가\", \"매출전망\" 등).\n**kwargs: 축별 추가 옵션.",
+        "capabilities": "14축 분석: 수익구조, 자금조달, 자산구조, 현금흐름, 수익성, 성장성, 안정성, 효율성, 종합평가, 이익품질, 비용구조, 자본배분, 투자효율, 재무정합성\n축 없이 호출 시 14축 가이드 반환\n개별 축 분석 시 Company 바인딩 (self 자동 전달)\n2-level 호출: c.analysis(\"financial\", \"수익성\"), c.analysis(\"valuation\", \"가치평가\")",
+        "example": "c = Company(\"005930\")\nc.analysis()                            # 전체 가이드\nc.analysis(\"financial\", \"수익구조\")       # 수익구조 분석\nc.analysis(\"valuation\", \"가치평가\")       # 가치평가\nc.analysis(\"forecast\", \"매출전망\")        # 매출전망",
+        "guide": "\"14축 분석 뭐가 있어?\" → c.analysis() (가이드 반환)\n\"수익구조 분석해줘\" → c.analysis(\"financial\", \"수익구조\")\n\"안정성 분석\" → c.analysis(\"financial\", \"안정성\")\n\"가치평가 해줘\" → c.analysis(\"valuation\", \"가치평가\")\n\"매출전망\" → c.analysis(\"forecast\", \"매출전망\")",
         "kind": "property",
-        "summary": "재무제표 완전 분석 — 14축, 6막 인과 구조. dual access (api-contract)."
+        "requires": "데이터: finance (자동 다운로드)",
+        "returns": "pl.DataFrame | dict — axis=None이면 가이드 DataFrame (axis/label/description/example/group/items).\naxis 지정 시 dict:\n{calcName} : dict — 축별 계산 결과\nhistory : list[dict] — 시계열 ({period, ...지표})\ndisplayHints : dict — core 컬럼 목록\nturningPoints : list — 전환점 (있으면)\n{calcName}Flags : list[str] — 경고 플래그\ndataAsOf : dict — latestPeriod, retrievedAt\n_summary (autoEnrich 자동 주입) — 핵심 지표 요약 + [엔진가정] 블록.\nassumptions — 엔진 가정 (overrides 재호출용).",
+        "seeAlso": "review: 14축 분석을 14개 섹션 보고서로 조합\ninsights: 7영역 등급 요약 (analysis보다 요약적)\nratios: 재무비율 시계열 (analysis의 입력 데이터)",
+        "summary": "재무제표 완전 분석 — 14축, 단일 종목 심층 (내부 구현)."
     },
     "Company.ask": {
         "aicontext": "AI가 분석 전 과정을 주도. dartlab 엔진(analysis, scan, gather 등)을\n도구로 호출하여 데이터 수집, 계산, 판단, 해석을 수행.",
@@ -89,9 +96,12 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "LLM 투입용 context slice DataFrame."
     },
     "Company.credit": {
-        "guide": "\"신용등급\" → c.credit(\"등급\")\n\"채무 감당되나\" → c.credit(\"채무상환\")\n\"전체 평가\" → c.credit(detail=True)\n\"속성 접근\" → c.credit.유동성()\n\n실제 동작은 ``_creditImpl`` 참조.",
+        "args": "axis: 축 이름 (\"채무상환\", \"자본구조\" 등). None이면 등급 종합.\ndetail: True이면 7축 상세 + 지표 시계열 포함.\nbasePeriod: 분석 기준 기간. None이면 최신.\noverrides: AI/사용자가 엔진 계산 가정을 직접 교체하는 dict.\n키: debtRatio, interestCoverage, currentRatio, quickRatio, ocfToDebt,\nfcfToDebt, scenarioStress. 상세: core/overrides.py.",
+        "example": "c.credit()              # → {\"grade\": \"dCR-AA\", \"score\": 6.6, ...}\nc.credit(\"채무상환\")     # → {\"axis\": \"채무상환능력\", \"score\": 2.7, ...}\nc.credit(detail=True)   # → 7축 상세 + metricsHistory\nc.credit(overrides={\"debtRatio\": 150, \"interestCoverage\": 2.5})  # 스트레스 시나리오",
         "kind": "property",
-        "summary": "dartlab 독립 신용평가 (dCR-AAA~D). 7축 — 채무상환/자본구조/유동성/현금흐름/사업안정성/재무신뢰성/공시리스크."
+        "returns": "dict | None: 등급 결과. axis 지정 시 해당 축만.",
+        "seeAlso": "review(\"신용평가\"): 보고서 형식으로 렌더링\nanalysis(\"financial\", \"신용평가\"): analysis 축으로 접근",
+        "summary": "독립 신용평가 — dCR 20단계 등급 (내부 구현)."
     },
     "Company.currency": {
         "example": "c = Company(\"005930\")\nc.currency  # \"KRW\"",
@@ -138,6 +148,7 @@ CAPABILITIES: dict[str, dict] = {
     },
     "Company.facts": {
         "kind": "property",
+        "returns": "pl.DataFrame | None\ntopic : str — 데이터 소스 topic\nperiod : str — 기간 (예: \"2025Q4\")\nvalue : str — 해당 topic/period 의 텍스트 또는 숫자 요약\n데이터 없으면 None.",
         "summary": "topic × period 형태의 통합 facts 테이블 (sections + finance + report merge)."
     },
     "Company.filings": {
@@ -231,6 +242,7 @@ CAPABILITIES: dict[str, dict] = {
     "Company.macro": {
         "guide": "\"매크로\" → c.macro()\n\"경기 사이클\" → c.macro(\"사이클\")\n\"위기 진단\" → c.macro(\"위기\")\n\"2008 시나리오\" → c.macro(\"시나리오\", \"2008 금융위기\")",
         "kind": "method",
+        "returns": "pl.DataFrame | dict\naxis=None: 가이드 DataFrame (axis/label/description/example/group).\naxis 지정: dict — 축별 매크로 분석 결과 (indicators, narrative 포함).",
         "summary": "시장 매크로 (6막 인과 — 사이클/재고/기업/정책/유동성/심리/시나리오). KR 자동 위임."
     },
     "Company.market": {
@@ -275,9 +287,10 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "낮을수록 먼저 시도. DART=10 (기본 provider)."
     },
     "Company.quant": {
-        "guide": "\"차트 판단\" → c.quant(\"판단\")\n\"모멘텀\" → c.quant(\"모멘텀\")\n\"지표 DF\" → c.quant(\"지표\")\n\"베타\" → c.quant(\"베타\")\n\n실제 동작은 ``_quantImpl`` 참조.",
+        "args": "axis: 축 이름. None이면 30축 가이드 DataFrame.\n(Phase 8 A1: 기존 `metric=` 은 호환 alias)\noverrides: 기술 분석 파라미터 교체. 키: window/threshold/period/benchmark.\n**kwargs: 축별 추가 파라미터.",
         "kind": "property",
-        "summary": "주가 기술적 분석 (30축). 기술지표/팩터/감성/최적화. dual access."
+        "returns": "axis=None → DataFrame (30축 가이드)\naxis=\"종합\" → dict (verdict, RSI, ADX, SMA 등)\naxis=\"지표\" → DataFrame (45개 지표)",
+        "summary": "주가 기술적 분석 — 30축 (내부 구현)."
     },
     "Company.rank": {
         "aicontext": "시장/섹터 내 상대 위치 파악 — 피어 비교 분석의 기초\nsizeClass로 대형/중형/소형주 분류",
@@ -353,9 +366,16 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "원문 markdown 보존 retrieval block DataFrame."
     },
     "Company.review": {
-        "guide": "\"보고서\" → c.review()\n\"신용 보고서\" → c.review(type=\"credit\")\n\"수익성 블록만\" → c.review(\"수익성\")\n\"사이클 관점\" → c.review(type=\"full\", template=\"사이클\")\n\n실제 동작은 ``_reviewImpl`` 참조.",
+        "aicontext": "reviewer()가 이 결과를 소비하여 AI 해석 생성\nask()에서 재무분석 컨텍스트로 활용",
+        "args": "section: 섹션명 (\"수익구조\" 등). None이면 전체.\nlayout: ReviewLayout 커스텀. None이면 기본.\nhelper: True면 해석 힌트 텍스트 포함. None이면 자동.\npreset: 프리셋명 (\"executive\"/\"audit\"/\"credit\"/\"growth\"/\"valuation\"). None이면 전체.\ntemplate: 스토리 템플릿 (\"성장\"/\"자본집약\"/\"지주\" 등). \"auto\"면 자동 판별.\ndetail: True면 전체 블록, False면 섹션 요약만. None이면 preset 기본값 또는 True.",
+        "capabilities": "14개 섹션 전체 보고서 (수익구조~재무정합성)\n단일 섹션 지정 가능\n4개 출력 형식 (rich, html, markdown, json)\n섹션간 순환 서사 자동 감지\n프리셋 지원 (executive/audit/credit/growth/valuation)\n스토리 템플릿 (사이클/프랜차이즈/턴어라운드/성장/자본집약/지주/현금부자)\ndetail=False로 요약만 표시\n레이아웃 커스텀",
+        "example": "c.review()                        # 전체 검토서\nc.review(\"수익구조\")                # 특정 섹션\nc.review(preset=\"audit\")          # 감사/회계 검토용\nc.review(template=\"auto\")         # 스토리 자동 판별\nc.review(template=\"성장\")          # 성장 템플릿 적용\nc.review(detail=False)            # 전 섹션 요약만",
+        "guide": "\"재무 검토서 만들어줘\" -> c.review()\n\"수익구조 분석\" -> c.review(\"수익구조\")\n\"감사용 리뷰\" -> c.review(preset=\"audit\")\n\"이 회사 스토리는?\" -> c.review(template=\"auto\")\n\"요약만 보여줘\" -> c.review(detail=False)\n\"AI 가 해석한 보고서\" -> dartlab.ask(\"005930 보고서 작성해줘\") (AI 가 review tool 호출)",
         "kind": "property",
-        "summary": "5엔진 결과 조립 보고서 — 11 reportType × 7 template. 느림(60~80초). dual access."
+        "requires": "데이터: finance + report (자동 다운로드)",
+        "returns": "Review — 구조화 보고서.",
+        "seeAlso": "dartlab.ask: AI 자율 분석 (분석 질문은 여기로)\nanalysis: 14축 개별 분석 (review가 내부적으로 소비)\ninsights: 7영역 등급 + 이상치 요약",
+        "summary": "재��제표 구조화 보고서 — 기업이야��꾼의 대본 (내부 구현)."
     },
     "Company.search": {
         "args": "keyword: 검색어 (부분 일치).",
@@ -397,13 +417,23 @@ CAPABILITIES: dict[str, dict] = {
         "summary": "현재 종목의 섹터별 밸류에이션 파라미터."
     },
     "Company.select": {
+        "args": "topic: IS, BS, CF, CIS, SCE 또는 docs topic.\nindList: 행 필터. 한글 항목/snakeId/항목명. 단일 str 도 가능.\ncolList: 열(기간) 필터. 단일 str 도 가능.\nfreq: 시계열 주기 — ``\"Q\"`` (분기, 기본) / ``\"Y\"`` (연간) / ``\"YTD\"`` (누적).\nscope: 재무제표 범위 — ``\"consolidated\"`` (연결, 기본) / ``\"separate\"`` (별도).",
+        "example": "c.select(\"IS\", [\"매출액\", \"영업이익\"])\nc.select(\"IS\", [\"매출액\"], freq=\"Y\")              # 연간 매출\nc.select(\"BS\", [\"자본총계\"], scope=\"separate\")    # 별도 자본\nc.select(\"IS\", [\"매출액\"]).chart()",
         "kind": "property",
-        "summary": "show() 결과에서 행/열 필터 — dual access."
+        "returns": "SelectResult\nshow()와 동일 컬럼 구조에서 indList/colList로 필터된 행/열.\n.chart() 체이닝으로 시각화 가능.\n내부 DataFrame 접근: result.df (pl.DataFrame).\nfinance topic 예시 (c.select(\"IS\", [\"매출액\"])):\nsnakeId : str — 계정 식별자\n항목 : str — 계정명\n2025Q4, 2025Q3, ... : float — 분기별 값 (원 단위)\n행 매칭 실패 시 ValueError.",
+        "summary": "show() 결과에서 행(indList) + 열(colList) 필터 — 내부 구현."
     },
     "Company.show": {
-        "guide": "\"손익계산서\" → c.show(\"IS\")\n\"재무상태\" → c.show(\"BS\")\n\"현금흐름\" → c.show(\"CF\")\n\"사업 개요\" → c.show(\"businessOverview\")\n\"주요 제품\" → c.show(\"mainProduct\")\n\"차입금\" → c.show(\"borrowings\")",
+        "aicontext": "120+ topic 단일 접근점 — LLM 이 데이터 조회 핵심 도구\nfinance topic 은 freq/scope 토글로 분기/연간/연결/별도 자유 전환",
+        "args": "topic: topic 이름. ``\"BS\"`` ``\"IS\"`` ``\"CF\"`` ``\"CIS\"`` ``\"SCE\"`` ``\"ratios\"``\n같은 finance topic 또는 ``\"dividend\"`` ``\"companyOverview\"`` 같은 docs/report\ntopic. 전체 목록은 ``c.topics``.\nblock: 블록 인덱스. None 이면 블록 목차 (1개면 바로 데이터).\nperiod: 단일 기간 필터 (``\"2023\"``, ``\"2024Q2\"``) 또는 리스트 (세로 비교 뷰).\nfreq: 시계열 주기 — ``\"Q\"`` (분기, 기본) / ``\"Y\"`` (연간 strict 합) /\n``\"YTD\"`` (year-to-date 누적). pandas 관용 코드. **finance topic 한정**.\nscope: 재무제표 범위 — ``\"consolidated\"`` (연결, 기본) / ``\"separate\"`` (별도).\n**finance topic 한정**.\nraw: True 면 원본 그대로 (정제 없이).",
+        "capabilities": "120+ topic 접근 (재무제표, 사업내용, 지배구조, 임원현황 등)\n기간 / 주기 / 범위 / 블록 / 세로뷰 모두 파라미터 토글\ndocs / finance / report 3 source 자동 통합",
+        "example": "c = dartlab.Company(\"005930\")\nc.show(\"IS\")                              # 분기 연결 (기본)\nc.show(\"IS\", freq=\"Y\")                    # 연간 연결\nc.show(\"IS\", scope=\"separate\")            # 분기 별도\nc.show(\"IS\", freq=\"Y\", scope=\"separate\")  # 연간 별도\nc.show(\"IS\", period=\"2023\")               # 2023년 필터\nc.show(\"dividend\")                        # 배당",
+        "guide": "\"분기 손익\" → ``c.show(\"IS\")``\n\"연간 손익\" → ``c.show(\"IS\", freq=\"Y\")``\n\"별도 재무상태표\" → ``c.show(\"BS\", scope=\"separate\")``\n\"2023년 손익\" → ``c.show(\"IS\", period=\"2023\")``\n\"배당 정보\" → ``c.show(\"dividend\")``",
         "kind": "property",
-        "summary": "원본 데이터 단일 진입점 — 재무제표(BS/IS/CF/CIS)/주석/공시 DataFrame. analysis 결과 검증용."
+        "requires": "데이터: docs (자동 다운로드). finance topic 은 finance parquet 도 필요.",
+        "returns": "pl.DataFrame | None\nfinance topic (IS/BS/CF/CIS/SCE):\nsnakeId : str — 계정 식별자 (영문 snake_case)\n항목 : str — 계정명 (한글)\n2025Q4, 2025Q3, ... : float — 분기별 값 (원 단위, freq=\"Q\" 기본)\n2025, 2024, ... : float — 연간 합산 값 (원 단위, freq=\"Y\")\nratios topic:\n항목 : str — 비율명\n2025Q4, 2025Q3, ... : float — 비율값 (%, 배)\nnotes topic (inventory, borrowings 등):\n항목 : str — 세부 항목명\n당기, 전기 또는 연도 컬럼 : float — 금액 (원 단위)\ndocs/report topic (dividend, employee 등):\ntopic별 컬럼 구조 — c.show(topic) 실행으로 확인\n블록 미지정 + 멀티블록 topic:\nblock : int — 블록 번호\ntitle : str — 블록 제목\n데이터 없으면 None.",
+        "seeAlso": "select: show() 결과에서 행/열 필터 + 차트\ntrace: 데이터 출처 추적\ntopics: 사용 가능한 topic 전체 목록",
+        "summary": "topic 의 데이터를 반환 — 내부 구현 (사용자는 ``c.show`` 호출)."
     },
     "Company.sources": {
         "aicontext": "데이터 가용성 사전 점검 — 분석 가능 범위 판단의 기초",
@@ -442,6 +472,7 @@ CAPABILITIES: dict[str, dict] = {
     },
     "Company.topicSummaries": {
         "kind": "method",
+        "returns": "dict[str, str]\n키 = topic 이름 (예: \"BS\", \"IS\", \"dividend\", \"companyOverview\")\n값 = 200자 요약 텍스트",
         "summary": "토픽별 요약 dict — AI가 경로 탐색에 사용."
     },
     "Company.topics": {
@@ -587,6 +618,7 @@ CAPABILITIES: dict[str, dict] = {
     },
     "codeToName": {
         "kind": "function",
+        "returns": "str | None\n회사명. 못 찾으면 None.",
         "summary": "종목코드 → 회사명."
     },
     "collect": {
@@ -690,7 +722,8 @@ CAPABILITIES: dict[str, dict] = {
     },
     "industry": {
         "kind": "function",
-        "summary": "산업 매퍼엔진 진입점."
+        "returns": "pl.DataFrame\nindustryId=None (가이드):\n산업ID : str — 산업 식별자\n산업명 : str — 한글 산업명\n공정수 : int — 해당 산업의 공정 단계 수\nindustryId 지정:\n공정 : str — 공정 단계명\n종목코드 : str — 6자리 코드\n종목명 : str — 회사명\nsummary=True:\n공정 : str — 공정명\n매출합계 : float — 공정별 매출 합산 (원)\n영업이익합계 : float — 공정별 영업이익 합산 (원)",
+        "summary": "산업지도를 조회한다."
     },
     "listing": {
         "args": "kind: 조회 종류. \"companies\"(기본), \"filings\", \"topics\", \"dartlist\".\n한글 alias 지원: \"기업\", \"공시\", \"토픽\", \"법인\", \"dart\".\ncorp: 종목코드 또는 ticker. filings/topics에 필수.\nmarket: \"KR\" 또는 \"US\". companies에서만 사용.",
@@ -765,6 +798,7 @@ CAPABILITIES: dict[str, dict] = {
     },
     "nameToCode": {
         "kind": "function",
+        "returns": "str | None\n6자리 종목코드. 못 찾으면 None.",
         "summary": "회사명 → 종목코드. 정확히 일치하는 첫 번째 결과."
     },
     "pastInsight": {

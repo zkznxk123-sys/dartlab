@@ -75,6 +75,18 @@ class Industry:
         Returns
         -------
         pl.DataFrame
+            industryId=None (가이드):
+                산업ID : str — 산업 식별자
+                산업명 : str — 한글 산업명
+                공정수 : int — 해당 산업의 공정 단계 수
+            industryId 지정:
+                공정 : str — 공정 단계명
+                종목코드 : str — 6자리 코드
+                종목명 : str — 회사명
+            summary=True:
+                공정 : str — 공정명
+                매출합계 : float — 공정별 매출 합산 (원)
+                영업이익합계 : float — 공정별 영업이익 합산 (원)
         """
         if industryId is None:
             return self._guide()

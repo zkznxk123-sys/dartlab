@@ -261,10 +261,13 @@ class Macro:
 
         Returns
         -------
-        pl.DataFrame
-            axis=None: 6막 기반 축 가이드
-        dict
-            분석 결과
+        pl.DataFrame | dict
+            axis=None (가이드): DataFrame (axis/label/description/example/group 컬럼)
+            axis 지정: dict — 축별 분석 결과.
+                cycle: {phase, label, confidence, indicators[{name, value, signal}]}
+                summary: {indicators[], narrative}
+                rates/liquidity/trade/...: {지표별 dict, narrative}
+            _summary (autoEnrich 자동) — 핵심 요약 + [엔진가정].
         """
         from dartlab.core.overrides import validateOverrides
 
