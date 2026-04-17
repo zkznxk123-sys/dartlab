@@ -1,4 +1,4 @@
-"""히스토리 fallback facade — naver(KR) → yahoo_direct → fmp → yahoo 순서 (async)."""
+"""히스토리 fallback facade — naver(KR) → naver_global → fmp 순서 (async)."""
 
 from __future__ import annotations
 

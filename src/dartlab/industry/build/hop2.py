@@ -30,11 +30,54 @@ HOP2_EDGE_LIMIT = 50  # 회사당 2-hop 엣지 최대
 
 
 def computeHop2() -> dict[str, dict]:
-    """전 종목 × 2-hop 이웃·엣지 사전 계산.
+    """전 종목 2-hop 공급망 사전 계산 — "내 공급사의 공급사" 를 미리 찾아둔다.
+
+    nodes.json + edges.json 에서 인접 리스트를 구성하고, 각 회사별로
+    1-hop 이웃의 이웃(2-hop)을 탐색한다. 허브 노드(degree > 200)는
+    amount 있는 거래의 상대만 1단계 더 확장(1.5-hop)하여 폭증을 방지한다.
+
+    Parameters
+    ----------
+    없음 — 내부적으로 loadNodes(), loadEdges() 호출.
 
     Returns
     -------
-    dict[stockCode → {"hop2Neighbors": [...], "hop2Edges": [...], "hub": bool}]
+    dict[str, dict]
+        stockCode → {
+            hop2Neighbors : list[dict]
+                stockCode : str — 2-hop 이웃 종목코드
+                corpName : str — 회사명
+                industry : str — 산업 ID
+                viaCode : str — 경유 노드 종목코드
+                viaName : str — 경유 노드 회사명
+                hopDistance : int — 항상 2
+            hop2Edges : list[dict]
+                from : str — 출발 종목코드
+                to : str — 도착 종목코드
+                type : str — 엣지 타입 (supplier/customer/affiliate)
+                amount : float | None — 거래 금액 (억원)
+                ratio : float | None — 매입비중 (%)
+                product : str — 거래 품목
+                hop : int — 1 또는 2
+                source : str — 데이터 소스
+            hub : bool — 허브 노드 여부 (degree > HUB_THRESHOLD)
+            direct1HopCount : int — 직접 이웃 수
+
+    Notes
+    -----
+    - 허브 임계값: HUB_THRESHOLD = 200 (degree 초과 시 1.5-hop 제한)
+    - hop2Neighbors 최대 100개, hop2Edges 최대 HOP2_EDGE_LIMIT(50)개
+    - amount 기준 내림차순 정렬
+    - 허브의 1.5-hop: amount 있는 1-hop 엣지 상대의 이웃만 확장 (최대 100)
+
+    Examples
+    --------
+    >>> from dartlab.industry.build.hop2 import computeHop2
+    >>> hop2 = computeHop2()
+    >>> hop2['005930']['hub']  # 삼성전자가 허브인지
+    False
+    >>> len(hop2['005930']['hop2Neighbors'])  # 2-hop 이웃 수
+    100
     """
     nodes = loadNodes()
     edges = loadEdges()
@@ -76,9 +119,20 @@ def computeHop2() -> dict[str, dict]:
                         hop2_set.add(far)
                         hop2_via[far] = mid
         else:
-            # 허브: 1.5-hop — 1-hop 이웃 중 amount 있는 엣지의 상대만 확장
-            # 쉽게: 1-hop 이웃 전체만 제공 (2-hop 스킵)
-            pass
+            # 허브(degree > 200): 전체 2-hop 은 수천 노드 폭증 → 제한적 확장
+            # amount 있는 1-hop 엣지의 상대만 1단계 더 확장 (1.5-hop)
+            for mid in direct:
+                mid_key = tuple(sorted([code, mid]))
+                mid_edges = edgeDetail.get(mid_key, [])
+                has_amount = any(e.amount for e in mid_edges)
+                if not has_amount:
+                    continue
+                for far in adj.get(mid, set()):
+                    if far == code or far in direct:
+                        continue
+                    if far not in hop2_set and len(hop2_set) < 100:
+                        hop2_set.add(far)
+                        hop2_via[far] = mid
 
         hop2_neighbors = []
         for far_code in list(hop2_set)[:200]:

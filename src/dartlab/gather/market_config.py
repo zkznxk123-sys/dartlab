@@ -14,7 +14,7 @@ class MarketConfig:
     currency: str  # "KRW", "USD"
     exchange_suffix: str  # ".KS", "", ".T"
     benchmark_ticker: str  # "^KS11", "^GSPC"
-    fallback_chain: tuple[str, ...]  # ("naver", "yahoo_direct")
+    fallback_chain: tuple[str, ...]  # ("naver", "naver_global")
     trading_hours_utc: tuple[int, int]  # (start_hour, end_hour)
 
 
@@ -29,7 +29,7 @@ MARKETS: dict[str, MarketConfig] = {
         currency="KRW",
         exchange_suffix=".KS",
         benchmark_ticker="^KS11",
-        fallback_chain=("naver", "yahoo_direct"),
+        fallback_chain=("naver", "naver_global"),
         trading_hours_utc=(0, 6),
     ),
     "US": MarketConfig(
@@ -47,7 +47,7 @@ MARKETS: dict[str, MarketConfig] = {
         currency="JPY",
         exchange_suffix=".T",
         benchmark_ticker="^N225",
-        fallback_chain=("yahoo_direct", "fmp"),
+        fallback_chain=("naver_global", "fmp"),
         trading_hours_utc=(0, 6),
     ),
     "HK": MarketConfig(
@@ -56,7 +56,7 @@ MARKETS: dict[str, MarketConfig] = {
         currency="HKD",
         exchange_suffix=".HK",
         benchmark_ticker="^HSI",
-        fallback_chain=("yahoo_direct", "fmp"),
+        fallback_chain=("naver_global", "fmp"),
         trading_hours_utc=(1, 8),
     ),
     "UK": MarketConfig(
@@ -65,7 +65,7 @@ MARKETS: dict[str, MarketConfig] = {
         currency="GBP",
         exchange_suffix=".L",
         benchmark_ticker="^FTSE",
-        fallback_chain=("yahoo_direct", "fmp"),
+        fallback_chain=("naver_global", "fmp"),
         trading_hours_utc=(8, 16),
     ),
     "DE": MarketConfig(
@@ -74,7 +74,7 @@ MARKETS: dict[str, MarketConfig] = {
         currency="EUR",
         exchange_suffix=".DE",
         benchmark_ticker="^GDAXI",
-        fallback_chain=("yahoo_direct", "fmp"),
+        fallback_chain=("naver_global", "fmp"),
         trading_hours_utc=(7, 16),
     ),
     "CN": MarketConfig(
@@ -83,7 +83,7 @@ MARKETS: dict[str, MarketConfig] = {
         currency="CNY",
         exchange_suffix=".SS",
         benchmark_ticker="000001.SS",
-        fallback_chain=("yahoo_direct", "fmp"),
+        fallback_chain=("naver_global", "fmp"),
         trading_hours_utc=(1, 7),
     ),
     "IN": MarketConfig(
@@ -92,7 +92,7 @@ MARKETS: dict[str, MarketConfig] = {
         currency="INR",
         exchange_suffix=".NS",
         benchmark_ticker="^NSEI",
-        fallback_chain=("yahoo_direct", "fmp"),
+        fallback_chain=("naver_global", "fmp"),
         trading_hours_utc=(4, 10),
     ),
 }
@@ -110,7 +110,7 @@ def resolve_ticker(stock_code: str, market: str, source: str) -> str:
     """stock_code + market + source → 소스별 ticker 문자열.
 
     - naver: 종목코드 그대로 (KR only)
-    - yahoo_direct: 종목코드 + 거래소 접미사
+    - naver_global: 종목코드 + 거래소 접미사
     - fmp: 종목코드 + 거래소 접미사 (Yahoo와 동일 형식)
     """
     market = market.upper()

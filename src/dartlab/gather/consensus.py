@@ -25,8 +25,8 @@ async def fetch(
 ) -> ConsensusData | None:
     """컨센서스 — fallback 체인 (async) + stale-while-revalidate.
 
-    KR: naver → yahoo_direct
-    US/기타: yahoo_direct → naver
+    KR: naver → naver_global
+    US/기타: naver_global → naver
 
     모든 소스 실패 시 24시간 이내 stale 캐시를 반환한다.
     """
@@ -40,9 +40,9 @@ async def fetch(
             return data
 
     if market == "KR":
-        chain = CONSENSUS_FALLBACK  # ["naver", "yahoo_direct"]
+        chain = CONSENSUS_FALLBACK  # ["naver", "naver_global"]
     else:
-        chain = ["yahoo_direct"]  # US는 naver 불가
+        chain = ["naver_global"]  # US는 naver 불가
 
     for domain_name in chain:
         if _cb.is_open(domain_name):

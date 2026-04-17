@@ -40,11 +40,44 @@ def _extract_by_ids(row_sub: pl.DataFrame, id_list, nm_list) -> float | None:
 
 
 def computeYoyDelta() -> dict[str, dict[str, Any]]:
-    """finance.parquet 에서 최신·전년 2개 연도 × 전종목 × 핵심 비율 delta 계산.
+    """전년 대비 재무 비율 변화(YoY delta) 전 종목 사전 계산.
+
+    scan/finance.parquet 에서 최신 2개 연도를 추출하고, 종목별로
+    ROE/영업이익률/순이익률/매출 증감률/부채비율 의 전기 대비 차이를 계산한다.
+    산업지도 CompanyCard 의 delta badge ("▲ +1.8%p") 에 사용.
+
+    Parameters
+    ----------
+    없음 — 내부적으로 _ensureScanData() 경로의 finance.parquet 로드.
 
     Returns
     -------
-    dict[stockCode → {roeDelta, opMarginDelta, netMarginDelta, revenueYoyPct, debtRatioDelta, asOfYear, priorYear}]
+    dict[str, dict[str, Any]]
+        stockCode → {
+            roeDelta : float | None — ROE 변화 (%p). 양수=개선
+            opMarginDelta : float | None — 영업이익률 변화 (%p)
+            netMarginDelta : float | None — 순이익률 변화 (%p)
+            revenueYoyPct : float | None — 매출 전년대비 증감률 (%)
+            debtRatioDelta : float | None — 부채비율 변화 (%p). 양수=악화
+            asOfYear : int | None — 최신 연도 (예: 2025)
+            priorYear : int | None — 전년 (예: 2024)
+        }
+
+    Notes
+    -----
+    - 연결재무제표(CFS) 우선, 없으면 개별(OFS) fallback
+    - 전년 데이터 없는 신규 상장사는 dict 에서 제외
+    - 모든 delta 가 None 인 종목도 제외
+    - scan.profitability 의 계정 ID/명 매핑을 재사용
+
+    Examples
+    --------
+    >>> from dartlab.industry.build.delta import computeYoyDelta
+    >>> d = computeYoyDelta()
+    >>> d['005930']['roeDelta']   # 삼성전자 ROE 변화 (%p)
+    -230.2
+    >>> d['000660']['revenueYoyPct']  # SK하이닉스 매출 YoY
+    41.9
     """
     from pathlib import Path
 

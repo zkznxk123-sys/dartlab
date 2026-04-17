@@ -141,12 +141,14 @@ def streamWithTools(
         for tc in resp.tool_calls:
             callKey = f"{tc.name}:{_hashArgs(tc.arguments)}"
             seenCalls[callKey] = seenCalls.get(callKey, 0) + 1
+            label = _toolLabel(tc.name, tc.arguments)
 
             yield AnalysisEvent(
                 "tool_call",
                 {
                     "id": tc.id,
                     "name": tc.name,
+                    "label": label,
                     "arguments": tc.arguments,
                     "round": roundIdx + 1,
                 },
@@ -162,6 +164,7 @@ def streamWithTools(
                 llmText = f"[tool error] {type(e).__name__}: {e}\n{tbText}"
                 uiText = llmText
                 status = "error"
+                raw = None
                 log.warning("tool %s failed: %s", tc.name, e)
 
             yield AnalysisEvent(
@@ -169,6 +172,8 @@ def streamWithTools(
                 {
                     "id": tc.id,
                     "name": tc.name,
+                    "label": label,
+                    "summary": _extractToolSummary(raw) if raw is not None else None,
                     "result": uiText,
                     "status": status,
                     "round": roundIdx + 1,
@@ -203,6 +208,66 @@ def streamWithTools(
         yield from llm.stream(messages)
     except Exception as e:  # noqa: BLE001
         yield f"\n\n[응답 생성 실패: {type(e).__name__}: {e}]"
+
+
+_TOOL_LABELS: dict[str, str] = {
+    "searchCompany": "종목 검색",
+    "analysis": "재무 분석",
+    "show": "원본 데이터 조회",
+    "credit": "신용등급 산출",
+    "scan": "전종목 비교",
+    "gather": "시장 데이터 수집",
+    "macro": "매크로 분석",
+    "pastInsight": "과거 분석 조회",
+    "sectorInsights": "업종 분석 조회",
+    "search": "공시 검색",
+    "pythonExec": "코드 실행",
+    "review": "보고서 생성",
+    "validateStory": "스토리 검증",
+    "audit": "감사 분석",
+    "capital": "주주환원 분석",
+    "debt": "부채 구조 분석",
+    "governance": "지배구조 분석",
+    "industry": "산업지도 조회",
+    "topdown": "탑다운 분석",
+    "quant": "정량분석",
+    "causalWeights": "인과 가중치",
+    "diff": "변경 비교",
+    "filings": "공시 목록",
+    "disclosure": "공시 조회",
+    "keywordTrend": "키워드 추이",
+    "codeName": "종목명 변환",
+}
+
+
+def _toolLabel(name: str, arguments: dict) -> str:
+    """tool 호출에 대한 사람 친화적 한글 레이블."""
+    base = _TOOL_LABELS.get(name, name)
+    target = arguments.get("stockCode") or arguments.get("keyword") or arguments.get("query") or ""
+    axis = arguments.get("axis") or arguments.get("topic") or ""
+    parts = [base]
+    if axis:
+        parts.append(str(axis))
+    if target:
+        parts.append(str(target))
+    return " — ".join(parts)
+
+
+def _extractToolSummary(raw: Any) -> str | None:
+    """tool 결과에서 _summary 1줄 추출 (autoEnrich 결과)."""
+    if raw is None:
+        return None
+    if isinstance(raw, dict):
+        summary = raw.get("_summary")
+        if isinstance(summary, str) and summary:
+            return summary.split("\n")[0][:200]
+        # 중첩 dict 의 첫 _summary
+        for v in raw.values():
+            if isinstance(v, dict) and "_summary" in v:
+                s = v["_summary"]
+                if isinstance(s, str) and s:
+                    return s.split("\n")[0][:200]
+    return None
 
 
 def _resolveToolChoice(category: str, roundIdx: int) -> str | None:

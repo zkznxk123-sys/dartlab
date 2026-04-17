@@ -23,8 +23,8 @@ _API_BASE = "https://api.stock.naver.com"
 _SUFFIXES = ["", ".O", ".N", ".K", ".A"]
 
 # 서버 보호: 호출 간 3~6초 강제 딜레이 (모듈 전역)
-_MIN_DELAY = 2.0
-_MAX_DELAY = 4.0
+_MIN_DELAY = 0.5
+_MAX_DELAY = 1.5
 _last_call_time: float = 0.0
 
 

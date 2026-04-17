@@ -24,10 +24,7 @@ def load_domain(name: str):
         from . import naver
 
         return naver
-    if name == "yahoo_direct":
-        from . import yahoo_direct
 
-        return yahoo_direct
     if name == "fmp":
         from . import fmp
 

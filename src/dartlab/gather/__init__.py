@@ -162,7 +162,7 @@ class Gather:
         return self.history(stock_code, start=start, end=end, market=market)
 
     def _priceSnapshot(self, stock_code: str, *, market: str = "KR") -> PriceSnapshot | None:
-        """현재가 스냅샷 — naver → yahoo_direct → yahoo fallback."""
+        """현재가 스냅샷 — naver → naver_global fallback."""
         cached = self._cache.get_typed(stock_code, "price")
         if cached is not None:
             return cached  # type: ignore[return-value]
@@ -299,7 +299,7 @@ class Gather:
                 module = load_domain("naver")
                 result = run_async(module.fetch_revenue_consensus(stock_code, self._client))
             else:
-                module = load_domain("yahoo_direct")
+                module = load_domain("naver_global")
                 result = run_async(
                     module.fetch_revenue_consensus(
                         stock_code,
@@ -325,7 +325,7 @@ class Gather:
         """OHLCV 히스토리 DataFrame 조회 (기간 지정).
 
         Capabilities:
-            - fallback 체인: Naver(KR) -> yahoo_direct -> FMP -> Yahoo
+            - fallback 체인: Naver(KR) -> naver_global -> FMP -> Yahoo
             - date, open, high, low, close, volume 컬럼
             - 자동 날짜 파싱 (문자열 -> pl.Date)
             - TTL 캐시 (TTL_HISTORY)
@@ -417,7 +417,7 @@ class Gather:
         """배당 이력 조회.
 
         Capabilities:
-            - fallback 체인: yahoo_direct -> FMP
+            - fallback 체인: naver_global -> FMP
             - 배당일, 배당금, 배당수익률 등
             - circuit breaker 적용
             - TTL 캐시
@@ -467,7 +467,7 @@ class Gather:
         """액면분할/병합 이력 조회.
 
         Capabilities:
-            - fallback 체인: yahoo_direct -> FMP
+            - fallback 체인: naver_global -> FMP
             - 분할일, 분할비율 등
             - circuit breaker 적용
             - TTL 캐시
@@ -828,7 +828,7 @@ class Gather:
         """전체 도메인 병렬 수집 -> GatherSnapshot.
 
         Capabilities:
-            - asyncio.gather()로 모든 도메인(naver, yahoo, fmp 등) 동시 호출
+            - asyncio.gather()로 모든 도메인(naver, naver_global, fmp 등) 동시 호출
             - 뉴스도 병렬 수집 (최근 7일)
             - 개별 도메인 실패 격리 — 나머지 결과로 스냅샷 생성
             - 10초 타임아웃 (부분 결과 반환)
@@ -914,12 +914,12 @@ class Gather:
     async def _fetch_domain_async(self, domain_name: str, stock_code: str, market: str) -> GatherResult:
         """단일 도메인에서 모든 데이터 수집 (async)."""
         module = load_domain(domain_name)
-        # fetch_all이 있는 도메인 (naver, yahoo)
+        # fetch_all이 있는 도메인 (naver, naver_global)
         if hasattr(module, "fetch_all"):
             if domain_name == "naver":
                 return await module.fetch_all(stock_code, self._client)
             return await module.fetch_all(stock_code, self._client, market=market)
-        # fetch_price만 있는 도메인 (yahoo_direct, fmp)
+        # fetch_price만 있는 도메인 (naver_global, fmp)
         price = None
         if hasattr(module, "fetch_price"):
             price = await module.fetch_price(stock_code, self._client, market=market)
