@@ -15,21 +15,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **AI 근본 재작업 — docstring → CAPABILITIES 자동 전파 파이프라인 완성**: 37개 AI tool 전부 Returns 구조 포함. CAPABILITIES returns 0→77건. AI 가 dartlab 의 모든 tool 반환 구조를 호출 전에 앎.
-- **generateSpec.py 파서 강화**: NumPy style Returns 인식, property→_Impl fallback, _CallableModule→원본 class __call__ fallback.
-- **tool description 자동 생성**: docstring Args/Returns → tool schema description 자동 포함. enum 규제 없이 AI 가 description 으로 이해.
+- **AI 분석 정확도 향상**: AI 가 각 도구의 반환 구조를 호출 전에 파악. 기존 런타임 에러 해소.
+- **도구 설명 자동화**: docstring Args/Returns → tool schema + 시스템 프롬프트 자동 반영.
+- **내부 모듈 구조 정리**: `memory/` → `persistence/` 통합. 중복 헬퍼 단일 출처화.
 
 ### Removed
 
-- **`_reference` 폴더 전체 삭제** (-49파일, -22,828줄)
-- **`fallback.py` / `EdgarCompany.reviewer()` / `readiness.py`** 삭제
-- **`memory/` → `persistence/` 통합**
+- **미사용 레퍼런스/실험 코드 삭제** (-49파일, -22,828줄)
+- **미사용 모듈 삭제**: `fallback.py`, `readiness.py`, `EdgarCompany.reviewer()`
 
 ### Fixed
 
-- **`pastInsight` tool schema 빈 스키마 버그** 수정
-- **P4 "강제 하한 금지" 위반** 수정 (4~7회/최소 4개 축/먼저 회수)
-- **analysis/financial `_getFirst` 2곳 → `safe.getFirst` SSOT 통합**
+- **AI 도구 호출 에러 수정**: `pastInsight` 빈 호출 crash, `show` scope/freq 혼동
+- **시스템 프롬프트 과잉 규제 제거**: 숫자 강제("4~7회") 삭제. AI 자율 판단 복원.
+- **중복 함수 통합**: `_getFirst` → `safe.getFirst` SSOT
 
 ## [0.9.14] - 2026-04-16
 
