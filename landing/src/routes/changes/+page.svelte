@@ -82,7 +82,7 @@
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
 	<meta name="twitter:card" content="summary_large_image" />
-	<link rel="alternate" type="application/rss+xml" title="dartlab 변화 감지 RSS" href="/dartlab/feed/movers.xml" />
+	<link rel="alternate" type="application/rss+xml" title="dartlab 변화 감지 RSS" href="{base}/feed/movers.xml" />
 </svelte:head>
 
 <div class="page">

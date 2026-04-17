@@ -68,7 +68,7 @@
 		rel="alternate"
 		type="application/rss+xml"
 		title={`${ind.name} 변화 감지 RSS`}
-		href={`/dartlab/feed/industry/${data.id}.xml`}
+		href={`${base}/feed/industry/${data.id}.xml`}
 	/>
 </svelte:head>
 

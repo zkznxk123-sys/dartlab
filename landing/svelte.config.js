@@ -93,6 +93,10 @@ const config = {
 				if (stripped.startsWith('/company/') || stripped.startsWith('/map/companies/')) {
 					return;
 				}
+				// /feed/ RSS/iCal 링크 — 정적 파일이라 prerender 불필요
+				if (stripped.startsWith('/feed/')) {
+					return;
+				}
 				throw new Error(`${message} (linked from ${referrer})`);
 			}
 		},
