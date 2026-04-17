@@ -152,7 +152,8 @@ async def fetch_history(
     period_type = "dayCandle"
     if start:
         try:
-            from datetime import date, datetime as _dt
+            from datetime import date
+            from datetime import datetime as _dt
 
             start_dt = _dt.strptime(start, "%Y-%m-%d").date()
             end_dt = _dt.strptime(end, "%Y-%m-%d").date() if end else date.today()

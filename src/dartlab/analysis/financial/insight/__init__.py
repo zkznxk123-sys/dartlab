@@ -13,7 +13,7 @@
     result.profile         # "premium"
 """
 
-from dartlab.analysis.financial.insight.pipeline import analyzeFinancial, analyzeAudit
+from dartlab.analysis.financial.insight.pipeline import analyzeAudit, analyzeFinancial
 
 # 호환 alias — 외부 코드가 analyze 로 import 가능 (점진 마이그레이션)
 analyze = analyzeFinancial

@@ -121,8 +121,9 @@ def _detectFiscalYearEndMonth(df) -> int | None:
     동일 (fy, fp) 태그로 붙음. 최근 fy 기준 가장 흔한 end month 가 현재 결산월.
     (UA 2024 Dec→Mar 전환 등 이력 노이즈에도 최근 기준 올바르게 판정.)
     """
-    import polars as pl
     from collections import Counter
+
+    import polars as pl
 
     fyDf = df.filter(pl.col("fp") == "FY").filter(pl.col("end").is_not_null())
     if isinstance(fyDf, pl.LazyFrame):
@@ -290,7 +291,6 @@ def buildFiscalToCalendarMap(rawFacts) -> dict[str, str]:
     # 각 fy 의 자체 결산월 기준으로 Q_n 예상 종료월 계산.
     result: dict[str, str] = {}
     candidates: dict[tuple[int, str], date] = {}
-    from datetime import timedelta
 
     # 각 fy 의 예상 Q_n 종료일을 fyEnd 기준 (4-n)*3 개월 전으로 계산.
     # ±45 일 윈도우로 매칭하면 AAPL 52-week 달력 등 month boundary shift 수용.

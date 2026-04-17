@@ -7,6 +7,7 @@ BS를 영업/비영업으로 재분류하여 자산 운영 구조를 본다.
 from __future__ import annotations
 
 from dartlab.core.finance.safe import get as _get
+
 _getF = _getF2 = _getF3 = _getF4 = _get
 
 from typing import Any
@@ -18,9 +19,8 @@ _MAX_YEARS = 8
 _MAX_QUARTERS = 5
 
 
-from dartlab.core.finance.safe import getFirst as _getFirst  # noqa: E402
-
 from dartlab.core.finance.calc import safePct as _pct  # noqa: E402
+from dartlab.core.finance.safe import getFirst as _getFirst  # noqa: E402
 
 # ── 영업/비영업 분류 매핑 ──
 

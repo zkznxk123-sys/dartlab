@@ -17,8 +17,6 @@ L0 순수 계산. dict 반환. narrate 는 review 만.
 
 from __future__ import annotations
 
-import math
-
 
 def calcBeneishMScore(
     *,

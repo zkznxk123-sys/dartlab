@@ -7,6 +7,7 @@ CF 3구간(영업/투자/재무) + FCF + 이익의 현금 뒷받침 + CF 패턴.
 from __future__ import annotations
 
 from dartlab.core.finance.safe import get as _get
+
 _getF = _getF2 = _getF3 = _getF4 = _get
 
 from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDictBySnakeId

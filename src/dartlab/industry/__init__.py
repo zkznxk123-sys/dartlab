@@ -25,21 +25,42 @@ from typing import Any
 
 import polars as pl
 
-
 # 섹터/매개변수 공개 API (기존 compat.py 경로 대체 — industry.sector 내부 정의)
+from dartlab.industry.sector import (  # noqa: F401 — public re-export
+    MARKET_KR as MARKET_KR,
+)
 from dartlab.industry.sector import (
-    Sector,
-    IndustryGroup,
-    SectorInfo,
-    SectorParams,
-    MarketParams,
-    MARKET_KR,
-    MARKET_US,
-    MARKET_PARAMS,
-    classify,
-    getParams,
-    getMarketParams,
-    getThresholds,
+    MARKET_PARAMS as MARKET_PARAMS,
+)
+from dartlab.industry.sector import (
+    MARKET_US as MARKET_US,
+)
+from dartlab.industry.sector import (
+    IndustryGroup as IndustryGroup,
+)
+from dartlab.industry.sector import (
+    MarketParams as MarketParams,
+)
+from dartlab.industry.sector import (
+    Sector as Sector,
+)
+from dartlab.industry.sector import (
+    SectorInfo as SectorInfo,
+)
+from dartlab.industry.sector import (
+    SectorParams as SectorParams,
+)
+from dartlab.industry.sector import (
+    classify as classify,
+)
+from dartlab.industry.sector import (
+    getMarketParams as getMarketParams,
+)
+from dartlab.industry.sector import (
+    getParams as getParams,
+)
+from dartlab.industry.sector import (
+    getThresholds as getThresholds,
 )
 
 _DATA_DIR = Path(__file__).parent

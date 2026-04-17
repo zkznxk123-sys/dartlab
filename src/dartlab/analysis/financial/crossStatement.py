@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 from dartlab.core.finance.safe import get as _get
+
 _getF = _getF2 = _getF3 = _getF4 = _get
 
 from dartlab.analysis.financial._helpers import annualColsFromPeriods, toDictBySnakeId
@@ -18,7 +19,6 @@ _MAX_YEARS = 8
 
 
 from dartlab.core.finance.safe import getFirst as _getFirst  # SSOT
-
 
 # ── IS-CF 괴리 ──
 

@@ -49,11 +49,16 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
 
     from dartlab.scan._helpers import _ensureScanData
     from dartlab.scan.profitability import (
-        _EQ_IDS, _EQ_NMS,
-        _NI_IDS, _NI_NMS,
-        _OP_IDS, _OP_NMS,
-        _REVENUE_IDS, _REVENUE_NMS,
-        _TA_IDS, _TA_NMS,
+        _EQ_IDS,
+        _EQ_NMS,
+        _NI_IDS,
+        _NI_NMS,
+        _OP_IDS,
+        _OP_NMS,
+        _REVENUE_IDS,
+        _REVENUE_NMS,
+        _TA_IDS,
+        _TA_NMS,
     )
     # 부채 계정 — scan.debt 에서 재사용 (없으면 fallback)
     try:
@@ -101,10 +106,28 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
 
     def _ratios(sub: pl.DataFrame) -> tuple:
         from dartlab.scan.profitability import (
-            _EQ_IDS as EQ_IDS, _EQ_NMS as EQ_NMS,
-            _NI_IDS as NI_IDS, _NI_NMS as NI_NMS,
-            _OP_IDS as OP_IDS, _OP_NMS as OP_NMS,
-            _REVENUE_IDS as R_IDS, _REVENUE_NMS as R_NMS,
+            _EQ_IDS as EQ_IDS,
+        )
+        from dartlab.scan.profitability import (
+            _EQ_NMS as EQ_NMS,
+        )
+        from dartlab.scan.profitability import (
+            _NI_IDS as NI_IDS,
+        )
+        from dartlab.scan.profitability import (
+            _NI_NMS as NI_NMS,
+        )
+        from dartlab.scan.profitability import (
+            _OP_IDS as OP_IDS,
+        )
+        from dartlab.scan.profitability import (
+            _OP_NMS as OP_NMS,
+        )
+        from dartlab.scan.profitability import (
+            _REVENUE_IDS as R_IDS,
+        )
+        from dartlab.scan.profitability import (
+            _REVENUE_NMS as R_NMS,
         )
         rev = _extract_by_ids(sub, R_IDS, R_NMS)
         op = _extract_by_ids(sub, OP_IDS, OP_NMS)

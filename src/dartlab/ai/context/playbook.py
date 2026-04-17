@@ -227,6 +227,7 @@ def retrieveBullets(
 # 갱신. LLM 호출 없이 결정론적. curate() (bullet) 와 같은 post-response 훅.
 
 import re as _re
+from typing import Any
 
 _STRENGTH_RE = _re.compile(
     r"(?:강점|장점|긍정|양호|우수|탄탄|회복|개선|성장|확대|증가|상승|반등)[:\s은는이가\.]+([^\n]{5,120})",

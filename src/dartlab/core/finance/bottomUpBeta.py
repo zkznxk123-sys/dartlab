@@ -56,8 +56,6 @@ def calcBottomUpBeta(
     if len(peers) < 5:
         # sector_default fallback
         try:
-            from dartlab.industry import getMarketParams  # fallback path
-
             # sectorParams 에서 직접 beta 조회
             from dartlab.industry.sector_params import get_sector_params_by_name
         except (ImportError, AttributeError):

@@ -6,7 +6,6 @@
 
 from __future__ import annotations
 
-
 _KR_EN_ALIASES: dict[str, str] = {
     # Tech
     "인텔": "Intel",

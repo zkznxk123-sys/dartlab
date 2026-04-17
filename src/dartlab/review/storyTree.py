@@ -12,7 +12,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 _TRAJECTORY_OVERRIDES: dict[str, dict] = {
     "possible": {
         # 낙관 시나리오 — 서사의 최대 잠재력

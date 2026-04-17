@@ -13,14 +13,13 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-import re
 from typing import Any, Generator
 
 log = logging.getLogger(__name__)
 
 from dartlab.ai.runtime.events import AnalysisEvent
 from dartlab.ai.runtime.postResponse import runPostResponse
-from dartlab.ai.runtime.prompts import buildSystemPromptParts, resolveCategoryAndIntent
+from dartlab.ai.runtime.prompts import buildSystemPromptParts
 
 # ── 데이터 신선도 추출 ────────────────────────────────────
 

@@ -13,7 +13,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 # Phase 12 A1: Smart Primary Selector — override 감응성 매트릭스.
 # override 가 들어올 때 primary 가 무감각 모델이면 감응 모델로 자동 전환.
 _MODEL_SENSITIVITY: dict[str, set[str]] = {

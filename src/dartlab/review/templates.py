@@ -783,8 +783,8 @@ LIFECYCLE_PHASES: dict[str, dict] = {
 # Phase 9 A1: 기업 유형 판별 로직 → core/finance/companyType.py (L0) 이동.
 # 하위 호환 re-export.
 from dartlab.core.finance.companyType import (  # noqa: F401
-    _checkHolding,
     _TEMPLATE_CHECKS,
+    _checkHolding,
     detectTemplate,
     detectTemplates,
 )

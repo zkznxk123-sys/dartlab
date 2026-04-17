@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 _FINANCIAL_SECTOR_KEYWORDS = ("금융", "Financial", "FINANCIALS", "Bank")
 _FINANCIAL_GROUP_KEYWORDS = ("은행", "금융지주", "증권", "보험", "신용카드", "BANK", "INSURANCE", "BROKERAGE", "Bank", "Insurance")
 

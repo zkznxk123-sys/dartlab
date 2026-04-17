@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 from dartlab.core.finance.safe import get as _get
+
 _getF = _getF2 = _getF3 = _getF4 = _get
 
 from typing import Any

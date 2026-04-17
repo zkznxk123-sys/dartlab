@@ -479,8 +479,6 @@ def _splitKwargs(target: str, kwargs: dict) -> tuple[dict, dict]:
     수동 whitelist 금지 원칙 (CAPABILITIES 자동). pastInsight/sectorInsights
     포함 모든 module-level tool 에 일관 적용.
     """
-    import dartlab
-
     fn = _resolveCallable("module", target)
     if fn is None:
         return {}, kwargs
