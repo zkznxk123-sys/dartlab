@@ -40,7 +40,18 @@ def calcHHI(supplierAmounts: list[float]) -> float:
 
 
 def riskLabel(hhi: float) -> str:
-    """HHI → 위험 라벨."""
+    """HHI 값을 위험 라벨로 변환한다.
+
+    Parameters
+    ----------
+    hhi : float
+        허핀달-허시만 지수 (0~10000).
+
+    Returns
+    -------
+    str
+        "데이터 부족" (0) / "분산" (<1500) / "중간" (<2500) / "집중" (>=2500).
+    """
     if hhi == 0:
         return "데이터 부족"
     if hhi < 1500:
@@ -51,9 +62,21 @@ def riskLabel(hhi: float) -> str:
 
 
 def calcTopNRatio(supplierAmounts: list[float], n: int = 3) -> float:
-    """상위 N 공급사가 차지하는 비중 (%).
+    """상위 N 공급사가 차지하는 비중을 계산한다.
 
-    amount가 있는 공급사만 대상. 최대 100%.
+    amount가 양수인 공급사만 대상. 최대 100%.
+
+    Parameters
+    ----------
+    supplierAmounts : list[float]
+        공급사별 거래금액 리스트 (억원).
+    n : int
+        상위 몇 개까지 합산할지 (기본 3).
+
+    Returns
+    -------
+    float
+        상위 N사 비중 (%, 0.0~100.0).
     """
     amounts = sorted([a for a in supplierAmounts if a and a > 0], reverse=True)
     total = sum(amounts)
@@ -82,7 +105,18 @@ def calcSupplyInsights(
     Returns
     -------
     dict
-        concentration/diversity/change/products 인사이트.
+        supplierCount : int — 공급사 수 (건)
+        customerCount : int — 고객사 수 (건)
+        preciseEdgeCount : int — 거래금액 있는 정밀 엣지 수 (건)
+        totalSupplyAmount : float — 총 매입금액 (억원)
+        hhi : float — 허핀달-허시만 지수 (0~10000)
+        hhiRisk : str — 위험 라벨
+        top1Ratio : float — 최대 공급사 비중 (%)
+        top3Ratio : float — 상위 3사 비중 (%)
+        industryDiversity : int — 공급사 소속 산업 수 (개)
+        stageDiversity : int — 공급사 소속 공정 수 (개)
+        topSupplyIndustries : list[tuple] — 공급 산업 상위 5
+        topSupplyStages : list[tuple] — 공급 공정 상위 5
     """
     # 이 회사가 to인 supplier 엣지 (공급받는 관계)
     incoming = [e for e in edges if e.toCode == stockCode and e.edgeType == "supplier"]
@@ -132,12 +166,24 @@ def calcIndustryConcentration(
     industryId: str,
     nodes: list[Any],
 ) -> dict:
-    """산업 내 매출 집중도 지표.
+    """산업 내 매출 집중도 지표를 계산한다.
+
+    Parameters
+    ----------
+    industryId : str
+        산업 ID (taxonomy 기준).
+    nodes : list[Any]
+        전체 IndustryNode 리스트.
 
     Returns
     -------
     dict
-        상위 3사 비중, HHI, 총 매출, 기업 수.
+        companyCount : int — 매출 양수 기업 수 (개)
+        totalRevenue : float — 산업 총 매출 (억원)
+        hhi : float — 매출 기준 HHI (0~10000)
+        hhiRisk : str — 위험 라벨
+        top3Ratio : float — 상위 3사 매출 비중 (%)
+        topN : list[dict] — 상위 5사 정보 (stockCode/corpName/stage/revenue)
     """
     members = [n for n in nodes if n.industry == industryId and n.revenue and n.revenue > 0]
     if not members:

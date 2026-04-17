@@ -19,9 +19,14 @@ _DATA_DIR = Path(__file__).parent
 
 @lru_cache(maxsize=1)
 def loadTaxonomy() -> dict[str, IndustryDef]:
-    """taxonomy.json을 로드하여 {industryId: IndustryDef} 반환.
+    """taxonomy.json을 로드하여 산업 분류체계 딕셔너리를 반환한다.
 
     lru_cache로 세션 내 1회만 파싱.
+
+    Returns
+    -------
+    dict[str, IndustryDef]
+        산업ID → IndustryDef 매핑. 각 IndustryDef에 ksicCodes, stages 포함.
     """
     path = _DATA_DIR / "taxonomy.json"
     raw = json.loads(path.read_text(encoding="utf-8"))
@@ -49,12 +54,29 @@ def loadTaxonomy() -> dict[str, IndustryDef]:
 
 
 def getIndustry(industryId: str) -> IndustryDef | None:
-    """산업 ID로 IndustryDef 조회."""
+    """산업 ID로 IndustryDef를 조회한다.
+
+    Parameters
+    ----------
+    industryId : str
+        taxonomy에 등록된 산업 ID (예: "semiconductor").
+
+    Returns
+    -------
+    IndustryDef | None
+        매칭된 산업 정의. 없으면 None.
+    """
     return loadTaxonomy().get(industryId)
 
 
 def listIndustries() -> list[dict[str, str]]:
-    """등록된 산업 목록."""
+    """등록된 전체 산업 목록을 반환한다.
+
+    Returns
+    -------
+    list[dict[str, str]]
+        각 dict에 industryId (str), name (str), stages (int, 공정 수) 포함.
+    """
     return [
         {
             "industryId": ind.industryId,
@@ -144,5 +166,10 @@ def matchStageByKeywords(
 
 
 def invalidateCache() -> None:
-    """taxonomy 캐시 무효화 (JSON 수정 후 호출)."""
+    """taxonomy lru_cache를 무효화한다.
+
+    Notes
+    -----
+    taxonomy.json 수정 후 호출하면 다음 loadTaxonomy() 때 재파싱.
+    """
     loadTaxonomy.cache_clear()

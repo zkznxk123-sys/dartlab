@@ -25,7 +25,13 @@ _EDGES_FILE = _DATA_DIR / "edges.json"
 
 
 def _getKindListDicts() -> list[dict]:
-    """KindList를 dict 리스트로 변환."""
+    """KindList DataFrame을 dict 리스트로 변환한다.
+
+    Returns
+    -------
+    list[dict]
+        종목코드/회사명/업종 등 KindList 컬럼을 포함하는 행별 딕셔너리.
+    """
     from dartlab.gather.listing import getKindList
 
     df = getKindList()
@@ -33,7 +39,18 @@ def _getKindListDicts() -> list[dict]:
 
 
 def _saveNodes(nodes: list[IndustryNode]) -> Path:
-    """nodes.json에 저장."""
+    """노드 리스트를 nodes.json으로 직렬화하여 저장한다.
+
+    Parameters
+    ----------
+    nodes : list[IndustryNode]
+        저장할 노드 리스트.
+
+    Returns
+    -------
+    Path
+        저장된 nodes.json 파일 경로.
+    """
     data = [n.toDict() for n in nodes]
     _NODES_FILE.write_text(
         json.dumps(data, ensure_ascii=False, indent=2),
@@ -44,7 +61,18 @@ def _saveNodes(nodes: list[IndustryNode]) -> Path:
 
 
 def _saveEdges(edges: list[IndustryEdge]) -> Path:
-    """edges.json에 저장."""
+    """엣지 리스트를 edges.json으로 직렬화하여 저장한다.
+
+    Parameters
+    ----------
+    edges : list[IndustryEdge]
+        저장할 엣지 리스트.
+
+    Returns
+    -------
+    Path
+        저장된 edges.json 파일 경로.
+    """
     data = [e.toDict() for e in edges]
     _EDGES_FILE.write_text(
         json.dumps(data, ensure_ascii=False, indent=2),
@@ -143,7 +171,13 @@ def buildIndustryMap(
 
 
 def loadNodes() -> list[IndustryNode]:
-    """nodes.json 로드."""
+    """nodes.json을 읽어 IndustryNode 리스트로 역직렬화한다.
+
+    Returns
+    -------
+    list[IndustryNode]
+        로드된 노드 리스트. 파일 없거나 파싱 실패 시 빈 리스트.
+    """
     if not _NODES_FILE.exists():
         return []
     try:
@@ -154,7 +188,13 @@ def loadNodes() -> list[IndustryNode]:
 
 
 def loadEdges() -> list[IndustryEdge]:
-    """edges.json 로드."""
+    """edges.json을 읽어 IndustryEdge 리스트로 역직렬화한다.
+
+    Returns
+    -------
+    list[IndustryEdge]
+        로드된 엣지 리스트. 파일 없거나 파싱 실패 시 빈 리스트.
+    """
     if not _EDGES_FILE.exists():
         return []
     try:

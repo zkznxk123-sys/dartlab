@@ -18,6 +18,29 @@ OUT = ROOT / "landing" / "static" / "map" / "insights.json"
 
 
 def _brief(data: dict) -> dict:
+    """개별 회사 JSON에서 랭킹에 필요한 요약 필드만 추출한다.
+
+    Parameters
+    ----------
+    data : dict
+        회사별 JSON 전체 (ego + supplyInsights 포함).
+
+    Returns
+    -------
+    dict
+        stockCode : str — 종목코드
+        corpName : str — 회사명
+        industry : str — 산업 ID
+        revenue : float | None — 매출 (억원)
+        hhi : float — HHI (0~10000)
+        hhiRisk : str — 위험 라벨
+        supplierCount : int — 공급사 수 (건)
+        customerCount : int — 고객사 수 (건)
+        preciseEdgeCount : int — 정밀 엣지 수 (건)
+        top1Ratio : float — 최대 공급사 비중 (%)
+        top3Ratio : float — 상위 3사 비중 (%)
+        industryDiversity : int — 공급 산업 다양성 (개)
+    """
     ego = data.get("ego", {})
     sup = data.get("supplyInsights", {}) or {}
     return {
@@ -37,6 +60,7 @@ def _brief(data: dict) -> dict:
 
 
 def main() -> None:
+    """회사별 JSON을 집계하여 5개 랭킹(집중/분산/연결/다양성/의존도)을 insights.json에 저장한다."""
     files = sorted(COMPANIES_DIR.glob("*.json"))
     entries = []
     for f in files:

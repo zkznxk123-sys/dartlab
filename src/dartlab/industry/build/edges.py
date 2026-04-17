@@ -21,7 +21,14 @@ logger = logging.getLogger(__name__)
 
 
 def _listingLookup() -> tuple[dict[str, str], dict[str, str]]:
-    """종목코드→회사명, 회사명→종목코드 매핑."""
+    """KindList에서 종목코드↔회사명 양방향 매핑 테이블을 생성한다.
+
+    Returns
+    -------
+    tuple[dict[str, str], dict[str, str]]
+        (code_to_name, name_to_code) 두 딕셔너리.
+        KindList 로드 실패 시 빈 딕셔너리 쌍 반환.
+    """
     try:
         from dartlab.gather.listing import getKindList
 
@@ -34,7 +41,18 @@ def _listingLookup() -> tuple[dict[str, str], dict[str, str]]:
 
 
 def _buildNodeIndex(nodes: list[IndustryNode]) -> dict[str, IndustryNode]:
-    """stockCode → primary node."""
+    """노드 리스트에서 primary 노드만 추출하여 종목코드 인덱스를 만든다.
+
+    Parameters
+    ----------
+    nodes : list[IndustryNode]
+        전체 노드 리스트.
+
+    Returns
+    -------
+    dict[str, IndustryNode]
+        종목코드 → primary IndustryNode 매핑. 중복 시 첫 번째만 보존.
+    """
     idx: dict[str, IndustryNode] = {}
     for n in nodes:
         if n.primary and n.stockCode not in idx:
@@ -46,9 +64,20 @@ def _buildNodeIndex(nodes: list[IndustryNode]) -> dict[str, IndustryNode]:
 
 
 def extractNetworkEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
-    """scan/network의 investedCompany 데이터에서 계열·투자 엣지 추출.
+    """scan/network의 investedCompany 데이터에서 계열·투자 엣지를 추출한다.
 
     상장사 간 투자 관계만 추출 (비상장 제외).
+    경영참여 → affiliate (confidence 0.9), 단순투자 → investor (confidence 0.6).
+
+    Parameters
+    ----------
+    nodes : list[IndustryNode]
+        전체 노드 리스트. primary 노드 기준으로 상장사 필터링.
+
+    Returns
+    -------
+    list[IndustryEdge]
+        추출된 계열·투자 엣지 리스트. 동일 from-to 쌍 중복 제거됨.
     """
     edges: list[IndustryEdge] = []
     nodeIdx = _buildNodeIndex(nodes)
@@ -136,7 +165,18 @@ _CORP_PATTERN = re.compile(
 
 
 def _extractCorpNames(content: str) -> list[str]:
-    """본문에서 법인명 패턴(㈜, (주), 주식회사)을 추출."""
+    """본문에서 법인명 패턴(㈜, (주), 주식회사)을 추출한다.
+
+    Parameters
+    ----------
+    content : str
+        검색 대상 텍스트.
+
+    Returns
+    -------
+    list[str]
+        추출된 법인명 리스트 (2글자 이상만).
+    """
     names: list[str] = []
     for m in _CORP_PATTERN.finditer(content):
         name = m.group(1) or m.group(2) or m.group(3) or m.group(4)
@@ -146,11 +186,22 @@ def _extractCorpNames(content: str) -> list[str]:
 
 
 def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
-    """docs parquet에서 거래처 관계를 추출.
+    """docs parquet의 섹션 제목 패턴으로 supplier/customer/affiliate 엣지를 추출한다.
 
     2가지 방법으로 상장사를 찾는다:
     1. 본문에서 ㈜/주식회사 패턴으로 법인명 추출 → KindList 매칭
     2. KindList 상장사명이 본문에 직접 나오는 경우 (3글자 이상)
+
+    Parameters
+    ----------
+    nodes : list[IndustryNode]
+        전체 노드 리스트. primary 노드의 종목코드별로 docs parquet를 스캔.
+
+    Returns
+    -------
+    list[IndustryEdge]
+        추출된 엣지 리스트. from+to+type 기준 중복 제거됨.
+        supplier confidence 0.7, customer 0.6, affiliate 0.5.
     """
     edges: list[IndustryEdge] = []
     nodeIdx = _buildNodeIndex(nodes)
@@ -280,10 +331,21 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
 
 
 def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
-    """docs "원재료 및 생산설비" 섹션의 마크다운 테이블에서 supplier 엣지 추출.
+    """docs "원재료 및 생산설비" 마크다운 테이블에서 구조화된 supplier 엣지를 추출한다.
 
     구조화된 데이터: 부문 / 품목 / 매입액 / 비중 / 매입처
     → 공급사 실명 + 제품 + 거래 비중이 포함된 정밀 엣지.
+
+    Parameters
+    ----------
+    nodes : list[IndustryNode]
+        전체 노드 리스트.
+
+    Returns
+    -------
+    list[IndustryEdge]
+        supplier 엣지 리스트. confidence 0.9 (테이블 직접 매칭).
+        각 엣지에 product (품목명), amount (매입액, 억원), ratio (비중, %) 포함.
     """
     from dartlab.industry.build.stage3_docs import _docsDir
     from dartlab.industry.build.table_parser import (
@@ -400,7 +462,21 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
 
 
 def buildAllEdges(nodes: list[IndustryNode], *, skipDocs: bool = False) -> list[IndustryEdge]:
-    """모든 소스에서 엣지를 수집하여 통합."""
+    """network·docs·원재료 테이블 3개 소스에서 엣지를 수집하여 통합한다.
+
+    Parameters
+    ----------
+    nodes : list[IndustryNode]
+        전체 노드 리스트.
+    skipDocs : bool
+        True이면 docs 기반 엣지(텍스트+테이블) 생략. 빠른 테스트용.
+
+    Returns
+    -------
+    list[IndustryEdge]
+        통합 엣지 리스트. from+to+type 기준 중복 제거.
+        우선순위: docs_table > docs > network.
+    """
     edges: list[IndustryEdge] = []
 
     # 1. scan/network

@@ -22,10 +22,38 @@ SITE_URL = "https://eddmpython.github.io/dartlab"
 
 
 def _escape(s: str) -> str:
+    """문자열을 XML-safe로 이스케이프한다.
+
+    Parameters
+    ----------
+    s : str
+        원본 문자열.
+
+    Returns
+    -------
+    str
+        HTML/XML 엔티티로 이스케이프된 문자열. None이면 빈 문자열.
+    """
     return html.escape(str(s or ""), quote=True)
 
 
 def _rssItem(entry: dict, cat_title: str, cat_key: str) -> str:
+    """movers 항목 하나를 RSS <item> XML 문자열로 변환한다.
+
+    Parameters
+    ----------
+    entry : dict
+        movers.json의 개별 항목 (stockCode/corpName/signal 등).
+    cat_title : str
+        카테고리 표시명 (예: "ROE 급등").
+    cat_key : str
+        카테고리 키 (guid 생성용).
+
+    Returns
+    -------
+    str
+        RSS <item> XML 블록.
+    """
     link = f"{SITE_URL}/map?focus={entry.get('stockCode', '')}"
     title = f"[{cat_title}] {entry.get('corpName', '')} ({entry.get('industryName', '')})"
     body_parts = [entry.get("signal", "")]
@@ -44,6 +72,15 @@ def _rssItem(entry: dict, cat_title: str, cat_key: str) -> str:
 
 
 def buildMoversFeed():
+    """movers.json에서 전체 통합 RSS + 산업별 RSS 피드를 생성한다.
+
+    Notes
+    -----
+    출력 파일:
+    - ``landing/static/feed/movers.xml`` — 전체 통합 (카테고리당 30건).
+    - ``landing/static/feed/industry/{id}.xml`` — 산업별.
+    movers.json 없으면 스킵.
+    """
     moversPath = OUT_DIR / "movers.json"
     if not moversPath.exists():
         print("  ⚠ movers.json 없음 — RSS 스킵")
@@ -100,7 +137,13 @@ def buildMoversFeed():
 
 
 def buildCalendarFeed():
-    """Movers 를 iCal 이벤트로 (캘린더 앱 연동)."""
+    """movers.json을 iCal(.ics) 이벤트로 변환하여 캘린더 앱 연동을 지원한다.
+
+    Notes
+    -----
+    출력: ``landing/static/feed/calendar.ics``.
+    카테고리당 20건. movers.json 없으면 스킵.
+    """
     moversPath = OUT_DIR / "movers.json"
     if not moversPath.exists():
         return
@@ -142,6 +185,7 @@ END:VCALENDAR
 
 
 def main():
+    """RSS + iCal 피드 빌드 진입점. buildMoversFeed + buildCalendarFeed 순차 실행."""
     print("[Feeds] RSS + iCal 생성")
     buildMoversFeed()
     buildCalendarFeed()
