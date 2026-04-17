@@ -22,6 +22,7 @@ from dartlab.providers.edgar.bulk.datasetBulk import (
     convertQuarterlyToParquets,
     discoverLatestQuarter,
     downloadQuarterlyDataset,
+    listLocalQuarters,
 )
 from dartlab.providers.edgar.bulk.freshness import (
     BulkFreshness,
@@ -45,5 +46,6 @@ __all__ = [
     "invalidateBulkFreshness",
     "isBulkFresh",
     "readSavedEtag",
+    "listLocalQuarters",
     "touchBulkFreshness",
 ]
