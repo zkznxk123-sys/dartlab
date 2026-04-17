@@ -132,7 +132,7 @@ def buildTools() -> list[AITool]:
         tools.append(
             AITool(
                 name=name,
-                description=cap.get("summary") or _firstDocLine(callable_) or name,
+                description=_mergeDescWithReturns(cap.get("summary", ""), callable_, name),
                 parameters=_buildSchema(callable_, name, kind, CAPABILITIES),
                 handler=_buildHandler(name, kind, target),
             )
@@ -259,8 +259,8 @@ def _buildSchema(obj: Any, name: str, kind: str, caps: dict) -> dict:
         sig = None
 
     if sig is not None:
-        # Phase 16 E1: module kind 의 stockCode 는 skip 하면 안 됨 (company 만 상단 자동 추가).
         _SKIP_NAMES = {"self", "cls"} | ({"stockCode"} if kind == "company" else set())
+        args_desc = _parseDocstringArgs(obj)
         for pName, param in sig.parameters.items():
             if pName in _SKIP_NAMES or param.kind in (
                 inspect.Parameter.VAR_POSITIONAL,
@@ -271,6 +271,9 @@ def _buildSchema(obj: Any, name: str, kind: str, caps: dict) -> dict:
             enumValues = _enumFromCapabilities(name, pName, caps)
             if enumValues:
                 prop["enum"] = enumValues
+            desc = args_desc.get(pName)
+            if desc:
+                prop["description"] = desc
             props[pName] = prop
             if param.default is inspect.Parameter.empty:
                 required.append(pName)
@@ -517,6 +520,78 @@ def _pythonExec(code: str, stockCode: str | None = None) -> str:
 def _firstDocLine(obj: Any) -> str:
     doc = inspect.getdoc(obj)
     return doc.split("\n", 1)[0].strip() if doc else ""
+
+
+_DOCSTRING_SECTIONS = {"Args:", "Parameters:", "Returns:", "Raises:", "Notes:", "Examples:", "See Also:", "반환:", "인자:"}
+
+
+def _mergeDescWithReturns(summary: str, callable_: Any, fallback_name: str) -> str:
+    """CAPABILITIES summary + docstring Returns 합체. AI 가 결과 구조를 아는 것이 핵심."""
+    full_desc = _toolDescription(callable_)
+    if summary:
+        if full_desc and "\n\nReturns:" in full_desc:
+            returns_part = full_desc.split("\n\nReturns:", 1)[1]
+            return f"{summary}\n\nReturns:{returns_part}"
+        return summary
+    return full_desc or fallback_name
+
+
+def _toolDescription(obj: Any) -> str:
+    """docstring summary + Returns 추출. AI 가 tool 결과 구조를 아는 것이 핵심."""
+    doc = inspect.getdoc(obj)
+    if not doc:
+        return ""
+    lines = doc.strip().split("\n")
+    summary = lines[0].strip()
+    returns_lines: list[str] = []
+    in_returns = False
+    for line in lines[1:]:
+        stripped = line.strip()
+        if stripped.startswith("Returns") or stripped.startswith("반환"):
+            in_returns = True
+            continue
+        if in_returns:
+            if stripped in _DOCSTRING_SECTIONS:
+                break
+            if stripped:
+                returns_lines.append(stripped)
+    if returns_lines:
+        returns_text = " ".join(returns_lines[:8])
+        return f"{summary}\n\nReturns: {returns_text}"
+    return summary
+
+
+def _parseDocstringArgs(obj: Any) -> dict[str, str]:
+    """docstring Args/Parameters 섹션에서 파라미터별 설명 추출."""
+    doc = inspect.getdoc(obj)
+    if not doc:
+        return {}
+    result: dict[str, str] = {}
+    in_args = False
+    current_param: str | None = None
+    for line in doc.split("\n"):
+        stripped = line.strip()
+        if stripped in ("Args:", "Parameters:", "인자:"):
+            in_args = True
+            continue
+        if not in_args:
+            continue
+        if stripped and stripped[0].isalpha() and stripped.endswith(":") and " " not in stripped.rstrip(":"):
+            break
+        if stripped.startswith("Returns") or stripped.startswith("Raises") or stripped.startswith("반환"):
+            break
+        if ":" in stripped and not stripped.startswith("-") and not stripped.startswith("*"):
+            parts = stripped.split(":", 1)
+            param_name = parts[0].strip().split("(")[0].strip()
+            desc = parts[1].strip() if len(parts) > 1 else ""
+            if param_name and param_name.isidentifier():
+                result[param_name] = desc
+                current_param = param_name
+            elif current_param and stripped:
+                result[current_param] += " " + stripped
+        elif current_param and stripped:
+            result[current_param] += " " + stripped
+    return result
 
 
 # ── OpenAI function calling 스키마 변환 (소비자용 헬퍼) ──
