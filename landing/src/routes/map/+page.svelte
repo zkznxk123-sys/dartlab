@@ -7,6 +7,7 @@
 	import FreshnessBadge from '$lib/components/industry/FreshnessBadge.svelte';
 	import CompareTray from '$lib/components/industry/CompareTray.svelte';
 	import FloatingCard from '$lib/components/industry/FloatingCard.svelte';
+	import MapCommandPalette from '$lib/components/industry/MapCommandPalette.svelte';
 	import { brand } from '$lib/brand';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
@@ -16,6 +17,35 @@
 	let { data }: { data: PageData } = $props();
 	let tourOpen = $state(false);
 	let moversDismissed = $state(false);
+	let cmdPaletteOpen = $state(false);
+
+	// ── 글로벌 키보드 단축키 ──
+	function globalKeyHandler(e: KeyboardEvent) {
+		// 입력 중 (input/textarea/select) 이면 스킵
+		const tag = (e.target as Element)?.tagName;
+		if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+		// Ctrl+K 또는 / → Command Palette
+		if ((e.ctrlKey && e.key === 'k') || (e.key === '/' && !e.ctrlKey && !e.metaKey)) {
+			e.preventDefault();
+			cmdPaletteOpen = true;
+			return;
+		}
+		// 1~6 → colorMetric 전환
+		const metricKeys: Record<string, typeof colorMetric> = {
+			'1': 'industry', '2': 'roe', '3': 'opMargin',
+			'4': 'debtRatio', '5': 'revCagr', '6': 'revenue'
+		};
+		if (metricKeys[e.key] && !e.ctrlKey && !e.metaKey) {
+			colorMetric = metricKeys[e.key];
+			return;
+		}
+		// ? → 투어
+		if (e.key === '?' && !e.ctrlKey) {
+			tourOpen = true;
+			return;
+		}
+	}
 
 	// 총 변화 건수
 	let moversCount = $derived.by(() => {
@@ -624,6 +654,8 @@
 	}
 </script>
 
+<svelte:window onkeydown={globalKeyHandler} />
+
 <svelte:head>
 	<title>산업지도 | dartlab 전자공시</title>
 	<meta
@@ -1160,6 +1192,13 @@
 		/>
 	</FloatingCard>
 {/each}
+
+<MapCommandPalette
+	open={cmdPaletteOpen}
+	nodes={allNodes}
+	onSelect={(code) => { isMobile ? handleNodeClick(nodeFinderById(code)) : detachCard(code); }}
+	onClose={() => (cmdPaletteOpen = false)}
+/>
 
 <TutorialTour
 	open={tourOpen}

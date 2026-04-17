@@ -36,6 +36,9 @@
 
 	let stepIdx = $state(0);
 	let highlight = $state<{ x: number; y: number; w: number; h: number } | null>(null);
+	// 퀵투어(3스텝) vs 풀투어(12스텝)
+	const QUICK_COUNT = 3;
+	let fullMode = $state(false);
 
 	const STEPS: Step[] = [
 		{
@@ -247,9 +250,22 @@
 		};
 	});
 
+	function maxStep(): number {
+		return fullMode ? STEPS.length - 1 : QUICK_COUNT - 1;
+	}
 	function next() {
-		if (stepIdx < STEPS.length - 1) stepIdx += 1;
-		else finish();
+		if (stepIdx < maxStep()) stepIdx += 1;
+		else if (!fullMode) {
+			// 퀵투어 끝 → "더 알아보기" 선택지 (finish 에서 처리)
+			finish();
+		} else {
+			finish();
+		}
+	}
+	function expandToFull() {
+		fullMode = true;
+		// 3스텝 끝에서 4스텝으로 이어서 진행
+		stepIdx = QUICK_COUNT;
 	}
 	function prev() {
 		if (stepIdx > 0) stepIdx -= 1;
@@ -261,6 +277,7 @@
 			/* noop */
 		}
 		stepIdx = 0;
+		fullMode = false;
 		onClose();
 	}
 	function skip() {
@@ -282,7 +299,7 @@
 		else if (e.key === 'ArrowLeft') prev();
 	}
 
-	const POP_W = 460;
+	const POP_W = 560;
 	let popStyle = $derived.by(() => {
 		if (!highlight) {
 			return 'top:50%;left:50%;transform:translate(-50%,-50%);';
@@ -346,7 +363,7 @@
 
 		<div class="popover" style={popStyle}>
 			<div class="header-row">
-				<div class="step-idx">STEP {stepIdx + 1} / {STEPS.length}</div>
+				<div class="step-idx">STEP {stepIdx + 1} / {maxStep() + 1}{#if !fullMode} (퀵투어){/if}</div>
 				<button class="skip" onclick={skip} title="튜토리얼 건너뛰기">건너뛰기</button>
 			</div>
 
@@ -376,16 +393,20 @@
 					{:else}
 						<span class="nav-placeholder"></span>
 					{/if}
-					{#if stepIdx < STEPS.length - 1}
+					{#if !fullMode && stepIdx === QUICK_COUNT - 1}
+						<!-- 퀵투어 마지막 → 풀투어 선택 -->
+						<button class="ghost" onclick={finish}>여기서 끝내기</button>
+						<button class="primary" onclick={expandToFull}>더 알아보기 ({STEPS.length - QUICK_COUNT}스텝) →</button>
+					{:else if stepIdx < maxStep()}
 						<button class="primary" onclick={next}>다음 →</button>
 					{:else}
-						<button class="primary" onclick={finish}>완료 🎉</button>
+						<button class="primary" onclick={finish}>완료</button>
 					{/if}
 				</div>
 			</div>
 
 			<div class="progress">
-				<div class="progress-fill" style:width="{((stepIdx + 1) / STEPS.length) * 100}%"></div>
+				<div class="progress-fill" style:width="{((stepIdx + 1) / (maxStep() + 1)) * 100}%"></div>
 			</div>
 		</div>
 	</div>
@@ -407,16 +428,28 @@
 	}
 	.popover {
 		position: absolute;
-		width: 460px;
+		width: 560px;
 		max-height: calc(100vh - 32px);
 		overflow-y: auto;
 		background: #0f1219;
 		border: 1px solid #334155;
 		border-radius: 12px;
-		padding: 18px 22px 14px;
+		padding: 24px 28px 18px;
 		color: #f1f5f9;
 		box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
 		pointer-events: auto;
+	}
+	@media (max-width: 640px) {
+		.popover {
+			width: 100vw;
+			max-height: 60vh;
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			top: auto !important;
+			border-radius: 16px 16px 0 0;
+			transform: none !important;
+		}
 	}
 	.header-row {
 		display: flex;
@@ -446,14 +479,14 @@
 	}
 	.popover h3 {
 		margin: 0 0 12px;
-		font-size: 17px;
+		font-size: 20px;
 		font-weight: 700;
 		color: #f1f5f9;
 		line-height: 1.4;
 	}
 	.body {
-		font-size: 13px;
-		line-height: 1.75;
+		font-size: 15px;
+		line-height: 1.8;
 		color: #cbd5e1;
 	}
 	.body :global(p) {
@@ -472,7 +505,7 @@
 		background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(52, 211, 153, 0.06));
 		border: 1px solid rgba(96, 165, 250, 0.25);
 		border-radius: 8px;
-		font-size: 12px;
+		font-size: 14px;
 		line-height: 1.6;
 		color: #cbd5e1;
 	}
