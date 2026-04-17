@@ -521,6 +521,7 @@
 
 	// ── 모바일 감지 ──
 	let isMobile = $state(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+	let sidebarCollapsed = $state(false);
 
 	// ── 노드 클릭 ──
 	function handleNodeClick(node: any) {
@@ -674,9 +675,12 @@
 	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
-<div class="map-page">
+<div class="map-page" class:sidebar-collapsed={sidebarCollapsed}>
 	<!-- 왼쪽 사이드바 -->
-	<aside class="sidebar">
+	<aside class="sidebar" class:collapsed={sidebarCollapsed}>
+		<button class="collapse-toggle" onclick={() => (sidebarCollapsed = !sidebarCollapsed)} title={sidebarCollapsed ? '사이드바 열기' : '사이드바 접기'}>
+			{sidebarCollapsed ? '≫' : '≪'}
+		</button>
 		<!-- 브랜드 바: 아바타 → GitHub → Coffee → 도움말 (단색 라인 아이콘 일관) -->
 		<div class="brand-bar">
 			<a class="brand-btn avatar" href="{base}/" title="dartlab 홈으로" aria-label="홈">
@@ -1078,6 +1082,8 @@
 				}))}
 				flows={data.atlas.flows}
 				onSelect={(ind: any) => enterIndustry(ind.id)}
+				{colorMetric}
+				industryStats={(data as any).industryStats || {}}
 			/>
 		{:else if viewMode === 'industry' && industryDetail}
 			<IndustryDrilldown
@@ -1218,16 +1224,55 @@
 		height: 100dvh;
 		background: #050811;
 		color: #f1f5f9;
+		transition: grid-template-columns 0.2s;
+	}
+	.map-page.sidebar-collapsed {
+		grid-template-columns: 48px 1fr;
+	}
+
+	.collapse-toggle {
+		position: absolute;
+		top: 8px;
+		right: -14px;
+		width: 28px;
+		height: 28px;
+		background: #0f1219;
+		border: 1px solid #1e2433;
+		border-radius: 50%;
+		color: #94a3b8;
+		font-size: 12px;
+		cursor: pointer;
+		z-index: 3;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.collapse-toggle:hover {
+		background: #1e2433;
+		color: #f1f5f9;
 	}
 
 	.sidebar {
 		display: flex;
+		position: relative;
 		flex-direction: column;
 		overflow-y: auto;
 		background: #0f1219;
 		border-right: 1px solid #1e2433;
 		padding: 16px 16px 64px;
 		color: #f1f5f9;
+		transition: width 0.2s, padding 0.2s;
+	}
+	.sidebar.collapsed {
+		padding: 8px 6px 16px;
+		overflow: hidden;
+	}
+	.sidebar.collapsed > :not(.brand-bar):not(.collapse-toggle) {
+		display: none;
+	}
+	.sidebar.collapsed .brand-bar {
+		flex-direction: column;
+		gap: 8px;
 	}
 
 	/* 브랜드 바: 모든 버튼 동일 크기/스타일 단색 라인 아이콘 */

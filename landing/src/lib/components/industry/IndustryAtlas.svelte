@@ -31,9 +31,24 @@
 		industries: IndustryNode[];
 		flows: FlowEdge[];
 		onSelect?: (ind: IndustryNode) => void;
+		colorMetric?: string;
+		industryStats?: Record<string, any>;
 	}
 
-	let { industries, flows, onSelect }: Props = $props();
+	let { industries, flows, onSelect, colorMetric = 'industry', industryStats = {} }: Props = $props();
+
+	function metricLabel(ind: IndustryNode): string {
+		if (colorMetric === 'industry' || !industryStats) return '';
+		const s = industryStats[ind.id];
+		if (!s) return '';
+		const keyMap: Record<string, string> = {
+			roe: 'avgRoe', opMargin: 'avgOpMargin', revCagr: 'avgCagr',
+			debtRatio: '', revenue: '', // atlas 에서 의미 없는 항목
+		};
+		const k = keyMap[colorMetric];
+		if (!k || s[k] === null || s[k] === undefined) return '';
+		return `${Number(s[k]).toFixed(1)}%`;
+	}
 
 	let container: HTMLDivElement | null = $state(null);
 	let w = $state(1200);
@@ -414,6 +429,21 @@
 					>
 						{n.nodeCount}사 · {formatRev(n.revenue)}
 					</text>
+					<!-- metric 숫자 (colorMetric != industry 일 때) -->
+					{#if colorMetric !== 'industry'}
+						{@const ml = metricLabel(n)}
+						{#if ml}
+							<text
+								class="ind-metric"
+								text-anchor="middle"
+								dominant-baseline="central"
+								y={Math.max(11, Math.min(16, n.r * 0.28)) * 0.85 + 14}
+								font-size="10"
+							>
+								{ml}
+							</text>
+						{/if}
+					{/if}
 				</g>
 			{/each}
 		</g>
@@ -510,6 +540,17 @@
 		stroke-width: 3px;
 		stroke-linejoin: round;
 		letter-spacing: -0.02em;
+		pointer-events: none;
+		user-select: none;
+	}
+	.ind-metric {
+		font-family: monospace;
+		font-weight: 700;
+		fill: #fbbf24;
+		paint-order: stroke fill;
+		stroke: rgba(5, 8, 17, 0.9);
+		stroke-width: 2.5px;
+		stroke-linejoin: round;
 		pointer-events: none;
 		user-select: none;
 	}
