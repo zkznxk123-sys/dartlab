@@ -348,14 +348,6 @@ def _enumFromCapabilities(toolName: str, paramName: str, caps: dict) -> list[str
             return list(SHOW_FREQS)
         except ImportError:
             return ["Q", "Y", "YTD"]
-    # show.scope — core/show.py 상수 자동 (Phase 16 E2)
-    if toolName == "show" and paramName == "scope":
-        try:
-            from dartlab.core.show import SHOW_SCOPES
-
-            return list(SHOW_SCOPES)
-        except ImportError:
-            return ["consolidated", "separate"]
     # search.scope — core/search/__init__.py 상수 자동
     if toolName == "search" and paramName == "scope":
         try:

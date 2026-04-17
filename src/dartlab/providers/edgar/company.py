@@ -2482,22 +2482,6 @@ class Company:
 
     # ── Methods ──
 
-    def reviewer(
-        self,
-        section: str | None = None,
-        layout=None,
-        helper: bool | None = None,
-        guide: str | None = None,
-        *,
-        preset: str | None = None,
-        detail: bool | None = None,
-        basePeriod: str | None = None,
-    ):
-        """AI 분석 보고서 — review() + 섹션별 AI 종합의견."""
-        from dartlab.review.registry import buildReview
-
-        return buildReview(self, section=section, layout=layout, basePeriod=basePeriod)
-
     def table(
         self, topic: str, subtopic: str | None = None, *, numeric: bool = False, period: str | None = None
     ) -> Any:
