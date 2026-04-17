@@ -4,7 +4,7 @@ src/dartlab/ai/README.md §2 의 "post-response 학습 (자율성 침해 아님)
 runtime/core.py::_runAskInner 에서 응답 종료 시 호출.
 
 3 훅:
-- memory.saveAnalysis       — executions 테이블 (general 포함)
+- persistence.store.saveAnalysis — executions 테이블 (general 포함)
 - playbook.saveInsightFromResponse — insights (regex 추출, stockCode 있을 때만)
 - playbook.curate           — ACE bullet delta merge (arxiv.org/abs/2510.04618)
 """
@@ -28,8 +28,8 @@ def runPostResponse(
 
     # 1. memory.saveAnalysis — general 질문도 executions 추적
     try:
-        from dartlab.ai.memory.store import getMemory
-        from dartlab.ai.memory.summarizer import extractGrade, summarizeResponse
+        from dartlab.ai.persistence.store import getMemory
+        from dartlab.ai.persistence.summarizer import extractGrade, summarizeResponse
 
         _mem = getMemory()
         _mem.saveAnalysis(

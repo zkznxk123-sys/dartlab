@@ -335,55 +335,44 @@ def _buildSchema(obj: Any, name: str, kind: str, caps: dict) -> dict:
 
 
 def _enumFromCapabilities(toolName: str, paramName: str, caps: dict) -> list[str]:
-    """CAPABILITIES 에서 `{engine}.{axis}` entry 를 수집해 enum 으로."""
-    # axis 파라미터 → 엔진 자체 공간의 축 entry 수집
+    """CAPABILITIES 에서 enum 값 자동 수집. dict dispatch 로 조건 nesting 제거."""
+    # axis 파라미터 → 엔진 자체 공간의 축 entry 수집 (scan/macro/gather 공통)
     if paramName == "axis" and toolName in ("scan", "macro", "gather"):
         prefix = f"{toolName}."
-        return sorted(k[len(prefix) :] for k in caps if k.startswith(prefix))
-    # show.topic — 재무제표/주석/docs topic 합집합 (엔진 메타에 모든게 있진 않음)
-    if toolName == "show" and paramName == "topic":
-        return _showTopics()
-    # show.freq — core/show.py 상수 자동
-    if toolName == "show" and paramName == "freq":
+        return sorted(k[len(prefix):] for k in caps if k.startswith(prefix))
+    # 특수 해석기 — (toolName, paramName) → resolver
+    resolver = _ENUM_RESOLVERS.get((toolName, paramName))
+    if resolver:
         try:
-            from dartlab.core.show import SHOW_FREQS
-
-            return list(SHOW_FREQS)
-        except ImportError:
-            return ["Q", "Y", "YTD"]
-    # search.scope — core/search/__init__.py 상수 자동
-    if toolName == "search" and paramName == "scope":
-        try:
-            from dartlab.core.search import SEARCH_SCOPES
-
-            return list(SEARCH_SCOPES)
-        except ImportError:
-            return ["auto", "title", "content", "both"]
-    # analysis.axis — _AXIS_REGISTRY 전체 (financial + forecast + valuation 그룹)
-    if toolName == "analysis" and paramName == "axis":
-        try:
-            from dartlab.analysis.financial import _AXIS_REGISTRY as _AR
-
-            return sorted(_AR.keys())
-        except ImportError:
-            return _parseAxesFromDocstring("analysis")
-    # credit.axis — 실제 _CREDIT_AXES 를 직접 사용 (추측 방지)
-    if toolName == "credit" and paramName == "axis":
-        try:
-            from dartlab.credit import _CREDIT_AXES  # type: ignore[attr-defined]
-
-            return list(_CREDIT_AXES.keys())
+            return resolver()
         except (ImportError, AttributeError):
-            return _parseAxesFromDocstring("credit")
-    # review.type — review/reportTypes.REPORT_TYPES 자동
-    if toolName == "review" and paramName == "type":
-        try:
-            from dartlab.review.reportTypes import REPORT_TYPES
-
-            return sorted(REPORT_TYPES.keys())
-        except ImportError:
-            return ["full"]
+            return []
     return []
+
+
+def _resolveShowFreq() -> list[str]:
+    from dartlab.core.show import SHOW_FREQS
+    return list(SHOW_FREQS)
+
+
+def _resolveSearchScope() -> list[str]:
+    from dartlab.core.search import SEARCH_SCOPES
+    return list(SEARCH_SCOPES)
+
+
+def _resolveAnalysisAxis() -> list[str]:
+    from dartlab.analysis.financial import _AXIS_REGISTRY as _AR
+    return sorted(_AR.keys())
+
+
+def _resolveCreditAxis() -> list[str]:
+    from dartlab.credit import _CREDIT_AXES  # type: ignore[attr-defined]
+    return list(_CREDIT_AXES.keys())
+
+
+def _resolveReviewType() -> list[str]:
+    from dartlab.review.reportTypes import REPORT_TYPES
+    return sorted(REPORT_TYPES.keys())
 
 
 def _parseAxesFromDocstring(target: str) -> list[str]:
@@ -444,6 +433,16 @@ def _showTopics() -> list[str]:
             seen.add(t)
             out.append(t)
     return out
+
+
+_ENUM_RESOLVERS: dict[tuple[str, str], Callable[[], list[str]]] = {
+    ("show", "topic"): _showTopics,
+    ("show", "freq"): _resolveShowFreq,
+    ("search", "scope"): _resolveSearchScope,
+    ("analysis", "axis"): _resolveAnalysisAxis,
+    ("credit", "axis"): _resolveCreditAxis,
+    ("review", "type"): _resolveReviewType,
+}
 
 
 def _paramType(param: inspect.Parameter) -> str:

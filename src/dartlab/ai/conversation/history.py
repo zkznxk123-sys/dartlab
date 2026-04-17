@@ -185,7 +185,7 @@ def compress_history(history: list[HistoryItem] | None) -> list[HistoryItem] | N
             cleaned = _strip_non_essential(text)
             # summarizeResponse로 종합/결론 섹션 추출 시도
             try:
-                from ..memory.summarizer import summarizeResponse
+                from ..persistence.summarizer import summarizeResponse
 
                 summary = summarizeResponse(cleaned, maxChars=150)
             except ImportError:

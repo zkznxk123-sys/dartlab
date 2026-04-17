@@ -166,11 +166,10 @@ def curate(
     outcome = gradeToOutcome(grade)
     inserted = 0
     skipped = 0
-    try:
-        from dartlab.ai.persistence import KnowledgeDB
+    from dartlab.ai.persistence import _get_db
 
-        db = KnowledgeDB.get()
-    except ImportError:
+    db = _get_db()
+    if db is None:
         return CurateResult(intent, sector, 0, len(bullets))
 
     for b in bullets:
@@ -205,11 +204,10 @@ def retrieveBullets(
     """
     if not intent:
         return []
-    try:
-        from dartlab.ai.persistence import KnowledgeDB
+    from dartlab.ai.persistence import _get_db
 
-        db = KnowledgeDB.get()
-    except ImportError:
+    db = _get_db()
+    if db is None:
         return []
     try:
         rows = db.get_bullets(
@@ -245,7 +243,7 @@ def saveInsightFromResponse(
     company: Any | None = None,
 ) -> None:
     """AI 응답에서 인사이트 추출 → KnowledgeDB 저장. curate 와 병렬 훅."""
-    from dartlab.ai.persistence import KnowledgeDB
+    from dartlab.ai.persistence import _get_db
 
     strengths = _STRENGTH_RE.findall(response_text)
     weaknesses = _WEAKNESS_RE.findall(response_text)
@@ -266,8 +264,10 @@ def saveInsightFromResponse(
     if company is not None:
         sector = getattr(company, "sector", None) or getattr(company, "sectorName", None) or ""
 
+    db = _get_db()
+    if db is None:
+        return
     try:
-        db = KnowledgeDB.get()
         db.save_insight(
             stock_code=stock_code,
             narrative=narrative,

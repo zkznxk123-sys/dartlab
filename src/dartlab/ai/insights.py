@@ -43,14 +43,10 @@ def pastInsight(stockCode: str) -> dict[str, Any] | None:
         dict — narrative / strengths / weaknesses / keyMetrics / dataAsOf / source.
         None — 과거 분석 없음.
     """
-    try:
-        from dartlab.ai.persistence import KnowledgeDB
-    except ImportError:
-        return None
+    from dartlab.ai.persistence import _get_db
 
-    try:
-        db = KnowledgeDB.get()
-    except (OSError, RuntimeError):
+    db = _get_db()
+    if db is None:
         return None
 
     rec = db.get_insight(stockCode, source="blog")
@@ -72,14 +68,10 @@ def sectorInsights(sector: str, limit: int = 3) -> list[dict[str, Any]]:
     Returns:
         list — 각 항목: narrative / strengths / weaknesses / keyMetrics / stockCode / corpName.
     """
-    try:
-        from dartlab.ai.persistence import KnowledgeDB
-    except ImportError:
-        return []
+    from dartlab.ai.persistence import _get_db
 
-    try:
-        db = KnowledgeDB.get()
-    except (OSError, RuntimeError):
+    db = _get_db()
+    if db is None:
         return []
 
     records = db.get_sector_insights(sector, limit=limit)

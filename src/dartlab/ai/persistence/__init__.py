@@ -1,23 +1,29 @@
-"""ai 엔진 영속성 — KnowledgeDB.
+"""ai 엔진 영속성 — KnowledgeDB + 분석 메모리 + 요약.
 
-dartlab AI 의 단일 영속 저장소. selfai 폐기 후 영속성 책임만 분리해서 보존.
+dartlab AI 의 단일 영속 패키지. Phase 17 C1 에서 memory/ 폴더 통합.
 
-테이블:
-    - executions: 모든 AI 실행 기록 (질문/결과/등급/모드)
-    - insights:   기업별 심층 분석 서사 (자기성장 루프)
-    - skills:     성공한 코드 패턴 (legacy, 폐기 예정)
-    - error_patterns: 에러 패턴 (legacy, 폐기 예정)
-    - meta:       DB 버전 / 마이그레이션 상태
+모듈:
+    knowledge_db.py — 단일 DB (executions/insights/playbook/meta 테이블)
+    store.py        — AnalysisMemory (executions 테이블 경계 레이어)
+    summarizer.py   — 규칙 기반 응답 요약/등급 추출
 
 대표 진입점:
     >>> from dartlab.ai.persistence import KnowledgeDB
     >>> db = KnowledgeDB.get()
     >>> db.save_execution(...)
-    >>> db.get_insight("005930")
 """
 
 from __future__ import annotations
 
 from dartlab.ai.persistence.knowledge_db import KnowledgeDB
+from dartlab.ai.persistence.store import AnalysisMemory, getMemory
 
-__all__ = ["KnowledgeDB"]
+__all__ = ["KnowledgeDB", "AnalysisMemory", "getMemory"]
+
+
+def _get_db():
+    """KnowledgeDB 싱글턴 안전 접근. 실패 시 None."""
+    try:
+        return KnowledgeDB.get()
+    except (OSError, RuntimeError):
+        return None
