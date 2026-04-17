@@ -515,6 +515,14 @@ button, a, input, textarea {
 	white-space: nowrap;
 	flex: 1;
 }
+.tool-summary {
+	color: var(--color-dl-text-muted);
+	font-size: 11px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	flex: 1;
+}
 .tool-body {
 	border-top: 0.5px solid rgba(148, 163, 184, 0.12);
 	display: grid;

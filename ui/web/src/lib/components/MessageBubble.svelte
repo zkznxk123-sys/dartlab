@@ -565,8 +565,12 @@
 									{:else}
 										<div class="tool-spinner-sm"></div>
 									{/if}
-									<span class="tool-name">{toolLabel(pair.call.name)}</span>
-									<span class="tool-args">{truncateStr(formatToolArg(pair.call.arguments), 60)}</span>
+									<span class="tool-name">{pair.call.label || toolLabel(pair.call.name)}</span>
+									{#if pair.result?.summary}
+										<span class="tool-summary">{truncateStr(pair.result.summary, 80)}</span>
+									{:else}
+										<span class="tool-args">{truncateStr(formatToolArg(pair.call.arguments), 60)}</span>
+									{/if}
 								</button>
 								{#if isToolExpanded && pair.result}
 									<div class="tool-body">

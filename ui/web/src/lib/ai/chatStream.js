@@ -146,6 +146,7 @@ export function createAskStreamCallbacks({
 			appendMessageList(store, "toolEvents", {
 				type: "call",
 				name: ev.name,
+				label: ev.label,
 				arguments: ev.arguments,
 			});
 		},
@@ -154,6 +155,8 @@ export function createAskStreamCallbacks({
 			appendMessageList(store, "toolEvents", {
 				type: "result",
 				name: ev.name,
+				label: ev.label,
+				summary: ev.summary,
 				result: ev.result,
 			});
 			if (isMissingDartKeyToolResult(ev.name, ev.result)) {
