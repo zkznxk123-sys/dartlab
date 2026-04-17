@@ -1369,6 +1369,7 @@ def _generateCapabilitiesPy() -> str:
                 "scan": ("dartlab.scan", "Scan"),
                 "macro": ("dartlab.macro", "Macro"),
                 "quant": ("dartlab.quant", "Quant"),
+                "industry": ("dartlab.industry", "Industry"),
                 "topdown": ("dartlab.topdown", None),  # 함수 직접 참조
             }
             candidates = [inspect.getdoc(getattr(type(obj), "__call__", None))]

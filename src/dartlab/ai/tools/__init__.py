@@ -193,6 +193,14 @@ def _resolveCallable(kind: str, target: str) -> Any:
                 return Quant.__call__
             except ImportError:
                 pass
+        if target == "industry":
+            from dartlab.industry import Industry
+
+            return Industry.__call__
+        if target == "topdown":
+            from dartlab.topdown import topdown as _topdownFn
+
+            return _topdownFn
         # 일반 모듈 함수 (search / searchName 등)
         try:
             import dartlab
