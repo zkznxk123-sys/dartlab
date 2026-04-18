@@ -173,20 +173,12 @@
 			linkVisibilityMinTransparency: isAtlas ? 0.75 : 0.15,
 			curvedLinks: true,
 			curvedLinkSegments: 16,
-			simulation: isAtlas ? {
-				repulsion: 1.0,
-				gravity: 0.15,
-				linkDistance: 10,
-				friction: 0.85,
-				decay: 1000,
-				onTick: () => updateLabels(),
-			} : {
-				// companies 뷰: 사전 계산 좌표 사용, 시뮬레이션 OFF
-				repulsion: 0,
-				gravity: 0,
-				linkDistance: 0,
-				friction: 1,
-				decay: 1,
+			simulation: {
+				repulsion: isAtlas ? 1.0 : 0.1,
+				gravity: isAtlas ? 0.15 : 0.0,
+				linkDistance: isAtlas ? 10 : 2,
+				friction: isAtlas ? 0.85 : 0.98,
+				decay: isAtlas ? 1000 : 200,
 				onTick: () => updateLabels(),
 			},
 			events: {
