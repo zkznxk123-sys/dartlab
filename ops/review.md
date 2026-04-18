@@ -579,19 +579,23 @@ AI audit 10개 질문 검증 (ops/ai.md §10)
 5. **AI audit** — `scripts/audit/aiAudit.py` 10개 질문 실행 + **사람 직접 읽고 판단**
 6. **품질 미달 시** — 3번으로 돌아가 재료 보강
 
-### 현재 약점 (개선 대상)
+### 관점 현황 (2026-04-18 기준)
 
-| 빠진 관점 | 재료 엔진 | 상태 |
+| 관점 | 재료 엔진 | 상태 |
 |---|---|---|
-| 유형별 관점 자동 설정 | analysis/lifeCycle | calc 있음, review 미연결 |
-| 시나리오 분석 (base/bull/bear) | analysis/forecast + overrides | calc 있음, review 미통합 |
-| pro forma 전망 재무제표 | core/finance/proforma | 함수 있음, review 미통합 |
-| 경쟁사 비교 서사 | scan + industry | 데이터 있음, 서사 미연결 |
-| 산업 밸류체인 맥락 | industry | 엔진 있음, review 미통합 |
-| 매크로 민감도 정량화 | analysis/macroExposure | calc 있음, review 미연결 |
+| 유형별 관점 자동 설정 | analysis/lifeCycle | ✅ lifeCycle → emphasize 자동 연결 |
+| 시나리오 분석 (base/bull/bear) | analysis/forecast + overrides | ✅ valuationSynthesisBlock scenarios |
+| pro forma 전망 재무제표 | core/finance/proforma | ✅ proFormaHighlightsBlock |
+| 경쟁사 비교 서사 | scan + industry | ✅ peerPositionBlock / peerRankingBlock |
+| 산업 밸류체인 맥락 | industry | ✅ chainPositionBlock |
+| 매크로 민감도 정량화 | analysis/macroExposure | ✅ macroSensitivityBlock |
+| 신용등급 시나리오 | credit + overrides | ✅ creditScenarioBlock |
+| thesis 보고서 | storyValidation | ✅ thesisReportBlocks |
+| quant 서사 연결 | quant narrate | ✅ quantModuleBlock |
 
-### 우선순위
+### 다음 개선 후보
 
-- Phase 1 (재료 있음): lifeCycle 연결 → scan peer 서사 → macroExposure 블록
-- Phase 2 (재료 보강): forecast 3시나리오 → proforma 블록 → industry 블록
-- Phase 3 (심화): credit 시나리오 → thesis 고도화 → quant 서사
+- 배당 지속성 시나리오 (금리 변동 시 배당 커버리지 변화)
+- ESG/탄소 리스크 관점 (재료 엔진 미구현)
+- 경영진 교체 리스크 (재료: governance + 공시 diff)
+- AI 논제 검증 고도화 (thesis — 가설→증거 자동 수집 강화)
