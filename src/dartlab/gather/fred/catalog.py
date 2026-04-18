@@ -108,11 +108,10 @@ CATALOG: dict[str, list[CatalogEntry]] = {
         CatalogEntry("EXHOSLUSM495S", "기존주택판매", "housing", "Monthly", "Number of Units", "기존 주택 판매건수"),
     ],
     "ism": [
-        CatalogEntry("NAPMNOI", "ISM 신규수주", "ism", "Monthly", "Index", "ISM 제조업 신규수주 (PMI 프록시)"),
-        CatalogEntry("NAPMII", "ISM 재고", "ism", "Monthly", "Index", "ISM 제조업 재고 지수"),
-        CatalogEntry("NEWORDER", "제조업 신규수주", "ism", "Monthly", "Millions of Dollars", "제조업 신규수주"),
+        CatalogEntry("AMTMNO", "제조업 신규수주", "ism", "Monthly", "Millions of Dollars", "제조업 총 신규수주 (PMI 프록시)"),
+        CatalogEntry("AMTMUO", "제조업 미충족수주", "ism", "Monthly", "Millions of Dollars", "제조업 미충족 수주 (재고 프록시)"),
+        CatalogEntry("NEWORDER", "비국방자본재 수주", "ism", "Monthly", "Millions of Dollars", "비국방 자본재 신규수주"),
         CatalogEntry("BUSINV", "총사업재고", "ism", "Monthly", "Millions of Dollars", "총 사업 재고"),
-        CatalogEntry("AMTMNO", "제조업 총수주", "ism", "Monthly", "Millions of Dollars", "제조업 총 신규수주"),
     ],
     "lei": [
         CatalogEntry("AWHMAN", "제조업 주당근로시간", "lei", "Monthly", "Hours", "제조업 평균 주당 근로시간"),

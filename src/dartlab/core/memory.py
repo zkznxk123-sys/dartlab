@@ -283,6 +283,14 @@ class BoundedCache:
             if not evicted:
                 break  # 모두 pinned면 초과 허용
 
+    def keys(self) -> list[str]:
+        with self._lock:
+            return list(self._store.keys())
+
+    def pop(self, key: str, *args: Any) -> Any:
+        with self._lock:
+            return self._store.pop(key, *args)
+
     def clear(self) -> None:
         with self._lock:
             self._store.clear()

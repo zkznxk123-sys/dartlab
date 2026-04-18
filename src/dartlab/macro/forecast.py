@@ -62,7 +62,7 @@ def _fetch_forecast_data(market: str, as_of: str | None = None) -> dict[str, flo
             ("awhman", "AWHMAN"),
             ("icsa", "ICSA"),
             ("acogno", "ACOGNO"),
-            ("napmnoi", "NAPMNOI"),
+            ("napmnoi", "AMTMNO"),
             ("acdgno", "ACDGNO"),
             ("permit", "PERMIT"),
             ("sp500", "SP500"),

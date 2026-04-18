@@ -187,7 +187,7 @@ def analyze_cycle(*, market: str = "US", as_of: str | None = None, overrides: di
 
         if market.upper() == "US":
             # ISM PMI - 50 (성장 신호)
-            ism = fetch_latest(g, "NAPMNOI")
+            ism = fetch_latest(g, "AMTMNO")
             # CPI YoY 3개월 모멘텀 (인플레 신호)
             cpi_yoy = indicators.get("cpi_yoy")
             cpi_yoy_prev = fetch_change_pct(g, "CPIAUCSL", 63)  # 3M ago
