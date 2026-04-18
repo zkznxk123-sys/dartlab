@@ -454,18 +454,17 @@ def _computeLayout(nodes, taxonomy) -> dict[str, tuple[float, float]]:
         cnt = len(byIndustry[ind_id])
         indSpreads[ind_id] = max(150, min(800, 30 * math.sqrt(cnt)))
 
-    # 나선형 배치: 각 산업을 충분한 거리로 분리
-    # 충돌 방지: 배치 후 이웃 간 최소 거리 확인 + 밀어내기
+    # 나선형 배치 + 강제 충돌 방지
     centers: dict[str, tuple[float, float]] = {}
-    golden = math.pi * (3 - math.sqrt(5))  # golden angle
-    baseRadius = 2000
+    golden = math.pi * (3 - math.sqrt(5))
+    baseRadius = 4000
     for i, ind_id in enumerate(indOrder):
         angle = golden * i - math.pi / 2
-        r = baseRadius + 500 * math.sqrt(i)
+        r = baseRadius + 800 * math.sqrt(i)
         centers[ind_id] = (r * math.cos(angle), r * math.sin(angle))
 
-    # 충돌 밀어내기: 각 산업 중심 간 최소 거리 = 양쪽 spread 합
-    for _ in range(20):  # 반복 relaxation
+    # 충돌 밀어내기: 최소 거리 = 양쪽 spread 합 × 1.5 + 300
+    for _ in range(50):
         moved = False
         cids = list(centers.keys())
         for a in range(len(cids)):
@@ -474,9 +473,9 @@ def _computeLayout(nodes, taxonomy) -> dict[str, tuple[float, float]]:
                 bx, by = centers[cids[b]]
                 dx, dy = bx - ax, by - ay
                 dist = math.sqrt(dx * dx + dy * dy) or 1
-                minDist = indSpreads[cids[a]] + indSpreads[cids[b]] + 200
+                minDist = (indSpreads[cids[a]] + indSpreads[cids[b]]) * 1.5 + 300
                 if dist < minDist:
-                    push = (minDist - dist) / 2
+                    push = (minDist - dist) / 2 + 50
                     nx, ny = dx / dist, dy / dist
                     centers[cids[a]] = (ax - nx * push, ay - ny * push)
                     centers[cids[b]] = (bx + nx * push, by + ny * push)

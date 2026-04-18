@@ -64,7 +64,6 @@ async def run_plain_chat(req: AskRequest) -> dict[str, str]:
     """회사 컨텍스트 없이 일반 AI 채팅을 실행한다."""
     try:
         answer = await collect_analysis_text(
-            None,
             req.question,
             provider=normalize_provider(req.provider) or req.provider,
             role=req.role or "summary",

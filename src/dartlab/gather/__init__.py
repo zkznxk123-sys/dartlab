@@ -337,14 +337,8 @@ class Gather:
                 module = load_domain("naver")
                 result = run_async(module.fetch_revenue_consensus(stock_code, self._client))
             else:
-                module = load_domain("naver_global")
-                result = run_async(
-                    module.fetch_revenue_consensus(
-                        stock_code,
-                        self._client,
-                        market=market,
-                    )
-                )
+                # US/글로벌: revenue consensus 소스 없음 (네이버 KR 전용)
+                result = []
         except (SourceUnavailableError, ImportError, OSError, AttributeError) as exc:
             log.warning("revenue_consensus 실패 (%s, %s): %s", stock_code, market, exc)
             result = []
