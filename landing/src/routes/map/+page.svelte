@@ -93,7 +93,7 @@
 	// atlas: 34개 산업 노드 + 산업간 supplier flow (default)
 	// companies: 기존 ecosystem 전체 2,664사
 	// industry: 한 산업 내부 drill-down
-	type ViewMode = 'atlas' | 'treemap' | 'companies' | 'industry';
+	type ViewMode = 'atlas' | 'treemap' | 'industry';
 	let viewMode: ViewMode = $state('atlas');
 	let drillIndustry: string | null = $state(null);
 	// 업종 체력 카드 (atlas 뷰에서 업종 클릭 시)
@@ -1241,7 +1241,10 @@
 				nodes={activeNodes}
 				links={activeLinks}
 				isAtlas={false}
+				industriesProp={data.ecosystem.industries || []}
+				industryFlows={data.ecosystem.industryFlows || []}
 				onNodeClick={handleNodeClick}
+				onIndustryClick={(indId) => enterIndustry(indId)}
 			/>
 		{/if}
 

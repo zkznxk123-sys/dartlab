@@ -33,15 +33,44 @@
 		edgeCount?: number;
 	}
 
+	interface IndustryMeta {
+		id: string;
+		name: string;
+		color: string;
+		count: number;
+		x?: number;
+		y?: number;
+		radius?: number;
+		totalRevenue?: number;
+	}
+	interface IndustryFlow {
+		fromIndustry: string;
+		toIndustry: string;
+		edgeCount: number;
+		amount: number;
+	}
+
 	interface Props {
 		nodes: NodeDatum[];
 		links: LinkDatum[];
 		isAtlas?: boolean;
+		industriesProp?: IndustryMeta[];
+		industryFlows?: IndustryFlow[];
 		onNodeClick?: (node: NodeDatum | null) => void;
 		onNodeHover?: (node: NodeDatum | null) => void;
+		onIndustryClick?: (industryId: string) => void;
 	}
 
-	let { nodes, links, isAtlas = false, onNodeClick, onNodeHover }: Props = $props();
+	let {
+		nodes,
+		links,
+		isAtlas = false,
+		industriesProp = [],
+		industryFlows = [],
+		onNodeClick,
+		onNodeHover,
+		onIndustryClick
+	}: Props = $props();
 
 	let container: HTMLDivElement | null = $state(null);
 	let graph: any = $state(null);
@@ -50,6 +79,19 @@
 	let industryLabels: Array<{ name: string; color: string; x: number; y: number; count: number; totalRev: number; radius: number }> =
 		$state([]);
 	let companyLabels: Array<{ id: string; name: string; x: number; y: number; rev: number }> = $state([]);
+
+	// semantic zoom — 산업 버블/flow 화면 좌표
+	let industryNodesOnScreen: Array<{
+		id: string; name: string; color: string; count: number;
+		sx: number; sy: number; sr: number; revLabel: string;
+	}> = $state([]);
+	let flowsOnScreen: Array<{ key: string; path: string; width: number }> = $state([]);
+
+	function fmtRev(v: number): string {
+		if (v >= 1e12) return `${(v / 1e12).toFixed(0)}조`;
+		if (v >= 1e8) return `${Math.round(v / 1e8).toLocaleString()}억`;
+		return `${v.toLocaleString()}`;
+	}
 
 	function updateLabels() {
 		if (!graph || !container) return;
@@ -134,6 +176,60 @@
 			}
 		}
 		companyLabels = rendered;
+
+		// semantic zoom: 산업 버블 + flow 화면 좌표
+		if (!isAtlas && industriesProp.length > 0 && currentZoom < 2.5) {
+			const indScreens: typeof industryNodesOnScreen = [];
+			const indMap: Record<string, { sx: number; sy: number; sr: number; color: string }> = {};
+			for (const ind of industriesProp) {
+				if (ind.x == null || ind.y == null) continue;
+				const c = graph.spaceToScreenPosition([ind.x, ind.y]);
+				if (!c) continue;
+				// 반지름: space 좌표계 → 화면 픽셀 (edge 점으로 변환해서 거리)
+				const rEdge = graph.spaceToScreenPosition([ind.x + (ind.radius || 100), ind.y]);
+				const sr = rEdge ? Math.abs(rEdge[0] - c[0]) : 40;
+				indScreens.push({
+					id: ind.id,
+					name: ind.name,
+					color: ind.color,
+					count: ind.count,
+					sx: c[0],
+					sy: c[1],
+					sr: Math.max(30, sr),
+					revLabel: fmtRev(ind.totalRevenue || 0)
+				});
+				indMap[ind.id] = { sx: c[0], sy: c[1], sr: Math.max(30, sr), color: ind.color };
+			}
+			industryNodesOnScreen = indScreens;
+
+			// flow 엣지 (산업 centroid 간 곡선)
+			const flowList: typeof flowsOnScreen = [];
+			const maxAmount = Math.max(...industryFlows.map((f) => f.amount || f.edgeCount || 1), 1);
+			for (const f of industryFlows) {
+				const a = indMap[f.fromIndustry];
+				const b = indMap[f.toIndustry];
+				if (!a || !b) continue;
+				// 곡선 제어점: 중앙에서 수직으로 offset
+				const mx = (a.sx + b.sx) / 2;
+				const my = (a.sy + b.sy) / 2;
+				const dx = b.sx - a.sx;
+				const dy = b.sy - a.sy;
+				const nx = -dy * 0.15;
+				const ny = dx * 0.15;
+				const path = `M${a.sx},${a.sy} Q${mx + nx},${my + ny} ${b.sx},${b.sy}`;
+				const weight = (f.amount || f.edgeCount * 1e9) / maxAmount;
+				const width = Math.max(1, Math.min(6, 0.8 + Math.log2(weight * 10 + 1) * 1.5));
+				flowList.push({
+					key: `${f.fromIndustry}→${f.toIndustry}`,
+					path,
+					width
+				});
+			}
+			flowsOnScreen = flowList;
+		} else if (industryNodesOnScreen.length > 0) {
+			industryNodesOnScreen = [];
+			flowsOnScreen = [];
+		}
 	}
 
 	onMount(async () => {
@@ -200,14 +296,24 @@
 				},
 				onZoom: () => {
 					if (graph) {
+						const prevZoom = currentZoom;
 						currentZoom = graph.getZoomLevel();
 						updateLabels();
+						// companies 뷰: 줌 기반 엣지 토글 (임계값 2.5)
+						if (!isAtlas) {
+							const showCompanyEdges = currentZoom >= 2.5;
+							const wasShowing = prevZoom >= 2.5;
+							if (showCompanyEdges !== wasShowing) {
+								graph.setData(nodes, showCompanyEdges ? links : []);
+							}
+						}
 					}
 				},
 			},
 		});
 
-		graph.setData(nodes, links);
+		// 초기: atlas는 링크 포함, companies는 축소 상태라 링크 없이 시작
+		graph.setData(nodes, isAtlas ? links : []);
 
 		// fit view after initial simulation
 		setTimeout(() => graph?.fitView(400), 1200);
@@ -259,18 +365,72 @@
 <div bind:this={container} class="ecosystem-container">
 	<!-- 라벨 오버레이 -->
 	<svg class="label-overlay" xmlns="http://www.w3.org/2000/svg">
-		<!-- 산업 클러스터 배경 (줌 아웃~중간) -->
-		{#if currentZoom < 6 && !isAtlas}
+		<!-- 산업 semantic zoom 레이어 (줌 < 2.5에서 atlas처럼 보임) -->
+		{#if !isAtlas && industryNodesOnScreen.length > 0}
+			{@const overlayOpacity = currentZoom < 2 ? 1 : currentZoom < 2.5 ? (2.5 - currentZoom) * 2 : 0}
+			{#if overlayOpacity > 0}
+				<g class="industry-layer" style="opacity:{overlayOpacity}; pointer-events:{currentZoom < 2.5 ? 'auto' : 'none'}">
+					<!-- 산업간 flow 엣지 (곡선) -->
+					{#each flowsOnScreen as flow (flow.key)}
+						<path
+							d={flow.path}
+							fill="none"
+							stroke="#fbbf24"
+							stroke-width={flow.width}
+							stroke-opacity={0.55}
+							stroke-linecap="round"
+						/>
+					{/each}
+					<!-- 산업 큰 버블 -->
+					{#each industryNodesOnScreen as ind (ind.id)}
+						<circle
+							cx={ind.sx}
+							cy={ind.sy}
+							r={ind.sr}
+							fill={ind.color}
+							fill-opacity="0.25"
+							stroke={ind.color}
+							stroke-width="2"
+							stroke-opacity="0.9"
+							class="ind-bubble"
+							onclick={() => onIndustryClick?.(ind.id)}
+						/>
+						<text
+							x={ind.sx}
+							y={ind.sy - 4}
+							text-anchor="middle"
+							dominant-baseline="central"
+							font-size={Math.max(14, Math.min(32, ind.sr / 3))}
+							font-weight="700"
+							fill={ind.color}
+							class="ind-label"
+							pointer-events="none"
+						>{ind.name}</text>
+						<text
+							x={ind.sx}
+							y={ind.sy + Math.max(14, Math.min(32, ind.sr / 3)) - 2}
+							text-anchor="middle"
+							dominant-baseline="central"
+							font-size="11"
+							fill="#cbd5e1"
+							pointer-events="none"
+						>{ind.count}사 · {ind.revLabel}</text>
+					{/each}
+				</g>
+			{/if}
+		{/if}
+		<!-- 기존 회사 클러스터 배경 (줌 인 시) -->
+		{#if currentZoom >= 2 && currentZoom < 6 && !isAtlas}
 			{#each industryLabels as label (label.name)}
 				<circle
 					cx={label.x}
 					cy={label.y}
 					r={label.radius}
 					fill={label.color}
-					opacity={currentZoom < 2 ? 0.04 : 0.06}
+					opacity={currentZoom < 3 ? 0.06 : 0.04}
 					stroke={label.color}
 					stroke-width="0.5"
-					stroke-opacity="0.15"
+					stroke-opacity="0.12"
 				/>
 			{/each}
 		{/if}
@@ -358,6 +518,20 @@
 		display: block;
 		width: 100%;
 		height: 100%;
+	}
+	.industry-layer {
+		transition: opacity 300ms ease;
+	}
+	.ind-bubble {
+		cursor: pointer;
+		transition: fill-opacity 150ms ease;
+	}
+	.ind-bubble:hover {
+		fill-opacity: 0.4;
+	}
+	.ind-label {
+		font-family: 'Pretendard Variable', sans-serif;
+		letter-spacing: -0.02em;
 	}
 	.label-overlay {
 		position: absolute;

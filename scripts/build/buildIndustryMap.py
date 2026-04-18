@@ -898,24 +898,74 @@ def buildEcosystem(
                 expanded.append([round(px + dx * 0.15, 1), round(py + dy * 0.15, 1)])
             indHulls[ind_id] = expanded
 
-    # 산업 메타 (필터 사이드바용)
+    # 산업 메타 — semantic zoom용 centroid + 집계
+    # 각 산업 = 소속 회사의 평균 위치 (줌 전환 시 공간 일치)
     industries = []
+    nodeByCode = {nd["id"]: nd for nd in nodeList}
     for ind_id, ind_def in taxonomy.items():
-        count = sum(1 for n in nodes if n.industry == ind_id)
+        memberNodes = [nd for nd in nodeList if nd["industry"] == ind_id]
+        count = len(memberNodes)
+        if count == 0:
+            continue
+
+        xs = [nd["x"] for nd in memberNodes]
+        ys = [nd["y"] for nd in memberNodes]
+        cx = sum(xs) / len(xs)
+        cy = sum(ys) / len(ys)
+
+        # radius: 회사 분산 기반 (줌 아웃 시 산업 버블 크기)
+        maxDist = max(
+            ((nd["x"] - cx) ** 2 + (nd["y"] - cy) ** 2) ** 0.5 for nd in memberNodes
+        )
+        radius = max(80, maxDist * 1.1)
+
+        totalRev = sum(nd["revenue"] for nd in memberNodes)
+
         entry = {
             "id": ind_id,
             "name": ind_def.name,
             "color": ind_color[ind_id],
             "count": count,
+            "x": round(cx, 1),
+            "y": round(cy, 1),
+            "radius": round(radius, 1),
+            "totalRevenue": round(totalRev),
         }
         if ind_id in indHulls:
             entry["hull"] = indHulls[ind_id]
         industries.append(entry)
     industries.sort(key=lambda x: x["count"], reverse=True)
 
+    # 산업간 flow 집계 (회사간 엣지 → industry_pair)
+    flowMap: dict[tuple[str, str], dict] = {}
+    for e in edges:
+        indA = nodeByCode.get(e.fromCode, {}).get("industry") if e.fromCode in nodeByCode else None
+        indB = nodeByCode.get(e.toCode, {}).get("industry") if e.toCode in nodeByCode else None
+        if not indA or not indB or indA == indB:
+            continue
+        key = (indA, indB)
+        if key not in flowMap:
+            flowMap[key] = {"edgeCount": 0, "amount": 0.0}
+        flowMap[key]["edgeCount"] += 1
+        flowMap[key]["amount"] += e.amount or 0
+
+    industryFlows = [
+        {
+            "fromIndustry": src,
+            "toIndustry": dst,
+            "edgeCount": data["edgeCount"],
+            "amount": round(data["amount"]),
+        }
+        for (src, dst), data in flowMap.items()
+    ]
+    # 중요도 순으로 상위 flow만 (너무 많으면 스파게티)
+    industryFlows.sort(key=lambda f: f["amount"] or f["edgeCount"], reverse=True)
+    industryFlows = industryFlows[:80]
+
     return {
         "version": "2026-04-14",
         "industries": industries,
+        "industryFlows": industryFlows,
         "nodes": nodeList,
         "links": linkList,
     }
