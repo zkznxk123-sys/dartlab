@@ -150,6 +150,10 @@ class Gather:
             g.price("AAPL", market="US")         # Apple 1년
             g.price("005930", snapshot=True)     # 현재가 스냅샷
         """
+        # market 자동 감지: 6자리 숫자 → KR, 알파벳 포함 → US
+        if market == "KR" and stock_code and not stock_code.strip().isdigit():
+            market = "US"
+
         if snapshot:
             return self._priceSnapshot(stock_code, market=market)
         from datetime import date, timedelta
@@ -383,6 +387,10 @@ class Gather:
             g.history("005930", start="2025-01-01", end="2025-12-31")
             g.history("AAPL", start="2025-06-01", end="2025-12-31", market="US")
         """
+        # market 자동 감지
+        if market == "KR" and stock_code and not stock_code.strip().isdigit():
+            market = "US"
+
         import polars as pl
 
         cache_key = f"{stock_code}:history:{start}:{end}"

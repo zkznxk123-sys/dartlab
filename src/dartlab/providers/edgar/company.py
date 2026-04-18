@@ -1800,6 +1800,8 @@ class Company:
         indList: str | list[str] | None = None,
         colList: str | list[str] | None = None,
         *,
+        freq: str = "Q",
+        scope: str = "consolidated",
         strict: bool = True,
     ):
         """show() 결과에서 행/열 필터 — 특정 계정 x 특정 기간 추출 (내부 구현).
