@@ -255,9 +255,9 @@
 				w = rect.width;
 				h = rect.height;
 				simulation
-					?.force('center', forceCenter(w / 2, h / 2).strength(0.02))
-					.force('x', forceX(w / 2).strength(0.025))
-					.force('y', forceY(h / 2).strength(0.035))
+					?.force('center', forceCenter(w / 2, h / 2).strength(0.08))
+					.force('x', forceX(w / 2).strength(0.06))
+					.force('y', forceY(h / 2).strength(0.06))
 					.alpha(0.3)
 					.restart();
 			}
