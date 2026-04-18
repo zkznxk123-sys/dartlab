@@ -50,7 +50,7 @@ c.analysis("financial", "수익성")
 
 ---
 
-![엔비디아 관통선 — 팹리스 + AI 수요 독점 = OPM 62%](./assets/50-hero-map.svg)
+![엔비디아 핵심 구조 — 팹리스 + AI 수요 독점 = OPM 62%](./assets/50-hero-map.svg)
 
 ---
 
