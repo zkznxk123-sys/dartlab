@@ -465,12 +465,18 @@ def buildBlocks(
             b["sectorKpi"] = _safe(lambda: sectorKpiBlock(_sectorKpi(company)))
 
     # ── 산업 밸류체인 (L2 industry 엔진) ──
-    if keys is None or keys & {"chainPosition"}:
-        if _need("chainPosition"):
-            from dartlab.industry.calcs import calcChainPosition
-            from dartlab.review.builders import chainPositionBlock
+    if keys is None or keys & {"chainPosition", "sectorMetrics", "sectorOutlook"}:
+        from dartlab.industry.calcs import calcChainPosition, calcSectorCycle, calcSectorDynamics, calcSectorMetrics
+        from dartlab.review.builders import chainPositionBlock, sectorMetricsBlock, sectorOutlookBlock
 
+        if _need("chainPosition"):
             b["chainPosition"] = _safe(lambda: chainPositionBlock(calcChainPosition(company)))
+        if _need("sectorMetrics"):
+            b["sectorMetrics"] = _safe(lambda: sectorMetricsBlock(calcSectorMetrics(company)))
+        if _need("sectorOutlook"):
+            b["sectorOutlook"] = _safe(
+                lambda: sectorOutlookBlock(calcSectorCycle(company), calcSectorDynamics(company))
+            )
 
     # ── 3부: 심화 분석 ──
     if keys is None or keys & {

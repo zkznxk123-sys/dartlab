@@ -284,6 +284,8 @@ _BLOCKS: list[BlockMeta] = [
         "비교분석",
         "전 상장사 2,665사 중 이 회사가 속한 산업·공정·역할·스트림 + 같은 공정 피어",
     ),
+    BlockMeta("sectorMetrics", "업종 실적 분포", "비교분석", "이 회사 업종의 OPM/CAGR/ROE 분포 + 업종 내 백분위"),
+    BlockMeta("sectorOutlook", "섹터 전망", "비교분석", "업종 사이클 판정(확장/수축/안정) + 매크로 순풍/역풍"),
     # ── 개선 시나리오 (How축) ──
     BlockMeta("improvementLevers", "개선 레버 순위", "improvementPlan", "영향도 × 난이도별 개선 경로"),
     BlockMeta("gradeUpgradePath", "신용등급 상향 경로", "improvementPlan", "dCR 한 노치 상향에 필요한 것"),

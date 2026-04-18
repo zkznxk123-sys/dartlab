@@ -5536,3 +5536,119 @@ def chainPositionBlock(data: dict | None) -> list:
         blocks.append(TableBlock(f"같은 공정 피어 ({len(peers)}사 중 상위 {len(rows)})", pl.DataFrame(rows)))
 
     return blocks
+
+
+# ── Industry (L2) — 섹터 실적 분포 + 전망 ──
+
+
+def sectorMetricsBlock(data: dict | None) -> list:
+    """calcSectorMetrics 결과 → 업종 실적 분포 블록.
+
+    Parameters
+    ----------
+    data : dict | None
+        calcSectorMetrics 반환값.
+
+    Returns
+    -------
+    list
+        HeadingBlock + TextBlock(분포 요약) + MetricBlock(내 위치).
+        data 가 None 이면 빈 리스트.
+    """
+    if not data:
+        return []
+
+    industryName = data.get("industryName") or "-"
+    peerCount = data.get("peerCount") or 0
+
+    blocks: list = [
+        HeadingBlock(
+            _meta("sectorMetrics").label,
+            level=2,
+            helper=f"{industryName} {peerCount}사 대비 실적 분포",
+        ),
+    ]
+
+    parts = []
+    opm = data.get("opmDistribution")
+    if opm:
+        parts.append(f"영업이익률 중앙값 {opm['median']}% (P25 {opm['p25']}% ~ P75 {opm['p75']}%)")
+    roe = data.get("roeDistribution")
+    if roe:
+        parts.append(f"ROE 중앙값 {roe['median']}% (P25 {roe['p25']}% ~ P75 {roe['p75']}%)")
+    cagr = data.get("cagrDistribution")
+    if cagr:
+        parts.append(f"매출 CAGR 중앙값 {cagr['median']}%")
+
+    if parts:
+        blocks.append(TextBlock(f"**{industryName}** {peerCount}사 분포: " + " · ".join(parts)))
+
+    metrics = []
+    myOpm = data.get("myOpmPercentile")
+    if myOpm is not None:
+        metrics.append(("영업이익률 위치", f"상위 {100 - myOpm:.0f}%"))
+    myRoe = data.get("myRoePercentile")
+    if myRoe is not None:
+        metrics.append(("ROE 위치", f"상위 {100 - myRoe:.0f}%"))
+    myCagr = data.get("myCagrPercentile")
+    if myCagr is not None:
+        metrics.append(("매출 CAGR 위치", f"상위 {100 - myCagr:.0f}%"))
+    if metrics:
+        blocks.append(MetricBlock(metrics))
+
+    return blocks
+
+
+def sectorOutlookBlock(cycle: dict | None, dynamics: dict | None) -> list:
+    """calcSectorCycle + calcSectorDynamics 결과 → 섹터 전망 블록.
+
+    Parameters
+    ----------
+    cycle : dict | None
+        calcSectorCycle 반환값.
+    dynamics : dict | None
+        calcSectorDynamics 반환값.
+
+    Returns
+    -------
+    list
+        HeadingBlock + TextBlock(사이클) + TextBlock(순풍/역풍).
+    """
+    if not cycle and not dynamics:
+        return []
+
+    industryName = (cycle or dynamics or {}).get("industryName") or "-"
+    blocks: list = [
+        HeadingBlock(
+            _meta("sectorOutlook").label,
+            level=2,
+            helper=f"{industryName} 사이클 + 매크로 교차",
+        ),
+    ]
+
+    if cycle:
+        phase = cycle.get("phase") or "미확인"
+        direction = cycle.get("direction") or ""
+        conf = cycle.get("confidence") or 0
+        trend = cycle.get("opmTrend") or []
+        narration = f"**{industryName}** 사이클: **{phase}** ({direction})"
+        if conf < 0.6:
+            narration += " — 데이터 제한으로 신뢰도 낮음"
+        blocks.append(TextBlock(narration))
+        if trend:
+            rows = [{"기간": t.get("year", ""), "OPM 중앙값(%)": str(t.get("median", ""))} for t in trend]
+            if rows:
+                blocks.append(TableBlock("OPM 추이", pl.DataFrame(rows)))
+
+    if dynamics:
+        summary = dynamics.get("summary") or ""
+        if summary:
+            blocks.append(TextBlock(summary))
+        tailwind = dynamics.get("tailwind") or []
+        headwind = dynamics.get("headwind") or []
+        if tailwind:
+            blocks.append(TextBlock("순풍: " + " · ".join(tailwind)))
+        if headwind:
+            blocks.append(TextBlock("역풍: " + " · ".join(headwind)))
+
+    return blocks
