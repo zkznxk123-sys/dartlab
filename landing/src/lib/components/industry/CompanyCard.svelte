@@ -211,18 +211,32 @@
 </script>
 
 <div class="card">
-	<button class="close" onclick={() => onClose?.()} aria-label="닫기">✕</button>
+	{#if !detached}
+		<button class="close" onclick={() => onClose?.()} aria-label="닫기">✕</button>
 
-	<!-- 1. Header -->
-	<div class="head">
-		<div class="head-title-row">
-			<h2>{node.label}</h2>
-			{#if dataAsOf}
-				<FreshnessBadge {dataAsOf} variant="dot" />
-			{/if}
+		<!-- 1. Header -->
+		<div class="head">
+			<div class="head-title-row">
+				<h2>{node.label}</h2>
+				{#if dataAsOf}
+					<FreshnessBadge {dataAsOf} variant="dot" />
+				{/if}
+			</div>
+			<p class="code">{node.id}</p>
+			<div class="badges">
+				<span class="badge industry" style:background="{node.color}20" style:color={node.color}>
+					{node.industryName}
+				</span>
+				{#if node.stageName || node.stage}
+					<span class="badge stage">{node.stageName || node.stage}</span>
+				{/if}
+				{#if node.role}<span class="badge role">{node.role}</span>{/if}
+				{#if node.stream}<span class="badge stream">{node.stream}</span>{/if}
+			</div>
 		</div>
-		<p class="code">{node.id}</p>
-		<div class="badges">
+	{:else}
+		<!-- FloatingCard 안: 배지만 간결하게 -->
+		<div class="badges" style="padding-top: 4px;">
 			<span class="badge industry" style:background="{node.color}20" style:color={node.color}>
 				{node.industryName}
 			</span>
@@ -232,7 +246,7 @@
 			{#if node.role}<span class="badge role">{node.role}</span>{/if}
 			{#if node.stream}<span class="badge stream">{node.stream}</span>{/if}
 		</div>
-	</div>
+	{/if}
 
 	{#if loading}
 		<div class="loading">상세 데이터 로드 중…</div>

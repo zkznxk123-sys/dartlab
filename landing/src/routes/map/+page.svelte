@@ -1233,7 +1233,7 @@
 	<FloatingCard
 		id={fc.id}
 		title={fc.node?.label || ''}
-		subtitle={fc.node?.industryName || ''}
+		subtitle="{fc.id} · {fc.node?.industryName || ''}"
 		bind:x={fc.x}
 		bind:y={fc.y}
 		bind:w={fc.w}
@@ -1377,10 +1377,13 @@
 		margin-left: auto;
 	}
 	.freshness-row {
-		padding-bottom: 12px;
-		margin-bottom: 12px;
+		padding-bottom: 8px;
+		margin-bottom: 8px;
 		border-bottom: 1px solid var(--color-dl-border);
-		overflow: hidden;
+	}
+	.freshness-row :global(.compact) {
+		flex-wrap: wrap;
+		gap: 4px;
 	}
 
 	.header h1 {
