@@ -425,6 +425,58 @@ def _roundOrNone(v, digits: int = 1):
         return None
 
 
+def _computeLayout(nodes, taxonomy) -> dict[str, tuple[float, float]]:
+    """34개 산업 중심점을 원형 배치 → 산업 내 노드를 중심 주변 나선 배치.
+
+    Returns
+    -------
+    dict
+        stockCode → (x, y) 좌표 매핑
+    """
+    import math
+
+    # 1. 산업별 그룹핑
+    byIndustry: dict[str, list] = {}
+    for n in nodes:
+        byIndustry.setdefault(n.industry, []).append(n)
+
+    # 2. 산업 중심점: 반지름 1200의 원에 균등 배치
+    # 매출 큰 산업 순으로 정렬 → 중요 산업이 위쪽
+    indOrder = sorted(
+        byIndustry.keys(),
+        key=lambda k: sum(n.revenue or 0 for n in byIndustry[k]),
+        reverse=True,
+    )
+    centers: dict[str, tuple[float, float]] = {}
+    for i, ind_id in enumerate(indOrder):
+        angle = -math.pi / 2 + 2 * math.pi * i / len(indOrder)
+        r = 1200
+        centers[ind_id] = (r * math.cos(angle), r * math.sin(angle))
+
+    # 3. 산업 내 노드: 매출 큰 순으로 나선 배치
+    coords: dict[str, tuple[float, float]] = {}
+    for ind_id, members in byIndustry.items():
+        cx, cy = centers[ind_id]
+        # 산업 크기에 비례한 반지름 (회사 수 √)
+        spread = max(80, min(400, 20 * math.sqrt(len(members))))
+        ranked = sorted(members, key=lambda x: x.revenue or 0, reverse=True)
+        for j, n in enumerate(ranked):
+            if j == 0:
+                # 가장 큰 회사 = 중심
+                coords[n.stockCode] = (cx, cy)
+            else:
+                # 나선 배치: 각도 = golden angle, 반지름 = √j
+                golden = math.pi * (3 - math.sqrt(5))
+                angle = golden * j
+                dist = spread * math.sqrt(j) / math.sqrt(len(ranked))
+                coords[n.stockCode] = (
+                    cx + dist * math.cos(angle),
+                    cy + dist * math.sin(angle),
+                )
+
+    return coords
+
+
 def buildEcosystem(
     scanMetrics: dict[str, dict] | None = None,
     yoyDeltas: dict[str, dict] | None = None,
@@ -511,6 +563,9 @@ def buildEcosystem(
                 return s.name
         return stageKey
 
+    # 좌표 사전 계산 (진짜 지도 — 고정 위치)
+    coords = _computeLayout(nodes, taxonomy)
+
     # 노드 (Cosmograph 포맷)
     nodeList = []
     for n in nodes:
@@ -564,6 +619,8 @@ def buildEcosystem(
                 "empCount": m.get("empCount"),
                 "size": rev_log,
                 "color": ind_color.get(n.industry, "#9ca3af"),
+                "x": round(coords.get(n.stockCode, (0, 0))[0], 1),
+                "y": round(coords.get(n.stockCode, (0, 0))[1], 1),
             }
         )
 

@@ -17,6 +17,8 @@
 		color: string;
 		isIndustry?: boolean;
 		nodeCount?: number;
+		x?: number;
+		y?: number;
 	}
 
 	interface LinkDatum {
@@ -163,12 +165,20 @@
 			linkVisibilityMinTransparency: 0.75,
 			curvedLinks: true,
 			curvedLinkSegments: 16,
-			simulation: {
+			simulation: isAtlas ? {
 				repulsion: 1.0,
 				gravity: 0.15,
 				linkDistance: 10,
 				friction: 0.85,
 				decay: 1000,
+				onTick: () => updateLabels(),
+			} : {
+				// companies 뷰: 사전 계산 좌표 사용, 시뮬레이션 최소화
+				repulsion: 0.3,
+				gravity: 0.02,
+				linkDistance: 5,
+				friction: 0.95,
+				decay: 100,
 				onTick: () => updateLabels(),
 			},
 			events: {
