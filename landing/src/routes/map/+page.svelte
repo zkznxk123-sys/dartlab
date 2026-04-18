@@ -1317,6 +1317,7 @@
 					onAddCompare={addToCompare}
 					onDetach={detachCard}
 					onShock={startShockSim}
+					moverSignal={moversSignalMap.get(selectedNode.id) || null}
 					onClose={() => handleNodeClick(null)}
 				/>
 			</div>
@@ -1397,6 +1398,7 @@
 			detached={true}
 			onDetach={detachCard}
 			onShock={startShockSim}
+			moverSignal={moversSignalMap.get(fc.id) || null}
 			onClose={() => closeFloating(fc.id)}
 		/>
 	</FloatingCard>

@@ -26,6 +26,8 @@
 		detached?: boolean;
 		// 충격 시뮬레이션
 		onShock?: (stockCode: string) => void;
+		// movers 이상 신호 (이 회사에 해당하면)
+		moverSignal?: string | null;
 	}
 
 	let {
@@ -39,7 +41,8 @@
 		onDetach,
 		compareDisabled = false,
 		detached = false,
-		onShock
+		onShock,
+		moverSignal = null
 	}: Props = $props();
 
 	let aiExpanded = $state(false);
@@ -307,6 +310,23 @@
 					<div class="t1-v">{node.industryRank}위</div>
 					<div class="t1-d">/ {node.industryPeerCount}사</div>
 				</div>
+			{/if}
+		</div>
+
+		<!-- 신용등급 + movers 경고 (승격) -->
+		<div class="priority-badges">
+			{#if detail?.creditMetrics?.grade || detail?.creditMetrics?.creditGrade}
+				{@const cg = detail.creditMetrics.grade || detail.creditMetrics.creditGrade}
+				<span class="priority-badge credit" title="dartlab 신용등급 (dCR)">
+					dCR {cg}
+				</span>
+			{/if}
+			{#if moverSignal}
+				{@const sigLabel = ({ profitImprove: '수익성 개선', profitDecline: '수익성 악화', revenueSpike: '매출 급증', revenueDrop: '매출 급락', debtStress: '부채 스트레스', extremeWarning: '극단 경고' })[moverSignal] || moverSignal}
+				{@const sigType = moverSignal.includes('Improve') || moverSignal === 'revenueSpike' ? 'good' : moverSignal === 'extremeWarning' ? 'warn' : 'bad'}
+				<span class="priority-badge mover {sigType}" title="이번 회계연도 급변 감지">
+					⚡ {sigLabel}
+				</span>
 			{/if}
 		</div>
 
@@ -936,6 +956,38 @@
 	.direction-badge.down {
 		background: rgba(239, 68, 68, 0.18);
 		color: #f87171;
+	}
+	.priority-badges {
+		display: flex;
+		gap: 6px;
+		flex-wrap: wrap;
+		margin-top: 8px;
+	}
+	.priority-badge {
+		font-size: 11px;
+		font-weight: 600;
+		padding: 3px 10px;
+		border-radius: 4px;
+	}
+	.priority-badge.credit {
+		background: rgba(96, 165, 250, 0.12);
+		color: var(--color-dl-blue);
+		border: 1px solid rgba(96, 165, 250, 0.25);
+	}
+	.priority-badge.mover.good {
+		background: rgba(16, 185, 129, 0.12);
+		color: var(--color-dl-success);
+		border: 1px solid rgba(16, 185, 129, 0.25);
+	}
+	.priority-badge.mover.bad {
+		background: rgba(239, 68, 68, 0.12);
+		color: var(--color-dl-danger);
+		border: 1px solid rgba(239, 68, 68, 0.25);
+	}
+	.priority-badge.mover.warn {
+		background: rgba(251, 191, 36, 0.12);
+		color: var(--color-dl-warning);
+		border: 1px solid rgba(251, 191, 36, 0.25);
 	}
 	.radar-section {
 		text-align: center;

@@ -47,7 +47,7 @@
 	let graph: any = $state(null);
 	let currentZoom = $state(1);
 	let hoveredNode: NodeDatum | null = $state(null);
-	let industryLabels: Array<{ name: string; color: string; x: number; y: number; count: number; totalRev: number }> =
+	let industryLabels: Array<{ name: string; color: string; x: number; y: number; count: number; totalRev: number; radius: number }> =
 		$state([]);
 	let companyLabels: Array<{ id: string; name: string; x: number; y: number; rev: number }> = $state([]);
 
@@ -100,6 +100,13 @@
 			const cy = sy[Math.floor(sy.length / 2)];
 			const screen = graph.spaceToScreenPosition([cx, cy]);
 			if (!screen) continue;
+			// 반지름: 노드 좌표 분산으로 클러스터 크기 추정
+			const maxDx = Math.max(...d.xs) - Math.min(...d.xs);
+			const maxDy = Math.max(...d.ys) - Math.min(...d.ys);
+			// 스크린 좌표 기준 반지름 (edge에서 다른 점으로 변환)
+			const edgeScreen = graph.spaceToScreenPosition([cx + maxDx / 2, cy]);
+			const screenRadius = edgeScreen ? Math.abs(edgeScreen[0] - screen[0]) + 10 : 40;
+
 			indLabels.push({
 				name: d.name,
 				color: d.color,
@@ -107,6 +114,7 @@
 				y: screen[1],
 				count: d.xs.length,
 				totalRev: d.totalRev,
+				radius: screenRadius,
 			});
 		}
 		industryLabels = indLabels;
@@ -257,6 +265,21 @@
 <div bind:this={container} class="ecosystem-container">
 	<!-- 라벨 오버레이 -->
 	<svg class="label-overlay" xmlns="http://www.w3.org/2000/svg">
+		<!-- 산업 클러스터 배경 (줌 아웃~중간) -->
+		{#if currentZoom < 6 && !isAtlas}
+			{#each industryLabels as label (label.name)}
+				<circle
+					cx={label.x}
+					cy={label.y}
+					r={label.radius}
+					fill={label.color}
+					opacity={currentZoom < 2 ? 0.04 : 0.06}
+					stroke={label.color}
+					stroke-width="0.5"
+					stroke-opacity="0.15"
+				/>
+			{/each}
+		{/if}
 		<!-- 산업 클러스터 라벨 (줌 아웃~중간) -->
 		{#if currentZoom < 4}
 			{#each industryLabels as label (label.name)}

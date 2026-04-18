@@ -704,18 +704,62 @@ def buildEcosystem(
             }
         )
 
+    # 산업별 convex hull 계산 (클러스터 배경 영역)
+    def _convexHull(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
+        """Graham scan으로 convex hull 계산."""
+        import math as _m
+
+        pts = sorted(set(points))
+        if len(pts) <= 2:
+            return pts
+
+        def cross(o, a, b):
+            return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+        lower = []
+        for p in pts:
+            while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
+                lower.pop()
+            lower.append(p)
+        upper = []
+        for p in reversed(pts):
+            while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
+                upper.pop()
+            upper.append(p)
+        return lower[:-1] + upper[:-1]
+
+    indHulls: dict[str, list] = {}
+    # nodeList에서 산업별 좌표 수집
+    indPoints: dict[str, list[tuple[float, float]]] = {}
+    for nd in nodeList:
+        ind = nd["industry"]
+        if nd.get("x") is not None and nd.get("y") is not None:
+            indPoints.setdefault(ind, []).append((nd["x"], nd["y"]))
+    for ind_id, pts in indPoints.items():
+        if len(pts) >= 3:
+            hull = _convexHull(pts)
+            # padding: hull 확장 (중심에서 바깥으로 15% 확장)
+            cx = sum(p[0] for p in hull) / len(hull)
+            cy = sum(p[1] for p in hull) / len(hull)
+            expanded = []
+            for px, py in hull:
+                dx, dy = px - cx, py - cy
+                expanded.append([round(px + dx * 0.15, 1), round(py + dy * 0.15, 1)])
+            indHulls[ind_id] = expanded
+
     # 산업 메타 (필터 사이드바용)
     industries = []
     for ind_id, ind_def in taxonomy.items():
         count = sum(1 for n in nodes if n.industry == ind_id)
-        industries.append(
-            {
-                "id": ind_id,
-                "name": ind_def.name,
-                "color": ind_color[ind_id],
-                "count": count,
-            }
-        )
+        entry = {
+            "id": ind_id,
+            "name": ind_def.name,
+            "color": ind_color[ind_id],
+            "count": count,
+        }
+        if ind_id in indHulls:
+            entry["hull"] = indHulls[ind_id]
+        industries.append(entry)
     industries.sort(key=lambda x: x["count"], reverse=True)
 
     return {
