@@ -116,17 +116,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "154040",
-        "corpName": "다산솔루에타",
-        "industry": "electronics",
+        "stockCode": "039560",
+        "corpName": "다산네트웍스",
+        "industry": "telecom",
         "viaCode": "208860",
         "viaName": "다산디엠씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "039560",
-        "corpName": "다산네트웍스",
-        "industry": "telecom",
+        "stockCode": "154040",
+        "corpName": "다산솔루에타",
+        "industry": "electronics",
         "viaCode": "208860",
         "viaName": "다산디엠씨",
         "hopDistance": 2

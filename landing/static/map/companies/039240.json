@@ -143,19 +143,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "232530",
-        "corpName": "이엠티",
-        "industry": "semiconductor",
-        "viaCode": "140520",
-        "viaName": "대창스틸",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "329180",
         "corpName": "HD현대중공업",
         "industry": "shipbuilding",
         "viaCode": "053260",
         "viaName": "금강철강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
+        "viaCode": "140520",
+        "viaName": "대창스틸",
         "hopDistance": 2
       }
     ],

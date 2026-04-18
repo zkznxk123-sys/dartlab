@@ -107,33 +107,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "023450",
-        "corpName": "동남합성",
-        "industry": "realestate",
+        "stockCode": "108380",
+        "corpName": "대양전기공업",
+        "industry": "electrical",
         "viaCode": "068240",
         "viaName": "다원시스",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "068240",
-        "viaName": "다원시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "362990",
-        "corpName": "드림인사이트",
-        "industry": "media",
-        "viaCode": "068240",
-        "viaName": "다원시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "266350",
-        "corpName": "팡스카이",
-        "industry": "software",
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
         "viaCode": "068240",
         "viaName": "다원시스",
         "hopDistance": 2
@@ -155,6 +139,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "266350",
+        "corpName": "팡스카이",
+        "industry": "software",
+        "viaCode": "068240",
+        "viaName": "다원시스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "317240",
         "corpName": "TS트릴리온",
         "industry": "chemical",
@@ -163,17 +155,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "108380",
-        "corpName": "대양전기공업",
-        "industry": "electrical",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "068240",
         "viaName": "다원시스",
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
+        "stockCode": "362990",
+        "corpName": "드림인사이트",
+        "industry": "media",
+        "viaCode": "068240",
+        "viaName": "다원시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023450",
+        "corpName": "동남합성",
+        "industry": "realestate",
         "viaCode": "068240",
         "viaName": "다원시스",
         "hopDistance": 2

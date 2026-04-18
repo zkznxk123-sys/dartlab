@@ -143,14 +143,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "103140",
-        "corpName": "풍산",
-        "industry": "steel",
-        "viaCode": "082920",
-        "viaName": "비츠로셀",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "488900",
         "corpName": "비츠로넥스텍",
         "industry": "energy",
@@ -167,9 +159,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "042370",
-        "corpName": "비츠로테크",
-        "industry": "electrical",
+        "stockCode": "103140",
+        "corpName": "풍산",
+        "industry": "steel",
+        "viaCode": "082920",
+        "viaName": "비츠로셀",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005810",
+        "corpName": "풍산홀딩스",
+        "industry": "retail",
         "viaCode": "082920",
         "viaName": "비츠로셀",
         "hopDistance": 2
@@ -183,9 +183,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005810",
-        "corpName": "풍산홀딩스",
-        "industry": "retail",
+        "stockCode": "042370",
+        "corpName": "비츠로테크",
+        "industry": "electrical",
         "viaCode": "082920",
         "viaName": "비츠로셀",
         "hopDistance": 2

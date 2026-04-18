@@ -152,27 +152,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "080420",
-        "viaName": "모다이노칩",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "031210",
         "corpName": "서울보증보험",
         "industry": "finance",
         "viaCode": "080420",
         "viaName": "모다이노칩",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "033290",
-        "viaName": "로젠",
         "hopDistance": 2
       },
       {
@@ -184,9 +168,25 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "033290",
+        "viaName": "로젠",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "052860",
         "corpName": "아이앤씨",
         "industry": "semiconductor",
+        "viaCode": "080420",
+        "viaName": "모다이노칩",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "080420",
         "viaName": "모다이노칩",
         "hopDistance": 2

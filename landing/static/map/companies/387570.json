@@ -107,6 +107,22 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "120110",
+        "corpName": "코오롱인더",
+        "industry": "plastic",
+        "viaCode": "246960",
+        "viaName": "SCL사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "365900",
+        "corpName": "브이씨",
+        "industry": "leisure",
+        "viaCode": "246960",
+        "viaName": "SCL사이언스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "045660",
         "corpName": "에이텍",
         "industry": "electronics",
@@ -126,22 +142,6 @@
         "stockCode": "002020",
         "corpName": "코오롱",
         "industry": "finance",
-        "viaCode": "246960",
-        "viaName": "SCL사이언스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "120110",
-        "corpName": "코오롱인더",
-        "industry": "plastic",
-        "viaCode": "246960",
-        "viaName": "SCL사이언스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "365900",
-        "corpName": "브이씨",
-        "industry": "leisure",
         "viaCode": "246960",
         "viaName": "SCL사이언스",
         "hopDistance": 2

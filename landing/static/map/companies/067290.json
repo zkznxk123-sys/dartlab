@@ -237,40 +237,24 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "005180",
-        "corpName": "빙그레",
-        "industry": "food",
-        "viaCode": "264900",
-        "viaName": "크라운제과",
+        "stockCode": "214680",
+        "corpName": "디알텍",
+        "industry": "medicalDevice",
+        "viaCode": "096760",
+        "viaName": "JW홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "007330",
-        "corpName": "푸른저축은행",
-        "industry": "finance",
-        "viaCode": "234080",
-        "viaName": "JW생명과학",
+        "stockCode": "109820",
+        "corpName": "진매트릭스",
+        "industry": "pharma",
+        "viaCode": "096760",
+        "viaName": "JW홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "003530",
-        "corpName": "한화투자증권",
-        "industry": "aerospace",
-        "viaCode": "001060",
-        "viaName": "JW중외제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "234080",
-        "viaName": "JW생명과학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005740",
-        "corpName": "크라운해태홀딩스",
+        "stockCode": "101530",
+        "corpName": "해태제과식품",
         "industry": "food",
         "viaCode": "264900",
         "viaName": "크라운제과",
@@ -285,14 +269,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "109820",
-        "corpName": "진매트릭스",
-        "industry": "pharma",
-        "viaCode": "096760",
-        "viaName": "JW홀딩스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "318060",
         "corpName": "그래피",
         "industry": "chemical",
@@ -301,11 +277,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002720",
-        "corpName": "국제약품",
+        "stockCode": "005740",
+        "corpName": "크라운해태홀딩스",
         "industry": "food",
-        "viaCode": "001060",
-        "viaName": "JW중외제약",
+        "viaCode": "264900",
+        "viaName": "크라운제과",
         "hopDistance": 2
       },
       {
@@ -317,14 +293,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "214680",
-        "corpName": "디알텍",
-        "industry": "medicalDevice",
-        "viaCode": "096760",
-        "viaName": "JW홀딩스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "027970",
         "corpName": "한국제지",
         "industry": "paper",
@@ -333,9 +301,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "051900",
-        "corpName": "LG생활건강",
-        "industry": "electronics",
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "234080",
+        "viaName": "JW생명과학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005180",
+        "corpName": "빙그레",
+        "industry": "food",
+        "viaCode": "264900",
+        "viaName": "크라운제과",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002720",
+        "corpName": "국제약품",
+        "industry": "food",
+        "viaCode": "001060",
+        "viaName": "JW중외제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007330",
+        "corpName": "푸른저축은행",
+        "industry": "finance",
+        "viaCode": "234080",
+        "viaName": "JW생명과학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001790",
+        "corpName": "대한제당",
+        "industry": "food",
         "viaCode": "264900",
         "viaName": "크라운제과",
         "hopDistance": 2
@@ -349,19 +349,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "101530",
-        "corpName": "해태제과식품",
-        "industry": "food",
+        "stockCode": "051900",
+        "corpName": "LG생활건강",
+        "industry": "electronics",
         "viaCode": "264900",
         "viaName": "크라운제과",
         "hopDistance": 2
       },
       {
-        "stockCode": "001790",
-        "corpName": "대한제당",
-        "industry": "food",
-        "viaCode": "264900",
-        "viaName": "크라운제과",
+        "stockCode": "003530",
+        "corpName": "한화투자증권",
+        "industry": "aerospace",
+        "viaCode": "001060",
+        "viaName": "JW중외제약",
         "hopDistance": 2
       }
     ],

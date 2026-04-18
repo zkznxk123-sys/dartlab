@@ -132,17 +132,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
         "industry": "finance",
         "viaCode": "060560",
         "viaName": "HC홈센타",
         "hopDistance": 2
       },
       {
-        "stockCode": "005750",
-        "corpName": "대림바스",
-        "industry": "realestate",
+        "stockCode": "225530",
+        "corpName": "HC보광산업",
+        "industry": "construction",
         "viaCode": "060560",
         "viaName": "HC홈센타",
         "hopDistance": 2
@@ -156,17 +156,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
+        "stockCode": "005750",
+        "corpName": "대림바스",
+        "industry": "realestate",
         "viaCode": "060560",
         "viaName": "HC홈센타",
         "hopDistance": 2
       },
       {
-        "stockCode": "225530",
-        "corpName": "HC보광산업",
-        "industry": "construction",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "060560",
         "viaName": "HC홈센타",
         "hopDistance": 2

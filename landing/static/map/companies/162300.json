@@ -152,25 +152,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "069330",
-        "corpName": "유아이디",
-        "industry": "electronics",
+        "stockCode": "084370",
+        "corpName": "유진테크",
+        "industry": "semiconductor",
         "viaCode": "177830",
         "viaName": "파버나인",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "015360",
-        "corpName": "INVENI",
-        "industry": "consulting",
-        "viaCode": "071850",
-        "viaName": "캐스텍코리아",
         "hopDistance": 2
       },
       {
         "stockCode": "099520",
         "corpName": "DGI",
         "industry": "retail",
+        "viaCode": "177830",
+        "viaName": "파버나인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069330",
+        "corpName": "유아이디",
+        "industry": "electronics",
         "viaCode": "177830",
         "viaName": "파버나인",
         "hopDistance": 2
@@ -184,11 +184,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "084370",
-        "corpName": "유진테크",
-        "industry": "semiconductor",
-        "viaCode": "177830",
-        "viaName": "파버나인",
+        "stockCode": "015360",
+        "corpName": "INVENI",
+        "industry": "consulting",
+        "viaCode": "071850",
+        "viaName": "캐스텍코리아",
         "hopDistance": 2
       },
       {

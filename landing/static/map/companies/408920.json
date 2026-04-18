@@ -209,24 +209,16 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "244460",
-        "corpName": "올리패스",
-        "industry": "software",
+        "stockCode": "318060",
+        "corpName": "그래피",
+        "industry": "chemical",
         "viaCode": "001510",
         "viaName": "SK증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "007820",
-        "corpName": "에스엠코어",
-        "industry": "machinery",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "261520",
-        "corpName": "이지스",
+        "stockCode": "018670",
+        "corpName": "SK가스",
         "industry": "software",
         "viaCode": "001510",
         "viaName": "SK증권",
@@ -241,57 +233,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "285130",
-        "corpName": "SK케미칼",
-        "industry": "software",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011790",
-        "corpName": "SKC",
-        "industry": "software",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064820",
-        "corpName": "케이프",
-        "industry": "auto",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "241820",
-        "corpName": "피씨엘",
-        "industry": "software",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034730",
-        "corpName": "SK",
-        "industry": "software",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "080160",
-        "corpName": "모두투어",
-        "industry": "logistics",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "456040",
-        "corpName": "OCI",
-        "industry": "chemical",
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
         "viaCode": "001510",
         "viaName": "SK증권",
         "hopDistance": 2
@@ -305,73 +249,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "060570",
-        "corpName": "드림어스컴퍼니",
-        "industry": "media",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "018470",
-        "corpName": "조일알미늄",
-        "industry": "food",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052260",
-        "corpName": "현대바이오랜드",
-        "industry": "chemical",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "096770",
         "corpName": "SK이노베이션",
         "industry": "chemical",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "263770",
-        "viaName": "유에스티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "250930",
-        "corpName": "예선테크",
-        "industry": "plastic",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033270",
-        "corpName": "유나이티드",
-        "industry": "pharma",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "318060",
-        "corpName": "그래피",
-        "industry": "chemical",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "361610",
-        "corpName": "SK아이이테크놀로지",
-        "industry": "software",
         "viaCode": "001510",
         "viaName": "SK증권",
         "hopDistance": 2
@@ -393,17 +273,57 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "038540",
-        "corpName": "상상인",
+        "stockCode": "064820",
+        "corpName": "케이프",
+        "industry": "auto",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038010",
+        "corpName": "제일테크노스",
+        "industry": "semiconductor",
+        "viaCode": "032560",
+        "viaName": "황금에스티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006120",
+        "corpName": "SK디스커버리",
         "industry": "software",
         "viaCode": "001510",
         "viaName": "SK증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "009410",
-        "corpName": "태영건설",
-        "industry": "construction",
+        "stockCode": "080160",
+        "corpName": "모두투어",
+        "industry": "logistics",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034730",
+        "corpName": "SK",
+        "industry": "software",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039860",
+        "corpName": "나노엔텍",
+        "industry": "pharma",
         "viaCode": "001510",
         "viaName": "SK증권",
         "hopDistance": 2
@@ -417,25 +337,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "013870",
-        "corpName": "지엠비코리아",
-        "industry": "auto",
+        "stockCode": "007820",
+        "corpName": "에스엠코어",
+        "industry": "machinery",
         "viaCode": "001510",
         "viaName": "SK증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "210980",
-        "corpName": "SK디앤디",
+        "stockCode": "285130",
+        "corpName": "SK케미칼",
         "industry": "software",
         "viaCode": "001510",
         "viaName": "SK증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
+        "stockCode": "361610",
+        "corpName": "SK아이이테크놀로지",
+        "industry": "software",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052260",
+        "corpName": "현대바이오랜드",
+        "industry": "chemical",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "244460",
+        "corpName": "올리패스",
+        "industry": "software",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "230360",
+        "corpName": "에코마케팅",
+        "industry": "media",
         "viaCode": "001510",
         "viaName": "SK증권",
         "hopDistance": 2
@@ -443,30 +387,6 @@
       {
         "stockCode": "088340",
         "corpName": "유라클",
-        "industry": "software",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030210",
-        "corpName": "다올투자증권",
-        "industry": "realestate",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006120",
-        "corpName": "SK디스커버리",
         "industry": "software",
         "viaCode": "001510",
         "viaName": "SK증권",
@@ -481,25 +401,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "038010",
-        "corpName": "제일테크노스",
-        "industry": "semiconductor",
-        "viaCode": "032560",
-        "viaName": "황금에스티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017670",
-        "corpName": "SK텔레콤",
-        "industry": "telecom",
+        "stockCode": "009410",
+        "corpName": "태영건설",
+        "industry": "construction",
         "viaCode": "001510",
         "viaName": "SK증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "230360",
-        "corpName": "에코마케팅",
-        "industry": "media",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "263770",
+        "viaName": "유에스티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "250930",
+        "corpName": "예선테크",
+        "industry": "plastic",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "241820",
+        "corpName": "피씨엘",
+        "industry": "software",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030210",
+        "corpName": "다올투자증권",
+        "industry": "realestate",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "210980",
+        "corpName": "SK디앤디",
+        "industry": "software",
         "viaCode": "001510",
         "viaName": "SK증권",
         "hopDistance": 2
@@ -513,9 +457,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "039860",
-        "corpName": "나노엔텍",
+        "stockCode": "011790",
+        "corpName": "SKC",
+        "industry": "software",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033270",
+        "corpName": "유나이티드",
         "industry": "pharma",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060570",
+        "corpName": "드림어스컴퍼니",
+        "industry": "media",
         "viaCode": "001510",
         "viaName": "SK증권",
         "hopDistance": 2
@@ -529,9 +489,65 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "019210",
         "corpName": "와이지-원",
         "industry": "steel",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013870",
+        "corpName": "지엠비코리아",
+        "industry": "auto",
+        "viaCode": "001510",
+        "viaName": "SK증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
         "viaCode": "001510",
         "viaName": "SK증권",
         "hopDistance": 2
@@ -545,22 +561,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "018670",
-        "corpName": "SK가스",
-        "industry": "software",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
-        "viaCode": "001510",
-        "viaName": "SK증권",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "148150",
         "corpName": "세경하이테크",
         "industry": "chemical",
@@ -569,9 +569,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "452400",
-        "corpName": "이닉스",
-        "industry": "semiconductor",
+        "stockCode": "018470",
+        "corpName": "조일알미늄",
+        "industry": "food",
         "viaCode": "001510",
         "viaName": "SK증권",
         "hopDistance": 2

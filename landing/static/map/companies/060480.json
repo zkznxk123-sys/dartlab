@@ -188,35 +188,19 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "032960",
-        "corpName": "동일기연",
+        "stockCode": "006660",
+        "corpName": "삼성공조",
         "industry": "electronics",
         "viaCode": "025820",
         "viaName": "이구산업",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "107640",
+        "corpName": "한중엔시에스",
+        "industry": "battery",
         "viaCode": "025820",
         "viaName": "이구산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010130",
-        "corpName": "고려아연",
-        "industry": "steel",
-        "viaCode": "025820",
-        "viaName": "이구산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012800",
-        "corpName": "대창",
-        "industry": "steel",
-        "viaCode": "043340",
-        "viaName": "에쎈테크",
         "hopDistance": 2
       },
       {
@@ -231,6 +215,30 @@
         "stockCode": "101390",
         "corpName": "아이엠",
         "industry": "electronics",
+        "viaCode": "043340",
+        "viaName": "에쎈테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010130",
+        "corpName": "고려아연",
+        "industry": "steel",
+        "viaCode": "025820",
+        "viaName": "이구산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032960",
+        "corpName": "동일기연",
+        "industry": "electronics",
+        "viaCode": "025820",
+        "viaName": "이구산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012800",
+        "corpName": "대창",
+        "industry": "steel",
         "viaCode": "043340",
         "viaName": "에쎈테크",
         "hopDistance": 2
@@ -252,14 +260,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "107640",
-        "corpName": "한중엔시에스",
-        "industry": "battery",
-        "viaCode": "025820",
-        "viaName": "이구산업",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "000910",
         "corpName": "유니온",
         "industry": "buildingMaterials",
@@ -268,9 +268,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006660",
-        "corpName": "삼성공조",
-        "industry": "electronics",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "025820",
         "viaName": "이구산업",
         "hopDistance": 2

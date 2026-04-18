@@ -114,19 +114,27 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "009300",
+        "corpName": "삼아제약",
+        "industry": "pharma",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "338220",
+        "corpName": "뷰노",
+        "industry": "software",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "025620",
         "corpName": "차AI헬스케어",
         "industry": "cosmetics",
         "viaCode": "085660",
         "viaName": "차바이오텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "216080",
-        "corpName": "제테마",
-        "industry": "pharma",
-        "viaCode": "000020",
-        "viaName": "동화약품",
         "hopDistance": 2
       },
       {
@@ -138,17 +146,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "007530",
-        "corpName": "와이엠",
-        "industry": "steel",
-        "viaCode": "085660",
-        "viaName": "차바이오텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "086450",
-        "corpName": "동국제약",
-        "industry": "pharma",
+        "stockCode": "382150",
+        "corpName": "온코크로스",
+        "industry": "software",
         "viaCode": "000020",
         "viaName": "동화약품",
         "hopDistance": 2
@@ -170,102 +170,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "126730",
-        "corpName": "코칩",
-        "industry": "electronics",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "200670",
-        "corpName": "휴메딕스",
-        "industry": "pharma",
-        "viaCode": "085660",
-        "viaName": "차바이오텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "358570",
-        "corpName": "지아이이노베이션",
-        "industry": "pharma",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "260930",
-        "corpName": "씨티케이",
-        "industry": "cosmetics",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "389650",
-        "corpName": "넥스트바이오메디컬",
-        "industry": "pharma",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "491000",
-        "corpName": "리브스메드",
-        "industry": "medicalDevice",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058820",
-        "corpName": "CMG제약",
-        "industry": "pharma",
-        "viaCode": "085660",
-        "viaName": "차바이오텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016580",
-        "corpName": "환인제약",
-        "industry": "food",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "338220",
-        "corpName": "뷰노",
-        "industry": "software",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009300",
-        "corpName": "삼아제약",
-        "industry": "pharma",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
-        "viaCode": "085660",
-        "viaName": "차바이오텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053620",
-        "corpName": "태양",
-        "industry": "energy",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "261780",
         "corpName": "차백신연구소",
         "industry": "pharma",
@@ -282,6 +186,22 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "126730",
+        "corpName": "코칩",
+        "industry": "electronics",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "260930",
+        "corpName": "씨티케이",
+        "industry": "cosmetics",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "001630",
         "corpName": "종근당홀딩스",
         "industry": "pharma",
@@ -290,9 +210,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
         "viaCode": "085660",
         "viaName": "차바이오텍",
         "hopDistance": 2
@@ -306,11 +226,91 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "382150",
-        "corpName": "온코크로스",
-        "industry": "software",
+        "stockCode": "216080",
+        "corpName": "제테마",
+        "industry": "pharma",
         "viaCode": "000020",
         "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "358570",
+        "corpName": "지아이이노베이션",
+        "industry": "pharma",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007530",
+        "corpName": "와이엠",
+        "industry": "steel",
+        "viaCode": "085660",
+        "viaName": "차바이오텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016580",
+        "corpName": "환인제약",
+        "industry": "food",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "491000",
+        "corpName": "리브스메드",
+        "industry": "medicalDevice",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "085660",
+        "viaName": "차바이오텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "389650",
+        "corpName": "넥스트바이오메디컬",
+        "industry": "pharma",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200670",
+        "corpName": "휴메딕스",
+        "industry": "pharma",
+        "viaCode": "085660",
+        "viaName": "차바이오텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053620",
+        "corpName": "태양",
+        "industry": "energy",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086450",
+        "corpName": "동국제약",
+        "industry": "pharma",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058820",
+        "corpName": "CMG제약",
+        "industry": "pharma",
+        "viaCode": "085660",
+        "viaName": "차바이오텍",
         "hopDistance": 2
       },
       {

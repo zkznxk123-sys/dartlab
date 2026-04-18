@@ -282,38 +282,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
-        "viaCode": "180400",
-        "viaName": "DXVX",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "402420",
-        "corpName": "켈스",
-        "industry": "pharma",
-        "viaCode": "084650",
-        "viaName": "랩지노믹스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "195940",
-        "corpName": "HK이노엔",
-        "industry": "pharma",
-        "viaCode": "338840",
-        "viaName": "와이바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "361390",
-        "corpName": "제노코",
-        "industry": "telecom",
-        "viaCode": "084650",
-        "viaName": "랩지노믹스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "204840",
         "corpName": "지엘팜텍",
         "industry": "realestate",
@@ -322,9 +290,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006800",
-        "corpName": "미래에셋증권",
-        "industry": "finance",
+        "stockCode": "006620",
+        "corpName": "동구바이오제약",
+        "industry": "pharma",
+        "viaCode": "314130",
+        "viaName": "지놈앤컴퍼니",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "180400",
+        "viaName": "DXVX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "128940",
+        "corpName": "한미약품",
+        "industry": "pharma",
+        "viaCode": "180400",
+        "viaName": "DXVX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053030",
+        "corpName": "바이넥스",
+        "industry": "pharma",
+        "viaCode": "338840",
+        "viaName": "와이바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "251120",
+        "corpName": "바이오에프디엔씨",
+        "industry": "pharma",
         "viaCode": "338840",
         "viaName": "와이바이오로직스",
         "hopDistance": 2
@@ -338,54 +338,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "086060",
-        "viaName": "진바이오텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "358570",
-        "corpName": "지아이이노베이션",
-        "industry": "pharma",
-        "viaCode": "180400",
-        "viaName": "DXVX",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006620",
-        "corpName": "동구바이오제약",
-        "industry": "pharma",
-        "viaCode": "314130",
-        "viaName": "지놈앤컴퍼니",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "044780",
-        "corpName": "에이치케이",
-        "industry": "medicalDevice",
-        "viaCode": "338840",
-        "viaName": "와이바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "128940",
-        "corpName": "한미약품",
-        "industry": "pharma",
-        "viaCode": "180400",
-        "viaName": "DXVX",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "225220",
-        "corpName": "제놀루션",
-        "industry": "software",
-        "viaCode": "084650",
-        "viaName": "랩지노믹스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "192820",
         "corpName": "코스맥스",
         "industry": "cosmetics",
@@ -394,25 +346,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003470",
-        "corpName": "유안타증권",
-        "industry": "finance",
-        "viaCode": "338840",
-        "viaName": "와이바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078160",
-        "corpName": "메디포스트",
-        "industry": "finance",
-        "viaCode": "084650",
-        "viaName": "랩지노믹스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "203400",
-        "corpName": "에이비온",
-        "industry": "pharma",
+        "stockCode": "238490",
+        "corpName": "힘스",
+        "industry": "electronics",
         "viaCode": "084650",
         "viaName": "랩지노믹스",
         "hopDistance": 2
@@ -426,17 +362,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "334970",
-        "corpName": "프레스티지바이오로직스",
+        "stockCode": "289170",
+        "corpName": "바이오텐",
         "industry": "pharma",
-        "viaCode": "180400",
-        "viaName": "DXVX",
+        "viaCode": "086060",
+        "viaName": "진바이오텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "238490",
-        "corpName": "힘스",
-        "industry": "electronics",
+        "stockCode": "361390",
+        "corpName": "제노코",
+        "industry": "telecom",
+        "viaCode": "084650",
+        "viaName": "랩지노믹스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "225220",
+        "corpName": "제놀루션",
+        "industry": "software",
+        "viaCode": "084650",
+        "viaName": "랩지노믹스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003470",
+        "corpName": "유안타증권",
+        "industry": "finance",
+        "viaCode": "338840",
+        "viaName": "와이바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095700",
+        "corpName": "제넥신",
+        "industry": "pharma",
+        "viaCode": "338840",
+        "viaName": "와이바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "203400",
+        "corpName": "에이비온",
+        "industry": "pharma",
         "viaCode": "084650",
         "viaName": "랩지노믹스",
         "hopDistance": 2
@@ -450,6 +418,38 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "338840",
+        "viaName": "와이바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "358570",
+        "corpName": "지아이이노베이션",
+        "industry": "pharma",
+        "viaCode": "338840",
+        "viaName": "와이바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "402420",
+        "corpName": "켈스",
+        "industry": "pharma",
+        "viaCode": "084650",
+        "viaName": "랩지노믹스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078160",
+        "corpName": "메디포스트",
+        "industry": "finance",
+        "viaCode": "084650",
+        "viaName": "랩지노믹스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "346010",
         "corpName": "타이드",
         "industry": "electronics",
@@ -458,17 +458,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "095700",
-        "corpName": "제넥신",
-        "industry": "pharma",
-        "viaCode": "338840",
-        "viaName": "와이바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053030",
-        "corpName": "바이넥스",
-        "industry": "pharma",
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
         "viaCode": "338840",
         "viaName": "와이바이오로직스",
         "hopDistance": 2
@@ -482,8 +474,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "251120",
-        "corpName": "바이오에프디엔씨",
+        "stockCode": "334970",
+        "corpName": "프레스티지바이오로직스",
+        "industry": "pharma",
+        "viaCode": "180400",
+        "viaName": "DXVX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "195940",
+        "corpName": "HK이노엔",
         "industry": "pharma",
         "viaCode": "338840",
         "viaName": "와이바이오로직스",
@@ -498,9 +498,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "289170",
-        "corpName": "바이오텐",
-        "industry": "pharma",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "086060",
         "viaName": "진바이오텍",
         "hopDistance": 2

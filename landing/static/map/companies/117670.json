@@ -123,14 +123,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "032860",
-        "viaName": "더라미",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "038460",
         "corpName": "바이오스마트",
         "industry": "electronics",
@@ -139,17 +131,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "125020",
-        "corpName": "티씨머티리얼즈",
-        "industry": "medicalDevice",
+        "stockCode": "057540",
+        "corpName": "옴니시스템",
+        "industry": "energy",
         "viaCode": "032860",
         "viaName": "더라미",
         "hopDistance": 2
       },
       {
-        "stockCode": "057540",
-        "corpName": "옴니시스템",
-        "industry": "energy",
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "032860",
+        "viaName": "더라미",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "125020",
+        "corpName": "티씨머티리얼즈",
+        "industry": "medicalDevice",
         "viaCode": "032860",
         "viaName": "더라미",
         "hopDistance": 2

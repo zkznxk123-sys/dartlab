@@ -195,11 +195,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "012800",
-        "corpName": "대창",
+        "stockCode": "460860",
+        "corpName": "동국제강",
         "industry": "steel",
-        "viaCode": "005160",
-        "viaName": "동국산업",
+        "viaCode": "075970",
+        "viaName": "동국알앤에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001940",
+        "corpName": "KISCO홀딩스",
+        "industry": "steel",
+        "viaCode": "075970",
+        "viaName": "동국알앤에스",
         "hopDistance": 2
       },
       {
@@ -208,6 +216,14 @@
         "industry": "steel",
         "viaCode": "075970",
         "viaName": "동국알앤에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012800",
+        "corpName": "대창",
+        "industry": "steel",
+        "viaCode": "005160",
+        "viaName": "동국산업",
         "hopDistance": 2
       },
       {
@@ -224,22 +240,6 @@
         "industry": "steel",
         "viaCode": "005160",
         "viaName": "동국산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "460860",
-        "corpName": "동국제강",
-        "industry": "steel",
-        "viaCode": "075970",
-        "viaName": "동국알앤에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001940",
-        "corpName": "KISCO홀딩스",
-        "industry": "steel",
-        "viaCode": "075970",
-        "viaName": "동국알앤에스",
         "hopDistance": 2
       }
     ],

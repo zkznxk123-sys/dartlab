@@ -109,9 +109,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "061090",
-        "corpName": "세나테크놀로지",
-        "industry": "retail",
+        "stockCode": "035900",
+        "corpName": "JYP Ent.",
+        "industry": "media",
         "viaCode": "376300",
         "viaName": "디어유",
         "hopDistance": 2
@@ -125,9 +125,89 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
+        "stockCode": "090460",
+        "corpName": "비에이치",
+        "industry": "electronics",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001800",
+        "corpName": "오리온홀딩스",
+        "industry": "food",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "293490",
+        "corpName": "카카오게임즈",
+        "industry": "software",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "048550",
+        "corpName": "SM C&C",
+        "industry": "media",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "323410",
+        "corpName": "카카오뱅크",
+        "industry": "finance",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054780",
+        "corpName": "키이스트",
+        "industry": "software",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "061090",
+        "corpName": "세나테크놀로지",
+        "industry": "retail",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217270",
+        "corpName": "넵튠",
+        "industry": "software",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377300",
+        "corpName": "카카오페이",
+        "industry": "finance",
         "viaCode": "376300",
         "viaName": "디어유",
         "hopDistance": 2
@@ -135,6 +215,14 @@
       {
         "stockCode": "060570",
         "corpName": "드림어스컴퍼니",
+        "industry": "media",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
         "industry": "media",
         "viaCode": "376300",
         "viaName": "디어유",
@@ -149,81 +237,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "323410",
-        "corpName": "카카오뱅크",
-        "industry": "finance",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "048550",
-        "corpName": "SM C&C",
-        "industry": "media",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "217270",
-        "corpName": "넵튠",
-        "industry": "software",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054780",
-        "corpName": "키이스트",
-        "industry": "software",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001800",
-        "corpName": "오리온홀딩스",
-        "industry": "food",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090460",
-        "corpName": "비에이치",
-        "industry": "electronics",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035900",
-        "corpName": "JYP Ent.",
-        "industry": "media",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "293490",
-        "corpName": "카카오게임즈",
-        "industry": "software",
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
         "viaCode": "376300",
         "viaName": "디어유",
         "hopDistance": 2
@@ -237,25 +253,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001630",
-        "corpName": "종근당홀딩스",
-        "industry": "pharma",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "458350",
         "corpName": "에스팀",
         "industry": "media",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "377300",
-        "corpName": "카카오페이",
-        "industry": "finance",
         "viaCode": "376300",
         "viaName": "디어유",
         "hopDistance": 2

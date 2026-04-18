@@ -170,11 +170,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "002620",
-        "viaName": "제일파마홀딩스",
+        "stockCode": "003520",
+        "corpName": "영진약품",
+        "industry": "pharma",
+        "viaCode": "271980",
+        "viaName": "제일약품",
         "hopDistance": 2
       },
       {
@@ -183,6 +183,14 @@
         "industry": "food",
         "viaCode": "271980",
         "viaName": "제일약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "002620",
+        "viaName": "제일파마홀딩스",
         "hopDistance": 2
       },
       {
@@ -197,23 +205,15 @@
         "stockCode": "012750",
         "corpName": "에스원",
         "industry": "electronics",
-        "viaCode": "271980",
-        "viaName": "제일약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003520",
-        "corpName": "영진약품",
-        "industry": "pharma",
-        "viaCode": "271980",
-        "viaName": "제일약품",
+        "viaCode": "002620",
+        "viaName": "제일파마홀딩스",
         "hopDistance": 2
       }
     ],
     "hop2Edges": [
       {
         "from": "271980",
-        "to": "033780",
+        "to": "003520",
         "type": "supplier",
         "amount": 3549.0,
         "ratio": null,
@@ -223,7 +223,7 @@
       },
       {
         "from": "271980",
-        "to": "003520",
+        "to": "033780",
         "type": "supplier",
         "amount": 3549.0,
         "ratio": null,

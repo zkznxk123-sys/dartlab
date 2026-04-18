@@ -147,19 +147,19 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "377030",
-        "corpName": "비트맥스",
-        "industry": "software",
+        "stockCode": "093510",
+        "corpName": "엔지브이아이",
+        "industry": "energy",
         "viaCode": "060900",
         "viaName": "에이전트AI",
         "hopDistance": 2
       },
       {
-        "stockCode": "053950",
-        "corpName": "경남제약",
-        "industry": "pharma",
-        "viaCode": "223310",
-        "viaName": "사토시홀딩스",
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "060900",
+        "viaName": "에이전트AI",
         "hopDistance": 2
       },
       {
@@ -187,11 +187,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "060900",
-        "viaName": "에이전트AI",
+        "stockCode": "377030",
+        "corpName": "비트맥스",
+        "industry": "software",
+        "viaCode": "223310",
+        "viaName": "사토시홀딩스",
         "hopDistance": 2
       },
       {
@@ -203,16 +203,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "095910",
-        "corpName": "에스에너지",
-        "industry": "energy",
-        "viaCode": "060900",
-        "viaName": "에이전트AI",
+        "stockCode": "053950",
+        "corpName": "경남제약",
+        "industry": "pharma",
+        "viaCode": "223310",
+        "viaName": "사토시홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "093510",
-        "corpName": "엔지브이아이",
+        "stockCode": "095910",
+        "corpName": "에스에너지",
         "industry": "energy",
         "viaCode": "060900",
         "viaName": "에이전트AI",

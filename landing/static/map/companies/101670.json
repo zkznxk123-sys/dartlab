@@ -140,33 +140,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "009310",
-        "corpName": "참엔지니어링",
-        "industry": "software",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "261520",
-        "corpName": "이지스",
-        "industry": "software",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "100590",
-        "corpName": "머큐리",
-        "industry": "telecom",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "045520",
         "corpName": "크린앤사이언스",
         "industry": "machinery",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "289080",
+        "corpName": "SV인베스트먼트",
+        "industry": "finance",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009310",
+        "corpName": "참엔지니어링",
+        "industry": "software",
         "viaCode": "073570",
         "viaName": "리튬포어스",
         "hopDistance": 2
@@ -180,25 +172,17 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "018290",
+        "corpName": "브이티",
+        "industry": "plastic",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "034730",
         "corpName": "SK",
         "industry": "software",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "122870",
-        "corpName": "와이지엔터테인먼트",
-        "industry": "media",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "087010",
-        "corpName": "펩트론",
-        "industry": "pharma",
         "viaCode": "073570",
         "viaName": "리튬포어스",
         "hopDistance": 2
@@ -220,17 +204,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "009810",
-        "corpName": "플레이그램",
-        "industry": "retail",
+        "stockCode": "186230",
+        "corpName": "그린플러스",
+        "industry": "construction",
         "viaCode": "073570",
         "viaName": "리튬포어스",
         "hopDistance": 2
       },
       {
-        "stockCode": "018290",
-        "corpName": "브이티",
-        "industry": "plastic",
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009810",
+        "corpName": "플레이그램",
+        "industry": "retail",
         "viaCode": "073570",
         "viaName": "리튬포어스",
         "hopDistance": 2
@@ -244,14 +236,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "185490",
-        "corpName": "아이진",
-        "industry": "pharma",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "053610",
         "corpName": "프로텍",
         "industry": "chemical",
@@ -260,16 +244,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "171120",
-        "corpName": "라이온켐텍",
-        "industry": "chemical",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000250",
-        "corpName": "삼천당제약",
+        "stockCode": "185490",
+        "corpName": "아이진",
         "industry": "pharma",
         "viaCode": "073570",
         "viaName": "리튬포어스",
@@ -284,6 +260,22 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "000250",
+        "corpName": "삼천당제약",
+        "industry": "pharma",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "087010",
+        "corpName": "펩트론",
+        "industry": "pharma",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "009830",
         "corpName": "한화솔루션",
         "industry": "chemical",
@@ -292,25 +284,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "289080",
-        "corpName": "SV인베스트먼트",
-        "industry": "finance",
+        "stockCode": "100590",
+        "corpName": "머큐리",
+        "industry": "telecom",
         "viaCode": "073570",
         "viaName": "리튬포어스",
         "hopDistance": 2
       },
       {
-        "stockCode": "186230",
-        "corpName": "그린플러스",
-        "industry": "construction",
+        "stockCode": "122870",
+        "corpName": "와이지엔터테인먼트",
+        "industry": "media",
         "viaCode": "073570",
         "viaName": "리튬포어스",
         "hopDistance": 2
       },
       {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "171120",
+        "corpName": "라이온켐텍",
+        "industry": "chemical",
         "viaCode": "073570",
         "viaName": "리튬포어스",
         "hopDistance": 2

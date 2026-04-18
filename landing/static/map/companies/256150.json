@@ -152,49 +152,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "045660",
-        "corpName": "에이텍",
-        "industry": "electronics",
-        "viaCode": "000300",
-        "viaName": "DH오토넥스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "377460",
-        "corpName": "위니아에이드",
-        "industry": "shipbuilding",
-        "viaCode": "000300",
-        "viaName": "DH오토넥스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002880",
-        "corpName": "대유에이텍",
-        "industry": "electronics",
-        "viaCode": "000300",
-        "viaName": "DH오토넥스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
+        "stockCode": "031440",
+        "corpName": "신세계푸드",
+        "industry": "retail",
         "viaCode": "284740",
         "viaName": "쿠쿠홈시스",
         "hopDistance": 2
       },
       {
-        "stockCode": "086280",
-        "corpName": "현대글로비스",
-        "industry": "logistics",
-        "viaCode": "000300",
-        "viaName": "DH오토넥스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "192400",
-        "corpName": "쿠쿠홀딩스",
-        "industry": "finance",
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
         "viaCode": "284740",
         "viaName": "쿠쿠홈시스",
         "hopDistance": 2
@@ -208,6 +176,22 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "284740",
+        "viaName": "쿠쿠홈시스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "115440",
         "corpName": "우리넷",
         "industry": "chemical",
@@ -216,17 +200,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001500",
-        "corpName": "현대차증권",
-        "industry": "realestate",
-        "viaCode": "000300",
-        "viaName": "DH오토넥스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
+        "stockCode": "012860",
+        "corpName": "모베이스전자",
+        "industry": "telecom",
         "viaCode": "000300",
         "viaName": "DH오토넥스",
         "hopDistance": 2
@@ -240,73 +216,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "000300",
-        "viaName": "DH오토넥스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "139480",
-        "corpName": "이마트",
-        "industry": "retail",
-        "viaCode": "284740",
-        "viaName": "쿠쿠홈시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041520",
-        "corpName": "이엘씨",
-        "industry": "semiconductor",
-        "viaCode": "000300",
-        "viaName": "DH오토넥스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "012630",
         "corpName": "HDC",
         "industry": "finance",
-        "viaCode": "000300",
-        "viaName": "DH오토넥스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002170",
-        "corpName": "삼양통상",
-        "industry": "textile",
-        "viaCode": "000300",
-        "viaName": "DH오토넥스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "026940",
-        "corpName": "부국철강",
-        "industry": "steel",
-        "viaCode": "000300",
-        "viaName": "DH오토넥스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003650",
-        "corpName": "미창석유공업",
-        "industry": "plastic",
-        "viaCode": "284740",
-        "viaName": "쿠쿠홈시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101330",
-        "corpName": "모베이스",
-        "industry": "telecom",
-        "viaCode": "000300",
-        "viaName": "DH오토넥스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "290120",
-        "corpName": "DH오토리드",
-        "industry": "auto",
         "viaCode": "000300",
         "viaName": "DH오토넥스",
         "hopDistance": 2
@@ -328,27 +240,115 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
+        "stockCode": "377460",
+        "corpName": "위니아에이드",
+        "industry": "shipbuilding",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "139480",
+        "corpName": "이마트",
+        "industry": "retail",
         "viaCode": "284740",
         "viaName": "쿠쿠홈시스",
         "hopDistance": 2
       },
       {
-        "stockCode": "012860",
-        "corpName": "모베이스전자",
+        "stockCode": "003650",
+        "corpName": "미창석유공업",
+        "industry": "plastic",
+        "viaCode": "284740",
+        "viaName": "쿠쿠홈시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "045660",
+        "corpName": "에이텍",
+        "industry": "electronics",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101330",
+        "corpName": "모베이스",
         "industry": "telecom",
         "viaCode": "000300",
         "viaName": "DH오토넥스",
         "hopDistance": 2
       },
       {
-        "stockCode": "031440",
-        "corpName": "신세계푸드",
-        "industry": "retail",
+        "stockCode": "002880",
+        "corpName": "대유에이텍",
+        "industry": "electronics",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001500",
+        "corpName": "현대차증권",
+        "industry": "realestate",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086280",
+        "corpName": "현대글로비스",
+        "industry": "logistics",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041520",
+        "corpName": "이엘씨",
+        "industry": "semiconductor",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002170",
+        "corpName": "삼양통상",
+        "industry": "textile",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192400",
+        "corpName": "쿠쿠홀딩스",
+        "industry": "finance",
         "viaCode": "284740",
         "viaName": "쿠쿠홈시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "290120",
+        "corpName": "DH오토리드",
+        "industry": "auto",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "026940",
+        "corpName": "부국철강",
+        "industry": "steel",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
         "hopDistance": 2
       }
     ],

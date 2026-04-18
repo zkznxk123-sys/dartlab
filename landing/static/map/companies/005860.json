@@ -123,6 +123,14 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "383220",
+        "viaName": "F&F",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "007700",
         "corpName": "F&F 홀딩스",
         "industry": "finance",
@@ -131,8 +139,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
+        "stockCode": "088350",
+        "corpName": "한화생명",
         "industry": "aerospace",
         "viaCode": "383220",
         "viaName": "F&F",
@@ -163,14 +171,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "210120",
-        "corpName": "캔버스엔",
-        "industry": "telecom",
-        "viaCode": "383220",
-        "viaName": "F&F",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "136490",
         "corpName": "선진",
         "industry": "food",
@@ -179,9 +179,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
+        "stockCode": "210120",
+        "corpName": "캔버스엔",
+        "industry": "telecom",
         "viaCode": "383220",
         "viaName": "F&F",
         "hopDistance": 2

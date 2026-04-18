@@ -142,22 +142,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "095340",
-        "corpName": "ISC",
-        "industry": "retail",
-        "viaCode": "122690",
-        "viaName": "서진오토모티브",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "122690",
-        "viaName": "서진오토모티브",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "089790",
         "corpName": "제이티",
         "industry": "semiconductor",
@@ -166,25 +150,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "033270",
-        "corpName": "유나이티드",
-        "industry": "pharma",
-        "viaCode": "122690",
-        "viaName": "서진오토모티브",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005940",
-        "corpName": "NH투자증권",
-        "industry": "finance",
-        "viaCode": "122690",
-        "viaName": "서진오토모티브",
+        "stockCode": "005380",
+        "corpName": "현대자동차",
+        "industry": "auto",
+        "viaCode": "038110",
+        "viaName": "에코플라스틱",
         "hopDistance": 2
       },
       {
         "stockCode": "038540",
         "corpName": "상상인",
         "industry": "software",
+        "viaCode": "038110",
+        "viaName": "에코플라스틱",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033340",
+        "corpName": "좋은사람들",
+        "industry": "textile",
         "viaCode": "038110",
         "viaName": "에코플라스틱",
         "hopDistance": 2
@@ -198,19 +182,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005380",
-        "corpName": "현대자동차",
-        "industry": "auto",
+        "stockCode": "033270",
+        "corpName": "유나이티드",
+        "industry": "pharma",
         "viaCode": "038110",
         "viaName": "에코플라스틱",
         "hopDistance": 2
       },
       {
-        "stockCode": "033340",
-        "corpName": "좋은사람들",
-        "industry": "textile",
+        "stockCode": "005940",
+        "corpName": "NH투자증권",
+        "industry": "finance",
         "viaCode": "122690",
         "viaName": "서진오토모티브",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095340",
+        "corpName": "ISC",
+        "industry": "retail",
+        "viaCode": "122690",
+        "viaName": "서진오토모티브",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "038110",
+        "viaName": "에코플라스틱",
         "hopDistance": 2
       }
     ],

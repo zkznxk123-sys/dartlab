@@ -228,17 +228,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "388210",
-        "corpName": "씨엠티엑스",
-        "industry": "semiconductor",
-        "viaCode": "004920",
-        "viaName": "씨아이테크",
+        "stockCode": "065570",
+        "corpName": "삼영이엔씨",
+        "industry": "telecom",
+        "viaCode": "348370",
+        "viaName": "엔켐",
         "hopDistance": 2
       },
       {
-        "stockCode": "138360",
-        "corpName": "앤로보틱스",
-        "industry": "machinery",
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "029480",
+        "viaName": "광무",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "290660",
+        "corpName": "네오펙트",
+        "industry": "retail",
         "viaCode": "029480",
         "viaName": "광무",
         "hopDistance": 2
@@ -252,33 +260,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001510",
-        "corpName": "SK증권",
-        "industry": "software",
-        "viaCode": "348370",
-        "viaName": "엔켐",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "185190",
-        "corpName": "수프로",
-        "industry": "retail",
-        "viaCode": "042940",
-        "viaName": "상지건설",
+        "stockCode": "009830",
+        "corpName": "한화솔루션",
+        "industry": "chemical",
+        "viaCode": "029480",
+        "viaName": "광무",
         "hopDistance": 2
       },
       {
         "stockCode": "031210",
         "corpName": "서울보증보험",
         "industry": "finance",
-        "viaCode": "029480",
-        "viaName": "광무",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009830",
-        "corpName": "한화솔루션",
-        "industry": "chemical",
         "viaCode": "029480",
         "viaName": "광무",
         "hopDistance": 2
@@ -292,17 +284,57 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "065570",
-        "corpName": "삼영이엔씨",
-        "industry": "telecom",
+        "stockCode": "388210",
+        "corpName": "씨엠티엑스",
+        "industry": "semiconductor",
+        "viaCode": "004920",
+        "viaName": "씨아이테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "004920",
+        "viaName": "씨아이테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019570",
+        "corpName": "플루토스",
+        "industry": "finance",
+        "viaCode": "029480",
+        "viaName": "광무",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001510",
+        "corpName": "SK증권",
+        "industry": "software",
         "viaCode": "348370",
         "viaName": "엔켐",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "138360",
+        "corpName": "앤로보틱스",
+        "industry": "machinery",
+        "viaCode": "029480",
+        "viaName": "광무",
         "hopDistance": 2
       },
       {
         "stockCode": "029780",
         "corpName": "삼성카드",
         "industry": "aerospace",
+        "viaCode": "029480",
+        "viaName": "광무",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "382800",
+        "corpName": "지앤비에스 에코",
+        "industry": "machinery",
         "viaCode": "029480",
         "viaName": "광무",
         "hopDistance": 2
@@ -316,51 +348,19 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "185190",
+        "corpName": "수프로",
+        "industry": "retail",
+        "viaCode": "042940",
+        "viaName": "상지건설",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "003540",
         "corpName": "대신증권",
         "industry": "finance",
         "viaCode": "348370",
         "viaName": "엔켐",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
-        "viaCode": "004920",
-        "viaName": "씨아이테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "290660",
-        "corpName": "네오펙트",
-        "industry": "retail",
-        "viaCode": "029480",
-        "viaName": "광무",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "019570",
-        "corpName": "플루토스",
-        "industry": "finance",
-        "viaCode": "029480",
-        "viaName": "광무",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "029480",
-        "viaName": "광무",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "382800",
-        "corpName": "지앤비에스 에코",
-        "industry": "machinery",
-        "viaCode": "029480",
-        "viaName": "광무",
         "hopDistance": 2
       }
     ],

@@ -116,41 +116,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "005720",
-        "corpName": "넥센",
-        "industry": "plastic",
-        "viaCode": "014530",
-        "viaName": "극동유화",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "073240",
-        "corpName": "금호타이어",
-        "industry": "retail",
-        "viaCode": "014530",
-        "viaName": "극동유화",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "032830",
         "corpName": "삼성생명",
         "industry": "finance",
-        "viaCode": "014530",
-        "viaName": "극동유화",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "393890",
-        "corpName": "더블유씨피",
-        "industry": "battery",
-        "viaCode": "014530",
-        "viaName": "극동유화",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009300",
-        "corpName": "삼아제약",
-        "industry": "pharma",
         "viaCode": "014530",
         "viaName": "극동유화",
         "hopDistance": 2
@@ -164,9 +132,41 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "009300",
+        "corpName": "삼아제약",
+        "industry": "pharma",
+        "viaCode": "014530",
+        "viaName": "극동유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "393890",
+        "corpName": "더블유씨피",
+        "industry": "battery",
+        "viaCode": "014530",
+        "viaName": "극동유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073240",
+        "corpName": "금호타이어",
+        "industry": "retail",
+        "viaCode": "014530",
+        "viaName": "극동유화",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "136490",
         "corpName": "선진",
         "industry": "food",
+        "viaCode": "014530",
+        "viaName": "극동유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005720",
+        "corpName": "넥센",
+        "industry": "plastic",
         "viaCode": "014530",
         "viaName": "극동유화",
         "hopDistance": 2

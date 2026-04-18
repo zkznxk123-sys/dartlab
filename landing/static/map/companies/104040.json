@@ -148,17 +148,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "018290",
-        "corpName": "브이티",
-        "industry": "plastic",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "131760",
         "viaName": "파인텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "018290",
+        "corpName": "브이티",
+        "industry": "plastic",
         "viaCode": "131760",
         "viaName": "파인텍",
         "hopDistance": 2

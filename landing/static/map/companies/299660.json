@@ -135,17 +135,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "007330",
-        "corpName": "푸른저축은행",
-        "industry": "finance",
-        "viaCode": "377740",
-        "viaName": "바이오노트",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "000370",
         "corpName": "한화손해보험",
         "industry": "aerospace",
+        "viaCode": "092040",
+        "viaName": "아미코젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082640",
+        "corpName": "동양생명",
+        "industry": "finance",
+        "viaCode": "092040",
+        "viaName": "아미코젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "238200",
+        "corpName": "비피도",
+        "industry": "food",
         "viaCode": "092040",
         "viaName": "아미코젠",
         "hopDistance": 2
@@ -159,40 +167,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "377740",
-        "viaName": "바이오노트",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "206650",
         "corpName": "유바이오로직스",
-        "industry": "pharma",
-        "viaCode": "377740",
-        "viaName": "바이오노트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "238200",
-        "corpName": "비피도",
-        "industry": "food",
-        "viaCode": "092040",
-        "viaName": "아미코젠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003300",
-        "corpName": "한일홀딩스",
-        "industry": "buildingMaterials",
-        "viaCode": "092040",
-        "viaName": "아미코젠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060590",
-        "corpName": "씨티씨바이오",
         "industry": "pharma",
         "viaCode": "377740",
         "viaName": "바이오노트",
@@ -215,11 +191,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "082640",
-        "corpName": "동양생명",
-        "industry": "finance",
-        "viaCode": "092040",
-        "viaName": "아미코젠",
+        "stockCode": "060590",
+        "corpName": "씨티씨바이오",
+        "industry": "pharma",
+        "viaCode": "377740",
+        "viaName": "바이오노트",
         "hopDistance": 2
       },
       {
@@ -231,9 +207,33 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "003300",
+        "corpName": "한일홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "092040",
+        "viaName": "아미코젠",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "217950",
         "corpName": "파마리서치바이오",
         "industry": "pharma",
+        "viaCode": "377740",
+        "viaName": "바이오노트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007330",
+        "corpName": "푸른저축은행",
+        "industry": "finance",
+        "viaCode": "377740",
+        "viaName": "바이오노트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
         "viaCode": "377740",
         "viaName": "바이오노트",
         "hopDistance": 2

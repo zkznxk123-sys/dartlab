@@ -108,9 +108,33 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "267320",
+        "viaName": "나인테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "469750",
+        "corpName": "아이비젼웍스",
+        "industry": "machinery",
+        "viaCode": "267320",
+        "viaName": "나인테크",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "092790",
         "corpName": "넥스틸",
         "industry": "medicalDevice",
+        "viaCode": "267320",
+        "viaName": "나인테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "364950",
+        "corpName": "에이아이코리아",
+        "industry": "battery",
         "viaCode": "267320",
         "viaName": "나인테크",
         "hopDistance": 2
@@ -126,30 +150,6 @@
       {
         "stockCode": "348210",
         "corpName": "넥스틴",
-        "industry": "semiconductor",
-        "viaCode": "267320",
-        "viaName": "나인테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "469750",
-        "corpName": "아이비젼웍스",
-        "industry": "machinery",
-        "viaCode": "267320",
-        "viaName": "나인테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "364950",
-        "corpName": "에이아이코리아",
-        "industry": "battery",
-        "viaCode": "267320",
-        "viaName": "나인테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
         "industry": "semiconductor",
         "viaCode": "267320",
         "viaName": "나인테크",

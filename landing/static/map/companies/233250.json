@@ -87,65 +87,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "005430",
-        "corpName": "한국공항",
-        "industry": "aerospace",
-        "viaCode": "026890",
-        "viaName": "스틱인베스트먼트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "026890",
-        "viaName": "스틱인베스트먼트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "372910",
-        "corpName": "한컴라이프케어",
-        "industry": "medicalDevice",
-        "viaCode": "026890",
-        "viaName": "스틱인베스트먼트",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "172670",
         "corpName": "에이엘티",
         "industry": "semiconductor",
-        "viaCode": "026890",
-        "viaName": "스틱인베스트먼트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "206560",
-        "corpName": "덱스터",
-        "industry": "medicalDevice",
-        "viaCode": "026890",
-        "viaName": "스틱인베스트먼트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "115160",
-        "corpName": "휴맥스",
-        "industry": "electronics",
-        "viaCode": "026890",
-        "viaName": "스틱인베스트먼트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "352820",
-        "corpName": "하이브",
-        "industry": "media",
-        "viaCode": "026890",
-        "viaName": "스틱인베스트먼트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032620",
-        "corpName": "GC메디아이",
-        "industry": "software",
         "viaCode": "026890",
         "viaName": "스틱인베스트먼트",
         "hopDistance": 2
@@ -159,9 +103,65 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "005430",
+        "corpName": "한국공항",
+        "industry": "aerospace",
+        "viaCode": "026890",
+        "viaName": "스틱인베스트먼트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "206560",
+        "corpName": "덱스터",
+        "industry": "medicalDevice",
+        "viaCode": "026890",
+        "viaName": "스틱인베스트먼트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032620",
+        "corpName": "GC메디아이",
+        "industry": "software",
+        "viaCode": "026890",
+        "viaName": "스틱인베스트먼트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352820",
+        "corpName": "하이브",
+        "industry": "media",
+        "viaCode": "026890",
+        "viaName": "스틱인베스트먼트",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "066670",
         "corpName": "디티씨",
         "industry": "electronics",
+        "viaCode": "026890",
+        "viaName": "스틱인베스트먼트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "026890",
+        "viaName": "스틱인베스트먼트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "115160",
+        "corpName": "휴맥스",
+        "industry": "electronics",
+        "viaCode": "026890",
+        "viaName": "스틱인베스트먼트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "372910",
+        "corpName": "한컴라이프케어",
+        "industry": "medicalDevice",
         "viaCode": "026890",
         "viaName": "스틱인베스트먼트",
         "hopDistance": 2

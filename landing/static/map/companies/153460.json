@@ -147,38 +147,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "250060",
-        "corpName": "모비스",
-        "industry": "auto",
-        "viaCode": "230240",
-        "viaName": "에치에프알",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "230240",
-        "viaName": "에치에프알",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053350",
-        "corpName": "이니텍",
-        "industry": "software",
-        "viaCode": "069410",
-        "viaName": "엔텔스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001740",
-        "corpName": "SK네트웍스",
-        "industry": "software",
-        "viaCode": "069410",
-        "viaName": "엔텔스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "073540",
         "corpName": "에프알텍",
         "industry": "telecom",
@@ -190,6 +158,38 @@
         "stockCode": "254120",
         "corpName": "자비스",
         "industry": "machinery",
+        "viaCode": "069410",
+        "viaName": "엔텔스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038680",
+        "corpName": "에스넷",
+        "industry": "food",
+        "viaCode": "069410",
+        "viaName": "엔텔스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "250060",
+        "corpName": "모비스",
+        "industry": "auto",
+        "viaCode": "230240",
+        "viaName": "에치에프알",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
+        "viaCode": "069410",
+        "viaName": "엔텔스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053350",
+        "corpName": "이니텍",
+        "industry": "software",
         "viaCode": "069410",
         "viaName": "엔텔스",
         "hopDistance": 2
@@ -211,19 +211,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "056360",
-        "corpName": "코위버",
-        "industry": "telecom",
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
         "viaCode": "230240",
         "viaName": "에치에프알",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017670",
-        "corpName": "SK텔레콤",
-        "industry": "telecom",
-        "viaCode": "069410",
-        "viaName": "엔텔스",
         "hopDistance": 2
       },
       {
@@ -235,9 +227,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "038680",
-        "corpName": "에스넷",
-        "industry": "food",
+        "stockCode": "056360",
+        "corpName": "코위버",
+        "industry": "telecom",
+        "viaCode": "230240",
+        "viaName": "에치에프알",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001740",
+        "corpName": "SK네트웍스",
+        "industry": "software",
         "viaCode": "069410",
         "viaName": "엔텔스",
         "hopDistance": 2

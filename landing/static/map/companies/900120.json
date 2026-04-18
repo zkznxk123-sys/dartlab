@@ -116,9 +116,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "348210",
-        "corpName": "넥스틴",
-        "industry": "semiconductor",
+        "stockCode": "016610",
+        "corpName": "DB증권",
+        "industry": "finance",
         "viaCode": "406820",
         "viaName": "뷰티스킨",
         "hopDistance": 2
@@ -132,9 +132,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "016610",
-        "corpName": "DB증권",
-        "industry": "finance",
+        "stockCode": "348210",
+        "corpName": "넥스틴",
+        "industry": "semiconductor",
         "viaCode": "406820",
         "viaName": "뷰티스킨",
         "hopDistance": 2

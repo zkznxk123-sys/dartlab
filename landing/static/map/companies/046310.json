@@ -123,17 +123,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031330",
-        "corpName": "에스에이엠티",
-        "industry": "electronics",
-        "viaCode": "318020",
-        "viaName": "포인트모바일",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "232530",
-        "corpName": "이엠티",
-        "industry": "semiconductor",
+        "stockCode": "331380",
+        "corpName": "포커스에이아이",
+        "industry": "machinery",
         "viaCode": "318020",
         "viaName": "포인트모바일",
         "hopDistance": 2
@@ -141,14 +133,6 @@
       {
         "stockCode": "259630",
         "corpName": "엠플러스",
-        "industry": "machinery",
-        "viaCode": "318020",
-        "viaName": "포인트모바일",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "331380",
-        "corpName": "포커스에이아이",
         "industry": "machinery",
         "viaCode": "318020",
         "viaName": "포인트모바일",
@@ -166,6 +150,22 @@
         "stockCode": "069510",
         "corpName": "에스텍",
         "industry": "electronics",
+        "viaCode": "318020",
+        "viaName": "포인트모바일",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031330",
+        "corpName": "에스에이엠티",
+        "industry": "electronics",
+        "viaCode": "318020",
+        "viaName": "포인트모바일",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
         "viaCode": "318020",
         "viaName": "포인트모바일",
         "hopDistance": 2

@@ -237,11 +237,27 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
+        "stockCode": "293780",
+        "corpName": "압타바이오",
+        "industry": "pharma",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "289080",
+        "corpName": "SV인베스트먼트",
         "industry": "finance",
-        "viaCode": "237690",
-        "viaName": "에스티팜",
+        "viaCode": "002810",
+        "viaName": "삼영무역",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "033530",
+        "viaName": "SJG세종",
         "hopDistance": 2
       },
       {
@@ -253,43 +269,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "039490",
-        "corpName": "키움증권",
-        "industry": "finance",
-        "viaCode": "237690",
-        "viaName": "에스티팜",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
-        "viaCode": "237690",
-        "viaName": "에스티팜",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003120",
-        "corpName": "일성아이에스",
+        "stockCode": "293480",
+        "corpName": "하나제약",
         "industry": "pharma",
         "viaCode": "005500",
         "viaName": "삼진제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024900",
-        "corpName": "디와이덕양",
-        "industry": "electronics",
-        "viaCode": "033530",
-        "viaName": "SJG세종",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123700",
-        "corpName": "에스제이엠",
-        "industry": "auto",
-        "viaCode": "033530",
-        "viaName": "SJG세종",
         "hopDistance": 2
       },
       {
@@ -301,43 +285,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003000",
-        "corpName": "부광약품",
-        "industry": "pharma",
-        "viaCode": "005500",
-        "viaName": "삼진제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "250060",
-        "corpName": "모비스",
-        "industry": "auto",
-        "viaCode": "033530",
-        "viaName": "SJG세종",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "037760",
+        "corpName": "쎄니트",
+        "industry": "steel",
         "viaCode": "120240",
         "viaName": "대정화금",
         "hopDistance": 2
       },
       {
-        "stockCode": "000050",
-        "corpName": "경방",
-        "industry": "retail",
-        "viaCode": "002810",
-        "viaName": "삼영무역",
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "237690",
+        "viaName": "에스티팜",
         "hopDistance": 2
       },
       {
-        "stockCode": "069510",
-        "corpName": "에스텍",
-        "industry": "electronics",
-        "viaCode": "005500",
-        "viaName": "삼진제약",
+        "stockCode": "123700",
+        "corpName": "에스제이엠",
+        "industry": "auto",
+        "viaCode": "033530",
+        "viaName": "SJG세종",
         "hopDistance": 2
       },
       {
@@ -349,65 +317,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "293480",
-        "corpName": "하나제약",
-        "industry": "pharma",
-        "viaCode": "005500",
-        "viaName": "삼진제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "432980",
-        "corpName": "엠에프씨",
-        "industry": "pharma",
-        "viaCode": "005500",
-        "viaName": "삼진제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037760",
-        "corpName": "쎄니트",
-        "industry": "steel",
-        "viaCode": "120240",
-        "viaName": "대정화금",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
-        "viaCode": "237690",
-        "viaName": "에스티팜",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "307750",
-        "corpName": "국전약품",
-        "industry": "pharma",
-        "viaCode": "005500",
-        "viaName": "삼진제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033830",
-        "corpName": "티비씨",
-        "industry": "media",
-        "viaCode": "005500",
-        "viaName": "삼진제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "028260",
-        "corpName": "삼성물산",
-        "industry": "construction",
-        "viaCode": "120240",
-        "viaName": "대정화금",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
+        "stockCode": "011210",
+        "corpName": "현대위아",
+        "industry": "auto",
         "viaCode": "033530",
         "viaName": "SJG세종",
         "hopDistance": 2
@@ -421,41 +333,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "170900",
-        "corpName": "동아에스티",
-        "industry": "pharma",
-        "viaCode": "237690",
-        "viaName": "에스티팜",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "388870",
-        "corpName": "파로스아이바이오",
+        "stockCode": "229500",
+        "corpName": "노브메타파마",
         "industry": "pharma",
         "viaCode": "120240",
         "viaName": "대정화금",
         "hopDistance": 2
       },
       {
-        "stockCode": "309710",
-        "corpName": "아이티켐",
-        "industry": "pharma",
-        "viaCode": "237690",
-        "viaName": "에스티팜",
+        "stockCode": "005380",
+        "corpName": "현대자동차",
+        "industry": "auto",
+        "viaCode": "033530",
+        "viaName": "SJG세종",
         "hopDistance": 2
       },
       {
-        "stockCode": "380550",
-        "corpName": "뉴로핏",
-        "industry": "chemical",
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
         "viaCode": "005500",
         "viaName": "삼진제약",
         "hopDistance": 2
       },
       {
-        "stockCode": "011210",
-        "corpName": "현대위아",
-        "industry": "auto",
+        "stockCode": "024900",
+        "corpName": "디와이덕양",
+        "industry": "electronics",
         "viaCode": "033530",
         "viaName": "SJG세종",
         "hopDistance": 2
@@ -469,27 +373,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006040",
-        "corpName": "동원산업",
-        "industry": "finance",
+        "stockCode": "170900",
+        "corpName": "동아에스티",
+        "industry": "pharma",
         "viaCode": "237690",
         "viaName": "에스티팜",
         "hopDistance": 2
       },
       {
-        "stockCode": "005380",
-        "corpName": "현대자동차",
-        "industry": "auto",
-        "viaCode": "033530",
-        "viaName": "SJG세종",
+        "stockCode": "028260",
+        "corpName": "삼성물산",
+        "industry": "construction",
+        "viaCode": "120240",
+        "viaName": "대정화금",
         "hopDistance": 2
       },
       {
-        "stockCode": "035810",
-        "corpName": "이지홀딩스",
-        "industry": "food",
-        "viaCode": "033530",
-        "viaName": "SJG세종",
+        "stockCode": "000050",
+        "corpName": "경방",
+        "industry": "retail",
+        "viaCode": "002810",
+        "viaName": "삼영무역",
         "hopDistance": 2
       },
       {
@@ -501,33 +405,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "293780",
-        "corpName": "압타바이오",
+        "stockCode": "196300",
+        "corpName": "HLB펩",
         "industry": "pharma",
-        "viaCode": "005500",
-        "viaName": "삼진제약",
+        "viaCode": "120240",
+        "viaName": "대정화금",
         "hopDistance": 2
       },
       {
-        "stockCode": "000640",
-        "corpName": "동아쏘시오홀딩스",
+        "stockCode": "432980",
+        "corpName": "엠에프씨",
         "industry": "pharma",
-        "viaCode": "237690",
-        "viaName": "에스티팜",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "119830",
-        "corpName": "아이텍",
-        "industry": "semiconductor",
-        "viaCode": "237690",
-        "viaName": "에스티팜",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089790",
-        "corpName": "제이티",
-        "industry": "semiconductor",
         "viaCode": "005500",
         "viaName": "삼진제약",
         "hopDistance": 2
@@ -549,41 +437,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "229500",
-        "corpName": "노브메타파마",
+        "stockCode": "380550",
+        "corpName": "뉴로핏",
+        "industry": "chemical",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006040",
+        "corpName": "동원산업",
+        "industry": "finance",
+        "viaCode": "237690",
+        "viaName": "에스티팜",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000640",
+        "corpName": "동아쏘시오홀딩스",
         "industry": "pharma",
-        "viaCode": "120240",
-        "viaName": "대정화금",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "389470",
-        "corpName": "인벤티지랩",
-        "industry": "software",
         "viaCode": "237690",
         "viaName": "에스티팜",
         "hopDistance": 2
       },
       {
-        "stockCode": "005940",
-        "corpName": "NH투자증권",
-        "industry": "finance",
-        "viaCode": "237690",
-        "viaName": "에스티팜",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "289080",
-        "corpName": "SV인베스트먼트",
-        "industry": "finance",
-        "viaCode": "002810",
-        "viaName": "삼영무역",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "346010",
-        "corpName": "타이드",
-        "industry": "electronics",
+        "stockCode": "119830",
+        "corpName": "아이텍",
+        "industry": "semiconductor",
         "viaCode": "237690",
         "viaName": "에스티팜",
         "hopDistance": 2
@@ -597,9 +477,129 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "196300",
-        "corpName": "HLB펩",
+        "stockCode": "035810",
+        "corpName": "이지홀딩스",
+        "industry": "food",
+        "viaCode": "033530",
+        "viaName": "SJG세종",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005940",
+        "corpName": "NH투자증권",
+        "industry": "finance",
+        "viaCode": "237690",
+        "viaName": "에스티팜",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003120",
+        "corpName": "일성아이에스",
         "industry": "pharma",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "237690",
+        "viaName": "에스티팜",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
+        "viaCode": "237690",
+        "viaName": "에스티팜",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "346010",
+        "corpName": "타이드",
+        "industry": "electronics",
+        "viaCode": "237690",
+        "viaName": "에스티팜",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "389470",
+        "corpName": "인벤티지랩",
+        "industry": "software",
+        "viaCode": "237690",
+        "viaName": "에스티팜",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "250060",
+        "corpName": "모비스",
+        "industry": "auto",
+        "viaCode": "033530",
+        "viaName": "SJG세종",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "309710",
+        "corpName": "아이티켐",
+        "industry": "pharma",
+        "viaCode": "237690",
+        "viaName": "에스티팜",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "388870",
+        "corpName": "파로스아이바이오",
+        "industry": "pharma",
+        "viaCode": "120240",
+        "viaName": "대정화금",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307750",
+        "corpName": "국전약품",
+        "industry": "pharma",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003000",
+        "corpName": "부광약품",
+        "industry": "pharma",
+        "viaCode": "005500",
+        "viaName": "삼진제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "237690",
+        "viaName": "에스티팜",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "120240",
         "viaName": "대정화금",
         "hopDistance": 2

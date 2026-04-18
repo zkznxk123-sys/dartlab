@@ -1,0 +1,64 @@
+name: Industry Map Build
+
+# ──────────────────────────────────────────────────────────────
+# scan 프리빌드 완료 후 산업지도 JSON 전체 재생성.
+# ecosystem.json + companies/*.json + industryStats.json 등
+# landing/static/map/ 에 커밋.
+# ──────────────────────────────────────────────────────────────
+
+on:
+  workflow_run:
+    workflows: ["Data Prebuild (DART)"]
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: map-build
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build-map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Build industry map (all companies)
+        run: uv run python -X utf8 scripts/build/buildIndustryMap.py --companies 0
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git add landing/static/map/
+          if git diff --cached --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "$(git diff --cached --stat)"
+          fi
+
+      - name: Commit & push map data
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(map): auto-rebuild industry map data [skip ci]"
+          git push

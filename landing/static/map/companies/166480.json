@@ -182,27 +182,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "159010",
-        "corpName": "아스플로",
-        "industry": "machinery",
-        "viaCode": "382800",
-        "viaName": "지앤비에스 에코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "021240",
-        "corpName": "코웨이",
-        "industry": "electronics",
-        "viaCode": "382800",
-        "viaName": "지앤비에스 에코",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "091590",
         "corpName": "남화토건",
         "industry": "construction",
         "viaCode": "071950",
         "viaName": "코아스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "370090",
+        "corpName": "퓨런티어",
+        "industry": "electronics",
+        "viaCode": "382800",
+        "viaName": "지앤비에스 에코",
         "hopDistance": 2
       },
       {
@@ -214,11 +206,27 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "106080",
+        "corpName": "케이이엠텍",
+        "industry": "electronics",
+        "viaCode": "382800",
+        "viaName": "지앤비에스 에코",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "029480",
         "corpName": "광무",
         "industry": "telecom",
         "viaCode": "382800",
         "viaName": "지앤비에스 에코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "302440",
+        "corpName": "SK바이오사이언스",
+        "industry": "pharma",
+        "viaCode": "071950",
+        "viaName": "코아스",
         "hopDistance": 2
       },
       {
@@ -230,17 +238,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "106080",
-        "corpName": "케이이엠텍",
-        "industry": "electronics",
-        "viaCode": "382800",
-        "viaName": "지앤비에스 에코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "370090",
-        "corpName": "퓨런티어",
-        "industry": "electronics",
+        "stockCode": "159010",
+        "corpName": "아스플로",
+        "industry": "machinery",
         "viaCode": "382800",
         "viaName": "지앤비에스 에코",
         "hopDistance": 2
@@ -254,11 +254,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "302440",
-        "corpName": "SK바이오사이언스",
-        "industry": "pharma",
-        "viaCode": "071950",
-        "viaName": "코아스",
+        "stockCode": "021240",
+        "corpName": "코웨이",
+        "industry": "electronics",
+        "viaCode": "382800",
+        "viaName": "지앤비에스 에코",
         "hopDistance": 2
       }
     ],

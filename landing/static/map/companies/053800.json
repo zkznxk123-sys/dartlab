@@ -170,49 +170,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "434480",
-        "viaName": "모니터랩",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "085910",
-        "corpName": "네오티스",
-        "industry": "auto",
-        "viaCode": "121060",
-        "viaName": "유니포인트",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "085310",
         "corpName": "엔케이",
         "industry": "food",
-        "viaCode": "121060",
-        "viaName": "유니포인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "121060",
-        "viaName": "유니포인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005940",
-        "corpName": "NH투자증권",
-        "industry": "finance",
-        "viaCode": "0015S0",
-        "viaName": "페스카로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064820",
-        "corpName": "케이프",
-        "industry": "auto",
         "viaCode": "121060",
         "viaName": "유니포인트",
         "hopDistance": 2
@@ -226,6 +186,46 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "070300",
+        "corpName": "엑스큐어",
+        "industry": "software",
+        "viaCode": "121060",
+        "viaName": "유니포인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005940",
+        "corpName": "NH투자증권",
+        "industry": "finance",
+        "viaCode": "0015S0",
+        "viaName": "페스카로",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085910",
+        "corpName": "네오티스",
+        "industry": "auto",
+        "viaCode": "121060",
+        "viaName": "유니포인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064820",
+        "corpName": "케이프",
+        "industry": "auto",
+        "viaCode": "121060",
+        "viaName": "유니포인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "121060",
+        "viaName": "유니포인트",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "208350",
         "corpName": "지란지교시큐리티",
         "industry": "software",
@@ -234,11 +234,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "070300",
-        "corpName": "엑스큐어",
-        "industry": "software",
-        "viaCode": "121060",
-        "viaName": "유니포인트",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "434480",
+        "viaName": "모니터랩",
         "hopDistance": 2
       }
     ],

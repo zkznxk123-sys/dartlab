@@ -116,6 +116,22 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "002390",
+        "corpName": "한독",
+        "industry": "realestate",
+        "viaCode": "095700",
+        "viaName": "제넥신",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038530",
+        "corpName": "케이바이오",
+        "industry": "retail",
+        "viaCode": "095700",
+        "viaName": "제넥신",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "296160",
         "corpName": "프로젠",
         "industry": "pharma",
@@ -124,24 +140,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000100",
-        "corpName": "유한양행",
+        "stockCode": "005250",
+        "corpName": "녹십자홀딩스",
         "industry": "pharma",
         "viaCode": "095700",
         "viaName": "제넥신",
         "hopDistance": 2
       },
       {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "095700",
-        "viaName": "제넥신",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005250",
-        "corpName": "녹십자홀딩스",
+        "stockCode": "950220",
+        "corpName": "네오이뮨텍",
         "industry": "pharma",
         "viaCode": "095700",
         "viaName": "제넥신",
@@ -164,17 +172,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "199800",
-        "corpName": "툴젠",
-        "industry": "software",
+        "stockCode": "338840",
+        "corpName": "와이바이오로직스",
+        "industry": "pharma",
         "viaCode": "095700",
         "viaName": "제넥신",
         "hopDistance": 2
       },
       {
-        "stockCode": "002390",
-        "corpName": "한독",
-        "industry": "realestate",
+        "stockCode": "000020",
+        "corpName": "동화약품",
+        "industry": "retail",
         "viaCode": "095700",
         "viaName": "제넥신",
         "hopDistance": 2
@@ -196,41 +204,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "053030",
-        "corpName": "바이넥스",
-        "industry": "pharma",
-        "viaCode": "095700",
-        "viaName": "제넥신",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "338840",
-        "corpName": "와이바이오로직스",
-        "industry": "pharma",
-        "viaCode": "095700",
-        "viaName": "제넥신",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "950220",
-        "corpName": "네오이뮨텍",
-        "industry": "pharma",
-        "viaCode": "095700",
-        "viaName": "제넥신",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000020",
-        "corpName": "동화약품",
-        "industry": "retail",
-        "viaCode": "095700",
-        "viaName": "제넥신",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038530",
-        "corpName": "케이바이오",
-        "industry": "retail",
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
         "viaCode": "095700",
         "viaName": "제넥신",
         "hopDistance": 2
@@ -239,6 +215,30 @@
         "stockCode": "003610",
         "corpName": "방림",
         "industry": "shipbuilding",
+        "viaCode": "095700",
+        "viaName": "제넥신",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000100",
+        "corpName": "유한양행",
+        "industry": "pharma",
+        "viaCode": "095700",
+        "viaName": "제넥신",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053030",
+        "corpName": "바이넥스",
+        "industry": "pharma",
+        "viaCode": "095700",
+        "viaName": "제넥신",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "199800",
+        "corpName": "툴젠",
+        "industry": "software",
         "viaCode": "095700",
         "viaName": "제넥신",
         "hopDistance": 2

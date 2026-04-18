@@ -154,17 +154,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "121440",
-        "corpName": "골프존홀딩스",
-        "industry": "leisure",
-        "viaCode": "086960",
-        "viaName": "MDS테크",
+        "stockCode": "084680",
+        "corpName": "이월드",
+        "industry": "realestate",
+        "viaCode": "030520",
+        "viaName": "한글과컴퓨터",
         "hopDistance": 2
       },
       {
-        "stockCode": "033230",
-        "corpName": "인성정보",
-        "industry": "software",
+        "stockCode": "054620",
+        "corpName": "APS",
+        "industry": "telecom",
+        "viaCode": "030520",
+        "viaName": "한글과컴퓨터",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "259630",
+        "corpName": "엠플러스",
+        "industry": "machinery",
         "viaCode": "030520",
         "viaName": "한글과컴퓨터",
         "hopDistance": 2
@@ -178,19 +186,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "036090",
-        "corpName": "위지트",
-        "industry": "electronics",
-        "viaCode": "086960",
-        "viaName": "MDS테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009810",
-        "corpName": "플레이그램",
-        "industry": "retail",
-        "viaCode": "086960",
-        "viaName": "MDS테크",
+        "stockCode": "033230",
+        "corpName": "인성정보",
+        "industry": "software",
+        "viaCode": "030520",
+        "viaName": "한글과컴퓨터",
         "hopDistance": 2
       },
       {
@@ -202,17 +202,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
-        "viaCode": "086960",
-        "viaName": "MDS테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054920",
-        "corpName": "한컴위드",
-        "industry": "software",
+        "stockCode": "036090",
+        "corpName": "위지트",
+        "industry": "electronics",
         "viaCode": "086960",
         "viaName": "MDS테크",
         "hopDistance": 2
@@ -226,6 +218,70 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "009810",
+        "corpName": "플레이그램",
+        "industry": "retail",
+        "viaCode": "030520",
+        "viaName": "한글과컴퓨터",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054920",
+        "corpName": "한컴위드",
+        "industry": "software",
+        "viaCode": "030520",
+        "viaName": "한글과컴퓨터",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078860",
+        "corpName": "스테이지원엔터",
+        "industry": "media",
+        "viaCode": "079370",
+        "viaName": "제우스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "372910",
+        "corpName": "한컴라이프케어",
+        "industry": "medicalDevice",
+        "viaCode": "030520",
+        "viaName": "한글과컴퓨터",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "030520",
+        "viaName": "한글과컴퓨터",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "086960",
+        "viaName": "MDS테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "277070",
+        "corpName": "린드먼아시아",
+        "industry": "chemical",
+        "viaCode": "030520",
+        "viaName": "한글과컴퓨터",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "121440",
+        "corpName": "골프존홀딩스",
+        "industry": "leisure",
+        "viaCode": "086960",
+        "viaName": "MDS테크",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "006200",
         "corpName": "한국전자홀딩스",
         "industry": "consulting",
@@ -234,9 +290,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "259630",
-        "corpName": "엠플러스",
-        "industry": "machinery",
+        "stockCode": "192650",
+        "corpName": "드림텍",
+        "industry": "electronics",
         "viaCode": "030520",
         "viaName": "한글과컴퓨터",
         "hopDistance": 2
@@ -250,67 +306,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "372910",
-        "corpName": "한컴라이프케어",
-        "industry": "medicalDevice",
-        "viaCode": "086960",
-        "viaName": "MDS테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078860",
-        "corpName": "스테이지원엔터",
-        "industry": "media",
-        "viaCode": "079370",
-        "viaName": "제우스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "277070",
-        "corpName": "린드먼아시아",
-        "industry": "chemical",
-        "viaCode": "030520",
-        "viaName": "한글과컴퓨터",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "192650",
-        "corpName": "드림텍",
-        "industry": "electronics",
-        "viaCode": "030520",
-        "viaName": "한글과컴퓨터",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "007330",
         "corpName": "푸른저축은행",
         "industry": "finance",
         "viaCode": "079370",
         "viaName": "제우스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "086960",
-        "viaName": "MDS테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054620",
-        "corpName": "APS",
-        "industry": "telecom",
-        "viaCode": "086960",
-        "viaName": "MDS테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084680",
-        "corpName": "이월드",
-        "industry": "realestate",
-        "viaCode": "086960",
-        "viaName": "MDS테크",
         "hopDistance": 2
       }
     ],

@@ -209,25 +209,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "450950",
-        "corpName": "아스테라시스",
-        "industry": "pharma",
-        "viaCode": "131220",
-        "viaName": "대한과학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "001800",
-        "viaName": "오리온홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007310",
-        "corpName": "오뚜기",
+        "stockCode": "005950",
+        "corpName": "이수화학",
         "industry": "food",
+        "viaCode": "038070",
+        "viaName": "서린바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
         "viaCode": "001800",
         "viaName": "오리온홀딩스",
         "hopDistance": 2
@@ -241,62 +233,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "141080",
-        "corpName": "리가켐바이오",
-        "industry": "pharma",
-        "viaCode": "001800",
-        "viaName": "오리온홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "086890",
-        "corpName": "이수앱지스",
-        "industry": "pharma",
-        "viaCode": "038070",
-        "viaName": "서린바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005740",
-        "corpName": "크라운해태홀딩스",
-        "industry": "food",
-        "viaCode": "001800",
-        "viaName": "오리온홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "271560",
-        "corpName": "오리온",
-        "industry": "food",
-        "viaCode": "001800",
-        "viaName": "오리온홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "182360",
-        "corpName": "큐브엔터",
-        "industry": "media",
-        "viaCode": "099430",
-        "viaName": "바이오플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "358570",
-        "corpName": "지아이이노베이션",
-        "industry": "pharma",
-        "viaCode": "038070",
-        "viaName": "서린바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032940",
-        "corpName": "원익",
-        "industry": "semiconductor",
-        "viaCode": "099430",
-        "viaName": "바이오플러스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "305090",
         "corpName": "마이크로디지탈",
         "industry": "machinery",
@@ -305,16 +241,40 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005180",
-        "corpName": "빙그레",
-        "industry": "food",
+        "stockCode": "348080",
+        "corpName": "큐라티스",
+        "industry": "pharma",
         "viaCode": "001800",
         "viaName": "오리온홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "145990",
-        "corpName": "삼양사",
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "001800",
+        "viaName": "오리온홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086980",
+        "corpName": "쇼박스",
+        "industry": "finance",
+        "viaCode": "001800",
+        "viaName": "오리온홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053030",
+        "corpName": "바이넥스",
+        "industry": "pharma",
+        "viaCode": "038070",
+        "viaName": "서린바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005180",
+        "corpName": "빙그레",
         "industry": "food",
         "viaCode": "001800",
         "viaName": "오리온홀딩스",
@@ -329,17 +289,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "216400",
-        "corpName": "인바이츠바이오코아",
+        "stockCode": "086890",
+        "corpName": "이수앱지스",
         "industry": "pharma",
         "viaCode": "038070",
         "viaName": "서린바이오",
         "hopDistance": 2
       },
       {
-        "stockCode": "086980",
-        "corpName": "쇼박스",
-        "industry": "finance",
+        "stockCode": "271560",
+        "corpName": "오리온",
+        "industry": "food",
+        "viaCode": "001800",
+        "viaName": "오리온홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "376300",
+        "corpName": "디어유",
+        "industry": "software",
         "viaCode": "001800",
         "viaName": "오리온홀딩스",
         "hopDistance": 2
@@ -353,43 +321,75 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005950",
-        "corpName": "이수화학",
+        "stockCode": "358570",
+        "corpName": "지아이이노베이션",
+        "industry": "pharma",
+        "viaCode": "038070",
+        "viaName": "서린바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "145990",
+        "corpName": "삼양사",
         "industry": "food",
-        "viaCode": "038070",
-        "viaName": "서린바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "376300",
-        "corpName": "디어유",
-        "industry": "software",
         "viaCode": "001800",
         "viaName": "오리온홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "053030",
-        "corpName": "바이넥스",
+        "stockCode": "032940",
+        "corpName": "원익",
+        "industry": "semiconductor",
+        "viaCode": "099430",
+        "viaName": "바이오플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005740",
+        "corpName": "크라운해태홀딩스",
+        "industry": "food",
+        "viaCode": "001800",
+        "viaName": "오리온홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "141080",
+        "corpName": "리가켐바이오",
+        "industry": "pharma",
+        "viaCode": "001800",
+        "viaName": "오리온홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "182360",
+        "corpName": "큐브엔터",
+        "industry": "media",
+        "viaCode": "099430",
+        "viaName": "바이오플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007310",
+        "corpName": "오뚜기",
+        "industry": "food",
+        "viaCode": "001800",
+        "viaName": "오리온홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "216400",
+        "corpName": "인바이츠바이오코아",
         "industry": "pharma",
         "viaCode": "038070",
         "viaName": "서린바이오",
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "001800",
-        "viaName": "오리온홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "348080",
-        "corpName": "큐라티스",
+        "stockCode": "450950",
+        "corpName": "아스테라시스",
         "industry": "pharma",
-        "viaCode": "001800",
-        "viaName": "오리온홀딩스",
+        "viaCode": "131220",
+        "viaName": "대한과학",
         "hopDistance": 2
       }
     ],

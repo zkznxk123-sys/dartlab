@@ -137,40 +137,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "009320",
-        "corpName": "아진전자부품",
-        "industry": "electronics",
-        "viaCode": "226590",
-        "viaName": "엠디바이스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "000660",
         "corpName": "SK하이닉스",
-        "industry": "semiconductor",
-        "viaCode": "226590",
-        "viaName": "엠디바이스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "226590",
-        "viaName": "엠디바이스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016360",
-        "corpName": "삼성증권",
-        "industry": "finance",
-        "viaCode": "226590",
-        "viaName": "엠디바이스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "452400",
-        "corpName": "이닉스",
         "industry": "semiconductor",
         "viaCode": "226590",
         "viaName": "엠디바이스",
@@ -185,8 +153,40 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
+        "viaCode": "226590",
+        "viaName": "엠디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016360",
+        "corpName": "삼성증권",
+        "industry": "finance",
+        "viaCode": "226590",
+        "viaName": "엠디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "226590",
+        "viaName": "엠디바이스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "052710",
         "corpName": "아모텍",
+        "industry": "electronics",
+        "viaCode": "226590",
+        "viaName": "엠디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009320",
+        "corpName": "아진전자부품",
         "industry": "electronics",
         "viaCode": "226590",
         "viaName": "엠디바이스",

@@ -142,49 +142,33 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "024720",
-        "corpName": "콜마홀딩스",
-        "industry": "retail",
-        "viaCode": "194700",
-        "viaName": "노바렉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "195940",
-        "corpName": "HK이노엔",
+        "stockCode": "293780",
+        "corpName": "압타바이오",
         "industry": "pharma",
         "viaCode": "194700",
         "viaName": "노바렉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "088800",
-        "corpName": "에이스테크",
-        "industry": "telecom",
+        "stockCode": "001440",
+        "corpName": "대한전선",
+        "industry": "electrical",
         "viaCode": "024840",
         "viaName": "KBI메탈",
         "hopDistance": 2
       },
       {
-        "stockCode": "377220",
-        "corpName": "프롬바이오",
-        "industry": "pharma",
-        "viaCode": "194700",
-        "viaName": "노바렉스",
+        "stockCode": "006340",
+        "corpName": "대원전선",
+        "industry": "electrical",
+        "viaCode": "024840",
+        "viaName": "KBI메탈",
         "hopDistance": 2
       },
       {
-        "stockCode": "087600",
-        "corpName": "픽셀플러스",
-        "industry": "machinery",
-        "viaCode": "131370",
-        "viaName": "알서포트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "008970",
-        "corpName": "KBI동양철관",
-        "industry": "construction",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
         "viaCode": "024840",
         "viaName": "KBI메탈",
         "hopDistance": 2
@@ -198,22 +182,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "024840",
-        "viaName": "KBI메탈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "142760",
-        "corpName": "모아라이프플러스",
-        "industry": "pharma",
-        "viaCode": "194700",
-        "viaName": "노바렉스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "001620",
         "corpName": "케이비아이동국실업",
         "industry": "electronics",
@@ -222,8 +190,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "357230",
-        "corpName": "에이치피오",
+        "stockCode": "088800",
+        "corpName": "에이스테크",
+        "industry": "telecom",
+        "viaCode": "024840",
+        "viaName": "KBI메탈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "142760",
+        "corpName": "모아라이프플러스",
         "industry": "pharma",
         "viaCode": "194700",
         "viaName": "노바렉스",
@@ -238,48 +214,24 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "024840",
-        "viaName": "KBI메탈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "237880",
-        "corpName": "클리오",
-        "industry": "cosmetics",
-        "viaCode": "131370",
-        "viaName": "알서포트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006340",
-        "corpName": "대원전선",
-        "industry": "electrical",
-        "viaCode": "024840",
-        "viaName": "KBI메탈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "471820",
-        "corpName": "셀로맥스사이언스",
-        "industry": "pharma",
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
         "viaCode": "194700",
         "viaName": "노바렉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "217480",
-        "corpName": "에스디생명공학",
-        "industry": "cosmetics",
+        "stockCode": "024720",
+        "corpName": "콜마홀딩스",
+        "industry": "retail",
         "viaCode": "194700",
         "viaName": "노바렉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "293780",
-        "corpName": "압타바이오",
+        "stockCode": "357230",
+        "corpName": "에이치피오",
         "industry": "pharma",
         "viaCode": "194700",
         "viaName": "노바렉스",
@@ -294,19 +246,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
+        "stockCode": "377220",
+        "corpName": "프롬바이오",
+        "industry": "pharma",
         "viaCode": "194700",
         "viaName": "노바렉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "001440",
-        "corpName": "대한전선",
-        "industry": "electrical",
+        "stockCode": "008970",
+        "corpName": "KBI동양철관",
+        "industry": "construction",
         "viaCode": "024840",
         "viaName": "KBI메탈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "237880",
+        "corpName": "클리오",
+        "industry": "cosmetics",
+        "viaCode": "131370",
+        "viaName": "알서포트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "087600",
+        "corpName": "픽셀플러스",
+        "industry": "machinery",
+        "viaCode": "131370",
+        "viaName": "알서포트",
         "hopDistance": 2
       },
       {
@@ -318,11 +286,43 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "217480",
+        "corpName": "에스디생명공학",
+        "industry": "cosmetics",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "195940",
+        "corpName": "HK이노엔",
+        "industry": "pharma",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "471820",
+        "corpName": "셀로맥스사이언스",
+        "industry": "pharma",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "161890",
         "corpName": "한국콜마",
         "industry": "cosmetics",
         "viaCode": "194700",
         "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "024840",
+        "viaName": "KBI메탈",
         "hopDistance": 2
       }
     ],

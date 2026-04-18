@@ -224,19 +224,19 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "003160",
-        "corpName": "디아이",
+        "stockCode": "002390",
+        "corpName": "한독",
         "industry": "realestate",
         "viaCode": "053610",
         "viaName": "프로텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "030200",
-        "corpName": "케이티",
+        "stockCode": "054620",
+        "corpName": "APS",
         "industry": "telecom",
-        "viaCode": "050890",
-        "viaName": "쏠리드",
+        "viaCode": "356680",
+        "viaName": "엑스게이트",
         "hopDistance": 2
       },
       {
@@ -248,49 +248,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "073490",
-        "corpName": "이노와이어리스",
-        "industry": "machinery",
-        "viaCode": "264450",
-        "viaName": "유비쿼스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000880",
-        "corpName": "한화",
-        "industry": "aerospace",
+        "stockCode": "039740",
+        "corpName": "한국정보공학",
+        "industry": "retail",
         "viaCode": "050890",
         "viaName": "쏠리드",
         "hopDistance": 2
       },
       {
-        "stockCode": "065450",
-        "corpName": "빅텍",
+        "stockCode": "089970",
+        "corpName": "브이엠",
         "industry": "machinery",
-        "viaCode": "050890",
-        "viaName": "쏠리드",
+        "viaCode": "053610",
+        "viaName": "프로텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "093320",
-        "corpName": "케이아이엔엑스",
-        "industry": "telecom",
+        "stockCode": "079940",
+        "corpName": "가비아",
+        "industry": "software",
         "viaCode": "356680",
         "viaName": "엑스게이트",
         "hopDistance": 2
       },
       {
-        "stockCode": "052330",
-        "corpName": "코텍",
-        "industry": "electronics",
-        "viaCode": "050890",
-        "viaName": "쏠리드",
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "053610",
+        "viaName": "프로텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "161390",
+        "corpName": "한국타이어앤테크놀로지",
+        "industry": "auto",
         "viaCode": "053610",
         "viaName": "프로텍",
         "hopDistance": 2
@@ -304,27 +296,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
+        "stockCode": "000880",
+        "corpName": "한화",
+        "industry": "aerospace",
         "viaCode": "050890",
         "viaName": "쏠리드",
         "hopDistance": 2
       },
       {
-        "stockCode": "079940",
-        "corpName": "가비아",
-        "industry": "software",
+        "stockCode": "093320",
+        "corpName": "케이아이엔엑스",
+        "industry": "telecom",
         "viaCode": "356680",
         "viaName": "엑스게이트",
         "hopDistance": 2
       },
       {
-        "stockCode": "443670",
-        "corpName": "에스피소프트",
-        "industry": "retail",
-        "viaCode": "356680",
-        "viaName": "엑스게이트",
+        "stockCode": "000240",
+        "corpName": "한국앤컴퍼니",
+        "industry": "finance",
+        "viaCode": "053610",
+        "viaName": "프로텍",
         "hopDistance": 2
       },
       {
@@ -336,22 +328,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "089970",
-        "corpName": "브이엠",
-        "industry": "machinery",
-        "viaCode": "053610",
-        "viaName": "프로텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "050890",
-        "viaName": "쏠리드",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "143160",
         "corpName": "아이디스",
         "industry": "telecom",
@@ -360,27 +336,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "272210",
-        "corpName": "한화시스템",
-        "industry": "aerospace",
+        "stockCode": "052330",
+        "corpName": "코텍",
+        "industry": "electronics",
         "viaCode": "050890",
         "viaName": "쏠리드",
         "hopDistance": 2
       },
       {
-        "stockCode": "039740",
-        "corpName": "한국정보공학",
-        "industry": "retail",
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
         "viaCode": "050890",
         "viaName": "쏠리드",
         "hopDistance": 2
       },
       {
-        "stockCode": "147760",
-        "corpName": "피엠티",
-        "industry": "semiconductor",
-        "viaCode": "053610",
-        "viaName": "프로텍",
+        "stockCode": "073490",
+        "corpName": "이노와이어리스",
+        "industry": "machinery",
+        "viaCode": "264450",
+        "viaName": "유비쿼스",
         "hopDistance": 2
       },
       {
@@ -392,8 +368,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "089790",
-        "corpName": "제이티",
+        "stockCode": "272210",
+        "corpName": "한화시스템",
+        "industry": "aerospace",
+        "viaCode": "050890",
+        "viaName": "쏠리드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "147760",
+        "corpName": "피엠티",
         "industry": "semiconductor",
         "viaCode": "053610",
         "viaName": "프로텍",
@@ -408,43 +392,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000240",
-        "corpName": "한국앤컴퍼니",
-        "industry": "finance",
-        "viaCode": "053610",
-        "viaName": "프로텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054620",
-        "corpName": "APS",
+        "stockCode": "030200",
+        "corpName": "케이티",
         "industry": "telecom",
-        "viaCode": "356680",
-        "viaName": "엑스게이트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002390",
-        "corpName": "한독",
-        "industry": "realestate",
-        "viaCode": "053610",
-        "viaName": "프로텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "391710",
-        "corpName": "코닉오토메이션",
-        "industry": "machinery",
-        "viaCode": "356680",
-        "viaName": "엑스게이트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053980",
-        "corpName": "오상자이엘",
-        "industry": "software",
-        "viaCode": "264450",
-        "viaName": "유비쿼스",
+        "viaCode": "050890",
+        "viaName": "쏠리드",
         "hopDistance": 2
       },
       {
@@ -456,9 +408,57 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "161390",
-        "corpName": "한국타이어앤테크놀로지",
-        "industry": "auto",
+        "stockCode": "053980",
+        "corpName": "오상자이엘",
+        "industry": "software",
+        "viaCode": "264450",
+        "viaName": "유비쿼스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "050890",
+        "viaName": "쏠리드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "443670",
+        "corpName": "에스피소프트",
+        "industry": "retail",
+        "viaCode": "356680",
+        "viaName": "엑스게이트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "053610",
+        "viaName": "프로텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065450",
+        "corpName": "빅텍",
+        "industry": "machinery",
+        "viaCode": "050890",
+        "viaName": "쏠리드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "391710",
+        "corpName": "코닉오토메이션",
+        "industry": "machinery",
+        "viaCode": "356680",
+        "viaName": "엑스게이트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "053610",
         "viaName": "프로텍",
         "hopDistance": 2

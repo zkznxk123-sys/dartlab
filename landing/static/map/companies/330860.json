@@ -188,17 +188,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "033640",
-        "viaName": "네패스",
+        "stockCode": "033310",
+        "corpName": "엠투엔",
+        "industry": "electronics",
+        "viaCode": "058470",
+        "viaName": "리노공업",
         "hopDistance": 2
       },
       {
-        "stockCode": "068790",
-        "corpName": "DMS",
-        "industry": "electronics",
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060260",
+        "corpName": "뉴보텍",
+        "industry": "chemical",
         "viaCode": "033640",
         "viaName": "네패스",
         "hopDistance": 2
@@ -212,22 +220,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "058470",
-        "viaName": "리노공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003540",
-        "corpName": "대신증권",
-        "industry": "finance",
-        "viaCode": "058470",
-        "viaName": "리노공업",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "031210",
         "corpName": "서울보증보험",
         "industry": "finance",
@@ -236,17 +228,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "033310",
-        "corpName": "엠투엔",
-        "industry": "electronics",
-        "viaCode": "058470",
-        "viaName": "리노공업",
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "033640",
+        "viaName": "네패스",
         "hopDistance": 2
       },
       {
-        "stockCode": "060260",
-        "corpName": "뉴보텍",
-        "industry": "chemical",
+        "stockCode": "068790",
+        "corpName": "DMS",
+        "industry": "electronics",
         "viaCode": "033640",
         "viaName": "네패스",
         "hopDistance": 2
@@ -268,19 +260,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "058470",
-        "viaName": "리노공업",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "004270",
         "corpName": "남성",
         "industry": "telecom",
         "viaCode": "058470",
         "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003540",
+        "corpName": "대신증권",
+        "industry": "finance",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "033640",
+        "viaName": "네패스",
         "hopDistance": 2
       }
     ],

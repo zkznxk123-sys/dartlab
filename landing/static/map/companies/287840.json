@@ -126,25 +126,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "216050",
-        "corpName": "인크로스",
-        "industry": "media",
+        "stockCode": "011930",
+        "corpName": "신성이엔지",
+        "industry": "energy",
         "viaCode": "041190",
         "viaName": "우리기술투자",
         "hopDistance": 2
       },
       {
-        "stockCode": "368770",
-        "corpName": "파이버프로",
-        "industry": "machinery",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024880",
-        "corpName": "케이피에프",
-        "industry": "steel",
+        "stockCode": "044990",
+        "corpName": "에이치엔에스하이텍",
+        "industry": "electronics",
         "viaCode": "041190",
         "viaName": "우리기술투자",
         "hopDistance": 2
@@ -158,9 +150,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "462980",
-        "corpName": "아이지넷",
+        "stockCode": "086980",
+        "corpName": "쇼박스",
         "industry": "finance",
+        "viaCode": "141080",
+        "viaName": "리가켐바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001800",
+        "corpName": "오리온홀딩스",
+        "industry": "food",
+        "viaCode": "141080",
+        "viaName": "리가켐바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "368770",
+        "corpName": "파이버프로",
+        "industry": "machinery",
         "viaCode": "041190",
         "viaName": "우리기술투자",
         "hopDistance": 2
@@ -174,25 +182,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "271560",
-        "corpName": "오리온",
-        "industry": "food",
-        "viaCode": "141080",
-        "viaName": "리가켐바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011930",
-        "corpName": "신성이엔지",
-        "industry": "energy",
+        "stockCode": "462980",
+        "corpName": "아이지넷",
+        "industry": "finance",
         "viaCode": "041190",
         "viaName": "우리기술투자",
         "hopDistance": 2
       },
       {
-        "stockCode": "189350",
-        "corpName": "코셋",
-        "industry": "telecom",
+        "stockCode": "024880",
+        "corpName": "케이피에프",
+        "industry": "steel",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "216050",
+        "corpName": "인크로스",
+        "industry": "media",
         "viaCode": "041190",
         "viaName": "우리기술투자",
         "hopDistance": 2
@@ -206,38 +214,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001800",
-        "corpName": "오리온홀딩스",
-        "industry": "food",
-        "viaCode": "141080",
-        "viaName": "리가켐바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "228850",
-        "corpName": "레이언스",
-        "industry": "medicalDevice",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "086980",
-        "corpName": "쇼박스",
-        "industry": "finance",
-        "viaCode": "141080",
-        "viaName": "리가켐바이오",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "354390",
         "corpName": "바스칸바이오제약",
         "industry": "pharma",
@@ -246,27 +222,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "194700",
-        "corpName": "노바렉스",
-        "industry": "pharma",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032820",
-        "corpName": "우리기술",
-        "industry": "electrical",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "001630",
         "corpName": "종근당홀딩스",
         "industry": "pharma",
         "viaCode": "141080",
         "viaName": "리가켐바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "271560",
+        "corpName": "오리온",
+        "industry": "food",
+        "viaCode": "141080",
+        "viaName": "리가켐바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084440",
+        "corpName": "유비온",
+        "industry": "education",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
         "hopDistance": 2
       },
       {
@@ -286,17 +262,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "044990",
-        "corpName": "에이치엔에스하이텍",
-        "industry": "electronics",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
         "viaCode": "041190",
         "viaName": "우리기술투자",
         "hopDistance": 2
       },
       {
-        "stockCode": "084440",
-        "corpName": "유비온",
-        "industry": "education",
+        "stockCode": "228850",
+        "corpName": "레이언스",
+        "industry": "medicalDevice",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "189350",
+        "corpName": "코셋",
+        "industry": "telecom",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032820",
+        "corpName": "우리기술",
+        "industry": "electrical",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "194700",
+        "corpName": "노바렉스",
+        "industry": "pharma",
         "viaCode": "041190",
         "viaName": "우리기술투자",
         "hopDistance": 2

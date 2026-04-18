@@ -235,25 +235,57 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "216080",
-        "corpName": "제테마",
+        "stockCode": "009300",
+        "corpName": "삼아제약",
         "industry": "pharma",
         "viaCode": "000020",
         "viaName": "동화약품",
         "hopDistance": 2
       },
       {
-        "stockCode": "086450",
-        "corpName": "동국제약",
+        "stockCode": "187420",
+        "corpName": "HLB제넥스",
         "industry": "pharma",
+        "viaCode": "278650",
+        "viaName": "HLB바이오스텝",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "293480",
+        "corpName": "하나제약",
+        "industry": "pharma",
+        "viaCode": "003220",
+        "viaName": "대원제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011320",
+        "corpName": "유니크",
+        "industry": "machinery",
+        "viaCode": "284620",
+        "viaName": "카이노스메드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006620",
+        "corpName": "동구바이오제약",
+        "industry": "pharma",
+        "viaCode": "338220",
+        "viaName": "뷰노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "382150",
+        "corpName": "온코크로스",
+        "industry": "software",
         "viaCode": "000020",
         "viaName": "동화약품",
         "hopDistance": 2
       },
       {
-        "stockCode": "347700",
-        "corpName": "스피어",
-        "industry": "electronics",
+        "stockCode": "006280",
+        "corpName": "녹십자",
+        "industry": "pharma",
         "viaCode": "338220",
         "viaName": "뷰노",
         "hopDistance": 2
@@ -267,17 +299,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006800",
-        "corpName": "미래에셋증권",
+        "stockCode": "309960",
+        "corpName": "LB인베스트먼트",
         "industry": "finance",
-        "viaCode": "347740",
-        "viaName": "피엔케이피부임상연구센타",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024850",
-        "corpName": "HLB이노베이션",
-        "industry": "semiconductor",
         "viaCode": "278650",
         "viaName": "HLB바이오스텝",
         "hopDistance": 2
@@ -291,11 +315,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "028300",
-        "corpName": "HLB",
+        "stockCode": "046210",
+        "corpName": "HLB파나진",
         "industry": "pharma",
         "viaCode": "278650",
         "viaName": "HLB바이오스텝",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067630",
+        "corpName": "HLB생명과학",
+        "industry": "pharma",
+        "viaCode": "278650",
+        "viaName": "HLB바이오스텝",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085310",
+        "corpName": "엔케이",
+        "industry": "food",
+        "viaCode": "347740",
+        "viaName": "피엔케이피부임상연구센타",
         "hopDistance": 2
       },
       {
@@ -307,81 +347,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "278650",
-        "viaName": "HLB바이오스텝",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006280",
-        "corpName": "녹십자",
-        "industry": "pharma",
-        "viaCode": "338220",
-        "viaName": "뷰노",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "476040",
-        "corpName": "오가노이드사이언스",
-        "industry": "pharma",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "046210",
-        "corpName": "HLB파나진",
-        "industry": "pharma",
-        "viaCode": "278650",
-        "viaName": "HLB바이오스텝",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "047920",
         "corpName": "HLB제약",
         "industry": "pharma",
-        "viaCode": "278650",
-        "viaName": "HLB바이오스텝",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003580",
-        "corpName": "HLB글로벌",
-        "industry": "food",
-        "viaCode": "278650",
-        "viaName": "HLB바이오스텝",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "358570",
-        "corpName": "지아이이노베이션",
-        "industry": "pharma",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006620",
-        "corpName": "동구바이오제약",
-        "industry": "pharma",
-        "viaCode": "338220",
-        "viaName": "뷰노",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "328130",
-        "corpName": "루닛",
-        "industry": "software",
-        "viaCode": "347740",
-        "viaName": "피엔케이피부임상연구센타",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "309960",
-        "corpName": "LB인베스트먼트",
-        "industry": "finance",
         "viaCode": "278650",
         "viaName": "HLB바이오스텝",
         "hopDistance": 2
@@ -395,27 +363,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "491000",
-        "corpName": "리브스메드",
-        "industry": "medicalDevice",
+        "stockCode": "347700",
+        "corpName": "스피어",
+        "industry": "electronics",
+        "viaCode": "338220",
+        "viaName": "뷰노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "476040",
+        "corpName": "오가노이드사이언스",
+        "industry": "pharma",
         "viaCode": "000020",
         "viaName": "동화약품",
         "hopDistance": 2
       },
       {
-        "stockCode": "078140",
-        "corpName": "대봉엘에스",
-        "industry": "cosmetics",
-        "viaCode": "347740",
-        "viaName": "피엔케이피부임상연구센타",
+        "stockCode": "322970",
+        "corpName": "무진메디",
+        "industry": "pharma",
+        "viaCode": "278650",
+        "viaName": "HLB바이오스텝",
         "hopDistance": 2
       },
       {
-        "stockCode": "293480",
-        "corpName": "하나제약",
+        "stockCode": "196300",
+        "corpName": "HLB펩",
         "industry": "pharma",
-        "viaCode": "003220",
-        "viaName": "대원제약",
+        "viaCode": "278650",
+        "viaName": "HLB바이오스텝",
         "hopDistance": 2
       },
       {
@@ -427,6 +403,62 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "024850",
+        "corpName": "HLB이노베이션",
+        "industry": "semiconductor",
+        "viaCode": "278650",
+        "viaName": "HLB바이오스텝",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "142280",
+        "corpName": "녹십자엠에스",
+        "industry": "pharma",
+        "viaCode": "338220",
+        "viaName": "뷰노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095700",
+        "corpName": "제넥신",
+        "industry": "pharma",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "328130",
+        "corpName": "루닛",
+        "industry": "software",
+        "viaCode": "347740",
+        "viaName": "피엔케이피부임상연구센타",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003580",
+        "corpName": "HLB글로벌",
+        "industry": "food",
+        "viaCode": "278650",
+        "viaName": "HLB바이오스텝",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "216080",
+        "corpName": "제테마",
+        "industry": "pharma",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "358570",
+        "corpName": "지아이이노베이션",
+        "industry": "pharma",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "016580",
         "corpName": "환인제약",
         "industry": "food",
@@ -435,11 +467,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005250",
-        "corpName": "녹십자홀딩스",
+        "stockCode": "028300",
+        "corpName": "HLB",
         "industry": "pharma",
-        "viaCode": "338220",
-        "viaName": "뷰노",
+        "viaCode": "278650",
+        "viaName": "HLB바이오스텝",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "491000",
+        "corpName": "리브스메드",
+        "industry": "medicalDevice",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "346010",
+        "corpName": "타이드",
+        "industry": "electronics",
+        "viaCode": "278650",
+        "viaName": "HLB바이오스텝",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "389470",
+        "corpName": "인벤티지랩",
+        "industry": "software",
+        "viaCode": "278650",
+        "viaName": "HLB바이오스텝",
         "hopDistance": 2
       },
       {
@@ -451,27 +507,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "011320",
-        "corpName": "유니크",
-        "industry": "machinery",
-        "viaCode": "284620",
-        "viaName": "카이노스메드",
+        "stockCode": "005250",
+        "corpName": "녹십자홀딩스",
+        "industry": "pharma",
+        "viaCode": "338220",
+        "viaName": "뷰노",
         "hopDistance": 2
       },
       {
-        "stockCode": "187420",
-        "corpName": "HLB제넥스",
-        "industry": "pharma",
-        "viaCode": "278650",
-        "viaName": "HLB바이오스텝",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009300",
-        "corpName": "삼아제약",
-        "industry": "pharma",
-        "viaCode": "000020",
-        "viaName": "동화약품",
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
+        "viaCode": "347740",
+        "viaName": "피엔케이피부임상연구센타",
         "hopDistance": 2
       },
       {
@@ -507,48 +555,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "067630",
-        "corpName": "HLB생명과학",
-        "industry": "pharma",
-        "viaCode": "278650",
-        "viaName": "HLB바이오스텝",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "085310",
-        "corpName": "엔케이",
-        "industry": "food",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "322970",
-        "corpName": "무진메디",
-        "industry": "pharma",
-        "viaCode": "278650",
-        "viaName": "HLB바이오스텝",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "389470",
-        "corpName": "인벤티지랩",
-        "industry": "software",
-        "viaCode": "278650",
-        "viaName": "HLB바이오스텝",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "346010",
-        "corpName": "타이드",
-        "industry": "electronics",
-        "viaCode": "278650",
-        "viaName": "HLB바이오스텝",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095700",
-        "corpName": "제넥신",
+        "stockCode": "086450",
+        "corpName": "동국제약",
         "industry": "pharma",
         "viaCode": "000020",
         "viaName": "동화약품",
@@ -563,27 +571,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "382150",
-        "corpName": "온코크로스",
-        "industry": "software",
-        "viaCode": "000020",
-        "viaName": "동화약품",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "003220",
+        "viaName": "대원제약",
         "hopDistance": 2
       },
       {
-        "stockCode": "196300",
-        "corpName": "HLB펩",
-        "industry": "pharma",
-        "viaCode": "278650",
-        "viaName": "HLB바이오스텝",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "142280",
-        "corpName": "녹십자엠에스",
-        "industry": "pharma",
-        "viaCode": "338220",
-        "viaName": "뷰노",
+        "stockCode": "078140",
+        "corpName": "대봉엘에스",
+        "industry": "cosmetics",
+        "viaCode": "347740",
+        "viaName": "피엔케이피부임상연구센타",
         "hopDistance": 2
       }
     ],

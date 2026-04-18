@@ -131,17 +131,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
+        "stockCode": "213420",
+        "corpName": "덕산네오룩스",
+        "industry": "electronics",
         "viaCode": "317330",
         "viaName": "덕산테코피아",
         "hopDistance": 2
       },
       {
-        "stockCode": "213420",
-        "corpName": "덕산네오룩스",
-        "industry": "electronics",
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
         "viaCode": "317330",
         "viaName": "덕산테코피아",
         "hopDistance": 2

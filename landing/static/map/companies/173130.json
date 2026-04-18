@@ -132,6 +132,14 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "078000",
+        "viaName": "텔코웨어",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "038680",
         "corpName": "에스넷",
         "industry": "food",
@@ -143,14 +151,6 @@
         "stockCode": "001740",
         "corpName": "SK네트웍스",
         "industry": "software",
-        "viaCode": "078000",
-        "viaName": "텔코웨어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
         "viaCode": "078000",
         "viaName": "텔코웨어",
         "hopDistance": 2

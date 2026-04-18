@@ -147,14 +147,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "249420",
-        "corpName": "일동제약",
-        "industry": "pharma",
-        "viaCode": "086450",
-        "viaName": "동국제약",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "000370",
         "corpName": "한화손해보험",
         "industry": "aerospace",
@@ -163,8 +155,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "011040",
-        "corpName": "경동제약",
+        "stockCode": "249420",
+        "corpName": "일동제약",
         "industry": "pharma",
         "viaCode": "086450",
         "viaName": "동국제약",
@@ -176,6 +168,14 @@
         "industry": "finance",
         "viaCode": "0007J0",
         "viaName": "인벤테라",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "204840",
+        "corpName": "지엘팜텍",
+        "industry": "realestate",
+        "viaCode": "086450",
+        "viaName": "동국제약",
         "hopDistance": 2
       },
       {
@@ -195,17 +195,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001540",
-        "corpName": "안국약품",
+        "stockCode": "006620",
+        "corpName": "동구바이오제약",
         "industry": "pharma",
-        "viaCode": "086450",
-        "viaName": "동국제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000810",
-        "corpName": "삼성화재해상보험",
-        "industry": "finance",
         "viaCode": "086450",
         "viaName": "동국제약",
         "hopDistance": 2
@@ -227,6 +219,22 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "000020",
+        "corpName": "동화약품",
+        "industry": "retail",
+        "viaCode": "086450",
+        "viaName": "동국제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000810",
+        "corpName": "삼성화재해상보험",
+        "industry": "finance",
+        "viaCode": "086450",
+        "viaName": "동국제약",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "005940",
         "corpName": "NH투자증권",
         "industry": "finance",
@@ -235,25 +243,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "204840",
-        "corpName": "지엘팜텍",
-        "industry": "realestate",
-        "viaCode": "086450",
-        "viaName": "동국제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006620",
-        "corpName": "동구바이오제약",
+        "stockCode": "011040",
+        "corpName": "경동제약",
         "industry": "pharma",
         "viaCode": "086450",
         "viaName": "동국제약",
         "hopDistance": 2
       },
       {
-        "stockCode": "000020",
-        "corpName": "동화약품",
-        "industry": "retail",
+        "stockCode": "001540",
+        "corpName": "안국약품",
+        "industry": "pharma",
         "viaCode": "086450",
         "viaName": "동국제약",
         "hopDistance": 2

@@ -159,57 +159,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "033540",
-        "corpName": "파라텍",
-        "industry": "machinery",
-        "viaCode": "078590",
-        "viaName": "휴림에이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "051630",
-        "corpName": "진양화학",
-        "industry": "plastic",
-        "viaCode": "100250",
-        "viaName": "진양홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083420",
-        "corpName": "그린케미칼",
-        "industry": "food",
-        "viaCode": "100250",
-        "viaName": "진양홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004800",
-        "corpName": "효성",
-        "industry": "chemical",
-        "viaCode": "078590",
-        "viaName": "휴림에이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025000",
-        "corpName": "KPX케미칼",
-        "industry": "software",
-        "viaCode": "100250",
-        "viaName": "진양홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "105550",
-        "corpName": "엣지파운드리",
-        "industry": "machinery",
-        "viaCode": "078590",
-        "viaName": "휴림에이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "114450",
-        "corpName": "그린생명과학",
-        "industry": "pharma",
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
         "viaCode": "100250",
         "viaName": "진양홀딩스",
         "hopDistance": 2
@@ -223,11 +175,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "010640",
-        "corpName": "진양폴리우레탄",
-        "industry": "plastic",
+        "stockCode": "114450",
+        "corpName": "그린생명과학",
+        "industry": "pharma",
         "viaCode": "100250",
         "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033540",
+        "corpName": "파라텍",
+        "industry": "machinery",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
         "hopDistance": 2
       },
       {
@@ -247,11 +207,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "090710",
-        "corpName": "휴림로봇",
-        "industry": "machinery",
-        "viaCode": "078590",
-        "viaName": "휴림에이텍",
+        "stockCode": "010640",
+        "corpName": "진양폴리우레탄",
+        "industry": "plastic",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083420",
+        "corpName": "그린케미칼",
+        "industry": "food",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
         "hopDistance": 2
       },
       {
@@ -263,17 +231,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
-        "viaCode": "100250",
-        "viaName": "진양홀딩스",
+        "stockCode": "105550",
+        "corpName": "엣지파운드리",
+        "industry": "machinery",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
         "hopDistance": 2
       },
       {
         "stockCode": "092230",
         "corpName": "KPX홀딩스",
         "industry": "chemical",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025000",
+        "corpName": "KPX케미칼",
+        "industry": "software",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051630",
+        "corpName": "진양화학",
+        "industry": "plastic",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090710",
+        "corpName": "휴림로봇",
+        "industry": "machinery",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003780",
+        "corpName": "진양산업",
+        "industry": "retail",
         "viaCode": "100250",
         "viaName": "진양홀딩스",
         "hopDistance": 2
@@ -287,11 +287,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003780",
-        "corpName": "진양산업",
-        "industry": "retail",
-        "viaCode": "100250",
-        "viaName": "진양홀딩스",
+        "stockCode": "004800",
+        "corpName": "효성",
+        "industry": "chemical",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
         "hopDistance": 2
       }
     ],

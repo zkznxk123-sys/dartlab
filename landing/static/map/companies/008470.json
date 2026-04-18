@@ -132,9 +132,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "296160",
-        "corpName": "프로젠",
-        "industry": "pharma",
+        "stockCode": "227950",
+        "corpName": "엔투텍",
+        "industry": "semiconductor",
         "viaCode": "270520",
         "viaName": "앱튼",
         "hopDistance": 2
@@ -148,14 +148,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "119850",
-        "corpName": "지엔씨에너지",
-        "industry": "energy",
-        "viaCode": "270520",
-        "viaName": "앱튼",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "005930",
         "corpName": "삼성전자",
         "industry": "semiconductor",
@@ -164,24 +156,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "007460",
-        "corpName": "에이프로젠",
-        "industry": "realestate",
-        "viaCode": "270520",
-        "viaName": "앱튼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "336260",
-        "corpName": "두산퓨얼셀",
-        "industry": "machinery",
-        "viaCode": "270520",
-        "viaName": "앱튼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003060",
-        "corpName": "에이프로젠바이오로직스",
+        "stockCode": "296160",
+        "corpName": "프로젠",
         "industry": "pharma",
         "viaCode": "270520",
         "viaName": "앱튼",
@@ -196,9 +172,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "227950",
-        "corpName": "엔투텍",
-        "industry": "semiconductor",
+        "stockCode": "109960",
+        "corpName": "앱토크롬",
+        "industry": "software",
+        "viaCode": "270520",
+        "viaName": "앱튼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "336260",
+        "corpName": "두산퓨얼셀",
+        "industry": "machinery",
+        "viaCode": "270520",
+        "viaName": "앱튼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "119850",
+        "corpName": "지엔씨에너지",
+        "industry": "energy",
+        "viaCode": "270520",
+        "viaName": "앱튼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003060",
+        "corpName": "에이프로젠바이오로직스",
+        "industry": "pharma",
         "viaCode": "270520",
         "viaName": "앱튼",
         "hopDistance": 2
@@ -212,9 +212,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "109960",
-        "corpName": "앱토크롬",
-        "industry": "software",
+        "stockCode": "007460",
+        "corpName": "에이프로젠",
+        "industry": "realestate",
         "viaCode": "270520",
         "viaName": "앱튼",
         "hopDistance": 2

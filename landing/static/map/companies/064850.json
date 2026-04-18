@@ -216,19 +216,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "250060",
-        "corpName": "모비스",
-        "industry": "auto",
+        "stockCode": "115160",
+        "corpName": "휴맥스",
+        "industry": "electronics",
         "viaCode": "279600",
         "viaName": "미디어젠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030210",
-        "corpName": "다올투자증권",
-        "industry": "realestate",
-        "viaCode": "010660",
-        "viaName": "화천기계",
         "hopDistance": 2
       },
       {
@@ -240,11 +232,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "033560",
-        "corpName": "블루콤",
-        "industry": "electronics",
-        "viaCode": "279600",
-        "viaName": "미디어젠",
+        "stockCode": "030210",
+        "corpName": "다올투자증권",
+        "industry": "realestate",
+        "viaCode": "010660",
+        "viaName": "화천기계",
         "hopDistance": 2
       },
       {
@@ -256,17 +248,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "105840",
-        "corpName": "우진",
-        "industry": "machinery",
-        "viaCode": "000850",
-        "viaName": "화천기공",
+        "stockCode": "250060",
+        "corpName": "모비스",
+        "industry": "auto",
+        "viaCode": "279600",
+        "viaName": "미디어젠",
         "hopDistance": 2
       },
       {
-        "stockCode": "012330",
-        "corpName": "현대모비스",
-        "industry": "auto",
+        "stockCode": "033560",
+        "corpName": "블루콤",
+        "industry": "electronics",
         "viaCode": "279600",
         "viaName": "미디어젠",
         "hopDistance": 2
@@ -296,9 +288,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "115160",
-        "corpName": "휴맥스",
-        "industry": "electronics",
+        "stockCode": "105840",
+        "corpName": "우진",
+        "industry": "machinery",
+        "viaCode": "000850",
+        "viaName": "화천기공",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012330",
+        "corpName": "현대모비스",
+        "industry": "auto",
         "viaCode": "279600",
         "viaName": "미디어젠",
         "hopDistance": 2

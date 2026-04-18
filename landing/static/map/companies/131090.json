@@ -125,64 +125,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "124500",
-        "corpName": "아이티센글로벌",
-        "industry": "software",
-        "viaCode": "232830",
-        "viaName": "아이티센피엔에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "119830",
-        "corpName": "아이텍",
-        "industry": "semiconductor",
-        "viaCode": "232830",
-        "viaName": "아이티센피엔에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "232830",
-        "viaName": "아이티센피엔에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "042510",
-        "corpName": "라온시큐어",
-        "industry": "realestate",
-        "viaCode": "232830",
-        "viaName": "아이티센피엔에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031820",
-        "corpName": "아이티센씨티에스",
-        "industry": "telecom",
-        "viaCode": "232830",
-        "viaName": "아이티센피엔에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "290270",
-        "corpName": "휴네시온",
-        "industry": "software",
-        "viaCode": "232830",
-        "viaName": "아이티센피엔에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "115500",
-        "corpName": "케이씨에스",
-        "industry": "railroad",
-        "viaCode": "232830",
-        "viaName": "아이티센피엔에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067010",
-        "corpName": "이씨에스",
+        "stockCode": "243870",
+        "corpName": "아이티센코어",
         "industry": "software",
         "viaCode": "232830",
         "viaName": "아이티센피엔에스",
@@ -197,24 +141,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "243870",
-        "corpName": "아이티센코어",
-        "industry": "software",
+        "stockCode": "031820",
+        "corpName": "아이티센씨티에스",
+        "industry": "telecom",
         "viaCode": "232830",
         "viaName": "아이티센피엔에스",
         "hopDistance": 2
       },
       {
-        "stockCode": "096250",
-        "corpName": "와이즈넛",
-        "industry": "software",
-        "viaCode": "232830",
-        "viaName": "아이티센피엔에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052860",
-        "corpName": "아이앤씨",
+        "stockCode": "119830",
+        "corpName": "아이텍",
         "industry": "semiconductor",
         "viaCode": "232830",
         "viaName": "아이티센피엔에스",
@@ -229,6 +165,46 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "067010",
+        "corpName": "이씨에스",
+        "industry": "software",
+        "viaCode": "232830",
+        "viaName": "아이티센피엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "290270",
+        "corpName": "휴네시온",
+        "industry": "software",
+        "viaCode": "232830",
+        "viaName": "아이티센피엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "124500",
+        "corpName": "아이티센글로벌",
+        "industry": "software",
+        "viaCode": "232830",
+        "viaName": "아이티센피엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096250",
+        "corpName": "와이즈넛",
+        "industry": "software",
+        "viaCode": "232830",
+        "viaName": "아이티센피엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "115500",
+        "corpName": "케이씨에스",
+        "industry": "railroad",
+        "viaCode": "232830",
+        "viaName": "아이티센피엔에스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "032680",
         "corpName": "소프트센",
         "industry": "software",
@@ -237,9 +213,33 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "042510",
+        "corpName": "라온시큐어",
+        "industry": "realestate",
+        "viaCode": "232830",
+        "viaName": "아이티센피엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052860",
+        "corpName": "아이앤씨",
+        "industry": "semiconductor",
+        "viaCode": "232830",
+        "viaName": "아이티센피엔에스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "010280",
         "corpName": "아이티센엔텍",
         "industry": "software",
+        "viaCode": "232830",
+        "viaName": "아이티센피엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "232830",
         "viaName": "아이티센피엔에스",
         "hopDistance": 2

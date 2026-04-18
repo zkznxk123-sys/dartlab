@@ -131,17 +131,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "263860",
-        "corpName": "지니언스",
-        "industry": "telecom",
-        "viaCode": "033540",
-        "viaName": "파라텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054180",
-        "corpName": "메디콕스",
-        "industry": "shipbuilding",
+        "stockCode": "013700",
+        "corpName": "까뮤이앤씨",
+        "industry": "realestate",
         "viaCode": "033540",
         "viaName": "파라텍",
         "hopDistance": 2
@@ -155,9 +147,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "034230",
-        "corpName": "파라다이스",
-        "industry": "leisure",
+        "stockCode": "054180",
+        "corpName": "메디콕스",
+        "industry": "shipbuilding",
+        "viaCode": "033540",
+        "viaName": "파라텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "263860",
+        "corpName": "지니언스",
+        "industry": "telecom",
         "viaCode": "033540",
         "viaName": "파라텍",
         "hopDistance": 2
@@ -179,9 +179,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "013700",
-        "corpName": "까뮤이앤씨",
-        "industry": "realestate",
+        "stockCode": "034230",
+        "corpName": "파라다이스",
+        "industry": "leisure",
         "viaCode": "033540",
         "viaName": "파라텍",
         "hopDistance": 2

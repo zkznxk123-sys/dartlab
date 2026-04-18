@@ -135,9 +135,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "086220",
-        "corpName": "광동헬스바이오",
-        "industry": "pharma",
+        "stockCode": "161890",
+        "corpName": "한국콜마",
+        "industry": "cosmetics",
         "viaCode": "142760",
         "viaName": "모아라이프플러스",
         "hopDistance": 2
@@ -151,9 +151,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "194700",
-        "corpName": "노바렉스",
+        "stockCode": "418550",
+        "corpName": "제이오",
+        "industry": "consulting",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "318060",
+        "corpName": "그래피",
+        "industry": "chemical",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200130",
+        "corpName": "콜마비앤에이치",
         "industry": "pharma",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "265740",
+        "corpName": "엔에프씨",
+        "industry": "cosmetics",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
         "viaCode": "142760",
         "viaName": "모아라이프플러스",
         "hopDistance": 2
@@ -183,17 +215,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "318060",
-        "corpName": "그래피",
-        "industry": "chemical",
-        "viaCode": "142760",
-        "viaName": "모아라이프플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "418550",
-        "corpName": "제이오",
-        "industry": "consulting",
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
         "viaCode": "142760",
         "viaName": "모아라이프플러스",
         "hopDistance": 2
@@ -207,17 +231,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
+        "stockCode": "194700",
+        "corpName": "노바렉스",
+        "industry": "pharma",
         "viaCode": "142760",
         "viaName": "모아라이프플러스",
         "hopDistance": 2
       },
       {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
+        "stockCode": "086220",
+        "corpName": "광동헬스바이오",
+        "industry": "pharma",
         "viaCode": "142760",
         "viaName": "모아라이프플러스",
         "hopDistance": 2
@@ -226,30 +250,6 @@
         "stockCode": "053030",
         "corpName": "바이넥스",
         "industry": "pharma",
-        "viaCode": "142760",
-        "viaName": "모아라이프플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "200130",
-        "corpName": "콜마비앤에이치",
-        "industry": "pharma",
-        "viaCode": "142760",
-        "viaName": "모아라이프플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "265740",
-        "corpName": "엔에프씨",
-        "industry": "cosmetics",
-        "viaCode": "142760",
-        "viaName": "모아라이프플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "161890",
-        "corpName": "한국콜마",
-        "industry": "cosmetics",
         "viaCode": "142760",
         "viaName": "모아라이프플러스",
         "hopDistance": 2

@@ -151,16 +151,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "226590",
-        "corpName": "엠디바이스",
-        "industry": "electronics",
-        "viaCode": "009320",
-        "viaName": "아진전자부품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "080420",
-        "corpName": "모다이노칩",
+        "stockCode": "005850",
+        "corpName": "에스엘",
         "industry": "electronics",
         "viaCode": "033290",
         "viaName": "로젠",
@@ -175,16 +167,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "009320",
-        "viaName": "아진전자부품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
+        "stockCode": "080420",
+        "corpName": "모다이노칩",
         "industry": "electronics",
         "viaCode": "033290",
         "viaName": "로젠",
@@ -196,6 +180,22 @@
         "industry": "textile",
         "viaCode": "033290",
         "viaName": "로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "009320",
+        "viaName": "아진전자부품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "226590",
+        "corpName": "엠디바이스",
+        "industry": "electronics",
+        "viaCode": "009320",
+        "viaName": "아진전자부품",
         "hopDistance": 2
       }
     ],

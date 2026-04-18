@@ -143,14 +143,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "394800",
-        "corpName": "쓰리빌리언",
-        "industry": "pharma",
-        "viaCode": "038290",
-        "viaName": "마크로젠",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "314130",
         "corpName": "지놈앤컴퍼니",
         "industry": "pharma",
@@ -159,9 +151,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "180400",
-        "corpName": "DXVX",
-        "industry": "consulting",
+        "stockCode": "394800",
+        "corpName": "쓰리빌리언",
+        "industry": "pharma",
+        "viaCode": "038290",
+        "viaName": "마크로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084650",
+        "corpName": "랩지노믹스",
+        "industry": "pharma",
         "viaCode": "038290",
         "viaName": "마크로젠",
         "hopDistance": 2
@@ -175,9 +175,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "084650",
-        "corpName": "랩지노믹스",
-        "industry": "pharma",
+        "stockCode": "180400",
+        "corpName": "DXVX",
+        "industry": "consulting",
         "viaCode": "038290",
         "viaName": "마크로젠",
         "hopDistance": 2

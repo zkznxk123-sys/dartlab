@@ -149,8 +149,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
+        "stockCode": "001450",
+        "corpName": "현대해상",
         "industry": "finance",
         "viaCode": "000250",
         "viaName": "삼천당제약",
@@ -165,17 +165,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
+        "stockCode": "124560",
+        "corpName": "태웅로직스",
+        "industry": "logistics",
         "viaCode": "000250",
         "viaName": "삼천당제약",
         "hopDistance": 2
       },
       {
-        "stockCode": "124560",
-        "corpName": "태웅로직스",
-        "industry": "logistics",
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
         "viaCode": "000250",
         "viaName": "삼천당제약",
         "hopDistance": 2

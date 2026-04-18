@@ -109,6 +109,14 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "213500",
+        "corpName": "한솔제지",
+        "industry": "paper",
+        "viaCode": "068290",
+        "viaName": "삼성출판사",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "035720",
         "corpName": "카카오",
         "industry": "software",
@@ -120,14 +128,6 @@
         "stockCode": "023410",
         "corpName": "유진기업",
         "industry": "construction",
-        "viaCode": "068290",
-        "viaName": "삼성출판사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "213500",
-        "corpName": "한솔제지",
-        "industry": "paper",
         "viaCode": "068290",
         "viaName": "삼성출판사",
         "hopDistance": 2

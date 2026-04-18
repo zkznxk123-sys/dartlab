@@ -99,25 +99,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "125210",
-        "corpName": "아모그린텍",
+        "stockCode": "044990",
+        "corpName": "에이치엔에스하이텍",
         "industry": "electronics",
         "viaCode": "027360",
         "viaName": "아주IB투자",
         "hopDistance": 2
       },
       {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "027360",
-        "viaName": "아주IB투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "357580",
-        "corpName": "아모센스",
-        "industry": "auto",
+        "stockCode": "125210",
+        "corpName": "아모그린텍",
+        "industry": "electronics",
         "viaCode": "027360",
         "viaName": "아주IB투자",
         "hopDistance": 2
@@ -131,9 +123,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "044990",
-        "corpName": "에이치엔에스하이텍",
-        "industry": "electronics",
+        "stockCode": "068100",
+        "corpName": "케이웨더",
+        "industry": "machinery",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "357580",
+        "corpName": "아모센스",
+        "industry": "auto",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
         "viaCode": "027360",
         "viaName": "아주IB투자",
         "hopDistance": 2
@@ -142,14 +150,6 @@
         "stockCode": "060850",
         "corpName": "영림원소프트랩",
         "industry": "software",
-        "viaCode": "027360",
-        "viaName": "아주IB투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "068100",
-        "corpName": "케이웨더",
-        "industry": "machinery",
         "viaCode": "027360",
         "viaName": "아주IB투자",
         "hopDistance": 2

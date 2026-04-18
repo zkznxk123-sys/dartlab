@@ -238,11 +238,43 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "003240",
-        "corpName": "태광산업",
-        "industry": "chemical",
+        "stockCode": "357780",
+        "corpName": "솔브레인",
+        "industry": "electronics",
+        "viaCode": "123330",
+        "viaName": "제닉",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
         "viaCode": "000540",
         "viaName": "흥국화재",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "170920",
+        "viaName": "엘티씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "451250",
+        "corpName": "삐아",
+        "industry": "cosmetics",
+        "viaCode": "123330",
+        "viaName": "제닉",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011070",
+        "corpName": "LG이노텍",
+        "industry": "electronics",
+        "viaCode": "007210",
+        "viaName": "벽산",
         "hopDistance": 2
       },
       {
@@ -254,17 +286,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "031980",
-        "corpName": "피에스케이홀딩스",
+        "stockCode": "092070",
+        "corpName": "디엔에프",
         "industry": "semiconductor",
-        "viaCode": "007210",
-        "viaName": "벽산",
+        "viaCode": "123330",
+        "viaName": "제닉",
         "hopDistance": 2
       },
       {
-        "stockCode": "394280",
-        "corpName": "오픈엣지테크놀로지",
-        "industry": "software",
+        "stockCode": "012330",
+        "corpName": "현대모비스",
+        "industry": "auto",
         "viaCode": "007210",
         "viaName": "벽산",
         "hopDistance": 2
@@ -278,43 +310,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006400",
-        "corpName": "삼성SDI",
+        "stockCode": "051910",
+        "corpName": "LG화학",
         "industry": "chemical",
         "viaCode": "007210",
         "viaName": "벽산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "357780",
-        "corpName": "솔브레인",
-        "industry": "electronics",
-        "viaCode": "123330",
-        "viaName": "제닉",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "420770",
-        "corpName": "기가비스",
-        "industry": "machinery",
-        "viaCode": "007210",
-        "viaName": "벽산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
-        "viaCode": "123330",
-        "viaName": "제닉",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "027830",
-        "corpName": "대성창투",
-        "industry": "finance",
-        "viaCode": "170920",
-        "viaName": "엘티씨",
         "hopDistance": 2
       },
       {
@@ -326,9 +326,65 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "011070",
-        "corpName": "LG이노텍",
+        "stockCode": "003830",
+        "corpName": "대한화섬",
+        "industry": "aerospace",
+        "viaCode": "000540",
+        "viaName": "흥국화재",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031980",
+        "corpName": "피에스케이홀딩스",
+        "industry": "semiconductor",
+        "viaCode": "007210",
+        "viaName": "벽산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006400",
+        "corpName": "삼성SDI",
+        "industry": "chemical",
+        "viaCode": "007210",
+        "viaName": "벽산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "247540",
+        "corpName": "에코프로비엠",
+        "industry": "chemical",
+        "viaCode": "007210",
+        "viaName": "벽산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
         "industry": "electronics",
+        "viaCode": "123330",
+        "viaName": "제닉",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "259960",
+        "corpName": "크래프톤",
+        "industry": "software",
+        "viaCode": "000540",
+        "viaName": "흥국화재",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
+        "viaCode": "007210",
+        "viaName": "벽산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "389500",
+        "corpName": "에스비비테크",
+        "industry": "machinery",
         "viaCode": "007210",
         "viaName": "벽산",
         "hopDistance": 2
@@ -342,40 +398,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "126600",
-        "corpName": "BGF에코머티리얼즈",
-        "industry": "construction",
-        "viaCode": "007210",
-        "viaName": "벽산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "044780",
-        "corpName": "에이치케이",
-        "industry": "medicalDevice",
-        "viaCode": "000540",
-        "viaName": "흥국화재",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012330",
-        "corpName": "현대모비스",
-        "industry": "auto",
-        "viaCode": "007210",
-        "viaName": "벽산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "451250",
-        "corpName": "삐아",
-        "industry": "cosmetics",
-        "viaCode": "123330",
-        "viaName": "제닉",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "051910",
-        "corpName": "LG화학",
+        "stockCode": "086520",
+        "corpName": "에코프로",
         "industry": "chemical",
         "viaCode": "007210",
         "viaName": "벽산",
@@ -390,99 +414,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000400",
-        "corpName": "롯데손해보험",
-        "industry": "finance",
-        "viaCode": "123330",
-        "viaName": "제닉",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089860",
-        "corpName": "롯데렌탈",
-        "industry": "logistics",
-        "viaCode": "000540",
-        "viaName": "흥국화재",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "247540",
-        "corpName": "에코프로비엠",
-        "industry": "chemical",
+        "stockCode": "394280",
+        "corpName": "오픈엣지테크놀로지",
+        "industry": "software",
         "viaCode": "007210",
         "viaName": "벽산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "092070",
-        "corpName": "디엔에프",
-        "industry": "semiconductor",
-        "viaCode": "123330",
-        "viaName": "제닉",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004910",
-        "corpName": "조광페인트",
-        "industry": "food",
-        "viaCode": "007210",
-        "viaName": "벽산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036830",
-        "corpName": "솔브레인홀딩스",
-        "industry": "electronics",
-        "viaCode": "123330",
-        "viaName": "제닉",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "123330",
-        "viaName": "제닉",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "389500",
-        "corpName": "에스비비테크",
-        "industry": "machinery",
-        "viaCode": "007210",
-        "viaName": "벽산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101970",
-        "corpName": "우양에이치씨",
-        "industry": "construction",
-        "viaCode": "123330",
-        "viaName": "제닉",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "271940",
-        "corpName": "일진하이솔루스",
-        "industry": "railroad",
-        "viaCode": "000540",
-        "viaName": "흥국화재",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "170920",
-        "viaName": "엘티씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016710",
-        "corpName": "대성홀딩스",
-        "industry": "realestate",
-        "viaCode": "170920",
-        "viaName": "엘티씨",
         "hopDistance": 2
       },
       {
@@ -494,6 +430,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "027830",
+        "corpName": "대성창투",
+        "industry": "finance",
+        "viaCode": "170920",
+        "viaName": "엘티씨",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "007690",
         "corpName": "국도화학",
         "industry": "chemical",
@@ -502,49 +446,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "109610",
-        "corpName": "에스와이",
-        "industry": "electronics",
-        "viaCode": "007210",
-        "viaName": "벽산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003830",
-        "corpName": "대한화섬",
-        "industry": "aerospace",
+        "stockCode": "271940",
+        "corpName": "일진하이솔루스",
+        "industry": "railroad",
         "viaCode": "000540",
         "viaName": "흥국화재",
         "hopDistance": 2
       },
       {
-        "stockCode": "053980",
-        "corpName": "오상자이엘",
-        "industry": "software",
-        "viaCode": "170920",
-        "viaName": "엘티씨",
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "000540",
+        "viaName": "흥국화재",
         "hopDistance": 2
       },
       {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "123330",
-        "viaName": "제닉",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "086520",
-        "corpName": "에코프로",
+        "stockCode": "003240",
+        "corpName": "태광산업",
         "industry": "chemical",
-        "viaCode": "007210",
-        "viaName": "벽산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "259960",
-        "corpName": "크래프톤",
-        "industry": "software",
         "viaCode": "000540",
         "viaName": "흥국화재",
         "hopDistance": 2
@@ -558,11 +478,91 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
+        "stockCode": "004910",
+        "corpName": "조광페인트",
+        "industry": "food",
+        "viaCode": "007210",
+        "viaName": "벽산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "126600",
+        "corpName": "BGF에코머티리얼즈",
+        "industry": "construction",
+        "viaCode": "007210",
+        "viaName": "벽산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053980",
+        "corpName": "오상자이엘",
+        "industry": "software",
+        "viaCode": "170920",
+        "viaName": "엘티씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "123330",
+        "viaName": "제닉",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089860",
+        "corpName": "롯데렌탈",
+        "industry": "logistics",
         "viaCode": "000540",
         "viaName": "흥국화재",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "420770",
+        "corpName": "기가비스",
+        "industry": "machinery",
+        "viaCode": "007210",
+        "viaName": "벽산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "123330",
+        "viaName": "제닉",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016710",
+        "corpName": "대성홀딩스",
+        "industry": "realestate",
+        "viaCode": "170920",
+        "viaName": "엘티씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036830",
+        "corpName": "솔브레인홀딩스",
+        "industry": "electronics",
+        "viaCode": "123330",
+        "viaName": "제닉",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101970",
+        "corpName": "우양에이치씨",
+        "industry": "construction",
+        "viaCode": "123330",
+        "viaName": "제닉",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000400",
+        "corpName": "롯데손해보험",
+        "industry": "finance",
+        "viaCode": "123330",
+        "viaName": "제닉",
         "hopDistance": 2
       }
     ],

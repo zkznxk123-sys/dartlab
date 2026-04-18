@@ -140,17 +140,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "097230",
-        "corpName": "HJ중공업",
+        "stockCode": "000720",
+        "corpName": "현대건설",
         "industry": "construction",
-        "viaCode": "018310",
-        "viaName": "삼목에스폼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007330",
-        "corpName": "푸른저축은행",
-        "industry": "finance",
         "viaCode": "018310",
         "viaName": "삼목에스폼",
         "hopDistance": 2
@@ -164,16 +156,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002460",
-        "corpName": "HS화성",
+        "stockCode": "097230",
+        "corpName": "HJ중공업",
         "industry": "construction",
         "viaCode": "018310",
         "viaName": "삼목에스폼",
         "hopDistance": 2
       },
       {
-        "stockCode": "000720",
-        "corpName": "현대건설",
+        "stockCode": "002460",
+        "corpName": "HS화성",
         "industry": "construction",
         "viaCode": "018310",
         "viaName": "삼목에스폼",
@@ -183,6 +175,14 @@
         "stockCode": "048470",
         "corpName": "대동스틸",
         "industry": "steel",
+        "viaCode": "018310",
+        "viaName": "삼목에스폼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007330",
+        "corpName": "푸른저축은행",
+        "industry": "finance",
         "viaCode": "018310",
         "viaName": "삼목에스폼",
         "hopDistance": 2

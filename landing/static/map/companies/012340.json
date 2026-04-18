@@ -123,6 +123,14 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "002220",
+        "viaName": "한일철강",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "000720",
         "corpName": "현대건설",
         "industry": "construction",
@@ -134,14 +142,6 @@
         "stockCode": "101000",
         "corpName": "KS인더스트리",
         "industry": "realestate",
-        "viaCode": "002220",
-        "viaName": "한일철강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004020",
-        "corpName": "현대제철",
-        "industry": "steel",
         "viaCode": "002220",
         "viaName": "한일철강",
         "hopDistance": 2

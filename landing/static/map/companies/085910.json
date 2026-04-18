@@ -185,9 +185,65 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "010130",
-        "corpName": "고려아연",
+        "stockCode": "064820",
+        "corpName": "케이프",
+        "industry": "auto",
+        "viaCode": "121060",
+        "viaName": "유니포인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
         "industry": "steel",
+        "viaCode": "005810",
+        "viaName": "풍산홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085310",
+        "corpName": "엔케이",
+        "industry": "food",
+        "viaCode": "121060",
+        "viaName": "유니포인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "093640",
+        "corpName": "케이알엠",
+        "industry": "semiconductor",
+        "viaCode": "005810",
+        "viaName": "풍산홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025540",
+        "corpName": "한국단자공업",
+        "industry": "electronics",
+        "viaCode": "103140",
+        "viaName": "풍산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007330",
+        "corpName": "푸른저축은행",
+        "industry": "finance",
+        "viaCode": "103140",
+        "viaName": "풍산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "103140",
+        "viaName": "풍산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024850",
+        "corpName": "HLB이노베이션",
+        "industry": "semiconductor",
         "viaCode": "103140",
         "viaName": "풍산",
         "hopDistance": 2
@@ -201,51 +257,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "121060",
-        "viaName": "유니포인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064820",
-        "corpName": "케이프",
-        "industry": "auto",
-        "viaCode": "121060",
-        "viaName": "유니포인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024850",
-        "corpName": "HLB이노베이션",
-        "industry": "semiconductor",
+        "stockCode": "012450",
+        "corpName": "한화에어로스페이스",
+        "industry": "aerospace",
         "viaCode": "103140",
         "viaName": "풍산",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
         "viaCode": "005810",
         "viaName": "풍산홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "024090",
-        "corpName": "디씨엠",
-        "industry": "construction",
+        "stockCode": "082920",
+        "corpName": "비츠로셀",
+        "industry": "battery",
         "viaCode": "103140",
         "viaName": "풍산",
         "hopDistance": 2
       },
       {
-        "stockCode": "093640",
-        "corpName": "케이알엠",
+        "stockCode": "195870",
+        "corpName": "해성디에스",
         "industry": "semiconductor",
-        "viaCode": "005810",
-        "viaName": "풍산홀딩스",
+        "viaCode": "103140",
+        "viaName": "풍산",
         "hopDistance": 2
       },
       {
@@ -265,11 +305,35 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "024090",
+        "corpName": "디씨엠",
+        "industry": "construction",
+        "viaCode": "103140",
+        "viaName": "풍산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010130",
+        "corpName": "고려아연",
+        "industry": "steel",
+        "viaCode": "103140",
+        "viaName": "풍산",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "099220",
         "corpName": "SDN",
         "industry": "energy",
         "viaCode": "103140",
         "viaName": "풍산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "121060",
+        "viaName": "유니포인트",
         "hopDistance": 2
       },
       {
@@ -281,75 +345,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "005810",
-        "viaName": "풍산홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004020",
-        "corpName": "현대제철",
-        "industry": "steel",
-        "viaCode": "005810",
-        "viaName": "풍산홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082920",
-        "corpName": "비츠로셀",
-        "industry": "battery",
-        "viaCode": "103140",
-        "viaName": "풍산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007330",
-        "corpName": "푸른저축은행",
+        "stockCode": "024110",
+        "corpName": "기업은행",
         "industry": "finance",
-        "viaCode": "103140",
-        "viaName": "풍산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "085310",
-        "corpName": "엔케이",
-        "industry": "food",
-        "viaCode": "121060",
-        "viaName": "유니포인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "103140",
-        "viaName": "풍산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "195870",
-        "corpName": "해성디에스",
-        "industry": "semiconductor",
-        "viaCode": "103140",
-        "viaName": "풍산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012450",
-        "corpName": "한화에어로스페이스",
-        "industry": "aerospace",
-        "viaCode": "103140",
-        "viaName": "풍산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025540",
-        "corpName": "한국단자공업",
-        "industry": "electronics",
-        "viaCode": "103140",
-        "viaName": "풍산",
+        "viaCode": "005810",
+        "viaName": "풍산홀딩스",
         "hopDistance": 2
       }
     ],

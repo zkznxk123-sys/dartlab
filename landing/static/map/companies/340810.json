@@ -109,17 +109,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
-        "viaCode": "094940",
-        "viaName": "푸른기술",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066430",
-        "corpName": "아이로보틱스",
-        "industry": "chemical",
+        "stockCode": "402420",
+        "corpName": "켈스",
+        "industry": "pharma",
         "viaCode": "094940",
         "viaName": "푸른기술",
         "hopDistance": 2
@@ -133,9 +125,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "402420",
-        "corpName": "켈스",
-        "industry": "pharma",
+        "stockCode": "066430",
+        "corpName": "아이로보틱스",
+        "industry": "chemical",
+        "viaCode": "094940",
+        "viaName": "푸른기술",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
         "viaCode": "094940",
         "viaName": "푸른기술",
         "hopDistance": 2

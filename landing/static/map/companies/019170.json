@@ -144,25 +144,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "068270",
-        "corpName": "셀트리온",
-        "industry": "pharma",
-        "viaCode": "002720",
-        "viaName": "국제약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011780",
-        "corpName": "금호석유화학",
-        "industry": "chemical",
-        "viaCode": "002720",
-        "viaName": "국제약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "307750",
-        "corpName": "국전약품",
-        "industry": "pharma",
+        "stockCode": "090430",
+        "corpName": "아모레퍼시픽",
+        "industry": "cosmetics",
         "viaCode": "002720",
         "viaName": "국제약품",
         "hopDistance": 2
@@ -171,6 +155,22 @@
         "stockCode": "140070",
         "corpName": "서플러스글로벌",
         "industry": "retail",
+        "viaCode": "002720",
+        "viaName": "국제약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000230",
+        "corpName": "일동홀딩스",
+        "industry": "food",
+        "viaCode": "002720",
+        "viaName": "국제약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
         "viaCode": "002720",
         "viaName": "국제약품",
         "hopDistance": 2
@@ -192,25 +192,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
+        "stockCode": "214390",
+        "corpName": "경보제약",
+        "industry": "pharma",
         "viaCode": "002720",
         "viaName": "국제약품",
         "hopDistance": 2
       },
       {
-        "stockCode": "108230",
-        "corpName": "톱텍",
-        "industry": "electronics",
-        "viaCode": "002720",
-        "viaName": "국제약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090430",
-        "corpName": "아모레퍼시픽",
-        "industry": "cosmetics",
+        "stockCode": "011780",
+        "corpName": "금호석유화학",
+        "industry": "chemical",
         "viaCode": "002720",
         "viaName": "국제약품",
         "hopDistance": 2
@@ -224,16 +216,24 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000230",
-        "corpName": "일동홀딩스",
-        "industry": "food",
+        "stockCode": "108230",
+        "corpName": "톱텍",
+        "industry": "electronics",
         "viaCode": "002720",
         "viaName": "국제약품",
         "hopDistance": 2
       },
       {
-        "stockCode": "214390",
-        "corpName": "경보제약",
+        "stockCode": "307750",
+        "corpName": "국전약품",
+        "industry": "pharma",
+        "viaCode": "002720",
+        "viaName": "국제약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068270",
+        "corpName": "셀트리온",
         "industry": "pharma",
         "viaCode": "002720",
         "viaName": "국제약품",

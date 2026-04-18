@@ -109,32 +109,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "006280",
-        "corpName": "녹십자",
-        "industry": "pharma",
-        "viaCode": "338220",
-        "viaName": "뷰노",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "005250",
         "corpName": "녹십자홀딩스",
-        "industry": "pharma",
-        "viaCode": "338220",
-        "viaName": "뷰노",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "347700",
-        "corpName": "스피어",
-        "industry": "electronics",
-        "viaCode": "338220",
-        "viaName": "뷰노",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006620",
-        "corpName": "동구바이오제약",
         "industry": "pharma",
         "viaCode": "338220",
         "viaName": "뷰노",
@@ -149,6 +125,30 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "142280",
+        "corpName": "녹십자엠에스",
+        "industry": "pharma",
+        "viaCode": "338220",
+        "viaName": "뷰노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006620",
+        "corpName": "동구바이오제약",
+        "industry": "pharma",
+        "viaCode": "338220",
+        "viaName": "뷰노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "347700",
+        "corpName": "스피어",
+        "industry": "electronics",
+        "viaCode": "338220",
+        "viaName": "뷰노",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "000020",
         "corpName": "동화약품",
         "industry": "retail",
@@ -157,8 +157,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "142280",
-        "corpName": "녹십자엠에스",
+        "stockCode": "006280",
+        "corpName": "녹십자",
         "industry": "pharma",
         "viaCode": "338220",
         "viaName": "뷰노",

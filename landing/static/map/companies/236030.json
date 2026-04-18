@@ -139,25 +139,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "117580",
-        "corpName": "대성에너지",
-        "industry": "energy",
-        "viaCode": "128820",
-        "viaName": "대성산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "008250",
-        "corpName": "이건산업",
-        "industry": "realestate",
-        "viaCode": "128820",
-        "viaName": "대성산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267850",
-        "corpName": "아시아나IDT",
-        "industry": "software",
+        "stockCode": "003490",
+        "corpName": "대한항공",
+        "industry": "logistics",
         "viaCode": "005430",
         "viaName": "한국공항",
         "hopDistance": 2
@@ -171,27 +155,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "021240",
-        "corpName": "코웨이",
-        "industry": "electronics",
+        "stockCode": "014620",
+        "corpName": "성광벤드",
+        "industry": "steel",
         "viaCode": "128820",
         "viaName": "대성산업",
         "hopDistance": 2
       },
       {
-        "stockCode": "003490",
-        "corpName": "대한항공",
-        "industry": "logistics",
+        "stockCode": "267850",
+        "corpName": "아시아나IDT",
+        "industry": "software",
         "viaCode": "005430",
         "viaName": "한국공항",
         "hopDistance": 2
       },
       {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "128820",
-        "viaName": "대성산업",
+        "stockCode": "020560",
+        "corpName": "아시아나항공",
+        "industry": "aerospace",
+        "viaCode": "005430",
+        "viaName": "한국공항",
         "hopDistance": 2
       },
       {
@@ -203,11 +187,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "272450",
-        "corpName": "진에어",
-        "industry": "aerospace",
-        "viaCode": "005430",
-        "viaName": "한국공항",
+        "stockCode": "008250",
+        "corpName": "이건산업",
+        "industry": "realestate",
+        "viaCode": "128820",
+        "viaName": "대성산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "128820",
+        "viaName": "대성산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "117580",
+        "corpName": "대성에너지",
+        "industry": "energy",
+        "viaCode": "128820",
+        "viaName": "대성산업",
         "hopDistance": 2
       },
       {
@@ -219,11 +219,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
+        "stockCode": "021240",
+        "corpName": "코웨이",
+        "industry": "electronics",
+        "viaCode": "128820",
+        "viaName": "대성산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "272450",
+        "corpName": "진에어",
+        "industry": "aerospace",
         "viaCode": "005430",
         "viaName": "한국공항",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "180640",
+        "corpName": "한진칼",
+        "industry": "consulting",
+        "viaCode": "005430",
+        "viaName": "한국공항",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "128820",
+        "viaName": "대성산업",
         "hopDistance": 2
       },
       {
@@ -243,41 +267,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "026890",
-        "corpName": "스틱인베스트먼트",
-        "industry": "chemical",
-        "viaCode": "005430",
-        "viaName": "한국공항",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "020560",
-        "corpName": "아시아나항공",
-        "industry": "aerospace",
-        "viaCode": "005430",
-        "viaName": "한국공항",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016710",
-        "corpName": "대성홀딩스",
-        "industry": "realestate",
-        "viaCode": "128820",
-        "viaName": "대성산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089790",
-        "corpName": "제이티",
-        "industry": "semiconductor",
-        "viaCode": "128820",
-        "viaName": "대성산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "180640",
-        "corpName": "한진칼",
-        "industry": "consulting",
+        "stockCode": "038880",
+        "corpName": "아이에이",
+        "industry": "electronics",
         "viaCode": "005430",
         "viaName": "한국공항",
         "hopDistance": 2
@@ -291,6 +283,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "026890",
+        "corpName": "스틱인베스트먼트",
+        "industry": "chemical",
+        "viaCode": "005430",
+        "viaName": "한국공항",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "017390",
         "corpName": "서울도시가스",
         "industry": "energy",
@@ -299,19 +299,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "014620",
-        "corpName": "성광벤드",
-        "industry": "steel",
-        "viaCode": "128820",
-        "viaName": "대성산업",
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "005430",
+        "viaName": "한국공항",
         "hopDistance": 2
       },
       {
-        "stockCode": "038880",
-        "corpName": "아이에이",
-        "industry": "electronics",
-        "viaCode": "005430",
-        "viaName": "한국공항",
+        "stockCode": "016710",
+        "corpName": "대성홀딩스",
+        "industry": "realestate",
+        "viaCode": "128820",
+        "viaName": "대성산업",
         "hopDistance": 2
       }
     ],

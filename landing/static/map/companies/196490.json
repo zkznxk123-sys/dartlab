@@ -154,38 +154,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "033640",
-        "viaName": "네패스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "330860",
-        "corpName": "네패스아크",
-        "industry": "semiconductor",
-        "viaCode": "033640",
-        "viaName": "네패스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "068790",
-        "corpName": "DMS",
-        "industry": "electronics",
-        "viaCode": "033640",
-        "viaName": "네패스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "033640",
-        "viaName": "네패스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "004020",
         "corpName": "현대제철",
         "industry": "steel",
@@ -202,6 +170,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "060260",
+        "corpName": "뉴보텍",
+        "industry": "chemical",
+        "viaCode": "033640",
+        "viaName": "네패스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "035720",
         "corpName": "카카오",
         "industry": "software",
@@ -210,9 +186,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "060260",
-        "corpName": "뉴보텍",
-        "industry": "chemical",
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "033640",
+        "viaName": "네패스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068790",
+        "corpName": "DMS",
+        "industry": "electronics",
         "viaCode": "033640",
         "viaName": "네패스",
         "hopDistance": 2
@@ -226,11 +210,27 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "330860",
+        "corpName": "네패스아크",
+        "industry": "semiconductor",
+        "viaCode": "033640",
+        "viaName": "네패스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "377300",
         "corpName": "카카오페이",
         "industry": "finance",
         "viaCode": "005010",
         "viaName": "휴스틸",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "033640",
+        "viaName": "네패스",
         "hopDistance": 2
       }
     ],

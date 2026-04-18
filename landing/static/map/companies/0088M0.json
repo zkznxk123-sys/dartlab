@@ -107,9 +107,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "119830",
-        "corpName": "아이텍",
-        "industry": "semiconductor",
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "170900",
+        "viaName": "동아에스티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008930",
+        "corpName": "한미사이언스",
+        "industry": "pharma",
         "viaCode": "170900",
         "viaName": "동아에스티",
         "hopDistance": 2
@@ -123,9 +131,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000100",
-        "corpName": "유한양행",
-        "industry": "pharma",
+        "stockCode": "179290",
+        "corpName": "엠아이텍",
+        "industry": "medicalDevice",
         "viaCode": "170900",
         "viaName": "동아에스티",
         "hopDistance": 2
@@ -139,17 +147,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "179290",
-        "corpName": "엠아이텍",
-        "industry": "medicalDevice",
+        "stockCode": "119830",
+        "corpName": "아이텍",
+        "industry": "semiconductor",
         "viaCode": "170900",
         "viaName": "동아에스티",
         "hopDistance": 2
       },
       {
-        "stockCode": "278990",
-        "corpName": "EMB",
-        "industry": "battery",
+        "stockCode": "140410",
+        "corpName": "메지온",
+        "industry": "pharma",
+        "viaCode": "170900",
+        "viaName": "동아에스티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "237690",
+        "corpName": "에스티팜",
+        "industry": "pharma",
         "viaCode": "170900",
         "viaName": "동아에스티",
         "hopDistance": 2
@@ -171,32 +187,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000520",
-        "corpName": "삼일제약",
-        "industry": "food",
+        "stockCode": "278990",
+        "corpName": "EMB",
+        "industry": "battery",
         "viaCode": "170900",
         "viaName": "동아에스티",
         "hopDistance": 2
       },
       {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
-        "viaCode": "170900",
-        "viaName": "동아에스티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "008930",
-        "corpName": "한미사이언스",
-        "industry": "pharma",
-        "viaCode": "170900",
-        "viaName": "동아에스티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "237690",
-        "corpName": "에스티팜",
+        "stockCode": "000100",
+        "corpName": "유한양행",
         "industry": "pharma",
         "viaCode": "170900",
         "viaName": "동아에스티",
@@ -211,9 +211,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "140410",
-        "corpName": "메지온",
-        "industry": "pharma",
+        "stockCode": "000520",
+        "corpName": "삼일제약",
+        "industry": "food",
         "viaCode": "170900",
         "viaName": "동아에스티",
         "hopDistance": 2

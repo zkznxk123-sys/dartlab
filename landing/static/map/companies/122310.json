@@ -123,17 +123,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "216080",
-        "corpName": "제테마",
-        "industry": "pharma",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
         "viaCode": "251630",
         "viaName": "브이원텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
+        "stockCode": "216080",
+        "corpName": "제테마",
+        "industry": "pharma",
         "viaCode": "251630",
         "viaName": "브이원텍",
         "hopDistance": 2

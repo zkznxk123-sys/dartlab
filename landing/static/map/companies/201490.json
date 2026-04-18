@@ -173,8 +173,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "010960",
-        "corpName": "삼호개발",
+        "stockCode": "006360",
+        "corpName": "GS건설",
         "industry": "construction",
         "viaCode": "084680",
         "viaName": "이월드",
@@ -189,9 +189,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "053450",
-        "corpName": "세코닉스",
+        "stockCode": "033240",
+        "corpName": "자화전자",
+        "industry": "electronics",
+        "viaCode": "190510",
+        "viaName": "나무가",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010960",
+        "corpName": "삼호개발",
+        "industry": "construction",
+        "viaCode": "084680",
+        "viaName": "이월드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "049630",
+        "corpName": "재영솔루텍",
         "industry": "machinery",
+        "viaCode": "190510",
+        "viaName": "나무가",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "254490",
+        "corpName": "미래반도체",
+        "industry": "retail",
         "viaCode": "190510",
         "viaName": "나무가",
         "hopDistance": 2
@@ -205,30 +229,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "078930",
-        "corpName": "GS",
-        "industry": "chemical",
-        "viaCode": "084680",
-        "viaName": "이월드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030520",
-        "corpName": "한글과컴퓨터",
-        "industry": "software",
-        "viaCode": "084680",
-        "viaName": "이월드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033240",
-        "corpName": "자화전자",
-        "industry": "electronics",
-        "viaCode": "190510",
-        "viaName": "나무가",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "060150",
         "corpName": "인선이엔티",
         "industry": "environment",
@@ -237,8 +237,32 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
+        "stockCode": "001250",
+        "corpName": "GS글로벌",
+        "industry": "chemical",
+        "viaCode": "084680",
+        "viaName": "이월드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041650",
+        "corpName": "상신브레이크",
+        "industry": "realestate",
+        "viaCode": "084680",
+        "viaName": "이월드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078930",
+        "corpName": "GS",
+        "industry": "chemical",
+        "viaCode": "084680",
+        "viaName": "이월드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016610",
+        "corpName": "DB증권",
         "industry": "finance",
         "viaCode": "084680",
         "viaName": "이월드",
@@ -253,17 +277,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "405000",
-        "corpName": "플라즈맵",
-        "industry": "medicalDevice",
+        "stockCode": "357880",
+        "corpName": "SKAI",
+        "industry": "software",
+        "viaCode": "084680",
+        "viaName": "이월드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082210",
+        "corpName": "옵트론텍",
+        "industry": "machinery",
         "viaCode": "190510",
         "viaName": "나무가",
         "hopDistance": 2
       },
       {
-        "stockCode": "041650",
-        "corpName": "상신브레이크",
-        "industry": "realestate",
+        "stockCode": "145020",
+        "corpName": "휴젤",
+        "industry": "pharma",
+        "viaCode": "084680",
+        "viaName": "이월드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "499790",
+        "corpName": "GS피앤엘",
+        "industry": "chemical",
         "viaCode": "084680",
         "viaName": "이월드",
         "hopDistance": 2
@@ -277,65 +317,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "049630",
-        "corpName": "재영솔루텍",
-        "industry": "machinery",
-        "viaCode": "190510",
-        "viaName": "나무가",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "499790",
-        "corpName": "GS피앤엘",
-        "industry": "chemical",
-        "viaCode": "084680",
-        "viaName": "이월드",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "086960",
         "corpName": "MDS테크",
         "industry": "realestate",
-        "viaCode": "084680",
-        "viaName": "이월드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "063760",
-        "corpName": "이엘피",
-        "industry": "electronics",
-        "viaCode": "084680",
-        "viaName": "이월드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "254490",
-        "corpName": "미래반도체",
-        "industry": "retail",
-        "viaCode": "190510",
-        "viaName": "나무가",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082210",
-        "corpName": "옵트론텍",
-        "industry": "machinery",
-        "viaCode": "190510",
-        "viaName": "나무가",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "077500",
-        "corpName": "유니퀘스트",
-        "industry": "retail",
-        "viaCode": "190510",
-        "viaName": "나무가",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006360",
-        "corpName": "GS건설",
-        "industry": "construction",
         "viaCode": "084680",
         "viaName": "이월드",
         "hopDistance": 2
@@ -349,35 +333,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001250",
-        "corpName": "GS글로벌",
-        "industry": "chemical",
-        "viaCode": "084680",
-        "viaName": "이월드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "317400",
-        "corpName": "자이에스앤디",
-        "industry": "construction",
-        "viaCode": "084680",
-        "viaName": "이월드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016610",
-        "corpName": "DB증권",
-        "industry": "finance",
-        "viaCode": "084680",
-        "viaName": "이월드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002170",
-        "corpName": "삼양통상",
-        "industry": "textile",
-        "viaCode": "084680",
-        "viaName": "이월드",
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "190510",
+        "viaName": "나무가",
         "hopDistance": 2
       },
       {
@@ -389,11 +349,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "013120",
-        "corpName": "동원개발",
-        "industry": "construction",
+        "stockCode": "030520",
+        "corpName": "한글과컴퓨터",
+        "industry": "software",
         "viaCode": "084680",
         "viaName": "이월드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "077500",
+        "corpName": "유니퀘스트",
+        "industry": "retail",
+        "viaCode": "190510",
+        "viaName": "나무가",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "063760",
+        "corpName": "이엘피",
+        "industry": "electronics",
+        "viaCode": "084680",
+        "viaName": "이월드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053450",
+        "corpName": "세코닉스",
+        "industry": "machinery",
+        "viaCode": "190510",
+        "viaName": "나무가",
         "hopDistance": 2
       },
       {
@@ -413,25 +397,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "190510",
-        "viaName": "나무가",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "145020",
-        "corpName": "휴젤",
-        "industry": "pharma",
+        "stockCode": "317400",
+        "corpName": "자이에스앤디",
+        "industry": "construction",
         "viaCode": "084680",
         "viaName": "이월드",
         "hopDistance": 2
       },
       {
-        "stockCode": "357880",
-        "corpName": "SKAI",
-        "industry": "software",
+        "stockCode": "405000",
+        "corpName": "플라즈맵",
+        "industry": "medicalDevice",
+        "viaCode": "190510",
+        "viaName": "나무가",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002170",
+        "corpName": "삼양통상",
+        "industry": "textile",
+        "viaCode": "084680",
+        "viaName": "이월드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013120",
+        "corpName": "동원개발",
+        "industry": "construction",
+        "viaCode": "084680",
+        "viaName": "이월드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "084680",
         "viaName": "이월드",
         "hopDistance": 2

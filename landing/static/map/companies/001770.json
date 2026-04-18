@@ -224,11 +224,35 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
+        "stockCode": "058400",
+        "corpName": "KNN",
+        "industry": "telecom",
+        "viaCode": "000970",
+        "viaName": "한국주철관공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
         "viaCode": "033500",
         "viaName": "동성화인텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "076080",
+        "viaName": "웰크론한텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058650",
+        "corpName": "세아홀딩스",
+        "industry": "realestate",
+        "viaCode": "000970",
+        "viaName": "한국주철관공업",
         "hopDistance": 2
       },
       {
@@ -240,9 +264,33 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "114190",
+        "corpName": "강원에너지",
+        "industry": "construction",
+        "viaCode": "076080",
+        "viaName": "웰크론한텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000020",
+        "corpName": "동화약품",
+        "industry": "retail",
+        "viaCode": "053620",
+        "viaName": "태양",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "025000",
         "corpName": "KPX케미칼",
         "industry": "software",
+        "viaCode": "033500",
+        "viaName": "동성화인텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
         "viaCode": "033500",
         "viaName": "동성화인텍",
         "hopDistance": 2
@@ -253,30 +301,6 @@
         "industry": "steel",
         "viaCode": "053620",
         "viaName": "태양",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005960",
-        "corpName": "동부건설",
-        "industry": "aerospace",
-        "viaCode": "053620",
-        "viaName": "태양",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "076080",
-        "viaName": "웰크론한텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058400",
-        "corpName": "KNN",
-        "industry": "telecom",
-        "viaCode": "000970",
-        "viaName": "한국주철관공업",
         "hopDistance": 2
       },
       {
@@ -296,11 +320,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "014280",
-        "corpName": "금강공업",
-        "industry": "construction",
-        "viaCode": "000970",
-        "viaName": "한국주철관공업",
+        "stockCode": "005960",
+        "corpName": "동부건설",
+        "industry": "aerospace",
+        "viaCode": "053620",
+        "viaName": "태양",
         "hopDistance": 2
       },
       {
@@ -312,33 +336,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "033830",
-        "corpName": "티비씨",
-        "industry": "media",
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
         "viaCode": "053620",
         "viaName": "태양",
         "hopDistance": 2
       },
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "076080",
-        "viaName": "웰크론한텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "114190",
-        "corpName": "강원에너지",
-        "industry": "construction",
-        "viaCode": "076080",
-        "viaName": "웰크론한텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089790",
-        "corpName": "제이티",
-        "industry": "semiconductor",
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
         "viaCode": "053620",
         "viaName": "태양",
         "hopDistance": 2
@@ -352,27 +360,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "058650",
-        "corpName": "세아홀딩스",
-        "industry": "realestate",
+        "stockCode": "014280",
+        "corpName": "금강공업",
+        "industry": "construction",
         "viaCode": "000970",
         "viaName": "한국주철관공업",
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "033500",
-        "viaName": "동성화인텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000020",
-        "corpName": "동화약품",
-        "industry": "retail",
-        "viaCode": "053620",
-        "viaName": "태양",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "076080",
+        "viaName": "웰크론한텍",
         "hopDistance": 2
       }
     ],

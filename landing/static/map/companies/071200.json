@@ -371,107 +371,27 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "099750",
-        "corpName": "이지케어텍",
-        "industry": "software",
-        "viaCode": "032850",
-        "viaName": "비트컴퓨터",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025770",
-        "corpName": "한국정보통신",
-        "industry": "finance",
-        "viaCode": "032850",
-        "viaName": "비트컴퓨터",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
-        "viaCode": "000150",
-        "viaName": "두산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010140",
-        "corpName": "삼성중공업",
-        "industry": "shipbuilding",
-        "viaCode": "333620",
-        "viaName": "엔시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "454910",
-        "corpName": "두산로보틱스",
-        "industry": "machinery",
-        "viaCode": "000150",
-        "viaName": "두산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034220",
-        "corpName": "LG디스플레이",
+        "stockCode": "064400",
+        "corpName": "LG씨엔에스",
         "industry": "electronics",
         "viaCode": "333620",
         "viaName": "엔시스",
         "hopDistance": 2
       },
       {
-        "stockCode": "398120",
-        "corpName": "에스지헬스케어",
-        "industry": "medicalDevice",
-        "viaCode": "032850",
-        "viaName": "비트컴퓨터",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
+        "stockCode": "082740",
+        "corpName": "한화엔진",
+        "industry": "aerospace",
         "viaCode": "000150",
         "viaName": "두산",
         "hopDistance": 2
       },
       {
-        "stockCode": "0082N0",
-        "corpName": "카나프테라퓨틱스",
-        "industry": "realestate",
-        "viaCode": "032620",
-        "viaName": "GC메디아이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006800",
-        "corpName": "미래에셋증권",
-        "industry": "finance",
-        "viaCode": "333620",
-        "viaName": "엔시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "456040",
-        "corpName": "OCI",
+        "stockCode": "015890",
+        "corpName": "태경산업",
         "industry": "chemical",
-        "viaCode": "032620",
-        "viaName": "GC메디아이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "321370",
-        "corpName": "센서뷰",
-        "industry": "electrical",
-        "viaCode": "000150",
-        "viaName": "두산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "336370",
-        "corpName": "솔루스첨단소재",
-        "industry": "machinery",
-        "viaCode": "000150",
-        "viaName": "두산",
+        "viaCode": "009270",
+        "viaName": "신원",
         "hopDistance": 2
       },
       {
@@ -483,11 +403,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "032620",
-        "viaName": "GC메디아이",
+        "stockCode": "090460",
+        "corpName": "비에이치",
+        "industry": "electronics",
+        "viaCode": "000150",
+        "viaName": "두산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "000150",
+        "viaName": "두산",
         "hopDistance": 2
       },
       {
@@ -499,19 +427,43 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002020",
-        "corpName": "코오롱",
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025770",
+        "corpName": "한국정보통신",
         "industry": "finance",
+        "viaCode": "032850",
+        "viaName": "비트컴퓨터",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "131970",
+        "corpName": "두산테스나",
+        "industry": "semiconductor",
         "viaCode": "000150",
         "viaName": "두산",
         "hopDistance": 2
       },
       {
-        "stockCode": "221800",
-        "corpName": "유투바이오",
-        "industry": "pharma",
-        "viaCode": "032620",
-        "viaName": "GC메디아이",
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "000150",
+        "viaName": "두산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "311060",
+        "corpName": "엘에이티",
+        "industry": "electronics",
+        "viaCode": "333620",
+        "viaName": "엔시스",
         "hopDistance": 2
       },
       {
@@ -523,11 +475,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "200670",
-        "corpName": "휴메딕스",
-        "industry": "pharma",
-        "viaCode": "032850",
-        "viaName": "비트컴퓨터",
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "333620",
+        "viaName": "엔시스",
         "hopDistance": 2
       },
       {
@@ -539,17 +491,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
-        "viaCode": "333620",
-        "viaName": "엔시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010470",
-        "corpName": "오리콤",
-        "industry": "media",
+        "stockCode": "034020",
+        "corpName": "두산에너빌리티",
+        "industry": "machinery",
         "viaCode": "000150",
         "viaName": "두산",
         "hopDistance": 2
@@ -563,32 +507,48 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "015890",
-        "corpName": "태경산업",
-        "industry": "chemical",
-        "viaCode": "009270",
-        "viaName": "신원",
+        "stockCode": "321370",
+        "corpName": "센서뷰",
+        "industry": "electrical",
+        "viaCode": "000150",
+        "viaName": "두산",
         "hopDistance": 2
       },
       {
-        "stockCode": "034020",
-        "corpName": "두산에너빌리티",
+        "stockCode": "095340",
+        "corpName": "ISC",
+        "industry": "retail",
+        "viaCode": "000150",
+        "viaName": "두산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "340450",
+        "corpName": "지씨지놈",
+        "industry": "electronics",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099750",
+        "corpName": "이지케어텍",
+        "industry": "software",
+        "viaCode": "032850",
+        "viaName": "비트컴퓨터",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "336370",
+        "corpName": "솔루스첨단소재",
         "industry": "machinery",
         "viaCode": "000150",
         "viaName": "두산",
         "hopDistance": 2
       },
       {
-        "stockCode": "199730",
-        "corpName": "바이오인프라",
-        "industry": "pharma",
-        "viaCode": "032620",
-        "viaName": "GC메디아이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "144510",
-        "corpName": "지씨셀",
+        "stockCode": "234690",
+        "corpName": "녹십자웰빙",
         "industry": "pharma",
         "viaCode": "032620",
         "viaName": "GC메디아이",
@@ -603,91 +563,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "064400",
-        "corpName": "LG씨엔에스",
-        "industry": "electronics",
-        "viaCode": "333620",
-        "viaName": "엔시스",
+        "stockCode": "454910",
+        "corpName": "두산로보틱스",
+        "industry": "machinery",
+        "viaCode": "000150",
+        "viaName": "두산",
         "hopDistance": 2
       },
       {
-        "stockCode": "005250",
-        "corpName": "녹십자홀딩스",
+        "stockCode": "199730",
+        "corpName": "바이오인프라",
         "industry": "pharma",
         "viaCode": "032620",
         "viaName": "GC메디아이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082740",
-        "corpName": "한화엔진",
-        "industry": "aerospace",
-        "viaCode": "000150",
-        "viaName": "두산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004020",
-        "corpName": "현대제철",
-        "industry": "steel",
-        "viaCode": "000150",
-        "viaName": "두산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "340450",
-        "corpName": "지씨지놈",
-        "industry": "electronics",
-        "viaCode": "032620",
-        "viaName": "GC메디아이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "026890",
-        "corpName": "스틱인베스트먼트",
-        "industry": "chemical",
-        "viaCode": "032620",
-        "viaName": "GC메디아이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090460",
-        "corpName": "비에이치",
-        "industry": "electronics",
-        "viaCode": "000150",
-        "viaName": "두산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007690",
-        "corpName": "국도화학",
-        "industry": "chemical",
-        "viaCode": "000150",
-        "viaName": "두산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "311060",
-        "corpName": "엘에이티",
-        "industry": "electronics",
-        "viaCode": "333620",
-        "viaName": "엔시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095340",
-        "corpName": "ISC",
-        "industry": "retail",
-        "viaCode": "000150",
-        "viaName": "두산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "092300",
-        "corpName": "현우산업",
-        "industry": "electronics",
-        "viaCode": "000150",
-        "viaName": "두산",
         "hopDistance": 2
       },
       {
@@ -699,33 +587,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "490470",
-        "corpName": "세미파이브",
-        "industry": "semiconductor",
-        "viaCode": "000150",
-        "viaName": "두산",
+        "stockCode": "142280",
+        "corpName": "녹십자엠에스",
+        "industry": "pharma",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
         "hopDistance": 2
       },
       {
-        "stockCode": "120110",
-        "corpName": "코오롱인더",
-        "industry": "plastic",
-        "viaCode": "000150",
-        "viaName": "두산",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "131970",
-        "corpName": "두산테스나",
-        "industry": "semiconductor",
-        "viaCode": "000150",
-        "viaName": "두산",
+        "stockCode": "398120",
+        "corpName": "에스지헬스케어",
+        "industry": "medicalDevice",
+        "viaCode": "032850",
+        "viaName": "비트컴퓨터",
         "hopDistance": 2
       },
       {
         "stockCode": "241560",
         "corpName": "두산밥캣",
         "industry": "machinery",
+        "viaCode": "000150",
+        "viaName": "두산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "0082N0",
+        "corpName": "카나프테라퓨틱스",
+        "industry": "realestate",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007690",
+        "corpName": "국도화학",
+        "industry": "chemical",
         "viaCode": "000150",
         "viaName": "두산",
         "hopDistance": 2
@@ -739,8 +635,128 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "234690",
-        "corpName": "녹십자웰빙",
+        "stockCode": "010470",
+        "corpName": "오리콤",
+        "industry": "media",
+        "viaCode": "000150",
+        "viaName": "두산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "490470",
+        "corpName": "세미파이브",
+        "industry": "semiconductor",
+        "viaCode": "000150",
+        "viaName": "두산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092300",
+        "corpName": "현우산업",
+        "industry": "electronics",
+        "viaCode": "000150",
+        "viaName": "두산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "120110",
+        "corpName": "코오롱인더",
+        "industry": "plastic",
+        "viaCode": "000150",
+        "viaName": "두산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002020",
+        "corpName": "코오롱",
+        "industry": "finance",
+        "viaCode": "000150",
+        "viaName": "두산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "144510",
+        "corpName": "지씨셀",
+        "industry": "pharma",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005250",
+        "corpName": "녹십자홀딩스",
+        "industry": "pharma",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034220",
+        "corpName": "LG디스플레이",
+        "industry": "electronics",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010140",
+        "corpName": "삼성중공업",
+        "industry": "shipbuilding",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "0008Z0",
+        "corpName": "에스엔시스",
+        "industry": "electrical",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200670",
+        "corpName": "휴메딕스",
+        "industry": "pharma",
+        "viaCode": "032850",
+        "viaName": "비트컴퓨터",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "026890",
+        "corpName": "스틱인베스트먼트",
+        "industry": "chemical",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "000150",
+        "viaName": "두산",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "221800",
+        "corpName": "유투바이오",
         "industry": "pharma",
         "viaCode": "032620",
         "viaName": "GC메디아이",
@@ -755,25 +771,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "0008Z0",
-        "corpName": "에스엔시스",
-        "industry": "electrical",
-        "viaCode": "333620",
-        "viaName": "엔시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
-        "viaCode": "333620",
-        "viaName": "엔시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "142280",
-        "corpName": "녹십자엠에스",
-        "industry": "pharma",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "032620",
         "viaName": "GC메디아이",
         "hopDistance": 2

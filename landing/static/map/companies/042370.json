@@ -237,14 +237,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "115500",
-        "corpName": "케이씨에스",
-        "industry": "railroad",
-        "viaCode": "054220",
-        "viaName": "비츠로시스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "031210",
         "corpName": "서울보증보험",
         "industry": "finance",
@@ -253,17 +245,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "044780",
-        "corpName": "에이치케이",
-        "industry": "medicalDevice",
+        "stockCode": "005810",
+        "corpName": "풍산홀딩스",
+        "industry": "retail",
         "viaCode": "082920",
         "viaName": "비츠로셀",
         "hopDistance": 2
       },
       {
-        "stockCode": "005810",
-        "corpName": "풍산홀딩스",
-        "industry": "retail",
+        "stockCode": "115500",
+        "corpName": "케이씨에스",
+        "industry": "railroad",
+        "viaCode": "054220",
+        "viaName": "비츠로시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
         "viaCode": "082920",
         "viaName": "비츠로셀",
         "hopDistance": 2
