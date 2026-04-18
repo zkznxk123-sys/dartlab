@@ -12,6 +12,10 @@
 		moversMap?: Map<string, string>;
 		// 충격 시뮬레이션 영향 맵: stockCode → intensity (0~1)
 		shockMap?: Map<string, number>;
+		// 타임라인: 선택 연도 ('' = 현재)
+		timelineYear?: string;
+		// 타임라인: 선택 연도의 회사별 데이터
+		timelineData?: Record<string, any>;
 	}
 
 	let {
@@ -22,7 +26,9 @@
 		sizeMetric = 'revenue',
 		onNodeClick,
 		moversMap = new Map(),
-		shockMap = new Map()
+		shockMap = new Map(),
+		timelineYear = '',
+		timelineData = {}
 	}: Props = $props();
 
 	let containerEl: HTMLDivElement | null = $state(null);
@@ -47,6 +53,12 @@
 
 	// Size value extractor — treemap needs positive values
 	function sizeValue(n: any): number {
+		// 타임라인 모드: 해당 연도 매출 사용
+		if (timelineYear && sizeMetric === 'revenue') {
+			const td = timelineData[n.id];
+			if (!td) return 0.1; // 해당 연도 데이터 없음 = 거의 안 보임
+			return Math.max(1, (td.revenue || 0) / 1e8);
+		}
 		if (sizeMetric === 'revenue') return Math.max(1, (n.revenue || 0) / 1e8);
 		if (sizeMetric === 'roe') return Math.max(0.1, (n.roe ?? 0) + 30);
 		if (sizeMetric === 'opMargin') return Math.max(0.1, (n.opMargin ?? 0) + 20);

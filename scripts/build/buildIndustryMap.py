@@ -477,6 +477,70 @@ def _computeLayout(nodes, taxonomy) -> dict[str, tuple[float, float]]:
     return coords
 
 
+def _buildTimeline(outDir, companies):
+    """companies/{code}.json의 financials5y에서 연도별 매출/OPM 추출 → timeline.json."""
+    from pathlib import Path
+
+    compDir = outDir / "companies"
+    timeline: dict[str, dict[str, dict]] = {}  # year → stockCode → {revenue, opMargin}
+    industryMap: dict[str, str] = {}  # stockCode → industry
+    allYears: set[str] = set()
+
+    for n in companies:
+        code = n.stockCode
+        fpath = compDir / f"{code}.json"
+        if not fpath.exists():
+            continue
+        try:
+            d = json.load(open(fpath, encoding="utf-8"))
+        except Exception:
+            continue
+
+        industryMap[code] = n.industry
+        for f in d.get("financials5y", []):
+            year = str(f.get("year", ""))
+            if not year:
+                continue
+            allYears.add(year)
+            if year not in timeline:
+                timeline[year] = {}
+            sales = f.get("sales") or 0
+            op = f.get("operating_profit")
+            opMargin = round(op / sales * 100, 1) if sales and op else None
+            timeline[year][code] = {
+                "revenue": round(sales),
+                "opMargin": opMargin,
+            }
+
+    # 산업별 집계
+    sortedYears = sorted(allYears)
+    industryTotals: dict[str, dict[str, dict]] = {}
+    for year in sortedYears:
+        industryTotals[year] = {}
+        byInd: dict[str, list] = {}
+        for code, data in timeline.get(year, {}).items():
+            ind = industryMap.get(code, "unknown")
+            byInd.setdefault(ind, []).append(data)
+        for ind, entries in byInd.items():
+            totalRev = sum(e["revenue"] for e in entries)
+            opms = [e["opMargin"] for e in entries if e["opMargin"] is not None]
+            industryTotals[year][ind] = {
+                "totalRevenue": round(totalRev),
+                "count": len(entries),
+                "avgOpm": round(sum(opms) / len(opms), 1) if opms else None,
+            }
+
+    result = {
+        "periods": sortedYears,
+        "data": timeline,
+        "industryTotals": industryTotals,
+    }
+    (outDir / "timeline.json").write_text(
+        json.dumps(result, ensure_ascii=False), encoding="utf-8"
+    )
+    print(f"  - {len(sortedYears)}개 연도 × {sum(len(v) for v in timeline.values())}건")
+
+
 def buildEcosystem(
     scanMetrics: dict[str, dict] | None = None,
     yoyDeltas: dict[str, dict] | None = None,
@@ -1118,6 +1182,10 @@ def main() -> None:
             json.dumps(enriched, ensure_ascii=False, indent=2), encoding="utf-8"
         )
     print(f"  - {len(topCompanies)}개사 생성 (enrich: {enrichedCount}사)")
+
+    # 타임라인 (연도별 산업 변화)
+    print("[타임라인] timeline.json 생성...")
+    _buildTimeline(OUT_DIR, topCompanies)
 
     # 산업 통계 (사용자 가치 인사이트)
     print("[산업 통계] industryStats.json")

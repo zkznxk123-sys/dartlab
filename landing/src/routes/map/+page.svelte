@@ -59,6 +59,18 @@
 	// 이상 신호 오버레이 토글
 	let showMoversOverlay = $state(false);
 
+	// 타임라인 슬라이더
+	let timelinePeriods = $derived((data as any)?.timeline?.periods || []);
+	let timelineData = $derived((data as any)?.timeline?.data || {});
+	let timelineIndustryTotals = $derived((data as any)?.timeline?.industryTotals || {});
+	let selectedYear: string = $state(''); // '' = 현재 (실시간)
+	$effect(() => {
+		// 기본값: 최신 연도 (또는 비활성)
+		if (timelinePeriods.length && !selectedYear) {
+			selectedYear = ''; // 현재 = 슬라이더 비활성
+		}
+	});
+
 	// movers stockCode → signal type 매핑
 	let moversSignalMap = $derived.by(() => {
 		const m = new Map<string, string>();
@@ -881,6 +893,37 @@
 			{/if}
 		</div>
 
+		<!-- 타임라인 슬라이더 -->
+		{#if timelinePeriods.length > 1}
+			<div class="section timeline-section">
+				<h3>시간 여행</h3>
+				<div class="timeline-slider">
+					<input
+						type="range"
+						min="0"
+						max={timelinePeriods.length}
+						step="1"
+						value={selectedYear ? timelinePeriods.indexOf(selectedYear) : timelinePeriods.length}
+						oninput={(e) => {
+							const idx = parseInt((e.target as HTMLInputElement).value);
+							selectedYear = idx >= timelinePeriods.length ? '' : timelinePeriods[idx];
+						}}
+					/>
+					<div class="timeline-labels">
+						{#each timelinePeriods as yr}
+							<span class="tl-year" class:active={selectedYear === yr}>{yr.slice(-2)}</span>
+						{/each}
+						<span class="tl-year" class:active={!selectedYear}>현재</span>
+					</div>
+				</div>
+				{#if selectedYear}
+					<div class="timeline-info">
+						{selectedYear}년 기준 · {Object.keys(timelineData[selectedYear] || {}).length}사
+					</div>
+				{/if}
+			</div>
+		{/if}
+
 		<!-- 오버레이 토글 -->
 		{#if moversCount > 0}
 			<div class="section overlay-toggles">
@@ -1220,6 +1263,8 @@
 				onNodeClick={handleTreemapClick}
 				moversMap={showMoversOverlay ? moversSignalMap : new Map()}
 				shockMap={shockImpactMap}
+				timelineYear={selectedYear}
+				timelineData={selectedYear ? (timelineData[selectedYear] || {}) : {}}
 			/>
 		{:else if viewMode === 'companies'}
 			<EcosystemMap
@@ -1959,6 +2004,38 @@
 	}
 	.loading-overlay .retry:hover {
 		background: rgba(96, 165, 250, 0.3);
+	}
+
+	.timeline-section h3 {
+		margin-bottom: 6px;
+	}
+	.timeline-slider {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	.timeline-slider input[type="range"] {
+		width: 100%;
+		accent-color: var(--color-dl-primary);
+	}
+	.timeline-labels {
+		display: flex;
+		justify-content: space-between;
+		font-size: 9px;
+		color: var(--color-dl-text-dim);
+	}
+	.tl-year {
+		cursor: pointer;
+	}
+	.tl-year.active {
+		color: var(--color-dl-primary-light);
+		font-weight: 700;
+	}
+	.timeline-info {
+		font-size: 10px;
+		color: var(--color-dl-text-muted);
+		margin-top: 4px;
+		text-align: center;
 	}
 
 	.overlay-toggles {
