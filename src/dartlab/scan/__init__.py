@@ -735,9 +735,17 @@ class Scan:
         financial_axes = set(_SCAN_GROUPS.get("financial", []))
         # EDGAR에서도 지원하는 축
         _EDGAR_AXES = {
-            "profitability", "growth", "quality", "liquidity",
-            "efficiency", "cashflow", "dividendTrend", "capital",
-            "debt", "account", "ratio",
+            "profitability",
+            "growth",
+            "quality",
+            "liquidity",
+            "efficiency",
+            "cashflow",
+            "dividendTrend",
+            "capital",
+            "debt",
+            "account",
+            "ratio",
         }
 
         rows = []
@@ -816,7 +824,7 @@ class Scan:
 
         lines.append("")
         lines.append("━━━ 빠른 시작 ━━━")
-        lines.append('  dartlab.scan()                              # 이 가이드')
+        lines.append("  dartlab.scan()                              # 이 가이드")
         lines.append('  dartlab.scan("governance")                  # 지배구조 전종목')
         lines.append('  dartlab.scan("financial", "profitability")  # 수익성 (financial 그룹)')
         lines.append('  dartlab.scan("screen", "value")             # 멀티팩터 스크리닝')

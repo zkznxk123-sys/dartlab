@@ -760,9 +760,7 @@ def buildBlocks(
                 # creditScoreBlock 결과에서 원본 dict 추출
                 _base_data = calcCreditScore(company, basePeriod=basePeriod)
                 _stress_data = calcCreditScore(company, basePeriod=basePeriod, overrides=_stress_overrides)
-                b["creditScenario"] = _safe(
-                    lambda: creditScenarioBlock(_base_data, _stress_data, _stress_overrides)
-                )
+                b["creditScenario"] = _safe(lambda: creditScenarioBlock(_base_data, _stress_data, _stress_overrides))
 
     # ── 4부: 가치평가 ──
     if keys is None or keys & {
@@ -1218,7 +1216,9 @@ def buildBlocks(
         if _need("macroSensitivity"):
             from dartlab.analysis.financial.macroExposure import calcMacroSensitivity
 
-            b["macroSensitivity"] = _safe(lambda: macroSensitivityBlock(calcMacroSensitivity(company, basePeriod=basePeriod)))
+            b["macroSensitivity"] = _safe(
+                lambda: macroSensitivityBlock(calcMacroSensitivity(company, basePeriod=basePeriod))
+            )
         if _need("valuationBand"):
             b["valuationBand"] = _safe(lambda: valuationBandBlock(calcValuationBand(company, basePeriod=basePeriod)))
         if _need("companyCyclePosition"):
@@ -1343,6 +1343,7 @@ def buildReview(
     }
     try:
         from dartlab.analysis.financial.lifeCycle import calcLifeCycle as _calcLC
+
         _lcResult = _calcLC(company, basePeriod=basePeriod)
         _lcPhase = _lcResult.get("phase") if _lcResult else None
     except (ImportError, AttributeError, TypeError, ValueError):

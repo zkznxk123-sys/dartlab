@@ -176,6 +176,7 @@ def resolveCategoryAndIntent(
 
 # ── 범주별 프롬프트 블록 (P8 신설) ───────────────────────────
 
+
 def buildCategoryBlock(category: str, intent: str, *, hasCompany: bool = False) -> str:
     """질문 범주별 최소 블록 — P8 가드 + META/OUT_OF_SCOPE 분기만."""
     if category == "out_of_scope":
@@ -184,10 +185,7 @@ def buildCategoryBlock(category: str, intent: str, *, hasCompany: bool = False) 
             "짧게 답하되 'dartlab 전문 영역 아님' 명시. tool 호출 금지. 끝에 금융 질문 예시 3개."
         )
     if category == "meta":
-        return (
-            "## 질문 범주: dartlab 안내\n"
-            "capabilities() 로 기능 조회 후 답하라. tool 호출 불필요. 코드 예시 1~2줄."
-        )
+        return "## 질문 범주: dartlab 안내\ncapabilities() 로 기능 조회 후 답하라. tool 호출 불필요. 코드 예시 1~2줄."
     # FINANCE — tool 경유 필수 (P8). 구체적 조합은 AI 자율 판단.
     return (
         "## 질문 범주: 금융 분석 — tool 경유 필수\n"

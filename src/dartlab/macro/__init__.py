@@ -397,7 +397,7 @@ class Macro:
 
         lines.append("")
         lines.append("━━━ 빠른 시작 ━━━")
-        lines.append('  dartlab.macro()                              # 이 가이드')
+        lines.append("  dartlab.macro()                              # 이 가이드")
         lines.append('  dartlab.macro("사이클")                       # 1막: 국면 진단')
         lines.append('  dartlab.macro("금리")                         # 3막: 정책 대응')
         lines.append('  dartlab.macro("종합")                         # 전체 종합 판정')
@@ -407,7 +407,9 @@ class Macro:
         lines.append("  KR: ECOS_API_KEY  (한국은행 → https://ecos.bok.or.kr/api/)")
         lines.append("  US: FRED_API_KEY  (연준    → https://fred.stlouisfed.org/docs/api/api_key.html)")
         lines.append("")
-        lines.append("노트북: https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/06_macro.py")
+        lines.append(
+            "노트북: https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/06_macro.py"
+        )
         return "\n".join(lines)
 
     # accessor 패턴: macro.cycle, macro.rates ...

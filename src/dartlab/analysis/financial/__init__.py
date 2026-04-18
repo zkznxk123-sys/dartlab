@@ -1165,5 +1165,7 @@ class Analysis:
         lines.append("  DART 전자공시 기반 재무제표 — API 키 불필요 (자동 다운로드)")
         lines.append("  전체 결과를 보고서로 → c.review()")
         lines.append("")
-        lines.append("노트북: https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_quickstart.ipynb")
+        lines.append(
+            "노트북: https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_quickstart.ipynb"
+        )
         return "\n".join(lines)

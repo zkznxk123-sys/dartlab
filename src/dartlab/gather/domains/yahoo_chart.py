@@ -239,19 +239,25 @@ async def fetch_history(
         h = highs[i] if i < len(highs) and highs[i] is not None else None
         lo = lows[i] if i < len(lows) and lows[i] is not None else None
         # 수정주가 우선, 없으면 종가
-        c = adj_closes[i] if i < len(adj_closes) and adj_closes[i] is not None else (closes[i] if i < len(closes) else None)
+        c = (
+            adj_closes[i]
+            if i < len(adj_closes) and adj_closes[i] is not None
+            else (closes[i] if i < len(closes) else None)
+        )
         v = volumes[i] if i < len(volumes) and volumes[i] is not None else 0
 
         if o is None or c is None:
             continue
 
-        rows.append({
-            "date": dt_str,
-            "open": round(float(o), 4),
-            "high": round(float(h), 4) if h else round(float(o), 4),
-            "low": round(float(lo), 4) if lo else round(float(o), 4),
-            "close": round(float(c), 4),
-            "volume": int(v),
-        })
+        rows.append(
+            {
+                "date": dt_str,
+                "open": round(float(o), 4),
+                "high": round(float(h), 4) if h else round(float(o), 4),
+                "low": round(float(lo), 4) if lo else round(float(o), 4),
+                "close": round(float(c), 4),
+                "volume": int(v),
+            }
+        )
 
     return rows

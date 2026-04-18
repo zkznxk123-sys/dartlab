@@ -113,7 +113,7 @@ def _distribution(values: list[float]) -> dict | None:
         "p75": round(_q(0.75), 2),
         "p90": round(_q(0.90), 2),
         "mean": round(mean, 2),
-        "std": round(variance ** 0.5, 2),
+        "std": round(variance**0.5, 2),
     }
 
 
@@ -247,9 +247,15 @@ def calcSectorMetrics(company: Any) -> dict | None:
         "opmDistribution": opmDist,
         "cagrDistribution": cagrDist,
         "roeDistribution": roeDist,
-        "myOpmPercentile": _percentile(myProf.get("opMargin"), opmDist) if myProf.get("opMargin") is not None and opmDist else None,
-        "myCagrPercentile": _percentile(myGrow.get("revenueCagr"), cagrDist) if myGrow.get("revenueCagr") is not None and cagrDist else None,
-        "myRoePercentile": _percentile(myProf.get("roe"), roeDist) if myProf.get("roe") is not None and roeDist else None,
+        "myOpmPercentile": _percentile(myProf.get("opMargin"), opmDist)
+        if myProf.get("opMargin") is not None and opmDist
+        else None,
+        "myCagrPercentile": _percentile(myGrow.get("revenueCagr"), cagrDist)
+        if myGrow.get("revenueCagr") is not None and cagrDist
+        else None,
+        "myRoePercentile": _percentile(myProf.get("roe"), roeDist)
+        if myProf.get("roe") is not None and roeDist
+        else None,
     }
 
 
@@ -399,7 +405,16 @@ def calcSectorDynamics(company: Any) -> dict | None:
     industryName = ind.name
 
     # 경기민감도 분류 (taxonomy 기반 규칙)
-    HIGH_SENSITIVITY = {"semiconductor", "auto", "construction", "steel", "chemical", "shipbuilding", "machinery", "battery"}
+    HIGH_SENSITIVITY = {
+        "semiconductor",
+        "auto",
+        "construction",
+        "steel",
+        "chemical",
+        "shipbuilding",
+        "machinery",
+        "battery",
+    }
     DEFENSIVE = {"pharma", "food", "education", "environment"}
     if industryId in HIGH_SENSITIVITY:
         sensitivity = "high"
@@ -412,6 +427,7 @@ def calcSectorDynamics(company: Any) -> dict | None:
     macroPhase = "미확인"
     try:
         import dartlab
+
         macro_result = dartlab.macro("사이클")
         if hasattr(macro_result, "iter_rows"):
             for r in macro_result.iter_rows(named=True):

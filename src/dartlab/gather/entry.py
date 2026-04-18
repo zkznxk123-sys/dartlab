@@ -498,5 +498,7 @@ class GatherEntry:
         lines.append("  insider: DART_API_KEY")
         lines.append("  → dartlab.gather._apiKeyGuide() 로 발급 링크 확인")
         lines.append("")
-        lines.append("노트북: https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/02_gather.py")
+        lines.append(
+            "노트북: https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo/02_gather.py"
+        )
         return "\n".join(lines)
