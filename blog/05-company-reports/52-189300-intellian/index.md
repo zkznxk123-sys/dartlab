@@ -359,15 +359,6 @@ LEO 위성통신 시장이 커지면 인텔리안테크는 최대 수혜자다. 
 
 ---
 
-## 공시 / Filings
-
-- [인텔리안테크 사업보고서 (2025년)](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260319001180) — DART 원문
-- [인텔리안테크 분기보고서 (2025년 3분기)](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20251114001478) — 연결 재무제표
-- [인텔리안테크 감사보고서 (2025년)](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260318800176) — 외부감사인 의견
-- [인텔리안테크 전자공시 전체](https://dart.fss.or.kr/dsaf001/main.do?corpCode=01017978) — DART 공시 목록
-
----
-
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
 

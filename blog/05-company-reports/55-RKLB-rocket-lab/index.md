@@ -430,16 +430,6 @@ Electron은 소형 위성 발사 시장(~$10B 규모)에서 돈을 번다. Neutr
 
 ---
 
-## 공시 / Filings
-
-- [Rocket Lab 10-K (2025)](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001819994&type=10-K) — SEC EDGAR 연간보고서
-- [Rocket Lab 10-Q (2025 Q3)](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001819994&type=10-Q) — 분기보고서
-- [Rocket Lab DEF 14A](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001819994&type=DEF+14A) — 주주총회 위임장
-- [Rocket Lab IR](https://investors.rocketlabusa.com/) — 실적 발표 자료
-- [Rocket Lab SEC Filings 전체](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001819994&type=&dateb=&owner=include&count=40) — EDGAR 공시 목록
-
----
-
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
 
