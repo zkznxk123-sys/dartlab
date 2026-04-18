@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-04-17",
+  "asOf": "2026-04-18",
   "categories": {
     "profitImprove": {
       "title": "수익성 개선 (ROE)",
@@ -1163,23 +1163,6 @@
           "note": "2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심."
         },
         {
-          "stockCode": "049950",
-          "corpName": "미래컴퍼니",
-          "industry": "machinery",
-          "industryName": "기계·장비",
-          "revenue": 40897794013.0,
-          "roe": -9.2,
-          "opMargin": -57.8,
-          "debtRatio": 17.6,
-          "roeDelta": -3.6,
-          "opMarginDelta": -45.2,
-          "debtRatioDelta": 1.8,
-          "revenueYoyPct": -86.0,
-          "asOfYear": 2025,
-          "signal": "매출 YoY -86.0% — 급락",
-          "note": "2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심."
-        },
-        {
           "stockCode": "065440",
           "corpName": "이루온",
           "industry": "telecom",
@@ -1191,6 +1174,23 @@
           "roeDelta": -0.8,
           "opMarginDelta": -13.1,
           "debtRatioDelta": 19.5,
+          "revenueYoyPct": -86.0,
+          "asOfYear": 2025,
+          "signal": "매출 YoY -86.0% — 급락",
+          "note": "2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심."
+        },
+        {
+          "stockCode": "049950",
+          "corpName": "미래컴퍼니",
+          "industry": "machinery",
+          "industryName": "기계·장비",
+          "revenue": 40897794013.0,
+          "roe": -9.2,
+          "opMargin": -57.8,
+          "debtRatio": 17.6,
+          "roeDelta": -3.6,
+          "opMarginDelta": -45.2,
+          "debtRatioDelta": 1.8,
           "revenueYoyPct": -86.0,
           "asOfYear": 2025,
           "signal": "매출 YoY -86.0% — 급락",

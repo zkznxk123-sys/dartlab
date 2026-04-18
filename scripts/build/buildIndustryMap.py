@@ -298,6 +298,104 @@ def _loadScanMetrics() -> dict[str, dict]:
     except Exception as e:
         print(f"  ⚠ growth 로드 실패: {e}")
 
+    # ── 추가 7축 (등급 문자열만 — ecosystem.json 경량화) ──
+
+    # governance (지배구조 A~E)
+    try:
+        from dartlab.scan.governance import scan_governance
+        gov = scan_governance()
+        for r in gov.iter_rows(named=True):
+            code = r.get("종목코드") or r.get("stockCode")
+            if not code:
+                continue
+            metrics.setdefault(code, {})
+            metrics[code]["govGrade"] = r.get("등급") or r.get("grade") or ""
+    except Exception as e:
+        print(f"  ⚠ governance 로드 실패: {e}")
+
+    # cashflow (8종 패턴)
+    try:
+        from dartlab.scan.cashflow import scanCashflow
+        cf = scanCashflow()
+        for r in cf.iter_rows(named=True):
+            code = r.get("종목코드") or r.get("stockCode")
+            if not code:
+                continue
+            metrics.setdefault(code, {})
+            metrics[code]["cfPattern"] = r.get("패턴") or r.get("pattern") or ""
+    except Exception as e:
+        print(f"  ⚠ cashflow 로드 실패: {e}")
+
+    # audit (감사 리스크)
+    try:
+        from dartlab.scan.audit import scanAudit
+        aud = scanAudit()
+        for r in aud.iter_rows(named=True):
+            code = r.get("종목코드") or r.get("stockCode")
+            if not code:
+                continue
+            metrics.setdefault(code, {})
+            metrics[code]["auditRisk"] = r.get("위험등급") or r.get("riskGrade") or ""
+    except Exception as e:
+        print(f"  ⚠ audit 로드 실패: {e}")
+
+    # quality (이익의 질)
+    try:
+        from dartlab.scan.quality import scanQuality
+        qual = scanQuality()
+        for r in qual.iter_rows(named=True):
+            code = r.get("종목코드") or r.get("stockCode")
+            if not code:
+                continue
+            metrics.setdefault(code, {})
+            metrics[code]["qualGrade"] = r.get("등급") or r.get("grade") or ""
+    except Exception as e:
+        print(f"  ⚠ quality 로드 실패: {e}")
+
+    # liquidity (유동성)
+    try:
+        from dartlab.scan.liquidity import scanLiquidity
+        liq = scanLiquidity()
+        for r in liq.iter_rows(named=True):
+            code = r.get("종목코드") or r.get("stockCode")
+            if not code:
+                continue
+            metrics.setdefault(code, {})
+            metrics[code]["liqGrade"] = r.get("등급") or r.get("grade") or ""
+    except Exception as e:
+        print(f"  ⚠ liquidity 로드 실패: {e}")
+
+    # capital (주주환원 분류)
+    try:
+        from dartlab.scan.capital import scan_capital
+        cap = scan_capital()
+        for r in cap.iter_rows(named=True):
+            code = r.get("종목코드") or r.get("stockCode")
+            if not code:
+                continue
+            metrics.setdefault(code, {})
+            metrics[code]["capClass"] = r.get("환원분류") or r.get("returnClass") or ""
+    except Exception as e:
+        print(f"  ⚠ capital 로드 실패: {e}")
+
+    # workforce (직원수)
+    try:
+        from dartlab.scan.workforce import scan_workforce
+        wf = scan_workforce()
+        for r in wf.iter_rows(named=True):
+            code = r.get("종목코드") or r.get("stockCode")
+            if not code:
+                continue
+            metrics.setdefault(code, {})
+            emp = r.get("직원수") or r.get("empCount")
+            if emp is not None:
+                try:
+                    metrics[code]["empCount"] = int(float(str(emp).replace(",", "")))
+                except (ValueError, TypeError):
+                    pass
+    except Exception as e:
+        print(f"  ⚠ workforce 로드 실패: {e}")
+
     return metrics
 
 
@@ -456,6 +554,14 @@ def buildEcosystem(
                 "holderPct": _roundOrNone(ins.get("holderPct")),
                 "holderChange": _roundOrNone(ins.get("holderChange")),
                 "stability": ins.get("stability") or "",
+                # scan 7축 등급 (문자열만)
+                "govGrade": m.get("govGrade") or "",
+                "cfPattern": m.get("cfPattern") or "",
+                "auditRisk": m.get("auditRisk") or "",
+                "qualGrade": m.get("qualGrade") or "",
+                "liqGrade": m.get("liqGrade") or "",
+                "capClass": m.get("capClass") or "",
+                "empCount": m.get("empCount"),
                 "size": rev_log,
                 "color": ind_color.get(n.industry, "#9ca3af"),
             }
