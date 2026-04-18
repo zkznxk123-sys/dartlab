@@ -150,9 +150,10 @@ class Gather:
             g.price("AAPL", market="US")         # Apple 1년
             g.price("005930", snapshot=True)     # 현재가 스냅샷
         """
-        # market 자동 감지: 6자리 숫자 → KR, 알파벳 포함 → US
-        if market == "KR" and stock_code and not stock_code.strip().isdigit():
-            market = "US"
+        # market 자동 감지 (core SSOT)
+        from dartlab.core.market import resolveMarket
+
+        market = resolveMarket(stock_code, market)
 
         if snapshot:
             return self._priceSnapshot(stock_code, market=market)
@@ -217,6 +218,9 @@ class Gather:
             g.consensus("005930")              # 삼성전자 컨센서스
             g.consensus("AAPL", market="US")   # Apple 컨센서스
         """
+        from dartlab.core.market import resolveMarket
+
+        market = resolveMarket(stock_code, market)
         cache_key = f"{stock_code}:{market}"
         cached = self._cache.get_typed(cache_key, "consensus")
         if cached is not None:
@@ -251,6 +255,9 @@ class Gather:
             g = getDefaultGather()
             g.flow("005930")   # 삼성전자 수급 시계열
         """
+        from dartlab.core.market import resolveMarket
+
+        market = resolveMarket(stock_code, market)
         import polars as pl
 
         if market != "KR":
@@ -381,9 +388,10 @@ class Gather:
             g.history("005930", start="2025-01-01", end="2025-12-31")
             g.history("AAPL", start="2025-06-01", end="2025-12-31", market="US")
         """
-        # market 자동 감지
-        if market == "KR" and stock_code and not stock_code.strip().isdigit():
-            market = "US"
+        # market 자동 감지 (core SSOT)
+        from dartlab.core.market import resolveMarket
+
+        market = resolveMarket(stock_code, market)
 
         import polars as pl
 
@@ -594,6 +602,9 @@ class Gather:
             g.insiderTrading("005930")              # 삼성전자 임원 거래
             g.insiderTrading("AAPL", market="US")   # Apple 내부자 거래
         """
+        from dartlab.core.market import resolveMarket
+
+        market = resolveMarket(stock_code, market)
         cache_key = f"{stock_code}:{market}:insider"
         cached = self._cache.get_typed(cache_key, "insider")
         if cached is not None:
@@ -645,6 +656,9 @@ class Gather:
             g.ownership("005930")              # 삼성전자 외국인 보유
             g.ownership("AAPL", market="US")   # Apple 기관 보유
         """
+        from dartlab.core.market import resolveMarket
+
+        market = resolveMarket(stock_code, market)
         cache_key = f"{stock_code}:{market}:ownership"
         cached = self._cache.get_typed(cache_key, "ownership")
         if cached is not None:

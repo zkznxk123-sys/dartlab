@@ -17,6 +17,7 @@ import logging
 
 import polars as pl
 
+from dartlab.core.finance.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.quant._helpers import extract_account, load_scan_parquet, resolve_market
 
 log = logging.getLogger(__name__)
@@ -89,27 +90,28 @@ def calcQuality(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     if lf is None:
         return {**result, "error": "finance.parquet 없음"}
 
-    # 전체 universe 스냅샷 (4분기 연결재무) — 횡단면 z 계산용
+    # 전체 universe 스냅샷 (연간 연결재무) — 횡단면 z 계산용
     try:
-        snap = (
-            lf.filter(pl.col("fs_nm").str.contains("연결")).filter(pl.col("reprt_nm").str.contains("4분기")).collect()
-        )
+        snap = extractAnnualConsolidated(lf.collect())
     except (pl.exceptions.ColumnNotFoundError, pl.exceptions.ComputeError) as e:
         return {**result, "error": str(e)}
     if snap.is_empty():
         return {**result, "error": "연결 4분기 데이터 없음"}
 
+    edgar = isEdgarSchema(snap)
+    year_col = "fy" if edgar else "bsns_year"
+
     # 가장 최근 충분한 데이터를 가진 연도
-    year_counts = snap.group_by("bsns_year").len().sort("bsns_year", descending=True)
+    year_counts = snap.group_by(year_col).len().sort(year_col, descending=True)
     yr = None
     for row in year_counts.iter_rows(named=True):
         if row["len"] >= 1000:
-            yr = row["bsns_year"]
+            yr = row[year_col]
             break
     if yr is None:
         return {**result, "error": "충분한 universe 연도 없음"}
 
-    snap_yr = snap.filter(pl.col("bsns_year") == yr)
+    snap_yr = snap.filter(pl.col(year_col) == yr)
     result["year"] = str(yr)
 
     # universe metric 캐시 (연도별)

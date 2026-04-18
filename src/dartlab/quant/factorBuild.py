@@ -24,6 +24,7 @@ import logging
 import numpy as np
 import polars as pl
 
+from dartlab.core.finance.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.quant._helpers import (
     extract_account,
     fetch_ohlcv,
@@ -42,10 +43,12 @@ def _latest_year(snap: pl.DataFrame, min_count: int = 1000) -> str | None:
     """충분한 universe를 가진 가장 최근 연도."""
     if snap.is_empty():
         return None
-    counts = snap.group_by("bsns_year").len().sort("bsns_year", descending=True)
+    year_col = "fy" if isEdgarSchema(snap) else "bsns_year"
+    counts = snap.group_by(year_col).len().sort(year_col, descending=True)
     for row in counts.iter_rows(named=True):
         if row["len"] >= min_count:
-            return row["bsns_year"]
+            y = row[year_col]
+            return str(y) if y is not None else None
     return None
 
 
@@ -59,17 +62,24 @@ def _build_universe_metrics(market: str, year: str) -> dict[str, dict[str, float
     if lf is None:
         return {}
 
-    snap = lf.filter(pl.col("fs_nm").str.contains("연결")).filter(pl.col("reprt_nm").str.contains("4분기")).collect()
+    snap = extractAnnualConsolidated(lf.collect())
     if snap.is_empty():
         return {}
 
-    cur = snap.filter(pl.col("bsns_year") == year)
+    edgar = isEdgarSchema(snap)
+    year_col = "fy" if edgar else "bsns_year"
+    year_val = int(year) if edgar else year
+    cur = snap.filter(pl.col(year_col) == year_val)
     # 전기 (asset growth용)
     try:
-        prev_year = str(int(year) - 1)
+        prev_year_val = int(year) - 1
     except ValueError:
-        prev_year = None
-    prev = snap.filter(pl.col("bsns_year") == prev_year) if prev_year else None
+        prev_year_val = None
+    if prev_year_val is not None:
+        pv = prev_year_val if edgar else str(prev_year_val)
+        prev = snap.filter(pl.col(year_col) == pv)
+    else:
+        prev = None
 
     out: dict[str, dict[str, float]] = {}
     codes = cur.get_column("stockCode").unique().to_list()
@@ -173,7 +183,7 @@ def build_factors(market: str = "KR") -> dict | None:
     lf = load_scan_parquet("finance", market)
     if lf is None:
         return None
-    snap = lf.filter(pl.col("fs_nm").str.contains("연결")).filter(pl.col("reprt_nm").str.contains("4분기")).collect()
+    snap = extractAnnualConsolidated(lf.collect())
     year = _latest_year(snap)
     if year is None:
         return None

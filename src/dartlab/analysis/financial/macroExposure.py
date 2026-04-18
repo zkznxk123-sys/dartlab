@@ -14,11 +14,11 @@ log = logging.getLogger(__name__)
 
 
 def _loadMacroIndicator(g, seriesId: str, source: str = "ecos", start: str = "2014-01-01"):
-    """gather에서 단일 매크로 지표 로드."""
+    """gather에서 단일 매크로 지표 로드 — source로 KR/US 자동 분기."""
     try:
         if source == "ecos":
             return g.macro("KR", seriesId, start=start)
-        return g.macro(seriesId, start=start)
+        return g.macro("US", seriesId, start=start)
     except (KeyError, ValueError, TypeError, AttributeError, ImportError):
         return None
 
@@ -166,12 +166,20 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
     # 업종 최적 3지표
     optimal = getExogenousIndicators(stockCode=stockCode)
 
-    # 범용 3지표
-    generic = [
-        ExogenousIndicator("BASE_RATE", "ecos", "기준금리", "financial"),
-        ExogenousIndicator("USDKRW", "ecos", "원/달러", "fx"),
-        ExogenousIndicator("IPI", "ecos", "산업생산", "domestic"),
-    ]
+    # 범용 3지표 — KR/US 자동 분기
+    currency = getattr(company, "currency", "KRW")
+    if currency == "USD":
+        generic = [
+            ExogenousIndicator("FEDFUNDS", "fred", "Federal Funds Rate", "financial"),
+            ExogenousIndicator("DTWEXBGS", "fred", "USD Index", "fx"),
+            ExogenousIndicator("INDPRO", "fred", "Industrial Production", "domestic"),
+        ]
+    else:
+        generic = [
+            ExogenousIndicator("BASE_RATE", "ecos", "기준금리", "financial"),
+            ExogenousIndicator("USDKRW", "ecos", "원/달러", "fx"),
+            ExogenousIndicator("IPI", "ecos", "산업생산", "domestic"),
+        ]
 
     def _regress(indicators: list[ExogenousIndicator]):
         """각 지표와 매출 성장률의 R-squared 계산."""

@@ -10,6 +10,7 @@ import logging
 import numpy as np
 import polars as pl
 
+from dartlab.core.finance.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.quant._helpers import load_scan_parquet, resolve_market
 
 log = logging.getLogger(__name__)
@@ -57,28 +58,41 @@ def calcEarnings(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     if lf is None:
         return {**result, "error": "finance.parquet 없음"}
     try:
-        stock = (
-            lf.filter(pl.col("stockCode") == stockCode)
-            .filter(pl.col("sj_div") == "IS")
-            .filter(pl.col("account_nm").str.contains("영업이익"))
-            .collect()
-        )
+        full = lf.filter(pl.col("stockCode") == stockCode).collect()
     except (KeyError, ValueError, TypeError, AttributeError) as e:
         return {**result, "error": str(e)}
-    if stock.is_empty():
+    if full.is_empty():
         return {**result, "error": "영업이익 데이터 없음"}
 
-    cfs = stock.filter(pl.col("fs_nm").str.contains("연결"))
-    if cfs.is_empty():
-        cfs = stock
+    edgar = isEdgarSchema(full)
+    annual = extractAnnualConsolidated(full)
 
     yearly: dict[str, float] = {}
-    for row in cfs.iter_rows(named=True):
-        y = row.get("bsns_year")
-        v = _parse(row.get("thstrm_amount"))
-        if y and v is not None:
-            if y not in yearly or abs(v) > abs(yearly.get(y, 0)):
-                yearly[y] = v
+    if edgar:
+        # EDGAR: operating_profit 컬럼 직접 사용
+        year_col = "fy"
+        for row in annual.iter_rows(named=True):
+            y = str(row.get(year_col, ""))
+            v = row.get("operating_profit")
+            if y and v is not None:
+                try:
+                    v = float(v)
+                except (ValueError, TypeError):
+                    continue
+                if y not in yearly or abs(v) > abs(yearly.get(y, 0)):
+                    yearly[y] = v
+    else:
+        # DART: sj_div + account_nm 필터
+        stock = annual.filter(
+            (pl.col("sj_div") == "IS")
+            & pl.col("account_nm").str.contains("영업이익")
+        )
+        for row in stock.iter_rows(named=True):
+            y = row.get("bsns_year")
+            v = _parse(row.get("thstrm_amount"))
+            if y and v is not None:
+                if y not in yearly or abs(v) > abs(yearly.get(y, 0)):
+                    yearly[y] = v
 
     if len(yearly) < 2:
         return {**result, "error": f"연도 부족 ({len(yearly)}개)"}

@@ -236,6 +236,15 @@ def _buildHandler(name: str, kind: str, target: str) -> Callable[..., Any]:
 
             # LLM 이 미지정 파라미터를 "" 로 보내는 케이스 정규화
             clean = {k: v for k, v in kwargs.items() if v not in (None, "")}
+
+            # market 자동 감지: stockCode 힌트가 있으면 core/market SSOT 사용
+            if "market" not in clean and target in ("macro", "gather", "scan"):
+                sc = clean.get("stockCode") or clean.get("target")
+                if sc and isinstance(sc, str):
+                    from dartlab.core.market import detectMarket
+
+                    clean["market"] = detectMarket(sc)
+
             fn = getattr(dartlab, target)
             core, post = _splitKwargs(target, clean)
             if target == "search" and clean.get("limit"):

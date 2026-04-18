@@ -59,57 +59,13 @@ class LeverageCycleResult:
 # 내부 헬퍼
 # ══════════════════════════════════════
 
-# 항목 패턴 (DART scan finance.parquet 기준)
-_OP_INCOME_NAMES = {"영업이익", "영업이익(손실)", "영업이익 (손실)", "Ⅳ. 영업이익", "Ⅴ.영업이익(손실)", "V. 영업이익"}
-_NET_INCOME_NAMES = {"당기순이익", "당기순이익(손실)"}
-_TOTAL_DEBT_NAMES = {"부채총계"}
-_TOTAL_EQUITY_NAMES = {"자본총계"}
-_INTEREST_EXPENSE_PATTERNS = ["이자비용", "금융비용", "금융원가"]
+# ── scanBridge 경유 — DART/EDGAR 통일 ──
 
-
-def _extract_annual_consolidated(df: pl.DataFrame) -> pl.DataFrame:
-    """연결재무제표 + 4분기(연간) 데이터만 추출."""
-    return df.filter((pl.col("fs_nm") == "연결재무제표") & (pl.col("reprt_nm") == "4분기"))
-
-
-def _sum_account(
-    annual: pl.DataFrame,
-    sj_div: str,
-    account_names: set[str],
-) -> pl.DataFrame:
-    """특정 계정의 기간별 합계."""
-    filtered = annual.filter((pl.col("sj_div") == sj_div) & (pl.col("account_nm").is_in(account_names)))
-    # thstrm_amount가 당기 금액
-    return (
-        filtered.group_by("bsns_year")
-        .agg(
-            pl.col("thstrm_amount").cast(pl.Float64, strict=False).sum().alias("total"),
-            pl.col("stockCode").n_unique().alias("count"),
-        )
-        .sort("bsns_year")
-    )
-
-
-def _median_ratio(
-    annual: pl.DataFrame,
-    numer_names: set[str],
-    denom_names: set[str],
-    sj_div: str = "BS",
-) -> pl.DataFrame:
-    """특정 비율의 기간별 중간값."""
-    numer = annual.filter((pl.col("sj_div") == sj_div) & (pl.col("account_nm").is_in(numer_names))).select(
-        "bsns_year", "stockCode", pl.col("thstrm_amount").cast(pl.Float64, strict=False).alias("numer")
-    )
-
-    denom = annual.filter((pl.col("sj_div") == sj_div) & (pl.col("account_nm").is_in(denom_names))).select(
-        "bsns_year", "stockCode", pl.col("thstrm_amount").cast(pl.Float64, strict=False).alias("denom")
-    )
-
-    joined = numer.join(denom, on=["bsns_year", "stockCode"], how="inner")
-    joined = joined.filter(pl.col("denom").abs() > 0)
-    joined = joined.with_columns((pl.col("numer") / pl.col("denom") * 100).alias("ratio"))
-
-    return joined.group_by("bsns_year").agg(pl.col("ratio").median().alias("median_ratio")).sort("bsns_year")
+from dartlab.core.finance.scanBridge import (
+    extractAnnualConsolidated as _extract_annual_consolidated,
+    medianRatioByYear as _median_ratio_bridge,
+    sumAccountByYear as _sum_account_bridge,
+)
 
 
 # ══════════════════════════════════════
@@ -124,12 +80,12 @@ def aggregateEarningsCycle(financeDf: pl.DataFrame) -> EarningsCycleResult:
         financeDf: scan/finance.parquet 전체 DataFrame
     """
     annual = _extract_annual_consolidated(financeDf)
-    result = _sum_account(annual, "IS", _OP_INCOME_NAMES)
+    result = _sum_account_bridge(annual, "영업이익")
 
     if len(result) < 2:
         return EarningsCycleResult([], [], [], "stable", "데이터부족", 0, "연간 영업이익 데이터 부족")
 
-    periods = result.get_column("bsns_year").to_list()
+    periods = result.get_column("year").to_list()
     totals = result.get_column("total").to_list()
     counts = result.get_column("count").to_list()
 
@@ -169,39 +125,34 @@ def ponziRatio(financeDf: pl.DataFrame) -> PonziRatioResult:
     ICR(이자보상배율) = 영업이익 / 이자비용.
     ICR < 1 = 영업이익으로 이자도 못 갚는 기업.
     """
+    from dartlab.core.finance.scanBridge import getAccountValue, isEdgarSchema
+
     annual = _extract_annual_consolidated(financeDf)
 
-    # 영업이익
-    op = annual.filter((pl.col("sj_div") == "IS") & (pl.col("account_nm").is_in(_OP_INCOME_NAMES))).select(
-        "bsns_year", "stockCode", pl.col("thstrm_amount").cast(pl.Float64, strict=False).alias("op_income")
-    )
-
-    # 이자비용 — account_nm에 "이자비용" 또는 "금융비용" 포함
-    interest = annual.filter(
-        (pl.col("sj_div") == "IS") & pl.col("account_nm").str.contains("이자비용|금융비용|금융원가")
-    ).select("bsns_year", "stockCode", pl.col("thstrm_amount").cast(pl.Float64, strict=False).abs().alias("interest"))
-
-    # 종목별 ICR
-    joined = op.join(interest, on=["bsns_year", "stockCode"], how="inner")
-    joined = joined.filter(pl.col("interest") > 0)
-    joined = joined.with_columns((pl.col("op_income") / pl.col("interest")).alias("icr"))
-
-    # 기간별 ICR<1 비중
-    by_year = (
-        joined.group_by("bsns_year")
-        .agg(
-            (pl.col("icr") < 1).sum().alias("ponzi_count"),
-            pl.len().alias("total"),
-        )
-        .sort("bsns_year")
-    )
-
-    if len(by_year) == 0:
+    # 연도 목록
+    year_col = "fy" if isEdgarSchema(annual) else "bsns_year"
+    if year_col not in annual.columns:
         return PonziRatioResult([], [], 0, "stable", "데이터부족", "이자비용 데이터 부족")
 
-    periods = by_year.get_column("bsns_year").to_list()
-    ponzi_counts = by_year.get_column("ponzi_count").to_list()
-    totals = by_year.get_column("total").to_list()
+    years = sorted(annual[year_col].unique().to_list())
+
+    # 기간별 ICR<1 비중
+    period_data: list[tuple[str, int, int]] = []
+    for yr in years:
+        op_map = getAccountValue(annual, "영업이익", year=yr)
+        int_map = getAccountValue(annual, "이자비용", year=yr)
+        common = set(op_map) & set(int_map)
+        if not common:
+            continue
+        ponzi = sum(1 for c in common if int_map[c] != 0 and op_map[c] / abs(int_map[c]) < 1)
+        period_data.append((yr, ponzi, len(common)))
+
+    if not period_data:
+        return PonziRatioResult([], [], 0, "stable", "데이터부족", "이자비용 데이터 부족")
+
+    periods = [d[0] for d in period_data]
+    ponzi_counts = [d[1] for d in period_data]
+    totals = [d[2] for d in period_data]
     ratios = [round(p / t, 3) if t > 0 else 0 for p, t in zip(ponzi_counts, totals)]
 
     current = ratios[-1]
@@ -228,12 +179,12 @@ def ponziRatio(financeDf: pl.DataFrame) -> PonziRatioResult:
 def leverageCycle(financeDf: pl.DataFrame) -> LeverageCycleResult:
     """전종목 부채비율 중간값 추이."""
     annual = _extract_annual_consolidated(financeDf)
-    result = _median_ratio(annual, _TOTAL_DEBT_NAMES, _TOTAL_EQUITY_NAMES, "BS")
+    result = _median_ratio_bridge(annual, "부채총계", "자본총계")
 
     if len(result) < 2:
         return LeverageCycleResult([], [], 0, "stable", "데이터부족", "부채비율 데이터 부족")
 
-    periods = result.get_column("bsns_year").to_list()
+    periods = result.get_column("year").to_list()
     medians = [round(v, 1) if v is not None else 0 for v in result.get_column("median_ratio").to_list()]
 
     current = medians[-1]

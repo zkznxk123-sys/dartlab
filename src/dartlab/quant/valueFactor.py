@@ -23,6 +23,7 @@ import logging
 
 import polars as pl
 
+from dartlab.core.finance.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.quant._helpers import (
     extract_account,
     fetch_ohlcv,
@@ -47,12 +48,11 @@ def _build_universe(market: str, year: str) -> dict[str, list[float]]:
     lf = load_scan_parquet("finance", market)
     if lf is None:
         return {}
-    snap = (
-        lf.filter(pl.col("fs_nm").str.contains("연결"))
-        .filter(pl.col("reprt_nm").str.contains("4분기"))
-        .filter(pl.col("bsns_year") == year)
-        .collect()
-    )
+    annual = extractAnnualConsolidated(lf.collect())
+    edgar = isEdgarSchema(annual)
+    year_col = "fy" if edgar else "bsns_year"
+    year_val = int(year) if edgar else year
+    snap = annual.filter(pl.col(year_col) == year_val)
     if snap.is_empty():
         return {}
 
@@ -126,24 +126,24 @@ def calcValue(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         return {**result, "error": "finance.parquet 없음"}
 
     try:
-        snap = (
-            lf.filter(pl.col("fs_nm").str.contains("연결")).filter(pl.col("reprt_nm").str.contains("4분기")).collect()
-        )
+        snap = extractAnnualConsolidated(lf.collect())
     except (pl.exceptions.ColumnNotFoundError, pl.exceptions.ComputeError) as e:
         return {**result, "error": str(e)}
     if snap.is_empty():
         return {**result, "error": "연결 4분기 데이터 없음"}
 
-    year_counts = snap.group_by("bsns_year").len().sort("bsns_year", descending=True)
+    edgar = isEdgarSchema(snap)
+    year_col = "fy" if edgar else "bsns_year"
+    year_counts = snap.group_by(year_col).len().sort(year_col, descending=True)
     yr = None
     for row in year_counts.iter_rows(named=True):
         if row["len"] >= 1000:
-            yr = row["bsns_year"]
+            yr = row[year_col]
             break
     if yr is None:
         return {**result, "error": "충분한 universe 연도 없음"}
 
-    snap_yr = snap.filter(pl.col("bsns_year") == yr)
+    snap_yr = snap.filter(pl.col(year_col) == yr)
     stock = snap_yr.filter(pl.col("stockCode") == stockCode)
     if stock.is_empty():
         return {**result, "error": f"{yr} 데이터 없음"}

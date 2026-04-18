@@ -9,36 +9,10 @@ from typing import Any
 log = logging.getLogger(__name__)
 
 
-# ── Market 감지 ──────────────────────────────────────────
+# ── Market 감지 — core/market.py SSOT ────────────────────
 
-
-def detect_market(stockCode: str) -> str:
-    """종목코드에서 시장을 자동 감지.
-
-    6자리 숫자 → KR, 알파벳 포함 → US.
-    """
-    if stockCode and stockCode.strip().isdigit() and len(stockCode.strip()) == 6:
-        return "KR"
-    return "US"
-
-
-def resolve_market(stockCode: str, market: str = "auto") -> str:
-    """market 파라미터 해석 — auto이면 종목코드 패턴으로 자동 감지.
-
-    Parameters
-    ----------
-    stockCode : str
-        종목코드 (예: "005930", "AAPL").
-    market : str
-        "KR" | "US" | "auto" (기본 "auto").
-
-    Returns
-    -------
-    str
-        "KR" 또는 "US"."""
-    if market and market.lower() != "auto":
-        return market.upper()
-    return detect_market(stockCode)
+from dartlab.core.market import detectMarket as detect_market  # noqa: F401
+from dartlab.core.market import resolveMarket as resolve_market  # noqa: F401
 
 
 # ── OHLCV fetch ──────────────────────────────────────────

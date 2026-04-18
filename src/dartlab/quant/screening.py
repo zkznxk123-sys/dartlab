@@ -9,6 +9,7 @@ import logging
 
 import polars as pl
 
+from dartlab.core.finance.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.quant._helpers import load_scan_parquet
 
 log = logging.getLogger(__name__)
@@ -186,39 +187,58 @@ def calcScreen(*, market: str = "KR", preset: str = "quality", stockCode: str | 
         return {**result, "error": "finance.parquet 없음"}
 
     try:
-        df = lf.filter(pl.col("fs_nm").str.contains("연결")).collect()
+        full = lf.collect()
+        df = extractAnnualConsolidated(full)
         if df.is_empty():
-            df = lf.collect()
+            df = full
     except (KeyError, ValueError, TypeError, AttributeError) as e:
         return {**result, "error": str(e)}
 
-    yr = df.get_column("bsns_year").sort(descending=True).to_list()[0]
-    df = df.filter(pl.col("bsns_year") == yr)
+    edgar = isEdgarSchema(df)
+    year_col = "fy" if edgar else "bsns_year"
+    yr = str(df.get_column(year_col).sort(descending=True).to_list()[0])
+    year_val = int(yr) if edgar else yr
+    df = df.filter(pl.col(year_col) == year_val)
 
     # 종목별 지표
     stocks: dict[str, dict] = {}
-    for row in df.iter_rows(named=True):
-        code = row.get("stockCode")
-        if not code:
-            continue
-        if code not in stocks:
-            stocks[code] = {"name": row.get("corp_name", "")}
-        sj = row.get("sj_div", "")
-        nm = str(row.get("account_nm", ""))
-        amt = _parse(row.get("thstrm_amount"))
-        prev = _parse(row.get("frmtrm_amount"))
-        s = stocks[code]
-        if sj == "IS" and nm == "매출액":
-            s["sales"] = amt
-            s["prev_sales"] = prev
-        if sj == "IS" and nm == "영업이익":
-            s["op"] = amt
-        if sj == "IS" and "당기순이익" in nm:
-            s["ni"] = amt
-        if sj == "BS" and nm == "자산총계":
-            s["assets"] = amt
-        if sj == "BS" and nm == "부채총계":
-            s["debt"] = amt
+    if edgar:
+        for row in df.iter_rows(named=True):
+            code = row.get("stockCode")
+            if not code:
+                continue
+            stocks[code] = {
+                "name": row.get("company_name", ""),
+                "sales": row.get("sales"),
+                "prev_sales": None,
+                "op": row.get("operating_profit"),
+                "ni": row.get("net_profit"),
+                "assets": row.get("total_assets"),
+                "debt": row.get("total_liabilities"),
+            }
+    else:
+        for row in df.iter_rows(named=True):
+            code = row.get("stockCode")
+            if not code:
+                continue
+            if code not in stocks:
+                stocks[code] = {"name": row.get("corp_name", "")}
+            sj = row.get("sj_div", "")
+            nm = str(row.get("account_nm", ""))
+            amt = _parse(row.get("thstrm_amount"))
+            prev = _parse(row.get("frmtrm_amount"))
+            s = stocks[code]
+            if sj == "IS" and nm == "매출액":
+                s["sales"] = amt
+                s["prev_sales"] = prev
+            if sj == "IS" and nm == "영업이익":
+                s["op"] = amt
+            if sj == "IS" and "당기순이익" in nm:
+                s["ni"] = amt
+            if sj == "BS" and nm == "자산총계":
+                s["assets"] = amt
+            if sj == "BS" and nm == "부채총계":
+                s["debt"] = amt
 
     passed = []
     for code, s in stocks.items():

@@ -10,6 +10,11 @@ import logging
 import numpy as np
 import polars as pl
 
+from dartlab.core.finance.scanBridge import (
+    extractAnnualConsolidated,
+    getAccountValue,
+    isEdgarSchema,
+)
 from dartlab.quant._helpers import load_scan_parquet
 from dartlab.quant.strategy.metrics import pearsonCorr, spearmanCorr
 
@@ -134,43 +139,15 @@ def _parse(val) -> float | None:
 
 
 def _load_account(lf: pl.LazyFrame, sj: str, account: str, year: str) -> dict[str, float]:
-    """특정 계정의 전종목 금액 추출. LazyFrame 필터 → collect."""
-    # 연결 + 해당 연도 + 계정
+    """특정 계정의 전종목 금액 추출 — scanBridge 경유 DART/EDGAR 통일."""
     try:
-        df = (
-            lf.filter(pl.col("bsns_year") == year)
-            .filter(pl.col("fs_nm").str.contains("연결"))
-            .filter(pl.col("sj_div") == sj)
-            .filter(pl.col("account_nm") == account)
-            .select("stockCode", "thstrm_amount")
-            .collect()
-        )
+        full = lf.collect()
     except (KeyError, ValueError, TypeError, AttributeError):
-        df = None
-
-    # fallback: 연결 없으면 전체
-    if df is None or df.is_empty():
-        try:
-            df = (
-                lf.filter(pl.col("bsns_year") == year)
-                .filter(pl.col("sj_div") == sj)
-                .filter(pl.col("account_nm") == account)
-                .select("stockCode", "thstrm_amount")
-                .collect()
-            )
-        except (KeyError, ValueError, TypeError, AttributeError):
-            return {}
-
-    if df is None or df.is_empty():
         return {}
-
-    result = {}
-    for row in df.iter_rows(named=True):
-        code = row.get("stockCode")
-        val = _parse(row.get("thstrm_amount"))
-        if code and val is not None and code not in result:
-            result[code] = val
-    return result
+    annual = extractAnnualConsolidated(full)
+    if annual.is_empty():
+        return {}
+    return getAccountValue(annual, account, year=year)
 
 
 def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> dict:
@@ -204,8 +181,11 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
         return {**result, "error": "finance.parquet 없음"}
 
     # 최신 연도 확인
+    edgar = isEdgarSchema(lf)
+    year_col = "fy" if edgar else "bsns_year"
     try:
-        years = lf.select("bsns_year").unique().collect().to_series().sort(descending=True).to_list()
+        years = lf.select(year_col).unique().collect().to_series().sort(descending=True).to_list()
+        years = [str(y) for y in years]
     except (KeyError, ValueError, TypeError, AttributeError) as e:
         return {**result, "error": str(e)}
 

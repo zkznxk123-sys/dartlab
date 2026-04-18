@@ -9,6 +9,7 @@ import logging
 
 import numpy as np
 
+from dartlab.core.finance.scanBridge import extractAnnualConsolidated, getAccountValue, isEdgarSchema
 from dartlab.quant._helpers import fetch_ohlcv, load_scan_parquet, ohlcv_to_arrays
 
 log = logging.getLogger(__name__)
@@ -148,7 +149,7 @@ def _adf_test(spread: np.ndarray) -> tuple[float | None, float, float]:
 
 
 def _get_top_stocks(market: str, n: int = 5) -> list[str]:
-    """finance.parquet에서 자산 상위 N종목."""
+    """finance.parquet에서 자산 상위 N종목 — scanBridge 경유."""
     import polars as pl
 
     lf = load_scan_parquet("finance", market)
@@ -156,32 +157,22 @@ def _get_top_stocks(market: str, n: int = 5) -> list[str]:
         return []
 
     try:
-        bs = (
-            lf.filter(pl.col("sj_div") == "BS")
-            .filter(pl.col("account_nm") == "자산총계")
-            .filter(pl.col("fs_nm").str.contains("연결"))
-            .collect()
-        )
+        full = lf.collect()
     except (KeyError, ValueError, TypeError, AttributeError):
         return []
 
-    if bs.is_empty():
+    annual = extractAnnualConsolidated(full)
+    if annual.is_empty():
         return []
 
-    yr = bs.get_column("bsns_year").sort(descending=True).to_list()[0]
-    bs = bs.filter(pl.col("bsns_year") == yr)
+    edgar = isEdgarSchema(annual)
+    year_col = "fy" if edgar else "bsns_year"
+    yr = annual.get_column(year_col).sort(descending=True).to_list()[0]
+    latest = annual.filter(pl.col(year_col) == yr)
 
-    # 금액 파싱 + 정렬
-    stocks = []
-    for row in bs.iter_rows(named=True):
-        code = row.get("stockCode")
-        val = row.get("thstrm_amount")
-        if code and val:
-            try:
-                amt = float(str(val).replace(",", ""))
-                stocks.append((code, amt))
-            except (ValueError, TypeError):
-                pass
+    assets_map = getAccountValue(latest, "자산총계")
+    if not assets_map:
+        return []
 
-    stocks.sort(key=lambda x: -x[1])
+    stocks = sorted(assets_map.items(), key=lambda x: -x[1])
     return [s[0] for s in stocks[:n]]
