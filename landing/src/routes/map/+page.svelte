@@ -10,6 +10,7 @@
 	import MapCommandPalette from '$lib/components/industry/MapCommandPalette.svelte';
 	import TreemapView from '$lib/components/industry/TreemapView.svelte';
 	import SectorHealthCard from '$lib/components/industry/SectorHealthCard.svelte';
+	import ShockSimulator from '$lib/components/industry/ShockSimulator.svelte';
 	import { brand } from '$lib/brand';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
@@ -36,7 +37,8 @@
 		// 1~6 → colorMetric 전환
 		const metricKeys: Record<string, typeof colorMetric> = {
 			'1': 'industry', '2': 'roe', '3': 'opMargin',
-			'4': 'debtRatio', '5': 'revCagr', '6': 'revenue'
+			'4': 'debtRatio', '5': 'revCagr', '6': 'revenue',
+			'7': 'govGrade', '8': 'holderPct', '9': 'marketShare'
 		};
 		if (metricKeys[e.key] && !e.ctrlKey && !e.metaKey) {
 			colorMetric = metricKeys[e.key];
@@ -54,6 +56,21 @@
 		}
 	}
 
+	// 이상 신호 오버레이 토글
+	let showMoversOverlay = $state(false);
+
+	// movers stockCode → signal type 매핑
+	let moversSignalMap = $derived.by(() => {
+		const m = new Map<string, string>();
+		const cats = (data as any)?.movers?.categories || {};
+		for (const [cat, v] of Object.entries(cats) as any) {
+			for (const e of v.entries || []) {
+				if (!m.has(e.stockCode)) m.set(e.stockCode, cat);
+			}
+		}
+		return m;
+	});
+
 	// 총 변화 건수
 	let moversCount = $derived.by(() => {
 		const cats = (data as any)?.movers?.categories || {};
@@ -70,12 +87,16 @@
 	// 업종 체력 카드 (atlas 뷰에서 업종 클릭 시)
 	let sectorHealthId: string | null = $state(null);
 	let sectorHealthName: string = $state('');
+	// 충격 시뮬레이션
+	let shockTargetId: string | null = $state(null);
+	let shockTargetName: string = $state('');
+	let shockImpactMap: Map<string, number> = $state(new Map());
 	let industryDetail: any = $state(null);
 	let industryLoading = $state(false);
 
 	// ── 색상 기준 ──
-	// industry: 산업 팔레트 / roe / opMargin / debtRatio / revCagr / revenue
-	type ColorMetric = 'industry' | 'roe' | 'opMargin' | 'debtRatio' | 'revCagr' | 'revenue';
+	type ColorMetric = 'industry' | 'roe' | 'opMargin' | 'debtRatio' | 'revCagr' | 'revenue'
+		| 'govGrade' | 'qualGrade' | 'holderPct' | 'holderChange' | 'marketShare' | 'empCount';
 	let colorMetric: ColorMetric = $state('roe');
 
 	const GRAY = '#475569';
@@ -136,7 +157,6 @@
 			]);
 		}
 		if (metric === 'revenue') {
-			// 매출 (원단위) 로그 스케일 파란계열
 			const eok = v / 1e8;
 			const t = Math.max(0, Math.min(1, Math.log10(Math.max(1, eok)) / 6));
 			return _scale(t, [
@@ -144,6 +164,26 @@
 				[0.5, [59, 130, 246]],
 				[1, [147, 197, 253]]
 			]);
+		}
+		// 등급 기반 색상 (A~E → 5단계)
+		if (metric === 'govGrade' || metric === 'qualGrade') {
+			const gradeMap: Record<string, number> = { 'A': 4, 'B': 3, 'C': 2, 'D': 1, 'E': 0, '우수': 4, '양호': 3, '보통': 2, '주의': 1, '위험': 0 };
+			const g = gradeMap[v] ?? -1;
+			if (g < 0) return GRAY;
+			return _scale(g, [[0, [239, 68, 68]], [2, [245, 158, 11]], [4, [16, 185, 129]]]);
+		}
+		if (metric === 'holderPct') {
+			return _scale(v, [[0, [59, 130, 246]], [25, [132, 204, 22]], [50, [16, 185, 129]], [75, [245, 158, 11]]]);
+		}
+		if (metric === 'holderChange') {
+			return _scale(v, [[-10, [239, 68, 68]], [0, [100, 116, 139]], [10, [16, 185, 129]]]);
+		}
+		if (metric === 'marketShare') {
+			return _scale(v, [[0, [30, 58, 138]], [5, [59, 130, 246]], [20, [132, 204, 22]], [50, [16, 185, 129]]]);
+		}
+		if (metric === 'empCount') {
+			const t = Math.max(0, Math.min(1, Math.log10(Math.max(1, v)) / 5));
+			return _scale(t, [[0, [100, 116, 139]], [0.5, [59, 130, 246]], [1, [147, 197, 253]]]);
 		}
 		return GRAY;
 	}
@@ -529,6 +569,13 @@
 		selectedNode = null;
 	}
 
+	// 충격 시뮬레이션 시작
+	function startShockSim(stockCode: string) {
+		const node = allNodes.find((n: any) => n.id === stockCode);
+		shockTargetId = stockCode;
+		shockTargetName = node?.label || stockCode;
+	}
+
 	// treemap 에서 노드 클릭 → FloatingCard
 	function handleTreemapClick(node: any) {
 		if (!node) return;
@@ -779,26 +826,50 @@
 		<div class="section color-switch">
 			<h3>색상 기준</h3>
 			<select class="metric-select" bind:value={colorMetric}>
-				<option value="industry">산업 팔레트</option>
-				<option value="roe">ROE (자기자본수익률)</option>
-				<option value="opMargin">영업이익률</option>
-				<option value="debtRatio">부채비율</option>
-				<option value="revCagr">매출 CAGR</option>
-				<option value="revenue">매출 규모</option>
+				<optgroup label="기본">
+					<option value="industry">산업 팔레트 (1)</option>
+					<option value="roe">ROE (2)</option>
+					<option value="opMargin">영업이익률 (3)</option>
+					<option value="debtRatio">부채비율 (4)</option>
+					<option value="revCagr">매출 CAGR (5)</option>
+					<option value="revenue">매출 규모 (6)</option>
+				</optgroup>
+				<optgroup label="거버넌스·내부자">
+					<option value="govGrade">지배구조 등급 (7)</option>
+					<option value="qualGrade">이익 질 등급</option>
+					<option value="holderPct">최대주주 지분율 (8)</option>
+					<option value="holderChange">지분 변동</option>
+				</optgroup>
+				<optgroup label="구조">
+					<option value="marketShare">업종 점유율 (9)</option>
+					<option value="empCount">직원수</option>
+				</optgroup>
 			</select>
 			{#if colorMetric !== 'industry'}
 				<div class="color-legend">
 					{#if colorMetric === 'debtRatio'}
 						<span class="lg-swatch" style="background:#10b981"></span>
 						<span class="lg-label">낮음(건전)</span>
-						<span class="lg-swatch" style="background:#f59e0b"></span>
 						<span class="lg-swatch" style="background:#ef4444"></span>
 						<span class="lg-label">높음(위험)</span>
-					{:else if colorMetric === 'revenue'}
+					{:else if colorMetric === 'revenue' || colorMetric === 'empCount'}
 						<span class="lg-swatch" style="background:#1e3a8a"></span>
 						<span class="lg-swatch" style="background:#3b82f6"></span>
 						<span class="lg-swatch" style="background:#93c5fd"></span>
 						<span class="lg-label">소 → 대</span>
+					{:else if colorMetric === 'holderChange'}
+						<span class="lg-swatch" style="background:#ef4444"></span>
+						<span class="lg-label">감소</span>
+						<span class="lg-swatch" style="background:#64748b"></span>
+						<span class="lg-label">변동없음</span>
+						<span class="lg-swatch" style="background:#10b981"></span>
+						<span class="lg-label">증가</span>
+					{:else if colorMetric === 'govGrade' || colorMetric === 'qualGrade'}
+						<span class="lg-swatch" style="background:#ef4444"></span>
+						<span class="lg-label">E/위험</span>
+						<span class="lg-swatch" style="background:#f59e0b"></span>
+						<span class="lg-swatch" style="background:#10b981"></span>
+						<span class="lg-label">A/우수</span>
 					{:else}
 						<span class="lg-swatch" style="background:#ef4444"></span>
 						<span class="lg-swatch" style="background:#f59e0b"></span>
@@ -809,6 +880,16 @@
 				</div>
 			{/if}
 		</div>
+
+		<!-- 오버레이 토글 -->
+		{#if moversCount > 0}
+			<div class="section overlay-toggles">
+				<label class="overlay-toggle">
+					<input type="checkbox" bind:checked={showMoversOverlay} />
+					<span>⚡ 이상 신호 ({moversCount}건)</span>
+				</label>
+			</div>
+		{/if}
 
 		<!-- 관점(view) 셀렉터 -->
 		<div class="section view-switch">
@@ -1137,6 +1218,8 @@
 				{colorMetric}
 				{colorFor}
 				onNodeClick={handleTreemapClick}
+				moversMap={showMoversOverlay ? moversSignalMap : new Map()}
+				shockMap={shockImpactMap}
 			/>
 		{:else if viewMode === 'companies'}
 			<EcosystemMap
@@ -1158,6 +1241,20 @@
 				onClose={() => (sectorHealthId = null)}
 			/>
 		{/if}
+
+		<!-- 충격 시뮬레이터 패널 -->
+		{#if shockTargetId}
+			<div class="shock-overlay">
+				<ShockSimulator
+					targetId={shockTargetId}
+					targetName={shockTargetName}
+					links={allLinks}
+					nodes={allNodes}
+					onImpactChange={(m) => (shockImpactMap = m)}
+					onClose={() => { shockTargetId = null; shockImpactMap = new Map(); }}
+				/>
+			</div>
+		{/if}
 	</main>
 
 
@@ -1174,6 +1271,7 @@
 					compareDisabled={comparing}
 					onAddCompare={addToCompare}
 					onDetach={detachCard}
+					onShock={startShockSim}
 					onClose={() => handleNodeClick(null)}
 				/>
 			</div>
@@ -1253,6 +1351,7 @@
 			compareDisabled={true}
 			detached={true}
 			onDetach={detachCard}
+			onShock={startShockSim}
 			onClose={() => closeFloating(fc.id)}
 		/>
 	</FloatingCard>
@@ -1860,6 +1959,29 @@
 	}
 	.loading-overlay .retry:hover {
 		background: rgba(96, 165, 250, 0.3);
+	}
+
+	.overlay-toggles {
+		padding: 8px 12px;
+	}
+	.overlay-toggle {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 12px;
+		color: var(--color-dl-text-muted);
+		cursor: pointer;
+	}
+	.overlay-toggle input {
+		accent-color: var(--color-dl-primary);
+	}
+
+	.shock-overlay {
+		position: absolute;
+		bottom: 16px;
+		right: 16px;
+		width: 340px;
+		z-index: 40;
 	}
 
 	.detail-panel {

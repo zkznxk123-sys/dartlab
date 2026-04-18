@@ -6,8 +6,12 @@
 		industries: any[];
 		colorMetric: string;
 		colorFor: (n: any, metric: any) => string;
-		sizeMetric?: 'revenue' | 'roe' | 'opMargin' | 'revCagr';
+		sizeMetric?: 'revenue' | 'roe' | 'opMargin' | 'revCagr' | 'empCount' | 'marketShare' | 'debtRatio' | 'holderPct';
 		onNodeClick?: (node: any) => void;
+		// movers 이상 신호: stockCode → signal category
+		moversMap?: Map<string, string>;
+		// 충격 시뮬레이션 영향 맵: stockCode → intensity (0~1)
+		shockMap?: Map<string, number>;
 	}
 
 	let {
@@ -16,7 +20,9 @@
 		colorMetric,
 		colorFor,
 		sizeMetric = 'revenue',
-		onNodeClick
+		onNodeClick,
+		moversMap = new Map(),
+		shockMap = new Map()
 	}: Props = $props();
 
 	let containerEl: HTMLDivElement | null = $state(null);
@@ -41,18 +47,14 @@
 
 	// Size value extractor — treemap needs positive values
 	function sizeValue(n: any): number {
-		if (sizeMetric === 'revenue') {
-			return Math.max(1, (n.revenue || 0) / 1e8); // 억 단위
-		}
-		if (sizeMetric === 'roe') {
-			return Math.max(0.1, (n.roe ?? 0) + 30); // shift to positive
-		}
-		if (sizeMetric === 'opMargin') {
-			return Math.max(0.1, (n.opMargin ?? 0) + 20);
-		}
-		if (sizeMetric === 'revCagr') {
-			return Math.max(0.1, (n.revCagr ?? 0) + 30);
-		}
+		if (sizeMetric === 'revenue') return Math.max(1, (n.revenue || 0) / 1e8);
+		if (sizeMetric === 'roe') return Math.max(0.1, (n.roe ?? 0) + 30);
+		if (sizeMetric === 'opMargin') return Math.max(0.1, (n.opMargin ?? 0) + 20);
+		if (sizeMetric === 'revCagr') return Math.max(0.1, (n.revCagr ?? 0) + 30);
+		if (sizeMetric === 'empCount') return Math.max(1, n.empCount ?? 1);
+		if (sizeMetric === 'marketShare') return Math.max(0.01, n.marketShare ?? 0.01);
+		if (sizeMetric === 'debtRatio') return Math.max(1, n.debtRatio ?? 1);
+		if (sizeMetric === 'holderPct') return Math.max(1, n.holderPct ?? 1);
 		return 1;
 	}
 
@@ -130,8 +132,13 @@
 					y1: leaf.y1,
 					w,
 					h,
-					color: colorFor(leaf.data._node, colorMetric),
-					showLabel: w > 40 && h > 16
+					color: shockMap.size > 0
+						? (shockMap.has(leaf.data.id)
+							? (shockMap.get(leaf.data.id)! > 0.5 ? '#ef4444' : shockMap.get(leaf.data.id)! > 0.1 ? '#fb923c' : '#fbbf24')
+							: '#1e293b')
+						: colorFor(leaf.data._node, colorMetric),
+					showLabel: w > 40 && h > 16,
+					signal: moversMap.get(leaf.data.id) || null
 				});
 			}
 		}
@@ -143,8 +150,12 @@
 	const SIZE_LABELS: Record<string, string> = {
 		revenue: '매출',
 		roe: 'ROE',
-		opMargin: '영업이익률',
-		revCagr: '매출 CAGR'
+		opMargin: 'OPM',
+		revCagr: 'CAGR',
+		empCount: '직원수',
+		marketShare: '점유율',
+		debtRatio: '부채',
+		holderPct: '지분율'
 	};
 
 	function metricDisplay(n: any): string {
@@ -211,6 +222,16 @@
 						rx="1"
 						opacity={hoveredId && hoveredId !== cell.id ? 0.5 : 0.85}
 					/>
+					{#if cell.signal && cell.w > 12 && cell.h > 12}
+						{@const sigColor = cell.signal.includes('Improve') || cell.signal === 'revenueSpike' ? '#10b981' : cell.signal === 'extremeWarning' ? '#fbbf24' : '#ef4444'}
+						<circle
+							cx={cell.x0 + cell.w - 6}
+							cy={cell.y0 + 6}
+							r="3"
+							fill={sigColor}
+							class="tm-pulse"
+						/>
+					{/if}
 					{#if cell.showLabel}
 						<text
 							x={cell.x0 + cell.w / 2}
@@ -330,6 +351,14 @@
 		fill: rgba(255, 255, 255, 0.7);
 		font-size: 9px;
 		pointer-events: none;
+	}
+	@keyframes tm-pulse-anim {
+		0%, 100% { opacity: 1; r: 3; }
+		50% { opacity: 0.4; r: 5; }
+	}
+	.tm-pulse {
+		pointer-events: none;
+		animation: tm-pulse-anim 2s ease-in-out infinite;
 	}
 	.tm-tooltip {
 		position: absolute;

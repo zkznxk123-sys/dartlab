@@ -24,6 +24,8 @@
 		compareDisabled?: boolean;
 		// 플로팅 모드에선 "띄우기" 버튼 숨김
 		detached?: boolean;
+		// 충격 시뮬레이션
+		onShock?: (stockCode: string) => void;
 	}
 
 	let {
@@ -36,7 +38,8 @@
 		onClose,
 		onDetach,
 		compareDisabled = false,
-		detached = false
+		detached = false,
+		onShock
 	}: Props = $props();
 
 	let aiExpanded = $state(false);
@@ -796,6 +799,11 @@
 		{#if onDetach && !detached}
 			<button class="action ghost" onclick={() => onDetach?.(node.id)} title="새 창으로 열기">
 				🗔 새 창
+			</button>
+		{/if}
+		{#if onShock}
+			<button class="action ghost shock-btn" onclick={() => onShock?.(node.id)} title="이 회사에 충격 발생 시 영향 범위 시뮬레이션">
+				⚡ 충격
 			</button>
 		{/if}
 		<a class="action ghost" href={issueUrl()} target="_blank" rel="noopener">
