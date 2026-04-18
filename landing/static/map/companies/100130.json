@@ -187,11 +187,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "104700",
-        "corpName": "한국철강",
-        "industry": "construction",
-        "viaCode": "075970",
-        "viaName": "동국알앤에스",
+        "stockCode": "021050",
+        "corpName": "서원",
+        "industry": "food",
+        "viaCode": "005160",
+        "viaName": "동국산업",
         "hopDistance": 2
       },
       {
@@ -203,16 +203,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001940",
-        "corpName": "KISCO홀딩스",
+        "stockCode": "005490",
+        "corpName": "POSCO홀딩스",
         "industry": "steel",
-        "viaCode": "075970",
-        "viaName": "동국알앤에스",
+        "viaCode": "005160",
+        "viaName": "동국산업",
         "hopDistance": 2
       },
       {
-        "stockCode": "007280",
-        "corpName": "한국특강",
+        "stockCode": "001940",
+        "corpName": "KISCO홀딩스",
         "industry": "steel",
         "viaCode": "075970",
         "viaName": "동국알앤에스",
@@ -227,26 +227,26 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "021050",
-        "corpName": "서원",
-        "industry": "food",
-        "viaCode": "005160",
-        "viaName": "동국산업",
+        "stockCode": "104700",
+        "corpName": "한국철강",
+        "industry": "construction",
+        "viaCode": "075970",
+        "viaName": "동국알앤에스",
         "hopDistance": 2
       },
       {
-        "stockCode": "005490",
-        "corpName": "POSCO홀딩스",
+        "stockCode": "007280",
+        "corpName": "한국특강",
         "industry": "steel",
-        "viaCode": "005160",
-        "viaName": "동국산업",
+        "viaCode": "075970",
+        "viaName": "동국알앤에스",
         "hopDistance": 2
       }
     ],
     "hop2Edges": [
       {
         "from": "075970",
-        "to": "104700",
+        "to": "001940",
         "type": "supplier",
         "amount": 11327.0,
         "ratio": null,
@@ -256,7 +256,7 @@
       },
       {
         "from": "075970",
-        "to": "001940",
+        "to": "104700",
         "type": "supplier",
         "amount": 11327.0,
         "ratio": null,

@@ -260,33 +260,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "000720",
-        "corpName": "현대건설",
+        "stockCode": "038010",
+        "corpName": "제일테크노스",
+        "industry": "semiconductor",
+        "viaCode": "032560",
+        "viaName": "황금에스티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "263770",
+        "viaName": "유에스티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001520",
+        "corpName": "동양",
         "industry": "construction",
-        "viaCode": "025900",
-        "viaName": "동화기업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "025900",
-        "viaName": "동화기업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "023410",
-        "corpName": "유진기업",
-        "industry": "construction",
-        "viaCode": "025900",
-        "viaName": "동화기업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "040300",
-        "corpName": "YTN",
-        "industry": "media",
         "viaCode": "025900",
         "viaName": "동화기업",
         "hopDistance": 2
@@ -300,9 +292,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "079430",
-        "corpName": "현대리바트",
-        "industry": "paper",
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
+        "viaCode": "025900",
+        "viaName": "동화기업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005440",
+        "corpName": "현대지에프홀딩스",
+        "industry": "realestate",
+        "viaCode": "025900",
+        "viaName": "동화기업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "040300",
+        "corpName": "YTN",
+        "industry": "media",
         "viaCode": "025900",
         "viaName": "동화기업",
         "hopDistance": 2
@@ -316,9 +324,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "011090",
-        "corpName": "에넥스",
+        "stockCode": "079430",
+        "corpName": "현대리바트",
         "industry": "paper",
+        "viaCode": "025900",
+        "viaName": "동화기업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023410",
+        "corpName": "유진기업",
+        "industry": "construction",
         "viaCode": "025900",
         "viaName": "동화기업",
         "hopDistance": 2
@@ -340,38 +356,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "007280",
-        "corpName": "한국특강",
-        "industry": "steel",
-        "viaCode": "025900",
-        "viaName": "동화기업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001510",
-        "corpName": "SK증권",
-        "industry": "software",
-        "viaCode": "408920",
-        "viaName": "메쎄이상",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038010",
-        "corpName": "제일테크노스",
-        "industry": "semiconductor",
-        "viaCode": "032560",
-        "viaName": "황금에스티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005440",
-        "corpName": "현대지에프홀딩스",
-        "industry": "realestate",
-        "viaCode": "025900",
-        "viaName": "동화기업",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "099220",
         "corpName": "SDN",
         "industry": "energy",
@@ -380,9 +364,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001520",
-        "corpName": "동양",
-        "industry": "construction",
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
         "viaCode": "025900",
         "viaName": "동화기업",
         "hopDistance": 2
@@ -396,11 +380,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "263770",
-        "viaName": "유에스티",
+        "stockCode": "011090",
+        "corpName": "에넥스",
+        "industry": "paper",
+        "viaCode": "025900",
+        "viaName": "동화기업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001510",
+        "corpName": "SK증권",
+        "industry": "software",
+        "viaCode": "408920",
+        "viaName": "메쎄이상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007280",
+        "corpName": "한국특강",
+        "industry": "steel",
+        "viaCode": "025900",
+        "viaName": "동화기업",
         "hopDistance": 2
       }
     ],

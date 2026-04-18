@@ -186,9 +186,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "044380",
-        "corpName": "주연테크",
-        "industry": "realestate",
+        "stockCode": "036000",
+        "corpName": "예림당",
+        "industry": "telecom",
         "viaCode": "004870",
         "viaName": "티웨이홀딩스",
         "hopDistance": 2
@@ -197,14 +197,6 @@
         "stockCode": "160550",
         "corpName": "NEW",
         "industry": "finance",
-        "viaCode": "004870",
-        "viaName": "티웨이홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
         "viaCode": "004870",
         "viaName": "티웨이홀딩스",
         "hopDistance": 2
@@ -226,9 +218,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "036000",
-        "corpName": "예림당",
-        "industry": "telecom",
+        "stockCode": "044380",
+        "corpName": "주연테크",
+        "industry": "realestate",
         "viaCode": "004870",
         "viaName": "티웨이홀딩스",
         "hopDistance": 2
@@ -239,6 +231,14 @@
         "industry": "realestate",
         "viaCode": "091810",
         "viaName": "티웨이항공",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "004870",
+        "viaName": "티웨이홀딩스",
         "hopDistance": 2
       }
     ],

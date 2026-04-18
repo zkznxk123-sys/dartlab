@@ -121,41 +121,57 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "259630",
-        "corpName": "엠플러스",
+        "stockCode": "950160",
+        "corpName": "코오롱티슈진",
+        "industry": "pharma",
+        "viaCode": "001200",
+        "viaName": "유진증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001520",
+        "corpName": "동양",
+        "industry": "construction",
+        "viaCode": "001200",
+        "viaName": "유진증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "222080",
+        "corpName": "씨아이에스",
         "industry": "machinery",
         "viaCode": "001200",
         "viaName": "유진증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "173940",
-        "corpName": "에프엔씨엔터",
-        "industry": "media",
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
         "viaCode": "001200",
         "viaName": "유진증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "475400",
-        "corpName": "씨메스",
-        "industry": "software",
-        "viaCode": "001200",
-        "viaName": "유진증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "900300",
-        "corpName": "오가닉티코스메틱",
+        "stockCode": "439090",
+        "corpName": "마녀공장",
         "industry": "cosmetics",
         "viaCode": "001200",
         "viaName": "유진증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "0007J0",
-        "corpName": "인벤테라",
+        "stockCode": "0009K0",
+        "corpName": "에임드바이오",
         "industry": "pharma",
+        "viaCode": "001200",
+        "viaName": "유진증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006730",
+        "corpName": "서부T&D",
+        "industry": "leisure",
         "viaCode": "001200",
         "viaName": "유진증권",
         "hopDistance": 2
@@ -169,9 +185,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "950160",
-        "corpName": "코오롱티슈진",
-        "industry": "pharma",
+        "stockCode": "019210",
+        "corpName": "와이지-원",
+        "industry": "steel",
+        "viaCode": "001200",
+        "viaName": "유진증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003460",
+        "corpName": "유화증권",
+        "industry": "finance",
+        "viaCode": "001200",
+        "viaName": "유진증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
+        "viaCode": "001200",
+        "viaName": "유진증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000070",
+        "corpName": "삼양홀딩스",
+        "industry": "consulting",
+        "viaCode": "001200",
+        "viaName": "유진증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
         "viaCode": "001200",
         "viaName": "유진증권",
         "hopDistance": 2
@@ -193,41 +241,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "222080",
-        "corpName": "씨아이에스",
+        "stockCode": "259630",
+        "corpName": "엠플러스",
         "industry": "machinery",
-        "viaCode": "001200",
-        "viaName": "유진증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "439090",
-        "corpName": "마녀공장",
-        "industry": "cosmetics",
-        "viaCode": "001200",
-        "viaName": "유진증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000070",
-        "corpName": "삼양홀딩스",
-        "industry": "consulting",
-        "viaCode": "001200",
-        "viaName": "유진증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "0009K0",
-        "corpName": "에임드바이오",
-        "industry": "pharma",
-        "viaCode": "001200",
-        "viaName": "유진증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003460",
-        "corpName": "유화증권",
-        "industry": "finance",
         "viaCode": "001200",
         "viaName": "유진증권",
         "hopDistance": 2
@@ -241,25 +257,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "153710",
-        "corpName": "옵티팜",
-        "industry": "pharma",
+        "stockCode": "475400",
+        "corpName": "씨메스",
+        "industry": "software",
         "viaCode": "001200",
         "viaName": "유진증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "006730",
-        "corpName": "서부T&D",
-        "industry": "leisure",
-        "viaCode": "001200",
-        "viaName": "유진증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039490",
-        "corpName": "키움증권",
-        "industry": "finance",
+        "stockCode": "900300",
+        "corpName": "오가닉티코스메틱",
+        "industry": "cosmetics",
         "viaCode": "001200",
         "viaName": "유진증권",
         "hopDistance": 2
@@ -273,25 +281,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
-        "viaCode": "001200",
-        "viaName": "유진증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
-        "viaCode": "001200",
-        "viaName": "유진증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "019210",
-        "corpName": "와이지-원",
-        "industry": "steel",
+        "stockCode": "173940",
+        "corpName": "에프엔씨엔터",
+        "industry": "media",
         "viaCode": "001200",
         "viaName": "유진증권",
         "hopDistance": 2
@@ -305,9 +297,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001520",
-        "corpName": "동양",
-        "industry": "construction",
+        "stockCode": "0007J0",
+        "corpName": "인벤테라",
+        "industry": "pharma",
+        "viaCode": "001200",
+        "viaName": "유진증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "153710",
+        "corpName": "옵티팜",
+        "industry": "pharma",
         "viaCode": "001200",
         "viaName": "유진증권",
         "hopDistance": 2

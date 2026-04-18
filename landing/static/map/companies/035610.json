@@ -195,17 +195,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "333620",
-        "corpName": "엔시스",
-        "industry": "electrical",
+        "stockCode": "000150",
+        "corpName": "두산",
+        "industry": "machinery",
         "viaCode": "071200",
         "viaName": "인피니트헬스케어",
         "hopDistance": 2
       },
       {
-        "stockCode": "000150",
-        "corpName": "두산",
-        "industry": "machinery",
+        "stockCode": "333620",
+        "corpName": "엔시스",
+        "industry": "electrical",
         "viaCode": "071200",
         "viaName": "인피니트헬스케어",
         "hopDistance": 2

@@ -146,49 +146,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "033310",
-        "corpName": "엠투엔",
-        "industry": "electronics",
-        "viaCode": "021880",
-        "viaName": "메이슨캐피탈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "175330",
-        "corpName": "JB금융지주",
-        "industry": "finance",
-        "viaCode": "021880",
-        "viaName": "메이슨캐피탈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "056080",
-        "viaName": "유진로봇",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267250",
-        "corpName": "HD현대",
-        "industry": "shipbuilding",
-        "viaCode": "021880",
-        "viaName": "메이슨캐피탈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "365900",
-        "corpName": "브이씨",
-        "industry": "leisure",
-        "viaCode": "021880",
-        "viaName": "메이슨캐피탈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004800",
-        "corpName": "효성",
-        "industry": "chemical",
+        "stockCode": "215600",
+        "corpName": "신라젠",
+        "industry": "pharma",
         "viaCode": "021880",
         "viaName": "메이슨캐피탈",
         "hopDistance": 2
@@ -202,17 +162,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "215600",
-        "corpName": "신라젠",
-        "industry": "pharma",
+        "stockCode": "217820",
+        "corpName": "원익피앤이",
+        "industry": "machinery",
         "viaCode": "021880",
         "viaName": "메이슨캐피탈",
         "hopDistance": 2
       },
       {
-        "stockCode": "217820",
-        "corpName": "원익피앤이",
-        "industry": "machinery",
+        "stockCode": "096240",
+        "corpName": "크레버스",
+        "industry": "education",
         "viaCode": "021880",
         "viaName": "메이슨캐피탈",
         "hopDistance": 2
@@ -226,19 +186,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "316140",
-        "corpName": "우리금융지주",
+        "stockCode": "175330",
+        "corpName": "JB금융지주",
         "industry": "finance",
         "viaCode": "021880",
         "viaName": "메이슨캐피탈",
         "hopDistance": 2
       },
       {
-        "stockCode": "034310",
-        "corpName": "NICE",
-        "industry": "finance",
-        "viaCode": "056080",
-        "viaName": "유진로봇",
+        "stockCode": "012700",
+        "corpName": "리드코프",
+        "industry": "retail",
+        "viaCode": "021880",
+        "viaName": "메이슨캐피탈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "365900",
+        "corpName": "브이씨",
+        "industry": "leisure",
+        "viaCode": "021880",
+        "viaName": "메이슨캐피탈",
         "hopDistance": 2
       },
       {
@@ -250,9 +218,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "012700",
-        "corpName": "리드코프",
-        "industry": "retail",
+        "stockCode": "004800",
+        "corpName": "효성",
+        "industry": "chemical",
         "viaCode": "021880",
         "viaName": "메이슨캐피탈",
         "hopDistance": 2
@@ -266,8 +234,32 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "138930",
-        "corpName": "BNK금융지주",
+        "stockCode": "316140",
+        "corpName": "우리금융지주",
+        "industry": "finance",
+        "viaCode": "021880",
+        "viaName": "메이슨캐피탈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267250",
+        "corpName": "HD현대",
+        "industry": "shipbuilding",
+        "viaCode": "021880",
+        "viaName": "메이슨캐피탈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033310",
+        "corpName": "엠투엔",
+        "industry": "electronics",
+        "viaCode": "021880",
+        "viaName": "메이슨캐피탈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
         "industry": "finance",
         "viaCode": "021880",
         "viaName": "메이슨캐피탈",
@@ -282,16 +274,24 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "096240",
-        "corpName": "크레버스",
-        "industry": "education",
-        "viaCode": "021880",
-        "viaName": "메이슨캐피탈",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "056080",
+        "viaName": "유진로봇",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
+        "stockCode": "034310",
+        "corpName": "NICE",
+        "industry": "finance",
+        "viaCode": "056080",
+        "viaName": "유진로봇",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "138930",
+        "corpName": "BNK금융지주",
         "industry": "finance",
         "viaCode": "021880",
         "viaName": "메이슨캐피탈",

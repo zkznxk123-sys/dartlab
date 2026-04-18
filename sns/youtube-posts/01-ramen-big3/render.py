@@ -4,8 +4,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 W, H = 1080, 1080
-OUT = Path(__file__).parent / "slides"
-OUT.mkdir(exist_ok=True)
+OUT = Path(__file__).parent
 AVATAR_DIR = Path(r"c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/landing/static")
 
 FONT_BOLD = "C:/Windows/Fonts/malgunbd.ttf"

@@ -129,17 +129,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
+        "stockCode": "001290",
+        "corpName": "상상인증권",
+        "industry": "finance",
         "viaCode": "192250",
         "viaName": "케이사인",
         "hopDistance": 2
       },
       {
-        "stockCode": "001290",
-        "corpName": "상상인증권",
-        "industry": "finance",
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
         "viaCode": "192250",
         "viaName": "케이사인",
         "hopDistance": 2

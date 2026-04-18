@@ -216,25 +216,49 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "078070",
-        "corpName": "유비쿼스홀딩스",
-        "industry": "realestate",
-        "viaCode": "356680",
-        "viaName": "엑스게이트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "348350",
-        "corpName": "위드텍",
-        "industry": "electronics",
+        "stockCode": "011420",
+        "corpName": "갤럭시아에스엠",
+        "industry": "media",
         "viaCode": "079940",
         "viaName": "가비아",
         "hopDistance": 2
       },
       {
-        "stockCode": "054620",
-        "corpName": "APS",
-        "industry": "telecom",
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "079940",
+        "viaName": "가비아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "079940",
+        "viaName": "가비아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "391710",
+        "corpName": "코닉오토메이션",
+        "industry": "machinery",
+        "viaCode": "356680",
+        "viaName": "엑스게이트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "136540",
+        "corpName": "윈스테크넷",
+        "industry": "software",
+        "viaCode": "356680",
+        "viaName": "엑스게이트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "418250",
+        "corpName": "시큐레터",
+        "industry": "software",
         "viaCode": "356680",
         "viaName": "엑스게이트",
         "hopDistance": 2
@@ -248,35 +272,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "079940",
-        "viaName": "가비아",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "136540",
-        "corpName": "윈스테크넷",
-        "industry": "software",
-        "viaCode": "356680",
-        "viaName": "엑스게이트",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "217320",
         "corpName": "썬테크",
         "industry": "electrical",
         "viaCode": "079940",
         "viaName": "가비아",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "093320",
-        "viaName": "케이아이엔엑스",
         "hopDistance": 2
       },
       {
@@ -288,25 +288,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "011420",
-        "corpName": "갤럭시아에스엠",
-        "industry": "media",
+        "stockCode": "348350",
+        "corpName": "위드텍",
+        "industry": "electronics",
         "viaCode": "079940",
         "viaName": "가비아",
         "hopDistance": 2
       },
       {
-        "stockCode": "418250",
-        "corpName": "시큐레터",
-        "industry": "software",
+        "stockCode": "078070",
+        "corpName": "유비쿼스홀딩스",
+        "industry": "realestate",
         "viaCode": "356680",
         "viaName": "엑스게이트",
         "hopDistance": 2
       },
       {
-        "stockCode": "391710",
-        "corpName": "코닉오토메이션",
-        "industry": "machinery",
+        "stockCode": "054620",
+        "corpName": "APS",
+        "industry": "telecom",
         "viaCode": "356680",
         "viaName": "엑스게이트",
         "hopDistance": 2
@@ -315,7 +315,7 @@
     "hop2Edges": [
       {
         "from": "356680",
-        "to": "054620",
+        "to": "391710",
         "type": "supplier",
         "amount": 9569.0,
         "ratio": 55.0,
@@ -325,7 +325,7 @@
       },
       {
         "from": "356680",
-        "to": "391710",
+        "to": "054620",
         "type": "supplier",
         "amount": 9569.0,
         "ratio": 55.0,

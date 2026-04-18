@@ -135,17 +135,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "014280",
-        "corpName": "금강공업",
-        "industry": "construction",
+        "stockCode": "329180",
+        "corpName": "HD현대중공업",
+        "industry": "shipbuilding",
         "viaCode": "053260",
         "viaName": "금강철강",
         "hopDistance": 2
       },
       {
-        "stockCode": "329180",
-        "corpName": "HD현대중공업",
-        "industry": "shipbuilding",
+        "stockCode": "014280",
+        "corpName": "금강공업",
+        "industry": "construction",
         "viaCode": "053260",
         "viaName": "금강철강",
         "hopDistance": 2

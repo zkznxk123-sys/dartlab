@@ -107,9 +107,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "125210",
-        "corpName": "아모그린텍",
-        "industry": "electronics",
+        "stockCode": "357580",
+        "corpName": "아모센스",
+        "industry": "auto",
         "viaCode": "027360",
         "viaName": "아주IB투자",
         "hopDistance": 2
@@ -123,17 +123,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "068100",
-        "corpName": "케이웨더",
-        "industry": "machinery",
-        "viaCode": "027360",
-        "viaName": "아주IB투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "357580",
-        "corpName": "아모센스",
-        "industry": "auto",
+        "stockCode": "060850",
+        "corpName": "영림원소프트랩",
+        "industry": "software",
         "viaCode": "027360",
         "viaName": "아주IB투자",
         "hopDistance": 2
@@ -147,9 +139,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "060850",
-        "corpName": "영림원소프트랩",
-        "industry": "software",
+        "stockCode": "068100",
+        "corpName": "케이웨더",
+        "industry": "machinery",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "125210",
+        "corpName": "아모그린텍",
+        "industry": "electronics",
         "viaCode": "027360",
         "viaName": "아주IB투자",
         "hopDistance": 2

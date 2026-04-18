@@ -143,33 +143,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "086790",
-        "corpName": "하나금융지주",
-        "industry": "finance",
-        "viaCode": "001130",
-        "viaName": "대한제분",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004370",
-        "corpName": "농심",
+        "stockCode": "035810",
+        "corpName": "이지홀딩스",
         "industry": "food",
         "viaCode": "001130",
         "viaName": "대한제분",
         "hopDistance": 2
       },
       {
-        "stockCode": "034120",
-        "corpName": "SBS",
-        "industry": "electronics",
+        "stockCode": "072710",
+        "corpName": "농심홀딩스",
+        "industry": "food",
         "viaCode": "001130",
         "viaName": "대한제분",
         "hopDistance": 2
       },
       {
-        "stockCode": "017670",
-        "corpName": "SK텔레콤",
-        "industry": "telecom",
+        "stockCode": "086790",
+        "corpName": "하나금융지주",
+        "industry": "finance",
         "viaCode": "001130",
         "viaName": "대한제분",
         "hopDistance": 2
@@ -183,25 +175,17 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "034120",
+        "corpName": "SBS",
+        "industry": "electronics",
+        "viaCode": "001130",
+        "viaName": "대한제분",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "004700",
         "corpName": "조광피혁",
         "industry": "auto",
-        "viaCode": "001130",
-        "viaName": "대한제분",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035810",
-        "corpName": "이지홀딩스",
-        "industry": "food",
-        "viaCode": "001130",
-        "viaName": "대한제분",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "475460",
-        "corpName": "미트박스",
-        "industry": "agriculture",
         "viaCode": "001130",
         "viaName": "대한제분",
         "hopDistance": 2
@@ -215,8 +199,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "072710",
-        "corpName": "농심홀딩스",
+        "stockCode": "004370",
+        "corpName": "농심",
         "industry": "food",
         "viaCode": "001130",
         "viaName": "대한제분",
@@ -239,9 +223,25 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "475460",
+        "corpName": "미트박스",
+        "industry": "agriculture",
+        "viaCode": "001130",
+        "viaName": "대한제분",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "004990",
         "corpName": "롯데지주",
         "industry": "finance",
+        "viaCode": "001130",
+        "viaName": "대한제분",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
         "viaCode": "001130",
         "viaName": "대한제분",
         "hopDistance": 2

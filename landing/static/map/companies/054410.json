@@ -211,11 +211,19 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "004020",
-        "corpName": "현대제철",
-        "industry": "steel",
-        "viaCode": "012620",
-        "viaName": "원일특강",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "001780",
+        "viaName": "알루코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "001780",
+        "viaName": "알루코",
         "hopDistance": 2
       },
       {
@@ -227,41 +235,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001000",
-        "corpName": "신라섬유",
-        "industry": "realestate",
-        "viaCode": "012620",
-        "viaName": "원일특강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025870",
-        "corpName": "신라에스지",
-        "industry": "food",
-        "viaCode": "012620",
-        "viaName": "원일특강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064350",
-        "corpName": "현대로템",
-        "industry": "railroad",
-        "viaCode": "001780",
-        "viaName": "알루코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "001780",
-        "viaName": "알루코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004970",
-        "corpName": "신라교역",
-        "industry": "auto",
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
         "viaCode": "012620",
         "viaName": "원일특강",
         "hopDistance": 2
@@ -275,43 +251,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002600",
-        "corpName": "조흥",
-        "industry": "construction",
-        "viaCode": "012620",
-        "viaName": "원일특강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010140",
-        "corpName": "삼성중공업",
-        "industry": "shipbuilding",
-        "viaCode": "900290",
-        "viaName": "GRT",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "034020",
         "corpName": "두산에너빌리티",
         "industry": "machinery",
         "viaCode": "012620",
         "viaName": "원일특강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024090",
-        "corpName": "디씨엠",
-        "industry": "construction",
-        "viaCode": "012620",
-        "viaName": "원일특강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000810",
-        "corpName": "삼성화재해상보험",
-        "industry": "finance",
-        "viaCode": "001780",
-        "viaName": "알루코",
         "hopDistance": 2
       },
       {
@@ -323,9 +267,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "047040",
-        "corpName": "대우건설",
-        "industry": "construction",
+        "stockCode": "025870",
+        "corpName": "신라에스지",
+        "industry": "food",
+        "viaCode": "012620",
+        "viaName": "원일특강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083310",
+        "corpName": "엘오티베큠",
+        "industry": "machinery",
         "viaCode": "001780",
         "viaName": "알루코",
         "hopDistance": 2
@@ -339,16 +291,64 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "083310",
-        "corpName": "엘오티베큠",
-        "industry": "machinery",
+        "stockCode": "004970",
+        "corpName": "신라교역",
+        "industry": "auto",
+        "viaCode": "012620",
+        "viaName": "원일특강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001000",
+        "corpName": "신라섬유",
+        "industry": "realestate",
+        "viaCode": "012620",
+        "viaName": "원일특강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002600",
+        "corpName": "조흥",
+        "industry": "construction",
+        "viaCode": "012620",
+        "viaName": "원일특강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024090",
+        "corpName": "디씨엠",
+        "industry": "construction",
+        "viaCode": "012620",
+        "viaName": "원일특강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047040",
+        "corpName": "대우건설",
+        "industry": "construction",
         "viaCode": "001780",
         "viaName": "알루코",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
+        "stockCode": "010140",
+        "corpName": "삼성중공업",
+        "industry": "shipbuilding",
+        "viaCode": "900290",
+        "viaName": "GRT",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064350",
+        "corpName": "현대로템",
+        "industry": "railroad",
+        "viaCode": "001780",
+        "viaName": "알루코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000810",
+        "corpName": "삼성화재해상보험",
         "industry": "finance",
         "viaCode": "001780",
         "viaName": "알루코",

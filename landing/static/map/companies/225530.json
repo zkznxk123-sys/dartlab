@@ -131,17 +131,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
-        "viaCode": "060560",
-        "viaName": "HC홈센타",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006570",
-        "corpName": "대림통상",
-        "industry": "buildingMaterials",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "060560",
         "viaName": "HC홈센타",
         "hopDistance": 2
@@ -155,9 +147,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
+        "viaCode": "060560",
+        "viaName": "HC홈센타",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006570",
+        "corpName": "대림통상",
+        "industry": "buildingMaterials",
         "viaCode": "060560",
         "viaName": "HC홈센타",
         "hopDistance": 2

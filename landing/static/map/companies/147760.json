@@ -144,40 +144,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "078070",
-        "corpName": "유비쿼스홀딩스",
-        "industry": "realestate",
-        "viaCode": "053610",
-        "viaName": "프로텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002390",
-        "corpName": "한독",
-        "industry": "realestate",
-        "viaCode": "053610",
-        "viaName": "프로텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089790",
-        "corpName": "제이티",
-        "industry": "semiconductor",
-        "viaCode": "053610",
-        "viaName": "프로텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "098120",
-        "corpName": "마이크로컨텍솔",
-        "industry": "semiconductor",
-        "viaCode": "053610",
-        "viaName": "프로텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000240",
-        "corpName": "한국앤컴퍼니",
+        "stockCode": "024110",
+        "corpName": "기업은행",
         "industry": "finance",
         "viaCode": "053610",
         "viaName": "프로텍",
@@ -192,17 +160,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
-        "viaCode": "053610",
-        "viaName": "프로텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "161390",
-        "corpName": "한국타이어앤테크놀로지",
-        "industry": "auto",
+        "stockCode": "000240",
+        "corpName": "한국앤컴퍼니",
+        "industry": "finance",
         "viaCode": "053610",
         "viaName": "프로텍",
         "hopDistance": 2
@@ -216,9 +176,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "053610",
+        "viaName": "프로텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "098120",
+        "corpName": "마이크로컨텍솔",
+        "industry": "semiconductor",
+        "viaCode": "053610",
+        "viaName": "프로텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161390",
+        "corpName": "한국타이어앤테크놀로지",
+        "industry": "auto",
+        "viaCode": "053610",
+        "viaName": "프로텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "053610",
+        "viaName": "프로텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078070",
+        "corpName": "유비쿼스홀딩스",
+        "industry": "realestate",
+        "viaCode": "053610",
+        "viaName": "프로텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002390",
+        "corpName": "한독",
+        "industry": "realestate",
         "viaCode": "053610",
         "viaName": "프로텍",
         "hopDistance": 2

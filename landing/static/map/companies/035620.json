@@ -260,41 +260,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
+        "stockCode": "065660",
+        "corpName": "안트로젠",
+        "industry": "pharma",
         "viaCode": "307930",
         "viaName": "컴퍼니케이",
         "hopDistance": 2
       },
       {
-        "stockCode": "017670",
-        "corpName": "SK텔레콤",
-        "industry": "telecom",
-        "viaCode": "064260",
-        "viaName": "다날",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035080",
-        "corpName": "그래디언트",
-        "industry": "retail",
-        "viaCode": "018700",
-        "viaName": "바른손",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "086980",
-        "corpName": "쇼박스",
-        "industry": "finance",
+        "stockCode": "030350",
+        "corpName": "드래곤플라이",
+        "industry": "software",
         "viaCode": "307930",
         "viaName": "컴퍼니케이",
         "hopDistance": 2
       },
       {
-        "stockCode": "194370",
-        "corpName": "제이에스코퍼레이션",
-        "industry": "textile",
+        "stockCode": "036420",
+        "corpName": "콘텐트리중앙",
+        "industry": "media",
         "viaCode": "307930",
         "viaName": "컴퍼니케이",
         "hopDistance": 2
@@ -308,89 +292,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "096610",
-        "corpName": "알에프세미",
-        "industry": "electronics",
-        "viaCode": "307930",
-        "viaName": "컴퍼니케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "307930",
-        "viaName": "컴퍼니케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "256630",
-        "corpName": "포인트엔지니어링",
-        "industry": "electronics",
-        "viaCode": "307930",
-        "viaName": "컴퍼니케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "179720",
-        "corpName": "머니무브",
-        "industry": "finance",
-        "viaCode": "018700",
-        "viaName": "바른손",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036420",
-        "corpName": "콘텐트리중앙",
-        "industry": "media",
-        "viaCode": "307930",
-        "viaName": "컴퍼니케이",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "035760",
         "corpName": "CJ ENM",
         "industry": "media",
-        "viaCode": "307930",
-        "viaName": "컴퍼니케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "289170",
-        "corpName": "바이오텐",
-        "industry": "pharma",
-        "viaCode": "018700",
-        "viaName": "바른손",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030350",
-        "corpName": "드래곤플라이",
-        "industry": "software",
-        "viaCode": "307930",
-        "viaName": "컴퍼니케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
-        "viaCode": "064260",
-        "viaName": "다날",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "081180",
-        "corpName": "쎄크",
-        "industry": "medicalDevice",
-        "viaCode": "018700",
-        "viaName": "바른손",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005940",
-        "corpName": "NH투자증권",
-        "industry": "finance",
         "viaCode": "307930",
         "viaName": "컴퍼니케이",
         "hopDistance": 2
@@ -412,17 +316,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "078020",
-        "corpName": "LS증권",
-        "industry": "machinery",
+        "stockCode": "035080",
+        "corpName": "그래디언트",
+        "industry": "retail",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
         "viaCode": "307930",
         "viaName": "컴퍼니케이",
         "hopDistance": 2
       },
       {
-        "stockCode": "065660",
-        "corpName": "안트로젠",
-        "industry": "pharma",
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "064260",
+        "viaName": "다날",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096610",
+        "corpName": "알에프세미",
+        "industry": "electronics",
+        "viaCode": "307930",
+        "viaName": "컴퍼니케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
+        "viaCode": "064260",
+        "viaName": "다날",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "256630",
+        "corpName": "포인트엔지니어링",
+        "industry": "electronics",
         "viaCode": "307930",
         "viaName": "컴퍼니케이",
         "hopDistance": 2
@@ -436,11 +372,75 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "194370",
+        "corpName": "제이에스코퍼레이션",
+        "industry": "textile",
+        "viaCode": "307930",
+        "viaName": "컴퍼니케이",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "024110",
         "corpName": "기업은행",
         "industry": "finance",
         "viaCode": "307930",
         "viaName": "컴퍼니케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078020",
+        "corpName": "LS증권",
+        "industry": "machinery",
+        "viaCode": "307930",
+        "viaName": "컴퍼니케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086980",
+        "corpName": "쇼박스",
+        "industry": "finance",
+        "viaCode": "307930",
+        "viaName": "컴퍼니케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "081180",
+        "corpName": "쎄크",
+        "industry": "medicalDevice",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005940",
+        "corpName": "NH투자증권",
+        "industry": "finance",
+        "viaCode": "307930",
+        "viaName": "컴퍼니케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "179720",
+        "corpName": "머니무브",
+        "industry": "finance",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "307930",
+        "viaName": "컴퍼니케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "289170",
+        "corpName": "바이오텐",
+        "industry": "pharma",
+        "viaCode": "018700",
+        "viaName": "바른손",
         "hopDistance": 2
       }
     ],

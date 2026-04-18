@@ -115,17 +115,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "175140",
-        "corpName": "휴먼테크놀로지",
-        "industry": "telecom",
-        "viaCode": "172670",
-        "viaName": "에이엘티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "047820",
-        "corpName": "초록뱀미디어",
-        "industry": "telecom",
+        "stockCode": "131290",
+        "corpName": "티에스이",
+        "industry": "semiconductor",
         "viaCode": "172670",
         "viaName": "에이엘티",
         "hopDistance": 2
@@ -139,25 +131,17 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "175140",
+        "corpName": "휴먼테크놀로지",
+        "industry": "telecom",
+        "viaCode": "172670",
+        "viaName": "에이엘티",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "131100",
         "corpName": "티엔엔터테인먼트",
         "industry": "food",
-        "viaCode": "172670",
-        "viaName": "에이엘티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
-        "viaCode": "172670",
-        "viaName": "에이엘티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "026890",
-        "corpName": "스틱인베스트먼트",
-        "industry": "chemical",
         "viaCode": "172670",
         "viaName": "에이엘티",
         "hopDistance": 2
@@ -171,9 +155,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "131290",
-        "corpName": "티에스이",
-        "industry": "semiconductor",
+        "stockCode": "026890",
+        "corpName": "스틱인베스트먼트",
+        "industry": "chemical",
+        "viaCode": "172670",
+        "viaName": "에이엘티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047820",
+        "corpName": "초록뱀미디어",
+        "industry": "telecom",
+        "viaCode": "172670",
+        "viaName": "에이엘티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
         "viaCode": "172670",
         "viaName": "에이엘티",
         "hopDistance": 2

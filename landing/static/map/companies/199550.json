@@ -129,17 +129,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "007070",
-        "corpName": "GS리테일",
-        "industry": "retail",
+        "stockCode": "066980",
+        "corpName": "한성크린텍",
+        "industry": "environment",
         "viaCode": "003680",
         "viaName": "한성기업",
         "hopDistance": 2
       },
       {
-        "stockCode": "078930",
-        "corpName": "GS",
-        "industry": "chemical",
+        "stockCode": "007070",
+        "corpName": "GS리테일",
+        "industry": "retail",
         "viaCode": "003680",
         "viaName": "한성기업",
         "hopDistance": 2
@@ -153,9 +153,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "066980",
-        "corpName": "한성크린텍",
-        "industry": "environment",
+        "stockCode": "078930",
+        "corpName": "GS",
+        "industry": "chemical",
         "viaCode": "003680",
         "viaName": "한성기업",
         "hopDistance": 2

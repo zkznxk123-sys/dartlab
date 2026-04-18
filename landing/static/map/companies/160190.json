@@ -114,16 +114,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "047770",
-        "corpName": "코데즈컴바인",
-        "industry": "textile",
-        "viaCode": "003200",
-        "viaName": "일신방직",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "111770",
-        "corpName": "영원무역",
+        "stockCode": "000950",
+        "corpName": "전방",
         "industry": "textile",
         "viaCode": "003200",
         "viaName": "일신방직",
@@ -138,17 +130,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000950",
-        "corpName": "전방",
-        "industry": "textile",
+        "stockCode": "000050",
+        "corpName": "경방",
+        "industry": "retail",
         "viaCode": "003200",
         "viaName": "일신방직",
         "hopDistance": 2
       },
       {
-        "stockCode": "001720",
-        "corpName": "신영증권",
-        "industry": "finance",
+        "stockCode": "047770",
+        "corpName": "코데즈컴바인",
+        "industry": "textile",
         "viaCode": "003200",
         "viaName": "일신방직",
         "hopDistance": 2
@@ -162,9 +154,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000050",
-        "corpName": "경방",
-        "industry": "retail",
+        "stockCode": "111770",
+        "corpName": "영원무역",
+        "industry": "textile",
+        "viaCode": "003200",
+        "viaName": "일신방직",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001720",
+        "corpName": "신영증권",
+        "industry": "finance",
         "viaCode": "003200",
         "viaName": "일신방직",
         "hopDistance": 2

@@ -105,6 +105,41 @@
 
 **공간 체크**: 완성 후 각 슬라이드를 4등분(좌상/우상/좌하/우하)했을 때, **4영역 중 3개 이상에 정보(텍스트·숫자·차트·이미지)가 있어야 한다.** 2개 이하면 레이아웃 재배치.
 
+### 아바타 활용 — 슬라이드 역할별 배치
+
+dartlab 아바타(`landing/static/avatar-*.png`)를 슬라이드 우하단에 배치한다. **역할별 아바타가 고정**이므로 매 게시물 일관성 유지.
+
+| 슬라이드 역할 | 아바타 | 표정/동작 |
+|---|---|---|
+| **후크** (질문) | `avatar-curious` | 물음표, 돋보기, 책 쌓아놓고 궁금해하는 |
+| **발견** (차트/숫자) | `avatar-chart` | 차트 들고 분석하는 |
+| **반전** (숨겨진 구조) | `avatar-detective` | 탐정 모자, 조사하는 |
+| **메커니즘** (구조 설명) | `avatar-analyze` | 분석 중 |
+| **비교** (경쟁사 대비) | `avatar-verify` | 검증하는 |
+| **CTA** (코드/링크) | `avatar-code` | 코드 작성 중 |
+| **판단** (결론) | `avatar-discover` | 발견한 표정 |
+
+**배치 규칙**:
+- 크기: **100~120px** (1080×1080 대비 약 10%)
+- 위치: **우하단** (W-140, H-140) 고정
+- 배경과 겹치지 않게 — dartlab 로고 텍스트 왼쪽으로 밀기
+- GIF에서도 매 프레임 동일 위치에 고정
+
+**render.py 구현**:
+```python
+AVATARS = {
+    "hook": "avatar-curious.png",
+    "discovery": "avatar-chart.png",
+    "twist": "avatar-detective.png",
+    "cta": "avatar-code.png",
+}
+
+def load_avatar(role, size=120):
+    path = AVATAR_DIR / AVATARS[role]
+    av = Image.open(path).convert("RGBA")
+    return av.resize((size, size), Image.LANCZOS)
+```
+
 ### 마지막 장 CTA 규칙
 
 캐러셀 CTA는 "프로필 링크"로 유도하지만, 유튜브는 **본문에 링크를 직접 넣을 수 있다.**
@@ -214,16 +249,17 @@ img_square = img_square.resize((1080, 1080), Image.LANCZOS)
 
 ```
 sns/youtube-posts/
-  {nn}-{code-slug}/
-    slides/
-      01-hook.webp          ← 1080×1080
-      02-discovery.webp
-      03-twist.webp
-      04-cta.webp
+  {nn}-{slug}/
+    01-hook.gif             ← 1080×1080 (GIF 또는 webp)
+    02-discovery.webp
+    03-twist.webp
+    04-cta.webp
     caption.txt             ← 게시물 본문
     meta.json               ← 게시일, 영상ID, 블로그slug
+    render.py               ← 재생성 스크립트
 ```
 
+- slides/ 하위 폴더 만들지 않는다 — 주제 폴더 바로 아래에 슬라이드 배치
 - 번호는 캐러셀과 독립 (유튜브 게시물 자체 순번)
 - `meta.json`에 연결된 영상/블로그 정보
 

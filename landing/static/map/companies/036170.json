@@ -135,14 +135,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "058450",
-        "corpName": "한주에이알티",
-        "industry": "electronics",
-        "viaCode": "053950",
-        "viaName": "경남제약",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "038530",
         "corpName": "케이바이오",
         "industry": "retail",
@@ -151,16 +143,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "083640",
-        "corpName": "인콘",
-        "industry": "software",
-        "viaCode": "053950",
-        "viaName": "경남제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "205470",
-        "corpName": "휴마시스",
+        "stockCode": "223310",
+        "corpName": "사토시홀딩스",
         "industry": "pharma",
         "viaCode": "053950",
         "viaName": "경남제약",
@@ -175,9 +159,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "261520",
-        "corpName": "이지스",
-        "industry": "software",
+        "stockCode": "007120",
+        "corpName": "미래아이앤지",
+        "industry": "electronics",
+        "viaCode": "053950",
+        "viaName": "경남제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "205470",
+        "corpName": "휴마시스",
+        "industry": "pharma",
         "viaCode": "053950",
         "viaName": "경남제약",
         "hopDistance": 2
@@ -191,6 +183,22 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "083640",
+        "corpName": "인콘",
+        "industry": "software",
+        "viaCode": "053950",
+        "viaName": "경남제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058450",
+        "corpName": "한주에이알티",
+        "industry": "electronics",
+        "viaCode": "053950",
+        "viaName": "경남제약",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "032800",
         "corpName": "판타지오",
         "industry": "media",
@@ -199,17 +207,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "007120",
-        "corpName": "미래아이앤지",
-        "industry": "electronics",
-        "viaCode": "053950",
-        "viaName": "경남제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "223310",
-        "corpName": "사토시홀딩스",
-        "industry": "pharma",
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
         "viaCode": "053950",
         "viaName": "경남제약",
         "hopDistance": 2

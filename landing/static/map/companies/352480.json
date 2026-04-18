@@ -252,56 +252,16 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "318410",
-        "corpName": "비비씨",
-        "industry": "chemical",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "200880",
-        "corpName": "서연이화",
-        "industry": "auto",
-        "viaCode": "000490",
-        "viaName": "대동",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "080530",
-        "corpName": "코디",
-        "industry": "cosmetics",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "103230",
-        "corpName": "에스앤더블류",
-        "industry": "electronics",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054620",
-        "corpName": "APS",
-        "industry": "telecom",
-        "viaCode": "002790",
-        "viaName": "아모레퍼시픽홀딩스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "204840",
         "corpName": "지엘팜텍",
+        "industry": "realestate",
+        "viaCode": "090430",
+        "viaName": "아모레퍼시픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035890",
+        "corpName": "서희건설",
         "industry": "realestate",
         "viaCode": "090430",
         "viaName": "아모레퍼시픽",
@@ -316,217 +276,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "044820",
-        "corpName": "코스맥스비티아이",
-        "industry": "food",
-        "viaCode": "237880",
-        "viaName": "클리오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123690",
-        "corpName": "한국화장품",
-        "industry": "cosmetics",
-        "viaCode": "114840",
-        "viaName": "아이패밀리에스씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017890",
-        "corpName": "한국알콜",
-        "industry": "chemical",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007860",
-        "corpName": "서연",
-        "industry": "auto",
-        "viaCode": "000490",
-        "viaName": "대동",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "004270",
         "corpName": "남성",
         "industry": "telecom",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035890",
-        "corpName": "서희건설",
-        "industry": "realestate",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "131370",
-        "corpName": "알서포트",
-        "industry": "software",
-        "viaCode": "237880",
-        "viaName": "클리오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "226320",
-        "corpName": "잇츠한불",
-        "industry": "cosmetics",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004020",
-        "corpName": "현대제철",
-        "industry": "steel",
-        "viaCode": "000490",
-        "viaName": "대동",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "008830",
-        "corpName": "대동기어",
-        "industry": "auto",
-        "viaCode": "000490",
-        "viaName": "대동",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "285130",
-        "corpName": "SK케미칼",
-        "industry": "software",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052260",
-        "corpName": "현대바이오랜드",
-        "industry": "chemical",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "192820",
-        "corpName": "코스맥스",
-        "industry": "cosmetics",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000810",
-        "corpName": "삼성화재해상보험",
-        "industry": "finance",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002720",
-        "corpName": "국제약품",
-        "industry": "food",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "020400",
-        "corpName": "대동금속",
-        "industry": "auto",
-        "viaCode": "000490",
-        "viaName": "대동",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "348350",
-        "corpName": "위드텍",
-        "industry": "electronics",
-        "viaCode": "000490",
-        "viaName": "대동",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "241710",
-        "corpName": "코스메카코리아",
-        "industry": "cosmetics",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "049070",
-        "corpName": "인탑스",
-        "industry": "electronics",
-        "viaCode": "000490",
-        "viaName": "대동",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "214370",
-        "corpName": "케어젠",
-        "industry": "pharma",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005940",
-        "corpName": "NH투자증권",
-        "industry": "finance",
-        "viaCode": "237880",
-        "viaName": "클리오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003350",
-        "corpName": "한국화장품제조",
-        "industry": "cosmetics",
-        "viaCode": "114840",
-        "viaName": "아이패밀리에스씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000520",
-        "corpName": "삼일제약",
-        "industry": "food",
         "viaCode": "090430",
         "viaName": "아모레퍼시픽",
         "hopDistance": 2
@@ -540,8 +292,136 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "251970",
-        "corpName": "펌텍코리아",
+        "stockCode": "001750",
+        "corpName": "한양증권",
+        "industry": "finance",
+        "viaCode": "000490",
+        "viaName": "대동",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "049070",
+        "corpName": "인탑스",
+        "industry": "electronics",
+        "viaCode": "000490",
+        "viaName": "대동",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003300",
+        "corpName": "한일홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "090430",
+        "viaName": "아모레퍼시픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "090430",
+        "viaName": "아모레퍼시픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007860",
+        "corpName": "서연",
+        "industry": "auto",
+        "viaCode": "000490",
+        "viaName": "대동",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192820",
+        "corpName": "코스맥스",
+        "industry": "cosmetics",
+        "viaCode": "237880",
+        "viaName": "클리오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "318410",
+        "corpName": "비비씨",
+        "industry": "chemical",
+        "viaCode": "090430",
+        "viaName": "아모레퍼시픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008830",
+        "corpName": "대동기어",
+        "industry": "auto",
+        "viaCode": "000490",
+        "viaName": "대동",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "241710",
+        "corpName": "코스메카코리아",
+        "industry": "cosmetics",
+        "viaCode": "237880",
+        "viaName": "클리오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000810",
+        "corpName": "삼성화재해상보험",
+        "industry": "finance",
+        "viaCode": "090430",
+        "viaName": "아모레퍼시픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161890",
+        "corpName": "한국콜마",
+        "industry": "cosmetics",
+        "viaCode": "237880",
+        "viaName": "클리오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054620",
+        "corpName": "APS",
+        "industry": "telecom",
+        "viaCode": "002790",
+        "viaName": "아모레퍼시픽홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044820",
+        "corpName": "코스맥스비티아이",
+        "industry": "food",
+        "viaCode": "237880",
+        "viaName": "클리오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "048410",
+        "corpName": "현대바이오",
+        "industry": "cosmetics",
+        "viaCode": "090430",
+        "viaName": "아모레퍼시픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "131370",
+        "corpName": "알서포트",
+        "industry": "software",
+        "viaCode": "237880",
+        "viaName": "클리오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214370",
+        "corpName": "케어젠",
+        "industry": "pharma",
+        "viaCode": "090430",
+        "viaName": "아모레퍼시픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "080530",
+        "corpName": "코디",
         "industry": "cosmetics",
         "viaCode": "090430",
         "viaName": "아모레퍼시픽",
@@ -556,9 +436,73 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "003350",
+        "corpName": "한국화장품제조",
+        "industry": "cosmetics",
+        "viaCode": "237880",
+        "viaName": "클리오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "090430",
+        "viaName": "아모레퍼시픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123690",
+        "corpName": "한국화장품",
+        "industry": "cosmetics",
+        "viaCode": "237880",
+        "viaName": "클리오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "000490",
+        "viaName": "대동",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200880",
+        "corpName": "서연이화",
+        "industry": "auto",
+        "viaCode": "000490",
+        "viaName": "대동",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "251970",
+        "corpName": "펌텍코리아",
+        "industry": "cosmetics",
+        "viaCode": "090430",
+        "viaName": "아모레퍼시픽",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "002840",
         "corpName": "미원상사",
         "industry": "chemical",
+        "viaCode": "090430",
+        "viaName": "아모레퍼시픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002720",
+        "corpName": "국제약품",
+        "industry": "food",
+        "viaCode": "090430",
+        "viaName": "아모레퍼시픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "226320",
+        "corpName": "잇츠한불",
+        "industry": "cosmetics",
         "viaCode": "090430",
         "viaName": "아모레퍼시픽",
         "hopDistance": 2
@@ -572,14 +516,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "200670",
-        "corpName": "휴메딕스",
-        "industry": "pharma",
-        "viaCode": "090430",
-        "viaName": "아모레퍼시픽",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "108230",
         "corpName": "톱텍",
         "industry": "electronics",
@@ -588,33 +524,97 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001750",
-        "corpName": "한양증권",
+        "stockCode": "001450",
+        "corpName": "현대해상",
         "industry": "finance",
+        "viaCode": "237880",
+        "viaName": "클리오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "285130",
+        "corpName": "SK케미칼",
+        "industry": "software",
+        "viaCode": "090430",
+        "viaName": "아모레퍼시픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017890",
+        "corpName": "한국알콜",
+        "industry": "chemical",
+        "viaCode": "090430",
+        "viaName": "아모레퍼시픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005940",
+        "corpName": "NH투자증권",
+        "industry": "finance",
+        "viaCode": "237880",
+        "viaName": "클리오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000520",
+        "corpName": "삼일제약",
+        "industry": "food",
+        "viaCode": "090430",
+        "viaName": "아모레퍼시픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "090430",
+        "viaName": "아모레퍼시픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "237880",
+        "viaName": "클리오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "020400",
+        "corpName": "대동금속",
+        "industry": "auto",
         "viaCode": "000490",
         "viaName": "대동",
         "hopDistance": 2
       },
       {
-        "stockCode": "003300",
-        "corpName": "한일홀딩스",
-        "industry": "buildingMaterials",
+        "stockCode": "200670",
+        "corpName": "휴메딕스",
+        "industry": "pharma",
         "viaCode": "090430",
         "viaName": "아모레퍼시픽",
         "hopDistance": 2
       },
       {
-        "stockCode": "048410",
-        "corpName": "현대바이오",
-        "industry": "cosmetics",
+        "stockCode": "052260",
+        "corpName": "현대바이오랜드",
+        "industry": "chemical",
         "viaCode": "090430",
         "viaName": "아모레퍼시픽",
         "hopDistance": 2
       },
       {
-        "stockCode": "161890",
-        "corpName": "한국콜마",
-        "industry": "cosmetics",
+        "stockCode": "348350",
+        "corpName": "위드텍",
+        "industry": "electronics",
+        "viaCode": "000490",
+        "viaName": "대동",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "103230",
+        "corpName": "에스앤더블류",
+        "industry": "electronics",
         "viaCode": "090430",
         "viaName": "아모레퍼시픽",
         "hopDistance": 2

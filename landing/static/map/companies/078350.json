@@ -159,9 +159,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "267250",
-        "corpName": "HD현대",
-        "industry": "shipbuilding",
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "industry": "buildingMaterials",
         "viaCode": "045100",
         "viaName": "한양이엔지",
         "hopDistance": 2
@@ -175,17 +175,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "007330",
-        "corpName": "푸른저축은행",
-        "industry": "finance",
+        "stockCode": "267250",
+        "corpName": "HD현대",
+        "industry": "shipbuilding",
         "viaCode": "045100",
         "viaName": "한양이엔지",
         "hopDistance": 2
       },
       {
-        "stockCode": "000910",
-        "corpName": "유니온",
-        "industry": "buildingMaterials",
+        "stockCode": "007330",
+        "corpName": "푸른저축은행",
+        "industry": "finance",
         "viaCode": "045100",
         "viaName": "한양이엔지",
         "hopDistance": 2

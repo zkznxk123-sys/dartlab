@@ -53,8 +53,8 @@
 
 	// Size value extractor — treemap needs positive values
 	function sizeValue(n: any): number {
-		// 타임라인 모드: 해당 연도 매출 사용
-		if (timelineYear && sizeMetric === 'revenue') {
+		// 타임라인 모드: 해당 연도 매출로 크기 결정
+		if (timelineYear) {
 			const td = timelineData[n.id];
 			if (!td) return 0.1; // 해당 연도 데이터 없음 = 거의 안 보임
 			return Math.max(1, (td.revenue || 0) / 1e8);
@@ -152,8 +152,13 @@
 							? (shockMap.get(leaf.data.id)! > 0.5 ? '#ef4444' : shockMap.get(leaf.data.id)! > 0.1 ? '#fb923c' : '#fbbf24')
 							: '#1e293b')
 						: timelineYear && timelineData[leaf.data.id]
-							? colorFor({ ...leaf.data._node, opMargin: timelineData[leaf.data.id].opMargin ?? leaf.data._node.opMargin }, colorMetric)
-							: colorFor(leaf.data._node, colorMetric),
+							? colorFor(
+								{ ...leaf.data._node, opMargin: timelineData[leaf.data.id].opMargin ?? leaf.data._node.opMargin, revenue: timelineData[leaf.data.id].revenue ?? leaf.data._node.revenue },
+								colorMetric === 'industry' ? 'opMargin' : colorMetric
+							)
+							: timelineYear && !timelineData[leaf.data.id]
+								? '#1e293b'
+								: colorFor(leaf.data._node, colorMetric),
 					showLabel: w > 40 && h > 16,
 					signal: moversMap.get(leaf.data.id) || null
 				});

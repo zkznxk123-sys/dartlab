@@ -157,17 +157,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "017370",
-        "corpName": "우신시스템",
-        "industry": "electronics",
-        "viaCode": "000250",
-        "viaName": "삼천당제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "124560",
-        "corpName": "태웅로직스",
-        "industry": "logistics",
+        "stockCode": "073570",
+        "corpName": "리튬포어스",
+        "industry": "misc",
         "viaCode": "000250",
         "viaName": "삼천당제약",
         "hopDistance": 2
@@ -181,9 +173,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "073570",
-        "corpName": "리튬포어스",
-        "industry": "misc",
+        "stockCode": "124560",
+        "corpName": "태웅로직스",
+        "industry": "logistics",
+        "viaCode": "000250",
+        "viaName": "삼천당제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017370",
+        "corpName": "우신시스템",
+        "industry": "electronics",
         "viaCode": "000250",
         "viaName": "삼천당제약",
         "hopDistance": 2

@@ -162,59 +162,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005950",
-        "corpName": "이수화학",
-        "industry": "food",
+        "stockCode": "007660",
+        "corpName": "이수페타시스",
+        "industry": "electronics",
         "viaCode": "086890",
         "viaName": "이수앱지스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "187420",
-        "corpName": "HLB제넥스",
-        "industry": "pharma",
-        "viaCode": "086890",
-        "viaName": "이수앱지스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "205470",
-        "corpName": "휴마시스",
-        "industry": "pharma",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009420",
-        "corpName": "한올바이오파마",
-        "industry": "realestate",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "397030",
-        "corpName": "에이프릴바이오",
-        "industry": "pharma",
-        "viaCode": "000100",
-        "viaName": "유한양행",
         "hopDistance": 2
       },
       {
@@ -226,121 +178,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066700",
-        "corpName": "테라젠이텍스",
-        "industry": "electronics",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "140610",
-        "corpName": "엔솔바이오사이언스",
+        "stockCode": "185750",
+        "corpName": "종근당",
         "industry": "pharma",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064550",
-        "corpName": "바이오니아",
-        "industry": "pharma",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "014820",
-        "corpName": "동원시스템즈",
-        "industry": "plastic",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "457190",
-        "corpName": "이수스페셜티케미컬",
-        "industry": "chemical",
-        "viaCode": "086890",
-        "viaName": "이수앱지스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007660",
-        "corpName": "이수페타시스",
-        "industry": "electronics",
-        "viaCode": "086890",
-        "viaName": "이수앱지스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003090",
-        "corpName": "대웅",
-        "industry": "pharma",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038070",
-        "corpName": "서린바이오",
-        "industry": "retail",
-        "viaCode": "086890",
-        "viaName": "이수앱지스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "091120",
-        "corpName": "이엠텍",
-        "industry": "electronics",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "069510",
-        "corpName": "에스텍",
-        "industry": "electronics",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066670",
-        "corpName": "디티씨",
-        "industry": "electronics",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "170900",
-        "corpName": "동아에스티",
-        "industry": "pharma",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "168330",
-        "corpName": "내츄럴엔도텍",
-        "industry": "food",
         "viaCode": "000100",
         "viaName": "유한양행",
         "hopDistance": 2
@@ -348,14 +188,6 @@
       {
         "stockCode": "001630",
         "corpName": "종근당홀딩스",
-        "industry": "pharma",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "424870",
-        "corpName": "이뮨온시아",
         "industry": "pharma",
         "viaCode": "000100",
         "viaName": "유한양행",
@@ -370,17 +202,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "095700",
-        "corpName": "제넥신",
-        "industry": "pharma",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000640",
-        "corpName": "동아쏘시오홀딩스",
-        "industry": "pharma",
+        "stockCode": "009420",
+        "corpName": "한올바이오파마",
+        "industry": "realestate",
         "viaCode": "000100",
         "viaName": "유한양행",
         "hopDistance": 2
@@ -402,24 +226,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "185750",
-        "corpName": "종근당",
+        "stockCode": "000640",
+        "corpName": "동아쏘시오홀딩스",
         "industry": "pharma",
         "viaCode": "000100",
         "viaName": "유한양행",
         "hopDistance": 2
       },
       {
-        "stockCode": "358570",
-        "corpName": "지아이이노베이션",
-        "industry": "pharma",
-        "viaCode": "000100",
-        "viaName": "유한양행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011040",
-        "corpName": "경동제약",
+        "stockCode": "170900",
+        "corpName": "동아에스티",
         "industry": "pharma",
         "viaCode": "000100",
         "viaName": "유한양행",
@@ -434,8 +250,120 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "296160",
-        "corpName": "프로젠",
+        "stockCode": "038070",
+        "corpName": "서린바이오",
+        "industry": "retail",
+        "viaCode": "086890",
+        "viaName": "이수앱지스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307750",
+        "corpName": "국전약품",
+        "industry": "pharma",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "358570",
+        "corpName": "지아이이노베이션",
+        "industry": "pharma",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003090",
+        "corpName": "대웅",
+        "industry": "pharma",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352820",
+        "corpName": "하이브",
+        "industry": "media",
+        "viaCode": "086890",
+        "viaName": "이수앱지스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095700",
+        "corpName": "제넥신",
+        "industry": "pharma",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "457190",
+        "corpName": "이수스페셜티케미컬",
+        "industry": "chemical",
+        "viaCode": "086890",
+        "viaName": "이수앱지스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "205470",
+        "corpName": "휴마시스",
+        "industry": "pharma",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "110020",
+        "corpName": "전진바이오팜",
+        "industry": "chemical",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "168330",
+        "corpName": "내츄럴엔도텍",
+        "industry": "food",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187420",
+        "corpName": "HLB제넥스",
+        "industry": "pharma",
+        "viaCode": "086890",
+        "viaName": "이수앱지스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066700",
+        "corpName": "테라젠이텍스",
+        "industry": "electronics",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064550",
+        "corpName": "바이오니아",
         "industry": "pharma",
         "viaCode": "000100",
         "viaName": "유한양행",
@@ -450,9 +378,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
+        "stockCode": "066670",
+        "corpName": "디티씨",
+        "industry": "electronics",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014820",
+        "corpName": "동원시스템즈",
+        "industry": "plastic",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091120",
+        "corpName": "이엠텍",
+        "industry": "electronics",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "140610",
+        "corpName": "엔솔바이오사이언스",
+        "industry": "pharma",
         "viaCode": "000100",
         "viaName": "유한양행",
         "hopDistance": 2
@@ -466,9 +418,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "033830",
-        "corpName": "티비씨",
-        "industry": "media",
+        "stockCode": "397030",
+        "corpName": "에이프릴바이오",
+        "industry": "pharma",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
         "viaCode": "000100",
         "viaName": "유한양행",
         "hopDistance": 2
@@ -482,27 +450,59 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "352820",
-        "corpName": "하이브",
-        "industry": "media",
-        "viaCode": "086890",
-        "viaName": "이수앱지스",
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "000100",
+        "viaName": "유한양행",
         "hopDistance": 2
       },
       {
-        "stockCode": "307750",
-        "corpName": "국전약품",
+        "stockCode": "296160",
+        "corpName": "프로젠",
         "industry": "pharma",
         "viaCode": "000100",
         "viaName": "유한양행",
         "hopDistance": 2
       },
       {
-        "stockCode": "110020",
-        "corpName": "전진바이오팜",
-        "industry": "chemical",
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
         "viaCode": "000100",
         "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "424870",
+        "corpName": "이뮨온시아",
+        "industry": "pharma",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011040",
+        "corpName": "경동제약",
+        "industry": "pharma",
+        "viaCode": "000100",
+        "viaName": "유한양행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005950",
+        "corpName": "이수화학",
+        "industry": "food",
+        "viaCode": "086890",
+        "viaName": "이수앱지스",
         "hopDistance": 2
       }
     ],

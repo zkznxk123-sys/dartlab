@@ -147,30 +147,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "086450",
-        "viaName": "동국제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "249420",
-        "corpName": "일동제약",
-        "industry": "pharma",
-        "viaCode": "086450",
-        "viaName": "동국제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001200",
-        "corpName": "유진증권",
-        "industry": "finance",
-        "viaCode": "0007J0",
-        "viaName": "인벤테라",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "204840",
         "corpName": "지엘팜텍",
         "industry": "realestate",
@@ -187,16 +163,24 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004310",
-        "corpName": "현대약품",
-        "industry": "pharma",
-        "viaCode": "086450",
-        "viaName": "동국제약",
+        "stockCode": "001200",
+        "corpName": "유진증권",
+        "industry": "finance",
+        "viaCode": "0007J0",
+        "viaName": "인벤테라",
         "hopDistance": 2
       },
       {
-        "stockCode": "006620",
-        "corpName": "동구바이오제약",
+        "stockCode": "005940",
+        "corpName": "NH투자증권",
+        "industry": "finance",
+        "viaCode": "0007J0",
+        "viaName": "인벤테라",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001540",
+        "corpName": "안국약품",
         "industry": "pharma",
         "viaCode": "086450",
         "viaName": "동국제약",
@@ -211,8 +195,40 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "145020",
-        "corpName": "휴젤",
+        "stockCode": "006620",
+        "corpName": "동구바이오제약",
+        "industry": "pharma",
+        "viaCode": "086450",
+        "viaName": "동국제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "086450",
+        "viaName": "동국제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "249420",
+        "corpName": "일동제약",
+        "industry": "pharma",
+        "viaCode": "086450",
+        "viaName": "동국제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011040",
+        "corpName": "경동제약",
+        "industry": "pharma",
+        "viaCode": "086450",
+        "viaName": "동국제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004310",
+        "corpName": "현대약품",
         "industry": "pharma",
         "viaCode": "086450",
         "viaName": "동국제약",
@@ -235,24 +251,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005940",
-        "corpName": "NH투자증권",
-        "industry": "finance",
-        "viaCode": "0007J0",
-        "viaName": "인벤테라",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011040",
-        "corpName": "경동제약",
-        "industry": "pharma",
-        "viaCode": "086450",
-        "viaName": "동국제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001540",
-        "corpName": "안국약품",
+        "stockCode": "145020",
+        "corpName": "휴젤",
         "industry": "pharma",
         "viaCode": "086450",
         "viaName": "동국제약",

@@ -116,25 +116,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "004170",
-        "corpName": "신세계",
-        "industry": "retail",
+        "stockCode": "307930",
+        "corpName": "컴퍼니케이",
+        "industry": "finance",
         "viaCode": "036420",
         "viaName": "콘텐트리중앙",
         "hopDistance": 2
       },
       {
-        "stockCode": "089790",
-        "corpName": "제이티",
-        "industry": "semiconductor",
-        "viaCode": "036420",
-        "viaName": "콘텐트리중앙",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033830",
-        "corpName": "티비씨",
-        "industry": "media",
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
         "viaCode": "036420",
         "viaName": "콘텐트리중앙",
         "hopDistance": 2
@@ -148,25 +140,33 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
+        "viaCode": "036420",
+        "viaName": "콘텐트리중앙",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "036420",
+        "viaName": "콘텐트리중앙",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004170",
+        "corpName": "신세계",
+        "industry": "retail",
+        "viaCode": "036420",
+        "viaName": "콘텐트리중앙",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "373160",
         "corpName": "데이원컴퍼니",
         "industry": "education",
-        "viaCode": "036420",
-        "viaName": "콘텐트리중앙",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "307930",
-        "corpName": "컴퍼니케이",
-        "industry": "finance",
-        "viaCode": "036420",
-        "viaName": "콘텐트리중앙",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
         "viaCode": "036420",
         "viaName": "콘텐트리중앙",
         "hopDistance": 2

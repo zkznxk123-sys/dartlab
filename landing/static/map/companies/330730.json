@@ -116,17 +116,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "373160",
-        "viaName": "데이원컴퍼니",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078340",
-        "corpName": "컴투스",
-        "industry": "software",
+        "stockCode": "036420",
+        "corpName": "콘텐트리중앙",
+        "industry": "media",
         "viaCode": "373160",
         "viaName": "데이원컴퍼니",
         "hopDistance": 2
@@ -140,6 +132,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "373160",
+        "viaName": "데이원컴퍼니",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "043710",
         "corpName": "서울리거",
         "industry": "pharma",
@@ -148,9 +148,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "036420",
-        "corpName": "콘텐트리중앙",
-        "industry": "media",
+        "stockCode": "078340",
+        "corpName": "컴투스",
+        "industry": "software",
         "viaCode": "373160",
         "viaName": "데이원컴퍼니",
         "hopDistance": 2

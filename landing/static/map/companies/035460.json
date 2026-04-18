@@ -211,371 +211,19 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "455900",
-        "corpName": "엔젤로보틱스",
-        "industry": "machinery",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "219130",
-        "corpName": "타이거일렉",
-        "industry": "electronics",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084010",
-        "corpName": "대한제강",
-        "industry": "construction",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "048530",
-        "corpName": "인트론바이오",
-        "industry": "pharma",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "145210",
-        "corpName": "다이나믹디자인",
-        "industry": "auto",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002230",
-        "corpName": "피에스텍",
-        "industry": "auto",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "014190",
-        "corpName": "원익큐브",
-        "industry": "chemical",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039860",
-        "corpName": "나노엔텍",
-        "industry": "pharma",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001250",
-        "corpName": "GS글로벌",
-        "industry": "chemical",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "270520",
-        "corpName": "앱튼",
-        "industry": "consulting",
-        "viaCode": "452200",
-        "viaName": "민테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "091970",
-        "corpName": "나노캠텍",
-        "industry": "plastic",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017180",
-        "corpName": "명문제약",
-        "industry": "pharma",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "210980",
-        "corpName": "SK디앤디",
-        "industry": "software",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011790",
-        "corpName": "SKC",
-        "industry": "software",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "153710",
-        "corpName": "옵티팜",
-        "industry": "pharma",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030530",
-        "corpName": "원익홀딩스",
-        "industry": "energy",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060570",
-        "corpName": "드림어스컴퍼니",
+        "stockCode": "041510",
+        "corpName": "에스엠",
         "industry": "media",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000660",
-        "corpName": "SK하이닉스",
-        "industry": "semiconductor",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032940",
-        "corpName": "원익",
-        "industry": "semiconductor",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "216400",
-        "corpName": "인바이츠바이오코아",
-        "industry": "pharma",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095910",
-        "corpName": "에스에너지",
-        "industry": "energy",
-        "viaCode": "452200",
-        "viaName": "민테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101490",
-        "corpName": "에스앤에스텍",
-        "industry": "semiconductor",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "018670",
-        "corpName": "SK가스",
-        "industry": "software",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "081580",
-        "corpName": "성우전자",
-        "industry": "electronics",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090460",
-        "corpName": "비에이치",
-        "industry": "electronics",
-        "viaCode": "452200",
-        "viaName": "민테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003850",
-        "corpName": "보령",
-        "industry": "pharma",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000100",
-        "corpName": "유한양행",
-        "industry": "pharma",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034730",
-        "corpName": "SK",
-        "industry": "software",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "139050",
-        "corpName": "BF랩스",
-        "industry": "software",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "100090",
-        "corpName": "SK오션플랜트",
-        "industry": "software",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "285130",
-        "corpName": "SK케미칼",
-        "industry": "software",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002070",
-        "corpName": "비비안",
-        "industry": "realestate",
         "viaCode": "025560",
         "viaName": "미래산업",
         "hopDistance": 2
       },
       {
-        "stockCode": "095500",
-        "corpName": "미래나노텍",
+        "stockCode": "177830",
+        "corpName": "파버나인",
         "industry": "electronics",
         "viaCode": "069510",
         "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000300",
-        "corpName": "DH오토넥스",
-        "industry": "telecom",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "131400",
-        "corpName": "이브이첨단소재",
-        "industry": "electronics",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066790",
-        "corpName": "씨씨에스",
-        "industry": "electronics",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "240810",
-        "corpName": "원익IPS",
-        "industry": "semiconductor",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "318020",
-        "corpName": "포인트모바일",
-        "industry": "electronics",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "402340",
-        "corpName": "SK스퀘어",
-        "industry": "software",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007460",
-        "corpName": "에이프로젠",
-        "industry": "realestate",
-        "viaCode": "452200",
-        "viaName": "민테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "074600",
-        "corpName": "원익QnC",
-        "industry": "construction",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "326030",
-        "corpName": "에스케이바이오팜",
-        "industry": "pharma",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "025560",
-        "viaName": "미래산업",
         "hopDistance": 2
       },
       {
@@ -587,104 +235,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "017670",
-        "corpName": "SK텔레콤",
-        "industry": "telecom",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "096770",
-        "corpName": "SK이노베이션",
-        "industry": "chemical",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035890",
-        "corpName": "서희건설",
-        "industry": "realestate",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088800",
-        "corpName": "에이스테크",
-        "industry": "telecom",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024800",
-        "corpName": "유성티엔에스",
-        "industry": "logistics",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089140",
-        "corpName": "넥스턴앤롤코리아",
-        "industry": "machinery",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000720",
-        "corpName": "현대건설",
-        "industry": "construction",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "361610",
-        "corpName": "SK아이이테크놀로지",
-        "industry": "software",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "950140",
-        "corpName": "잉글우드랩",
-        "industry": "cosmetics",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009810",
-        "corpName": "플레이그램",
-        "industry": "retail",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "216050",
-        "corpName": "인크로스",
-        "industry": "media",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033530",
-        "corpName": "SJG세종",
-        "industry": "electronics",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "499790",
-        "corpName": "GS피앤엘",
+        "stockCode": "014190",
+        "corpName": "원익큐브",
         "industry": "chemical",
         "viaCode": "069510",
         "viaName": "에스텍",
@@ -699,97 +251,73 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "104830",
-        "corpName": "원익머트리얼즈",
-        "industry": "energy",
+        "stockCode": "007820",
+        "corpName": "에스엠코어",
+        "industry": "machinery",
         "viaCode": "069510",
         "viaName": "에스텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "007070",
-        "corpName": "GS리테일",
-        "industry": "retail",
+        "stockCode": "318020",
+        "corpName": "포인트모바일",
+        "industry": "electronics",
         "viaCode": "069510",
         "viaName": "에스텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "041910",
-        "corpName": "폴라리스AI파마",
-        "industry": "pharma",
+        "stockCode": "066790",
+        "corpName": "씨씨에스",
+        "industry": "electronics",
         "viaCode": "069510",
         "viaName": "에스텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "011040",
-        "corpName": "경동제약",
-        "industry": "pharma",
+        "stockCode": "001250",
+        "corpName": "GS글로벌",
+        "industry": "chemical",
         "viaCode": "069510",
         "viaName": "에스텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "031860",
-        "corpName": "디에이치엑스컴퍼니",
-        "industry": "retail",
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
         "viaCode": "069510",
         "viaName": "에스텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "120110",
-        "corpName": "코오롱인더",
-        "industry": "plastic",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "226400",
-        "corpName": "오스테오닉",
-        "industry": "medicalDevice",
-        "viaCode": "452200",
-        "viaName": "민테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060380",
-        "corpName": "동양에스텍",
-        "industry": "steel",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001540",
-        "corpName": "안국약품",
-        "industry": "pharma",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006360",
-        "corpName": "GS건설",
+        "stockCode": "074600",
+        "corpName": "원익QnC",
         "industry": "construction",
         "viaCode": "069510",
         "viaName": "에스텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
+        "stockCode": "256630",
+        "corpName": "포인트엔지니어링",
+        "industry": "electronics",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "131400",
+        "corpName": "이브이첨단소재",
+        "industry": "electronics",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041910",
+        "corpName": "폴라리스AI파마",
+        "industry": "pharma",
         "viaCode": "069510",
         "viaName": "에스텍",
         "hopDistance": 2
@@ -803,6 +331,430 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
+        "industry": "chemical",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "226400",
+        "corpName": "오스테오닉",
+        "industry": "medicalDevice",
+        "viaCode": "452200",
+        "viaName": "민테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "270520",
+        "corpName": "앱튼",
+        "industry": "consulting",
+        "viaCode": "452200",
+        "viaName": "민테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "081580",
+        "corpName": "성우전자",
+        "industry": "electronics",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003850",
+        "corpName": "보령",
+        "industry": "pharma",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100090",
+        "corpName": "SK오션플랜트",
+        "industry": "software",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016670",
+        "corpName": "디모아",
+        "industry": "realestate",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011040",
+        "corpName": "경동제약",
+        "industry": "pharma",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "499790",
+        "corpName": "GS피앤엘",
+        "industry": "chemical",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "153710",
+        "corpName": "옵티팜",
+        "industry": "pharma",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "326030",
+        "corpName": "에스케이바이오팜",
+        "industry": "pharma",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035890",
+        "corpName": "서희건설",
+        "industry": "realestate",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007070",
+        "corpName": "GS리테일",
+        "industry": "retail",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "282720",
+        "corpName": "금양그린파워",
+        "industry": "construction",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039860",
+        "corpName": "나노엔텍",
+        "industry": "pharma",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000100",
+        "corpName": "유한양행",
+        "industry": "pharma",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088800",
+        "corpName": "에이스테크",
+        "industry": "telecom",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060380",
+        "corpName": "동양에스텍",
+        "industry": "steel",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095910",
+        "corpName": "에스에너지",
+        "industry": "energy",
+        "viaCode": "452200",
+        "viaName": "민테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "402340",
+        "corpName": "SK스퀘어",
+        "industry": "software",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "021240",
+        "corpName": "코웨이",
+        "industry": "electronics",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "145020",
+        "corpName": "휴젤",
+        "industry": "pharma",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034730",
+        "corpName": "SK",
+        "industry": "software",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "361610",
+        "corpName": "SK아이이테크놀로지",
+        "industry": "software",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "373220",
+        "corpName": "LG에너지솔루션",
+        "industry": "chemical",
+        "viaCode": "452200",
+        "viaName": "민테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002170",
+        "corpName": "삼양통상",
+        "industry": "textile",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002070",
+        "corpName": "비비안",
+        "industry": "realestate",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001740",
+        "corpName": "SK네트웍스",
+        "industry": "software",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005500",
+        "corpName": "삼진제약",
+        "industry": "retail",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033530",
+        "corpName": "SJG세종",
+        "industry": "electronics",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017180",
+        "corpName": "명문제약",
+        "industry": "pharma",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095500",
+        "corpName": "미래나노텍",
+        "industry": "electronics",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "285130",
+        "corpName": "SK케미칼",
+        "industry": "software",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "210980",
+        "corpName": "SK디앤디",
+        "industry": "software",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "455900",
+        "corpName": "엔젤로보틱스",
+        "industry": "machinery",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "216050",
+        "corpName": "인크로스",
+        "industry": "media",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "216400",
+        "corpName": "인바이츠바이오코아",
+        "industry": "pharma",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217820",
+        "corpName": "원익피앤이",
+        "industry": "machinery",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089140",
+        "corpName": "넥스턴앤롤코리아",
+        "industry": "machinery",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "290550",
+        "corpName": "디케이티",
+        "industry": "electronics",
+        "viaCode": "452200",
+        "viaName": "민테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035420",
+        "corpName": "NAVER",
+        "industry": "software",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011790",
+        "corpName": "SKC",
+        "industry": "software",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "317400",
+        "corpName": "자이에스앤디",
+        "industry": "construction",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "104830",
+        "corpName": "원익머트리얼즈",
+        "industry": "energy",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009810",
+        "corpName": "플레이그램",
+        "industry": "retail",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018670",
+        "corpName": "SK가스",
+        "industry": "software",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "475150",
+        "corpName": "SK이터닉스",
+        "industry": "software",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078930",
+        "corpName": "GS",
+        "industry": "chemical",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031860",
+        "corpName": "디에이치엑스컴퍼니",
+        "industry": "retail",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "161390",
         "corpName": "한국타이어앤테크놀로지",
         "industry": "auto",
@@ -811,8 +763,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "177830",
-        "corpName": "파버나인",
+        "stockCode": "219130",
+        "corpName": "타이거일렉",
         "industry": "electronics",
         "viaCode": "069510",
         "viaName": "에스텍",
@@ -827,43 +779,107 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "007820",
-        "corpName": "에스엠코어",
-        "industry": "machinery",
+        "stockCode": "032850",
+        "corpName": "비트컴퓨터",
+        "industry": "software",
         "viaCode": "069510",
         "viaName": "에스텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "290550",
-        "corpName": "디케이티",
-        "industry": "electronics",
-        "viaCode": "452200",
-        "viaName": "민테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078930",
-        "corpName": "GS",
-        "industry": "chemical",
+        "stockCode": "101490",
+        "corpName": "에스앤에스텍",
+        "industry": "semiconductor",
         "viaCode": "069510",
         "viaName": "에스텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "256630",
-        "corpName": "포인트엔지니어링",
-        "industry": "electronics",
+        "stockCode": "001540",
+        "corpName": "안국약품",
+        "industry": "pharma",
         "viaCode": "069510",
         "viaName": "에스텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "000240",
-        "corpName": "한국앤컴퍼니",
-        "industry": "finance",
+        "stockCode": "139050",
+        "corpName": "BF랩스",
+        "industry": "software",
         "viaCode": "069510",
         "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065770",
+        "corpName": "CS",
+        "industry": "telecom",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024800",
+        "corpName": "유성티엔에스",
+        "industry": "logistics",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "263700",
+        "corpName": "케어랩스",
+        "industry": "software",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091970",
+        "corpName": "나노캠텍",
+        "industry": "plastic",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006360",
+        "corpName": "GS건설",
+        "industry": "construction",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030530",
+        "corpName": "원익홀딩스",
+        "industry": "energy",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "240810",
+        "corpName": "원익IPS",
+        "industry": "semiconductor",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "145210",
+        "corpName": "다이나믹디자인",
+        "industry": "auto",
+        "viaCode": "025560",
+        "viaName": "미래산업",
         "hopDistance": 2
       },
       {
@@ -875,9 +891,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005500",
-        "corpName": "삼진제약",
-        "industry": "retail",
+        "stockCode": "060570",
+        "corpName": "드림어스컴퍼니",
+        "industry": "media",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002230",
+        "corpName": "피에스텍",
+        "industry": "auto",
         "viaCode": "069510",
         "viaName": "에스텍",
         "hopDistance": 2
@@ -891,22 +915,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "145020",
-        "corpName": "휴젤",
-        "industry": "pharma",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "263700",
-        "corpName": "케어랩스",
-        "industry": "software",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "095340",
         "corpName": "ISC",
         "industry": "retail",
@@ -915,97 +923,89 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "217820",
-        "corpName": "원익피앤이",
-        "industry": "machinery",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "065770",
-        "corpName": "CS",
+        "stockCode": "000300",
+        "corpName": "DH오토넥스",
         "industry": "telecom",
         "viaCode": "069510",
         "viaName": "에스텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "282720",
-        "corpName": "금양그린파워",
-        "industry": "construction",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "021240",
-        "corpName": "코웨이",
+        "stockCode": "090460",
+        "corpName": "비에이치",
         "industry": "electronics",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035420",
-        "corpName": "NAVER",
-        "industry": "software",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032850",
-        "corpName": "비트컴퓨터",
-        "industry": "software",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "317400",
-        "corpName": "자이에스앤디",
-        "industry": "construction",
-        "viaCode": "069510",
-        "viaName": "에스텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "373220",
-        "corpName": "LG에너지솔루션",
-        "industry": "chemical",
         "viaCode": "452200",
         "viaName": "민테크",
         "hopDistance": 2
       },
       {
-        "stockCode": "016670",
-        "corpName": "디모아",
-        "industry": "realestate",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002170",
-        "corpName": "삼양통상",
-        "industry": "textile",
+        "stockCode": "000240",
+        "corpName": "한국앤컴퍼니",
+        "industry": "finance",
         "viaCode": "069510",
         "viaName": "에스텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "475150",
-        "corpName": "SK이터닉스",
-        "industry": "software",
+        "stockCode": "084010",
+        "corpName": "대한제강",
+        "industry": "construction",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032940",
+        "corpName": "원익",
+        "industry": "semiconductor",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007460",
+        "corpName": "에이프로젠",
+        "industry": "realestate",
+        "viaCode": "452200",
+        "viaName": "민테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "120110",
+        "corpName": "코오롱인더",
+        "industry": "plastic",
+        "viaCode": "069510",
+        "viaName": "에스텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "048530",
+        "corpName": "인트론바이오",
+        "industry": "pharma",
         "viaCode": "069510",
         "viaName": "에스텍",
         "hopDistance": 2

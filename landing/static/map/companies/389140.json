@@ -135,65 +135,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "039490",
-        "corpName": "키움증권",
+        "stockCode": "001450",
+        "corpName": "현대해상",
         "industry": "finance",
-        "viaCode": "230360",
-        "viaName": "에코마케팅",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060570",
-        "corpName": "드림어스컴퍼니",
-        "industry": "media",
         "viaCode": "035900",
         "viaName": "JYP Ent.",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084110",
-        "corpName": "휴온스글로벌",
-        "industry": "pharma",
-        "viaCode": "230360",
-        "viaName": "에코마케팅",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "230360",
-        "viaName": "에코마케팅",
         "hopDistance": 2
       },
       {
         "stockCode": "300080",
         "corpName": "플리토",
         "industry": "software",
-        "viaCode": "035900",
-        "viaName": "JYP Ent.",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "035900",
-        "viaName": "JYP Ent.",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "204020",
-        "corpName": "그리티",
-        "industry": "textile",
-        "viaCode": "230360",
-        "viaName": "에코마케팅",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
         "viaCode": "035900",
         "viaName": "JYP Ent.",
         "hopDistance": 2
@@ -207,33 +159,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "376300",
-        "corpName": "디어유",
-        "industry": "software",
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
+        "viaCode": "230360",
+        "viaName": "에코마케팅",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060570",
+        "corpName": "드림어스컴퍼니",
+        "industry": "media",
         "viaCode": "035900",
         "viaName": "JYP Ent.",
         "hopDistance": 2
       },
       {
-        "stockCode": "002680",
-        "corpName": "한탑",
-        "industry": "food",
-        "viaCode": "230360",
-        "viaName": "에코마케팅",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001510",
-        "corpName": "SK증권",
-        "industry": "software",
-        "viaCode": "230360",
-        "viaName": "에코마케팅",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "200670",
-        "corpName": "휴메딕스",
-        "industry": "pharma",
+        "stockCode": "204020",
+        "corpName": "그리티",
+        "industry": "textile",
         "viaCode": "230360",
         "viaName": "에코마케팅",
         "hopDistance": 2
@@ -247,11 +191,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "111110",
-        "corpName": "호전실업",
-        "industry": "textile",
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
         "viaCode": "230360",
         "viaName": "에코마케팅",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "376300",
+        "corpName": "디어유",
+        "industry": "software",
+        "viaCode": "035900",
+        "viaName": "JYP Ent.",
         "hopDistance": 2
       },
       {
@@ -271,9 +223,57 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "035900",
+        "viaName": "JYP Ent.",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "230360",
+        "viaName": "에코마케팅",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "003530",
         "corpName": "한화투자증권",
         "industry": "aerospace",
+        "viaCode": "230360",
+        "viaName": "에코마케팅",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200670",
+        "corpName": "휴메딕스",
+        "industry": "pharma",
+        "viaCode": "230360",
+        "viaName": "에코마케팅",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002680",
+        "corpName": "한탑",
+        "industry": "food",
+        "viaCode": "230360",
+        "viaName": "에코마케팅",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "111110",
+        "corpName": "호전실업",
+        "industry": "textile",
+        "viaCode": "230360",
+        "viaName": "에코마케팅",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001510",
+        "corpName": "SK증권",
+        "industry": "software",
         "viaCode": "230360",
         "viaName": "에코마케팅",
         "hopDistance": 2

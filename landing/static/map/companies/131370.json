@@ -161,33 +161,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "024840",
-        "corpName": "KBI메탈",
-        "industry": "auto",
-        "viaCode": "479960",
-        "viaName": "위너스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "237880",
-        "viaName": "클리오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "352480",
-        "corpName": "씨앤씨인터내셔널",
-        "industry": "cosmetics",
-        "viaCode": "237880",
-        "viaName": "클리오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "241710",
-        "corpName": "코스메카코리아",
-        "industry": "cosmetics",
+        "stockCode": "044820",
+        "corpName": "코스맥스비티아이",
+        "industry": "food",
         "viaCode": "237880",
         "viaName": "클리오",
         "hopDistance": 2
@@ -201,43 +177,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "019570",
-        "corpName": "플루토스",
-        "industry": "finance",
-        "viaCode": "087600",
-        "viaName": "픽셀플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "044820",
-        "corpName": "코스맥스비티아이",
-        "industry": "food",
-        "viaCode": "237880",
-        "viaName": "클리오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "192820",
-        "corpName": "코스맥스",
+        "stockCode": "352480",
+        "corpName": "씨앤씨인터내셔널",
         "industry": "cosmetics",
         "viaCode": "237880",
         "viaName": "클리오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123690",
-        "corpName": "한국화장품",
-        "industry": "cosmetics",
-        "viaCode": "237880",
-        "viaName": "클리오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037460",
-        "corpName": "삼지전자",
-        "industry": "telecom",
-        "viaCode": "087600",
-        "viaName": "픽셀플러스",
         "hopDistance": 2
       },
       {
@@ -249,9 +193,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "194700",
-        "corpName": "노바렉스",
-        "industry": "pharma",
+        "stockCode": "024840",
+        "corpName": "KBI메탈",
+        "industry": "auto",
         "viaCode": "479960",
         "viaName": "위너스",
         "hopDistance": 2
@@ -267,6 +211,62 @@
       {
         "stockCode": "161890",
         "corpName": "한국콜마",
+        "industry": "cosmetics",
+        "viaCode": "237880",
+        "viaName": "클리오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019570",
+        "corpName": "플루토스",
+        "industry": "finance",
+        "viaCode": "087600",
+        "viaName": "픽셀플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "237880",
+        "viaName": "클리오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "194700",
+        "corpName": "노바렉스",
+        "industry": "pharma",
+        "viaCode": "479960",
+        "viaName": "위너스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192820",
+        "corpName": "코스맥스",
+        "industry": "cosmetics",
+        "viaCode": "237880",
+        "viaName": "클리오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037460",
+        "corpName": "삼지전자",
+        "industry": "telecom",
+        "viaCode": "087600",
+        "viaName": "픽셀플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "241710",
+        "corpName": "코스메카코리아",
+        "industry": "cosmetics",
+        "viaCode": "237880",
+        "viaName": "클리오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123690",
+        "corpName": "한국화장품",
         "industry": "cosmetics",
         "viaCode": "237880",
         "viaName": "클리오",

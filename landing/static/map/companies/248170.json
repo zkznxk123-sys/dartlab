@@ -156,17 +156,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "006040",
-        "corpName": "동원산업",
-        "industry": "finance",
+        "stockCode": "008040",
+        "corpName": "사조동아원",
+        "industry": "food",
         "viaCode": "007540",
         "viaName": "샘표",
         "hopDistance": 2
       },
       {
-        "stockCode": "089790",
-        "corpName": "제이티",
-        "industry": "semiconductor",
+        "stockCode": "267980",
+        "corpName": "매일유업",
+        "industry": "food",
         "viaCode": "007540",
         "viaName": "샘표",
         "hopDistance": 2
@@ -180,17 +180,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "008040",
-        "corpName": "사조동아원",
-        "industry": "food",
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
         "viaCode": "007540",
         "viaName": "샘표",
         "hopDistance": 2
       },
       {
-        "stockCode": "267980",
-        "corpName": "매일유업",
-        "industry": "food",
+        "stockCode": "006040",
+        "corpName": "동원산업",
+        "industry": "finance",
         "viaCode": "007540",
         "viaName": "샘표",
         "hopDistance": 2

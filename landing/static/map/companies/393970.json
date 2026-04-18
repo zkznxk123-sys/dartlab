@@ -164,57 +164,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "009190",
-        "corpName": "대양금속",
-        "industry": "steel",
+        "stockCode": "220100",
+        "corpName": "퓨쳐켐",
+        "industry": "chemical",
         "viaCode": "007530",
         "viaName": "와이엠",
         "hopDistance": 2
       },
       {
-        "stockCode": "365590",
-        "corpName": "하이딥",
-        "industry": "semiconductor",
-        "viaCode": "382800",
-        "viaName": "지앤비에스 에코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "166480",
-        "corpName": "코아스템켐온",
-        "industry": "pharma",
-        "viaCode": "382800",
-        "viaName": "지앤비에스 에코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "118990",
-        "corpName": "모트렉스",
-        "industry": "auto",
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
         "viaCode": "007530",
         "viaName": "와이엠",
         "hopDistance": 2
       },
       {
-        "stockCode": "370090",
-        "corpName": "퓨런티어",
-        "industry": "electronics",
-        "viaCode": "382800",
-        "viaName": "지앤비에스 에코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "097780",
-        "corpName": "에코볼트",
-        "industry": "electronics",
-        "viaCode": "192650",
-        "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
+        "stockCode": "273640",
+        "corpName": "와이엠텍",
+        "industry": "electrical",
         "viaCode": "007530",
         "viaName": "와이엠",
         "hopDistance": 2
@@ -228,11 +196,291 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "204270",
+        "corpName": "제이앤티씨",
+        "industry": "electronics",
+        "viaCode": "192650",
+        "viaName": "드림텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005670",
+        "corpName": "푸드웰",
+        "industry": "food",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "192650",
+        "viaName": "드림텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "405000",
+        "corpName": "플라즈맵",
+        "industry": "medicalDevice",
+        "viaCode": "192650",
+        "viaName": "드림텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058820",
+        "corpName": "CMG제약",
+        "industry": "pharma",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "166480",
+        "corpName": "코아스템켐온",
+        "industry": "pharma",
+        "viaCode": "382800",
+        "viaName": "지앤비에스 에코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "192650",
+        "viaName": "드림텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067310",
+        "corpName": "하나마이크론",
+        "industry": "semiconductor",
+        "viaCode": "192650",
+        "viaName": "드림텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "365590",
+        "corpName": "하이딥",
+        "industry": "semiconductor",
+        "viaCode": "382800",
+        "viaName": "지앤비에스 에코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002900",
+        "corpName": "TYM",
+        "industry": "retail",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009190",
+        "corpName": "대양금속",
+        "industry": "steel",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "118990",
+        "corpName": "모트렉스",
+        "industry": "auto",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "097780",
+        "corpName": "에코볼트",
+        "industry": "electronics",
+        "viaCode": "192650",
+        "viaName": "드림텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085660",
+        "corpName": "차바이오텍",
+        "industry": "pharma",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "251370",
+        "corpName": "와이엠티",
+        "industry": "electronics",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065680",
+        "corpName": "우주일렉트로",
+        "industry": "electronics",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009140",
+        "corpName": "경인전자",
+        "industry": "electronics",
+        "viaCode": "106080",
+        "viaName": "케이이엠텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "192650",
+        "viaName": "드림텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "159010",
+        "corpName": "아스플로",
+        "industry": "machinery",
+        "viaCode": "382800",
+        "viaName": "지앤비에스 에코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "353200",
+        "corpName": "대덕전자",
+        "industry": "electronics",
+        "viaCode": "192650",
+        "viaName": "드림텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "021240",
+        "corpName": "코웨이",
+        "industry": "electronics",
+        "viaCode": "382800",
+        "viaName": "지앤비에스 에코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "370090",
+        "corpName": "퓨런티어",
+        "industry": "electronics",
+        "viaCode": "382800",
+        "viaName": "지앤비에스 에코",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "090460",
         "corpName": "비에이치",
         "industry": "electronics",
         "viaCode": "007530",
         "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030520",
+        "corpName": "한글과컴퓨터",
+        "industry": "software",
+        "viaCode": "192650",
+        "viaName": "드림텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025540",
+        "corpName": "한국단자공업",
+        "industry": "electronics",
+        "viaCode": "192650",
+        "viaName": "드림텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "155650",
+        "corpName": "와이엠씨",
+        "industry": "semiconductor",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
+        "viaCode": "192650",
+        "viaName": "드림텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
+        "viaCode": "192650",
+        "viaName": "드림텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082270",
+        "corpName": "젬백스",
+        "industry": "software",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054920",
+        "corpName": "한컴위드",
+        "industry": "software",
+        "viaCode": "192650",
+        "viaName": "드림텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "077500",
+        "corpName": "유니퀘스트",
+        "industry": "retail",
+        "viaCode": "192650",
+        "viaName": "드림텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003530",
+        "corpName": "한화투자증권",
+        "industry": "aerospace",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067010",
+        "corpName": "이씨에스",
+        "industry": "software",
+        "viaCode": "192650",
+        "viaName": "드림텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "190510",
+        "corpName": "나무가",
+        "industry": "electronics",
+        "viaCode": "192650",
+        "viaName": "드림텍",
         "hopDistance": 2
       },
       {
@@ -252,259 +500,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "273640",
-        "corpName": "와이엠텍",
-        "industry": "electrical",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000720",
-        "corpName": "현대건설",
-        "industry": "construction",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "220100",
-        "corpName": "퓨쳐켐",
-        "industry": "chemical",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009140",
-        "corpName": "경인전자",
-        "industry": "electronics",
-        "viaCode": "106080",
-        "viaName": "케이이엠텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "159010",
-        "corpName": "아스플로",
-        "industry": "machinery",
-        "viaCode": "382800",
-        "viaName": "지앤비에스 에코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "232530",
-        "corpName": "이엠티",
-        "industry": "semiconductor",
-        "viaCode": "192650",
-        "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "190510",
-        "corpName": "나무가",
-        "industry": "electronics",
-        "viaCode": "192650",
-        "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054920",
-        "corpName": "한컴위드",
-        "industry": "software",
-        "viaCode": "192650",
-        "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "065680",
-        "corpName": "우주일렉트로",
-        "industry": "electronics",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025540",
-        "corpName": "한국단자공업",
-        "industry": "electronics",
-        "viaCode": "192650",
-        "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001630",
-        "corpName": "종근당홀딩스",
-        "industry": "pharma",
-        "viaCode": "192650",
-        "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "109610",
-        "corpName": "에스와이",
-        "industry": "electronics",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "021240",
-        "corpName": "코웨이",
-        "industry": "electronics",
-        "viaCode": "382800",
-        "viaName": "지앤비에스 에코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "085660",
-        "corpName": "차바이오텍",
-        "industry": "pharma",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "353200",
-        "corpName": "대덕전자",
-        "industry": "electronics",
-        "viaCode": "192650",
-        "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030520",
-        "corpName": "한글과컴퓨터",
-        "industry": "software",
-        "viaCode": "192650",
-        "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "204270",
-        "corpName": "제이앤티씨",
-        "industry": "electronics",
-        "viaCode": "192650",
-        "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082270",
-        "corpName": "젬백스",
-        "industry": "software",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "077500",
-        "corpName": "유니퀘스트",
-        "industry": "retail",
-        "viaCode": "192650",
-        "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "192650",
-        "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003530",
-        "corpName": "한화투자증권",
-        "industry": "aerospace",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067310",
-        "corpName": "하나마이크론",
-        "industry": "semiconductor",
-        "viaCode": "192650",
-        "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "405000",
-        "corpName": "플라즈맵",
-        "industry": "medicalDevice",
-        "viaCode": "192650",
-        "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "251370",
-        "corpName": "와이엠티",
-        "industry": "electronics",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067010",
-        "corpName": "이씨에스",
-        "industry": "software",
-        "viaCode": "192650",
-        "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002900",
-        "corpName": "TYM",
-        "industry": "retail",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "031330",
         "corpName": "에스에이엠티",
         "industry": "electronics",
         "viaCode": "192650",
         "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "192650",
-        "viaName": "드림텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005670",
-        "corpName": "푸드웰",
-        "industry": "food",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058820",
-        "corpName": "CMG제약",
-        "industry": "pharma",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "155650",
-        "corpName": "와이엠씨",
-        "industry": "semiconductor",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "007530",
-        "viaName": "와이엠",
         "hopDistance": 2
       }
     ],

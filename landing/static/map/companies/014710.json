@@ -376,233 +376,49 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "213420",
-        "corpName": "덕산네오룩스",
-        "industry": "electronics",
+        "stockCode": "016880",
+        "corpName": "웅진",
+        "industry": "education",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
         "hopDistance": 2
       },
       {
-        "stockCode": "103140",
-        "corpName": "풍산",
-        "industry": "steel",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000880",
-        "corpName": "한화",
-        "industry": "aerospace",
-        "viaCode": "003960",
-        "viaName": "사조대림",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078600",
-        "corpName": "대주전자재료",
-        "industry": "battery",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024880",
-        "corpName": "케이피에프",
-        "industry": "steel",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "094280",
-        "corpName": "효성 ITX",
-        "industry": "chemical",
+        "stockCode": "072710",
+        "corpName": "농심홀딩스",
+        "industry": "food",
         "viaCode": "008040",
         "viaName": "사조동아원",
         "hopDistance": 2
       },
       {
-        "stockCode": "454910",
-        "corpName": "두산로보틱스",
-        "industry": "machinery",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "028670",
-        "corpName": "팬오션",
-        "industry": "logistics",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "210980",
-        "corpName": "SK디앤디",
-        "industry": "software",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "382840",
-        "corpName": "원준",
-        "industry": "machinery",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "086710",
-        "corpName": "선진뷰티사이언스",
-        "industry": "cosmetics",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "049520",
-        "corpName": "유아이엘",
-        "industry": "electronics",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "200670",
-        "corpName": "휴메딕스",
-        "industry": "pharma",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "443250",
-        "corpName": "레뷰코퍼레이션",
-        "industry": "media",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "352820",
-        "corpName": "하이브",
-        "industry": "media",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007540",
-        "corpName": "샘표",
-        "industry": "retail",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "214270",
-        "corpName": "FSN",
-        "industry": "software",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "183300",
-        "corpName": "코미코",
-        "industry": "electronics",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006840",
-        "corpName": "AK홀딩스",
+        "stockCode": "039490",
+        "corpName": "키움증권",
         "industry": "finance",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
         "hopDistance": 2
       },
       {
-        "stockCode": "031440",
-        "corpName": "신세계푸드",
-        "industry": "retail",
-        "viaCode": "003960",
-        "viaName": "사조대림",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "357780",
-        "corpName": "솔브레인",
+        "stockCode": "079370",
+        "corpName": "제우스",
         "industry": "electronics",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
         "hopDistance": 2
       },
       {
-        "stockCode": "045100",
-        "corpName": "한양이엔지",
-        "industry": "consulting",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "234080",
-        "corpName": "JW생명과학",
+        "stockCode": "109820",
+        "corpName": "진매트릭스",
         "industry": "pharma",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
         "hopDistance": 2
       },
       {
-        "stockCode": "090460",
-        "corpName": "비에이치",
-        "industry": "electronics",
-        "viaCode": "003960",
-        "viaName": "사조대림",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267250",
-        "corpName": "HD현대",
-        "industry": "shipbuilding",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088390",
-        "corpName": "이녹스",
-        "industry": "railroad",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "354320",
-        "corpName": "알멕",
-        "industry": "plastic",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "462870",
-        "corpName": "시프트업",
-        "industry": "software",
+        "stockCode": "246960",
+        "corpName": "SCL사이언스",
+        "industry": "chemical",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
         "hopDistance": 2
@@ -616,8 +432,216 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "005740",
+        "corpName": "크라운해태홀딩스",
+        "industry": "food",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
+        "industry": "chemical",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000880",
+        "corpName": "한화",
+        "industry": "aerospace",
+        "viaCode": "003960",
+        "viaName": "사조대림",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067990",
+        "corpName": "도이치모터스",
+        "industry": "retail",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "278280",
         "corpName": "천보",
+        "industry": "electronics",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "006090",
+        "viaName": "사조오양",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101530",
+        "corpName": "해태제과식품",
+        "industry": "food",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "213420",
+        "corpName": "덕산네오룩스",
+        "industry": "electronics",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096760",
+        "corpName": "JW홀딩스",
+        "industry": "retail",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "183300",
+        "corpName": "코미코",
+        "industry": "electronics",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "094280",
+        "corpName": "효성 ITX",
+        "industry": "chemical",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004990",
+        "corpName": "롯데지주",
+        "industry": "finance",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "253450",
+        "corpName": "스튜디오드래곤",
+        "industry": "media",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "382840",
+        "corpName": "원준",
+        "industry": "machinery",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060590",
+        "corpName": "씨티씨바이오",
+        "industry": "pharma",
+        "viaCode": "003960",
+        "viaName": "사조대림",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352820",
+        "corpName": "하이브",
+        "industry": "media",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "373220",
+        "corpName": "LG에너지솔루션",
+        "industry": "chemical",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "139480",
+        "corpName": "이마트",
+        "industry": "retail",
+        "viaCode": "003960",
+        "viaName": "사조대림",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007310",
+        "corpName": "오뚜기",
+        "industry": "food",
+        "viaCode": "003960",
+        "viaName": "사조대림",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "454910",
+        "corpName": "두산로보틱스",
+        "industry": "machinery",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "295310",
+        "corpName": "에이치브이엠",
+        "industry": "semiconductor",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031440",
+        "corpName": "신세계푸드",
+        "industry": "retail",
+        "viaCode": "003960",
+        "viaName": "사조대림",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "210980",
+        "corpName": "SK디앤디",
+        "industry": "software",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "420770",
+        "corpName": "기가비스",
+        "industry": "machinery",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "357780",
+        "corpName": "솔브레인",
         "industry": "electronics",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
@@ -632,121 +656,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "025900",
-        "corpName": "동화기업",
-        "industry": "paper",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "377300",
-        "corpName": "카카오페이",
-        "industry": "finance",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "246960",
-        "corpName": "SCL사이언스",
-        "industry": "chemical",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005740",
-        "corpName": "크라운해태홀딩스",
-        "industry": "food",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "221840",
-        "corpName": "하이즈항공",
-        "industry": "aerospace",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "062040",
-        "corpName": "산일전기",
-        "industry": "electrical",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "109820",
-        "corpName": "진매트릭스",
-        "industry": "pharma",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "161000",
-        "corpName": "애경케미칼",
-        "industry": "chemical",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "280360",
-        "corpName": "롯데웰푸드",
-        "industry": "food",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005810",
-        "corpName": "풍산홀딩스",
-        "industry": "retail",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "096770",
-        "corpName": "SK이노베이션",
-        "industry": "chemical",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "005070",
         "corpName": "코스모신소재",
         "industry": "battery",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084730",
-        "corpName": "팅크웨어",
-        "industry": "electronics",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "015020",
-        "corpName": "이스타코",
-        "industry": "realestate",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "079370",
-        "corpName": "제우스",
-        "industry": "electronics",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
         "hopDistance": 2
@@ -760,128 +672,56 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "139480",
-        "corpName": "이마트",
-        "industry": "retail",
-        "viaCode": "003960",
-        "viaName": "사조대림",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "096760",
-        "corpName": "JW홀딩스",
-        "industry": "retail",
+        "stockCode": "354320",
+        "corpName": "알멕",
+        "industry": "plastic",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
         "hopDistance": 2
       },
       {
-        "stockCode": "179290",
-        "corpName": "엠아이텍",
-        "industry": "medicalDevice",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004370",
-        "corpName": "농심",
-        "industry": "food",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "358570",
-        "corpName": "지아이이노베이션",
-        "industry": "pharma",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "253450",
-        "corpName": "스튜디오드래곤",
-        "industry": "media",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002710",
-        "corpName": "TCC스틸",
+        "stockCode": "024880",
+        "corpName": "케이피에프",
         "industry": "steel",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
         "hopDistance": 2
       },
       {
-        "stockCode": "033830",
-        "corpName": "티비씨",
-        "industry": "media",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007310",
-        "corpName": "오뚜기",
-        "industry": "food",
-        "viaCode": "003960",
-        "viaName": "사조대림",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "072710",
-        "corpName": "농심홀딩스",
-        "industry": "food",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "420770",
-        "corpName": "기가비스",
-        "industry": "machinery",
+        "stockCode": "234080",
+        "corpName": "JW생명과학",
+        "industry": "pharma",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
         "hopDistance": 2
       },
       {
-        "stockCode": "016880",
-        "corpName": "웅진",
-        "industry": "education",
+        "stockCode": "012630",
+        "corpName": "HDC",
+        "industry": "finance",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
         "hopDistance": 2
       },
       {
-        "stockCode": "295310",
-        "corpName": "에이치브이엠",
+        "stockCode": "005930",
+        "corpName": "삼성전자",
         "industry": "semiconductor",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
         "hopDistance": 2
       },
       {
-        "stockCode": "101530",
-        "corpName": "해태제과식품",
-        "industry": "food",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
+        "stockCode": "028670",
+        "corpName": "팬오션",
+        "industry": "logistics",
+        "viaCode": "007160",
+        "viaName": "사조산업",
         "hopDistance": 2
       },
       {
-        "stockCode": "377740",
-        "corpName": "바이오노트",
+        "stockCode": "358570",
+        "corpName": "지아이이노베이션",
         "industry": "pharma",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
@@ -896,41 +736,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "353810",
-        "corpName": "이지바이오",
-        "industry": "chemical",
+        "stockCode": "002710",
+        "corpName": "TCC스틸",
+        "industry": "steel",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
         "hopDistance": 2
       },
       {
-        "stockCode": "064820",
-        "corpName": "케이프",
-        "industry": "auto",
+        "stockCode": "103140",
+        "corpName": "풍산",
+        "industry": "steel",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
         "hopDistance": 2
       },
       {
-        "stockCode": "006400",
-        "corpName": "삼성SDI",
-        "industry": "chemical",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067990",
-        "corpName": "도이치모터스",
+        "stockCode": "007540",
+        "corpName": "샘표",
         "industry": "retail",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "221840",
+        "corpName": "하이즈항공",
+        "industry": "aerospace",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
         "hopDistance": 2
       },
       {
-        "stockCode": "012630",
-        "corpName": "HDC",
-        "industry": "finance",
+        "stockCode": "018310",
+        "corpName": "삼목에스폼",
+        "industry": "plastic",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200670",
+        "corpName": "휴메딕스",
+        "industry": "pharma",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
         "hopDistance": 2
@@ -944,19 +792,43 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004990",
-        "corpName": "롯데지주",
-        "industry": "finance",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
+        "stockCode": "353810",
+        "corpName": "이지바이오",
+        "industry": "chemical",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
         "hopDistance": 2
       },
       {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
-        "viaCode": "006090",
-        "viaName": "사조오양",
+        "stockCode": "006400",
+        "corpName": "삼성SDI",
+        "industry": "chemical",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084730",
+        "corpName": "팅크웨어",
+        "industry": "electronics",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079160",
+        "corpName": "CJ CGV",
+        "industry": "food",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086710",
+        "corpName": "선진뷰티사이언스",
+        "industry": "cosmetics",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
         "hopDistance": 2
       },
       {
@@ -976,49 +848,177 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "060590",
-        "corpName": "씨티씨바이오",
-        "industry": "pharma",
-        "viaCode": "003960",
-        "viaName": "사조대림",
+        "stockCode": "049520",
+        "corpName": "유아이엘",
+        "industry": "electronics",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
         "hopDistance": 2
       },
       {
-        "stockCode": "039490",
-        "corpName": "키움증권",
+        "stockCode": "006840",
+        "corpName": "AK홀딩스",
         "industry": "finance",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "280360",
+        "corpName": "롯데웰푸드",
+        "industry": "food",
         "viaCode": "008040",
         "viaName": "사조동아원",
         "hopDistance": 2
       },
       {
-        "stockCode": "373220",
-        "corpName": "LG에너지솔루션",
+        "stockCode": "078600",
+        "corpName": "대주전자재료",
+        "industry": "battery",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090460",
+        "corpName": "비에이치",
+        "industry": "electronics",
+        "viaCode": "003960",
+        "viaName": "사조대림",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377300",
+        "corpName": "카카오페이",
+        "industry": "finance",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214270",
+        "corpName": "FSN",
+        "industry": "software",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "443250",
+        "corpName": "레뷰코퍼레이션",
+        "industry": "media",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377740",
+        "corpName": "바이오노트",
+        "industry": "pharma",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267250",
+        "corpName": "HD현대",
+        "industry": "shipbuilding",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088390",
+        "corpName": "이녹스",
+        "industry": "railroad",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025900",
+        "corpName": "동화기업",
+        "industry": "paper",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "462870",
+        "corpName": "시프트업",
+        "industry": "software",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "179290",
+        "corpName": "엠아이텍",
+        "industry": "medicalDevice",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "062040",
+        "corpName": "산일전기",
+        "industry": "electrical",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "045100",
+        "corpName": "한양이엔지",
+        "industry": "consulting",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015020",
+        "corpName": "이스타코",
+        "industry": "realestate",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005810",
+        "corpName": "풍산홀딩스",
+        "industry": "retail",
+        "viaCode": "007330",
+        "viaName": "푸른저축은행",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161000",
+        "corpName": "애경케미칼",
         "industry": "chemical",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
         "hopDistance": 2
       },
       {
-        "stockCode": "089790",
-        "corpName": "제이티",
-        "industry": "semiconductor",
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
         "viaCode": "008040",
         "viaName": "사조동아원",
         "hopDistance": 2
       },
       {
-        "stockCode": "079160",
-        "corpName": "CJ CGV",
+        "stockCode": "004370",
+        "corpName": "농심",
         "industry": "food",
-        "viaCode": "007330",
-        "viaName": "푸른저축은행",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
         "hopDistance": 2
       },
       {
-        "stockCode": "018310",
-        "corpName": "삼목에스폼",
-        "industry": "plastic",
+        "stockCode": "064820",
+        "corpName": "케이프",
+        "industry": "auto",
         "viaCode": "007330",
         "viaName": "푸른저축은행",
         "hopDistance": 2

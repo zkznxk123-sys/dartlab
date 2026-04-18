@@ -140,17 +140,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "225530",
-        "corpName": "HC보광산업",
-        "industry": "construction",
-        "viaCode": "060560",
-        "viaName": "HC홈센타",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "060560",
         "viaName": "HC홈센타",
         "hopDistance": 2
@@ -164,9 +156,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
+        "viaCode": "060560",
+        "viaName": "HC홈센타",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "225530",
+        "corpName": "HC보광산업",
+        "industry": "construction",
         "viaCode": "060560",
         "viaName": "HC홈센타",
         "hopDistance": 2

@@ -192,9 +192,41 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "058400",
-        "corpName": "KNN",
+        "stockCode": "013520",
+        "corpName": "화승코퍼레이션",
+        "industry": "plastic",
+        "viaCode": "006060",
+        "viaName": "화승인더스트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004270",
+        "corpName": "남성",
         "industry": "telecom",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079430",
+        "corpName": "현대리바트",
+        "industry": "paper",
+        "viaCode": "002820",
+        "viaName": "SUN&L",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "006060",
+        "viaName": "화승인더스트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090350",
+        "corpName": "노루페인트",
+        "industry": "chemical",
         "viaCode": "004910",
         "viaName": "조광페인트",
         "hopDistance": 2
@@ -216,6 +248,62 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "007280",
+        "corpName": "한국특강",
+        "industry": "steel",
+        "viaCode": "002820",
+        "viaName": "SUN&L",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008870",
+        "corpName": "금비",
+        "industry": "construction",
+        "viaCode": "002820",
+        "viaName": "SUN&L",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015230",
+        "corpName": "대창단조",
+        "industry": "electronics",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058400",
+        "corpName": "KNN",
+        "industry": "telecom",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006840",
+        "corpName": "AK홀딩스",
+        "industry": "finance",
+        "viaCode": "002820",
+        "viaName": "SUN&L",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "006060",
+        "viaName": "화승인더스트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000320",
+        "corpName": "노루홀딩스",
+        "industry": "finance",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "095910",
         "corpName": "에스에너지",
         "industry": "energy",
@@ -232,57 +320,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "007280",
-        "corpName": "한국특강",
-        "industry": "steel",
-        "viaCode": "002820",
-        "viaName": "SUN&L",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004270",
-        "corpName": "남성",
-        "industry": "telecom",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "005750",
         "corpName": "대림바스",
         "industry": "realestate",
-        "viaCode": "006060",
-        "viaName": "화승인더스트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000500",
-        "corpName": "가온전선",
-        "industry": "retail",
-        "viaCode": "002820",
-        "viaName": "SUN&L",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "008870",
-        "corpName": "금비",
-        "industry": "construction",
-        "viaCode": "002820",
-        "viaName": "SUN&L",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "079430",
-        "corpName": "현대리바트",
-        "industry": "paper",
-        "viaCode": "002820",
-        "viaName": "SUN&L",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "013520",
-        "corpName": "화승코퍼레이션",
-        "industry": "plastic",
         "viaCode": "006060",
         "viaName": "화승인더스트리",
         "hopDistance": 2
@@ -296,65 +336,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006840",
-        "corpName": "AK홀딩스",
-        "industry": "finance",
-        "viaCode": "002820",
-        "viaName": "SUN&L",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "241590",
-        "corpName": "화승엔터프라이즈",
-        "industry": "textile",
-        "viaCode": "006060",
-        "viaName": "화승인더스트리",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "016800",
         "corpName": "퍼시스",
         "industry": "paper",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007210",
-        "corpName": "벽산",
-        "industry": "auto",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "015230",
-        "corpName": "대창단조",
-        "industry": "electronics",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007690",
-        "corpName": "국도화학",
-        "industry": "chemical",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "378850",
-        "corpName": "화승알앤에이",
-        "industry": "plastic",
-        "viaCode": "006060",
-        "viaName": "화승인더스트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000860",
-        "corpName": "강남제비스코",
-        "industry": "chemical",
         "viaCode": "004910",
         "viaName": "조광페인트",
         "hopDistance": 2
@@ -376,41 +360,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "033830",
-        "corpName": "티비씨",
-        "industry": "media",
-        "viaCode": "006060",
-        "viaName": "화승인더스트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090350",
-        "corpName": "노루페인트",
+        "stockCode": "007690",
+        "corpName": "국도화학",
         "industry": "chemical",
         "viaCode": "004910",
         "viaName": "조광페인트",
         "hopDistance": 2
       },
       {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "006060",
-        "viaName": "화승인더스트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "006060",
-        "viaName": "화승인더스트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000320",
-        "corpName": "노루홀딩스",
-        "industry": "finance",
+        "stockCode": "007210",
+        "corpName": "벽산",
+        "industry": "auto",
         "viaCode": "004910",
         "viaName": "조광페인트",
         "hopDistance": 2
@@ -419,6 +379,46 @@
         "stockCode": "024110",
         "corpName": "기업은행",
         "industry": "finance",
+        "viaCode": "006060",
+        "viaName": "화승인더스트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000860",
+        "corpName": "강남제비스코",
+        "industry": "chemical",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "378850",
+        "corpName": "화승알앤에이",
+        "industry": "plastic",
+        "viaCode": "006060",
+        "viaName": "화승인더스트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
+        "viaCode": "006060",
+        "viaName": "화승인더스트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000500",
+        "corpName": "가온전선",
+        "industry": "retail",
+        "viaCode": "002820",
+        "viaName": "SUN&L",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "241590",
+        "corpName": "화승엔터프라이즈",
+        "industry": "textile",
         "viaCode": "006060",
         "viaName": "화승인더스트리",
         "hopDistance": 2

@@ -109,57 +109,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "000210",
-        "corpName": "DL",
-        "industry": "construction",
-        "viaCode": "010780",
-        "viaName": "아이에스동서",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "000720",
         "corpName": "현대건설",
         "industry": "construction",
-        "viaCode": "010780",
-        "viaName": "아이에스동서",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082640",
-        "corpName": "동양생명",
-        "industry": "finance",
-        "viaCode": "010780",
-        "viaName": "아이에스동서",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "091590",
-        "corpName": "남화토건",
-        "industry": "construction",
-        "viaCode": "010780",
-        "viaName": "아이에스동서",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "138930",
-        "corpName": "BNK금융지주",
-        "industry": "finance",
-        "viaCode": "010780",
-        "viaName": "아이에스동서",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "097230",
-        "corpName": "HJ중공업",
-        "industry": "construction",
-        "viaCode": "010780",
-        "viaName": "아이에스동서",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060380",
-        "corpName": "동양에스텍",
-        "industry": "steel",
         "viaCode": "010780",
         "viaName": "아이에스동서",
         "hopDistance": 2
@@ -173,8 +125,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "012630",
-        "corpName": "HDC",
+        "stockCode": "138930",
+        "corpName": "BNK금융지주",
         "industry": "finance",
         "viaCode": "010780",
         "viaName": "아이에스동서",
@@ -189,8 +141,64 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "060150",
+        "corpName": "인선이엔티",
+        "industry": "environment",
+        "viaCode": "010780",
+        "viaName": "아이에스동서",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060380",
+        "corpName": "동양에스텍",
+        "industry": "steel",
+        "viaCode": "010780",
+        "viaName": "아이에스동서",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "097230",
+        "corpName": "HJ중공업",
+        "industry": "construction",
+        "viaCode": "010780",
+        "viaName": "아이에스동서",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091590",
+        "corpName": "남화토건",
+        "industry": "construction",
+        "viaCode": "010780",
+        "viaName": "아이에스동서",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012630",
+        "corpName": "HDC",
+        "industry": "finance",
+        "viaCode": "010780",
+        "viaName": "아이에스동서",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "375500",
         "corpName": "DL이앤씨",
+        "industry": "construction",
+        "viaCode": "010780",
+        "viaName": "아이에스동서",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082640",
+        "corpName": "동양생명",
+        "industry": "finance",
+        "viaCode": "010780",
+        "viaName": "아이에스동서",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000210",
+        "corpName": "DL",
         "industry": "construction",
         "viaCode": "010780",
         "viaName": "아이에스동서",
@@ -200,14 +208,6 @@
         "stockCode": "298690",
         "corpName": "에어부산",
         "industry": "aerospace",
-        "viaCode": "010780",
-        "viaName": "아이에스동서",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060150",
-        "corpName": "인선이엔티",
-        "industry": "environment",
         "viaCode": "010780",
         "viaName": "아이에스동서",
         "hopDistance": 2

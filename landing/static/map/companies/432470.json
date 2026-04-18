@@ -109,65 +109,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "057050",
-        "viaName": "현대홈쇼핑",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090460",
-        "corpName": "비에이치",
-        "industry": "electronics",
-        "viaCode": "057050",
-        "viaName": "현대홈쇼핑",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "453340",
-        "corpName": "현대그린푸드",
-        "industry": "retail",
-        "viaCode": "057050",
-        "viaName": "현대홈쇼핑",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "083650",
         "corpName": "비에이치아이",
         "industry": "machinery",
-        "viaCode": "057050",
-        "viaName": "현대홈쇼핑",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053210",
-        "corpName": "케이티스카이라이프",
-        "industry": "telecom",
-        "viaCode": "057050",
-        "viaName": "현대홈쇼핑",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "013890",
-        "corpName": "지누스",
-        "industry": "paper",
-        "viaCode": "057050",
-        "viaName": "현대홈쇼핑",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064820",
-        "corpName": "케이프",
-        "industry": "auto",
-        "viaCode": "057050",
-        "viaName": "현대홈쇼핑",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "227840",
-        "corpName": "현대코퍼레이션홀딩스",
-        "industry": "textile",
         "viaCode": "057050",
         "viaName": "현대홈쇼핑",
         "hopDistance": 2
@@ -181,24 +125,24 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "052260",
-        "corpName": "현대바이오랜드",
-        "industry": "chemical",
+        "stockCode": "126560",
+        "corpName": "현대퓨처넷",
+        "industry": "telecom",
         "viaCode": "057050",
         "viaName": "현대홈쇼핑",
         "hopDistance": 2
       },
       {
-        "stockCode": "002070",
-        "corpName": "비비안",
-        "industry": "realestate",
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
         "viaCode": "057050",
         "viaName": "현대홈쇼핑",
         "hopDistance": 2
       },
       {
-        "stockCode": "143160",
-        "corpName": "아이디스",
+        "stockCode": "037460",
+        "corpName": "삼지전자",
         "industry": "telecom",
         "viaCode": "057050",
         "viaName": "현대홈쇼핑",
@@ -213,25 +157,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "041440",
-        "corpName": "현대에버다임",
-        "industry": "machinery",
-        "viaCode": "057050",
-        "viaName": "현대홈쇼핑",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090850",
-        "corpName": "현대이지웰",
-        "industry": "software",
-        "viaCode": "057050",
-        "viaName": "현대홈쇼핑",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005440",
-        "corpName": "현대지에프홀딩스",
-        "industry": "realestate",
+        "stockCode": "048410",
+        "corpName": "현대바이오",
+        "industry": "cosmetics",
         "viaCode": "057050",
         "viaName": "현대홈쇼핑",
         "hopDistance": 2
@@ -245,17 +173,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "011760",
-        "corpName": "현대코퍼레이션",
-        "industry": "construction",
+        "stockCode": "093190",
+        "corpName": "빅솔론",
+        "industry": "electronics",
         "viaCode": "057050",
         "viaName": "현대홈쇼핑",
         "hopDistance": 2
       },
       {
-        "stockCode": "093190",
-        "corpName": "빅솔론",
-        "industry": "electronics",
+        "stockCode": "453340",
+        "corpName": "현대그린푸드",
+        "industry": "retail",
+        "viaCode": "057050",
+        "viaName": "현대홈쇼핑",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "227840",
+        "corpName": "현대코퍼레이션홀딩스",
+        "industry": "textile",
         "viaCode": "057050",
         "viaName": "현대홈쇼핑",
         "hopDistance": 2
@@ -269,9 +205,89 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006370",
-        "corpName": "대구백화점",
+        "stockCode": "053210",
+        "corpName": "케이티스카이라이프",
+        "industry": "telecom",
+        "viaCode": "057050",
+        "viaName": "현대홈쇼핑",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090460",
+        "corpName": "비에이치",
+        "industry": "electronics",
+        "viaCode": "057050",
+        "viaName": "현대홈쇼핑",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041440",
+        "corpName": "현대에버다임",
+        "industry": "machinery",
+        "viaCode": "057050",
+        "viaName": "현대홈쇼핑",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002070",
+        "corpName": "비비안",
+        "industry": "realestate",
+        "viaCode": "057050",
+        "viaName": "현대홈쇼핑",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090850",
+        "corpName": "현대이지웰",
+        "industry": "software",
+        "viaCode": "057050",
+        "viaName": "현대홈쇼핑",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013890",
+        "corpName": "지누스",
+        "industry": "paper",
+        "viaCode": "057050",
+        "viaName": "현대홈쇼핑",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "020000",
+        "corpName": "한섬",
+        "industry": "textile",
+        "viaCode": "057050",
+        "viaName": "현대홈쇼핑",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011760",
+        "corpName": "현대코퍼레이션",
+        "industry": "construction",
+        "viaCode": "057050",
+        "viaName": "현대홈쇼핑",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "057050",
+        "viaName": "현대홈쇼핑",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069960",
+        "corpName": "현대백화점",
         "industry": "retail",
+        "viaCode": "057050",
+        "viaName": "현대홈쇼핑",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005440",
+        "corpName": "현대지에프홀딩스",
+        "industry": "realestate",
         "viaCode": "057050",
         "viaName": "현대홈쇼핑",
         "hopDistance": 2
@@ -293,49 +309,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "020000",
-        "corpName": "한섬",
-        "industry": "textile",
+        "stockCode": "052260",
+        "corpName": "현대바이오랜드",
+        "industry": "chemical",
         "viaCode": "057050",
         "viaName": "현대홈쇼핑",
         "hopDistance": 2
       },
       {
-        "stockCode": "037460",
-        "corpName": "삼지전자",
+        "stockCode": "064820",
+        "corpName": "케이프",
+        "industry": "auto",
+        "viaCode": "057050",
+        "viaName": "현대홈쇼핑",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "143160",
+        "corpName": "아이디스",
         "industry": "telecom",
         "viaCode": "057050",
         "viaName": "현대홈쇼핑",
         "hopDistance": 2
       },
       {
-        "stockCode": "069960",
-        "corpName": "현대백화점",
+        "stockCode": "006370",
+        "corpName": "대구백화점",
         "industry": "retail",
-        "viaCode": "057050",
-        "viaName": "현대홈쇼핑",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "057050",
-        "viaName": "현대홈쇼핑",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "048410",
-        "corpName": "현대바이오",
-        "industry": "cosmetics",
-        "viaCode": "057050",
-        "viaName": "현대홈쇼핑",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "126560",
-        "corpName": "현대퓨처넷",
-        "industry": "telecom",
         "viaCode": "057050",
         "viaName": "현대홈쇼핑",
         "hopDistance": 2

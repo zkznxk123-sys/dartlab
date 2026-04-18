@@ -147,25 +147,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "093510",
-        "corpName": "엔지브이아이",
-        "industry": "energy",
-        "viaCode": "060900",
-        "viaName": "에이전트AI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "060900",
-        "viaName": "에이전트AI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "098660",
-        "corpName": "에스티오",
-        "industry": "textile",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
         "viaCode": "223310",
         "viaName": "사토시홀딩스",
         "hopDistance": 2
@@ -179,25 +163,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "223310",
-        "viaName": "사토시홀딩스",
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "060900",
+        "viaName": "에이전트AI",
         "hopDistance": 2
       },
       {
-        "stockCode": "377030",
-        "corpName": "비트맥스",
-        "industry": "software",
-        "viaCode": "223310",
-        "viaName": "사토시홀딩스",
+        "stockCode": "093510",
+        "corpName": "엔지브이아이",
+        "industry": "energy",
+        "viaCode": "060900",
+        "viaName": "에이전트AI",
         "hopDistance": 2
       },
       {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
         "viaCode": "060900",
         "viaName": "에이전트AI",
         "hopDistance": 2
@@ -211,17 +195,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "095910",
-        "corpName": "에스에너지",
-        "industry": "energy",
+        "stockCode": "377030",
+        "corpName": "비트맥스",
+        "industry": "software",
+        "viaCode": "223310",
+        "viaName": "사토시홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "098660",
+        "corpName": "에스티오",
+        "industry": "textile",
+        "viaCode": "223310",
+        "viaName": "사토시홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
         "viaCode": "060900",
         "viaName": "에이전트AI",
         "hopDistance": 2
       },
       {
-        "stockCode": "109610",
-        "corpName": "에스와이",
-        "industry": "electronics",
+        "stockCode": "095910",
+        "corpName": "에스에너지",
+        "industry": "energy",
         "viaCode": "060900",
         "viaName": "에이전트AI",
         "hopDistance": 2

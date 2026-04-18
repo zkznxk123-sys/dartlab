@@ -129,6 +129,14 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "033780",
+        "corpName": "케이티앤지",
+        "industry": "food",
+        "viaCode": "078140",
+        "viaName": "대봉엘에스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "084110",
         "corpName": "휴온스글로벌",
         "industry": "pharma",
@@ -137,9 +145,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "085310",
-        "corpName": "엔케이",
-        "industry": "food",
+        "stockCode": "347740",
+        "corpName": "피엔케이피부임상연구센타",
+        "industry": "consulting",
         "viaCode": "078140",
         "viaName": "대봉엘에스",
         "hopDistance": 2
@@ -147,6 +155,14 @@
       {
         "stockCode": "082800",
         "corpName": "비보존 제약",
+        "industry": "pharma",
+        "viaCode": "078140",
+        "viaName": "대봉엘에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200670",
+        "corpName": "휴메딕스",
         "industry": "pharma",
         "viaCode": "078140",
         "viaName": "대봉엘에스",
@@ -161,24 +177,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "347740",
-        "corpName": "피엔케이피부임상연구센타",
-        "industry": "consulting",
-        "viaCode": "078140",
-        "viaName": "대봉엘에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "200670",
-        "corpName": "휴메딕스",
-        "industry": "pharma",
-        "viaCode": "078140",
-        "viaName": "대봉엘에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033780",
-        "corpName": "케이티앤지",
+        "stockCode": "085310",
+        "corpName": "엔케이",
         "industry": "food",
         "viaCode": "078140",
         "viaName": "대봉엘에스",

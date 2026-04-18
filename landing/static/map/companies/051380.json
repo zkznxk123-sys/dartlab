@@ -144,62 +144,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "065570",
-        "corpName": "삼영이엔씨",
-        "industry": "telecom",
-        "viaCode": "069460",
-        "viaName": "대호에이엘",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "043360",
-        "corpName": "디지아이",
-        "industry": "electronics",
-        "viaCode": "099520",
-        "viaName": "DGI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025620",
-        "corpName": "차AI헬스케어",
-        "industry": "cosmetics",
-        "viaCode": "069460",
-        "viaName": "대호에이엘",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
-        "viaCode": "069460",
-        "viaName": "대호에이엘",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "460850",
-        "corpName": "동국씨엠",
-        "industry": "steel",
-        "viaCode": "069460",
-        "viaName": "대호에이엘",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "380540",
-        "corpName": "옵티코어",
-        "industry": "electronics",
-        "viaCode": "069460",
-        "viaName": "대호에이엘",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "091580",
-        "corpName": "상신이디피",
-        "industry": "electronics",
-        "viaCode": "069460",
-        "viaName": "대호에이엘",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "089970",
         "corpName": "브이엠",
         "industry": "machinery",
@@ -208,32 +152,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "177830",
-        "corpName": "파버나인",
-        "industry": "electronics",
-        "viaCode": "099520",
-        "viaName": "DGI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "069460",
-        "viaName": "대호에이엘",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "121800",
-        "corpName": "비덴트",
-        "industry": "electronics",
-        "viaCode": "069460",
-        "viaName": "대호에이엘",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "139990",
-        "corpName": "아주스틸",
+        "stockCode": "380540",
+        "corpName": "옵티코어",
         "industry": "electronics",
         "viaCode": "069460",
         "viaName": "대호에이엘",
@@ -248,9 +168,73 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "025620",
+        "corpName": "차AI헬스케어",
+        "industry": "cosmetics",
+        "viaCode": "069460",
+        "viaName": "대호에이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "069460",
+        "viaName": "대호에이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "139990",
+        "corpName": "아주스틸",
+        "industry": "electronics",
+        "viaCode": "069460",
+        "viaName": "대호에이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "121800",
+        "corpName": "비덴트",
+        "industry": "electronics",
+        "viaCode": "069460",
+        "viaName": "대호에이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091580",
+        "corpName": "상신이디피",
+        "industry": "electronics",
+        "viaCode": "069460",
+        "viaName": "대호에이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "177830",
+        "corpName": "파버나인",
+        "industry": "electronics",
+        "viaCode": "099520",
+        "viaName": "DGI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "460850",
+        "corpName": "동국씨엠",
+        "industry": "steel",
+        "viaCode": "069460",
+        "viaName": "대호에이엘",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "052790",
         "corpName": "액토즈소프트",
         "industry": "software",
+        "viaCode": "099520",
+        "viaName": "DGI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "043360",
+        "corpName": "디지아이",
+        "industry": "electronics",
         "viaCode": "099520",
         "viaName": "DGI",
         "hopDistance": 2
@@ -261,6 +245,22 @@
         "industry": "finance",
         "viaCode": "099520",
         "viaName": "DGI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "069460",
+        "viaName": "대호에이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065570",
+        "corpName": "삼영이엔씨",
+        "industry": "telecom",
+        "viaCode": "069460",
+        "viaName": "대호에이엘",
         "hopDistance": 2
       },
       {

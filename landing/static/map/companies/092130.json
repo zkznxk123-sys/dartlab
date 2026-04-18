@@ -135,16 +135,16 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "005950",
-        "corpName": "이수화학",
+        "stockCode": "001680",
+        "corpName": "대상",
         "industry": "food",
         "viaCode": "034950",
         "viaName": "한국기업평가",
         "hopDistance": 2
       },
       {
-        "stockCode": "001680",
-        "corpName": "대상",
+        "stockCode": "005950",
+        "corpName": "이수화학",
         "industry": "food",
         "viaCode": "034950",
         "viaName": "한국기업평가",

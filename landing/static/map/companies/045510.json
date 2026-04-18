@@ -130,8 +130,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "064400",
-        "corpName": "LG씨엔에스",
+        "stockCode": "034220",
+        "corpName": "LG디스플레이",
         "industry": "electronics",
         "viaCode": "333620",
         "viaName": "엔시스",
@@ -146,14 +146,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000150",
-        "corpName": "두산",
-        "industry": "machinery",
-        "viaCode": "071200",
-        "viaName": "인피니트헬스케어",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "139670",
         "corpName": "키네마스터",
         "industry": "software",
@@ -162,8 +154,48 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "034220",
-        "corpName": "LG디스플레이",
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000150",
+        "corpName": "두산",
+        "industry": "machinery",
+        "viaCode": "071200",
+        "viaName": "인피니트헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064400",
+        "corpName": "LG씨엔에스",
+        "industry": "electronics",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032620",
+        "corpName": "GC메디아이",
+        "industry": "software",
+        "viaCode": "071200",
+        "viaName": "인피니트헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051900",
+        "corpName": "LG생활건강",
         "industry": "electronics",
         "viaCode": "333620",
         "viaName": "엔시스",
@@ -178,17 +210,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006800",
-        "corpName": "미래에셋증권",
-        "industry": "finance",
-        "viaCode": "333620",
-        "viaName": "엔시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
+        "stockCode": "0008Z0",
+        "corpName": "에스엔시스",
+        "industry": "electrical",
         "viaCode": "333620",
         "viaName": "엔시스",
         "hopDistance": 2
@@ -210,22 +234,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "0008Z0",
-        "corpName": "에스엔시스",
-        "industry": "electrical",
-        "viaCode": "333620",
-        "viaName": "엔시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032620",
-        "corpName": "GC메디아이",
-        "industry": "software",
-        "viaCode": "071200",
-        "viaName": "인피니트헬스케어",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "035610",
         "corpName": "솔본",
         "industry": "consulting",
@@ -239,14 +247,6 @@
         "industry": "software",
         "viaCode": "071200",
         "viaName": "인피니트헬스케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "051900",
-        "corpName": "LG생활건강",
-        "industry": "electronics",
-        "viaCode": "333620",
-        "viaName": "엔시스",
         "hopDistance": 2
       }
     ],

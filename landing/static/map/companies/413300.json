@@ -107,25 +107,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "219130",
-        "corpName": "타이거일렉",
-        "industry": "electronics",
-        "viaCode": "131290",
-        "viaName": "티에스이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "446540",
-        "corpName": "메가터치",
-        "industry": "battery",
-        "viaCode": "131290",
-        "viaName": "티에스이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "480370",
-        "corpName": "씨케이솔루션",
-        "industry": "consulting",
+        "stockCode": "035890",
+        "corpName": "서희건설",
+        "industry": "realestate",
         "viaCode": "131290",
         "viaName": "티에스이",
         "hopDistance": 2
@@ -139,17 +123,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "068760",
-        "corpName": "셀트리온제약",
+        "stockCode": "219130",
+        "corpName": "타이거일렉",
+        "industry": "electronics",
+        "viaCode": "131290",
+        "viaName": "티에스이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068270",
+        "corpName": "셀트리온",
         "industry": "pharma",
         "viaCode": "131290",
         "viaName": "티에스이",
         "hopDistance": 2
       },
       {
-        "stockCode": "035890",
-        "corpName": "서희건설",
-        "industry": "realestate",
+        "stockCode": "446540",
+        "corpName": "메가터치",
+        "industry": "battery",
         "viaCode": "131290",
         "viaName": "티에스이",
         "hopDistance": 2
@@ -163,9 +155,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "068270",
-        "corpName": "셀트리온",
+        "stockCode": "068760",
+        "corpName": "셀트리온제약",
         "industry": "pharma",
+        "viaCode": "131290",
+        "viaName": "티에스이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "480370",
+        "corpName": "씨케이솔루션",
+        "industry": "consulting",
         "viaCode": "131290",
         "viaName": "티에스이",
         "hopDistance": 2

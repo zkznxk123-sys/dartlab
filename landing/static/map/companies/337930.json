@@ -215,59 +215,19 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "259630",
-        "corpName": "엠플러스",
-        "industry": "machinery",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "487570",
-        "corpName": "HS효성",
-        "industry": "chemical",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002780",
-        "corpName": "진흥기업",
-        "industry": "construction",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "352940",
-        "corpName": "인바이오",
-        "industry": "chemical",
+        "stockCode": "240550",
+        "corpName": "동방메디컬",
+        "industry": "medicalDevice",
         "viaCode": "095500",
         "viaName": "미래나노텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "044820",
-        "corpName": "코스맥스비티아이",
-        "industry": "food",
-        "viaCode": "175250",
-        "viaName": "아이큐어",
+        "stockCode": "011420",
+        "corpName": "갤럭시아에스엠",
+        "industry": "media",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
         "hopDistance": 2
       },
       {
@@ -279,121 +239,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "056700",
-        "corpName": "신화인터텍",
-        "industry": "electronics",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "365900",
-        "corpName": "브이씨",
-        "industry": "leisure",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004800",
-        "corpName": "효성",
-        "industry": "chemical",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084110",
-        "corpName": "휴온스글로벌",
-        "industry": "pharma",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "051910",
-        "corpName": "LG화학",
-        "industry": "chemical",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083450",
-        "corpName": "GST",
-        "industry": "chemical",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011170",
-        "corpName": "롯데케미칼",
-        "industry": "chemical",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "298050",
-        "corpName": "HS효성첨단소재",
-        "industry": "chemical",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "298000",
-        "corpName": "효성화학",
-        "industry": "chemical",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "094280",
-        "corpName": "효성 ITX",
-        "industry": "chemical",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "247540",
-        "corpName": "에코프로비엠",
-        "industry": "chemical",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "069510",
-        "corpName": "에스텍",
-        "industry": "electronics",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "192820",
-        "corpName": "코스맥스",
-        "industry": "cosmetics",
-        "viaCode": "175250",
-        "viaName": "아이큐어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "298040",
-        "corpName": "효성중공업",
-        "industry": "chemical",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
         "viaCode": "298020",
         "viaName": "효성티앤씨",
         "hopDistance": 2
@@ -407,115 +255,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "222040",
-        "corpName": "코스맥스엔비티",
-        "industry": "pharma",
-        "viaCode": "175250",
-        "viaName": "아이큐어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "316140",
-        "corpName": "우리금융지주",
-        "industry": "finance",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "086520",
-        "corpName": "에코프로",
-        "industry": "chemical",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "094480",
-        "corpName": "갤럭시아머니트리",
-        "industry": "finance",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "240550",
-        "corpName": "동방메디컬",
-        "industry": "medicalDevice",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084850",
-        "corpName": "아이티엠반도체",
+        "stockCode": "067770",
+        "corpName": "세진티에스",
         "industry": "electronics",
         "viaCode": "095500",
         "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "263810",
-        "corpName": "상신전자",
-        "industry": "electronics",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016360",
-        "corpName": "삼성증권",
-        "industry": "finance",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006380",
-        "corpName": "카프로",
-        "industry": "chemical",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "092590",
-        "corpName": "럭스피아",
-        "industry": "electronics",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "0007C0",
-        "corpName": "아크릴",
-        "industry": "software",
-        "viaCode": "175250",
-        "viaName": "아이큐어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039560",
-        "corpName": "다산네트웍스",
-        "industry": "telecom",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003240",
-        "corpName": "태광산업",
-        "industry": "chemical",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
         "hopDistance": 2
       },
       {
@@ -527,41 +271,89 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "346010",
-        "corpName": "타이드",
-        "industry": "electronics",
+        "stockCode": "192820",
+        "corpName": "코스맥스",
+        "industry": "cosmetics",
         "viaCode": "175250",
         "viaName": "아이큐어",
         "hopDistance": 2
       },
       {
-        "stockCode": "126600",
-        "corpName": "BGF에코머티리얼즈",
-        "industry": "construction",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
+        "stockCode": "0007C0",
+        "corpName": "아크릴",
+        "industry": "software",
+        "viaCode": "175250",
+        "viaName": "아이큐어",
         "hopDistance": 2
       },
       {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
+        "stockCode": "222040",
+        "corpName": "코스맥스엔비티",
+        "industry": "pharma",
+        "viaCode": "175250",
+        "viaName": "아이큐어",
         "hopDistance": 2
       },
       {
         "stockCode": "090350",
         "corpName": "노루페인트",
         "industry": "chemical",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "094280",
+        "corpName": "효성 ITX",
+        "industry": "chemical",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "365900",
+        "corpName": "브이씨",
+        "industry": "leisure",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044820",
+        "corpName": "코스맥스비티아이",
+        "industry": "food",
+        "viaCode": "175250",
+        "viaName": "아이큐어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "094480",
+        "corpName": "갤럭시아머니트리",
+        "industry": "finance",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
         "viaCode": "298020",
         "viaName": "효성티앤씨",
         "hopDistance": 2
@@ -575,16 +367,152 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "217480",
-        "corpName": "에스디생명공학",
-        "industry": "cosmetics",
+        "stockCode": "298040",
+        "corpName": "효성중공업",
+        "industry": "chemical",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000320",
+        "corpName": "노루홀딩스",
+        "industry": "finance",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352940",
+        "corpName": "인바이오",
+        "industry": "chemical",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "346010",
+        "corpName": "타이드",
+        "industry": "electronics",
         "viaCode": "175250",
         "viaName": "아이큐어",
         "hopDistance": 2
       },
       {
-        "stockCode": "006650",
-        "corpName": "대한유화",
+        "stockCode": "247540",
+        "corpName": "에코프로비엠",
+        "industry": "chemical",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "126600",
+        "corpName": "BGF에코머티리얼즈",
+        "industry": "construction",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004800",
+        "corpName": "효성",
+        "industry": "chemical",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003240",
+        "corpName": "태광산업",
+        "industry": "chemical",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027410",
+        "corpName": "BGF",
+        "industry": "retail",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "259630",
+        "corpName": "엠플러스",
+        "industry": "machinery",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086520",
+        "corpName": "에코프로",
+        "industry": "chemical",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039560",
+        "corpName": "다산네트웍스",
+        "industry": "telecom",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298000",
+        "corpName": "효성화학",
+        "industry": "chemical",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "316140",
+        "corpName": "우리금융지주",
+        "industry": "finance",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298050",
+        "corpName": "HS효성첨단소재",
+        "industry": "chemical",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006380",
+        "corpName": "카프로",
         "industry": "chemical",
         "viaCode": "298020",
         "viaName": "효성티앤씨",
@@ -599,49 +527,121 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "011420",
-        "corpName": "갤럭시아에스엠",
-        "industry": "media",
-        "viaCode": "298020",
-        "viaName": "효성티앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067770",
-        "corpName": "세진티에스",
+        "stockCode": "092590",
+        "corpName": "럭스피아",
         "industry": "electronics",
         "viaCode": "095500",
         "viaName": "미래나노텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "027410",
-        "corpName": "BGF",
-        "industry": "retail",
+        "stockCode": "056700",
+        "corpName": "신화인터텍",
+        "industry": "electronics",
         "viaCode": "298020",
         "viaName": "효성티앤씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "000320",
-        "corpName": "노루홀딩스",
-        "industry": "finance",
+        "stockCode": "006650",
+        "corpName": "대한유화",
+        "industry": "chemical",
         "viaCode": "298020",
         "viaName": "효성티앤씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
+        "stockCode": "051910",
+        "corpName": "LG화학",
+        "industry": "chemical",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217480",
+        "corpName": "에스디생명공학",
+        "industry": "cosmetics",
+        "viaCode": "175250",
+        "viaName": "아이큐어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "263810",
+        "corpName": "상신전자",
+        "industry": "electronics",
         "viaCode": "095500",
         "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002780",
+        "corpName": "진흥기업",
+        "industry": "construction",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083450",
+        "corpName": "GST",
+        "industry": "chemical",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
         "hopDistance": 2
       },
       {
         "stockCode": "024110",
         "corpName": "기업은행",
         "industry": "finance",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016360",
+        "corpName": "삼성증권",
+        "industry": "finance",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011170",
+        "corpName": "롯데케미칼",
+        "industry": "chemical",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "487570",
+        "corpName": "HS효성",
+        "industry": "chemical",
+        "viaCode": "298020",
+        "viaName": "효성티앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084850",
+        "corpName": "아이티엠반도체",
+        "industry": "electronics",
         "viaCode": "095500",
         "viaName": "미래나노텍",
         "hopDistance": 2

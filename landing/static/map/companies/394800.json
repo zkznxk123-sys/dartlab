@@ -95,6 +95,22 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "084650",
+        "corpName": "랩지노믹스",
+        "industry": "pharma",
+        "viaCode": "038290",
+        "viaName": "마크로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "180400",
+        "corpName": "DXVX",
+        "industry": "consulting",
+        "viaCode": "038290",
+        "viaName": "마크로젠",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "086060",
         "corpName": "진바이오텍",
         "industry": "food",
@@ -111,25 +127,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "084650",
-        "corpName": "랩지노믹스",
-        "industry": "pharma",
-        "viaCode": "038290",
-        "viaName": "마크로젠",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "338840",
         "corpName": "와이바이오로직스",
         "industry": "pharma",
-        "viaCode": "038290",
-        "viaName": "마크로젠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "180400",
-        "corpName": "DXVX",
-        "industry": "consulting",
         "viaCode": "038290",
         "viaName": "마크로젠",
         "hopDistance": 2

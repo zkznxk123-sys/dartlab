@@ -147,51 +147,75 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "318410",
-        "corpName": "비비씨",
-        "industry": "chemical",
+        "stockCode": "066360",
+        "corpName": "체리부로",
+        "industry": "food",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "371950",
-        "corpName": "풍원정밀",
-        "industry": "electronics",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "289080",
-        "corpName": "SV인베스트먼트",
+        "stockCode": "039490",
+        "corpName": "키움증권",
         "industry": "finance",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "333620",
-        "corpName": "엔시스",
-        "industry": "electrical",
+        "stockCode": "085620",
+        "corpName": "미래에셋생명",
+        "industry": "finance",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "950220",
-        "corpName": "네오이뮨텍",
-        "industry": "pharma",
+        "stockCode": "060850",
+        "corpName": "영림원소프트랩",
+        "industry": "software",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "475460",
-        "corpName": "미트박스",
-        "industry": "agriculture",
+        "stockCode": "290720",
+        "corpName": "푸드나무",
+        "industry": "retail",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085310",
+        "corpName": "엔케이",
+        "industry": "food",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054620",
+        "corpName": "APS",
+        "industry": "telecom",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "440320",
+        "corpName": "오픈놀",
+        "industry": "software",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267260",
+        "corpName": "HD현대일렉트릭",
+        "industry": "shipbuilding",
+        "viaCode": "238490",
+        "viaName": "힘스",
         "hopDistance": 2
       },
       {
@@ -203,9 +227,161 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "236810",
-        "corpName": "엔비티",
+        "stockCode": "207940",
+        "corpName": "삼성바이오로직스",
+        "industry": "pharma",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068270",
+        "corpName": "셀트리온",
+        "industry": "pharma",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "227840",
+        "corpName": "현대코퍼레이션홀딩스",
+        "industry": "textile",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352700",
+        "corpName": "씨앤투스",
+        "industry": "electronics",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "262840",
+        "corpName": "아이퀘스트",
         "industry": "software",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "074600",
+        "corpName": "원익QnC",
+        "industry": "construction",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032300",
+        "corpName": "한국파마",
+        "industry": "pharma",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "149010",
+        "corpName": "아이케이세미콘",
+        "industry": "semiconductor",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009540",
+        "corpName": "HD한국조선해양",
+        "industry": "shipbuilding",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "108860",
+        "corpName": "셀바스AI",
+        "industry": "software",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084650",
+        "corpName": "랩지노믹스",
+        "industry": "pharma",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067370",
+        "corpName": "선바이오",
+        "industry": "chemical",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "389500",
+        "corpName": "에스비비테크",
+        "industry": "machinery",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100590",
+        "corpName": "머큐리",
+        "industry": "telecom",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "122640",
+        "corpName": "예스티",
+        "industry": "electronics",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "272290",
+        "corpName": "이녹스첨단소재",
+        "industry": "electronics",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084440",
+        "corpName": "유비온",
+        "industry": "education",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007070",
+        "corpName": "GS리테일",
+        "industry": "retail",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "334970",
+        "corpName": "프레스티지바이오로직스",
+        "industry": "pharma",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "405100",
+        "corpName": "큐알티",
+        "industry": "consulting",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
@@ -219,48 +395,104 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "091120",
-        "corpName": "이엠텍",
+        "stockCode": "083500",
+        "corpName": "에프엔에스테크",
         "industry": "electronics",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084650",
-        "corpName": "랩지노믹스",
-        "industry": "pharma",
         "viaCode": "238490",
         "viaName": "힘스",
         "hopDistance": 2
       },
       {
-        "stockCode": "317870",
-        "corpName": "엔바이오니아",
-        "industry": "electronics",
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "072990",
+        "corpName": "에이치시티",
+        "industry": "consulting",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "192080",
-        "corpName": "더블유게임즈",
+        "stockCode": "328380",
+        "corpName": "솔트웨어",
         "industry": "software",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "028670",
-        "corpName": "팬오션",
-        "industry": "logistics",
+        "stockCode": "282880",
+        "corpName": "코윈테크",
+        "industry": "electronics",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "389500",
-        "corpName": "에스비비테크",
+        "stockCode": "239610",
+        "corpName": "에이치엘사이언스",
+        "industry": "pharma",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "338840",
+        "corpName": "와이바이오로직스",
+        "industry": "pharma",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "208370",
+        "corpName": "셀바스헬스케어",
+        "industry": "telecom",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352820",
+        "corpName": "하이브",
+        "industry": "media",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099750",
+        "corpName": "이지케어텍",
+        "industry": "software",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000670",
+        "corpName": "영풍",
+        "industry": "retail",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "419080",
+        "corpName": "엔젯",
         "industry": "machinery",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
@@ -275,17 +507,65 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "036120",
-        "corpName": "서울평가정보",
-        "industry": "software",
+        "stockCode": "371950",
+        "corpName": "풍원정밀",
+        "industry": "electronics",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "272110",
+        "corpName": "케이엔제이",
+        "industry": "semiconductor",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "222420",
-        "corpName": "쎄노텍",
-        "industry": "buildingMaterials",
+        "stockCode": "064550",
+        "corpName": "바이오니아",
+        "industry": "pharma",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091120",
+        "corpName": "이엠텍",
+        "industry": "electronics",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "063760",
+        "corpName": "이엘피",
+        "industry": "electronics",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "042000",
+        "corpName": "카페24",
+        "industry": "media",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "270870",
+        "corpName": "뉴트리",
+        "industry": "food",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "347740",
+        "corpName": "피엔케이피부임상연구센타",
+        "industry": "consulting",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
@@ -299,19 +579,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "011760",
-        "corpName": "현대코퍼레이션",
-        "industry": "construction",
+        "stockCode": "097520",
+        "corpName": "엠씨넥스",
+        "industry": "electronics",
         "viaCode": "238490",
         "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084440",
-        "corpName": "유비온",
-        "industry": "education",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
@@ -323,73 +595,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000910",
-        "corpName": "유니온",
-        "industry": "buildingMaterials",
+        "stockCode": "289080",
+        "corpName": "SV인베스트먼트",
+        "industry": "finance",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "089030",
-        "corpName": "테크윙",
-        "industry": "machinery",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "049520",
-        "corpName": "유아이엘",
-        "industry": "electronics",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000660",
-        "corpName": "SK하이닉스",
-        "industry": "semiconductor",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "073560",
-        "corpName": "우리손에프앤지",
-        "industry": "food",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "334970",
-        "corpName": "프레스티지바이오로직스",
-        "industry": "pharma",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "262840",
-        "corpName": "아이퀘스트",
+        "stockCode": "035420",
+        "corpName": "NAVER",
         "industry": "software",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "352820",
-        "corpName": "하이브",
-        "industry": "media",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "110020",
-        "corpName": "전진바이오팜",
-        "industry": "chemical",
+        "stockCode": "417840",
+        "corpName": "저스템",
+        "industry": "machinery",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
@@ -403,67 +627,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "290720",
-        "corpName": "푸드나무",
-        "industry": "retail",
+        "stockCode": "318410",
+        "corpName": "비비씨",
+        "industry": "chemical",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "000670",
-        "corpName": "영풍",
-        "industry": "retail",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090460",
-        "corpName": "비에이치",
-        "industry": "electronics",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "068270",
-        "corpName": "셀트리온",
-        "industry": "pharma",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052770",
-        "corpName": "아이톡시",
+        "stockCode": "234300",
+        "corpName": "에스트래픽",
         "industry": "software",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "088390",
-        "corpName": "이녹스",
-        "industry": "railroad",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "309960",
-        "corpName": "LB인베스트먼트",
-        "industry": "finance",
+        "stockCode": "300120",
+        "corpName": "라온피플",
+        "industry": "machinery",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "272290",
-        "corpName": "이녹스첨단소재",
-        "industry": "electronics",
-        "viaCode": "238490",
-        "viaName": "힘스",
+        "stockCode": "445180",
+        "corpName": "퓨릿",
+        "industry": "semiconductor",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
@@ -475,32 +667,64 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "067370",
-        "corpName": "선바이오",
+        "stockCode": "028670",
+        "corpName": "팬오션",
+        "industry": "logistics",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "950220",
+        "corpName": "네오이뮨텍",
+        "industry": "pharma",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073560",
+        "corpName": "우리손에프앤지",
+        "industry": "food",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002920",
+        "corpName": "유성기업",
+        "industry": "electronics",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "238090",
+        "corpName": "앤디포스",
+        "industry": "plastic",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
         "industry": "chemical",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "009540",
-        "corpName": "HD한국조선해양",
-        "industry": "shipbuilding",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "260930",
-        "corpName": "씨티케이",
-        "industry": "cosmetics",
+        "stockCode": "304360",
+        "corpName": "에스바이오메딕스",
+        "industry": "realestate",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "083500",
-        "corpName": "에프엔에스테크",
+        "stockCode": "060720",
+        "corpName": "KH바텍",
         "industry": "electronics",
         "viaCode": "238490",
         "viaName": "힘스",
@@ -515,145 +739,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "229000",
-        "corpName": "젠큐릭스",
-        "industry": "pharma",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267260",
-        "corpName": "HD현대일렉트릭",
-        "industry": "shipbuilding",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "207940",
-        "corpName": "삼성바이오로직스",
-        "industry": "pharma",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "108490",
-        "corpName": "로보티즈",
-        "industry": "electronics",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "240810",
-        "corpName": "원익IPS",
-        "industry": "semiconductor",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "204270",
-        "corpName": "제이앤티씨",
-        "industry": "electronics",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "063760",
-        "corpName": "이엘피",
-        "industry": "electronics",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "208370",
-        "corpName": "셀바스헬스케어",
-        "industry": "telecom",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "440320",
-        "corpName": "오픈놀",
-        "industry": "software",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "074600",
-        "corpName": "원익QnC",
-        "industry": "construction",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "085620",
-        "corpName": "미래에셋생명",
-        "industry": "finance",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "278990",
         "corpName": "EMB",
         "industry": "battery",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "310210",
-        "corpName": "보로노이",
-        "industry": "pharma",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "272110",
-        "corpName": "케이엔제이",
-        "industry": "semiconductor",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054620",
-        "corpName": "APS",
-        "industry": "telecom",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "238090",
-        "corpName": "앤디포스",
-        "industry": "plastic",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "352700",
-        "corpName": "씨앤투스",
-        "industry": "electronics",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
@@ -667,131 +755,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "234300",
-        "corpName": "에스트래픽",
-        "industry": "software",
+        "stockCode": "290690",
+        "corpName": "소룩스",
+        "industry": "electrical",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "462350",
-        "corpName": "이노스페이스",
-        "industry": "aerospace",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "239610",
-        "corpName": "에이치엘사이언스",
-        "industry": "pharma",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "361570",
-        "corpName": "알비더블유",
-        "industry": "media",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064550",
-        "corpName": "바이오니아",
-        "industry": "pharma",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "085310",
-        "corpName": "엔케이",
-        "industry": "food",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "215480",
-        "corpName": "토박스코리아",
-        "industry": "retail",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000810",
-        "corpName": "삼성화재해상보험",
-        "industry": "finance",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "417840",
-        "corpName": "저스템",
-        "industry": "machinery",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099750",
-        "corpName": "이지케어텍",
-        "industry": "software",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066360",
-        "corpName": "체리부로",
-        "industry": "food",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "270870",
-        "corpName": "뉴트리",
-        "industry": "food",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "072990",
-        "corpName": "에이치시티",
-        "industry": "consulting",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007070",
-        "corpName": "GS리테일",
-        "industry": "retail",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "097520",
-        "corpName": "엠씨넥스",
+        "stockCode": "108490",
+        "corpName": "로보티즈",
         "industry": "electronics",
-        "viaCode": "238490",
-        "viaName": "힘스",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
@@ -803,16 +779,96 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "263810",
-        "corpName": "상신전자",
+        "stockCode": "192080",
+        "corpName": "더블유게임즈",
+        "industry": "software",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036120",
+        "corpName": "서울평가정보",
+        "industry": "software",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "333620",
+        "corpName": "엔시스",
+        "industry": "electrical",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011760",
+        "corpName": "현대코퍼레이션",
+        "industry": "construction",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "309960",
+        "corpName": "LB인베스트먼트",
+        "industry": "finance",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "021040",
+        "corpName": "대호특수강",
+        "industry": "steel",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "industry": "buildingMaterials",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041020",
+        "corpName": "폴라리스오피스",
+        "industry": "software",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "317870",
+        "corpName": "엔바이오니아",
         "industry": "electronics",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "032300",
-        "corpName": "한국파마",
+        "stockCode": "011690",
+        "corpName": "와이투솔루션",
+        "industry": "electrical",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "230360",
+        "corpName": "에코마케팅",
+        "industry": "media",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "293780",
+        "corpName": "압타바이오",
         "industry": "pharma",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
@@ -827,113 +883,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "100590",
-        "corpName": "머큐리",
-        "industry": "telecom",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "042000",
-        "corpName": "카페24",
-        "industry": "media",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "304360",
-        "corpName": "에스바이오메딕스",
-        "industry": "realestate",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "338840",
-        "corpName": "와이바이오로직스",
-        "industry": "pharma",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "282880",
-        "corpName": "코윈테크",
+        "stockCode": "204270",
+        "corpName": "제이앤티씨",
         "industry": "electronics",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "293780",
-        "corpName": "압타바이오",
-        "industry": "pharma",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002920",
-        "corpName": "유성기업",
-        "industry": "electronics",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "405100",
-        "corpName": "큐알티",
-        "industry": "consulting",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "347740",
-        "corpName": "피엔케이피부임상연구센타",
-        "industry": "consulting",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "020560",
-        "corpName": "아시아나항공",
-        "industry": "aerospace",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "456040",
-        "corpName": "OCI",
-        "industry": "chemical",
-        "viaCode": "006800",
-        "viaName": "미래에셋증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "227840",
-        "corpName": "현대코퍼레이션홀딩스",
-        "industry": "textile",
         "viaCode": "238490",
         "viaName": "힘스",
         "hopDistance": 2
       },
       {
-        "stockCode": "277810",
-        "corpName": "레인보우로보틱스",
+        "stockCode": "215480",
+        "corpName": "토박스코리아",
+        "industry": "retail",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "382480",
+        "corpName": "지아이텍",
+        "industry": "software",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "405000",
+        "corpName": "플라즈맵",
+        "industry": "medicalDevice",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "361670",
+        "corpName": "삼영에스앤씨",
         "industry": "machinery",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000810",
+        "corpName": "삼성화재해상보험",
+        "industry": "finance",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2
@@ -942,6 +934,14 @@
         "stockCode": "008870",
         "corpName": "금비",
         "industry": "construction",
+        "viaCode": "006800",
+        "viaName": "미래에셋증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "260930",
+        "corpName": "씨티케이",
+        "industry": "cosmetics",
         "viaCode": "006800",
         "viaName": "미래에셋증권",
         "hopDistance": 2

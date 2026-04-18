@@ -204,11 +204,51 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "295310",
-        "corpName": "에이치브이엠",
-        "industry": "semiconductor",
+        "stockCode": "140430",
+        "corpName": "카티스",
+        "industry": "software",
         "viaCode": "347700",
         "viaName": "스피어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003220",
+        "corpName": "대원제약",
+        "industry": "pharma",
+        "viaCode": "347700",
+        "viaName": "스피어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "347700",
+        "viaName": "스피어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "203690",
+        "corpName": "아크솔루션스",
+        "industry": "cosmetics",
+        "viaCode": "347700",
+        "viaName": "스피어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001290",
+        "corpName": "상상인증권",
+        "industry": "finance",
+        "viaCode": "192250",
+        "viaName": "케이사인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053800",
+        "corpName": "안랩",
+        "industry": "software",
+        "viaCode": "434480",
+        "viaName": "모니터랩",
         "hopDistance": 2
       },
       {
@@ -228,73 +268,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "203690",
-        "corpName": "아크솔루션스",
-        "industry": "cosmetics",
-        "viaCode": "347700",
-        "viaName": "스피어",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "088350",
         "corpName": "한화생명",
         "industry": "aerospace",
-        "viaCode": "192250",
-        "viaName": "케이사인",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082800",
-        "corpName": "비보존 제약",
-        "industry": "pharma",
-        "viaCode": "347700",
-        "viaName": "스피어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "008490",
-        "corpName": "서흥",
-        "industry": "chemical",
-        "viaCode": "347700",
-        "viaName": "스피어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "411080",
-        "corpName": "샌즈랩",
-        "industry": "medicalDevice",
-        "viaCode": "192250",
-        "viaName": "케이사인",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053800",
-        "corpName": "안랩",
-        "industry": "software",
-        "viaCode": "434480",
-        "viaName": "모니터랩",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003220",
-        "corpName": "대원제약",
-        "industry": "pharma",
-        "viaCode": "347700",
-        "viaName": "스피어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "140430",
-        "corpName": "카티스",
-        "industry": "software",
-        "viaCode": "347700",
-        "viaName": "스피어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001290",
-        "corpName": "상상인증권",
-        "industry": "finance",
         "viaCode": "192250",
         "viaName": "케이사인",
         "hopDistance": 2
@@ -308,11 +284,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "434480",
-        "viaName": "모니터랩",
+        "stockCode": "082800",
+        "corpName": "비보존 제약",
+        "industry": "pharma",
+        "viaCode": "347700",
+        "viaName": "스피어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "411080",
+        "corpName": "샌즈랩",
+        "industry": "medicalDevice",
+        "viaCode": "192250",
+        "viaName": "케이사인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008490",
+        "corpName": "서흥",
+        "industry": "chemical",
+        "viaCode": "347700",
+        "viaName": "스피어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "295310",
+        "corpName": "에이치브이엠",
+        "industry": "semiconductor",
+        "viaCode": "347700",
+        "viaName": "스피어",
         "hopDistance": 2
       }
     ],

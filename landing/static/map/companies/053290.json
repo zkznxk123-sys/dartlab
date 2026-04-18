@@ -124,17 +124,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "037460",
-        "corpName": "삼지전자",
-        "industry": "telecom",
-        "viaCode": "060280",
-        "viaName": "큐렉소",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "290650",
-        "corpName": "엘앤씨바이오",
-        "industry": "pharma",
+        "stockCode": "348340",
+        "corpName": "뉴로메카",
+        "industry": "machinery",
         "viaCode": "060280",
         "viaName": "큐렉소",
         "hopDistance": 2
@@ -148,9 +140,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "348340",
-        "corpName": "뉴로메카",
-        "industry": "machinery",
+        "stockCode": "037460",
+        "corpName": "삼지전자",
+        "industry": "telecom",
+        "viaCode": "060280",
+        "viaName": "큐렉소",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "290650",
+        "corpName": "엘앤씨바이오",
+        "industry": "pharma",
         "viaCode": "060280",
         "viaName": "큐렉소",
         "hopDistance": 2

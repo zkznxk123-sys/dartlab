@@ -145,11 +145,19 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "120110",
-        "corpName": "코오롱인더",
-        "industry": "plastic",
+        "stockCode": "001430",
+        "corpName": "세아베스틸지주",
+        "industry": "electronics",
         "viaCode": "009160",
         "viaName": "SIMPAC",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "365900",
+        "corpName": "브이씨",
+        "industry": "leisure",
+        "viaCode": "105840",
+        "viaName": "우진",
         "hopDistance": 2
       },
       {
@@ -158,6 +166,22 @@
         "industry": "machinery",
         "viaCode": "105840",
         "viaName": "우진",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307180",
+        "corpName": "아이엘",
+        "industry": "chemical",
+        "viaCode": "009160",
+        "viaName": "SIMPAC",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084010",
+        "corpName": "대한제강",
+        "industry": "construction",
+        "viaCode": "009160",
+        "viaName": "SIMPAC",
         "hopDistance": 2
       },
       {
@@ -177,22 +201,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "084010",
-        "corpName": "대한제강",
-        "industry": "construction",
-        "viaCode": "009160",
-        "viaName": "SIMPAC",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001470",
-        "corpName": "삼부토건",
-        "industry": "construction",
-        "viaCode": "105840",
-        "viaName": "우진",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "950170",
         "corpName": "JTC",
         "industry": "cosmetics",
@@ -201,25 +209,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "307180",
-        "corpName": "아이엘",
-        "industry": "chemical",
+        "stockCode": "120110",
+        "corpName": "코오롱인더",
+        "industry": "plastic",
         "viaCode": "009160",
         "viaName": "SIMPAC",
         "hopDistance": 2
       },
       {
-        "stockCode": "001430",
-        "corpName": "세아베스틸지주",
-        "industry": "electronics",
-        "viaCode": "009160",
-        "viaName": "SIMPAC",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "365900",
-        "corpName": "브이씨",
-        "industry": "leisure",
+        "stockCode": "001470",
+        "corpName": "삼부토건",
+        "industry": "construction",
         "viaCode": "105840",
         "viaName": "우진",
         "hopDistance": 2

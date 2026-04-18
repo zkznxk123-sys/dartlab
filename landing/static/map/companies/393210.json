@@ -128,17 +128,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "450520",
-        "corpName": "인스웨이브",
-        "industry": "realestate",
-        "viaCode": "203450",
-        "viaName": "유니온바이오메트릭스",
+        "stockCode": "024800",
+        "corpName": "유성티엔에스",
+        "industry": "logistics",
+        "viaCode": "030610",
+        "viaName": "교보증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
+        "stockCode": "267320",
+        "corpName": "나인테크",
+        "industry": "machinery",
         "viaCode": "030610",
         "viaName": "교보증권",
         "hopDistance": 2
@@ -152,88 +152,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "133750",
-        "corpName": "메가엠디",
-        "industry": "education",
-        "viaCode": "030610",
-        "viaName": "교보증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024800",
-        "corpName": "유성티엔에스",
-        "industry": "logistics",
-        "viaCode": "030610",
-        "viaName": "교보증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "080160",
-        "corpName": "모두투어",
-        "industry": "logistics",
-        "viaCode": "030610",
-        "viaName": "교보증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004770",
-        "corpName": "써니전자",
-        "industry": "retail",
-        "viaCode": "203450",
-        "viaName": "유니온바이오메트릭스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "203450",
-        "viaName": "유니온바이오메트릭스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095340",
-        "corpName": "ISC",
-        "industry": "retail",
-        "viaCode": "203450",
-        "viaName": "유니온바이오메트릭스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "236200",
-        "corpName": "슈프리마",
-        "industry": "telecom",
-        "viaCode": "203450",
-        "viaName": "유니온바이오메트릭스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009410",
-        "corpName": "태영건설",
-        "industry": "construction",
-        "viaCode": "030610",
-        "viaName": "교보증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "408470",
-        "corpName": "한패스",
-        "industry": "finance",
-        "viaCode": "203450",
-        "viaName": "유니온바이오메트릭스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036220",
-        "corpName": "오상헬스케어",
-        "industry": "medicalDevice",
-        "viaCode": "203450",
-        "viaName": "유니온바이오메트릭스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011760",
-        "corpName": "현대코퍼레이션",
+        "stockCode": "095570",
+        "corpName": "AJ네트웍스",
         "industry": "construction",
         "viaCode": "030610",
         "viaName": "교보증권",
@@ -248,81 +168,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000910",
-        "corpName": "유니온",
-        "industry": "buildingMaterials",
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
         "viaCode": "203450",
         "viaName": "유니온바이오메트릭스",
         "hopDistance": 2
       },
       {
-        "stockCode": "373220",
-        "corpName": "LG에너지솔루션",
+        "stockCode": "004770",
+        "corpName": "써니전자",
+        "industry": "retail",
+        "viaCode": "203450",
+        "viaName": "유니온바이오메트릭스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "148150",
+        "corpName": "세경하이테크",
         "industry": "chemical",
-        "viaCode": "203450",
-        "viaName": "유니온바이오메트릭스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "120110",
-        "corpName": "코오롱인더",
-        "industry": "plastic",
-        "viaCode": "030610",
-        "viaName": "교보증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "180640",
-        "corpName": "한진칼",
-        "industry": "consulting",
-        "viaCode": "030610",
-        "viaName": "교보증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011690",
-        "corpName": "와이투솔루션",
-        "industry": "electrical",
-        "viaCode": "030610",
-        "viaName": "교보증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009830",
-        "corpName": "한화솔루션",
-        "industry": "chemical",
-        "viaCode": "203450",
-        "viaName": "유니온바이오메트릭스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
-        "viaCode": "030610",
-        "viaName": "교보증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267320",
-        "corpName": "나인테크",
-        "industry": "machinery",
-        "viaCode": "030610",
-        "viaName": "교보증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036630",
-        "corpName": "세종텔레콤",
-        "industry": "telecom",
-        "viaCode": "030610",
-        "viaName": "교보증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "264660",
-        "corpName": "씨앤지하이테크",
-        "industry": "machinery",
         "viaCode": "203450",
         "viaName": "유니온바이오메트릭스",
         "hopDistance": 2
@@ -336,27 +200,115 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004100",
-        "corpName": "태양금속공업",
-        "industry": "electronics",
+        "stockCode": "236200",
+        "corpName": "슈프리마",
+        "industry": "telecom",
+        "viaCode": "203450",
+        "viaName": "유니온바이오메트릭스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "180640",
+        "corpName": "한진칼",
+        "industry": "consulting",
         "viaCode": "030610",
         "viaName": "교보증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "095570",
-        "corpName": "AJ네트웍스",
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "030610",
+        "viaName": "교보증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "080160",
+        "corpName": "모두투어",
+        "industry": "logistics",
+        "viaCode": "030610",
+        "viaName": "교보증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095340",
+        "corpName": "ISC",
+        "industry": "retail",
+        "viaCode": "203450",
+        "viaName": "유니온바이오메트릭스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "408470",
+        "corpName": "한패스",
+        "industry": "finance",
+        "viaCode": "203450",
+        "viaName": "유니온바이오메트릭스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "373220",
+        "corpName": "LG에너지솔루션",
+        "industry": "chemical",
+        "viaCode": "203450",
+        "viaName": "유니온바이오메트릭스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036220",
+        "corpName": "오상헬스케어",
+        "industry": "medicalDevice",
+        "viaCode": "203450",
+        "viaName": "유니온바이오메트릭스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "264660",
+        "corpName": "씨앤지하이테크",
+        "industry": "machinery",
+        "viaCode": "203450",
+        "viaName": "유니온바이오메트릭스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011760",
+        "corpName": "현대코퍼레이션",
         "industry": "construction",
         "viaCode": "030610",
         "viaName": "교보증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "148150",
-        "corpName": "세경하이테크",
-        "industry": "chemical",
+        "stockCode": "133750",
+        "corpName": "메가엠디",
+        "industry": "education",
+        "viaCode": "030610",
+        "viaName": "교보증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009410",
+        "corpName": "태영건설",
+        "industry": "construction",
+        "viaCode": "030610",
+        "viaName": "교보증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "industry": "buildingMaterials",
         "viaCode": "203450",
         "viaName": "유니온바이오메트릭스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "030610",
+        "viaName": "교보증권",
         "hopDistance": 2
       },
       {
@@ -365,6 +317,54 @@
         "industry": "finance",
         "viaCode": "203450",
         "viaName": "유니온바이오메트릭스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036630",
+        "corpName": "세종텔레콤",
+        "industry": "telecom",
+        "viaCode": "030610",
+        "viaName": "교보증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009830",
+        "corpName": "한화솔루션",
+        "industry": "chemical",
+        "viaCode": "203450",
+        "viaName": "유니온바이오메트릭스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "450520",
+        "corpName": "인스웨이브",
+        "industry": "realestate",
+        "viaCode": "203450",
+        "viaName": "유니온바이오메트릭스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "120110",
+        "corpName": "코오롱인더",
+        "industry": "plastic",
+        "viaCode": "030610",
+        "viaName": "교보증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004100",
+        "corpName": "태양금속공업",
+        "industry": "electronics",
+        "viaCode": "030610",
+        "viaName": "교보증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011690",
+        "corpName": "와이투솔루션",
+        "industry": "electrical",
+        "viaCode": "030610",
+        "viaName": "교보증권",
         "hopDistance": 2
       }
     ],

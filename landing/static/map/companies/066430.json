@@ -123,25 +123,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "402420",
-        "corpName": "켈스",
-        "industry": "pharma",
-        "viaCode": "094940",
-        "viaName": "푸른기술",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "041510",
         "corpName": "에스엠",
         "industry": "media",
-        "viaCode": "094940",
-        "viaName": "푸른기술",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "340810",
-        "corpName": "시선AI",
-        "industry": "software",
         "viaCode": "094940",
         "viaName": "푸른기술",
         "hopDistance": 2
@@ -155,9 +139,25 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "340810",
+        "corpName": "시선AI",
+        "industry": "software",
+        "viaCode": "094940",
+        "viaName": "푸른기술",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "072130",
         "corpName": "유엔젤",
         "industry": "telecom",
+        "viaCode": "094940",
+        "viaName": "푸른기술",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "402420",
+        "corpName": "켈스",
+        "industry": "pharma",
         "viaCode": "094940",
         "viaName": "푸른기술",
         "hopDistance": 2

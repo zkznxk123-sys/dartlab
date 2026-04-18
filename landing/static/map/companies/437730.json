@@ -149,49 +149,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "082640",
-        "corpName": "동양생명",
-        "industry": "finance",
+        "stockCode": "002030",
+        "corpName": "아세아",
+        "industry": "consulting",
         "viaCode": "241690",
         "viaName": "유니테크노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "013870",
+        "viaName": "지엠비코리아",
         "hopDistance": 2
       },
       {
         "stockCode": "041510",
         "corpName": "에스엠",
         "industry": "media",
-        "viaCode": "241690",
-        "viaName": "유니테크노",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "013570",
-        "corpName": "디와이",
-        "industry": "electronics",
-        "viaCode": "241690",
-        "viaName": "유니테크노",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001510",
-        "corpName": "SK증권",
-        "industry": "software",
-        "viaCode": "013870",
-        "viaName": "지엠비코리아",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004270",
-        "corpName": "남성",
-        "industry": "telecom",
-        "viaCode": "013870",
-        "viaName": "지엠비코리아",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002030",
-        "corpName": "아세아",
-        "industry": "consulting",
         "viaCode": "241690",
         "viaName": "유니테크노",
         "hopDistance": 2
@@ -221,9 +197,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
+        "stockCode": "004270",
+        "corpName": "남성",
+        "industry": "telecom",
+        "viaCode": "013870",
+        "viaName": "지엠비코리아",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013570",
+        "corpName": "디와이",
+        "industry": "electronics",
+        "viaCode": "241690",
+        "viaName": "유니테크노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082640",
+        "corpName": "동양생명",
         "industry": "finance",
+        "viaCode": "241690",
+        "viaName": "유니테크노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001510",
+        "corpName": "SK증권",
+        "industry": "software",
         "viaCode": "013870",
         "viaName": "지엠비코리아",
         "hopDistance": 2

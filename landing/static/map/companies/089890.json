@@ -123,9 +123,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "077360",
-        "corpName": "덕산하이메탈",
-        "industry": "semiconductor",
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
         "viaCode": "317330",
         "viaName": "덕산테코피아",
         "hopDistance": 2
@@ -139,9 +139,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
+        "stockCode": "077360",
+        "corpName": "덕산하이메탈",
+        "industry": "semiconductor",
         "viaCode": "317330",
         "viaName": "덕산테코피아",
         "hopDistance": 2

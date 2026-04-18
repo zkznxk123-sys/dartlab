@@ -127,8 +127,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "279060",
-        "corpName": "이노벡스",
+        "stockCode": "015760",
+        "corpName": "한국전력공사",
+        "industry": "energy",
+        "viaCode": "360070",
+        "viaName": "탑머티리얼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "282880",
+        "corpName": "코윈테크",
         "industry": "electronics",
         "viaCode": "360070",
         "viaName": "탑머티리얼",
@@ -143,16 +151,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "015760",
-        "corpName": "한국전력공사",
-        "industry": "energy",
-        "viaCode": "360070",
-        "viaName": "탑머티리얼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "282880",
-        "corpName": "코윈테크",
+        "stockCode": "279060",
+        "corpName": "이노벡스",
         "industry": "electronics",
         "viaCode": "360070",
         "viaName": "탑머티리얼",

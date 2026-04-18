@@ -104,6 +104,14 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
+        "viaCode": "032850",
+        "viaName": "비트컴퓨터",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "071200",
         "corpName": "인피니트헬스케어",
         "industry": "pharma",
@@ -112,9 +120,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "069510",
-        "corpName": "에스텍",
-        "industry": "electronics",
+        "stockCode": "025770",
+        "corpName": "한국정보통신",
+        "industry": "finance",
         "viaCode": "032850",
         "viaName": "비트컴퓨터",
         "hopDistance": 2
@@ -131,14 +139,6 @@
         "stockCode": "099750",
         "corpName": "이지케어텍",
         "industry": "software",
-        "viaCode": "032850",
-        "viaName": "비트컴퓨터",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025770",
-        "corpName": "한국정보통신",
-        "industry": "finance",
         "viaCode": "032850",
         "viaName": "비트컴퓨터",
         "hopDistance": 2

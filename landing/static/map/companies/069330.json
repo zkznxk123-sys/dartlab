@@ -167,33 +167,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "162300",
-        "corpName": "신스틸",
-        "industry": "steel",
-        "viaCode": "177830",
-        "viaName": "파버나인",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099520",
-        "corpName": "DGI",
-        "industry": "retail",
-        "viaCode": "177830",
-        "viaName": "파버나인",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "019550",
-        "corpName": "SBI인베스트먼트",
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
         "industry": "finance",
         "viaCode": "179900",
         "viaName": "유티아이",
         "hopDistance": 2
       },
       {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
+        "stockCode": "019550",
+        "corpName": "SBI인베스트먼트",
+        "industry": "finance",
         "viaCode": "179900",
         "viaName": "유티아이",
         "hopDistance": 2
@@ -207,11 +191,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "143160",
-        "corpName": "아이디스",
-        "industry": "telecom",
+        "stockCode": "064090",
+        "corpName": "인크레더블버즈",
+        "industry": "retail",
         "viaCode": "179900",
         "viaName": "유티아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "179900",
+        "viaName": "유티아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099520",
+        "corpName": "DGI",
+        "industry": "retail",
+        "viaCode": "177830",
+        "viaName": "파버나인",
         "hopDistance": 2
       },
       {
@@ -223,17 +223,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "064090",
-        "corpName": "인크레더블버즈",
-        "industry": "retail",
-        "viaCode": "179900",
-        "viaName": "유티아이",
+        "stockCode": "162300",
+        "corpName": "신스틸",
+        "industry": "steel",
+        "viaCode": "177830",
+        "viaName": "파버나인",
         "hopDistance": 2
       },
       {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
+        "stockCode": "143160",
+        "corpName": "아이디스",
+        "industry": "telecom",
         "viaCode": "179900",
         "viaName": "유티아이",
         "hopDistance": 2

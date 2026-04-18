@@ -228,41 +228,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "065570",
-        "corpName": "삼영이엔씨",
-        "industry": "telecom",
-        "viaCode": "348370",
-        "viaName": "엔켐",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "029480",
-        "viaName": "광무",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "290660",
         "corpName": "네오펙트",
         "industry": "retail",
-        "viaCode": "029480",
-        "viaName": "광무",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "023410",
-        "corpName": "유진기업",
-        "industry": "construction",
-        "viaCode": "042940",
-        "viaName": "상지건설",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009830",
-        "corpName": "한화솔루션",
-        "industry": "chemical",
         "viaCode": "029480",
         "viaName": "광무",
         "hopDistance": 2
@@ -276,9 +244,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
+        "stockCode": "029780",
+        "corpName": "삼성카드",
+        "industry": "aerospace",
         "viaCode": "029480",
         "viaName": "광무",
         "hopDistance": 2
@@ -292,27 +260,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "083550",
-        "corpName": "케이엠",
+        "stockCode": "009830",
+        "corpName": "한화솔루션",
         "industry": "chemical",
-        "viaCode": "004920",
-        "viaName": "씨아이테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "019570",
-        "corpName": "플루토스",
-        "industry": "finance",
         "viaCode": "029480",
         "viaName": "광무",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001510",
-        "corpName": "SK증권",
-        "industry": "software",
-        "viaCode": "348370",
-        "viaName": "엔켐",
         "hopDistance": 2
       },
       {
@@ -324,11 +276,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "029780",
-        "corpName": "삼성카드",
-        "industry": "aerospace",
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
         "viaCode": "029480",
         "viaName": "광무",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023410",
+        "corpName": "유진기업",
+        "industry": "construction",
+        "viaCode": "042940",
+        "viaName": "상지건설",
         "hopDistance": 2
       },
       {
@@ -340,11 +300,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "013570",
-        "corpName": "디와이",
-        "industry": "electronics",
-        "viaCode": "042940",
-        "viaName": "상지건설",
+        "stockCode": "019570",
+        "corpName": "플루토스",
+        "industry": "finance",
+        "viaCode": "029480",
+        "viaName": "광무",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "004920",
+        "viaName": "씨아이테크",
         "hopDistance": 2
       },
       {
@@ -359,6 +327,38 @@
         "stockCode": "003540",
         "corpName": "대신증권",
         "industry": "finance",
+        "viaCode": "348370",
+        "viaName": "엔켐",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013570",
+        "corpName": "디와이",
+        "industry": "electronics",
+        "viaCode": "042940",
+        "viaName": "상지건설",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "029480",
+        "viaName": "광무",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065570",
+        "corpName": "삼영이엔씨",
+        "industry": "telecom",
+        "viaCode": "348370",
+        "viaName": "엔켐",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001510",
+        "corpName": "SK증권",
+        "industry": "software",
         "viaCode": "348370",
         "viaName": "엔켐",
         "hopDistance": 2

@@ -147,9 +147,57 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "013570",
-        "corpName": "디와이",
-        "industry": "electronics",
+        "stockCode": "004060",
+        "corpName": "SG세계물산",
+        "industry": "retail",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004270",
+        "corpName": "남성",
+        "industry": "telecom",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "383800",
+        "corpName": "LX홀딩스",
+        "industry": "finance",
+        "viaCode": "452400",
+        "viaName": "이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054620",
+        "corpName": "APS",
+        "industry": "telecom",
         "viaCode": "000660",
         "viaName": "SK하이닉스",
         "hopDistance": 2
@@ -163,57 +211,145 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "039860",
-        "corpName": "나노엔텍",
-        "industry": "pharma",
+        "stockCode": "093190",
+        "corpName": "빅솔론",
+        "industry": "electronics",
         "viaCode": "452400",
         "viaName": "이닉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
+        "stockCode": "007820",
+        "corpName": "에스엠코어",
+        "industry": "machinery",
         "viaCode": "000660",
         "viaName": "SK하이닉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "069510",
-        "corpName": "에스텍",
+        "stockCode": "066570",
+        "corpName": "LG전자",
         "industry": "electronics",
         "viaCode": "000660",
         "viaName": "SK하이닉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "001510",
-        "corpName": "SK증권",
-        "industry": "software",
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "074600",
+        "corpName": "원익QnC",
+        "industry": "construction",
         "viaCode": "452400",
         "viaName": "이닉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "219750",
-        "corpName": "한국비티비",
+        "stockCode": "238490",
+        "corpName": "힘스",
+        "industry": "electronics",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
+        "industry": "chemical",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024090",
+        "corpName": "디씨엠",
+        "industry": "construction",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013570",
+        "corpName": "디와이",
+        "industry": "electronics",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082640",
+        "corpName": "동양생명",
+        "industry": "finance",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100090",
+        "corpName": "SK오션플랜트",
+        "industry": "software",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "226590",
+        "corpName": "엠디바이스",
+        "industry": "electronics",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092220",
+        "corpName": "KEC",
+        "industry": "semiconductor",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011040",
+        "corpName": "경동제약",
         "industry": "pharma",
         "viaCode": "000660",
         "viaName": "SK하이닉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "004060",
-        "corpName": "SG세계물산",
+        "stockCode": "039740",
+        "corpName": "한국정보공학",
         "industry": "retail",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083640",
-        "corpName": "인콘",
-        "industry": "software",
         "viaCode": "452400",
         "viaName": "이닉스",
         "hopDistance": 2
@@ -227,9 +363,249 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348350",
+        "corpName": "위드텍",
+        "industry": "electronics",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "103230",
+        "corpName": "에스앤더블류",
+        "industry": "electronics",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006370",
+        "corpName": "대구백화점",
+        "industry": "retail",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "326030",
+        "corpName": "에스케이바이오팜",
+        "industry": "pharma",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035890",
+        "corpName": "서희건설",
+        "industry": "realestate",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017000",
+        "corpName": "신원종합개발",
+        "industry": "construction",
+        "viaCode": "452400",
+        "viaName": "이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039860",
+        "corpName": "나노엔텍",
+        "industry": "pharma",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "236200",
+        "corpName": "슈프리마",
+        "industry": "telecom",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006660",
+        "corpName": "삼성공조",
+        "industry": "electronics",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "402340",
+        "corpName": "SK스퀘어",
+        "industry": "software",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "361610",
+        "corpName": "SK아이이테크놀로지",
+        "industry": "software",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034730",
+        "corpName": "SK",
+        "industry": "software",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "139480",
+        "corpName": "이마트",
+        "industry": "retail",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002170",
+        "corpName": "삼양통상",
+        "industry": "textile",
+        "viaCode": "452400",
+        "viaName": "이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001740",
+        "corpName": "SK네트웍스",
+        "industry": "software",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034120",
+        "corpName": "SBS",
+        "industry": "electronics",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083640",
+        "corpName": "인콘",
+        "industry": "software",
+        "viaCode": "452400",
+        "viaName": "이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066670",
+        "corpName": "디티씨",
+        "industry": "electronics",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "063760",
+        "corpName": "이엘피",
+        "industry": "electronics",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031440",
+        "corpName": "신세계푸드",
+        "industry": "retail",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "285130",
+        "corpName": "SK케미칼",
+        "industry": "software",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "210980",
         "corpName": "SK디앤디",
         "industry": "software",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054670",
+        "corpName": "대한뉴팜",
+        "industry": "pharma",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060260",
+        "corpName": "뉴보텍",
+        "industry": "chemical",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "216050",
+        "corpName": "인크로스",
+        "industry": "media",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010100",
+        "corpName": "한국무브넥스",
+        "industry": "electronics",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217820",
+        "corpName": "원익피앤이",
+        "industry": "machinery",
+        "viaCode": "452400",
+        "viaName": "이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032190",
+        "corpName": "다우데이타",
+        "industry": "retail",
         "viaCode": "452400",
         "viaName": "이닉스",
         "hopDistance": 2
@@ -238,8 +614,184 @@
         "stockCode": "011790",
         "corpName": "SKC",
         "industry": "software",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037460",
+        "corpName": "삼지전자",
+        "industry": "telecom",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "337840",
+        "corpName": "유엑스엔",
+        "industry": "medicalDevice",
         "viaCode": "452400",
         "viaName": "이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032830",
+        "corpName": "삼성생명",
+        "industry": "finance",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "108320",
+        "corpName": "LX세미콘",
+        "industry": "semiconductor",
+        "viaCode": "452400",
+        "viaName": "이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018670",
+        "corpName": "SK가스",
+        "industry": "software",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "475150",
+        "corpName": "SK이터닉스",
+        "industry": "software",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092300",
+        "corpName": "현우산업",
+        "industry": "electronics",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006120",
+        "corpName": "SK디스커버리",
+        "industry": "software",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "050120",
+        "corpName": "ES큐브",
+        "industry": "retail",
+        "viaCode": "452400",
+        "viaName": "이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052260",
+        "corpName": "현대바이오랜드",
+        "industry": "chemical",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000140",
+        "corpName": "하이트진로홀딩스",
+        "industry": "food",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033270",
+        "corpName": "유나이티드",
+        "industry": "pharma",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "263700",
+        "corpName": "케어랩스",
+        "industry": "software",
+        "viaCode": "452400",
+        "viaName": "이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003550",
+        "corpName": "LG",
+        "industry": "electronics",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003650",
+        "corpName": "미창석유공업",
+        "industry": "plastic",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001720",
+        "corpName": "신영증권",
+        "industry": "finance",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
         "hopDistance": 2
       },
       {
@@ -251,9 +803,73 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "000810",
+        "corpName": "삼성화재해상보험",
+        "industry": "finance",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "219750",
+        "corpName": "한국비티비",
+        "industry": "pharma",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038530",
+        "corpName": "케이바이오",
+        "industry": "retail",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "240810",
+        "corpName": "원익IPS",
+        "industry": "semiconductor",
+        "viaCode": "452400",
+        "viaName": "이닉스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "060570",
         "corpName": "드림어스컴퍼니",
         "industry": "media",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095340",
+        "corpName": "ISC",
+        "industry": "retail",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067080",
+        "corpName": "대화제약",
+        "industry": "pharma",
+        "viaCode": "000660",
+        "viaName": "SK하이닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
         "viaCode": "452400",
         "viaName": "이닉스",
         "hopDistance": 2
@@ -275,22 +891,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "012750",
         "corpName": "에스원",
         "industry": "electronics",
@@ -299,227 +899,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000140",
-        "corpName": "하이트진로홀딩스",
-        "industry": "food",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031440",
-        "corpName": "신세계푸드",
-        "industry": "retail",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010100",
-        "corpName": "한국무브넥스",
-        "industry": "electronics",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "018670",
-        "corpName": "SK가스",
-        "industry": "software",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039740",
-        "corpName": "한국정보공학",
-        "industry": "retail",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003550",
-        "corpName": "LG",
-        "industry": "electronics",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034730",
-        "corpName": "SK",
-        "industry": "software",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032830",
-        "corpName": "삼성생명",
-        "industry": "finance",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "100090",
-        "corpName": "SK오션플랜트",
-        "industry": "software",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "285130",
-        "corpName": "SK케미칼",
-        "industry": "software",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "238490",
-        "corpName": "힘스",
-        "industry": "electronics",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "383800",
-        "corpName": "LX홀딩스",
-        "industry": "finance",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "236200",
-        "corpName": "슈프리마",
-        "industry": "telecom",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "348350",
-        "corpName": "위드텍",
-        "industry": "electronics",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003650",
-        "corpName": "미창석유공업",
-        "industry": "plastic",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "240810",
-        "corpName": "원익IPS",
+        "stockCode": "166090",
+        "corpName": "하나머티리얼즈",
         "industry": "semiconductor",
         "viaCode": "452400",
         "viaName": "이닉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "034120",
-        "corpName": "SBS",
-        "industry": "electronics",
+        "stockCode": "024070",
+        "corpName": "WISCOM",
+        "industry": "chemical",
         "viaCode": "000660",
         "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001720",
-        "corpName": "신영증권",
-        "industry": "finance",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "337840",
-        "corpName": "유엑스엔",
-        "industry": "medicalDevice",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "402340",
-        "corpName": "SK스퀘어",
-        "industry": "software",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "063760",
-        "corpName": "이엘피",
-        "industry": "electronics",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033270",
-        "corpName": "유나이티드",
-        "industry": "pharma",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "226590",
-        "corpName": "엠디바이스",
-        "industry": "electronics",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "092300",
-        "corpName": "현우산업",
-        "industry": "electronics",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038530",
-        "corpName": "케이바이오",
-        "industry": "retail",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006370",
-        "corpName": "대구백화점",
-        "industry": "retail",
-        "viaCode": "452400",
-        "viaName": "이닉스",
         "hopDistance": 2
       },
       {
@@ -531,41 +923,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "074600",
-        "corpName": "원익QnC",
-        "industry": "construction",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037460",
-        "corpName": "삼지전자",
-        "industry": "telecom",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "326030",
-        "corpName": "에스케이바이오팜",
-        "industry": "pharma",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054670",
-        "corpName": "대한뉴팜",
-        "industry": "pharma",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054620",
-        "corpName": "APS",
-        "industry": "telecom",
+        "stockCode": "001510",
+        "corpName": "SK증권",
+        "industry": "software",
         "viaCode": "000660",
         "viaName": "SK하이닉스",
         "hopDistance": 2
@@ -579,371 +939,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "017670",
-        "corpName": "SK텔레콤",
-        "industry": "telecom",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004270",
-        "corpName": "남성",
-        "industry": "telecom",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035890",
-        "corpName": "서희건설",
-        "industry": "realestate",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "096770",
-        "corpName": "SK이노베이션",
-        "industry": "chemical",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "092220",
-        "corpName": "KEC",
-        "industry": "semiconductor",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084110",
-        "corpName": "휴온스글로벌",
-        "industry": "pharma",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "361610",
-        "corpName": "SK아이이테크놀로지",
-        "industry": "software",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052260",
-        "corpName": "현대바이오랜드",
-        "industry": "chemical",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "216050",
-        "corpName": "인크로스",
-        "industry": "media",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000810",
-        "corpName": "삼성화재해상보험",
-        "industry": "finance",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "109610",
-        "corpName": "에스와이",
-        "industry": "electronics",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067080",
-        "corpName": "대화제약",
-        "industry": "pharma",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "139480",
-        "corpName": "이마트",
-        "industry": "retail",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "104830",
-        "corpName": "원익머트리얼즈",
-        "industry": "energy",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060260",
-        "corpName": "뉴보텍",
-        "industry": "chemical",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011040",
-        "corpName": "경동제약",
-        "industry": "pharma",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032190",
-        "corpName": "다우데이타",
-        "industry": "retail",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024090",
-        "corpName": "디씨엠",
-        "industry": "construction",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006660",
-        "corpName": "삼성공조",
-        "industry": "electronics",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017000",
-        "corpName": "신원종합개발",
-        "industry": "construction",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "050120",
-        "corpName": "ES큐브",
-        "industry": "retail",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "088350",
         "corpName": "한화생명",
         "industry": "aerospace",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "103230",
-        "corpName": "에스앤더블류",
-        "industry": "electronics",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "108320",
-        "corpName": "LX세미콘",
-        "industry": "semiconductor",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024070",
-        "corpName": "WISCOM",
-        "industry": "chemical",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
         "viaCode": "000660",
         "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "456040",
-        "corpName": "OCI",
-        "industry": "chemical",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006120",
-        "corpName": "SK디스커버리",
-        "industry": "software",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082640",
-        "corpName": "동양생명",
-        "industry": "finance",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007820",
-        "corpName": "에스엠코어",
-        "industry": "machinery",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066670",
-        "corpName": "디티씨",
-        "industry": "electronics",
-        "viaCode": "000660",
-        "viaName": "SK하이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "263700",
-        "corpName": "케어랩스",
-        "industry": "software",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095340",
-        "corpName": "ISC",
-        "industry": "retail",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "217820",
-        "corpName": "원익피앤이",
-        "industry": "machinery",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001630",
-        "corpName": "종근당홀딩스",
-        "industry": "pharma",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "093190",
-        "corpName": "빅솔론",
-        "industry": "electronics",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002170",
-        "corpName": "삼양통상",
-        "industry": "textile",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "475150",
-        "corpName": "SK이터닉스",
-        "industry": "software",
-        "viaCode": "452400",
-        "viaName": "이닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "302440",
-        "corpName": "SK바이오사이언스",
-        "industry": "pharma",
-        "viaCode": "452400",
-        "viaName": "이닉스",
         "hopDistance": 2
       }
     ],

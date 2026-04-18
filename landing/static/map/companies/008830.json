@@ -288,8 +288,56 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "200880",
-        "corpName": "서연이화",
+        "stockCode": "001530",
+        "corpName": "디아이동일",
+        "industry": "food",
+        "viaCode": "018470",
+        "viaName": "조일알미늄",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
+        "viaCode": "307950",
+        "viaName": "현대오토에버",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001750",
+        "corpName": "한양증권",
+        "industry": "finance",
+        "viaCode": "000490",
+        "viaName": "대동",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "049070",
+        "corpName": "인탑스",
+        "industry": "electronics",
+        "viaCode": "000490",
+        "viaName": "대동",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "307950",
+        "viaName": "현대오토에버",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "307950",
+        "viaName": "현대오토에버",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007860",
+        "corpName": "서연",
         "industry": "auto",
         "viaCode": "000490",
         "viaName": "대동",
@@ -304,67 +352,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "013700",
-        "corpName": "까뮤이앤씨",
-        "industry": "realestate",
-        "viaCode": "018470",
-        "viaName": "조일알미늄",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058650",
-        "corpName": "세아홀딩스",
+        "stockCode": "001500",
+        "corpName": "현대차증권",
         "industry": "realestate",
         "viaCode": "307950",
         "viaName": "현대오토에버",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007860",
-        "corpName": "서연",
-        "industry": "auto",
-        "viaCode": "000490",
-        "viaName": "대동",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011210",
-        "corpName": "현대위아",
-        "industry": "auto",
-        "viaCode": "307950",
-        "viaName": "현대오토에버",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012330",
-        "corpName": "현대모비스",
-        "industry": "auto",
-        "viaCode": "307950",
-        "viaName": "현대오토에버",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004020",
-        "corpName": "현대제철",
-        "industry": "steel",
-        "viaCode": "000490",
-        "viaName": "대동",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000720",
-        "corpName": "현대건설",
-        "industry": "construction",
-        "viaCode": "307950",
-        "viaName": "현대오토에버",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006110",
-        "corpName": "삼아알미늄",
-        "industry": "food",
-        "viaCode": "018470",
-        "viaName": "조일알미늄",
         "hopDistance": 2
       },
       {
@@ -376,25 +368,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005380",
-        "corpName": "현대자동차",
+        "stockCode": "352480",
+        "corpName": "씨앤씨인터내셔널",
+        "industry": "cosmetics",
+        "viaCode": "000490",
+        "viaName": "대동",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000270",
+        "corpName": "기아",
         "industry": "auto",
         "viaCode": "307950",
         "viaName": "현대오토에버",
         "hopDistance": 2
       },
       {
-        "stockCode": "001510",
-        "corpName": "SK증권",
-        "industry": "software",
-        "viaCode": "018470",
-        "viaName": "조일알미늄",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001630",
-        "corpName": "종근당홀딩스",
-        "industry": "pharma",
+        "stockCode": "004560",
+        "corpName": "현대비앤지스틸",
+        "industry": "steel",
         "viaCode": "307950",
         "viaName": "현대오토에버",
         "hopDistance": 2
@@ -408,27 +400,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "348350",
-        "corpName": "위드텍",
+        "stockCode": "101390",
+        "corpName": "아이엠",
         "industry": "electronics",
-        "viaCode": "000490",
-        "viaName": "대동",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
         "viaCode": "307950",
         "viaName": "현대오토에버",
         "hopDistance": 2
       },
       {
-        "stockCode": "352480",
-        "corpName": "씨앤씨인터내셔널",
-        "industry": "cosmetics",
-        "viaCode": "000490",
-        "viaName": "대동",
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "307950",
+        "viaName": "현대오토에버",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "307950",
+        "viaName": "현대오토에버",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "307950",
+        "viaName": "현대오토에버",
         "hopDistance": 2
       },
       {
@@ -448,25 +448,81 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
+        "stockCode": "013700",
+        "corpName": "까뮤이앤씨",
+        "industry": "realestate",
+        "viaCode": "018470",
+        "viaName": "조일알미늄",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377300",
+        "corpName": "카카오페이",
+        "industry": "finance",
         "viaCode": "307950",
         "viaName": "현대오토에버",
         "hopDistance": 2
       },
       {
-        "stockCode": "049070",
-        "corpName": "인탑스",
-        "industry": "electronics",
+        "stockCode": "006110",
+        "corpName": "삼아알미늄",
+        "industry": "food",
+        "viaCode": "018470",
+        "viaName": "조일알미늄",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
         "viaCode": "000490",
         "viaName": "대동",
         "hopDistance": 2
       },
       {
-        "stockCode": "001500",
-        "corpName": "현대차증권",
+        "stockCode": "200880",
+        "corpName": "서연이화",
+        "industry": "auto",
+        "viaCode": "000490",
+        "viaName": "대동",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058650",
+        "corpName": "세아홀딩스",
         "industry": "realestate",
+        "viaCode": "307950",
+        "viaName": "현대오토에버",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001510",
+        "corpName": "SK증권",
+        "industry": "software",
+        "viaCode": "018470",
+        "viaName": "조일알미늄",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "119500",
+        "viaName": "포메탈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038880",
+        "corpName": "아이에이",
+        "industry": "electronics",
+        "viaCode": "307950",
+        "viaName": "현대오토에버",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011210",
+        "corpName": "현대위아",
+        "industry": "auto",
         "viaCode": "307950",
         "viaName": "현대오토에버",
         "hopDistance": 2
@@ -480,9 +536,25 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "005380",
+        "corpName": "현대자동차",
+        "industry": "auto",
+        "viaCode": "307950",
+        "viaName": "현대오토에버",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "086280",
         "corpName": "현대글로비스",
         "industry": "logistics",
+        "viaCode": "307950",
+        "viaName": "현대오토에버",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012330",
+        "corpName": "현대모비스",
+        "industry": "auto",
         "viaCode": "307950",
         "viaName": "현대오토에버",
         "hopDistance": 2
@@ -496,43 +568,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "115160",
-        "corpName": "휴맥스",
+        "stockCode": "348350",
+        "corpName": "위드텍",
         "industry": "electronics",
-        "viaCode": "307950",
-        "viaName": "현대오토에버",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "377300",
-        "corpName": "카카오페이",
-        "industry": "finance",
-        "viaCode": "307950",
-        "viaName": "현대오토에버",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000270",
-        "corpName": "기아",
-        "industry": "auto",
-        "viaCode": "307950",
-        "viaName": "현대오토에버",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
-        "viaCode": "307950",
-        "viaName": "현대오토에버",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001530",
-        "corpName": "디아이동일",
-        "industry": "food",
-        "viaCode": "018470",
-        "viaName": "조일알미늄",
+        "viaCode": "000490",
+        "viaName": "대동",
         "hopDistance": 2
       },
       {
@@ -544,51 +584,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "101390",
-        "corpName": "아이엠",
+        "stockCode": "115160",
+        "corpName": "휴맥스",
         "industry": "electronics",
         "viaCode": "307950",
         "viaName": "현대오토에버",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001750",
-        "corpName": "한양증권",
-        "industry": "finance",
-        "viaCode": "000490",
-        "viaName": "대동",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038880",
-        "corpName": "아이에이",
-        "industry": "electronics",
-        "viaCode": "307950",
-        "viaName": "현대오토에버",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "307950",
-        "viaName": "현대오토에버",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004560",
-        "corpName": "현대비앤지스틸",
-        "industry": "steel",
-        "viaCode": "307950",
-        "viaName": "현대오토에버",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "119500",
-        "viaName": "포메탈",
         "hopDistance": 2
       }
     ],

@@ -166,27 +166,19 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "067920",
+        "viaName": "이글루",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
         "industry": "finance",
         "viaCode": "214450",
         "viaName": "파마리서치",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "206650",
-        "corpName": "유바이오로직스",
-        "industry": "pharma",
-        "viaCode": "377740",
-        "viaName": "바이오노트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "137310",
-        "corpName": "에스디바이오센서",
-        "industry": "pharma",
-        "viaCode": "377740",
-        "viaName": "바이오노트",
         "hopDistance": 2
       },
       {
@@ -198,25 +190,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
-        "viaCode": "067920",
-        "viaName": "이글루",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
         "viaCode": "214450",
         "viaName": "파마리서치",
         "hopDistance": 2
       },
       {
-        "stockCode": "299660",
-        "corpName": "셀리드",
-        "industry": "pharma",
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
         "viaCode": "377740",
         "viaName": "바이오노트",
         "hopDistance": 2
@@ -238,30 +222,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001630",
-        "corpName": "종근당홀딩스",
-        "industry": "pharma",
-        "viaCode": "214450",
-        "viaName": "파마리서치",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067390",
-        "corpName": "아스트",
-        "industry": "aerospace",
-        "viaCode": "067920",
-        "viaName": "이글루",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060590",
-        "corpName": "씨티씨바이오",
-        "industry": "pharma",
-        "viaCode": "377740",
-        "viaName": "바이오노트",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "337840",
         "corpName": "유엑스엔",
         "industry": "medicalDevice",
@@ -270,35 +230,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
+        "stockCode": "137310",
+        "corpName": "에스디바이오센서",
+        "industry": "pharma",
         "viaCode": "377740",
         "viaName": "바이오노트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000910",
-        "corpName": "유니온",
-        "industry": "buildingMaterials",
-        "viaCode": "067920",
-        "viaName": "이글루",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039490",
-        "corpName": "키움증권",
-        "industry": "finance",
-        "viaCode": "214450",
-        "viaName": "파마리서치",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "170790",
-        "corpName": "파이오링크",
-        "industry": "telecom",
-        "viaCode": "067920",
-        "viaName": "이글루",
         "hopDistance": 2
       },
       {
@@ -310,11 +246,75 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "060590",
+        "corpName": "씨티씨바이오",
+        "industry": "pharma",
+        "viaCode": "377740",
+        "viaName": "바이오노트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067390",
+        "corpName": "아스트",
+        "industry": "aerospace",
+        "viaCode": "067920",
+        "viaName": "이글루",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "012750",
         "corpName": "에스원",
         "industry": "electronics",
         "viaCode": "067920",
         "viaName": "이글루",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "industry": "buildingMaterials",
+        "viaCode": "067920",
+        "viaName": "이글루",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "214450",
+        "viaName": "파마리서치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "214450",
+        "viaName": "파마리서치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "299660",
+        "corpName": "셀리드",
+        "industry": "pharma",
+        "viaCode": "377740",
+        "viaName": "바이오노트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "170790",
+        "corpName": "파이오링크",
+        "industry": "telecom",
+        "viaCode": "067920",
+        "viaName": "이글루",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "206650",
+        "corpName": "유바이오로직스",
+        "industry": "pharma",
+        "viaCode": "377740",
+        "viaName": "바이오노트",
         "hopDistance": 2
       }
     ],

@@ -125,14 +125,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "017040",
-        "corpName": "광명전기",
-        "industry": "machinery",
-        "viaCode": "079960",
-        "viaName": "동양이엔피",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "041510",
         "corpName": "에스엠",
         "industry": "media",
@@ -141,16 +133,24 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005680",
-        "corpName": "삼영전자공업",
+        "stockCode": "004710",
+        "corpName": "한솔테크닉스",
         "industry": "electronics",
         "viaCode": "079960",
         "viaName": "동양이엔피",
         "hopDistance": 2
       },
       {
-        "stockCode": "031330",
-        "corpName": "에스에이엠티",
+        "stockCode": "017040",
+        "corpName": "광명전기",
+        "industry": "machinery",
+        "viaCode": "079960",
+        "viaName": "동양이엔피",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054090",
+        "corpName": "삼진엘앤디",
         "industry": "electronics",
         "viaCode": "079960",
         "viaName": "동양이엔피",
@@ -165,8 +165,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "054090",
-        "corpName": "삼진엘앤디",
+        "stockCode": "005680",
+        "corpName": "삼영전자공업",
         "industry": "electronics",
         "viaCode": "079960",
         "viaName": "동양이엔피",
@@ -181,16 +181,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "009470",
-        "corpName": "삼화전기",
+        "stockCode": "031330",
+        "corpName": "에스에이엠티",
         "industry": "electronics",
         "viaCode": "079960",
         "viaName": "동양이엔피",
         "hopDistance": 2
       },
       {
-        "stockCode": "004710",
-        "corpName": "한솔테크닉스",
+        "stockCode": "009470",
+        "corpName": "삼화전기",
         "industry": "electronics",
         "viaCode": "079960",
         "viaName": "동양이엔피",

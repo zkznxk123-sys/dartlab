@@ -145,16 +145,24 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "039490",
-        "corpName": "키움증권",
-        "industry": "finance",
+        "stockCode": "011320",
+        "corpName": "유니크",
+        "industry": "machinery",
         "viaCode": "199730",
         "viaName": "바이오인프라",
         "hopDistance": 2
       },
       {
-        "stockCode": "144510",
-        "corpName": "지씨셀",
+        "stockCode": "234690",
+        "corpName": "녹십자웰빙",
+        "industry": "pharma",
+        "viaCode": "199730",
+        "viaName": "바이오인프라",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005250",
+        "corpName": "녹십자홀딩스",
         "industry": "pharma",
         "viaCode": "199730",
         "viaName": "바이오인프라",
@@ -169,9 +177,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005250",
-        "corpName": "녹십자홀딩스",
+        "stockCode": "144510",
+        "corpName": "지씨셀",
         "industry": "pharma",
+        "viaCode": "199730",
+        "viaName": "바이오인프라",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
         "viaCode": "199730",
         "viaName": "바이오인프라",
         "hopDistance": 2
@@ -185,17 +201,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "011320",
-        "corpName": "유니크",
-        "industry": "machinery",
+        "stockCode": "032620",
+        "corpName": "GC메디아이",
+        "industry": "software",
         "viaCode": "199730",
         "viaName": "바이오인프라",
         "hopDistance": 2
       },
       {
-        "stockCode": "032620",
-        "corpName": "GC메디아이",
-        "industry": "software",
+        "stockCode": "006280",
+        "corpName": "녹십자",
+        "industry": "pharma",
         "viaCode": "199730",
         "viaName": "바이오인프라",
         "hopDistance": 2
@@ -214,22 +230,6 @@
         "industry": "pharma",
         "viaCode": "359090",
         "viaName": "씨엔알리서치",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006280",
-        "corpName": "녹십자",
-        "industry": "pharma",
-        "viaCode": "199730",
-        "viaName": "바이오인프라",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "234690",
-        "corpName": "녹십자웰빙",
-        "industry": "pharma",
-        "viaCode": "199730",
-        "viaName": "바이오인프라",
         "hopDistance": 2
       }
     ],

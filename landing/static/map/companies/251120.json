@@ -124,6 +124,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "358570",
+        "corpName": "지아이이노베이션",
+        "industry": "pharma",
+        "viaCode": "338840",
+        "viaName": "와이바이오로직스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "095700",
         "corpName": "제넥신",
         "industry": "pharma",
@@ -140,14 +148,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "038290",
-        "corpName": "마크로젠",
-        "industry": "consulting",
-        "viaCode": "338840",
-        "viaName": "와이바이오로직스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "044780",
         "corpName": "에이치케이",
         "industry": "medicalDevice",
@@ -156,9 +156,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "358570",
-        "corpName": "지아이이노베이션",
-        "industry": "pharma",
+        "stockCode": "038290",
+        "corpName": "마크로젠",
+        "industry": "consulting",
         "viaCode": "338840",
         "viaName": "와이바이오로직스",
         "hopDistance": 2

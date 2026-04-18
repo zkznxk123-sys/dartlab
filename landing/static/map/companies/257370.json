@@ -149,30 +149,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "004830",
-        "corpName": "덕성",
-        "industry": "chemical",
-        "viaCode": "137400",
-        "viaName": "피엔티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "014820",
-        "corpName": "동원시스템즈",
-        "industry": "plastic",
-        "viaCode": "137400",
-        "viaName": "피엔티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011200",
-        "corpName": "HMM",
-        "industry": "shipbuilding",
-        "viaCode": "137400",
-        "viaName": "피엔티",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "003470",
         "corpName": "유안타증권",
         "industry": "finance",
@@ -189,22 +165,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "103140",
-        "corpName": "풍산",
-        "industry": "steel",
-        "viaCode": "137400",
-        "viaName": "피엔티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "018250",
-        "corpName": "애경산업",
-        "industry": "chemical",
-        "viaCode": "137400",
-        "viaName": "피엔티",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "005810",
         "corpName": "풍산홀딩스",
         "industry": "retail",
@@ -213,9 +173,49 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "103140",
+        "corpName": "풍산",
+        "industry": "steel",
+        "viaCode": "137400",
+        "viaName": "피엔티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011200",
+        "corpName": "HMM",
+        "industry": "shipbuilding",
+        "viaCode": "137400",
+        "viaName": "피엔티",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "270660",
         "corpName": "에브리봇",
         "industry": "machinery",
+        "viaCode": "137400",
+        "viaName": "피엔티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004830",
+        "corpName": "덕성",
+        "industry": "chemical",
+        "viaCode": "137400",
+        "viaName": "피엔티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014820",
+        "corpName": "동원시스템즈",
+        "industry": "plastic",
+        "viaCode": "137400",
+        "viaName": "피엔티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018250",
+        "corpName": "애경산업",
+        "industry": "chemical",
         "viaCode": "137400",
         "viaName": "피엔티",
         "hopDistance": 2

@@ -123,17 +123,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "038460",
-        "corpName": "바이오스마트",
-        "industry": "electronics",
+        "stockCode": "057540",
+        "corpName": "옴니시스템",
+        "industry": "energy",
         "viaCode": "032860",
         "viaName": "더라미",
         "hopDistance": 2
       },
       {
-        "stockCode": "057540",
-        "corpName": "옴니시스템",
-        "industry": "energy",
+        "stockCode": "038460",
+        "corpName": "바이오스마트",
+        "industry": "electronics",
         "viaCode": "032860",
         "viaName": "더라미",
         "hopDistance": 2

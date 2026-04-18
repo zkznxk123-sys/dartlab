@@ -187,7 +187,9 @@ def f(*, freq: Literal["Q", "Y", "YTD"] = "Q")  # ✓
 
 ---
 
-## 5. 종목코드 하나면 끝 (편의성 3원칙)
+## 5. Company 편의성 3원칙
+
+> 이 원칙은 Company-bound API의 설계 원칙이며, dartlab 전체 사상이 아니다.
 
 ### 접근성
 - 공개 함수는 종목코드 (str) 또는 Company 만 받는다
@@ -347,7 +349,7 @@ CI sentinel `tests/test_imports.py` 가 강제.
 analysis = 도구, review = 사람의 보고서, AI = 적극적 분석가.
 
 ### sections 사상
-sections (topic × period 수평화) 가 회사의 전체 지도. 양대 축 중 하나.
+sections (topic × period 수평화) 가 회사의 전체 지도. Company 엔진의 핵심 사상.
 
 ```
 sections = { topic: { period: content } }

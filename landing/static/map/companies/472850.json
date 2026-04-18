@@ -160,19 +160,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "066900",
-        "corpName": "디에이피",
-        "industry": "electronics",
-        "viaCode": "033290",
-        "viaName": "로젠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "033290",
-        "viaName": "로젠",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "080420",
+        "viaName": "모다이노칩",
         "hopDistance": 2
       },
       {
@@ -184,11 +176,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "080420",
-        "viaName": "모다이노칩",
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "033290",
+        "viaName": "로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066900",
+        "corpName": "디에이피",
+        "industry": "electronics",
+        "viaCode": "033290",
+        "viaName": "로젠",
         "hopDistance": 2
       }
     ],

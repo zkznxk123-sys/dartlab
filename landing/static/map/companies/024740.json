@@ -159,19 +159,19 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "004020",
-        "corpName": "현대제철",
-        "industry": "steel",
-        "viaCode": "126640",
-        "viaName": "화신정공",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "010100",
         "corpName": "한국무브넥스",
         "industry": "electronics",
         "viaCode": "005030",
         "viaName": "부산주공",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "126640",
+        "viaName": "화신정공",
         "hopDistance": 2
       },
       {
@@ -183,17 +183,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
         "viaCode": "005030",
         "viaName": "부산주공",
         "hopDistance": 2
       },
       {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
         "viaCode": "005030",
         "viaName": "부산주공",
         "hopDistance": 2

@@ -170,91 +170,19 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "078130",
-        "corpName": "국일제지",
-        "industry": "paper",
-        "viaCode": "027970",
-        "viaName": "한국제지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002760",
-        "corpName": "보락",
-        "industry": "cosmetics",
-        "viaCode": "101530",
-        "viaName": "해태제과식품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037230",
-        "corpName": "한국팩키지",
-        "industry": "paper",
-        "viaCode": "027970",
-        "viaName": "한국제지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "280360",
-        "corpName": "롯데웰푸드",
-        "industry": "food",
-        "viaCode": "005610",
-        "viaName": "SPC삼립",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "013570",
-        "corpName": "디와이",
-        "industry": "electronics",
-        "viaCode": "101530",
-        "viaName": "해태제과식품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009580",
-        "corpName": "무림P&P",
-        "industry": "paper",
-        "viaCode": "027970",
-        "viaName": "한국제지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016590",
-        "corpName": "신대양제지",
-        "industry": "paper",
-        "viaCode": "027970",
-        "viaName": "한국제지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011780",
-        "corpName": "금호석유화학",
-        "industry": "chemical",
-        "viaCode": "027970",
-        "viaName": "한국제지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "014160",
-        "corpName": "대영포장",
-        "industry": "paper",
-        "viaCode": "101530",
-        "viaName": "해태제과식품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034810",
-        "corpName": "해성산업",
-        "industry": "realestate",
-        "viaCode": "027970",
-        "viaName": "한국제지",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "001790",
         "corpName": "대한제당",
         "industry": "food",
         "viaCode": "101530",
         "viaName": "해태제과식품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012200",
+        "corpName": "계양전기",
+        "industry": "auto",
+        "viaCode": "027970",
+        "viaName": "한국제지",
         "hopDistance": 2
       },
       {
@@ -274,35 +202,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "264900",
-        "corpName": "크라운제과",
+        "stockCode": "097950",
+        "corpName": "CJ제일제당",
         "industry": "food",
-        "viaCode": "027970",
-        "viaName": "한국제지",
+        "viaCode": "101530",
+        "viaName": "해태제과식품",
         "hopDistance": 2
       },
       {
-        "stockCode": "012200",
-        "corpName": "계양전기",
-        "industry": "auto",
-        "viaCode": "027970",
-        "viaName": "한국제지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "145990",
-        "corpName": "삼양사",
-        "industry": "food",
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
         "viaCode": "005610",
         "viaName": "SPC삼립",
         "hopDistance": 2
       },
       {
-        "stockCode": "052600",
-        "corpName": "한네트",
-        "industry": "finance",
-        "viaCode": "005610",
-        "viaName": "SPC삼립",
+        "stockCode": "008040",
+        "corpName": "사조동아원",
+        "industry": "food",
+        "viaCode": "101530",
+        "viaName": "해태제과식품",
         "hopDistance": 2
       },
       {
@@ -314,25 +234,129 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "097950",
-        "corpName": "CJ제일제당",
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "005610",
+        "viaName": "SPC삼립",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037230",
+        "corpName": "한국팩키지",
+        "industry": "paper",
+        "viaCode": "027970",
+        "viaName": "한국제지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "264900",
+        "corpName": "크라운제과",
         "industry": "food",
         "viaCode": "101530",
         "viaName": "해태제과식품",
         "hopDistance": 2
       },
       {
+        "stockCode": "280360",
+        "corpName": "롯데웰푸드",
+        "industry": "food",
+        "viaCode": "005610",
+        "viaName": "SPC삼립",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "005740",
         "corpName": "크라운해태홀딩스",
         "industry": "food",
+        "viaCode": "101530",
+        "viaName": "해태제과식품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011780",
+        "corpName": "금호석유화학",
+        "industry": "chemical",
         "viaCode": "027970",
         "viaName": "한국제지",
         "hopDistance": 2
       },
       {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
+        "stockCode": "052600",
+        "corpName": "한네트",
+        "industry": "finance",
+        "viaCode": "005610",
+        "viaName": "SPC삼립",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016590",
+        "corpName": "신대양제지",
+        "industry": "paper",
+        "viaCode": "027970",
+        "viaName": "한국제지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078130",
+        "corpName": "국일제지",
+        "industry": "paper",
+        "viaCode": "027970",
+        "viaName": "한국제지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002760",
+        "corpName": "보락",
+        "industry": "cosmetics",
+        "viaCode": "101530",
+        "viaName": "해태제과식품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034810",
+        "corpName": "해성산업",
+        "industry": "realestate",
+        "viaCode": "027970",
+        "viaName": "한국제지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014160",
+        "corpName": "대영포장",
+        "industry": "paper",
+        "viaCode": "101530",
+        "viaName": "해태제과식품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009580",
+        "corpName": "무림P&P",
+        "industry": "paper",
+        "viaCode": "027970",
+        "viaName": "한국제지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007310",
+        "corpName": "오뚜기",
+        "industry": "food",
+        "viaCode": "005610",
+        "viaName": "SPC삼립",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "145990",
+        "corpName": "삼양사",
+        "industry": "food",
+        "viaCode": "005610",
+        "viaName": "SPC삼립",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001680",
+        "corpName": "대상",
+        "industry": "food",
         "viaCode": "005610",
         "viaName": "SPC삼립",
         "hopDistance": 2
@@ -346,35 +370,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "008040",
-        "corpName": "사조동아원",
-        "industry": "food",
+        "stockCode": "013570",
+        "corpName": "디와이",
+        "industry": "electronics",
         "viaCode": "101530",
         "viaName": "해태제과식품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001680",
-        "corpName": "대상",
-        "industry": "food",
-        "viaCode": "005610",
-        "viaName": "SPC삼립",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007310",
-        "corpName": "오뚜기",
-        "industry": "food",
-        "viaCode": "005610",
-        "viaName": "SPC삼립",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "005610",
-        "viaName": "SPC삼립",
         "hopDistance": 2
       },
       {
@@ -388,7 +388,7 @@
     ],
     "hop2Edges": [
       {
-        "from": "001680",
+        "from": "145990",
         "to": "005610",
         "type": "supplier",
         "amount": 8068920.0,
@@ -398,7 +398,7 @@
         "source": "docs_table"
       },
       {
-        "from": "145990",
+        "from": "001680",
         "to": "005610",
         "type": "supplier",
         "amount": 8068920.0,

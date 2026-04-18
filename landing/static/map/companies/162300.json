@@ -160,22 +160,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "099520",
-        "corpName": "DGI",
-        "industry": "retail",
-        "viaCode": "177830",
-        "viaName": "파버나인",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "069330",
-        "corpName": "유아이디",
-        "industry": "electronics",
-        "viaCode": "177830",
-        "viaName": "파버나인",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "069510",
         "corpName": "에스텍",
         "industry": "electronics",
@@ -192,9 +176,25 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "099520",
+        "corpName": "DGI",
+        "industry": "retail",
+        "viaCode": "177830",
+        "viaName": "파버나인",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "217590",
         "corpName": "티엠씨",
         "industry": "electrical",
+        "viaCode": "177830",
+        "viaName": "파버나인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069330",
+        "corpName": "유아이디",
+        "industry": "electronics",
         "viaCode": "177830",
         "viaName": "파버나인",
         "hopDistance": 2

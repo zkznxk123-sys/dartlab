@@ -178,25 +178,33 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "294090",
-        "corpName": "이오플로우",
+        "stockCode": "038070",
+        "corpName": "서린바이오",
+        "industry": "retail",
+        "viaCode": "228760",
+        "viaName": "지노믹트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "450950",
+        "viaName": "아스테라시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068330",
+        "corpName": "일신바이오",
         "industry": "machinery",
         "viaCode": "337840",
         "viaName": "유엑스엔",
         "hopDistance": 2
       },
       {
-        "stockCode": "099430",
-        "corpName": "바이오플러스",
-        "industry": "pharma",
-        "viaCode": "228760",
-        "viaName": "지노믹트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "418550",
-        "corpName": "제이오",
-        "industry": "consulting",
+        "stockCode": "294090",
+        "corpName": "이오플로우",
+        "industry": "machinery",
         "viaCode": "337840",
         "viaName": "유엑스엔",
         "hopDistance": 2
@@ -210,9 +218,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "259630",
-        "corpName": "엠플러스",
-        "industry": "machinery",
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
         "viaCode": "337840",
         "viaName": "유엑스엔",
         "hopDistance": 2
@@ -226,57 +234,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "119830",
-        "corpName": "아이텍",
-        "industry": "semiconductor",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038070",
-        "corpName": "서린바이오",
-        "industry": "retail",
-        "viaCode": "228760",
-        "viaName": "지노믹트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "068330",
-        "corpName": "일신바이오",
+        "stockCode": "259630",
+        "corpName": "엠플러스",
         "industry": "machinery",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "091120",
-        "corpName": "이엠텍",
-        "industry": "electronics",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "137310",
-        "corpName": "에스디바이오센서",
-        "industry": "pharma",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
         "viaCode": "337840",
         "viaName": "유엑스엔",
         "hopDistance": 2
@@ -290,11 +250,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "278990",
-        "corpName": "EMB",
-        "industry": "battery",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
+        "stockCode": "099430",
+        "corpName": "바이오플러스",
+        "industry": "pharma",
+        "viaCode": "228760",
+        "viaName": "지노믹트리",
         "hopDistance": 2
       },
       {
@@ -306,11 +266,51 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
-        "viaCode": "450950",
-        "viaName": "아스테라시스",
+        "stockCode": "278990",
+        "corpName": "EMB",
+        "industry": "battery",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "119830",
+        "corpName": "아이텍",
+        "industry": "semiconductor",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "418550",
+        "corpName": "제이오",
+        "industry": "consulting",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091120",
+        "corpName": "이엠텍",
+        "industry": "electronics",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "137310",
+        "corpName": "에스디바이오센서",
+        "industry": "pharma",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
         "hopDistance": 2
       }
     ],

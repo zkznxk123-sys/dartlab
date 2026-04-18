@@ -164,9 +164,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "368970",
-        "corpName": "오에스피",
-        "industry": "food",
+        "stockCode": "263700",
+        "corpName": "케어랩스",
+        "industry": "software",
+        "viaCode": "005250",
+        "viaName": "녹십자홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003300",
+        "corpName": "한일홀딩스",
+        "industry": "buildingMaterials",
         "viaCode": "006280",
         "viaName": "녹십자",
         "hopDistance": 2
@@ -175,46 +183,30 @@
         "stockCode": "338220",
         "corpName": "뷰노",
         "industry": "software",
-        "viaCode": "005250",
-        "viaName": "녹십자홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "005250",
-        "viaName": "녹십자홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "005250",
-        "viaName": "녹십자홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "005250",
-        "viaName": "녹십자홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "206650",
-        "corpName": "유바이오로직스",
-        "industry": "pharma",
         "viaCode": "006280",
         "viaName": "녹십자",
         "hopDistance": 2
       },
       {
-        "stockCode": "000670",
-        "corpName": "영풍",
-        "industry": "retail",
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "006280",
+        "viaName": "녹십자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "142280",
+        "viaName": "녹십자엠에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065570",
+        "corpName": "삼영이엔씨",
+        "industry": "telecom",
         "viaCode": "006280",
         "viaName": "녹십자",
         "hopDistance": 2
@@ -223,22 +215,6 @@
         "stockCode": "064820",
         "corpName": "케이프",
         "industry": "auto",
-        "viaCode": "005250",
-        "viaName": "녹십자홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "006280",
-        "viaName": "녹십자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "456040",
-        "corpName": "OCI",
-        "industry": "chemical",
         "viaCode": "005250",
         "viaName": "녹십자홀딩스",
         "hopDistance": 2
@@ -268,6 +244,30 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "221800",
+        "corpName": "유투바이오",
+        "industry": "pharma",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000670",
+        "corpName": "영풍",
+        "industry": "retail",
+        "viaCode": "006280",
+        "viaName": "녹십자",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "145020",
         "corpName": "휴젤",
         "industry": "pharma",
@@ -276,27 +276,43 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "263700",
-        "corpName": "케어랩스",
-        "industry": "software",
-        "viaCode": "005250",
-        "viaName": "녹십자홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "340450",
-        "corpName": "지씨지놈",
-        "industry": "electronics",
-        "viaCode": "005250",
-        "viaName": "녹십자홀딩스",
+        "stockCode": "199730",
+        "corpName": "바이오인프라",
+        "industry": "pharma",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
         "hopDistance": 2
       },
       {
         "stockCode": "234690",
         "corpName": "녹십자웰빙",
         "industry": "pharma",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095700",
+        "corpName": "제넥신",
+        "industry": "pharma",
         "viaCode": "005250",
         "viaName": "녹십자홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010130",
+        "corpName": "고려아연",
+        "industry": "steel",
+        "viaCode": "006280",
+        "viaName": "녹십자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "026890",
+        "corpName": "스틱인베스트먼트",
+        "industry": "chemical",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
         "hopDistance": 2
       },
       {
@@ -308,17 +324,113 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "199730",
-        "corpName": "바이오인프라",
-        "industry": "pharma",
+        "stockCode": "340450",
+        "corpName": "지씨지놈",
+        "industry": "electronics",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214330",
+        "corpName": "금호에이치티",
+        "industry": "electronics",
+        "viaCode": "006280",
+        "viaName": "녹십자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "006280",
+        "viaName": "녹십자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
         "viaCode": "005250",
         "viaName": "녹십자홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
+        "stockCode": "144510",
+        "corpName": "지씨셀",
+        "industry": "pharma",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071200",
+        "corpName": "인피니트헬스케어",
+        "industry": "pharma",
+        "viaCode": "032620",
+        "viaName": "GC메디아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "006280",
+        "viaName": "녹십자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "249420",
+        "corpName": "일동제약",
+        "industry": "pharma",
+        "viaCode": "006280",
+        "viaName": "녹십자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
         "industry": "aerospace",
+        "viaCode": "006280",
+        "viaName": "녹십자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "368970",
+        "corpName": "오에스피",
+        "industry": "food",
+        "viaCode": "006280",
+        "viaName": "녹십자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002240",
+        "corpName": "고려제강",
+        "industry": "steel",
+        "viaCode": "005250",
+        "viaName": "녹십자홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "300720",
+        "corpName": "한일시멘트",
+        "industry": "construction",
+        "viaCode": "006280",
+        "viaName": "녹십자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
         "viaCode": "006280",
         "viaName": "녹십자",
         "hopDistance": 2
@@ -332,19 +444,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "214330",
-        "corpName": "금호에이치티",
-        "industry": "electronics",
-        "viaCode": "005250",
-        "viaName": "녹십자홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095700",
-        "corpName": "제넥신",
+        "stockCode": "206650",
+        "corpName": "유바이오로직스",
         "industry": "pharma",
-        "viaCode": "005250",
-        "viaName": "녹십자홀딩스",
+        "viaCode": "006280",
+        "viaName": "녹십자",
         "hopDistance": 2
       },
       {
@@ -353,110 +457,6 @@
         "industry": "pharma",
         "viaCode": "006280",
         "viaName": "녹십자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "142280",
-        "viaName": "녹십자엠에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
-        "viaCode": "006280",
-        "viaName": "녹십자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "065570",
-        "corpName": "삼영이엔씨",
-        "industry": "telecom",
-        "viaCode": "006280",
-        "viaName": "녹십자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "144510",
-        "corpName": "지씨셀",
-        "industry": "pharma",
-        "viaCode": "005250",
-        "viaName": "녹십자홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002240",
-        "corpName": "고려제강",
-        "industry": "steel",
-        "viaCode": "005250",
-        "viaName": "녹십자홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "071200",
-        "corpName": "인피니트헬스케어",
-        "industry": "pharma",
-        "viaCode": "032620",
-        "viaName": "GC메디아이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "249420",
-        "corpName": "일동제약",
-        "industry": "pharma",
-        "viaCode": "005250",
-        "viaName": "녹십자홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "300720",
-        "corpName": "한일시멘트",
-        "industry": "construction",
-        "viaCode": "005250",
-        "viaName": "녹십자홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010130",
-        "corpName": "고려아연",
-        "industry": "steel",
-        "viaCode": "005250",
-        "viaName": "녹십자홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "026890",
-        "corpName": "스틱인베스트먼트",
-        "industry": "chemical",
-        "viaCode": "032620",
-        "viaName": "GC메디아이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003300",
-        "corpName": "한일홀딩스",
-        "industry": "buildingMaterials",
-        "viaCode": "005250",
-        "viaName": "녹십자홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "221800",
-        "corpName": "유투바이오",
-        "industry": "pharma",
-        "viaCode": "032620",
-        "viaName": "GC메디아이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "032620",
-        "viaName": "GC메디아이",
         "hopDistance": 2
       }
     ],

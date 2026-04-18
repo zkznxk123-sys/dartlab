@@ -150,14 +150,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "228850",
-        "corpName": "레이언스",
-        "industry": "medicalDevice",
-        "viaCode": "043150",
-        "viaName": "바텍",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "031210",
         "corpName": "서울보증보험",
         "industry": "finance",
@@ -166,9 +158,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004690",
-        "corpName": "삼천리",
-        "industry": "energy",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "043150",
         "viaName": "바텍",
         "hopDistance": 2
@@ -179,6 +171,22 @@
         "industry": "finance",
         "viaCode": "036190",
         "viaName": "금화피에스시",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "228850",
+        "corpName": "레이언스",
+        "industry": "medicalDevice",
+        "viaCode": "043150",
+        "viaName": "바텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004690",
+        "corpName": "삼천리",
+        "industry": "energy",
+        "viaCode": "043150",
+        "viaName": "바텍",
         "hopDistance": 2
       },
       {
@@ -195,14 +203,6 @@
         "industry": "construction",
         "viaCode": "036190",
         "viaName": "금화피에스시",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "043150",
-        "viaName": "바텍",
         "hopDistance": 2
       }
     ],

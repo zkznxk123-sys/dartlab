@@ -170,6 +170,22 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "002620",
+        "viaName": "제일파마홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012750",
+        "corpName": "에스원",
+        "industry": "electronics",
+        "viaCode": "002620",
+        "viaName": "제일파마홀딩스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "003520",
         "corpName": "영진약품",
         "industry": "pharma",
@@ -186,27 +202,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "002620",
-        "viaName": "제일파마홀딩스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "002020",
         "corpName": "코오롱",
         "industry": "finance",
         "viaCode": "271980",
         "viaName": "제일약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012750",
-        "corpName": "에스원",
-        "industry": "electronics",
-        "viaCode": "002620",
-        "viaName": "제일파마홀딩스",
         "hopDistance": 2
       }
     ],

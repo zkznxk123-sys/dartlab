@@ -118,83 +118,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "352940",
-        "corpName": "인바이오",
-        "industry": "chemical",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053350",
-        "corpName": "이니텍",
-        "industry": "software",
-        "viaCode": "043610",
-        "viaName": "KT지니뮤직",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032640",
-        "corpName": "LG유플러스",
-        "industry": "telecom",
-        "viaCode": "043610",
-        "viaName": "KT지니뮤직",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053210",
-        "corpName": "케이티스카이라이프",
-        "industry": "telecom",
-        "viaCode": "043610",
-        "viaName": "KT지니뮤직",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036030",
-        "corpName": "케이티알파",
+        "stockCode": "240550",
+        "corpName": "동방메디컬",
         "industry": "medicalDevice",
-        "viaCode": "043610",
-        "viaName": "KT지니뮤직",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084110",
-        "corpName": "휴온스글로벌",
-        "industry": "pharma",
         "viaCode": "095500",
         "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "418470",
-        "corpName": "KT밀리의서재",
-        "industry": "telecom",
-        "viaCode": "043610",
-        "viaName": "KT지니뮤직",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "247540",
-        "corpName": "에코프로비엠",
-        "industry": "chemical",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "069510",
-        "corpName": "에스텍",
-        "industry": "electronics",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "237820",
-        "corpName": "플레이디",
-        "industry": "media",
-        "viaCode": "043610",
-        "viaName": "KT지니뮤직",
         "hopDistance": 2
       },
       {
@@ -206,65 +134,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "337930",
-        "corpName": "젝시믹스",
-        "industry": "textile",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035760",
-        "corpName": "CJ ENM",
-        "industry": "media",
-        "viaCode": "043610",
-        "viaName": "KT지니뮤직",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "086520",
-        "corpName": "에코프로",
-        "industry": "chemical",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "240550",
-        "corpName": "동방메디컬",
-        "industry": "medicalDevice",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084850",
-        "corpName": "아이티엠반도체",
+        "stockCode": "067770",
+        "corpName": "세진티에스",
         "industry": "electronics",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "263810",
-        "corpName": "상신전자",
-        "industry": "electronics",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016360",
-        "corpName": "삼성증권",
-        "industry": "finance",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039560",
-        "corpName": "다산네트웍스",
-        "industry": "telecom",
         "viaCode": "095500",
         "viaName": "미래나노텍",
         "hopDistance": 2
@@ -278,32 +150,24 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "304360",
-        "corpName": "에스바이오메딕스",
-        "industry": "realestate",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067770",
-        "corpName": "세진티에스",
-        "industry": "electronics",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "030200",
         "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "043610",
+        "viaName": "KT지니뮤직",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035760",
+        "corpName": "CJ ENM",
+        "industry": "media",
+        "viaCode": "043610",
+        "viaName": "KT지니뮤직",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "418470",
+        "corpName": "KT밀리의서재",
         "industry": "telecom",
         "viaCode": "043610",
         "viaName": "KT지니뮤직",
@@ -318,9 +182,145 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "304360",
+        "corpName": "에스바이오메딕스",
+        "industry": "realestate",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "337930",
+        "corpName": "젝시믹스",
+        "industry": "textile",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352940",
+        "corpName": "인바이오",
+        "industry": "chemical",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "247540",
+        "corpName": "에코프로비엠",
+        "industry": "chemical",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053350",
+        "corpName": "이니텍",
+        "industry": "software",
+        "viaCode": "043610",
+        "viaName": "KT지니뮤직",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053210",
+        "corpName": "케이티스카이라이프",
+        "industry": "telecom",
+        "viaCode": "043610",
+        "viaName": "KT지니뮤직",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "237820",
+        "corpName": "플레이디",
+        "industry": "media",
+        "viaCode": "043610",
+        "viaName": "KT지니뮤직",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086520",
+        "corpName": "에코프로",
+        "industry": "chemical",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039560",
+        "corpName": "다산네트웍스",
+        "industry": "telecom",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "263810",
+        "corpName": "상신전자",
+        "industry": "electronics",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "024110",
         "corpName": "기업은행",
         "industry": "finance",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016360",
+        "corpName": "삼성증권",
+        "industry": "finance",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036030",
+        "corpName": "케이티알파",
+        "industry": "medicalDevice",
+        "viaCode": "043610",
+        "viaName": "KT지니뮤직",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032640",
+        "corpName": "LG유플러스",
+        "industry": "telecom",
+        "viaCode": "043610",
+        "viaName": "KT지니뮤직",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084850",
+        "corpName": "아이티엠반도체",
+        "industry": "electronics",
         "viaCode": "095500",
         "viaName": "미래나노텍",
         "hopDistance": 2

@@ -87,41 +87,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "069620",
-        "viaName": "대웅제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009420",
-        "corpName": "한올바이오파마",
-        "industry": "realestate",
-        "viaCode": "069620",
-        "viaName": "대웅제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033230",
-        "corpName": "인성정보",
-        "industry": "software",
-        "viaCode": "069620",
-        "viaName": "대웅제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "353810",
-        "corpName": "이지바이오",
-        "industry": "chemical",
-        "viaCode": "069620",
-        "viaName": "대웅제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "382150",
-        "corpName": "온코크로스",
-        "industry": "software",
+        "stockCode": "004060",
+        "corpName": "SG세계물산",
+        "industry": "retail",
         "viaCode": "069620",
         "viaName": "대웅제약",
         "hopDistance": 2
@@ -135,9 +103,57 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
+        "stockCode": "052860",
+        "corpName": "아이앤씨",
+        "industry": "semiconductor",
+        "viaCode": "069620",
+        "viaName": "대웅제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "353810",
+        "corpName": "이지바이오",
+        "industry": "chemical",
+        "viaCode": "069620",
+        "viaName": "대웅제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009420",
+        "corpName": "한올바이오파마",
+        "industry": "realestate",
+        "viaCode": "069620",
+        "viaName": "대웅제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "458870",
+        "corpName": "씨어스테크놀로지",
+        "industry": "electronics",
+        "viaCode": "069620",
+        "viaName": "대웅제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "219750",
+        "corpName": "한국비티비",
+        "industry": "pharma",
+        "viaCode": "069620",
+        "viaName": "대웅제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "402420",
+        "corpName": "켈스",
+        "industry": "pharma",
+        "viaCode": "069620",
+        "viaName": "대웅제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307750",
+        "corpName": "국전약품",
+        "industry": "pharma",
         "viaCode": "069620",
         "viaName": "대웅제약",
         "hopDistance": 2
@@ -145,22 +161,6 @@
       {
         "stockCode": "000100",
         "corpName": "유한양행",
-        "industry": "pharma",
-        "viaCode": "069620",
-        "viaName": "대웅제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084110",
-        "corpName": "휴온스글로벌",
-        "industry": "pharma",
-        "viaCode": "069620",
-        "viaName": "대웅제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "314140",
-        "corpName": "알피바이오",
         "industry": "pharma",
         "viaCode": "069620",
         "viaName": "대웅제약",
@@ -175,48 +175,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "219750",
-        "corpName": "한국비티비",
-        "industry": "pharma",
-        "viaCode": "069620",
-        "viaName": "대웅제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052860",
-        "corpName": "아이앤씨",
-        "industry": "semiconductor",
-        "viaCode": "069620",
-        "viaName": "대웅제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "458870",
-        "corpName": "씨어스테크놀로지",
-        "industry": "electronics",
-        "viaCode": "069620",
-        "viaName": "대웅제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004060",
-        "corpName": "SG세계물산",
-        "industry": "retail",
-        "viaCode": "069620",
-        "viaName": "대웅제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011040",
-        "corpName": "경동제약",
-        "industry": "pharma",
-        "viaCode": "069620",
-        "viaName": "대웅제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "402420",
-        "corpName": "켈스",
+        "stockCode": "314140",
+        "corpName": "알피바이오",
         "industry": "pharma",
         "viaCode": "069620",
         "viaName": "대웅제약",
@@ -239,16 +199,56 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "200670",
-        "corpName": "휴메딕스",
+        "stockCode": "382150",
+        "corpName": "온코크로스",
+        "industry": "software",
+        "viaCode": "069620",
+        "viaName": "대웅제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
         "industry": "pharma",
         "viaCode": "069620",
         "viaName": "대웅제약",
         "hopDistance": 2
       },
       {
-        "stockCode": "307750",
-        "corpName": "국전약품",
+        "stockCode": "033230",
+        "corpName": "인성정보",
+        "industry": "software",
+        "viaCode": "069620",
+        "viaName": "대웅제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "069620",
+        "viaName": "대웅제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "069620",
+        "viaName": "대웅제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011040",
+        "corpName": "경동제약",
+        "industry": "pharma",
+        "viaCode": "069620",
+        "viaName": "대웅제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200670",
+        "corpName": "휴메딕스",
         "industry": "pharma",
         "viaCode": "069620",
         "viaName": "대웅제약",

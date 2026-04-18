@@ -142,121 +142,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "003490",
-        "corpName": "대한항공",
-        "industry": "logistics",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "200130",
-        "corpName": "콜마비앤에이치",
-        "industry": "pharma",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "018670",
-        "corpName": "SK가스",
-        "industry": "software",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "205470",
-        "corpName": "휴마시스",
-        "industry": "pharma",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001230",
-        "corpName": "동국홀딩스",
-        "industry": "steel",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "018250",
-        "corpName": "애경산업",
-        "industry": "chemical",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "278470",
-        "corpName": "에이피알",
-        "industry": "cosmetics",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017670",
-        "corpName": "SK텔레콤",
-        "industry": "telecom",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002320",
-        "corpName": "한진",
-        "industry": "logistics",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032800",
-        "corpName": "판타지오",
-        "industry": "media",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "307930",
-        "corpName": "컴퍼니케이",
-        "industry": "finance",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "096770",
-        "corpName": "SK이노베이션",
-        "industry": "chemical",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267850",
-        "corpName": "아시아나IDT",
-        "industry": "software",
+        "stockCode": "001520",
+        "corpName": "동양",
+        "industry": "construction",
         "viaCode": "180640",
         "viaName": "한진칼",
         "hopDistance": 2
@@ -270,78 +158,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "020560",
-        "corpName": "아시아나항공",
-        "industry": "aerospace",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "044480",
-        "corpName": "빌리언스",
-        "industry": "plastic",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064820",
-        "corpName": "케이프",
-        "industry": "auto",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003610",
-        "corpName": "방림",
-        "industry": "shipbuilding",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006120",
-        "corpName": "SK디스커버리",
-        "industry": "software",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034730",
-        "corpName": "SK",
-        "industry": "software",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "298690",
-        "corpName": "에어부산",
-        "industry": "aerospace",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039860",
-        "corpName": "나노엔텍",
-        "industry": "pharma",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "067630",
         "corpName": "HLB생명과학",
         "industry": "pharma",
@@ -350,161 +166,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "111770",
-        "corpName": "영원무역",
-        "industry": "textile",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
         "viaCode": "180640",
         "viaName": "한진칼",
         "hopDistance": 2
       },
       {
-        "stockCode": "007820",
-        "corpName": "에스엠코어",
-        "industry": "machinery",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "285130",
-        "corpName": "SK케미칼",
-        "industry": "software",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052260",
-        "corpName": "현대바이오랜드",
-        "industry": "chemical",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006840",
-        "corpName": "AK홀딩스",
-        "industry": "finance",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007120",
-        "corpName": "미래아이앤지",
-        "industry": "electronics",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "448780",
-        "corpName": "마이크로엔엑스",
-        "industry": "electrical",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053950",
-        "corpName": "경남제약",
-        "industry": "pharma",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034230",
-        "corpName": "파라다이스",
-        "industry": "leisure",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "253610",
-        "corpName": "루트락",
-        "industry": "pharma",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "028670",
-        "corpName": "팬오션",
+        "stockCode": "002320",
+        "corpName": "한진",
         "industry": "logistics",
         "viaCode": "180640",
         "viaName": "한진칼",
         "hopDistance": 2
       },
       {
-        "stockCode": "024720",
-        "corpName": "콜마홀딩스",
-        "industry": "retail",
+        "stockCode": "307930",
+        "corpName": "컴퍼니케이",
+        "industry": "finance",
         "viaCode": "038530",
         "viaName": "케이바이오",
         "hopDistance": 2
       },
       {
-        "stockCode": "083640",
-        "corpName": "인콘",
-        "industry": "software",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
+        "stockCode": "003300",
+        "corpName": "한일홀딩스",
+        "industry": "buildingMaterials",
         "viaCode": "180640",
         "viaName": "한진칼",
         "hopDistance": 2
       },
       {
-        "stockCode": "095700",
-        "corpName": "제넥신",
-        "industry": "pharma",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "156100",
-        "corpName": "엘앤케이바이오",
-        "industry": "medicalDevice",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "210980",
-        "corpName": "SK디앤디",
-        "industry": "software",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041910",
-        "corpName": "폴라리스AI파마",
-        "industry": "pharma",
+        "stockCode": "278470",
+        "corpName": "에이피알",
+        "industry": "cosmetics",
         "viaCode": "038530",
         "viaName": "케이바이오",
         "hopDistance": 2
@@ -518,14 +214,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005430",
-        "corpName": "한국공항",
-        "industry": "aerospace",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "010950",
         "corpName": "S-Oil",
         "industry": "chemical",
@@ -534,19 +222,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000700",
-        "corpName": "유수홀딩스",
-        "industry": "consulting",
+        "stockCode": "030610",
+        "corpName": "교보증권",
+        "industry": "finance",
         "viaCode": "180640",
         "viaName": "한진칼",
         "hopDistance": 2
       },
       {
-        "stockCode": "005940",
-        "corpName": "NH투자증권",
-        "industry": "finance",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
+        "stockCode": "034230",
+        "corpName": "파라다이스",
+        "industry": "leisure",
+        "viaCode": "180640",
+        "viaName": "한진칼",
         "hopDistance": 2
       },
       {
@@ -558,24 +246,64 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "011040",
-        "corpName": "경동제약",
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039860",
+        "corpName": "나노엔텍",
         "industry": "pharma",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018250",
+        "corpName": "애경산업",
+        "industry": "chemical",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161890",
+        "corpName": "한국콜마",
+        "industry": "cosmetics",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028670",
+        "corpName": "팬오션",
+        "industry": "logistics",
         "viaCode": "180640",
         "viaName": "한진칼",
         "hopDistance": 2
       },
       {
-        "stockCode": "003530",
-        "corpName": "한화투자증권",
-        "industry": "aerospace",
-        "viaCode": "180640",
-        "viaName": "한진칼",
+        "stockCode": "420570",
+        "corpName": "제이투케이바이오",
+        "industry": "cosmetics",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
         "hopDistance": 2
       },
       {
-        "stockCode": "272450",
-        "corpName": "진에어",
+        "stockCode": "044480",
+        "corpName": "빌리언스",
+        "industry": "plastic",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "020560",
+        "corpName": "아시아나항공",
         "industry": "aerospace",
         "viaCode": "180640",
         "viaName": "한진칼",
@@ -590,59 +318,115 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000660",
-        "corpName": "SK하이닉스",
-        "industry": "semiconductor",
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007820",
+        "corpName": "에스엠코어",
+        "industry": "machinery",
         "viaCode": "038530",
         "viaName": "케이바이오",
         "hopDistance": 2
       },
       {
-        "stockCode": "023410",
-        "corpName": "유진기업",
-        "industry": "construction",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "420570",
-        "corpName": "제이투케이바이오",
-        "industry": "cosmetics",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "300720",
-        "corpName": "한일시멘트",
-        "industry": "construction",
-        "viaCode": "180640",
-        "viaName": "한진칼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "261520",
-        "corpName": "이지스",
+        "stockCode": "018670",
+        "corpName": "SK가스",
         "industry": "software",
         "viaCode": "038530",
         "viaName": "케이바이오",
         "hopDistance": 2
       },
       {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
+        "stockCode": "006840",
+        "corpName": "AK홀딩스",
+        "industry": "finance",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
         "viaCode": "180640",
         "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053950",
+        "corpName": "경남제약",
+        "industry": "pharma",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003490",
+        "corpName": "대한항공",
+        "industry": "logistics",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024720",
+        "corpName": "콜마홀딩스",
+        "industry": "retail",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "111770",
+        "corpName": "영원무역",
+        "industry": "textile",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032800",
+        "corpName": "판타지오",
+        "industry": "media",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "272450",
+        "corpName": "진에어",
+        "industry": "aerospace",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034730",
+        "corpName": "SK",
+        "industry": "software",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
         "hopDistance": 2
       },
       {
@@ -654,17 +438,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "302440",
-        "corpName": "SK바이오사이언스",
+        "stockCode": "041910",
+        "corpName": "폴라리스AI파마",
         "industry": "pharma",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "217480",
-        "corpName": "에스디생명공학",
-        "industry": "cosmetics",
         "viaCode": "038530",
         "viaName": "케이바이오",
         "hopDistance": 2
@@ -678,6 +454,150 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "095700",
+        "corpName": "제넥신",
+        "industry": "pharma",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000700",
+        "corpName": "유수홀딩스",
+        "industry": "consulting",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "205470",
+        "corpName": "휴마시스",
+        "industry": "pharma",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
+        "industry": "chemical",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001740",
+        "corpName": "SK네트웍스",
+        "industry": "software",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "156100",
+        "corpName": "엘앤케이바이오",
+        "industry": "medicalDevice",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "253610",
+        "corpName": "루트락",
+        "industry": "pharma",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052260",
+        "corpName": "현대바이오랜드",
+        "industry": "chemical",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083640",
+        "corpName": "인콘",
+        "industry": "software",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217480",
+        "corpName": "에스디생명공학",
+        "industry": "cosmetics",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005430",
+        "corpName": "한국공항",
+        "industry": "aerospace",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003530",
+        "corpName": "한화투자증권",
+        "industry": "aerospace",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298690",
+        "corpName": "에어부산",
+        "industry": "aerospace",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006120",
+        "corpName": "SK디스커버리",
+        "industry": "software",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003610",
+        "corpName": "방림",
+        "industry": "shipbuilding",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "038880",
         "corpName": "아이에이",
         "industry": "electronics",
@@ -686,17 +606,65 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "030610",
-        "corpName": "교보증권",
-        "industry": "finance",
+        "stockCode": "285130",
+        "corpName": "SK케미칼",
+        "industry": "software",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "448780",
+        "corpName": "마이크로엔엑스",
+        "industry": "electrical",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267850",
+        "corpName": "아시아나IDT",
+        "industry": "software",
         "viaCode": "180640",
         "viaName": "한진칼",
         "hopDistance": 2
       },
       {
-        "stockCode": "003300",
-        "corpName": "한일홀딩스",
-        "industry": "buildingMaterials",
+        "stockCode": "007120",
+        "corpName": "미래아이앤지",
+        "industry": "electronics",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200130",
+        "corpName": "콜마비앤에이치",
+        "industry": "pharma",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "210980",
+        "corpName": "SK디앤디",
+        "industry": "software",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005940",
+        "corpName": "NH투자증권",
+        "industry": "finance",
+        "viaCode": "038530",
+        "viaName": "케이바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023410",
+        "corpName": "유진기업",
+        "industry": "construction",
         "viaCode": "180640",
         "viaName": "한진칼",
         "hopDistance": 2
@@ -710,25 +678,57 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001520",
-        "corpName": "동양",
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011040",
+        "corpName": "경동제약",
+        "industry": "pharma",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "300720",
+        "corpName": "한일시멘트",
         "industry": "construction",
         "viaCode": "180640",
         "viaName": "한진칼",
         "hopDistance": 2
       },
       {
-        "stockCode": "161890",
-        "corpName": "한국콜마",
-        "industry": "cosmetics",
-        "viaCode": "038530",
-        "viaName": "케이바이오",
+        "stockCode": "064820",
+        "corpName": "케이프",
+        "industry": "auto",
+        "viaCode": "180640",
+        "viaName": "한진칼",
         "hopDistance": 2
       },
       {
-        "stockCode": "001740",
-        "corpName": "SK네트웍스",
-        "industry": "software",
+        "stockCode": "001230",
+        "corpName": "동국홀딩스",
+        "industry": "steel",
+        "viaCode": "180640",
+        "viaName": "한진칼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "302440",
+        "corpName": "SK바이오사이언스",
+        "industry": "pharma",
         "viaCode": "038530",
         "viaName": "케이바이오",
         "hopDistance": 2

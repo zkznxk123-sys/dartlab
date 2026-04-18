@@ -156,30 +156,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "046890",
-        "viaName": "서울반도체",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "103230",
-        "corpName": "에스앤더블류",
-        "industry": "electronics",
-        "viaCode": "046890",
-        "viaName": "서울반도체",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "046890",
-        "viaName": "서울반도체",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "001450",
         "corpName": "현대해상",
         "industry": "finance",
@@ -188,17 +164,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "022100",
-        "corpName": "포스코DX",
-        "industry": "steel",
-        "viaCode": "046890",
-        "viaName": "서울반도체",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005490",
-        "corpName": "POSCO홀딩스",
-        "industry": "steel",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "046890",
         "viaName": "서울반도체",
         "hopDistance": 2
@@ -212,9 +180,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "005490",
+        "corpName": "POSCO홀딩스",
+        "industry": "steel",
+        "viaCode": "046890",
+        "viaName": "서울반도체",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "046890",
+        "viaName": "서울반도체",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "046890",
+        "viaName": "서울반도체",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "022100",
+        "corpName": "포스코DX",
+        "industry": "steel",
+        "viaCode": "046890",
+        "viaName": "서울반도체",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "103230",
+        "corpName": "에스앤더블류",
+        "industry": "electronics",
         "viaCode": "046890",
         "viaName": "서울반도체",
         "hopDistance": 2

@@ -114,30 +114,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "070590",
-        "corpName": "인티큐브",
-        "industry": "telecom",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064260",
-        "corpName": "다날",
-        "industry": "finance",
-        "viaCode": "018700",
-        "viaName": "바른손",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "307930",
         "corpName": "컴퍼니케이",
         "industry": "finance",
@@ -146,72 +122,32 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "035080",
-        "corpName": "그래디언트",
-        "industry": "retail",
-        "viaCode": "018700",
-        "viaName": "바른손",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004150",
-        "corpName": "한솔홀딩스",
-        "industry": "consulting",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
         "viaCode": "004710",
         "viaName": "한솔테크닉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "225570",
-        "corpName": "넥슨게임즈",
-        "industry": "software",
-        "viaCode": "018700",
-        "viaName": "바른손",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "061040",
-        "corpName": "알에프텍",
-        "industry": "telecom",
+        "stockCode": "271560",
+        "corpName": "오리온",
+        "industry": "food",
         "viaCode": "004710",
         "viaName": "한솔테크닉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "194370",
-        "corpName": "제이에스코퍼레이션",
-        "industry": "textile",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035620",
-        "corpName": "바른손이앤에이",
-        "industry": "finance",
-        "viaCode": "018700",
-        "viaName": "바른손",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "091700",
-        "corpName": "파트론",
+        "stockCode": "049070",
+        "corpName": "인탑스",
         "industry": "electronics",
         "viaCode": "004710",
         "viaName": "한솔테크닉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054210",
-        "corpName": "이랜텍",
+        "stockCode": "248070",
+        "corpName": "솔루엠",
         "industry": "electronics",
         "viaCode": "004710",
         "viaName": "한솔테크닉스",
@@ -226,6 +162,46 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "064260",
+        "corpName": "다날",
+        "industry": "finance",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035080",
+        "corpName": "그래디언트",
+        "industry": "retail",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "061040",
+        "corpName": "알에프텍",
+        "industry": "telecom",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "277880",
+        "corpName": "티에스아이",
+        "industry": "machinery",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "207490",
         "corpName": "에이펙스인텍",
         "industry": "electrical",
@@ -234,16 +210,104 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "179720",
-        "corpName": "머니무브",
+        "stockCode": "225570",
+        "corpName": "넥슨게임즈",
+        "industry": "software",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004150",
+        "corpName": "한솔홀딩스",
+        "industry": "consulting",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "070590",
+        "corpName": "인티큐브",
+        "industry": "telecom",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035620",
+        "corpName": "바른손이앤에이",
         "industry": "finance",
         "viaCode": "018700",
         "viaName": "바른손",
         "hopDistance": 2
       },
       {
+        "stockCode": "070300",
+        "corpName": "엑스큐어",
+        "industry": "software",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "045970",
+        "corpName": "코아시아",
+        "industry": "semiconductor",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "055490",
+        "corpName": "테이팩스",
+        "industry": "plastic",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "232530",
         "corpName": "이엠티",
+        "industry": "semiconductor",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054210",
+        "corpName": "이랜텍",
+        "industry": "electronics",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "194370",
+        "corpName": "제이에스코퍼레이션",
+        "industry": "textile",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "166090",
+        "corpName": "하나머티리얼즈",
         "industry": "semiconductor",
         "viaCode": "004710",
         "viaName": "한솔테크닉스",
@@ -258,9 +322,73 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "271560",
-        "corpName": "오리온",
-        "industry": "food",
+        "stockCode": "079960",
+        "corpName": "동양이엔피",
+        "industry": "electronics",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "213500",
+        "corpName": "한솔제지",
+        "industry": "paper",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091700",
+        "corpName": "파트론",
+        "industry": "electronics",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009180",
+        "corpName": "한솔로지스틱스",
+        "industry": "logistics",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014680",
+        "corpName": "한솔케미칼",
+        "industry": "machinery",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "179720",
+        "corpName": "머니무브",
+        "industry": "finance",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025750",
+        "corpName": "한솔홈데코",
+        "industry": "paper",
+        "viaCode": "004710",
+        "viaName": "한솔테크닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "020760",
+        "corpName": "일진디스플",
+        "industry": "electronics",
         "viaCode": "004710",
         "viaName": "한솔테크닉스",
         "hopDistance": 2
@@ -277,134 +405,6 @@
         "stockCode": "114810",
         "corpName": "한솔아이원스",
         "industry": "electronics",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "049070",
-        "corpName": "인탑스",
-        "industry": "electronics",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "079960",
-        "corpName": "동양이엔피",
-        "industry": "electronics",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "020760",
-        "corpName": "일진디스플",
-        "industry": "electronics",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009180",
-        "corpName": "한솔로지스틱스",
-        "industry": "logistics",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "248070",
-        "corpName": "솔루엠",
-        "industry": "electronics",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "277880",
-        "corpName": "티에스아이",
-        "industry": "machinery",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "045970",
-        "corpName": "코아시아",
-        "industry": "semiconductor",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "014680",
-        "corpName": "한솔케미칼",
-        "industry": "machinery",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "070300",
-        "corpName": "엑스큐어",
-        "industry": "software",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025750",
-        "corpName": "한솔홈데코",
-        "industry": "paper",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "166090",
-        "corpName": "하나머티리얼즈",
-        "industry": "semiconductor",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "055490",
-        "corpName": "테이팩스",
-        "industry": "plastic",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "004710",
-        "viaName": "한솔테크닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "213500",
-        "corpName": "한솔제지",
-        "industry": "paper",
         "viaCode": "004710",
         "viaName": "한솔테크닉스",
         "hopDistance": 2

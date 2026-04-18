@@ -166,8 +166,104 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "260930",
+        "corpName": "씨티케이",
+        "industry": "cosmetics",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "251630",
+        "viaName": "브이원텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "122310",
+        "corpName": "제노레이",
+        "industry": "medicalDevice",
+        "viaCode": "251630",
+        "viaName": "브이원텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "382150",
+        "corpName": "온코크로스",
+        "industry": "software",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095700",
+        "corpName": "제넥신",
+        "industry": "pharma",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053620",
+        "corpName": "태양",
+        "industry": "energy",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200580",
+        "corpName": "메디쎄이",
+        "industry": "medicalDevice",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016580",
+        "corpName": "환인제약",
+        "industry": "food",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "389650",
+        "corpName": "넥스트바이오메디컬",
+        "industry": "pharma",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "009300",
         "corpName": "삼아제약",
+        "industry": "pharma",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086450",
+        "corpName": "동국제약",
+        "industry": "pharma",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "476040",
+        "corpName": "오가노이드사이언스",
+        "industry": "pharma",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "358570",
+        "corpName": "지아이이노베이션",
         "industry": "pharma",
         "viaCode": "000020",
         "viaName": "동화약품",
@@ -190,46 +286,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "122310",
-        "corpName": "제노레이",
-        "industry": "medicalDevice",
-        "viaCode": "251630",
-        "viaName": "브이원텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "085310",
-        "corpName": "엔케이",
-        "industry": "food",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "251630",
-        "viaName": "브이원텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "389650",
-        "corpName": "넥스트바이오메디컬",
-        "industry": "pharma",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095700",
-        "corpName": "제넥신",
-        "industry": "pharma",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "126730",
         "corpName": "코칩",
         "industry": "electronics",
@@ -238,64 +294,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "260930",
-        "corpName": "씨티케이",
-        "industry": "cosmetics",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053620",
-        "corpName": "태양",
-        "industry": "energy",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "382150",
-        "corpName": "온코크로스",
-        "industry": "software",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "086450",
-        "corpName": "동국제약",
-        "industry": "pharma",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "358570",
-        "corpName": "지아이이노베이션",
-        "industry": "pharma",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "476040",
-        "corpName": "오가노이드사이언스",
-        "industry": "pharma",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "200580",
-        "corpName": "메디쎄이",
-        "industry": "medicalDevice",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016580",
-        "corpName": "환인제약",
+        "stockCode": "085310",
+        "corpName": "엔케이",
         "industry": "food",
         "viaCode": "000020",
         "viaName": "동화약품",

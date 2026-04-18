@@ -135,16 +135,16 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "060380",
-        "corpName": "동양에스텍",
+        "stockCode": "005490",
+        "corpName": "POSCO홀딩스",
         "industry": "steel",
         "viaCode": "008420",
         "viaName": "문배철강",
         "hopDistance": 2
       },
       {
-        "stockCode": "005490",
-        "corpName": "POSCO홀딩스",
+        "stockCode": "060380",
+        "corpName": "동양에스텍",
         "industry": "steel",
         "viaCode": "008420",
         "viaName": "문배철강",

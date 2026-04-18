@@ -132,9 +132,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "460860",
-        "corpName": "동국제강",
-        "industry": "steel",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "007680",
+        "viaName": "대원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "296160",
+        "corpName": "프로젠",
+        "industry": "pharma",
         "viaCode": "007680",
         "viaName": "대원",
         "hopDistance": 2
@@ -156,17 +164,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "296160",
-        "corpName": "프로젠",
-        "industry": "pharma",
-        "viaCode": "007680",
-        "viaName": "대원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "023410",
-        "corpName": "유진기업",
-        "industry": "construction",
+        "stockCode": "460860",
+        "corpName": "동국제강",
+        "industry": "steel",
         "viaCode": "007680",
         "viaName": "대원",
         "hopDistance": 2
@@ -180,9 +180,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
+        "stockCode": "095570",
+        "corpName": "AJ네트웍스",
+        "industry": "construction",
+        "viaCode": "007680",
+        "viaName": "대원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023410",
+        "corpName": "유진기업",
+        "industry": "construction",
+        "viaCode": "007680",
+        "viaName": "대원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "007680",
+        "viaName": "대원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007460",
+        "corpName": "에이프로젠",
+        "industry": "realestate",
         "viaCode": "007680",
         "viaName": "대원",
         "hopDistance": 2
@@ -207,30 +231,6 @@
         "stockCode": "007280",
         "corpName": "한국특강",
         "industry": "steel",
-        "viaCode": "007680",
-        "viaName": "대원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095570",
-        "corpName": "AJ네트웍스",
-        "industry": "construction",
-        "viaCode": "007680",
-        "viaName": "대원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "007680",
-        "viaName": "대원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007460",
-        "corpName": "에이프로젠",
-        "industry": "realestate",
         "viaCode": "007680",
         "viaName": "대원",
         "hopDistance": 2

@@ -159,70 +159,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "038060",
-        "corpName": "루멘스",
-        "industry": "realestate",
-        "viaCode": "100220",
-        "viaName": "비상교육",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "108380",
-        "corpName": "대양전기공업",
-        "industry": "electrical",
-        "viaCode": "068240",
-        "viaName": "다원시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054620",
-        "corpName": "APS",
-        "industry": "telecom",
-        "viaCode": "052770",
-        "viaName": "아이톡시",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "068240",
-        "viaName": "다원시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "068240",
-        "viaName": "다원시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "021080",
-        "corpName": "에이티넘인베스트",
-        "industry": "finance",
-        "viaCode": "226400",
-        "viaName": "오스테오닉",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "317240",
-        "corpName": "TS트릴리온",
-        "industry": "chemical",
-        "viaCode": "068240",
-        "viaName": "다원시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "140610",
-        "corpName": "엔솔바이오사이언스",
-        "industry": "pharma",
-        "viaCode": "226400",
-        "viaName": "오스테오닉",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "260660",
         "corpName": "알리코제약",
         "industry": "pharma",
@@ -231,19 +167,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "150900",
-        "corpName": "파수",
-        "industry": "software",
-        "viaCode": "226400",
-        "viaName": "오스테오닉",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "100220",
-        "viaName": "비상교육",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "068240",
+        "viaName": "다원시스",
         "hopDistance": 2
       },
       {
@@ -255,11 +183,67 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "260870",
-        "corpName": "SK시그넷",
+        "stockCode": "150900",
+        "corpName": "파수",
         "industry": "software",
         "viaCode": "226400",
         "viaName": "오스테오닉",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "021080",
+        "corpName": "에이티넘인베스트",
+        "industry": "finance",
+        "viaCode": "226400",
+        "viaName": "오스테오닉",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085620",
+        "corpName": "미래에셋생명",
+        "industry": "finance",
+        "viaCode": "052770",
+        "viaName": "아이톡시",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "100220",
+        "viaName": "비상교육",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054620",
+        "corpName": "APS",
+        "industry": "telecom",
+        "viaCode": "052770",
+        "viaName": "아이톡시",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "226400",
+        "viaName": "오스테오닉",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
+        "viaCode": "052770",
+        "viaName": "아이톡시",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "052770",
+        "viaName": "아이톡시",
         "hopDistance": 2
       },
       {
@@ -279,33 +263,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "362990",
-        "corpName": "드림인사이트",
-        "industry": "media",
-        "viaCode": "068240",
-        "viaName": "다원시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "023450",
-        "corpName": "동남합성",
-        "industry": "realestate",
-        "viaCode": "068240",
-        "viaName": "다원시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
-        "viaCode": "100220",
-        "viaName": "비상교육",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
         "viaCode": "052770",
         "viaName": "아이톡시",
         "hopDistance": 2
@@ -319,27 +279,43 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "052770",
-        "viaName": "아이톡시",
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "100220",
+        "viaName": "비상교육",
         "hopDistance": 2
       },
       {
-        "stockCode": "006800",
-        "corpName": "미래에셋증권",
-        "industry": "finance",
-        "viaCode": "052770",
-        "viaName": "아이톡시",
+        "stockCode": "023450",
+        "corpName": "동남합성",
+        "industry": "realestate",
+        "viaCode": "068240",
+        "viaName": "다원시스",
         "hopDistance": 2
       },
       {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
-        "viaCode": "052770",
-        "viaName": "아이톡시",
+        "stockCode": "038060",
+        "corpName": "루멘스",
+        "industry": "realestate",
+        "viaCode": "100220",
+        "viaName": "비상교육",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "140610",
+        "corpName": "엔솔바이오사이언스",
+        "industry": "pharma",
+        "viaCode": "226400",
+        "viaName": "오스테오닉",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "317240",
+        "corpName": "TS트릴리온",
+        "industry": "chemical",
+        "viaCode": "068240",
+        "viaName": "다원시스",
         "hopDistance": 2
       },
       {
@@ -351,25 +327,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "085620",
-        "corpName": "미래에셋생명",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
         "industry": "finance",
-        "viaCode": "052770",
-        "viaName": "아이톡시",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
-        "viaCode": "052770",
-        "viaName": "아이톡시",
+        "viaCode": "068240",
+        "viaName": "다원시스",
         "hopDistance": 2
       },
       {
         "stockCode": "024110",
         "corpName": "기업은행",
         "industry": "finance",
+        "viaCode": "068240",
+        "viaName": "다원시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "108380",
+        "corpName": "대양전기공업",
+        "industry": "electrical",
+        "viaCode": "068240",
+        "viaName": "다원시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "260870",
+        "corpName": "SK시그넷",
+        "industry": "software",
+        "viaCode": "226400",
+        "viaName": "오스테오닉",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "068240",
+        "viaName": "다원시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "362990",
+        "corpName": "드림인사이트",
+        "industry": "media",
         "viaCode": "068240",
         "viaName": "다원시스",
         "hopDistance": 2

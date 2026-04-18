@@ -235,11 +235,59 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031440",
-        "corpName": "신세계푸드",
+        "stockCode": "290660",
+        "corpName": "네오펙트",
         "industry": "retail",
-        "viaCode": "002600",
-        "viaName": "조흥",
+        "viaCode": "260970",
+        "viaName": "에스앤디",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092730",
+        "corpName": "네오팜",
+        "industry": "chemical",
+        "viaCode": "260970",
+        "viaName": "에스앤디",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007680",
+        "corpName": "대원",
+        "industry": "construction",
+        "viaCode": "260970",
+        "viaName": "에스앤디",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016380",
+        "corpName": "KG스틸",
+        "industry": "steel",
+        "viaCode": "260970",
+        "viaName": "에스앤디",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029780",
+        "corpName": "삼성카드",
+        "industry": "aerospace",
+        "viaCode": "004970",
+        "viaName": "신라교역",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007070",
+        "corpName": "GS리테일",
+        "industry": "retail",
+        "viaCode": "260970",
+        "viaName": "에스앤디",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005490",
+        "corpName": "POSCO홀딩스",
+        "industry": "steel",
+        "viaCode": "004970",
+        "viaName": "신라교역",
         "hopDistance": 2
       },
       {
@@ -251,56 +299,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "040300",
-        "corpName": "YTN",
-        "industry": "media",
-        "viaCode": "004970",
-        "viaName": "신라교역",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "046440",
-        "corpName": "KG모빌리언스",
-        "industry": "finance",
+        "stockCode": "004140",
+        "corpName": "동방",
+        "industry": "logistics",
         "viaCode": "260970",
         "viaName": "에스앤디",
         "hopDistance": 2
       },
       {
-        "stockCode": "161000",
-        "corpName": "애경케미칼",
-        "industry": "chemical",
-        "viaCode": "260970",
-        "viaName": "에스앤디",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "018250",
-        "corpName": "애경산업",
-        "industry": "chemical",
-        "viaCode": "260970",
-        "viaName": "에스앤디",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001390",
-        "corpName": "KG케미칼",
-        "industry": "environment",
-        "viaCode": "260970",
-        "viaName": "에스앤디",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "047040",
-        "corpName": "대우건설",
-        "industry": "construction",
-        "viaCode": "004970",
-        "viaName": "신라교역",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004020",
-        "corpName": "현대제철",
+        "stockCode": "054410",
+        "corpName": "케이피티유",
         "industry": "steel",
         "viaCode": "012620",
         "viaName": "원일특강",
@@ -315,56 +323,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "089590",
-        "corpName": "제주항공",
-        "industry": "aerospace",
-        "viaCode": "260970",
-        "viaName": "에스앤디",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082640",
-        "corpName": "동양생명",
-        "industry": "finance",
-        "viaCode": "260970",
-        "viaName": "에스앤디",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001250",
-        "corpName": "GS글로벌",
-        "industry": "chemical",
-        "viaCode": "260970",
-        "viaName": "에스앤디",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "092730",
-        "corpName": "네오팜",
-        "industry": "chemical",
-        "viaCode": "260970",
-        "viaName": "에스앤디",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004140",
-        "corpName": "동방",
-        "industry": "logistics",
-        "viaCode": "260970",
-        "viaName": "에스앤디",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007680",
-        "corpName": "대원",
+        "stockCode": "317400",
+        "corpName": "자이에스앤디",
         "industry": "construction",
         "viaCode": "260970",
         "viaName": "에스앤디",
         "hopDistance": 2
       },
       {
-        "stockCode": "078930",
-        "corpName": "GS",
+        "stockCode": "018250",
+        "corpName": "애경산업",
         "industry": "chemical",
         "viaCode": "260970",
         "viaName": "에스앤디",
@@ -387,105 +355,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "034020",
-        "corpName": "두산에너빌리티",
-        "industry": "machinery",
-        "viaCode": "012620",
-        "viaName": "원일특강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "145020",
-        "corpName": "휴젤",
-        "industry": "pharma",
+        "stockCode": "046440",
+        "corpName": "KG모빌리언스",
+        "industry": "finance",
         "viaCode": "260970",
         "viaName": "에스앤디",
         "hopDistance": 2
       },
       {
-        "stockCode": "151860",
-        "corpName": "KG에코솔루션",
-        "industry": "environment",
-        "viaCode": "260970",
-        "viaName": "에스앤디",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "029780",
-        "corpName": "삼성카드",
-        "industry": "aerospace",
-        "viaCode": "004970",
-        "viaName": "신라교역",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "499790",
-        "corpName": "GS피앤엘",
+        "stockCode": "001250",
+        "corpName": "GS글로벌",
         "industry": "chemical",
         "viaCode": "260970",
         "viaName": "에스앤디",
         "hopDistance": 2
       },
       {
-        "stockCode": "016380",
-        "corpName": "KG스틸",
-        "industry": "steel",
+        "stockCode": "078930",
+        "corpName": "GS",
+        "industry": "chemical",
         "viaCode": "260970",
         "viaName": "에스앤디",
         "hopDistance": 2
       },
       {
-        "stockCode": "035600",
-        "corpName": "KG이니시스",
-        "industry": "software",
-        "viaCode": "260970",
-        "viaName": "에스앤디",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "139480",
-        "corpName": "이마트",
-        "industry": "retail",
-        "viaCode": "002600",
-        "viaName": "조흥",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "290660",
-        "corpName": "네오펙트",
-        "industry": "retail",
-        "viaCode": "260970",
-        "viaName": "에스앤디",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007070",
-        "corpName": "GS리테일",
-        "industry": "retail",
-        "viaCode": "260970",
-        "viaName": "에스앤디",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030210",
-        "corpName": "다올투자증권",
-        "industry": "realestate",
-        "viaCode": "260970",
-        "viaName": "에스앤디",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "317400",
-        "corpName": "자이에스앤디",
-        "industry": "construction",
-        "viaCode": "260970",
-        "viaName": "에스앤디",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002170",
-        "corpName": "삼양통상",
-        "industry": "textile",
+        "stockCode": "145020",
+        "corpName": "휴젤",
+        "industry": "pharma",
         "viaCode": "260970",
         "viaName": "에스앤디",
         "hopDistance": 2
@@ -499,35 +395,43 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "179530",
-        "corpName": "애드바이오텍",
-        "industry": "food",
+        "stockCode": "002170",
+        "corpName": "삼양통상",
+        "industry": "textile",
         "viaCode": "260970",
         "viaName": "에스앤디",
         "hopDistance": 2
       },
       {
-        "stockCode": "007310",
-        "corpName": "오뚜기",
-        "industry": "food",
+        "stockCode": "139480",
+        "corpName": "이마트",
+        "industry": "retail",
         "viaCode": "002600",
         "viaName": "조흥",
         "hopDistance": 2
       },
       {
-        "stockCode": "024090",
-        "corpName": "디씨엠",
-        "industry": "construction",
+        "stockCode": "089590",
+        "corpName": "제주항공",
+        "industry": "aerospace",
+        "viaCode": "260970",
+        "viaName": "에스앤디",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
         "viaCode": "012620",
         "viaName": "원일특강",
         "hopDistance": 2
       },
       {
-        "stockCode": "054410",
-        "corpName": "케이피티유",
-        "industry": "steel",
-        "viaCode": "012620",
-        "viaName": "원일특강",
+        "stockCode": "030210",
+        "corpName": "다올투자증권",
+        "industry": "realestate",
+        "viaCode": "260970",
+        "viaName": "에스앤디",
         "hopDistance": 2
       },
       {
@@ -539,11 +443,107 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005490",
-        "corpName": "POSCO홀딩스",
-        "industry": "steel",
+        "stockCode": "007310",
+        "corpName": "오뚜기",
+        "industry": "food",
+        "viaCode": "002600",
+        "viaName": "조흥",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047040",
+        "corpName": "대우건설",
+        "industry": "construction",
         "viaCode": "004970",
         "viaName": "신라교역",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024090",
+        "corpName": "디씨엠",
+        "industry": "construction",
+        "viaCode": "012620",
+        "viaName": "원일특강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "151860",
+        "corpName": "KG에코솔루션",
+        "industry": "environment",
+        "viaCode": "260970",
+        "viaName": "에스앤디",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082640",
+        "corpName": "동양생명",
+        "industry": "finance",
+        "viaCode": "260970",
+        "viaName": "에스앤디",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "179530",
+        "corpName": "애드바이오텍",
+        "industry": "food",
+        "viaCode": "260970",
+        "viaName": "에스앤디",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031440",
+        "corpName": "신세계푸드",
+        "industry": "retail",
+        "viaCode": "002600",
+        "viaName": "조흥",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001390",
+        "corpName": "KG케미칼",
+        "industry": "environment",
+        "viaCode": "260970",
+        "viaName": "에스앤디",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "040300",
+        "corpName": "YTN",
+        "industry": "media",
+        "viaCode": "004970",
+        "viaName": "신라교역",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034020",
+        "corpName": "두산에너빌리티",
+        "industry": "machinery",
+        "viaCode": "012620",
+        "viaName": "원일특강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161000",
+        "corpName": "애경케미칼",
+        "industry": "chemical",
+        "viaCode": "260970",
+        "viaName": "에스앤디",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "499790",
+        "corpName": "GS피앤엘",
+        "industry": "chemical",
+        "viaCode": "260970",
+        "viaName": "에스앤디",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035600",
+        "corpName": "KG이니시스",
+        "industry": "software",
+        "viaCode": "260970",
+        "viaName": "에스앤디",
         "hopDistance": 2
       }
     ],

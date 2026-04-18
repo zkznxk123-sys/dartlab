@@ -123,14 +123,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "009470",
-        "corpName": "삼화전기",
-        "industry": "electronics",
-        "viaCode": "011230",
-        "viaName": "삼화전자공업",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "001820",
         "corpName": "삼화콘덴서공업",
         "industry": "electronics",
@@ -142,6 +134,14 @@
         "stockCode": "043590",
         "corpName": "웰킵스하이텍",
         "industry": "semiconductor",
+        "viaCode": "011230",
+        "viaName": "삼화전자공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009470",
+        "corpName": "삼화전기",
+        "industry": "electronics",
         "viaCode": "011230",
         "viaName": "삼화전자공업",
         "hopDistance": 2

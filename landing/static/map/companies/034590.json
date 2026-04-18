@@ -186,30 +186,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "310210",
-        "corpName": "보로노이",
-        "industry": "pharma",
-        "viaCode": "128940",
-        "viaName": "한미약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267290",
-        "corpName": "경동도시가스",
-        "industry": "energy",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "128940",
-        "viaName": "한미약품",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "053050",
         "corpName": "지에스이",
         "industry": "energy",
@@ -218,9 +194,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
+        "stockCode": "004060",
+        "corpName": "SG세계물산",
+        "industry": "retail",
         "viaCode": "128940",
         "viaName": "한미약품",
         "hopDistance": 2
@@ -234,70 +210,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "038010",
-        "corpName": "제일테크노스",
-        "industry": "semiconductor",
-        "viaCode": "128940",
-        "viaName": "한미약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "096770",
-        "corpName": "SK이노베이션",
-        "industry": "chemical",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "128940",
-        "viaName": "한미약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084110",
-        "corpName": "휴온스글로벌",
-        "industry": "pharma",
-        "viaCode": "128940",
-        "viaName": "한미약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "008930",
-        "corpName": "한미사이언스",
-        "industry": "pharma",
-        "viaCode": "128940",
-        "viaName": "한미약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003520",
-        "corpName": "영진약품",
-        "industry": "pharma",
-        "viaCode": "128940",
-        "viaName": "한미약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "043150",
-        "corpName": "바텍",
-        "industry": "medicalDevice",
-        "viaCode": "004690",
-        "viaName": "삼천리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "215200",
-        "corpName": "메가스터디교육",
-        "industry": "education",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "003480",
         "corpName": "한진중공업홀딩스",
         "industry": "energy",
@@ -306,72 +218,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "004690",
-        "viaName": "삼천리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078930",
-        "corpName": "GS",
-        "industry": "chemical",
-        "viaCode": "004690",
-        "viaName": "삼천리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "285130",
-        "corpName": "SK케미칼",
-        "industry": "software",
+        "stockCode": "005490",
+        "corpName": "POSCO홀딩스",
+        "industry": "steel",
         "viaCode": "036460",
         "viaName": "한국가스공사",
         "hopDistance": 2
       },
       {
-        "stockCode": "117580",
-        "corpName": "대성에너지",
-        "industry": "energy",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "241770",
-        "corpName": "메카로",
-        "industry": "semiconductor",
-        "viaCode": "004690",
-        "viaName": "삼천리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "014160",
-        "corpName": "대영포장",
-        "industry": "paper",
-        "viaCode": "004690",
-        "viaName": "삼천리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "004690",
-        "viaName": "삼천리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "180400",
-        "corpName": "DXVX",
-        "industry": "consulting",
-        "viaCode": "128940",
-        "viaName": "한미약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "170900",
-        "corpName": "동아에스티",
+        "stockCode": "185750",
+        "corpName": "종근당",
         "industry": "pharma",
         "viaCode": "128940",
         "viaName": "한미약품",
@@ -386,24 +242,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004060",
-        "corpName": "SG세계물산",
-        "industry": "retail",
-        "viaCode": "128940",
-        "viaName": "한미약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "071320",
-        "corpName": "지역난방공사",
-        "industry": "energy",
-        "viaCode": "004690",
-        "viaName": "삼천리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067080",
-        "corpName": "대화제약",
+        "stockCode": "008930",
+        "corpName": "한미사이언스",
         "industry": "pharma",
         "viaCode": "128940",
         "viaName": "한미약품",
@@ -418,19 +258,43 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "018000",
-        "corpName": "유니슨",
-        "industry": "energy",
+        "stockCode": "215200",
+        "corpName": "메가스터디교육",
+        "industry": "education",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "097950",
+        "corpName": "CJ제일제당",
+        "industry": "food",
+        "viaCode": "128940",
+        "viaName": "한미약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024950",
+        "corpName": "삼천리자전거",
+        "industry": "retail",
         "viaCode": "004690",
         "viaName": "삼천리",
         "hopDistance": 2
       },
       {
-        "stockCode": "005880",
-        "corpName": "대한해운",
-        "industry": "shipbuilding",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
+        "stockCode": "037460",
+        "corpName": "삼지전자",
+        "industry": "telecom",
+        "viaCode": "128940",
+        "viaName": "한미약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "170900",
+        "corpName": "동아에스티",
+        "industry": "pharma",
+        "viaCode": "128940",
+        "viaName": "한미약품",
         "hopDistance": 2
       },
       {
@@ -450,97 +314,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "185750",
-        "corpName": "종근당",
-        "industry": "pharma",
-        "viaCode": "128940",
-        "viaName": "한미약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "015360",
-        "corpName": "INVENI",
-        "industry": "consulting",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "094850",
-        "corpName": "참좋은여행",
-        "industry": "logistics",
+        "stockCode": "241770",
+        "corpName": "메카로",
+        "industry": "semiconductor",
         "viaCode": "004690",
         "viaName": "삼천리",
         "hopDistance": 2
       },
       {
-        "stockCode": "033780",
-        "corpName": "케이티앤지",
-        "industry": "food",
-        "viaCode": "128940",
-        "viaName": "한미약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036640",
-        "corpName": "HRS",
-        "industry": "chemical",
-        "viaCode": "004690",
-        "viaName": "삼천리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "015760",
-        "corpName": "한국전력공사",
-        "industry": "energy",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "047050",
-        "corpName": "포스코인터내셔널",
-        "industry": "steel",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "097950",
-        "corpName": "CJ제일제당",
-        "industry": "food",
-        "viaCode": "128940",
-        "viaName": "한미약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "023410",
-        "corpName": "유진기업",
-        "industry": "construction",
-        "viaCode": "004690",
-        "viaName": "삼천리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054950",
-        "corpName": "제이브이엠",
-        "industry": "machinery",
-        "viaCode": "128940",
-        "viaName": "한미약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
+        "stockCode": "005880",
+        "corpName": "대한해운",
+        "industry": "shipbuilding",
         "viaCode": "036460",
         "viaName": "한국가스공사",
         "hopDistance": 2
@@ -554,6 +338,238 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "038010",
+        "corpName": "제일테크노스",
+        "industry": "semiconductor",
+        "viaCode": "128940",
+        "viaName": "한미약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "180400",
+        "corpName": "DXVX",
+        "industry": "consulting",
+        "viaCode": "128940",
+        "viaName": "한미약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003520",
+        "corpName": "영진약품",
+        "industry": "pharma",
+        "viaCode": "128940",
+        "viaName": "한미약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054950",
+        "corpName": "제이브이엠",
+        "industry": "machinery",
+        "viaCode": "128940",
+        "viaName": "한미약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "004690",
+        "viaName": "삼천리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033780",
+        "corpName": "케이티앤지",
+        "industry": "food",
+        "viaCode": "128940",
+        "viaName": "한미약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "310210",
+        "corpName": "보로노이",
+        "industry": "pharma",
+        "viaCode": "128940",
+        "viaName": "한미약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078930",
+        "corpName": "GS",
+        "industry": "chemical",
+        "viaCode": "004690",
+        "viaName": "삼천리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "004690",
+        "viaName": "삼천리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067080",
+        "corpName": "대화제약",
+        "industry": "pharma",
+        "viaCode": "128940",
+        "viaName": "한미약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
+        "viaCode": "128940",
+        "viaName": "한미약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
+        "industry": "chemical",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014160",
+        "corpName": "대영포장",
+        "industry": "paper",
+        "viaCode": "004690",
+        "viaName": "삼천리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "094850",
+        "corpName": "참좋은여행",
+        "industry": "logistics",
+        "viaCode": "004690",
+        "viaName": "삼천리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071320",
+        "corpName": "지역난방공사",
+        "industry": "energy",
+        "viaCode": "004690",
+        "viaName": "삼천리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267290",
+        "corpName": "경동도시가스",
+        "industry": "energy",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "128940",
+        "viaName": "한미약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015760",
+        "corpName": "한국전력공사",
+        "industry": "energy",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "285130",
+        "corpName": "SK케미칼",
+        "industry": "software",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015360",
+        "corpName": "INVENI",
+        "industry": "consulting",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "043150",
+        "corpName": "바텍",
+        "industry": "medicalDevice",
+        "viaCode": "004690",
+        "viaName": "삼천리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036640",
+        "corpName": "HRS",
+        "industry": "chemical",
+        "viaCode": "004690",
+        "viaName": "삼천리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "117580",
+        "corpName": "대성에너지",
+        "industry": "energy",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018000",
+        "corpName": "유니슨",
+        "industry": "energy",
+        "viaCode": "004690",
+        "viaName": "삼천리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023410",
+        "corpName": "유진기업",
+        "industry": "construction",
+        "viaCode": "004690",
+        "viaName": "삼천리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047050",
+        "corpName": "포스코인터내셔널",
+        "industry": "steel",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "128940",
+        "viaName": "한미약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "128940",
+        "viaName": "한미약품",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "200670",
         "corpName": "휴메딕스",
         "industry": "pharma",
@@ -562,33 +578,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "037460",
-        "corpName": "삼지전자",
-        "industry": "telecom",
-        "viaCode": "128940",
-        "viaName": "한미약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016710",
-        "corpName": "대성홀딩스",
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
         "industry": "realestate",
         "viaCode": "036460",
         "viaName": "한국가스공사",
         "hopDistance": 2
       },
       {
-        "stockCode": "024950",
-        "corpName": "삼천리자전거",
-        "industry": "retail",
-        "viaCode": "004690",
-        "viaName": "삼천리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005490",
-        "corpName": "POSCO홀딩스",
-        "industry": "steel",
+        "stockCode": "016710",
+        "corpName": "대성홀딩스",
+        "industry": "realestate",
         "viaCode": "036460",
         "viaName": "한국가스공사",
         "hopDistance": 2

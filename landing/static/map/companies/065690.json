@@ -142,9 +142,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "089790",
-        "corpName": "제이티",
-        "industry": "semiconductor",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "122690",
+        "viaName": "서진오토모티브",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005940",
+        "corpName": "NH투자증권",
+        "industry": "finance",
         "viaCode": "122690",
         "viaName": "서진오토모티브",
         "hopDistance": 2
@@ -158,43 +166,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
-        "viaCode": "038110",
-        "viaName": "에코플라스틱",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033340",
-        "corpName": "좋은사람들",
-        "industry": "textile",
-        "viaCode": "038110",
-        "viaName": "에코플라스틱",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "352820",
         "corpName": "하이브",
         "industry": "media",
         "viaCode": "038110",
         "viaName": "에코플라스틱",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033270",
-        "corpName": "유나이티드",
-        "industry": "pharma",
-        "viaCode": "038110",
-        "viaName": "에코플라스틱",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005940",
-        "corpName": "NH투자증권",
-        "industry": "finance",
-        "viaCode": "122690",
-        "viaName": "서진오토모티브",
         "hopDistance": 2
       },
       {
@@ -206,9 +182,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "122690",
+        "viaName": "서진오토모티브",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033270",
+        "corpName": "유나이티드",
+        "industry": "pharma",
+        "viaCode": "122690",
+        "viaName": "서진오토모티브",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033340",
+        "corpName": "좋은사람들",
+        "industry": "textile",
+        "viaCode": "122690",
+        "viaName": "서진오토모티브",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
         "viaCode": "038110",
         "viaName": "에코플라스틱",
         "hopDistance": 2

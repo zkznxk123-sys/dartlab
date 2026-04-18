@@ -109,33 +109,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "214260",
-        "corpName": "라파스",
-        "industry": "pharma",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084680",
-        "corpName": "이월드",
-        "industry": "realestate",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012030",
-        "corpName": "DB",
-        "industry": "semiconductor",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000990",
-        "corpName": "DB하이텍",
-        "industry": "semiconductor",
+        "stockCode": "406820",
+        "corpName": "뷰티스킨",
+        "industry": "cosmetics",
         "viaCode": "016610",
         "viaName": "DB증권",
         "hopDistance": 2
@@ -149,40 +125,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001470",
-        "corpName": "삼부토건",
-        "industry": "construction",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "278470",
         "corpName": "에이피알",
-        "industry": "cosmetics",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "250030",
-        "corpName": "진코스텍",
-        "industry": "textile",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "452190",
-        "corpName": "한빛레이저",
-        "industry": "medicalDevice",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "406820",
-        "corpName": "뷰티스킨",
         "industry": "cosmetics",
         "viaCode": "016610",
         "viaName": "DB증권",
@@ -197,9 +141,49 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "214260",
+        "corpName": "라파스",
+        "industry": "pharma",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "005830",
         "corpName": "DB손해보험",
         "industry": "finance",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006840",
+        "corpName": "AK홀딩스",
+        "industry": "finance",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012030",
+        "corpName": "DB",
+        "industry": "semiconductor",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084680",
+        "corpName": "이월드",
+        "industry": "realestate",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000990",
+        "corpName": "DB하이텍",
+        "industry": "semiconductor",
         "viaCode": "016610",
         "viaName": "DB증권",
         "hopDistance": 2
@@ -213,9 +197,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006840",
-        "corpName": "AK홀딩스",
-        "industry": "finance",
+        "stockCode": "001470",
+        "corpName": "삼부토건",
+        "industry": "construction",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452190",
+        "corpName": "한빛레이저",
+        "industry": "medicalDevice",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "250030",
+        "corpName": "진코스텍",
+        "industry": "textile",
         "viaCode": "016610",
         "viaName": "DB증권",
         "hopDistance": 2

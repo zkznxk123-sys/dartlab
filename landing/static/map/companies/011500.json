@@ -163,9 +163,49 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "008490",
-        "corpName": "서흥",
+        "stockCode": "008060",
+        "corpName": "대덕",
+        "industry": "electronics",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090350",
+        "corpName": "노루페인트",
         "industry": "chemical",
+        "viaCode": "089010",
+        "viaName": "켐트로닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000320",
+        "corpName": "노루홀딩스",
+        "industry": "finance",
+        "viaCode": "089010",
+        "viaName": "켐트로닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100120",
+        "corpName": "뷰웍스",
+        "industry": "medicalDevice",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "353200",
+        "corpName": "대덕전자",
+        "industry": "electronics",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014100",
+        "corpName": "메디앙스",
+        "industry": "retail",
         "viaCode": "023450",
         "viaName": "동남합성",
         "hopDistance": 2
@@ -179,9 +219,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "134380",
-        "corpName": "미원화학",
-        "industry": "cosmetics",
+        "stockCode": "068240",
+        "corpName": "다원시스",
+        "industry": "semiconductor",
+        "viaCode": "023450",
+        "viaName": "동남합성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002840",
+        "corpName": "미원상사",
+        "industry": "chemical",
         "viaCode": "023450",
         "viaName": "동남합성",
         "hopDistance": 2
@@ -195,24 +243,24 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "011170",
-        "corpName": "롯데케미칼",
-        "industry": "chemical",
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
         "viaCode": "089010",
         "viaName": "켐트로닉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "107590",
-        "corpName": "미원홀딩스",
+        "stockCode": "008490",
+        "corpName": "서흥",
         "industry": "chemical",
         "viaCode": "023450",
         "viaName": "동남합성",
         "hopDistance": 2
       },
       {
-        "stockCode": "049550",
-        "corpName": "잉크테크",
+        "stockCode": "007690",
+        "corpName": "국도화학",
         "industry": "chemical",
         "viaCode": "023450",
         "viaName": "동남합성",
@@ -227,49 +275,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
-        "viaCode": "089010",
-        "viaName": "켐트로닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "353200",
-        "corpName": "대덕전자",
-        "industry": "electronics",
-        "viaCode": "023450",
-        "viaName": "동남합성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007690",
-        "corpName": "국도화학",
+        "stockCode": "049550",
+        "corpName": "잉크테크",
         "industry": "chemical",
         "viaCode": "023450",
         "viaName": "동남합성",
         "hopDistance": 2
       },
       {
-        "stockCode": "008060",
-        "corpName": "대덕",
+        "stockCode": "459100",
+        "corpName": "위츠",
         "industry": "electronics",
-        "viaCode": "023450",
-        "viaName": "동남합성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000860",
-        "corpName": "강남제비스코",
-        "industry": "chemical",
         "viaCode": "089010",
         "viaName": "켐트로닉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "100120",
-        "corpName": "뷰웍스",
-        "industry": "medicalDevice",
+        "stockCode": "107590",
+        "corpName": "미원홀딩스",
+        "industry": "chemical",
         "viaCode": "023450",
         "viaName": "동남합성",
         "hopDistance": 2
@@ -283,17 +307,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "459100",
-        "corpName": "위츠",
-        "industry": "electronics",
+        "stockCode": "000860",
+        "corpName": "강남제비스코",
+        "industry": "chemical",
         "viaCode": "089010",
         "viaName": "켐트로닉스",
         "hopDistance": 2
       },
       {
-        "stockCode": "068240",
-        "corpName": "다원시스",
-        "industry": "semiconductor",
+        "stockCode": "011170",
+        "corpName": "롯데케미칼",
+        "industry": "chemical",
+        "viaCode": "089010",
+        "viaName": "켐트로닉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051900",
+        "corpName": "LG생활건강",
+        "industry": "electronics",
         "viaCode": "023450",
         "viaName": "동남합성",
         "hopDistance": 2
@@ -307,41 +339,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "014100",
-        "corpName": "메디앙스",
-        "industry": "retail",
-        "viaCode": "023450",
-        "viaName": "동남합성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090350",
-        "corpName": "노루페인트",
-        "industry": "chemical",
-        "viaCode": "089010",
-        "viaName": "켐트로닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002840",
-        "corpName": "미원상사",
-        "industry": "chemical",
-        "viaCode": "023450",
-        "viaName": "동남합성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000320",
-        "corpName": "노루홀딩스",
-        "industry": "finance",
-        "viaCode": "089010",
-        "viaName": "켐트로닉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "051900",
-        "corpName": "LG생활건강",
-        "industry": "electronics",
+        "stockCode": "134380",
+        "corpName": "미원화학",
+        "industry": "cosmetics",
         "viaCode": "023450",
         "viaName": "동남합성",
         "hopDistance": 2

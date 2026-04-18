@@ -166,41 +166,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "228670",
-        "viaName": "레이",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "319660",
         "corpName": "피에스케이",
         "industry": "semiconductor",
-        "viaCode": "228670",
-        "viaName": "레이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "318060",
-        "corpName": "그래피",
-        "industry": "chemical",
-        "viaCode": "228670",
-        "viaName": "레이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "354320",
-        "viaName": "알멕",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "458870",
-        "corpName": "씨어스테크놀로지",
-        "industry": "electronics",
         "viaCode": "228670",
         "viaName": "레이",
         "hopDistance": 2
@@ -214,9 +182,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "011760",
-        "corpName": "현대코퍼레이션",
-        "industry": "construction",
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
         "viaCode": "354320",
         "viaName": "알멕",
         "hopDistance": 2
@@ -230,9 +198,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "007330",
-        "corpName": "푸른저축은행",
-        "industry": "finance",
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "228670",
+        "viaName": "레이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011760",
+        "corpName": "현대코퍼레이션",
+        "industry": "construction",
         "viaCode": "354320",
         "viaName": "알멕",
         "hopDistance": 2
@@ -243,6 +219,30 @@
         "industry": "medicalDevice",
         "viaCode": "228670",
         "viaName": "레이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "458870",
+        "corpName": "씨어스테크놀로지",
+        "industry": "electronics",
+        "viaCode": "228670",
+        "viaName": "레이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "318060",
+        "corpName": "그래피",
+        "industry": "chemical",
+        "viaCode": "228670",
+        "viaName": "레이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007330",
+        "corpName": "푸른저축은행",
+        "industry": "finance",
+        "viaCode": "354320",
+        "viaName": "알멕",
         "hopDistance": 2
       }
     ],

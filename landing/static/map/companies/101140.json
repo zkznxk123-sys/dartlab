@@ -185,22 +185,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "321820",
-        "corpName": "아티스트컴퍼니",
-        "industry": "software",
-        "viaCode": "066410",
-        "viaName": "버킷스튜디오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "256840",
-        "corpName": "한국비엔씨",
-        "industry": "realestate",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "353810",
         "corpName": "이지바이오",
         "industry": "chemical",
@@ -217,83 +201,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "066980",
-        "corpName": "한성크린텍",
-        "industry": "environment",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "142760",
-        "corpName": "모아라이프플러스",
+        "stockCode": "118000",
+        "corpName": "메타케어",
         "industry": "pharma",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "057680",
-        "corpName": "티사이언티픽",
-        "industry": "software",
         "viaCode": "066410",
         "viaName": "버킷스튜디오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095500",
-        "corpName": "미래나노텍",
-        "industry": "electronics",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009810",
-        "corpName": "플레이그램",
-        "industry": "retail",
-        "viaCode": "066410",
-        "viaName": "버킷스튜디오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "027710",
-        "corpName": "팜스토리",
-        "industry": "food",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "195500",
-        "corpName": "마니커에프앤지",
-        "industry": "food",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035810",
-        "corpName": "이지홀딩스",
-        "industry": "food",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "153710",
-        "corpName": "옵티팜",
-        "industry": "pharma",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052300",
-        "corpName": "오션인더블유",
-        "industry": "logistics",
-        "viaCode": "121800",
-        "viaName": "비덴트",
         "hopDistance": 2
       },
       {
@@ -305,19 +217,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "073560",
-        "corpName": "우리손에프앤지",
+        "stockCode": "035810",
+        "corpName": "이지홀딩스",
         "industry": "food",
         "viaCode": "352940",
         "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "118000",
-        "corpName": "메타케어",
-        "industry": "pharma",
-        "viaCode": "066410",
-        "viaName": "버킷스튜디오",
         "hopDistance": 2
       },
       {
@@ -337,17 +241,81 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "027740",
-        "corpName": "마니커",
+        "stockCode": "073560",
+        "corpName": "우리손에프앤지",
+        "industry": "food",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "142760",
+        "corpName": "모아라이프플러스",
+        "industry": "pharma",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009810",
+        "corpName": "플레이그램",
+        "industry": "retail",
+        "viaCode": "066410",
+        "viaName": "버킷스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066980",
+        "corpName": "한성크린텍",
+        "industry": "environment",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "057680",
+        "corpName": "티사이언티픽",
+        "industry": "software",
+        "viaCode": "066410",
+        "viaName": "버킷스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052300",
+        "corpName": "오션인더블유",
+        "industry": "logistics",
+        "viaCode": "121800",
+        "viaName": "비덴트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "321820",
+        "corpName": "아티스트컴퍼니",
+        "industry": "software",
+        "viaCode": "066410",
+        "viaName": "버킷스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027710",
+        "corpName": "팜스토리",
+        "industry": "food",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "256840",
+        "corpName": "한국비엔씨",
         "industry": "realestate",
         "viaCode": "352940",
         "viaName": "인바이오",
         "hopDistance": 2
       },
       {
-        "stockCode": "208140",
-        "corpName": "정다운",
-        "industry": "food",
+        "stockCode": "095500",
+        "corpName": "미래나노텍",
+        "industry": "electronics",
         "viaCode": "352940",
         "viaName": "인바이오",
         "hopDistance": 2
@@ -366,6 +334,38 @@
         "industry": "electronics",
         "viaCode": "121800",
         "viaName": "비덴트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "208140",
+        "corpName": "정다운",
+        "industry": "food",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "195500",
+        "corpName": "마니커에프앤지",
+        "industry": "food",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027740",
+        "corpName": "마니커",
+        "industry": "realestate",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "153710",
+        "corpName": "옵티팜",
+        "industry": "pharma",
+        "viaCode": "352940",
+        "viaName": "인바이오",
         "hopDistance": 2
       }
     ],

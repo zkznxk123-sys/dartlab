@@ -99,33 +99,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "053980",
-        "corpName": "오상자이엘",
-        "industry": "software",
-        "viaCode": "036220",
-        "viaName": "오상헬스케어",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "092200",
         "corpName": "디아이씨",
         "industry": "electronics",
-        "viaCode": "036220",
-        "viaName": "오상헬스케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
-        "viaCode": "036220",
-        "viaName": "오상헬스케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067010",
-        "corpName": "이씨에스",
-        "industry": "software",
         "viaCode": "036220",
         "viaName": "오상헬스케어",
         "hopDistance": 2
@@ -139,14 +115,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "203450",
-        "corpName": "유니온바이오메트릭스",
-        "industry": "telecom",
-        "viaCode": "036220",
-        "viaName": "오상헬스케어",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "003160",
         "corpName": "디아이",
         "industry": "realestate",
@@ -155,9 +123,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "461030",
-        "corpName": "아이엠비디엑스",
-        "industry": "pharma",
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
+        "viaCode": "036220",
+        "viaName": "오상헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053980",
+        "corpName": "오상자이엘",
+        "industry": "software",
         "viaCode": "036220",
         "viaName": "오상헬스케어",
         "hopDistance": 2
@@ -165,6 +141,30 @@
       {
         "stockCode": "221800",
         "corpName": "유투바이오",
+        "industry": "pharma",
+        "viaCode": "036220",
+        "viaName": "오상헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "203450",
+        "corpName": "유니온바이오메트릭스",
+        "industry": "telecom",
+        "viaCode": "036220",
+        "viaName": "오상헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067010",
+        "corpName": "이씨에스",
+        "industry": "software",
+        "viaCode": "036220",
+        "viaName": "오상헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "461030",
+        "corpName": "아이엠비디엑스",
         "industry": "pharma",
         "viaCode": "036220",
         "viaName": "오상헬스케어",

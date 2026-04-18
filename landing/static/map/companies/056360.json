@@ -135,9 +135,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "073540",
-        "corpName": "에프알텍",
-        "industry": "telecom",
+        "stockCode": "029780",
+        "corpName": "삼성카드",
+        "industry": "aerospace",
+        "viaCode": "230240",
+        "viaName": "에치에프알",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "153460",
+        "corpName": "네이블",
+        "industry": "software",
+        "viaCode": "230240",
+        "viaName": "에치에프알",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
         "viaCode": "230240",
         "viaName": "에치에프알",
         "hopDistance": 2
@@ -159,33 +175,17 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "073540",
+        "corpName": "에프알텍",
+        "industry": "telecom",
+        "viaCode": "230240",
+        "viaName": "에치에프알",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "250060",
         "corpName": "모비스",
         "industry": "auto",
-        "viaCode": "230240",
-        "viaName": "에치에프알",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "029780",
-        "corpName": "삼성카드",
-        "industry": "aerospace",
-        "viaCode": "230240",
-        "viaName": "에치에프알",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "230240",
-        "viaName": "에치에프알",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "153460",
-        "corpName": "네이블",
-        "industry": "software",
         "viaCode": "230240",
         "viaName": "에치에프알",
         "hopDistance": 2

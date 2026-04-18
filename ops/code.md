@@ -148,13 +148,34 @@ pl.DataFrame
 
 ## 릴리즈
 
+- **release 절대 금지** — 사용자 명시 지시 없으면 version bump / git tag / PyPI publish 금지. "릴리즈할까요?" 제안도 금지
 - **끝자리(patch)만 올린다** — minor/major는 사용자 지시 시에만
 - GitHub Actions trusted publishing
 - 절차: `pyproject.toml` 버전 → 커밋 → `git tag vX.Y.Z && git push origin vX.Y.Z`
-- CHANGELOG.md + docs/changelog.md 동시 업데이트 (상세하게 — GitHub Release 노트로 사용)
+- CHANGELOG.md + docs/changelog.md 동시 업데이트
+- **PyPI wheel 검증 필수** (0.9.11 accountMappings.json 빠진 사고로 확정):
+  1. `uv build --wheel` 후 accountMappings.json 포함 확인
+  2. json 파일 30개 이상 포함 확인
+  3. Node.js 테스트 `cd pyodide && node test_node.mjs` 13/13 통과
+  4. PyPI 같은 버전 덮어쓰기 불가
 
 ## Git
 
 - AI 흔적 커밋 메시지/코드/주석에 포함하지 않는다 (pre-commit hook 자동 차단)
 - 커밋 메시지는 한국어 또는 영어
 - force push 하지 않는다
+
+## 검증 엄격성
+
+- **AI provider = oauth-codex**: AI 테스트/검증/audit 시 oauth-codex (gemini 아님)
+- **벤치마킹 필수**: UI/AI/에이전트 작업 시 Claude Code 벤치마킹 강제
+- **ACE 효과 주장 금지**: 자동 메트릭만으로 효과 주장 X — 사람 판정 기반 비교 필수
+- **이미지 생성 = Replicate 전용** (`black-forest-labs/flux-1.1-pro`, TTS minimax/speech-02-hd). OpenAI/DALL-E/기타 금지
+
+## 코드 품질 강행규칙
+
+- **클린코드 지향**. 구조 개선이 기능 추가보다 우선
+- **wrapper/adapter/bridge 우회 레이어 금지** — 근본 코드 직접 수정
+- **사용되지 않는 코드 즉시 삭제** — "나중에 쓸 수도" 금지
+- **파라미터 추가보다 설계 변경 먼저 검토**
+- **근본 원인 1곳만 수정**: 우회 함수/fallback 분기/private 함수 덕지덕지 패치 금지

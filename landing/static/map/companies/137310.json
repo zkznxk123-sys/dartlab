@@ -236,185 +236,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "259630",
-        "corpName": "엠플러스",
-        "industry": "machinery",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "048530",
-        "corpName": "인트론바이오",
-        "industry": "pharma",
-        "viaCode": "060590",
-        "viaName": "씨티씨바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006620",
-        "corpName": "동구바이오제약",
-        "industry": "pharma",
-        "viaCode": "377740",
-        "viaName": "바이오노트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006280",
-        "corpName": "녹십자",
-        "industry": "pharma",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "299660",
-        "corpName": "셀리드",
-        "industry": "pharma",
-        "viaCode": "377740",
-        "viaName": "바이오노트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003960",
-        "corpName": "사조대림",
-        "industry": "food",
-        "viaCode": "060590",
-        "viaName": "씨티씨바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "131220",
-        "corpName": "대한과학",
-        "industry": "retail",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "418550",
-        "corpName": "제이오",
-        "industry": "consulting",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "092040",
-        "corpName": "아미코젠",
-        "industry": "food",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "019550",
         "corpName": "SBI인베스트먼트",
         "industry": "finance",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "091120",
-        "corpName": "이엠텍",
-        "industry": "electronics",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "217950",
-        "corpName": "파마리서치바이오",
-        "industry": "pharma",
-        "viaCode": "377740",
-        "viaName": "바이오노트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066360",
-        "corpName": "체리부로",
-        "industry": "food",
-        "viaCode": "060590",
-        "viaName": "씨티씨바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "294090",
-        "corpName": "이오플로우",
-        "industry": "machinery",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "214330",
-        "corpName": "금호에이치티",
-        "industry": "electronics",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "119830",
-        "corpName": "아이텍",
-        "industry": "semiconductor",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "068330",
-        "corpName": "일신바이오",
-        "industry": "machinery",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "185490",
-        "corpName": "아이진",
-        "industry": "pharma",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "377740",
-        "viaName": "바이오노트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "214450",
-        "corpName": "파마리서치",
-        "industry": "pharma",
-        "viaCode": "377740",
-        "viaName": "바이오노트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "389470",
-        "corpName": "인벤티지랩",
-        "industry": "software",
         "viaCode": "206650",
         "viaName": "유바이오로직스",
         "hopDistance": 2
@@ -428,6 +252,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "066360",
+        "corpName": "체리부로",
+        "industry": "food",
+        "viaCode": "060590",
+        "viaName": "씨티씨바이오",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "061250",
         "corpName": "화일약품",
         "industry": "food",
@@ -436,27 +268,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "452400",
-        "corpName": "이닉스",
-        "industry": "semiconductor",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "200670",
-        "corpName": "휴메딕스",
+        "stockCode": "006620",
+        "corpName": "동구바이오제약",
         "industry": "pharma",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
+        "viaCode": "377740",
+        "viaName": "바이오노트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "377740",
+        "viaName": "바이오노트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "418550",
+        "corpName": "제이오",
+        "industry": "consulting",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214450",
+        "corpName": "파마리서치",
+        "industry": "pharma",
+        "viaCode": "377740",
+        "viaName": "바이오노트",
         "hopDistance": 2
       },
       {
@@ -468,9 +308,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "278990",
-        "corpName": "EMB",
-        "industry": "battery",
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068330",
+        "corpName": "일신바이오",
+        "industry": "machinery",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "294090",
+        "corpName": "이오플로우",
+        "industry": "machinery",
         "viaCode": "337840",
         "viaName": "유엑스엔",
         "hopDistance": 2
@@ -484,11 +340,155 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "185490",
+        "corpName": "아이진",
+        "industry": "pharma",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "002020",
         "corpName": "코오롱",
         "industry": "finance",
         "viaCode": "060590",
         "viaName": "씨티씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "389470",
+        "corpName": "인벤티지랩",
+        "industry": "software",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "278990",
+        "corpName": "EMB",
+        "industry": "battery",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092040",
+        "corpName": "아미코젠",
+        "industry": "food",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217950",
+        "corpName": "파마리서치바이오",
+        "industry": "pharma",
+        "viaCode": "377740",
+        "viaName": "바이오노트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "259630",
+        "corpName": "엠플러스",
+        "industry": "machinery",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006280",
+        "corpName": "녹십자",
+        "industry": "pharma",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "131220",
+        "corpName": "대한과학",
+        "industry": "retail",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "119830",
+        "corpName": "아이텍",
+        "industry": "semiconductor",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214330",
+        "corpName": "금호에이치티",
+        "industry": "electronics",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091120",
+        "corpName": "이엠텍",
+        "industry": "electronics",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003960",
+        "corpName": "사조대림",
+        "industry": "food",
+        "viaCode": "060590",
+        "viaName": "씨티씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200670",
+        "corpName": "휴메딕스",
+        "industry": "pharma",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "048530",
+        "corpName": "인트론바이오",
+        "industry": "pharma",
+        "viaCode": "060590",
+        "viaName": "씨티씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "299660",
+        "corpName": "셀리드",
+        "industry": "pharma",
+        "viaCode": "377740",
+        "viaName": "바이오노트",
         "hopDistance": 2
       }
     ],

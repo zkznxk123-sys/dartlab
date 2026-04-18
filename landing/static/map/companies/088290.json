@@ -116,41 +116,41 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "238090",
-        "corpName": "앤디포스",
-        "industry": "plastic",
+        "stockCode": "016790",
+        "corpName": "현대사료",
+        "industry": "food",
         "viaCode": "096690",
         "viaName": "에이루트",
         "hopDistance": 2
       },
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
         "viaCode": "096690",
         "viaName": "에이루트",
         "hopDistance": 2
       },
       {
-        "stockCode": "068270",
-        "corpName": "셀트리온",
-        "industry": "pharma",
+        "stockCode": "008770",
+        "corpName": "호텔신라",
+        "industry": "leisure",
         "viaCode": "096690",
         "viaName": "에이루트",
         "hopDistance": 2
       },
       {
-        "stockCode": "375500",
-        "corpName": "DL이앤씨",
-        "industry": "construction",
+        "stockCode": "034230",
+        "corpName": "파라다이스",
+        "industry": "leisure",
         "viaCode": "096690",
         "viaName": "에이루트",
         "hopDistance": 2
       },
       {
-        "stockCode": "051910",
-        "corpName": "LG화학",
-        "industry": "chemical",
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
         "viaCode": "096690",
         "viaName": "에이루트",
         "hopDistance": 2
@@ -164,9 +164,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
+        "stockCode": "375500",
+        "corpName": "DL이앤씨",
+        "industry": "construction",
         "viaCode": "096690",
         "viaName": "에이루트",
         "hopDistance": 2
@@ -180,9 +180,49 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "096690",
+        "viaName": "에이루트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "096690",
+        "viaName": "에이루트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "238090",
+        "corpName": "앤디포스",
+        "industry": "plastic",
+        "viaCode": "096690",
+        "viaName": "에이루트",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "247540",
         "corpName": "에코프로비엠",
         "industry": "chemical",
+        "viaCode": "096690",
+        "viaName": "에이루트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068270",
+        "corpName": "셀트리온",
+        "industry": "pharma",
+        "viaCode": "096690",
+        "viaName": "에이루트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377300",
+        "corpName": "카카오페이",
+        "industry": "finance",
         "viaCode": "096690",
         "viaName": "에이루트",
         "hopDistance": 2
@@ -204,9 +244,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "034230",
-        "corpName": "파라다이스",
-        "industry": "leisure",
+        "stockCode": "051910",
+        "corpName": "LG화학",
+        "industry": "chemical",
         "viaCode": "096690",
         "viaName": "에이루트",
         "hopDistance": 2
@@ -220,49 +260,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
-        "viaCode": "096690",
-        "viaName": "에이루트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "008770",
-        "corpName": "호텔신라",
-        "industry": "leisure",
-        "viaCode": "096690",
-        "viaName": "에이루트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "377300",
-        "corpName": "카카오페이",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
         "industry": "finance",
-        "viaCode": "096690",
-        "viaName": "에이루트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016790",
-        "corpName": "현대사료",
-        "industry": "food",
-        "viaCode": "096690",
-        "viaName": "에이루트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "096690",
-        "viaName": "에이루트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
         "viaCode": "096690",
         "viaName": "에이루트",
         "hopDistance": 2

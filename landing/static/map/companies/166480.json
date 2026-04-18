@@ -174,11 +174,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "365590",
-        "corpName": "하이딥",
-        "industry": "semiconductor",
-        "viaCode": "382800",
-        "viaName": "지앤비에스 에코",
+        "stockCode": "302440",
+        "corpName": "SK바이오사이언스",
+        "industry": "pharma",
+        "viaCode": "071950",
+        "viaName": "코아스",
         "hopDistance": 2
       },
       {
@@ -190,27 +190,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "370090",
-        "corpName": "퓨런티어",
-        "industry": "electronics",
-        "viaCode": "382800",
-        "viaName": "지앤비에스 에코",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "361610",
         "corpName": "SK아이이테크놀로지",
         "industry": "software",
         "viaCode": "071950",
         "viaName": "코아스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "106080",
-        "corpName": "케이이엠텍",
-        "industry": "electronics",
-        "viaCode": "382800",
-        "viaName": "지앤비에스 에코",
         "hopDistance": 2
       },
       {
@@ -222,17 +206,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "302440",
-        "corpName": "SK바이오사이언스",
-        "industry": "pharma",
-        "viaCode": "071950",
-        "viaName": "코아스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "393970",
-        "corpName": "대진첨단소재",
-        "industry": "chemical",
+        "stockCode": "106080",
+        "corpName": "케이이엠텍",
+        "industry": "electronics",
         "viaCode": "382800",
         "viaName": "지앤비에스 에코",
         "hopDistance": 2
@@ -246,6 +222,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "393970",
+        "corpName": "대진첨단소재",
+        "industry": "chemical",
+        "viaCode": "382800",
+        "viaName": "지앤비에스 에코",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "196300",
         "corpName": "HLB펩",
         "industry": "pharma",
@@ -254,8 +238,24 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "365590",
+        "corpName": "하이딥",
+        "industry": "semiconductor",
+        "viaCode": "382800",
+        "viaName": "지앤비에스 에코",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "021240",
         "corpName": "코웨이",
+        "industry": "electronics",
+        "viaCode": "382800",
+        "viaName": "지앤비에스 에코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "370090",
+        "corpName": "퓨런티어",
         "industry": "electronics",
         "viaCode": "382800",
         "viaName": "지앤비에스 에코",

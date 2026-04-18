@@ -117,16 +117,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "389650",
-        "corpName": "넥스트바이오메디컬",
-        "industry": "pharma",
+        "stockCode": "347700",
+        "corpName": "스피어",
+        "industry": "electronics",
         "viaCode": "338220",
         "viaName": "뷰노",
         "hopDistance": 2
       },
       {
-        "stockCode": "142280",
-        "corpName": "녹십자엠에스",
+        "stockCode": "389650",
+        "corpName": "넥스트바이오메디컬",
         "industry": "pharma",
         "viaCode": "338220",
         "viaName": "뷰노",
@@ -141,17 +141,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "347700",
-        "corpName": "스피어",
-        "industry": "electronics",
-        "viaCode": "338220",
-        "viaName": "뷰노",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000020",
-        "corpName": "동화약품",
-        "industry": "retail",
+        "stockCode": "142280",
+        "corpName": "녹십자엠에스",
+        "industry": "pharma",
         "viaCode": "338220",
         "viaName": "뷰노",
         "hopDistance": 2
@@ -160,6 +152,14 @@
         "stockCode": "006280",
         "corpName": "녹십자",
         "industry": "pharma",
+        "viaCode": "338220",
+        "viaName": "뷰노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000020",
+        "corpName": "동화약품",
+        "industry": "retail",
         "viaCode": "338220",
         "viaName": "뷰노",
         "hopDistance": 2

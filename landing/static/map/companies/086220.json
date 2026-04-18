@@ -194,6 +194,30 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "286940",
+        "corpName": "롯데이노베이트",
+        "industry": "software",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "194700",
+        "corpName": "노바렉스",
+        "industry": "pharma",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "318060",
         "corpName": "그래피",
         "industry": "chemical",
@@ -202,11 +226,115 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "200130",
-        "corpName": "콜마비앤에이치",
-        "industry": "pharma",
+        "stockCode": "037460",
+        "corpName": "삼지전자",
+        "industry": "telecom",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "418550",
+        "corpName": "제이오",
+        "industry": "consulting",
         "viaCode": "142760",
         "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161890",
+        "corpName": "한국콜마",
+        "industry": "cosmetics",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "265740",
+        "corpName": "엔에프씨",
+        "industry": "cosmetics",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068330",
+        "corpName": "일신바이오",
+        "industry": "machinery",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003090",
+        "corpName": "대웅",
+        "industry": "pharma",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352940",
+        "corpName": "인바이오",
+        "industry": "chemical",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099190",
+        "corpName": "아이센스",
+        "industry": "medicalDevice",
+        "viaCode": "335810",
+        "viaName": "프리시젼바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006880",
+        "corpName": "신송홀딩스",
+        "industry": "retail",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "142760",
+        "viaName": "모아라이프플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004450",
+        "corpName": "삼화왕관",
+        "industry": "steel",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214330",
+        "corpName": "금호에이치티",
+        "industry": "electronics",
+        "viaCode": "009290",
+        "viaName": "광동제약",
         "hopDistance": 2
       },
       {
@@ -226,97 +354,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "352940",
-        "corpName": "인바이오",
-        "industry": "chemical",
+        "stockCode": "296160",
+        "corpName": "프로젠",
+        "industry": "pharma",
         "viaCode": "142760",
         "viaName": "모아라이프플러스",
         "hopDistance": 2
       },
       {
-        "stockCode": "265740",
-        "corpName": "엔에프씨",
-        "industry": "cosmetics",
+        "stockCode": "200130",
+        "corpName": "콜마비앤에이치",
+        "industry": "pharma",
         "viaCode": "142760",
         "viaName": "모아라이프플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "286940",
-        "corpName": "롯데이노베이트",
-        "industry": "software",
-        "viaCode": "009290",
-        "viaName": "광동제약",
         "hopDistance": 2
       },
       {
         "stockCode": "053030",
         "corpName": "바이넥스",
         "industry": "pharma",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084110",
-        "corpName": "휴온스글로벌",
-        "industry": "pharma",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "418550",
-        "corpName": "제이오",
-        "industry": "consulting",
-        "viaCode": "142760",
-        "viaName": "모아라이프플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003090",
-        "corpName": "대웅",
-        "industry": "pharma",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004450",
-        "corpName": "삼화왕관",
-        "industry": "steel",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "142760",
-        "viaName": "모아라이프플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "214330",
-        "corpName": "금호에이치티",
-        "industry": "electronics",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "068330",
-        "corpName": "일신바이오",
-        "industry": "machinery",
-        "viaCode": "142760",
-        "viaName": "모아라이프플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006880",
-        "corpName": "신송홀딩스",
-        "industry": "retail",
         "viaCode": "009290",
         "viaName": "광동제약",
         "hopDistance": 2
@@ -330,67 +386,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "142760",
-        "viaName": "모아라이프플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "296160",
-        "corpName": "프로젠",
-        "industry": "pharma",
-        "viaCode": "142760",
-        "viaName": "모아라이프플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "302440",
         "corpName": "SK바이오사이언스",
         "industry": "pharma",
         "viaCode": "065170",
         "viaName": "비엘팜텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037460",
-        "corpName": "삼지전자",
-        "industry": "telecom",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099190",
-        "corpName": "아이센스",
-        "industry": "medicalDevice",
-        "viaCode": "335810",
-        "viaName": "프리시젼바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "194700",
-        "corpName": "노바렉스",
-        "industry": "pharma",
-        "viaCode": "142760",
-        "viaName": "모아라이프플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "161890",
-        "corpName": "한국콜마",
-        "industry": "cosmetics",
-        "viaCode": "142760",
-        "viaName": "모아라이프플러스",
         "hopDistance": 2
       }
     ],

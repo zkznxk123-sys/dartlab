@@ -5,8 +5,8 @@
 <link>https://eddmpython.github.io/dartlab/changes</link>
 <description>한국 상장사 이번 회계연도 급변 Top — ROE/OpMargin/매출/부채 변화</description>
 <language>ko-kr</language>
-<lastBuildDate>Thu, 16 Apr 2026 09:50:46 +0000</lastBuildDate>
-<pubDate>2026-04-16T00:00:00Z</pubDate>
+<lastBuildDate>Sat, 18 Apr 2026 06:16:38 +0000</lastBuildDate>
+<pubDate>2026-04-18T00:00:00Z</pubDate>
 <item>
   <title>[수익성 개선 (ROE)] 두올 (자동차)</title>
   <link>https://eddmpython.github.io/dartlab/map?focus=016740</link>
@@ -463,13 +463,6 @@
   <description>매출 YoY -87.2% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
 </item>
 <item>
-  <title>[매출 급락 (YoY -20% 이하)] 에스퓨얼셀 (에너지·유틸리티)</title>
-  <link>https://eddmpython.github.io/dartlab/map?focus=288620</link>
-  <guid isPermaLink="false">revenueDrop-288620-2025</guid>
-  <category>매출 급락 (YoY -20% 이하)</category>
-  <description>매출 YoY -86.2% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
-</item>
-<item>
   <title>[매출 급락 (YoY -20% 이하)] 베셀 (전자부품)</title>
   <link>https://eddmpython.github.io/dartlab/map?focus=177350</link>
   <guid isPermaLink="false">revenueDrop-177350-2025</guid>
@@ -477,16 +470,23 @@
   <description>매출 YoY -86.2% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
 </item>
 <item>
-  <title>[매출 급락 (YoY -20% 이하)] 미래컴퍼니 (기계·장비)</title>
-  <link>https://eddmpython.github.io/dartlab/map?focus=049950</link>
-  <guid isPermaLink="false">revenueDrop-049950-2025</guid>
+  <title>[매출 급락 (YoY -20% 이하)] 에스퓨얼셀 (에너지·유틸리티)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=288620</link>
+  <guid isPermaLink="false">revenueDrop-288620-2025</guid>
   <category>매출 급락 (YoY -20% 이하)</category>
-  <description>매출 YoY -86.0% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
+  <description>매출 YoY -86.2% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
 </item>
 <item>
   <title>[매출 급락 (YoY -20% 이하)] 이루온 (통신장비)</title>
   <link>https://eddmpython.github.io/dartlab/map?focus=065440</link>
   <guid isPermaLink="false">revenueDrop-065440-2025</guid>
+  <category>매출 급락 (YoY -20% 이하)</category>
+  <description>매출 YoY -86.0% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
+</item>
+<item>
+  <title>[매출 급락 (YoY -20% 이하)] 미래컴퍼니 (기계·장비)</title>
+  <link>https://eddmpython.github.io/dartlab/map?focus=049950</link>
+  <guid isPermaLink="false">revenueDrop-049950-2025</guid>
   <category>매출 급락 (YoY -20% 이하)</category>
   <description>매출 YoY -86.0% — 급락 | 2024→2025 매출 급감. 수요 둔화/고객사 이탈 의심.</description>
 </item>

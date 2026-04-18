@@ -95,9 +95,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "455180",
-        "corpName": "케이지에이",
-        "industry": "auto",
+        "stockCode": "015760",
+        "corpName": "한국전력공사",
+        "industry": "energy",
+        "viaCode": "360070",
+        "viaName": "탑머티리얼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "282880",
+        "corpName": "코윈테크",
+        "industry": "electronics",
         "viaCode": "360070",
         "viaName": "탑머티리얼",
         "hopDistance": 2
@@ -111,17 +119,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "015760",
-        "corpName": "한국전력공사",
-        "industry": "energy",
-        "viaCode": "360070",
-        "viaName": "탑머티리얼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "282880",
-        "corpName": "코윈테크",
-        "industry": "electronics",
+        "stockCode": "455180",
+        "corpName": "케이지에이",
+        "industry": "auto",
         "viaCode": "360070",
         "viaName": "탑머티리얼",
         "hopDistance": 2

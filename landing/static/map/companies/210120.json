@@ -147,88 +147,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "383220",
-        "viaName": "F&F",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007700",
-        "corpName": "F&F 홀딩스",
-        "industry": "finance",
-        "viaCode": "383220",
-        "viaName": "F&F",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "043090",
-        "corpName": "더테크놀로지",
-        "industry": "medicalDevice",
-        "viaCode": "091970",
-        "viaName": "나노캠텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "383220",
-        "viaName": "F&F",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "145170",
-        "corpName": "노브랜드",
-        "industry": "textile",
-        "viaCode": "383220",
-        "viaName": "F&F",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025560",
-        "corpName": "미래산업",
-        "industry": "electronics",
-        "viaCode": "091970",
-        "viaName": "나노캠텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "136480",
-        "corpName": "하림",
-        "industry": "food",
-        "viaCode": "383220",
-        "viaName": "F&F",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "005860",
         "corpName": "한일사료",
-        "industry": "food",
-        "viaCode": "383220",
-        "viaName": "F&F",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003380",
-        "corpName": "하림지주",
-        "industry": "finance",
-        "viaCode": "383220",
-        "viaName": "F&F",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036580",
-        "corpName": "팜스코",
-        "industry": "food",
-        "viaCode": "383220",
-        "viaName": "F&F",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "136490",
-        "corpName": "선진",
         "industry": "food",
         "viaCode": "383220",
         "viaName": "F&F",
@@ -243,6 +163,86 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "091970",
+        "viaName": "나노캠텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "145170",
+        "corpName": "노브랜드",
+        "industry": "textile",
+        "viaCode": "383220",
+        "viaName": "F&F",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "136480",
+        "corpName": "하림",
+        "industry": "food",
+        "viaCode": "383220",
+        "viaName": "F&F",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "043090",
+        "corpName": "더테크놀로지",
+        "industry": "medicalDevice",
+        "viaCode": "091970",
+        "viaName": "나노캠텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007700",
+        "corpName": "F&F 홀딩스",
+        "industry": "finance",
+        "viaCode": "383220",
+        "viaName": "F&F",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "383220",
+        "viaName": "F&F",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "383220",
+        "viaName": "F&F",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003380",
+        "corpName": "하림지주",
+        "industry": "finance",
+        "viaCode": "383220",
+        "viaName": "F&F",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "136490",
+        "corpName": "선진",
+        "industry": "food",
+        "viaCode": "383220",
+        "viaName": "F&F",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025560",
+        "corpName": "미래산업",
+        "industry": "electronics",
+        "viaCode": "091970",
+        "viaName": "나노캠텍",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "054540",
         "corpName": "삼영엠텍",
         "industry": "electronics",
@@ -251,11 +251,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "091970",
-        "viaName": "나노캠텍",
+        "stockCode": "036580",
+        "corpName": "팜스코",
+        "industry": "food",
+        "viaCode": "383220",
+        "viaName": "F&F",
         "hopDistance": 2
       }
     ],

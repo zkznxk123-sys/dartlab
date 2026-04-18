@@ -127,24 +127,184 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "064400",
-        "corpName": "LG씨엔에스",
+        "stockCode": "005420",
+        "corpName": "코스모화학",
+        "industry": "chemical",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "257720",
+        "corpName": "실리콘투",
+        "industry": "cosmetics",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003550",
+        "corpName": "LG",
         "industry": "electronics",
         "viaCode": "051900",
         "viaName": "LG생활건강",
         "hopDistance": 2
       },
       {
-        "stockCode": "005950",
-        "corpName": "이수화학",
-        "industry": "food",
+        "stockCode": "079550",
+        "corpName": "LIG넥스원",
+        "industry": "aerospace",
         "viaCode": "051900",
         "viaName": "LG생활건강",
         "hopDistance": 2
       },
       {
-        "stockCode": "200130",
-        "corpName": "콜마비앤에이치",
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "222110",
+        "corpName": "팬젠",
+        "industry": "pharma",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192820",
+        "corpName": "코스맥스",
+        "industry": "cosmetics",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "194700",
+        "corpName": "노바렉스",
+        "industry": "pharma",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037460",
+        "corpName": "삼지전자",
+        "industry": "telecom",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "383800",
+        "corpName": "LX홀딩스",
+        "industry": "finance",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "108670",
+        "corpName": "LX하우시스",
+        "industry": "electronics",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013810",
+        "corpName": "스페코",
+        "industry": "construction",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034220",
+        "corpName": "LG디스플레이",
+        "industry": "electronics",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "265740",
+        "corpName": "엔에프씨",
+        "industry": "cosmetics",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "257990",
+        "corpName": "나우코스",
+        "industry": "cosmetics",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161890",
+        "corpName": "한국콜마",
+        "industry": "cosmetics",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054050",
+        "corpName": "농우바이오",
+        "industry": "agriculture",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038530",
+        "corpName": "케이바이오",
+        "industry": "retail",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187790",
+        "corpName": "나노",
+        "industry": "chemical",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "439580",
+        "corpName": "블루엠텍",
+        "industry": "pharma",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "239610",
+        "corpName": "에이치엘사이언스",
         "industry": "pharma",
         "viaCode": "195940",
         "viaName": "HK이노엔",
@@ -159,46 +319,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "333620",
-        "corpName": "엔시스",
-        "industry": "electrical",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "257990",
-        "corpName": "나우코스",
-        "industry": "cosmetics",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "011070",
         "corpName": "LG이노텍",
         "industry": "electronics",
@@ -207,57 +327,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "032640",
-        "corpName": "LG유플러스",
-        "industry": "telecom",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
         "hopDistance": 2
       },
       {
-        "stockCode": "108670",
-        "corpName": "LX하우시스",
+        "stockCode": "066570",
+        "corpName": "LG전자",
         "industry": "electronics",
         "viaCode": "051900",
         "viaName": "LG생활건강",
         "hopDistance": 2
       },
       {
-        "stockCode": "003550",
-        "corpName": "LG",
+        "stockCode": "037560",
+        "corpName": "LG헬로비전",
         "industry": "electronics",
         "viaCode": "051900",
         "viaName": "LG생활건강",
         "hopDistance": 2
       },
       {
-        "stockCode": "001120",
-        "corpName": "LX인터내셔널",
-        "industry": "textile",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "265740",
-        "corpName": "엔에프씨",
-        "industry": "cosmetics",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "079550",
-        "corpName": "LIG넥스원",
-        "industry": "aerospace",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
         "viaCode": "051900",
         "viaName": "LG생활건강",
         "hopDistance": 2
@@ -271,17 +367,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "239610",
-        "corpName": "에이치엘사이언스",
-        "industry": "pharma",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "051910",
-        "corpName": "LG화학",
-        "industry": "chemical",
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
         "viaCode": "051900",
         "viaName": "LG생활건강",
         "hopDistance": 2
@@ -295,49 +383,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "014820",
-        "corpName": "동원시스템즈",
-        "industry": "plastic",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "214390",
-        "corpName": "경보제약",
+        "stockCode": "341170",
+        "corpName": "퓨쳐메디신",
         "industry": "pharma",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "192820",
-        "corpName": "코스맥스",
-        "industry": "cosmetics",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "187790",
-        "corpName": "나노",
-        "industry": "chemical",
         "viaCode": "195940",
         "viaName": "HK이노엔",
         "hopDistance": 2
@@ -351,17 +399,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "383800",
-        "corpName": "LX홀딩스",
-        "industry": "finance",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
+        "stockCode": "338840",
+        "corpName": "와이바이오로직스",
+        "industry": "pharma",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
         "hopDistance": 2
       },
       {
-        "stockCode": "001630",
-        "corpName": "종근당홀딩스",
-        "industry": "pharma",
+        "stockCode": "024720",
+        "corpName": "콜마홀딩스",
+        "industry": "retail",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "264900",
+        "corpName": "크라운제과",
+        "industry": "food",
         "viaCode": "051900",
         "viaName": "LG생활건강",
         "hopDistance": 2
@@ -383,121 +439,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "023450",
-        "corpName": "동남합성",
-        "industry": "realestate",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "161890",
-        "corpName": "한국콜마",
-        "industry": "cosmetics",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024720",
-        "corpName": "콜마홀딩스",
-        "industry": "retail",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "264900",
-        "corpName": "크라운제과",
-        "industry": "food",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "071670",
-        "corpName": "에이테크솔루션",
-        "industry": "electronics",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067390",
-        "corpName": "아스트",
-        "industry": "aerospace",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037560",
-        "corpName": "LG헬로비전",
-        "industry": "electronics",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035000",
-        "corpName": "HS애드",
-        "industry": "media",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "044780",
-        "corpName": "에이치케이",
-        "industry": "medicalDevice",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "341170",
-        "corpName": "퓨쳐메디신",
-        "industry": "pharma",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
+        "stockCode": "373220",
+        "corpName": "LG에너지솔루션",
+        "industry": "chemical",
         "viaCode": "051900",
         "viaName": "LG생활건강",
         "hopDistance": 2
@@ -511,25 +455,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "257720",
-        "corpName": "실리콘투",
-        "industry": "cosmetics",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "373220",
-        "corpName": "LG에너지솔루션",
-        "industry": "chemical",
-        "viaCode": "051900",
-        "viaName": "LG생활건강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038530",
-        "corpName": "케이바이오",
-        "industry": "retail",
+        "stockCode": "067390",
+        "corpName": "아스트",
+        "industry": "aerospace",
         "viaCode": "195940",
         "viaName": "HK이노엔",
         "hopDistance": 2
@@ -543,6 +471,30 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "001120",
+        "corpName": "LX인터내셔널",
+        "industry": "textile",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035000",
+        "corpName": "HS애드",
+        "industry": "media",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "333620",
+        "corpName": "엔시스",
+        "industry": "electrical",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "243070",
         "corpName": "휴온스",
         "industry": "pharma",
@@ -551,17 +503,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005420",
-        "corpName": "코스모화학",
+        "stockCode": "214390",
+        "corpName": "경보제약",
+        "industry": "pharma",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012750",
+        "corpName": "에스원",
+        "industry": "electronics",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023450",
+        "corpName": "동남합성",
+        "industry": "realestate",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051910",
+        "corpName": "LG화학",
         "industry": "chemical",
         "viaCode": "051900",
         "viaName": "LG생활건강",
         "hopDistance": 2
       },
       {
-        "stockCode": "034220",
-        "corpName": "LG디스플레이",
-        "industry": "electronics",
+        "stockCode": "014820",
+        "corpName": "동원시스템즈",
+        "industry": "plastic",
         "viaCode": "051900",
         "viaName": "LG생활건강",
         "hopDistance": 2
@@ -575,65 +559,81 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "338840",
-        "corpName": "와이바이오로직스",
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200130",
+        "corpName": "콜마비앤에이치",
         "industry": "pharma",
         "viaCode": "195940",
         "viaName": "HK이노엔",
         "hopDistance": 2
       },
       {
-        "stockCode": "054050",
-        "corpName": "농우바이오",
-        "industry": "agriculture",
+        "stockCode": "064400",
+        "corpName": "LG씨엔에스",
+        "industry": "electronics",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071670",
+        "corpName": "에이테크솔루션",
+        "industry": "electronics",
         "viaCode": "195940",
         "viaName": "HK이노엔",
         "hopDistance": 2
       },
       {
-        "stockCode": "037460",
-        "corpName": "삼지전자",
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032640",
+        "corpName": "LG유플러스",
         "industry": "telecom",
         "viaCode": "051900",
         "viaName": "LG생활건강",
         "hopDistance": 2
       },
       {
-        "stockCode": "194700",
-        "corpName": "노바렉스",
-        "industry": "pharma",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "013810",
-        "corpName": "스페코",
-        "industry": "construction",
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
         "viaCode": "051900",
         "viaName": "LG생활건강",
         "hopDistance": 2
       },
       {
-        "stockCode": "222110",
-        "corpName": "팬젠",
-        "industry": "pharma",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "051900",
+        "viaName": "LG생활건강",
         "hopDistance": 2
       },
       {
-        "stockCode": "439580",
-        "corpName": "블루엠텍",
-        "industry": "pharma",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012750",
-        "corpName": "에스원",
-        "industry": "electronics",
+        "stockCode": "005950",
+        "corpName": "이수화학",
+        "industry": "food",
         "viaCode": "051900",
         "viaName": "LG생활건강",
         "hopDistance": 2
@@ -641,7 +641,7 @@
     ],
     "hop2Edges": [
       {
-        "from": "005950",
+        "from": "023450",
         "to": "051900",
         "type": "supplier",
         "amount": 2655.0,
@@ -651,7 +651,7 @@
         "source": "docs_table"
       },
       {
-        "from": "023450",
+        "from": "005950",
         "to": "051900",
         "type": "supplier",
         "amount": 2655.0,

@@ -143,9 +143,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "121600",
         "viaName": "나노신소재",
         "hopDistance": 2
@@ -159,17 +159,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
         "industry": "aerospace",
         "viaCode": "121600",
         "viaName": "나노신소재",
         "hopDistance": 2
       },
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
         "viaCode": "121600",
         "viaName": "나노신소재",
         "hopDistance": 2

@@ -135,86 +135,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "310210",
-        "corpName": "보로노이",
-        "industry": "pharma",
-        "viaCode": "003470",
-        "viaName": "유안타증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082640",
-        "corpName": "동양생명",
-        "industry": "finance",
-        "viaCode": "003470",
-        "viaName": "유안타증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "146060",
-        "corpName": "율촌",
-        "industry": "plastic",
-        "viaCode": "003470",
-        "viaName": "유안타증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009580",
-        "corpName": "무림P&P",
-        "industry": "paper",
-        "viaCode": "003470",
-        "viaName": "유안타증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000240",
-        "corpName": "한국앤컴퍼니",
-        "industry": "finance",
-        "viaCode": "003470",
-        "viaName": "유안타증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052260",
-        "corpName": "현대바이오랜드",
-        "industry": "chemical",
-        "viaCode": "003470",
-        "viaName": "유안타증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009200",
-        "corpName": "무림페이퍼",
-        "industry": "paper",
-        "viaCode": "003470",
-        "viaName": "유안타증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "340360",
-        "corpName": "다보링크",
-        "industry": "telecom",
-        "viaCode": "003470",
-        "viaName": "유안타증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "178320",
-        "corpName": "서진시스템",
-        "industry": "electronics",
-        "viaCode": "003470",
-        "viaName": "유안타증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "417180",
-        "corpName": "핑거스토리",
-        "industry": "media",
-        "viaCode": "003470",
-        "viaName": "유안타증권",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "012320",
         "corpName": "경동인베스트",
         "industry": "finance",
@@ -239,33 +159,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "464080",
-        "corpName": "에스오에스랩",
-        "industry": "machinery",
-        "viaCode": "003470",
-        "viaName": "유안타증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004360",
-        "corpName": "세방",
-        "industry": "logistics",
-        "viaCode": "003470",
-        "viaName": "유안타증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
-        "viaCode": "003470",
-        "viaName": "유안타증권",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "451220",
         "corpName": "아이엠티",
         "industry": "machinery",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "310210",
+        "corpName": "보로노이",
+        "industry": "pharma",
         "viaCode": "003470",
         "viaName": "유안타증권",
         "hopDistance": 2
@@ -279,9 +183,105 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "009200",
+        "corpName": "무림페이퍼",
+        "industry": "paper",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "464080",
+        "corpName": "에스오에스랩",
+        "industry": "machinery",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000240",
+        "corpName": "한국앤컴퍼니",
+        "industry": "finance",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009580",
+        "corpName": "무림P&P",
+        "industry": "paper",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004360",
+        "corpName": "세방",
+        "industry": "logistics",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "137400",
         "corpName": "피엔티",
         "industry": "machinery",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "178320",
+        "corpName": "서진시스템",
+        "industry": "electronics",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "146060",
+        "corpName": "율촌",
+        "industry": "plastic",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082640",
+        "corpName": "동양생명",
+        "industry": "finance",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "417180",
+        "corpName": "핑거스토리",
+        "industry": "media",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "340360",
+        "corpName": "다보링크",
+        "industry": "telecom",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052260",
+        "corpName": "현대바이오랜드",
+        "industry": "chemical",
+        "viaCode": "003470",
+        "viaName": "유안타증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
         "viaCode": "003470",
         "viaName": "유안타증권",
         "hopDistance": 2

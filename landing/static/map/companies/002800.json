@@ -123,9 +123,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "003540",
-        "corpName": "대신증권",
-        "industry": "finance",
+        "stockCode": "243070",
+        "corpName": "휴온스",
+        "industry": "pharma",
+        "viaCode": "308430",
+        "viaName": "셀비온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "378800",
+        "corpName": "샤페론",
+        "industry": "pharma",
         "viaCode": "308430",
         "viaName": "셀비온",
         "hopDistance": 2
@@ -139,17 +147,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "243070",
-        "corpName": "휴온스",
-        "industry": "pharma",
-        "viaCode": "308430",
-        "viaName": "셀비온",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "378800",
-        "corpName": "샤페론",
-        "industry": "pharma",
+        "stockCode": "003540",
+        "corpName": "대신증권",
+        "industry": "finance",
         "viaCode": "308430",
         "viaName": "셀비온",
         "hopDistance": 2
