@@ -37,7 +37,6 @@ async def stream_topic_summary(
     """topic 요약을 SSE 스트리밍으로 생성한다."""
     try:
         async for event in stream_analysis(
-            company,
             build_topic_summary_question(topic),
             provider=normalize_provider(provider) or provider,
             role="summary",
