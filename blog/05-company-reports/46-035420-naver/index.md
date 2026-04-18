@@ -473,16 +473,6 @@ Z Holdings는 2023년 LY Corporation으로 재편됐다. 일본 인터넷 시장
 
 ---
 
-## 공시 / Filings
-
-- [네이버 사업보고서 (2025년)](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260401800255) — DART 원문
-- [네이버 분기보고서 (2025년 3분기)](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20251114001556) — 연결 재무제표
-- [네이버 감사보고서 (2025년)](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260318800193) — 외부감사인 의견
-- [네이버 IR](https://www.navercorp.com/investment/management) — 실적 발표 자료
-- [네이버 전자공시 전체](https://dart.fss.or.kr/dsaf001/main.do?corpCode=00258801) — DART 공시 목록
-
----
-
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
 

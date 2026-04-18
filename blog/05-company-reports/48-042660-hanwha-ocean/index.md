@@ -370,16 +370,6 @@ c.select("CF", ["영업활동현금흐름","유형자산의 취득"])
 
 ---
 
-## 공시 / Filings
-
-- [한화오션 사업보고서 (2025년)](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260401800349) — DART 원문
-- [한화오션 분기보고서 (2025년 3분기)](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20251114001673) — 연결 재무제표
-- [한화오션 감사보고서 (2025년)](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260318800256) — 외부감사인 의견
-- [한화오션 IR](https://www.hanwhaoceanco.com/ko/ir/) — 실적 발표 자료
-- [한화오션 전자공시 전체](https://dart.fss.or.kr/dsaf001/main.do?corpCode=00126380) — DART 공시 목록
-
----
-
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
 

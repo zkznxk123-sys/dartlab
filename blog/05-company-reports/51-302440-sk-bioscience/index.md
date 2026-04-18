@@ -360,16 +360,6 @@ SK바이오사이언스의 2025년은 "매출 반등, 마진 미회복"이다. 6
 
 ---
 
-## 공시 / Filings
-
-- [SK바이오사이언스 사업보고서 (2025년)](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260319001042) — DART 원문
-- [SK바이오사이언스 분기보고서 (2025년 3분기)](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20251114001329) — 연결 재무제표
-- [SK바이오사이언스 감사보고서 (2025년)](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260318800141) — 외부감사인 의견
-- [SK바이오사이언스 IR](https://www.skbioscience.com/kr/ir) — 실적 발표 자료
-- [SK바이오사이언스 전자공시 전체](https://dart.fss.or.kr/dsaf001/main.do?corpCode=01336190) — DART 공시 목록
-
----
-
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
 

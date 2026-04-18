@@ -375,16 +375,6 @@ dartlab 신용등급 dCR-BB-. "투기등급"이다. [네이버](/blog/naver)의 
 
 ---
 
-## 공시 / Filings
-
-- [에스퓨얼셀 사업보고서 (2025년)](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260319001277) — DART 원문
-- [에스퓨얼셀 상호변경 공시 (2026.03)](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260327903193) — 사명 변경 안내
-- [에스퓨얼셀 유상증자 (2026.03)](https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260303002959) — 유상증자 결정
-- [에스퓨얼셀 전자공시 전체](https://dart.fss.or.kr/dsaf001/main.do?corpCode=01371414) — DART 공시 목록
-- [NuScale Power 10-K (2025)](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001822966&type=10-K) — SEC EDGAR
-
----
-
 <!-- AUTO:START — sync_financials.py가 자동 생성. 수동 편집 금지 -->
 
 
