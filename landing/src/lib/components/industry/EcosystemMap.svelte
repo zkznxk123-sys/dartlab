@@ -181,12 +181,12 @@
 				decay: 1000,
 				onTick: () => updateLabels(),
 			} : {
-				// companies 뷰: 사전 계산 좌표 사용, 시뮬레이션 최소화
-				repulsion: 0.3,
-				gravity: 0.02,
-				linkDistance: 5,
-				friction: 0.95,
-				decay: 100,
+				// companies 뷰: 사전 계산 좌표 사용, 시뮬레이션 OFF
+				repulsion: 0,
+				gravity: 0,
+				linkDistance: 0,
+				friction: 1,
+				decay: 1,
 				onTick: () => updateLabels(),
 			},
 			events: {
