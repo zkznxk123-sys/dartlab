@@ -16,7 +16,13 @@
 	--color-dl-border: #1e2433;
 	--color-dl-success: #34d399;
 	--color-dl-warning: #fbbf24;
+	--color-dl-danger: #ef4444;
 	--color-dl-coffee: #ffdd00;
+	--color-dl-blue: #60a5fa;
+	--color-dl-score-good: #10b981;
+	--color-dl-score-ok: #84cc16;
+	--color-dl-score-caution: #f59e0b;
+	--color-dl-score-bad: #ef4444;
 
 	--font-sans: 'Pretendard Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
 	--font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;

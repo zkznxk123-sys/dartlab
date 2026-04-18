@@ -209,6 +209,13 @@
 
 	<!-- T1: 3초 요약 (headline) -->
 	<div class="t1-summary">
+		<!-- 방향성 배지 -->
+		{#if blogPosts[0]?.direction}
+			{@const dir = blogPosts[0].direction}
+			<span class="direction-badge {dir === '상승' || dir === 'bullish' ? 'up' : dir === '악화' || dir === 'bearish' ? 'down' : 'hold'}">
+				{dir}
+			</span>
+		{/if}
 		{#if aiInsight?.verdict || blogPosts[0]?.verdict}
 			<div class="t1-verdict">
 				{aiInsight?.verdict || blogPosts[0]?.verdict}
@@ -253,6 +260,17 @@
 					<div class="t1-d">/ {node.industryPeerCount}사</div>
 				</div>
 			{/if}
+		</div>
+
+		<!-- scan 7축 배지행 -->
+		<div class="scan-badges">
+			{#if node.govGrade}<span class="scan-badge" title="지배구조 등급">G:{node.govGrade}</span>{/if}
+			{#if node.cfPattern}<span class="scan-badge" title="현금흐름 패턴">CF:{node.cfPattern}</span>{/if}
+			{#if node.auditRisk}<span class="scan-badge" title="감사 리스크">{node.auditRisk}</span>{/if}
+			{#if node.qualGrade}<span class="scan-badge" title="이익 질">Q:{node.qualGrade}</span>{/if}
+			{#if node.liqGrade}<span class="scan-badge" title="유동성">L:{node.liqGrade}</span>{/if}
+			{#if node.capClass}<span class="scan-badge" title="주주환원 분류">{node.capClass}</span>{/if}
+			{#if node.empCount}<span class="scan-badge" title="직원수">{node.empCount.toLocaleString()}명</span>{/if}
 		</div>
 	</div>
 
@@ -703,6 +721,43 @@
 		color: #cbd5e1;
 		font-size: 12px;
 		font-family: monospace;
+	}
+	.direction-badge {
+		display: inline-block;
+		font-size: 11px;
+		font-weight: 700;
+		padding: 2px 10px;
+		border-radius: 999px;
+		margin-bottom: 6px;
+	}
+	.direction-badge.up {
+		background: rgba(52, 211, 153, 0.18);
+		color: #34d399;
+	}
+	.direction-badge.hold {
+		background: rgba(251, 191, 36, 0.18);
+		color: #fbbf24;
+	}
+	.direction-badge.down {
+		background: rgba(239, 68, 68, 0.18);
+		color: #f87171;
+	}
+	.scan-badges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+		margin-top: 8px;
+	}
+	.scan-badge {
+		font-size: 10px;
+		padding: 2px 8px;
+		border-radius: 4px;
+		font-weight: 500;
+		font-family: monospace;
+		background: rgba(255, 255, 255, 0.06);
+		border: 1px solid #1e2433;
+		color: #cbd5e1;
+		cursor: help;
 	}
 	.t1-grid {
 		display: grid;

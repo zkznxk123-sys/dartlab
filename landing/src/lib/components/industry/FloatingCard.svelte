@@ -47,6 +47,16 @@
 	let dragStart = { mx: 0, my: 0, x: 0, y: 0 };
 	let shaking = $state(false);
 	let showHint = $state(false);
+	let compact = $state(false); // compact: 헤더만, full: 전체
+
+	function toggleCompact() {
+		compact = !compact;
+		if (compact) {
+			h = 80;
+		} else {
+			h = 640;
+		}
+	}
 
 	// 첫 사용 힌트 (1회만)
 	$effect(() => {
@@ -128,7 +138,8 @@
 	aria-label={title}
 >
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<header class="fc-head" onmousedown={onHeaderMouseDown}>
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<header class="fc-head" onmousedown={onHeaderMouseDown} ondblclick={toggleCompact}>
 		<div class="fc-titles">
 			<div class="fc-title">{title}</div>
 			{#if subtitle}
@@ -139,9 +150,11 @@
 			<button class="fc-close" onclick={onClose} aria-label="닫기" title="닫기">✕</button>
 		</div>
 	</header>
-	<div class="fc-body">
-		{#if children}{@render children()}{/if}
-	</div>
+	{#if !compact}
+		<div class="fc-body">
+			{#if children}{@render children()}{/if}
+		</div>
+	{/if}
 	{#if showHint}
 		<div class="fc-hint">드래그로 이동 · 모서리로 크기 조절</div>
 	{/if}

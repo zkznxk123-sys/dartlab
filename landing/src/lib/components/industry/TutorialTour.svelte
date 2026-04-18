@@ -299,7 +299,7 @@
 		else if (e.key === 'ArrowLeft') prev();
 	}
 
-	const POP_W = 560;
+	const POP_W = 640;
 	let popStyle = $derived.by(() => {
 		if (!highlight) {
 			return 'top:50%;left:50%;transform:translate(-50%,-50%);';
@@ -428,7 +428,7 @@
 	}
 	.popover {
 		position: absolute;
-		width: 560px;
+		width: 640px;
 		max-height: calc(100vh - 32px);
 		overflow-y: auto;
 		background: #0f1219;
@@ -479,14 +479,14 @@
 	}
 	.popover h3 {
 		margin: 0 0 12px;
-		font-size: 20px;
+		font-size: 22px;
 		font-weight: 700;
 		color: #f1f5f9;
 		line-height: 1.4;
 	}
 	.body {
-		font-size: 15px;
-		line-height: 1.8;
+		font-size: 16px;
+		line-height: 1.75;
 		color: #cbd5e1;
 	}
 	.body :global(p) {
