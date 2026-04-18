@@ -236,13 +236,9 @@
 	});
 
 	// props(nodes/links) 변경 시 Cosmograph 데이터 재설정
-	// currentZoom은 의존성에서 제외 (onZoom에서 별도 처리)
 	$effect(() => {
 		if (!graph) return;
-		void nodes;
-		void links;
-		// companies 뷰에서는 onZoom 콜백이 엣지 토글 담당
-		graph.setData(nodes, isAtlas ? links : []);
+		graph.setData(nodes, links);
 	});
 
 	// 외부 제어 함수
