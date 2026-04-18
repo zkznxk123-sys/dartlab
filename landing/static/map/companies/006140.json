@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 119898403747.0,
-      "operating_profit": 6831726569.0,
-      "net_profit": 8220614129.0,
-      "total_assets": 170556817012.0
-    },
-    {
-      "year": "2022",
-      "sales": 157729343615.0,
-      "operating_profit": 6090013153.0,
-      "net_profit": 6956942395.0,
-      "total_assets": 185641531769.0
-    },
-    {
-      "year": "2023",
-      "sales": 166844087220.0,
-      "operating_profit": 7413259937.0,
-      "net_profit": 6110513294.0,
-      "total_assets": 186696829445.0
-    },
-    {
-      "year": "2024",
-      "sales": 169298930720.0,
-      "operating_profit": 10781292288.0,
-      "net_profit": 9221466937.0,
-      "total_assets": 191860910350.0
-    },
-    {
-      "year": "2025",
-      "sales": 178552370684.0,
-      "operating_profit": 10959713371.0,
-      "net_profit": 9354291863.0,
-      "total_assets": 198058302500.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -132,145 +96,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "021880",
-        "corpName": "메이슨캐피탈",
-        "industry": "finance",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001520",
-        "corpName": "동양",
-        "industry": "construction",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089860",
-        "corpName": "롯데렌탈",
-        "industry": "logistics",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "013030",
-        "corpName": "하이록코리아",
-        "industry": "steel",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000720",
-        "corpName": "현대건설",
-        "industry": "construction",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "241560",
-        "corpName": "두산밥캣",
-        "industry": "machinery",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001940",
-        "corpName": "KISCO홀딩스",
-        "industry": "steel",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010950",
-        "corpName": "S-Oil",
-        "industry": "chemical",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007330",
-        "corpName": "푸른저축은행",
-        "industry": "finance",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "210540",
-        "corpName": "디와이파워",
-        "industry": "machinery",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004990",
-        "corpName": "롯데지주",
-        "industry": "finance",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012450",
-        "corpName": "한화에어로스페이스",
-        "industry": "aerospace",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "329180",
-        "corpName": "HD현대중공업",
+        "stockCode": "322000",
+        "corpName": "HD현대에너지솔루션",
         "industry": "shipbuilding",
         "viaCode": "267250",
         "viaName": "HD현대",
         "hopDistance": 2
       },
       {
-        "stockCode": "038010",
-        "corpName": "제일테크노스",
-        "industry": "semiconductor",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267260",
-        "corpName": "HD현대일렉트릭",
-        "industry": "shipbuilding",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "125020",
-        "corpName": "티씨머티리얼즈",
-        "industry": "medicalDevice",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
+        "stockCode": "000500",
+        "corpName": "가온전선",
+        "industry": "retail",
         "viaCode": "267250",
         "viaName": "HD현대",
         "hopDistance": 2
@@ -284,65 +120,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010140",
-        "corpName": "삼성중공업",
-        "industry": "shipbuilding",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003620",
-        "corpName": "KG모빌리티",
-        "industry": "electronics",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "373220",
-        "corpName": "LG에너지솔루션",
-        "industry": "chemical",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "322000",
-        "corpName": "HD현대에너지솔루션",
-        "industry": "shipbuilding",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "460860",
-        "corpName": "동국제강",
-        "industry": "steel",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004020",
-        "corpName": "현대제철",
-        "industry": "steel",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000880",
-        "corpName": "한화",
-        "industry": "aerospace",
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
         "viaCode": "267250",
         "viaName": "HD현대",
         "hopDistance": 2
@@ -356,17 +136,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "460930",
-        "corpName": "현대힘스",
-        "industry": "shipbuilding",
+        "stockCode": "001440",
+        "corpName": "대한전선",
+        "industry": "electrical",
         "viaCode": "267250",
         "viaName": "HD현대",
         "hopDistance": 2
       },
       {
-        "stockCode": "013570",
-        "corpName": "디와이",
-        "industry": "electronics",
+        "stockCode": "013030",
+        "corpName": "하이록코리아",
+        "industry": "steel",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "210540",
+        "corpName": "디와이파워",
+        "industry": "machinery",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089860",
+        "corpName": "롯데렌탈",
+        "industry": "logistics",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012450",
+        "corpName": "한화에어로스페이스",
+        "industry": "aerospace",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
         "viaCode": "267250",
         "viaName": "HD현대",
         "hopDistance": 2
@@ -380,32 +192,24 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "151860",
-        "corpName": "KG에코솔루션",
-        "industry": "environment",
+        "stockCode": "063760",
+        "corpName": "이엘피",
+        "industry": "electronics",
         "viaCode": "267250",
         "viaName": "HD현대",
         "hopDistance": 2
       },
       {
-        "stockCode": "011810",
-        "corpName": "STX",
-        "industry": "food",
+        "stockCode": "007330",
+        "corpName": "푸른저축은행",
+        "industry": "finance",
         "viaCode": "267250",
         "viaName": "HD현대",
         "hopDistance": 2
       },
       {
-        "stockCode": "001440",
-        "corpName": "대한전선",
-        "industry": "electrical",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "071970",
-        "corpName": "HD현대마린엔진",
+        "stockCode": "329180",
+        "corpName": "HD현대중공업",
         "industry": "shipbuilding",
         "viaCode": "267250",
         "viaName": "HD현대",
@@ -420,14 +224,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "063760",
-        "corpName": "이엘피",
-        "industry": "electronics",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "001390",
         "corpName": "KG케미칼",
         "industry": "environment",
@@ -436,9 +232,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "042660",
-        "corpName": "한화오션",
-        "industry": "shipbuilding",
+        "stockCode": "460860",
+        "corpName": "동국제강",
+        "industry": "steel",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "373220",
+        "corpName": "LG에너지솔루션",
+        "industry": "chemical",
         "viaCode": "267250",
         "viaName": "HD현대",
         "hopDistance": 2
@@ -452,9 +256,177 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "439260",
+        "corpName": "대한조선",
+        "industry": "shipbuilding",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000880",
+        "corpName": "한화",
+        "industry": "aerospace",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004990",
+        "corpName": "롯데지주",
+        "industry": "finance",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003620",
+        "corpName": "KG모빌리티",
+        "industry": "electronics",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "045100",
         "corpName": "한양이엔지",
         "industry": "consulting",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001940",
+        "corpName": "KISCO홀딩스",
+        "industry": "steel",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071970",
+        "corpName": "HD현대마린엔진",
+        "industry": "shipbuilding",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010140",
+        "corpName": "삼성중공업",
+        "industry": "shipbuilding",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010950",
+        "corpName": "S-Oil",
+        "industry": "chemical",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "125020",
+        "corpName": "티씨머티리얼즈",
+        "industry": "medicalDevice",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "021880",
+        "corpName": "메이슨캐피탈",
+        "industry": "finance",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038010",
+        "corpName": "제일테크노스",
+        "industry": "semiconductor",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011810",
+        "corpName": "STX",
+        "industry": "food",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "042660",
+        "corpName": "한화오션",
+        "industry": "shipbuilding",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001520",
+        "corpName": "동양",
+        "industry": "construction",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "151860",
+        "corpName": "KG에코솔루션",
+        "industry": "environment",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013570",
+        "corpName": "디와이",
+        "industry": "electronics",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267260",
+        "corpName": "HD현대일렉트릭",
+        "industry": "shipbuilding",
+        "viaCode": "267250",
+        "viaName": "HD현대",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "241560",
+        "corpName": "두산밥캣",
+        "industry": "machinery",
         "viaCode": "267250",
         "viaName": "HD현대",
         "hopDistance": 2
@@ -468,17 +440,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "439260",
-        "corpName": "대한조선",
+        "stockCode": "460930",
+        "corpName": "현대힘스",
         "industry": "shipbuilding",
-        "viaCode": "267250",
-        "viaName": "HD현대",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000500",
-        "corpName": "가온전선",
-        "industry": "retail",
         "viaCode": "267250",
         "viaName": "HD현대",
         "hopDistance": 2

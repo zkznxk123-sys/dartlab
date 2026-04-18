@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 141813793806.0,
-      "operating_profit": 13835638959.0,
-      "net_profit": 0.0,
-      "total_assets": 118380108763.0
-    },
-    {
-      "year": "2022",
-      "sales": 134555280289.0,
-      "operating_profit": 11212790775.0,
-      "net_profit": 8549998817.0,
-      "total_assets": 117631244505.0
-    },
-    {
-      "year": "2023",
-      "sales": 149383250987.0,
-      "operating_profit": 15801950015.0,
-      "net_profit": 13179429229.0,
-      "total_assets": 122271325265.0
-    },
-    {
-      "year": "2024",
-      "sales": 128710756347.0,
-      "operating_profit": 8787500672.0,
-      "net_profit": 0.0,
-      "total_assets": 126303882056.0
-    },
-    {
-      "year": "2025",
-      "sales": 137023822812.0,
-      "operating_profit": 14897684207.0,
-      "net_profit": 12200254265.0,
-      "total_assets": 135628627147.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,17 +87,49 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
+        "stockCode": "136490",
+        "corpName": "선진",
+        "industry": "food",
         "viaCode": "028670",
         "viaName": "팬오션",
         "hopDistance": 2
       },
       {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
+        "stockCode": "088350",
+        "corpName": "한화생명",
         "industry": "aerospace",
+        "viaCode": "028670",
+        "viaName": "팬오션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "028670",
+        "viaName": "팬오션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
+        "viaCode": "028670",
+        "viaName": "팬오션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "136480",
+        "corpName": "하림",
+        "industry": "food",
+        "viaCode": "028670",
+        "viaName": "팬오션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036580",
+        "corpName": "팜스코",
+        "industry": "food",
         "viaCode": "028670",
         "viaName": "팬오션",
         "hopDistance": 2
@@ -149,6 +145,14 @@
       {
         "stockCode": "003380",
         "corpName": "하림지주",
+        "industry": "finance",
+        "viaCode": "028670",
+        "viaName": "팬오션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082640",
+        "corpName": "동양생명",
         "industry": "finance",
         "viaCode": "028670",
         "viaName": "팬오션",
@@ -171,6 +175,62 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "006260",
+        "corpName": "LS",
+        "industry": "machinery",
+        "viaCode": "028670",
+        "viaName": "팬오션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007160",
+        "corpName": "사조산업",
+        "industry": "realestate",
+        "viaCode": "028670",
+        "viaName": "팬오션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004360",
+        "corpName": "세방",
+        "industry": "logistics",
+        "viaCode": "028670",
+        "viaName": "팬오션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091810",
+        "corpName": "티웨이항공",
+        "industry": "aerospace",
+        "viaCode": "028670",
+        "viaName": "팬오션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "028670",
+        "viaName": "팬오션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011810",
+        "corpName": "STX",
+        "industry": "food",
+        "viaCode": "028670",
+        "viaName": "팬오션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000860",
+        "corpName": "강남제비스코",
+        "industry": "chemical",
+        "viaCode": "028670",
+        "viaName": "팬오션",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "077970",
         "corpName": "STX엔진",
         "industry": "auto",
@@ -179,8 +239,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "007160",
-        "corpName": "사조산업",
+        "stockCode": "212560",
+        "corpName": "네오오토",
+        "industry": "auto",
+        "viaCode": "028670",
+        "viaName": "팬오션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002140",
+        "corpName": "고려산업",
         "industry": "realestate",
         "viaCode": "028670",
         "viaName": "팬오션",
@@ -195,118 +263,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "136490",
-        "corpName": "선진",
-        "industry": "food",
-        "viaCode": "028670",
-        "viaName": "팬오션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "212560",
-        "corpName": "네오오토",
-        "industry": "auto",
-        "viaCode": "028670",
-        "viaName": "팬오션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "091810",
-        "corpName": "티웨이항공",
-        "industry": "aerospace",
-        "viaCode": "028670",
-        "viaName": "팬오션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036580",
-        "corpName": "팜스코",
-        "industry": "food",
-        "viaCode": "028670",
-        "viaName": "팬오션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006800",
-        "corpName": "미래에셋증권",
-        "industry": "finance",
-        "viaCode": "028670",
-        "viaName": "팬오션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "136480",
-        "corpName": "하림",
-        "industry": "food",
-        "viaCode": "028670",
-        "viaName": "팬오션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006260",
-        "corpName": "LS",
-        "industry": "machinery",
-        "viaCode": "028670",
-        "viaName": "팬오션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004360",
-        "corpName": "세방",
-        "industry": "logistics",
-        "viaCode": "028670",
-        "viaName": "팬오션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011810",
-        "corpName": "STX",
-        "industry": "food",
-        "viaCode": "028670",
-        "viaName": "팬오션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082640",
-        "corpName": "동양생명",
-        "industry": "finance",
-        "viaCode": "028670",
-        "viaName": "팬오션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "028670",
-        "viaName": "팬오션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002140",
-        "corpName": "고려산업",
-        "industry": "realestate",
-        "viaCode": "028670",
-        "viaName": "팬오션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000860",
-        "corpName": "강남제비스코",
-        "industry": "chemical",
-        "viaCode": "028670",
-        "viaName": "팬오션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "028670",
-        "viaName": "팬오션",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "034310",
         "corpName": "NICE",
         "industry": "finance",
@@ -315,9 +271,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
         "industry": "aerospace",
+        "viaCode": "028670",
+        "viaName": "팬오션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "028670",
         "viaName": "팬오션",
         "hopDistance": 2

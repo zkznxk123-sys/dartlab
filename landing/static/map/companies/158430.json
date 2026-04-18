@@ -14,43 +14,7 @@
   "edges": [],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 43281463183.0,
-      "operating_profit": 9142113693.0,
-      "net_profit": 1523272651.0,
-      "total_assets": 97856639138.0
-    },
-    {
-      "year": "2022",
-      "sales": 44743476684.0,
-      "operating_profit": 8046838457.0,
-      "net_profit": 254156558.0,
-      "total_assets": 119034599740.0
-    },
-    {
-      "year": "2023",
-      "sales": 55030886112.0,
-      "operating_profit": 11412710566.0,
-      "net_profit": 1004848004.0,
-      "total_assets": 145001224908.0
-    },
-    {
-      "year": "2024",
-      "sales": 65423627200.0,
-      "operating_profit": 14436928478.0,
-      "net_profit": 11038402513.0,
-      "total_assets": 138945851809.0
-    },
-    {
-      "year": "2025",
-      "sales": 67603200088.0,
-      "operating_profit": 10357738081.0,
-      "net_profit": 2182773210.0,
-      "total_assets": 145538963528.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,

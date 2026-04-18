@@ -116,43 +116,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 88248282788.0,
-      "operating_profit": -542222576.0,
-      "net_profit": 3115174580.0,
-      "total_assets": 59714398945.0
-    },
-    {
-      "year": "2022",
-      "sales": 66667583595.0,
-      "operating_profit": -6294304449.0,
-      "net_profit": 0.0,
-      "total_assets": 53242325293.0
-    },
-    {
-      "year": "2023",
-      "sales": 43504587021.0,
-      "operating_profit": -4656483408.0,
-      "net_profit": -1853744.0,
-      "total_assets": 45913552331.0
-    },
-    {
-      "year": "2024",
-      "sales": 53068185647.0,
-      "operating_profit": -2902454919.0,
-      "net_profit": -2630921499.0,
-      "total_assets": 42542059412.0
-    },
-    {
-      "year": "2025",
-      "sales": 62628503833.0,
-      "operating_profit": -1676717973.0,
-      "net_profit": null,
-      "total_assets": 45597070898.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -204,19 +168,19 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "093640",
+        "corpName": "케이알엠",
+        "industry": "semiconductor",
+        "viaCode": "046970",
+        "viaName": "우리로",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "007720",
         "corpName": "소노스퀘어",
         "industry": "retail",
         "viaCode": "004870",
         "viaName": "티웨이홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000910",
-        "corpName": "유니온",
-        "industry": "buildingMaterials",
-        "viaCode": "046970",
-        "viaName": "우리로",
         "hopDistance": 2
       },
       {
@@ -228,35 +192,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "093640",
-        "corpName": "케이알엠",
-        "industry": "semiconductor",
+        "stockCode": "036580",
+        "corpName": "팜스코",
+        "industry": "food",
         "viaCode": "046970",
         "viaName": "우리로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "143540",
-        "corpName": "영우디에스피",
-        "industry": "electronics",
-        "viaCode": "046970",
-        "viaName": "우리로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "004870",
-        "viaName": "티웨이홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001290",
-        "corpName": "상상인증권",
-        "industry": "finance",
-        "viaCode": "193250",
-        "viaName": "링크드",
         "hopDistance": 2
       },
       {
@@ -268,24 +208,32 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "251270",
-        "corpName": "넷마블",
+        "stockCode": "038540",
+        "corpName": "상상인",
         "industry": "software",
         "viaCode": "193250",
         "viaName": "링크드",
         "hopDistance": 2
       },
       {
-        "stockCode": "010950",
-        "corpName": "S-Oil",
+        "stockCode": "102260",
+        "corpName": "동성케미컬",
         "industry": "chemical",
-        "viaCode": "004870",
-        "viaName": "티웨이홀딩스",
+        "viaCode": "036000",
+        "viaName": "예림당",
         "hopDistance": 2
       },
       {
-        "stockCode": "058630",
-        "corpName": "엠게임",
+        "stockCode": "143540",
+        "corpName": "영우디에스피",
+        "industry": "electronics",
+        "viaCode": "046970",
+        "viaName": "우리로",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "205500",
+        "corpName": "넥써쓰",
         "industry": "software",
         "viaCode": "193250",
         "viaName": "링크드",
@@ -300,11 +248,27 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "004870",
+        "viaName": "티웨이홀딩스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "091810",
         "corpName": "티웨이항공",
         "industry": "aerospace",
         "viaCode": "004870",
         "viaName": "티웨이홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "industry": "buildingMaterials",
+        "viaCode": "046970",
+        "viaName": "우리로",
         "hopDistance": 2
       },
       {
@@ -316,35 +280,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "036580",
-        "corpName": "팜스코",
-        "industry": "food",
-        "viaCode": "046970",
-        "viaName": "우리로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
-        "viaCode": "004870",
-        "viaName": "티웨이홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "205500",
-        "corpName": "넥써쓰",
+        "stockCode": "058630",
+        "corpName": "엠게임",
         "industry": "software",
         "viaCode": "193250",
         "viaName": "링크드",
         "hopDistance": 2
       },
       {
-        "stockCode": "102260",
-        "corpName": "동성케미컬",
+        "stockCode": "001290",
+        "corpName": "상상인증권",
+        "industry": "finance",
+        "viaCode": "193250",
+        "viaName": "링크드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010950",
+        "corpName": "S-Oil",
         "industry": "chemical",
-        "viaCode": "036000",
-        "viaName": "예림당",
+        "viaCode": "004870",
+        "viaName": "티웨이홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "251270",
+        "corpName": "넷마블",
+        "industry": "software",
+        "viaCode": "193250",
+        "viaName": "링크드",
         "hopDistance": 2
       }
     ],

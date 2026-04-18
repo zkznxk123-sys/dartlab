@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 5918927009.0,
-      "operating_profit": 914318075.0,
-      "net_profit": -1257223166.0,
-      "total_assets": 114979365053.0
-    },
-    {
-      "year": "2022",
-      "sales": 90280280019.0,
-      "operating_profit": -1171753276.0,
-      "net_profit": -2621835777.0,
-      "total_assets": 112471091464.0
-    },
-    {
-      "year": "2023",
-      "sales": 78592428760.0,
-      "operating_profit": 1178662628.0,
-      "net_profit": 2035242278.0,
-      "total_assets": 104708757325.0
-    },
-    {
-      "year": "2024",
-      "sales": 2793277256.0,
-      "operating_profit": 5786457572.0,
-      "net_profit": -5942975136.0,
-      "total_assets": 98684088137.0
-    },
-    {
-      "year": "2025",
-      "sales": 94256105408.0,
-      "operating_profit": 6517348342.0,
-      "net_profit": 6053139380.0,
-      "total_assets": 99824976715.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,174 +87,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "053050",
-        "corpName": "지에스이",
-        "industry": "energy",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "228850",
-        "corpName": "레이언스",
-        "industry": "medicalDevice",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003550",
-        "corpName": "LG",
-        "industry": "electronics",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "339950",
-        "corpName": "아이비김영",
-        "industry": "education",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "383800",
-        "corpName": "LX홀딩스",
-        "industry": "finance",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "108670",
-        "corpName": "LX하우시스",
-        "industry": "electronics",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034220",
-        "corpName": "LG디스플레이",
-        "industry": "electronics",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005090",
-        "corpName": "SGC에너지",
-        "industry": "energy",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "108320",
-        "corpName": "LX세미콘",
-        "industry": "semiconductor",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011070",
-        "corpName": "LG이노텍",
-        "industry": "electronics",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "456040",
-        "corpName": "OCI",
-        "industry": "chemical",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037560",
-        "corpName": "LG헬로비전",
-        "industry": "electronics",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090360",
-        "corpName": "로보스타",
-        "industry": "electronics",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078930",
-        "corpName": "GS",
-        "industry": "chemical",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011780",
-        "corpName": "금호석유화학",
-        "industry": "chemical",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "373220",
-        "corpName": "LG에너지솔루션",
-        "industry": "chemical",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "096770",
         "corpName": "SK이노베이션",
         "industry": "chemical",
@@ -299,56 +95,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001740",
-        "corpName": "SK네트웍스",
-        "industry": "software",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035000",
-        "corpName": "HS애드",
-        "industry": "media",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012750",
-        "corpName": "에스원",
-        "industry": "electronics",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "051910",
-        "corpName": "LG화학",
-        "industry": "chemical",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "093050",
-        "corpName": "LF",
-        "industry": "textile",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "001120",
-        "viaName": "LX인터내셔널",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064400",
-        "corpName": "LG씨엔에스",
+        "stockCode": "034220",
+        "corpName": "LG디스플레이",
         "industry": "electronics",
         "viaCode": "001120",
         "viaName": "LX인터내셔널",
@@ -366,6 +114,222 @@
         "stockCode": "032640",
         "corpName": "LG유플러스",
         "industry": "telecom",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "383800",
+        "corpName": "LX홀딩스",
+        "industry": "finance",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011070",
+        "corpName": "LG이노텍",
+        "industry": "electronics",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064400",
+        "corpName": "LG씨엔에스",
+        "industry": "electronics",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053050",
+        "corpName": "지에스이",
+        "industry": "energy",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090360",
+        "corpName": "로보스타",
+        "industry": "electronics",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "339950",
+        "corpName": "아이비김영",
+        "industry": "education",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "093050",
+        "corpName": "LF",
+        "industry": "textile",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051910",
+        "corpName": "LG화학",
+        "industry": "chemical",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001740",
+        "corpName": "SK네트웍스",
+        "industry": "software",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078930",
+        "corpName": "GS",
+        "industry": "chemical",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "108670",
+        "corpName": "LX하우시스",
+        "industry": "electronics",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "108320",
+        "corpName": "LX세미콘",
+        "industry": "semiconductor",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "228850",
+        "corpName": "레이언스",
+        "industry": "medicalDevice",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "373220",
+        "corpName": "LG에너지솔루션",
+        "industry": "chemical",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005090",
+        "corpName": "SGC에너지",
+        "industry": "energy",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003550",
+        "corpName": "LG",
+        "industry": "electronics",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037560",
+        "corpName": "LG헬로비전",
+        "industry": "electronics",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035000",
+        "corpName": "HS애드",
+        "industry": "media",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012750",
+        "corpName": "에스원",
+        "industry": "electronics",
+        "viaCode": "001120",
+        "viaName": "LX인터내셔널",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011780",
+        "corpName": "금호석유화학",
+        "industry": "chemical",
         "viaCode": "001120",
         "viaName": "LX인터내셔널",
         "hopDistance": 2

@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 90439385838.0,
-      "operating_profit": 2478952607.0,
-      "net_profit": 2135672882.0,
-      "total_assets": 88728995097.0
-    },
-    {
-      "year": "2022",
-      "sales": 112023615166.0,
-      "operating_profit": 3360717366.0,
-      "net_profit": -93289913.0,
-      "total_assets": 123204013415.0
-    },
-    {
-      "year": "2023",
-      "sales": 89999273324.0,
-      "operating_profit": -2250906635.0,
-      "net_profit": -9127435828.0,
-      "total_assets": 146705597226.0
-    },
-    {
-      "year": "2024",
-      "sales": 130144952679.0,
-      "operating_profit": -2820596330.0,
-      "net_profit": -122533298.0,
-      "total_assets": 144602477210.0
-    },
-    {
-      "year": "2025",
-      "sales": 89629369374.0,
-      "operating_profit": -2807340148.0,
-      "net_profit": null,
-      "total_assets": 143090006684.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,6 +87,14 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "034230",
+        "corpName": "파라다이스",
+        "industry": "leisure",
+        "viaCode": "033540",
+        "viaName": "파라텍",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "031210",
         "corpName": "서울보증보험",
         "industry": "finance",
@@ -139,33 +111,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000050",
-        "corpName": "경방",
-        "industry": "retail",
-        "viaCode": "033540",
-        "viaName": "파라텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054180",
-        "corpName": "메디콕스",
-        "industry": "shipbuilding",
-        "viaCode": "033540",
-        "viaName": "파라텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "192410",
-        "corpName": "오늘이엔엠",
-        "industry": "telecom",
-        "viaCode": "033540",
-        "viaName": "파라텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078590",
-        "corpName": "휴림에이텍",
-        "industry": "auto",
+        "stockCode": "013700",
+        "corpName": "까뮤이앤씨",
+        "industry": "realestate",
         "viaCode": "033540",
         "viaName": "파라텍",
         "hopDistance": 2
@@ -179,17 +127,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "034230",
-        "corpName": "파라다이스",
-        "industry": "leisure",
+        "stockCode": "192410",
+        "corpName": "오늘이엔엠",
+        "industry": "telecom",
         "viaCode": "033540",
         "viaName": "파라텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "013700",
-        "corpName": "까뮤이앤씨",
-        "industry": "realestate",
+        "stockCode": "054180",
+        "corpName": "메디콕스",
+        "industry": "shipbuilding",
+        "viaCode": "033540",
+        "viaName": "파라텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000050",
+        "corpName": "경방",
+        "industry": "retail",
+        "viaCode": "033540",
+        "viaName": "파라텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078590",
+        "corpName": "휴림에이텍",
+        "industry": "auto",
         "viaCode": "033540",
         "viaName": "파라텍",
         "hopDistance": 2

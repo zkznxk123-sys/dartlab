@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 11761977467.0,
-      "operating_profit": 2178935858.0,
-      "net_profit": 0.0,
-      "total_assets": 34469497915.0
-    },
-    {
-      "year": "2022",
-      "sales": 13752579320.0,
-      "operating_profit": 2849002252.0,
-      "net_profit": 2332756887.0,
-      "total_assets": 36901486645.0
-    },
-    {
-      "year": "2023",
-      "sales": 15214698591.0,
-      "operating_profit": 3337080633.0,
-      "net_profit": 0.0,
-      "total_assets": 40931861667.0
-    },
-    {
-      "year": "2024",
-      "sales": 15777579149.0,
-      "operating_profit": 2779561522.0,
-      "net_profit": 0.0,
-      "total_assets": 44275016240.0
-    },
-    {
-      "year": "2025",
-      "sales": 16015916140.0,
-      "operating_profit": 2442895493.0,
-      "net_profit": 2911419463.0,
-      "total_assets": 57794757767.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -143,81 +107,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "460870",
-        "corpName": "에스엠씨지",
+        "stockCode": "001260",
+        "corpName": "남광토건",
         "industry": "construction",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
       },
       {
-        "stockCode": "000720",
-        "corpName": "현대건설",
-        "industry": "construction",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005490",
-        "corpName": "POSCO홀딩스",
-        "industry": "steel",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "096350",
-        "corpName": "대창솔루션",
-        "industry": "auto",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032190",
-        "corpName": "다우데이타",
-        "industry": "retail",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "121060",
-        "corpName": "유니포인트",
-        "industry": "construction",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "175330",
-        "corpName": "JB금융지주",
-        "industry": "finance",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "224060",
-        "corpName": "더코디",
+        "stockCode": "007120",
+        "corpName": "미래아이앤지",
         "industry": "electronics",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "306200",
-        "corpName": "세아제강",
-        "industry": "steel",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078140",
-        "corpName": "대봉엘에스",
-        "industry": "cosmetics",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
@@ -231,129 +131,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "091340",
-        "corpName": "S&K폴리텍",
-        "industry": "auto",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "198080",
-        "corpName": "캐프",
+        "stockCode": "122640",
+        "corpName": "예스티",
         "industry": "electronics",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064960",
-        "corpName": "SNT모티브",
-        "industry": "electronics",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "129260",
-        "corpName": "인터지스",
-        "industry": "logistics",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009810",
-        "corpName": "플레이그램",
-        "industry": "retail",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078860",
-        "corpName": "스테이지원엔터",
-        "industry": "media",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123840",
-        "corpName": "뉴온",
-        "industry": "semiconductor",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "141000",
-        "corpName": "비아트론",
-        "industry": "electronics",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095190",
-        "corpName": "이엠코리아",
-        "industry": "machinery",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "236810",
-        "corpName": "엔비티",
-        "industry": "software",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "181710",
-        "corpName": "NHN",
-        "industry": "software",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032800",
-        "corpName": "판타지오",
-        "industry": "media",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "102260",
-        "corpName": "동성케미컬",
-        "industry": "chemical",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "021240",
-        "corpName": "코웨이",
-        "industry": "electronics",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041910",
-        "corpName": "폴라리스AI파마",
-        "industry": "pharma",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "182400",
-        "corpName": "엔케이젠바이오텍코리아",
-        "industry": "chemical",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
@@ -367,88 +147,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "041440",
-        "corpName": "현대에버다임",
-        "industry": "machinery",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "106520",
-        "corpName": "노블엠앤비",
-        "industry": "machinery",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "046070",
-        "corpName": "코다코",
-        "industry": "media",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006800",
-        "corpName": "미래에셋증권",
+        "stockCode": "175330",
+        "corpName": "JB금융지주",
         "industry": "finance",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
       },
       {
-        "stockCode": "030210",
-        "corpName": "다올투자증권",
-        "industry": "realestate",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084010",
-        "corpName": "대한제강",
-        "industry": "construction",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084110",
-        "corpName": "휴온스글로벌",
-        "industry": "pharma",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "251270",
-        "corpName": "넷마블",
-        "industry": "software",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "253610",
-        "corpName": "루트락",
-        "industry": "pharma",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "227100",
-        "corpName": "프로브잇",
-        "industry": "retail",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "104460",
-        "corpName": "디와이피엔에프",
+        "stockCode": "126880",
+        "corpName": "제이엔케이글로벌",
         "industry": "machinery",
         "viaCode": "085310",
         "viaName": "엔케이",
@@ -463,17 +171,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "126880",
-        "corpName": "제이엔케이글로벌",
-        "industry": "machinery",
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
       },
       {
-        "stockCode": "136540",
-        "corpName": "윈스테크넷",
-        "industry": "software",
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
@@ -487,41 +203,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000020",
-        "corpName": "동화약품",
-        "industry": "retail",
+        "stockCode": "060250",
+        "corpName": "NHN KCP",
+        "industry": "finance",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
       },
       {
-        "stockCode": "022220",
-        "corpName": "티케이지애강",
+        "stockCode": "069260",
+        "corpName": "티케이지휴켐스",
         "industry": "chemical",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "047810",
-        "corpName": "한국항공우주",
-        "industry": "aerospace",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001430",
-        "corpName": "세아베스틸지주",
-        "industry": "electronics",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007120",
-        "corpName": "미래아이앤지",
-        "industry": "electronics",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
@@ -535,49 +227,145 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "015590",
-        "corpName": "DKME",
+        "stockCode": "136540",
+        "corpName": "윈스테크넷",
+        "industry": "software",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078140",
+        "corpName": "대봉엘에스",
+        "industry": "cosmetics",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009810",
+        "corpName": "플레이그램",
+        "industry": "retail",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "046070",
+        "corpName": "코다코",
+        "industry": "media",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "106520",
+        "corpName": "노블엠앤비",
         "industry": "machinery",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
       },
       {
-        "stockCode": "052900",
-        "corpName": "KX하이텍",
-        "industry": "plastic",
+        "stockCode": "306200",
+        "corpName": "세아제강",
+        "industry": "steel",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
       },
       {
-        "stockCode": "000860",
-        "corpName": "강남제비스코",
+        "stockCode": "104460",
+        "corpName": "디와이피엔에프",
+        "industry": "machinery",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "236810",
+        "corpName": "엔비티",
+        "industry": "software",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095190",
+        "corpName": "이엠코리아",
+        "industry": "machinery",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "182400",
+        "corpName": "엔케이젠바이오텍코리아",
         "industry": "chemical",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
       },
       {
-        "stockCode": "060250",
-        "corpName": "NHN KCP",
-        "industry": "finance",
+        "stockCode": "460870",
+        "corpName": "에스엠씨지",
+        "industry": "construction",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
       },
       {
-        "stockCode": "016670",
-        "corpName": "디모아",
+        "stockCode": "022220",
+        "corpName": "티케이지애강",
+        "industry": "chemical",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041910",
+        "corpName": "폴라리스AI파마",
+        "industry": "pharma",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064960",
+        "corpName": "SNT모티브",
+        "industry": "electronics",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "224060",
+        "corpName": "더코디",
+        "industry": "electronics",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030210",
+        "corpName": "다올투자증권",
         "industry": "realestate",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
       },
       {
-        "stockCode": "001260",
-        "corpName": "남광토건",
-        "industry": "construction",
+        "stockCode": "253610",
+        "corpName": "루트락",
+        "industry": "pharma",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005490",
+        "corpName": "POSCO홀딩스",
+        "industry": "steel",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
@@ -591,33 +379,81 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "347740",
-        "corpName": "피엔케이피부임상연구센타",
-        "industry": "consulting",
+        "stockCode": "052900",
+        "corpName": "KX하이텍",
+        "industry": "plastic",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
       },
       {
-        "stockCode": "003030",
-        "corpName": "세아제강지주",
-        "industry": "consulting",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "183190",
-        "corpName": "아세아시멘트",
-        "industry": "construction",
-        "viaCode": "085310",
-        "viaName": "엔케이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "122640",
-        "corpName": "예스티",
+        "stockCode": "198080",
+        "corpName": "캐프",
         "industry": "electronics",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041440",
+        "corpName": "현대에버다임",
+        "industry": "machinery",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "102260",
+        "corpName": "동성케미컬",
+        "industry": "chemical",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "181710",
+        "corpName": "NHN",
+        "industry": "software",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001430",
+        "corpName": "세아베스틸지주",
+        "industry": "electronics",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "227100",
+        "corpName": "프로브잇",
+        "industry": "retail",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015590",
+        "corpName": "DKME",
+        "industry": "machinery",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "251270",
+        "corpName": "넷마블",
+        "industry": "software",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016670",
+        "corpName": "디모아",
+        "industry": "realestate",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2
@@ -631,9 +467,137 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "069260",
-        "corpName": "티케이지휴켐스",
+        "stockCode": "084010",
+        "corpName": "대한제강",
+        "industry": "construction",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "021240",
+        "corpName": "코웨이",
+        "industry": "electronics",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003030",
+        "corpName": "세아제강지주",
+        "industry": "consulting",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "129260",
+        "corpName": "인터지스",
+        "industry": "logistics",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078860",
+        "corpName": "스테이지원엔터",
+        "industry": "media",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "121060",
+        "corpName": "유니포인트",
+        "industry": "construction",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000860",
+        "corpName": "강남제비스코",
         "industry": "chemical",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123840",
+        "corpName": "뉴온",
+        "industry": "semiconductor",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091340",
+        "corpName": "S&K폴리텍",
+        "industry": "auto",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032190",
+        "corpName": "다우데이타",
+        "industry": "retail",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032800",
+        "corpName": "판타지오",
+        "industry": "media",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096350",
+        "corpName": "대창솔루션",
+        "industry": "auto",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "183190",
+        "corpName": "아세아시멘트",
+        "industry": "construction",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "347740",
+        "corpName": "피엔케이피부임상연구센타",
+        "industry": "consulting",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "141000",
+        "corpName": "비아트론",
+        "industry": "electronics",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047810",
+        "corpName": "한국항공우주",
+        "industry": "aerospace",
+        "viaCode": "085310",
+        "viaName": "엔케이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000020",
+        "corpName": "동화약품",
+        "industry": "retail",
         "viaCode": "085310",
         "viaName": "엔케이",
         "hopDistance": 2

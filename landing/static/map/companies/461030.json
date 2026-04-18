@@ -147,15 +147,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2025",
-      "sales": 5328626310.0,
-      "operating_profit": -8664254150.0,
-      "net_profit": -7933872386.0,
-      "total_assets": 27119871677.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 2,
     "customerCount": 0,
@@ -240,27 +232,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "336040",
-        "corpName": "타스컴",
-        "industry": "medicalDevice",
-        "viaCode": "036220",
-        "viaName": "오상헬스케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "092200",
-        "corpName": "디아이씨",
+        "stockCode": "192650",
+        "corpName": "드림텍",
         "industry": "electronics",
-        "viaCode": "036220",
-        "viaName": "오상헬스케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
-        "viaCode": "036220",
-        "viaName": "오상헬스케어",
+        "viaCode": "067310",
+        "viaName": "하나마이크론",
         "hopDistance": 2
       },
       {
@@ -272,195 +248,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "036830",
-        "corpName": "솔브레인홀딩스",
-        "industry": "electronics",
-        "viaCode": "290650",
-        "viaName": "엘앤씨바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039490",
-        "corpName": "키움증권",
-        "industry": "finance",
-        "viaCode": "290650",
-        "viaName": "엘앤씨바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006620",
-        "corpName": "동구바이오제약",
-        "industry": "pharma",
-        "viaCode": "290650",
-        "viaName": "엘앤씨바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "0007C0",
-        "corpName": "아크릴",
-        "industry": "software",
-        "viaCode": "290650",
-        "viaName": "엘앤씨바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "217190",
-        "corpName": "제너셈",
-        "industry": "semiconductor",
-        "viaCode": "067310",
-        "viaName": "하나마이크론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060280",
-        "corpName": "큐렉소",
-        "industry": "retail",
-        "viaCode": "290650",
-        "viaName": "엘앤씨바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
-        "viaCode": "331920",
-        "viaName": "셀레믹스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "221800",
-        "corpName": "유투바이오",
-        "industry": "pharma",
-        "viaCode": "331920",
-        "viaName": "셀레믹스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "456040",
-        "corpName": "OCI",
-        "industry": "chemical",
-        "viaCode": "166090",
-        "viaName": "하나머티리얼즈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "452300",
-        "corpName": "캡스톤파트너스",
-        "industry": "finance",
-        "viaCode": "290650",
-        "viaName": "엘앤씨바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003540",
-        "corpName": "대신증권",
-        "industry": "finance",
-        "viaCode": "331920",
-        "viaName": "셀레믹스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "452400",
-        "corpName": "이닉스",
-        "industry": "semiconductor",
-        "viaCode": "166090",
-        "viaName": "하나머티리얼즈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "297890",
-        "corpName": "HB솔루션",
-        "industry": "electronics",
-        "viaCode": "067310",
-        "viaName": "하나마이크론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "192650",
-        "corpName": "드림텍",
-        "industry": "electronics",
-        "viaCode": "067310",
-        "viaName": "하나마이크론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "332570",
-        "corpName": "PS일렉트로닉스",
-        "industry": "electronics",
-        "viaCode": "067310",
-        "viaName": "하나마이크론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "166090",
-        "viaName": "하나머티리얼즈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "067310",
-        "viaName": "하나마이크론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "290650",
-        "viaName": "엘앤씨바이오",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "220180",
         "corpName": "핸디소프트",
         "industry": "software",
         "viaCode": "036220",
         "viaName": "오상헬스케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052900",
-        "corpName": "KX하이텍",
-        "industry": "plastic",
-        "viaCode": "166090",
-        "viaName": "하나머티리얼즈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053980",
-        "corpName": "오상자이엘",
-        "industry": "software",
-        "viaCode": "036220",
-        "viaName": "오상헬스케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "203450",
-        "corpName": "유니온바이오메트릭스",
-        "industry": "telecom",
-        "viaCode": "036220",
-        "viaName": "오상헬스케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067010",
-        "corpName": "이씨에스",
-        "industry": "software",
-        "viaCode": "036220",
-        "viaName": "오상헬스케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "166090",
-        "viaName": "하나머티리얼즈",
         "hopDistance": 2
       },
       {
@@ -472,9 +264,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "127120",
-        "corpName": "제이에스링크",
-        "industry": "pharma",
+        "stockCode": "092200",
+        "corpName": "디아이씨",
+        "industry": "electronics",
+        "viaCode": "036220",
+        "viaName": "오상헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "332570",
+        "corpName": "PS일렉트로닉스",
+        "industry": "electronics",
+        "viaCode": "067310",
+        "viaName": "하나마이크론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "166090",
+        "viaName": "하나머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
+        "viaCode": "036220",
+        "viaName": "오상헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "290650",
         "viaName": "엘앤씨바이오",
         "hopDistance": 2
@@ -496,6 +320,62 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "067310",
+        "viaName": "하나마이크론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052900",
+        "corpName": "KX하이텍",
+        "industry": "plastic",
+        "viaCode": "166090",
+        "viaName": "하나머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053980",
+        "corpName": "오상자이엘",
+        "industry": "software",
+        "viaCode": "036220",
+        "viaName": "오상헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "0007C0",
+        "corpName": "아크릴",
+        "industry": "software",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036830",
+        "corpName": "솔브레인홀딩스",
+        "industry": "electronics",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
+        "viaCode": "166090",
+        "viaName": "하나머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067010",
+        "corpName": "이씨에스",
+        "industry": "software",
+        "viaCode": "036220",
+        "viaName": "오상헬스케어",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "114810",
         "corpName": "한솔아이원스",
         "industry": "electronics",
@@ -507,6 +387,118 @@
         "stockCode": "122450",
         "corpName": "KX",
         "industry": "telecom",
+        "viaCode": "166090",
+        "viaName": "하나머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
+        "viaCode": "166090",
+        "viaName": "하나머티리얼즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "036220",
+        "viaName": "오상헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "221800",
+        "corpName": "유투바이오",
+        "industry": "pharma",
+        "viaCode": "036220",
+        "viaName": "오상헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217190",
+        "corpName": "제너셈",
+        "industry": "semiconductor",
+        "viaCode": "067310",
+        "viaName": "하나마이크론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006620",
+        "corpName": "동구바이오제약",
+        "industry": "pharma",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452300",
+        "corpName": "캡스톤파트너스",
+        "industry": "finance",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003540",
+        "corpName": "대신증권",
+        "industry": "finance",
+        "viaCode": "331920",
+        "viaName": "셀레믹스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "127120",
+        "corpName": "제이에스링크",
+        "industry": "pharma",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060280",
+        "corpName": "큐렉소",
+        "industry": "retail",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "203450",
+        "corpName": "유니온바이오메트릭스",
+        "industry": "telecom",
+        "viaCode": "036220",
+        "viaName": "오상헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "336040",
+        "corpName": "타스컴",
+        "industry": "medicalDevice",
+        "viaCode": "036220",
+        "viaName": "오상헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "297890",
+        "corpName": "HB솔루션",
+        "industry": "electronics",
+        "viaCode": "067310",
+        "viaName": "하나마이크론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "166090",
         "viaName": "하나머티리얼즈",
         "hopDistance": 2

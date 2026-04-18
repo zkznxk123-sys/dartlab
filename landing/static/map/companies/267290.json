@@ -140,43 +140,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 1457154328305.0,
-      "operating_profit": 27131980264.0,
-      "net_profit": 22123762450.0,
-      "total_assets": 904491765792.0
-    },
-    {
-      "year": "2022",
-      "sales": 2304945009655.0,
-      "operating_profit": 25271267744.0,
-      "net_profit": 0.0,
-      "total_assets": 1067615033035.0
-    },
-    {
-      "year": "2023",
-      "sales": 1799453797857.0,
-      "operating_profit": 28284881618.0,
-      "net_profit": 0.0,
-      "total_assets": 951329118368.0
-    },
-    {
-      "year": "2024",
-      "sales": 1791907870026.0,
-      "operating_profit": 26974142734.0,
-      "net_profit": 28619534130.0,
-      "total_assets": 947683277099.0
-    },
-    {
-      "year": "2025",
-      "sales": 1759465296335.0,
-      "operating_profit": 33045868447.0,
-      "net_profit": 0.0,
-      "total_assets": 928832980978.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -256,259 +220,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "053050",
-        "corpName": "지에스이",
-        "industry": "energy",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000050",
-        "corpName": "경방",
-        "industry": "retail",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003300",
-        "corpName": "한일홀딩스",
-        "industry": "buildingMaterials",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003480",
-        "corpName": "한진중공업홀딩스",
-        "industry": "energy",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005490",
-        "corpName": "POSCO홀딩스",
-        "industry": "steel",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "079980",
-        "corpName": "휴비스",
-        "industry": "textile",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001630",
-        "corpName": "종근당홀딩스",
-        "industry": "pharma",
-        "viaCode": "009450",
-        "viaName": "경동나비엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "215200",
-        "corpName": "메가스터디교육",
-        "industry": "education",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011790",
-        "corpName": "SKC",
-        "industry": "software",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034590",
-        "corpName": "인천도시가스",
-        "industry": "energy",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039860",
-        "corpName": "나노엔텍",
-        "industry": "pharma",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000660",
-        "corpName": "SK하이닉스",
-        "industry": "semiconductor",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001720",
-        "corpName": "신영증권",
-        "industry": "finance",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005880",
-        "corpName": "대한해운",
-        "industry": "shipbuilding",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054620",
-        "corpName": "APS",
-        "industry": "telecom",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038530",
-        "corpName": "케이바이오",
-        "industry": "retail",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060570",
-        "corpName": "드림어스컴퍼니",
-        "industry": "media",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "093190",
-        "corpName": "빅솔론",
-        "industry": "electronics",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007820",
-        "corpName": "에스엠코어",
-        "industry": "machinery",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "456040",
-        "corpName": "OCI",
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
         "industry": "chemical",
-        "viaCode": "018670",
-        "viaName": "SK가스",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
         "hopDistance": 2
       },
       {
         "stockCode": "029460",
         "corpName": "케이씨",
         "industry": "energy",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095340",
-        "corpName": "ISC",
-        "industry": "retail",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "475150",
-        "corpName": "SK이터닉스",
-        "industry": "software",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003240",
-        "corpName": "태광산업",
-        "industry": "chemical",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "402340",
-        "corpName": "SK스퀘어",
-        "industry": "software",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017670",
-        "corpName": "SK텔레콤",
-        "industry": "telecom",
-        "viaCode": "018670",
-        "viaName": "SK가스",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
         "hopDistance": 2
       },
       {
@@ -520,33 +244,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "034730",
-        "corpName": "SK",
+        "stockCode": "100090",
+        "corpName": "SK오션플랜트",
         "industry": "software",
         "viaCode": "018670",
         "viaName": "SK가스",
         "hopDistance": 2
       },
       {
-        "stockCode": "277410",
-        "corpName": "인산가",
-        "industry": "food",
-        "viaCode": "009450",
-        "viaName": "경동나비엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078930",
-        "corpName": "GS",
-        "industry": "chemical",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "453450",
-        "corpName": "그리드위즈",
-        "industry": "auto",
+        "stockCode": "054620",
+        "corpName": "APS",
+        "industry": "telecom",
         "viaCode": "018670",
         "viaName": "SK가스",
         "hopDistance": 2
@@ -560,43 +268,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "043260",
-        "corpName": "성호전자",
-        "industry": "electronics",
-        "viaCode": "009450",
-        "viaName": "경동나비엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "096770",
-        "corpName": "SK이노베이션",
-        "industry": "chemical",
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
         "viaCode": "018670",
         "viaName": "SK가스",
         "hopDistance": 2
       },
       {
-        "stockCode": "001740",
-        "corpName": "SK네트웍스",
+        "stockCode": "034730",
+        "corpName": "SK",
         "industry": "software",
         "viaCode": "018670",
         "viaName": "SK가스",
         "hopDistance": 2
       },
       {
-        "stockCode": "034120",
-        "corpName": "SBS",
-        "industry": "electronics",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "452400",
-        "corpName": "이닉스",
-        "industry": "semiconductor",
-        "viaCode": "018670",
-        "viaName": "SK가스",
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
         "hopDistance": 2
       },
       {
@@ -608,115 +300,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004690",
-        "corpName": "삼천리",
-        "industry": "energy",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "109610",
-        "corpName": "에스와이",
-        "industry": "electronics",
+        "stockCode": "060570",
+        "corpName": "드림어스컴퍼니",
+        "industry": "media",
         "viaCode": "018670",
         "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012750",
-        "corpName": "에스원",
-        "industry": "electronics",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "013570",
-        "corpName": "디와이",
-        "industry": "electronics",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009410",
-        "corpName": "태영건설",
-        "industry": "construction",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006120",
-        "corpName": "SK디스커버리",
-        "industry": "software",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001510",
-        "corpName": "SK증권",
-        "industry": "software",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "063760",
-        "corpName": "이엘피",
-        "industry": "electronics",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "285130",
-        "corpName": "SK케미칼",
-        "industry": "software",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "009450",
-        "viaName": "경동나비엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003470",
-        "corpName": "유안타증권",
-        "industry": "finance",
-        "viaCode": "012320",
-        "viaName": "경동인베스트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "015760",
-        "corpName": "한국전력공사",
-        "industry": "energy",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
         "hopDistance": 2
       },
       {
@@ -728,8 +316,48 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "210980",
-        "corpName": "SK디앤디",
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095340",
+        "corpName": "ISC",
+        "industry": "retail",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053050",
+        "corpName": "지에스이",
+        "industry": "energy",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012750",
+        "corpName": "에스원",
+        "industry": "electronics",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "277410",
+        "corpName": "인산가",
+        "industry": "food",
+        "viaCode": "009450",
+        "viaName": "경동나비엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001510",
+        "corpName": "SK증권",
         "industry": "software",
         "viaCode": "018670",
         "viaName": "SK가스",
@@ -744,38 +372,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "047050",
-        "corpName": "포스코인터내셔널",
-        "industry": "steel",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "100090",
-        "corpName": "SK오션플랜트",
-        "industry": "software",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "036460",
-        "viaName": "한국가스공사",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "092220",
         "corpName": "KEC",
         "industry": "semiconductor",
@@ -784,17 +380,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "300720",
-        "corpName": "한일시멘트",
-        "industry": "construction",
-        "viaCode": "018670",
-        "viaName": "SK가스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
+        "stockCode": "215200",
+        "corpName": "메가스터디교육",
+        "industry": "education",
         "viaCode": "036460",
         "viaName": "한국가스공사",
         "hopDistance": 2
@@ -808,6 +396,38 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "302440",
+        "corpName": "SK바이오사이언스",
+        "industry": "pharma",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "453450",
+        "corpName": "그리드위즈",
+        "industry": "auto",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000050",
+        "corpName": "경방",
+        "industry": "retail",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034120",
+        "corpName": "SBS",
+        "industry": "electronics",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "216050",
         "corpName": "인크로스",
         "industry": "media",
@@ -816,9 +436,225 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "302440",
-        "corpName": "SK바이오사이언스",
+        "stockCode": "001740",
+        "corpName": "SK네트웍스",
+        "industry": "software",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "063760",
+        "corpName": "이엘피",
+        "industry": "electronics",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078930",
+        "corpName": "GS",
+        "industry": "chemical",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "300720",
+        "corpName": "한일시멘트",
+        "industry": "construction",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007820",
+        "corpName": "에스엠코어",
+        "industry": "machinery",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
         "industry": "pharma",
+        "viaCode": "009450",
+        "viaName": "경동나비엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003240",
+        "corpName": "태광산업",
+        "industry": "chemical",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "009450",
+        "viaName": "경동나비엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005490",
+        "corpName": "POSCO홀딩스",
+        "industry": "steel",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "210980",
+        "corpName": "SK디앤디",
+        "industry": "software",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005880",
+        "corpName": "대한해운",
+        "industry": "shipbuilding",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "402340",
+        "corpName": "SK스퀘어",
+        "industry": "software",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "093190",
+        "corpName": "빅솔론",
+        "industry": "electronics",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004690",
+        "corpName": "삼천리",
+        "industry": "energy",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003470",
+        "corpName": "유안타증권",
+        "industry": "finance",
+        "viaCode": "012320",
+        "viaName": "경동인베스트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039860",
+        "corpName": "나노엔텍",
+        "industry": "pharma",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079980",
+        "corpName": "휴비스",
+        "industry": "textile",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "475150",
+        "corpName": "SK이터닉스",
+        "industry": "software",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006120",
+        "corpName": "SK디스커버리",
+        "industry": "software",
         "viaCode": "018670",
         "viaName": "SK가스",
         "hopDistance": 2
@@ -829,6 +665,134 @@
         "industry": "pharma",
         "viaCode": "018670",
         "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003300",
+        "corpName": "한일홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015760",
+        "corpName": "한국전력공사",
+        "industry": "energy",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001720",
+        "corpName": "신영증권",
+        "industry": "finance",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "285130",
+        "corpName": "SK케미칼",
+        "industry": "software",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038530",
+        "corpName": "케이바이오",
+        "industry": "retail",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013570",
+        "corpName": "디와이",
+        "industry": "electronics",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011790",
+        "corpName": "SKC",
+        "industry": "software",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "009450",
+        "viaName": "경동나비엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009410",
+        "corpName": "태영건설",
+        "industry": "construction",
+        "viaCode": "018670",
+        "viaName": "SK가스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047050",
+        "corpName": "포스코인터내셔널",
+        "industry": "steel",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003480",
+        "corpName": "한진중공업홀딩스",
+        "industry": "energy",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034590",
+        "corpName": "인천도시가스",
+        "industry": "energy",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "036460",
+        "viaName": "한국가스공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "043260",
+        "corpName": "성호전자",
+        "industry": "electronics",
+        "viaCode": "009450",
+        "viaName": "경동나비엔",
         "hopDistance": 2
       }
     ],

@@ -54,43 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 77819354644.0,
-      "operating_profit": 16621225798.0,
-      "net_profit": 0.0,
-      "total_assets": 199837837379.0
-    },
-    {
-      "year": "2022",
-      "sales": 82710338752.0,
-      "operating_profit": 15337972136.0,
-      "net_profit": 15891053192.0,
-      "total_assets": 207719196317.0
-    },
-    {
-      "year": "2023",
-      "sales": 70580550198.0,
-      "operating_profit": 8974525316.0,
-      "net_profit": 0.0,
-      "total_assets": 211744326657.0
-    },
-    {
-      "year": "2024",
-      "sales": 73949173060.0,
-      "operating_profit": 19932389780.0,
-      "net_profit": 8486759.0,
-      "total_assets": 244243219582.0
-    },
-    {
-      "year": "2025",
-      "sales": 72274341672.0,
-      "operating_profit": 17987264966.0,
-      "net_profit": 0.0,
-      "total_assets": 262457516860.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -162,17 +126,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "004270",
-        "corpName": "남성",
-        "industry": "telecom",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "065450",
-        "corpName": "빅텍",
-        "industry": "machinery",
+        "stockCode": "018680",
+        "corpName": "서울제약",
+        "industry": "pharma",
         "viaCode": "051780",
         "viaName": "큐로홀딩스",
         "hopDistance": 2
@@ -186,73 +142,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "047820",
-        "corpName": "초록뱀미디어",
+        "stockCode": "004270",
+        "corpName": "남성",
         "industry": "telecom",
-        "viaCode": "051780",
-        "viaName": "큐로홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "015230",
-        "corpName": "대창단조",
-        "industry": "electronics",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "065060",
-        "corpName": "지엔코",
-        "industry": "textile",
-        "viaCode": "051780",
-        "viaName": "큐로홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058400",
-        "corpName": "KNN",
-        "industry": "telecom",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "040350",
-        "corpName": "크레오에스지",
-        "industry": "software",
-        "viaCode": "051780",
-        "viaName": "큐로홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006740",
-        "corpName": "블루산업개발",
-        "industry": "paper",
-        "viaCode": "051780",
-        "viaName": "큐로홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000320",
-        "corpName": "노루홀딩스",
-        "industry": "finance",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095910",
-        "corpName": "에스에너지",
-        "industry": "energy",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016800",
-        "corpName": "퍼시스",
-        "industry": "paper",
         "viaCode": "004910",
         "viaName": "조광페인트",
         "hopDistance": 2
@@ -266,9 +158,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "083550",
-        "corpName": "케이엠",
+        "stockCode": "016600",
+        "corpName": "큐캐피탈",
         "industry": "chemical",
+        "viaCode": "051780",
+        "viaName": "큐로홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007210",
+        "corpName": "벽산",
+        "industry": "auto",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "131100",
+        "corpName": "티엔엔터테인먼트",
+        "industry": "food",
+        "viaCode": "051780",
+        "viaName": "큐로홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095910",
+        "corpName": "에스에너지",
+        "industry": "energy",
         "viaCode": "004910",
         "viaName": "조광페인트",
         "hopDistance": 2
@@ -282,17 +198,57 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "007210",
-        "corpName": "벽산",
-        "industry": "auto",
+        "stockCode": "058400",
+        "corpName": "KNN",
+        "industry": "telecom",
         "viaCode": "004910",
         "viaName": "조광페인트",
         "hopDistance": 2
       },
       {
-        "stockCode": "016600",
-        "corpName": "큐캐피탈",
+        "stockCode": "015230",
+        "corpName": "대창단조",
+        "industry": "electronics",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
         "industry": "chemical",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "040350",
+        "corpName": "크레오에스지",
+        "industry": "software",
+        "viaCode": "051780",
+        "viaName": "큐로홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065060",
+        "corpName": "지엔코",
+        "industry": "textile",
+        "viaCode": "051780",
+        "viaName": "큐로홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000320",
+        "corpName": "노루홀딩스",
+        "industry": "finance",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006740",
+        "corpName": "블루산업개발",
+        "industry": "paper",
         "viaCode": "051780",
         "viaName": "큐로홀딩스",
         "hopDistance": 2
@@ -300,6 +256,22 @@
       {
         "stockCode": "015590",
         "corpName": "DKME",
+        "industry": "machinery",
+        "viaCode": "051780",
+        "viaName": "큐로홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016800",
+        "corpName": "퍼시스",
+        "industry": "paper",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065450",
+        "corpName": "빅텍",
         "industry": "machinery",
         "viaCode": "051780",
         "viaName": "큐로홀딩스",
@@ -314,17 +286,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "131100",
-        "corpName": "티엔엔터테인먼트",
-        "industry": "food",
-        "viaCode": "051780",
-        "viaName": "큐로홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "018680",
-        "corpName": "서울제약",
-        "industry": "pharma",
+        "stockCode": "047820",
+        "corpName": "초록뱀미디어",
+        "industry": "telecom",
         "viaCode": "051780",
         "viaName": "큐로홀딩스",
         "hopDistance": 2

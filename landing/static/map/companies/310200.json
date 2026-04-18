@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 49036805412.0,
-      "operating_profit": 13009415839.0,
-      "net_profit": 21299407030.0,
-      "total_assets": 101344429359.0
-    },
-    {
-      "year": "2022",
-      "sales": 58131424584.0,
-      "operating_profit": 9626892101.0,
-      "net_profit": 5446041060.0,
-      "total_assets": 141531814054.0
-    },
-    {
-      "year": "2023",
-      "sales": 111346904329.0,
-      "operating_profit": 22862982635.0,
-      "net_profit": 10393572993.0,
-      "total_assets": 199639542919.0
-    },
-    {
-      "year": "2024",
-      "sales": 130975963475.0,
-      "operating_profit": 25139081598.0,
-      "net_profit": 18029079938.0,
-      "total_assets": 255587888312.0
-    },
-    {
-      "year": "2025",
-      "sales": 150299705151.0,
-      "operating_profit": 22683638558.0,
-      "net_profit": 14044673132.0,
-      "total_assets": 271345115964.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,38 +87,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "127710",
-        "corpName": "아시아경제",
-        "industry": "media",
-        "viaCode": "122450",
-        "viaName": "KX",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "122450",
-        "viaName": "KX",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "232530",
-        "corpName": "이엠티",
-        "industry": "semiconductor",
-        "viaCode": "122450",
-        "viaName": "KX",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "229500",
-        "corpName": "노브메타파마",
-        "industry": "pharma",
-        "viaCode": "122450",
-        "viaName": "KX",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "001260",
         "corpName": "남광토건",
         "industry": "construction",
@@ -171,9 +103,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "166090",
-        "corpName": "하나머티리얼즈",
-        "industry": "semiconductor",
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
         "viaCode": "122450",
         "viaName": "KX",
         "hopDistance": 2
@@ -190,6 +122,38 @@
         "stockCode": "083550",
         "corpName": "케이엠",
         "industry": "chemical",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "127710",
+        "corpName": "아시아경제",
+        "industry": "media",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "229500",
+        "corpName": "노브메타파마",
+        "industry": "pharma",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "166090",
+        "corpName": "하나머티리얼즈",
+        "industry": "semiconductor",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
         "viaCode": "122450",
         "viaName": "KX",
         "hopDistance": 2

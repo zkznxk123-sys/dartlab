@@ -54,36 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 342291290905.0,
-      "operating_profit": 6897980369.0,
-      "net_profit": 6129868043.0,
-      "total_assets": 162028047288.0
-    },
-    {
-      "year": "2022",
-      "sales": 415312784536.0,
-      "operating_profit": 11396109298.0,
-      "net_profit": 9660233517.0,
-      "total_assets": 168121776442.0
-    },
-    {
-      "year": "2023",
-      "sales": 390306288912.0,
-      "operating_profit": 10725528763.0,
-      "net_profit": 8552078509.0,
-      "total_assets": 161754716360.0
-    },
-    {
-      "year": "2025",
-      "sales": 357139177502.0,
-      "operating_profit": 5957941620.0,
-      "net_profit": 4632837436.0,
-      "total_assets": 159149627172.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -143,19 +114,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "014280",
-        "corpName": "금강공업",
-        "industry": "construction",
-        "viaCode": "053260",
-        "viaName": "금강철강",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "232530",
         "corpName": "이엠티",
         "industry": "semiconductor",
         "viaCode": "140520",
         "viaName": "대창스틸",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014280",
+        "corpName": "금강공업",
+        "industry": "construction",
+        "viaCode": "053260",
+        "viaName": "금강철강",
         "hopDistance": 2
       }
     ],

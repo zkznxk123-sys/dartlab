@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 22185766040.0,
-      "operating_profit": 1690299644.0,
-      "net_profit": 1973891113.0,
-      "total_assets": 30157557116.0
-    },
-    {
-      "year": "2022",
-      "sales": 22753888786.0,
-      "operating_profit": 1868663188.0,
-      "net_profit": 2087240063.0,
-      "total_assets": 32625851694.0
-    },
-    {
-      "year": "2023",
-      "sales": 24675744970.0,
-      "operating_profit": 1276134767.0,
-      "net_profit": 1996166111.0,
-      "total_assets": 44502556212.0
-    },
-    {
-      "year": "2024",
-      "sales": 47855112752.0,
-      "operating_profit": 11331960375.0,
-      "net_profit": 9836190603.0,
-      "total_assets": 56330195131.0
-    },
-    {
-      "year": "2025",
-      "sales": 33726070959.0,
-      "operating_profit": 414314485.0,
-      "net_profit": -1269215199.0,
-      "total_assets": 52460568366.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,33 +87,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "115480",
-        "corpName": "씨유메디칼",
-        "industry": "medicalDevice",
+        "stockCode": "009180",
+        "corpName": "한솔로지스틱스",
+        "industry": "logistics",
         "viaCode": "070300",
         "viaName": "엑스큐어",
         "hopDistance": 2
       },
       {
-        "stockCode": "213500",
-        "corpName": "한솔제지",
-        "industry": "paper",
-        "viaCode": "070300",
-        "viaName": "엑스큐어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "057540",
-        "corpName": "옴니시스템",
-        "industry": "energy",
-        "viaCode": "070300",
-        "viaName": "엑스큐어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "055490",
-        "corpName": "테이팩스",
-        "industry": "plastic",
+        "stockCode": "004150",
+        "corpName": "한솔홀딩스",
+        "industry": "consulting",
         "viaCode": "070300",
         "viaName": "엑스큐어",
         "hopDistance": 2
@@ -158,6 +106,38 @@
         "stockCode": "214270",
         "corpName": "FSN",
         "industry": "software",
+        "viaCode": "070300",
+        "viaName": "엑스큐어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "121060",
+        "corpName": "유니포인트",
+        "industry": "construction",
+        "viaCode": "070300",
+        "viaName": "엑스큐어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "115480",
+        "corpName": "씨유메디칼",
+        "industry": "medicalDevice",
+        "viaCode": "070300",
+        "viaName": "엑스큐어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014680",
+        "corpName": "한솔케미칼",
+        "industry": "machinery",
+        "viaCode": "070300",
+        "viaName": "엑스큐어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "213500",
+        "corpName": "한솔제지",
+        "industry": "paper",
         "viaCode": "070300",
         "viaName": "엑스큐어",
         "hopDistance": 2
@@ -179,30 +159,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "009180",
-        "corpName": "한솔로지스틱스",
-        "industry": "logistics",
-        "viaCode": "070300",
-        "viaName": "엑스큐어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "121060",
-        "corpName": "유니포인트",
-        "industry": "construction",
-        "viaCode": "070300",
-        "viaName": "엑스큐어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "014680",
-        "corpName": "한솔케미칼",
-        "industry": "machinery",
-        "viaCode": "070300",
-        "viaName": "엑스큐어",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "099220",
         "corpName": "SDN",
         "industry": "energy",
@@ -211,17 +167,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "025750",
-        "corpName": "한솔홈데코",
-        "industry": "paper",
-        "viaCode": "070300",
-        "viaName": "엑스큐어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004150",
-        "corpName": "한솔홀딩스",
-        "industry": "consulting",
+        "stockCode": "057540",
+        "corpName": "옴니시스템",
+        "industry": "energy",
         "viaCode": "070300",
         "viaName": "엑스큐어",
         "hopDistance": 2
@@ -230,6 +178,22 @@
         "stockCode": "070590",
         "corpName": "인티큐브",
         "industry": "telecom",
+        "viaCode": "070300",
+        "viaName": "엑스큐어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "055490",
+        "corpName": "테이팩스",
+        "industry": "plastic",
+        "viaCode": "070300",
+        "viaName": "엑스큐어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025750",
+        "corpName": "한솔홈데코",
+        "industry": "paper",
         "viaCode": "070300",
         "viaName": "엑스큐어",
         "hopDistance": 2

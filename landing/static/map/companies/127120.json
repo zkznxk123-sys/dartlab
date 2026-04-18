@@ -54,43 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 22991546533.0,
-      "operating_profit": -5152362148.0,
-      "net_profit": 0.0,
-      "total_assets": 41016981634.0
-    },
-    {
-      "year": "2022",
-      "sales": 16981077512.0,
-      "operating_profit": -5147247988.0,
-      "net_profit": -8077710734.0,
-      "total_assets": 43506963601.0
-    },
-    {
-      "year": "2023",
-      "sales": 21948990482.0,
-      "operating_profit": -4342056425.0,
-      "net_profit": null,
-      "total_assets": 38757552045.0
-    },
-    {
-      "year": "2024",
-      "sales": 15907717174.0,
-      "operating_profit": -9111567866.0,
-      "net_profit": null,
-      "total_assets": 54386406588.0
-    },
-    {
-      "year": "2025",
-      "sales": 19316467820.0,
-      "operating_profit": -12486699717.0,
-      "net_profit": -16445157062.0,
-      "total_assets": 123036511340.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -142,6 +106,22 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "046120",
+        "viaName": "오르비텍",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "348350",
         "corpName": "위드텍",
         "industry": "electronics",
@@ -158,49 +138,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "290650",
-        "viaName": "엘앤씨바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067390",
-        "corpName": "아스트",
-        "industry": "aerospace",
+        "stockCode": "106240",
+        "corpName": "파인테크닉스",
+        "industry": "electrical",
         "viaCode": "046120",
         "viaName": "오르비텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "009810",
-        "corpName": "플레이그램",
-        "industry": "retail",
-        "viaCode": "046120",
-        "viaName": "오르비텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "044780",
-        "corpName": "에이치케이",
-        "industry": "medicalDevice",
-        "viaCode": "046120",
-        "viaName": "오르비텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036830",
-        "corpName": "솔브레인홀딩스",
-        "industry": "electronics",
-        "viaCode": "290650",
-        "viaName": "엘앤씨바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039490",
-        "corpName": "키움증권",
-        "industry": "finance",
+        "stockCode": "0007C0",
+        "corpName": "아크릴",
+        "industry": "software",
         "viaCode": "290650",
         "viaName": "엘앤씨바이오",
         "hopDistance": 2
@@ -222,17 +170,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "0007C0",
-        "corpName": "아크릴",
-        "industry": "software",
-        "viaCode": "290650",
-        "viaName": "엘앤씨바이오",
+        "stockCode": "009810",
+        "corpName": "플레이그램",
+        "industry": "retail",
+        "viaCode": "046120",
+        "viaName": "오르비텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "461030",
-        "corpName": "아이엠비디엑스",
-        "industry": "pharma",
+        "stockCode": "036830",
+        "corpName": "솔브레인홀딩스",
+        "industry": "electronics",
         "viaCode": "290650",
         "viaName": "엘앤씨바이오",
         "hopDistance": 2
@@ -246,17 +194,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "051600",
-        "corpName": "한전KPS",
-        "industry": "construction",
-        "viaCode": "046120",
-        "viaName": "오르비텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "106240",
-        "corpName": "파인테크닉스",
-        "industry": "electrical",
+        "stockCode": "067390",
+        "corpName": "아스트",
+        "industry": "aerospace",
         "viaCode": "046120",
         "viaName": "오르비텍",
         "hopDistance": 2
@@ -265,6 +205,30 @@
         "stockCode": "060280",
         "corpName": "큐렉소",
         "industry": "retail",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051600",
+        "corpName": "한전KPS",
+        "industry": "construction",
+        "viaCode": "046120",
+        "viaName": "오르비텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "461030",
+        "corpName": "아이엠비디엑스",
+        "industry": "pharma",
+        "viaCode": "290650",
+        "viaName": "엘앤씨바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
         "viaCode": "290650",
         "viaName": "엘앤씨바이오",
         "hopDistance": 2

@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 74448361724.0,
-      "operating_profit": -5004237081.0,
-      "net_profit": -13853743760.0,
-      "total_assets": 148401320247.0
-    },
-    {
-      "year": "2022",
-      "sales": 90031247780.0,
-      "operating_profit": -3089472220.0,
-      "net_profit": -52481592965.0,
-      "total_assets": 87877238053.0
-    },
-    {
-      "year": "2023",
-      "sales": 79873110316.0,
-      "operating_profit": -2778151380.0,
-      "net_profit": -23028082927.0,
-      "total_assets": 57776956547.0
-    },
-    {
-      "year": "2024",
-      "sales": 85271882741.0,
-      "operating_profit": -1414572482.0,
-      "net_profit": -8438473770.0,
-      "total_assets": 52992136434.0
-    },
-    {
-      "year": "2025",
-      "sales": 82279635343.0,
-      "operating_profit": -2043739015.0,
-      "net_profit": -1476107720.0,
-      "total_assets": 59836855590.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -131,14 +95,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "038460",
-        "corpName": "바이오스마트",
-        "industry": "electronics",
-        "viaCode": "032860",
-        "viaName": "더라미",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "030200",
         "corpName": "케이티",
         "industry": "telecom",
@@ -150,6 +106,14 @@
         "stockCode": "125020",
         "corpName": "티씨머티리얼즈",
         "industry": "medicalDevice",
+        "viaCode": "032860",
+        "viaName": "더라미",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038460",
+        "corpName": "바이오스마트",
+        "industry": "electronics",
         "viaCode": "032860",
         "viaName": "더라미",
         "hopDistance": 2

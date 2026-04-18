@@ -85,43 +85,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 16972440217.0,
-      "operating_profit": -2389556051.0,
-      "net_profit": -4432725121.0,
-      "total_assets": 138948612880.0
-    },
-    {
-      "year": "2022",
-      "sales": 28990439048.0,
-      "operating_profit": -3438169411.0,
-      "net_profit": -4688260552.0,
-      "total_assets": 200256518815.0
-    },
-    {
-      "year": "2023",
-      "sales": 41257657896.0,
-      "operating_profit": 1267041584.0,
-      "net_profit": 9680993019.0,
-      "total_assets": 243994293982.0
-    },
-    {
-      "year": "2024",
-      "sales": 31640413075.0,
-      "operating_profit": -1245982417.0,
-      "net_profit": -13004514136.0,
-      "total_assets": 233036978483.0
-    },
-    {
-      "year": "2025",
-      "sales": 70440930511.0,
-      "operating_profit": 2281825045.0,
-      "net_profit": -2348922332.0,
-      "total_assets": 340909640792.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -173,110 +137,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "024800",
-        "corpName": "유성티엔에스",
-        "industry": "logistics",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035890",
-        "corpName": "서희건설",
-        "industry": "realestate",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "091970",
-        "corpName": "나노캠텍",
-        "industry": "plastic",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
-        "viaCode": "131400",
-        "viaName": "이브이첨단소재",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009620",
-        "corpName": "삼보산업",
-        "industry": "steel",
-        "viaCode": "145210",
-        "viaName": "다이나믹디자인",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "145210",
-        "viaName": "다이나믹디자인",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009810",
-        "corpName": "플레이그램",
-        "industry": "retail",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035460",
-        "corpName": "기산텔레콤",
-        "industry": "electronics",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
-        "viaCode": "145210",
-        "viaName": "다이나믹디자인",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078860",
-        "corpName": "스테이지원엔터",
-        "industry": "media",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002070",
-        "corpName": "비비안",
-        "industry": "realestate",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "096770",
         "corpName": "SK이노베이션",
         "industry": "chemical",
@@ -293,6 +153,110 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "145210",
+        "viaName": "다이나믹디자인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017960",
+        "corpName": "한국카본",
+        "industry": "chemical",
+        "viaCode": "131400",
+        "viaName": "이브이첨단소재",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091970",
+        "corpName": "나노캠텍",
+        "industry": "plastic",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
+        "viaCode": "145210",
+        "viaName": "다이나믹디자인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009620",
+        "corpName": "삼보산업",
+        "industry": "steel",
+        "viaCode": "145210",
+        "viaName": "다이나믹디자인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024800",
+        "corpName": "유성티엔에스",
+        "industry": "logistics",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009810",
+        "corpName": "플레이그램",
+        "industry": "retail",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002070",
+        "corpName": "비비안",
+        "industry": "realestate",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "131400",
+        "viaName": "이브이첨단소재",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "131400",
+        "viaName": "이브이첨단소재",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "023960",
         "corpName": "에쓰씨엔지니어링",
         "industry": "construction",
@@ -301,17 +265,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
-        "viaCode": "025560",
-        "viaName": "미래산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
+        "stockCode": "035460",
+        "corpName": "기산텔레콤",
+        "industry": "electronics",
         "viaCode": "025560",
         "viaName": "미래산업",
         "hopDistance": 2
@@ -333,11 +289,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "017960",
-        "corpName": "한국카본",
-        "industry": "chemical",
-        "viaCode": "131400",
-        "viaName": "이브이첨단소재",
+        "stockCode": "078860",
+        "corpName": "스테이지원엔터",
+        "industry": "media",
+        "viaCode": "025560",
+        "viaName": "미래산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035890",
+        "corpName": "서희건설",
+        "industry": "realestate",
+        "viaCode": "025560",
+        "viaName": "미래산업",
         "hopDistance": 2
       }
     ],

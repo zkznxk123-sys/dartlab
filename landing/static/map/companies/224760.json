@@ -150,14 +150,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "043150",
-        "viaName": "바텍",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "024110",
         "corpName": "기업은행",
         "industry": "finance",
@@ -166,11 +158,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
         "industry": "finance",
-        "viaCode": "036190",
-        "viaName": "금화피에스시",
+        "viaCode": "043150",
+        "viaName": "바텍",
         "hopDistance": 2
       },
       {
@@ -201,6 +193,14 @@
         "stockCode": "051600",
         "corpName": "한전KPS",
         "industry": "construction",
+        "viaCode": "036190",
+        "viaName": "금화피에스시",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "036190",
         "viaName": "금화피에스시",
         "hopDistance": 2

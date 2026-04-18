@@ -135,43 +135,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 69475495579.0,
-      "operating_profit": 1660476360.0,
-      "net_profit": 3165485154.0,
-      "total_assets": 199174593034.0
-    },
-    {
-      "year": "2022",
-      "sales": 82197409668.0,
-      "operating_profit": 2981395714.0,
-      "net_profit": -388139911.0,
-      "total_assets": 213260375695.0
-    },
-    {
-      "year": "2023",
-      "sales": 93906675105.0,
-      "operating_profit": 3036940781.0,
-      "net_profit": 6455349074.0,
-      "total_assets": 242098204538.0
-    },
-    {
-      "year": "2024",
-      "sales": 99099733323.0,
-      "operating_profit": 1020328528.0,
-      "net_profit": 2694712068.0,
-      "total_assets": 303436817189.0
-    },
-    {
-      "year": "2025",
-      "sales": 105229184685.0,
-      "operating_profit": -3692472431.0,
-      "net_profit": -10077182181.0,
-      "total_assets": 305961524392.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -223,9 +187,105 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "220100",
-        "corpName": "퓨쳐켐",
-        "industry": "chemical",
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "085660",
+        "viaName": "차바이오텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016580",
+        "corpName": "환인제약",
+        "industry": "food",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041930",
+        "corpName": "동아화성",
+        "industry": "electronics",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "118990",
+        "corpName": "모트렉스",
+        "industry": "auto",
+        "viaCode": "155650",
+        "viaName": "와이엠씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066700",
+        "corpName": "테라젠이텍스",
+        "industry": "electronics",
+        "viaCode": "085660",
+        "viaName": "차바이오텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090460",
+        "corpName": "비에이치",
+        "industry": "electronics",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009190",
+        "corpName": "대양금속",
+        "industry": "steel",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028300",
+        "corpName": "HLB",
+        "industry": "pharma",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "206640",
+        "corpName": "바디텍메드",
+        "industry": "medicalDevice",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011150",
+        "corpName": "CJ씨푸드",
+        "industry": "food",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069080",
+        "corpName": "웹젠",
+        "industry": "software",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012450",
+        "corpName": "한화에어로스페이스",
+        "industry": "aerospace",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "155650",
         "viaName": "와이엠씨",
         "hopDistance": 2
@@ -239,41 +299,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "206640",
-        "corpName": "바디텍메드",
-        "industry": "medicalDevice",
+        "stockCode": "059090",
+        "corpName": "미코",
+        "industry": "electronics",
         "viaCode": "065450",
         "viaName": "빅텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "476040",
-        "corpName": "오가노이드사이언스",
-        "industry": "pharma",
-        "viaCode": "085660",
-        "viaName": "차바이오텍",
+        "stockCode": "220100",
+        "corpName": "퓨쳐켐",
+        "industry": "chemical",
+        "viaCode": "155650",
+        "viaName": "와이엠씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "028300",
-        "corpName": "HLB",
-        "industry": "pharma",
+        "stockCode": "058400",
+        "corpName": "KNN",
+        "industry": "telecom",
         "viaCode": "065450",
         "viaName": "빅텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "273640",
-        "corpName": "와이엠텍",
-        "industry": "electrical",
-        "viaCode": "007530",
-        "viaName": "와이엠",
+        "stockCode": "003530",
+        "corpName": "한화투자증권",
+        "industry": "aerospace",
+        "viaCode": "261780",
+        "viaName": "차백신연구소",
         "hopDistance": 2
       },
       {
-        "stockCode": "005670",
-        "corpName": "푸드웰",
-        "industry": "food",
+        "stockCode": "272210",
+        "corpName": "한화시스템",
+        "industry": "aerospace",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065680",
+        "corpName": "우주일렉트로",
+        "industry": "electronics",
         "viaCode": "007530",
         "viaName": "와이엠",
         "hopDistance": 2
@@ -287,9 +355,97 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "214430",
-        "corpName": "아이쓰리시스템",
-        "industry": "machinery",
+        "stockCode": "051780",
+        "corpName": "큐로홀딩스",
+        "industry": "electronics",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025620",
+        "corpName": "차AI헬스케어",
+        "industry": "cosmetics",
+        "viaCode": "085660",
+        "viaName": "차바이오텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "251370",
+        "corpName": "와이엠티",
+        "industry": "electronics",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200670",
+        "corpName": "휴메딕스",
+        "industry": "pharma",
+        "viaCode": "085660",
+        "viaName": "차바이오텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000880",
+        "corpName": "한화",
+        "industry": "aerospace",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "085660",
+        "viaName": "차바이오텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "106080",
+        "corpName": "케이이엠텍",
+        "industry": "electronics",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005670",
+        "corpName": "푸드웰",
+        "industry": "food",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "393970",
+        "corpName": "대진첨단소재",
+        "industry": "chemical",
+        "viaCode": "007530",
+        "viaName": "와이엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079190",
+        "corpName": "케스피온",
+        "industry": "telecom",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096610",
+        "corpName": "알에프세미",
+        "industry": "electronics",
         "viaCode": "065450",
         "viaName": "빅텍",
         "hopDistance": 2
@@ -311,131 +467,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002900",
-        "corpName": "TYM",
-        "industry": "retail",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "013810",
-        "corpName": "스페코",
-        "industry": "construction",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012450",
-        "corpName": "한화에어로스페이스",
-        "industry": "aerospace",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009190",
-        "corpName": "대양금속",
-        "industry": "steel",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "118990",
-        "corpName": "모트렉스",
-        "industry": "auto",
-        "viaCode": "155650",
-        "viaName": "와이엠씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "079190",
-        "corpName": "케스피온",
-        "industry": "telecom",
-        "viaCode": "155650",
-        "viaName": "와이엠씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "068790",
-        "corpName": "DMS",
-        "industry": "electronics",
-        "viaCode": "085660",
-        "viaName": "차바이오텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058400",
-        "corpName": "KNN",
+        "stockCode": "050890",
+        "corpName": "쏠리드",
         "industry": "telecom",
         "viaCode": "065450",
         "viaName": "빅텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "090370",
-        "corpName": "메타랩스",
-        "industry": "textile",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "251370",
-        "corpName": "와이엠티",
-        "industry": "electronics",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
+        "stockCode": "476040",
+        "corpName": "오가노이드사이언스",
+        "industry": "pharma",
         "viaCode": "085660",
         "viaName": "차바이오텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "065680",
-        "corpName": "우주일렉트로",
-        "industry": "electronics",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "096610",
-        "corpName": "알에프세미",
-        "industry": "electronics",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
-        "viaCode": "085660",
-        "viaName": "차바이오텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "059090",
-        "corpName": "미코",
-        "industry": "electronics",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090460",
-        "corpName": "비에이치",
-        "industry": "electronics",
-        "viaCode": "007530",
-        "viaName": "와이엠",
         "hopDistance": 2
       },
       {
@@ -447,83 +491,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000880",
-        "corpName": "한화",
-        "industry": "aerospace",
+        "stockCode": "214430",
+        "corpName": "아이쓰리시스템",
+        "industry": "machinery",
         "viaCode": "065450",
         "viaName": "빅텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "011150",
-        "corpName": "CJ씨푸드",
-        "industry": "food",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041930",
-        "corpName": "동아화성",
-        "industry": "electronics",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "272210",
-        "corpName": "한화시스템",
-        "industry": "aerospace",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082270",
-        "corpName": "젬백스",
-        "industry": "software",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "109610",
-        "corpName": "에스와이",
-        "industry": "electronics",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066700",
-        "corpName": "테라젠이텍스",
+        "stockCode": "068790",
+        "corpName": "DMS",
         "industry": "electronics",
         "viaCode": "085660",
         "viaName": "차바이오텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "069080",
-        "corpName": "웹젠",
-        "industry": "software",
+        "stockCode": "013810",
+        "corpName": "스페코",
+        "industry": "construction",
         "viaCode": "065450",
         "viaName": "빅텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "003530",
-        "corpName": "한화투자증권",
-        "industry": "aerospace",
-        "viaCode": "261780",
-        "viaName": "차백신연구소",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "155650",
-        "viaName": "와이엠씨",
+        "stockCode": "002900",
+        "corpName": "TYM",
+        "industry": "retail",
+        "viaCode": "007530",
+        "viaName": "와이엠",
         "hopDistance": 2
       },
       {
@@ -535,43 +531,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "025620",
-        "corpName": "차AI헬스케어",
-        "industry": "cosmetics",
-        "viaCode": "085660",
-        "viaName": "차바이오텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016580",
-        "corpName": "환인제약",
-        "industry": "food",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "051780",
-        "corpName": "큐로홀딩스",
-        "industry": "electronics",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "106080",
-        "corpName": "케이이엠텍",
-        "industry": "electronics",
+        "stockCode": "273640",
+        "corpName": "와이엠텍",
+        "industry": "electrical",
         "viaCode": "007530",
         "viaName": "와이엠",
         "hopDistance": 2
       },
       {
-        "stockCode": "200670",
-        "corpName": "휴메딕스",
-        "industry": "pharma",
-        "viaCode": "085660",
-        "viaName": "차바이오텍",
+        "stockCode": "082270",
+        "corpName": "젬백스",
+        "industry": "software",
+        "viaCode": "007530",
+        "viaName": "와이엠",
         "hopDistance": 2
       },
       {
@@ -583,17 +555,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "393970",
-        "corpName": "대진첨단소재",
-        "industry": "chemical",
-        "viaCode": "007530",
-        "viaName": "와이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "050890",
-        "corpName": "쏠리드",
-        "industry": "telecom",
+        "stockCode": "090370",
+        "corpName": "메타랩스",
+        "industry": "textile",
         "viaCode": "065450",
         "viaName": "빅텍",
         "hopDistance": 2

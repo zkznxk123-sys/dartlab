@@ -54,29 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2023",
-      "sales": null,
-      "operating_profit": 1343769502.0,
-      "net_profit": null,
-      "total_assets": 92236121824.0
-    },
-    {
-      "year": "2024",
-      "sales": 133286175797.0,
-      "operating_profit": -6895864010.0,
-      "net_profit": -4802079400.0,
-      "total_assets": 115662297418.0
-    },
-    {
-      "year": "2025",
-      "sales": 185905308362.0,
-      "operating_profit": -1970924664.0,
-      "net_profit": -4512664602.0,
-      "total_assets": 109964440011.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -137,30 +115,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "257720",
-        "corpName": "실리콘투",
-        "industry": "cosmetics",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "178600",
-        "corpName": "대동고려삼",
-        "industry": "food",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "194700",
-        "corpName": "노바렉스",
-        "industry": "pharma",
-        "viaCode": "293780",
-        "viaName": "압타바이오",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "161890",
         "corpName": "한국콜마",
         "industry": "cosmetics",
@@ -169,17 +123,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "054050",
-        "corpName": "농우바이오",
-        "industry": "agriculture",
+        "stockCode": "071670",
+        "corpName": "에이테크솔루션",
+        "industry": "electronics",
         "viaCode": "195940",
         "viaName": "HK이노엔",
         "hopDistance": 2
       },
       {
-        "stockCode": "038530",
-        "corpName": "케이바이오",
-        "industry": "retail",
+        "stockCode": "222110",
+        "corpName": "팬젠",
+        "industry": "pharma",
         "viaCode": "195940",
         "viaName": "HK이노엔",
         "hopDistance": 2
@@ -193,8 +147,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "239610",
-        "corpName": "에이치엘사이언스",
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
+        "viaCode": "293780",
+        "viaName": "압타바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "338840",
+        "corpName": "와이바이오로직스",
         "industry": "pharma",
         "viaCode": "195940",
         "viaName": "HK이노엔",
@@ -209,32 +171,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "314140",
-        "corpName": "알피바이오",
-        "industry": "pharma",
-        "viaCode": "293780",
-        "viaName": "압타바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "341170",
-        "corpName": "퓨쳐메디신",
-        "industry": "pharma",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009780",
-        "corpName": "엠에스씨",
-        "industry": "food",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "338840",
-        "corpName": "와이바이오로직스",
+        "stockCode": "200130",
+        "corpName": "콜마비앤에이치",
         "industry": "pharma",
         "viaCode": "195940",
         "viaName": "HK이노엔",
@@ -249,27 +187,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "021240",
-        "corpName": "코웨이",
-        "industry": "electronics",
+        "stockCode": "178600",
+        "corpName": "대동고려삼",
+        "industry": "food",
         "viaCode": "195940",
         "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067390",
-        "corpName": "아스트",
-        "industry": "aerospace",
-        "viaCode": "195940",
-        "viaName": "HK이노엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006800",
-        "corpName": "미래에셋증권",
-        "industry": "finance",
-        "viaCode": "293780",
-        "viaName": "압타바이오",
         "hopDistance": 2
       },
       {
@@ -281,6 +203,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "243070",
         "corpName": "휴온스",
         "industry": "pharma",
@@ -289,8 +219,40 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "214390",
-        "corpName": "경보제약",
+        "stockCode": "194700",
+        "corpName": "노바렉스",
+        "industry": "pharma",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "257720",
+        "corpName": "실리콘투",
+        "industry": "cosmetics",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "341170",
+        "corpName": "퓨쳐메디신",
+        "industry": "pharma",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "314140",
+        "corpName": "알피바이오",
         "industry": "pharma",
         "viaCode": "195940",
         "viaName": "HK이노엔",
@@ -305,40 +267,56 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
+        "stockCode": "067390",
+        "corpName": "아스트",
+        "industry": "aerospace",
         "viaCode": "195940",
         "viaName": "HK이노엔",
         "hopDistance": 2
       },
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
+        "stockCode": "009780",
+        "corpName": "엠에스씨",
+        "industry": "food",
         "viaCode": "195940",
         "viaName": "HK이노엔",
         "hopDistance": 2
       },
       {
-        "stockCode": "200130",
-        "corpName": "콜마비앤에이치",
-        "industry": "pharma",
-        "viaCode": "293780",
-        "viaName": "압타바이오",
+        "stockCode": "054050",
+        "corpName": "농우바이오",
+        "industry": "agriculture",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
         "hopDistance": 2
       },
       {
-        "stockCode": "071670",
-        "corpName": "에이테크솔루션",
+        "stockCode": "021240",
+        "corpName": "코웨이",
         "industry": "electronics",
         "viaCode": "195940",
         "viaName": "HK이노엔",
         "hopDistance": 2
       },
       {
-        "stockCode": "222110",
-        "corpName": "팬젠",
+        "stockCode": "038530",
+        "corpName": "케이바이오",
+        "industry": "retail",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "239610",
+        "corpName": "에이치엘사이언스",
+        "industry": "pharma",
+        "viaCode": "195940",
+        "viaName": "HK이노엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214390",
+        "corpName": "경보제약",
         "industry": "pharma",
         "viaCode": "195940",
         "viaName": "HK이노엔",

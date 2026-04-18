@@ -47,43 +47,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 40624175326.0,
-      "operating_profit": 2319856022.0,
-      "net_profit": 2553550846.0,
-      "total_assets": 64577327010.0
-    },
-    {
-      "year": "2022",
-      "sales": 47944605467.0,
-      "operating_profit": 1905675069.0,
-      "net_profit": 4825350646.0,
-      "total_assets": 81305213288.0
-    },
-    {
-      "year": "2023",
-      "sales": 64920252518.0,
-      "operating_profit": 5013561602.0,
-      "net_profit": 6098020491.0,
-      "total_assets": 86401120350.0
-    },
-    {
-      "year": "2024",
-      "sales": 94827257434.0,
-      "operating_profit": 15387822768.0,
-      "net_profit": 14023169268.0,
-      "total_assets": 107071735945.0
-    },
-    {
-      "year": "2025",
-      "sales": 108613630588.0,
-      "operating_profit": 18042145824.0,
-      "net_profit": 19041489175.0,
-      "total_assets": 118435399289.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -135,17 +99,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "388790",
-        "corpName": "라이콤",
-        "industry": "medicalDevice",
-        "viaCode": "025540",
-        "viaName": "한국단자공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "092440",
-        "corpName": "기신정기",
-        "industry": "retail",
+        "stockCode": "009470",
+        "corpName": "삼화전기",
+        "industry": "electronics",
         "viaCode": "025540",
         "viaName": "한국단자공업",
         "hopDistance": 2
@@ -159,48 +115,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "103140",
-        "corpName": "풍산",
-        "industry": "steel",
+        "stockCode": "092440",
+        "corpName": "기신정기",
+        "industry": "retail",
         "viaCode": "025540",
         "viaName": "한국단자공업",
         "hopDistance": 2
       },
       {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "025540",
-        "viaName": "한국단자공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011040",
-        "corpName": "경동제약",
-        "industry": "pharma",
-        "viaCode": "025540",
-        "viaName": "한국단자공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001270",
-        "corpName": "부국증권",
-        "industry": "finance",
-        "viaCode": "025540",
-        "viaName": "한국단자공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "300720",
-        "corpName": "한일시멘트",
-        "industry": "construction",
-        "viaCode": "025540",
-        "viaName": "한국단자공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009470",
-        "corpName": "삼화전기",
+        "stockCode": "003620",
+        "corpName": "KG모빌리티",
         "industry": "electronics",
         "viaCode": "025540",
         "viaName": "한국단자공업",
@@ -223,6 +147,46 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "103140",
+        "corpName": "풍산",
+        "industry": "steel",
+        "viaCode": "025540",
+        "viaName": "한국단자공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011040",
+        "corpName": "경동제약",
+        "industry": "pharma",
+        "viaCode": "025540",
+        "viaName": "한국단자공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "300720",
+        "corpName": "한일시멘트",
+        "industry": "construction",
+        "viaCode": "025540",
+        "viaName": "한국단자공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "388790",
+        "corpName": "라이콤",
+        "industry": "medicalDevice",
+        "viaCode": "025540",
+        "viaName": "한국단자공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001270",
+        "corpName": "부국증권",
+        "industry": "finance",
+        "viaCode": "025540",
+        "viaName": "한국단자공업",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "000810",
         "corpName": "삼성화재해상보험",
         "industry": "finance",
@@ -231,9 +195,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003620",
-        "corpName": "KG모빌리티",
-        "industry": "electronics",
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
         "viaCode": "025540",
         "viaName": "한국단자공업",
         "hopDistance": 2

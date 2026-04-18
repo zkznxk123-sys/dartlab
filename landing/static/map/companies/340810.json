@@ -35,29 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2023",
-      "sales": 14100761179.0,
-      "operating_profit": -9771154270.0,
-      "net_profit": -9628112240.0,
-      "total_assets": 42567213653.0
-    },
-    {
-      "year": "2024",
-      "sales": 14447002396.0,
-      "operating_profit": -10440188251.0,
-      "net_profit": -10660375208.0,
-      "total_assets": 29164887906.0
-    },
-    {
-      "year": "2025",
-      "sales": 13970253305.0,
-      "operating_profit": -11271052457.0,
-      "net_profit": -15336171320.0,
-      "total_assets": 35175122811.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -109,14 +87,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "094940",
-        "viaName": "푸른기술",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "003160",
         "corpName": "디아이",
         "industry": "realestate",
@@ -128,6 +98,14 @@
         "stockCode": "066430",
         "corpName": "아이로보틱스",
         "industry": "chemical",
+        "viaCode": "094940",
+        "viaName": "푸른기술",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
         "viaCode": "094940",
         "viaName": "푸른기술",
         "hopDistance": 2

@@ -290,43 +290,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 120283764981.0,
-      "operating_profit": -3954732702.0,
-      "net_profit": -18272273530.0,
-      "total_assets": 370469443510.0
-    },
-    {
-      "year": "2022",
-      "sales": 186344639061.0,
-      "operating_profit": -24913262401.0,
-      "net_profit": -12295797893.0,
-      "total_assets": 386550617429.0
-    },
-    {
-      "year": "2023",
-      "sales": 147335163984.0,
-      "operating_profit": -20281322515.0,
-      "net_profit": -4232986260.0,
-      "total_assets": 337160026663.0
-    },
-    {
-      "year": "2024",
-      "sales": 80432665935.0,
-      "operating_profit": -11816014440.0,
-      "net_profit": -54683820431.0,
-      "total_assets": 293502455885.0
-    },
-    {
-      "year": "2025",
-      "sales": 101995172098.0,
-      "operating_profit": -9556606628.0,
-      "net_profit": -41781737653.0,
-      "total_assets": 242562329443.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -387,19 +351,59 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "279570",
-        "corpName": "케이뱅크",
-        "industry": "finance",
+        "stockCode": "066410",
+        "corpName": "버킷스튜디오",
+        "industry": "telecom",
+        "viaCode": "321820",
+        "viaName": "아티스트컴퍼니",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "200350",
+        "viaName": "아티스트스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
         "viaCode": "078340",
         "viaName": "컴투스",
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "241840",
-        "viaName": "에이스토리",
+        "stockCode": "144960",
+        "corpName": "뉴파워프라즈마",
+        "industry": "machinery",
+        "viaCode": "004250",
+        "viaName": "엔피씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038880",
+        "corpName": "아이에이",
+        "industry": "electronics",
+        "viaCode": "078340",
+        "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "208370",
+        "corpName": "셀바스헬스케어",
+        "industry": "telecom",
+        "viaCode": "108860",
+        "viaName": "셀바스AI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "078340",
+        "viaName": "컴투스",
         "hopDistance": 2
       },
       {
@@ -419,83 +423,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "263750",
-        "corpName": "펄어비스",
-        "industry": "software",
-        "viaCode": "432430",
-        "viaName": "와이랩",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "194480",
-        "corpName": "데브시스터즈",
-        "industry": "software",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066410",
-        "corpName": "버킷스튜디오",
-        "industry": "telecom",
-        "viaCode": "321820",
-        "viaName": "아티스트컴퍼니",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035760",
-        "corpName": "CJ ENM",
-        "industry": "media",
-        "viaCode": "241840",
-        "viaName": "에이스토리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "373160",
-        "corpName": "데이원컴퍼니",
-        "industry": "education",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037460",
-        "corpName": "삼지전자",
-        "industry": "telecom",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "375500",
-        "corpName": "DL이앤씨",
-        "industry": "construction",
-        "viaCode": "241840",
-        "viaName": "에이스토리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "253450",
-        "corpName": "스튜디오드래곤",
-        "industry": "media",
-        "viaCode": "432430",
-        "viaName": "와이랩",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "079950",
-        "corpName": "인베니아",
-        "industry": "electronics",
-        "viaCode": "004250",
-        "viaName": "엔피씨",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "060570",
         "corpName": "드림어스컴퍼니",
         "industry": "media",
         "viaCode": "361570",
         "viaName": "알비더블유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "078340",
+        "viaName": "컴투스",
         "hopDistance": 2
       },
       {
@@ -507,75 +447,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "041920",
-        "corpName": "메디아나",
-        "industry": "medicalDevice",
-        "viaCode": "108860",
-        "viaName": "셀바스AI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095340",
-        "corpName": "ISC",
-        "industry": "retail",
-        "viaCode": "108860",
-        "viaName": "셀바스AI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "236810",
-        "corpName": "엔비티",
+        "stockCode": "263750",
+        "corpName": "펄어비스",
         "industry": "software",
-        "viaCode": "063080",
-        "viaName": "컴투스홀딩스",
+        "viaCode": "432430",
+        "viaName": "와이랩",
         "hopDistance": 2
       },
       {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "004250",
-        "viaName": "엔피씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "328130",
-        "corpName": "루닛",
-        "industry": "software",
-        "viaCode": "004250",
-        "viaName": "엔피씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "208370",
-        "corpName": "셀바스헬스케어",
-        "industry": "telecom",
-        "viaCode": "108860",
-        "viaName": "셀바스AI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "144960",
-        "corpName": "뉴파워프라즈마",
-        "industry": "machinery",
-        "viaCode": "004250",
-        "viaName": "엔피씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017670",
-        "corpName": "SK텔레콤",
-        "industry": "telecom",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "238490",
-        "corpName": "힘스",
-        "industry": "electronics",
-        "viaCode": "108860",
-        "viaName": "셀바스AI",
+        "stockCode": "035760",
+        "corpName": "CJ ENM",
+        "industry": "media",
+        "viaCode": "241840",
+        "viaName": "에이스토리",
         "hopDistance": 2
       },
       {
@@ -587,6 +471,30 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "095340",
+        "corpName": "ISC",
+        "industry": "retail",
+        "viaCode": "108860",
+        "viaName": "셀바스AI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "004250",
+        "viaName": "엔피씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041920",
+        "corpName": "메디아나",
+        "industry": "medicalDevice",
+        "viaCode": "108860",
+        "viaName": "셀바스AI",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "005850",
         "corpName": "에스엘",
         "industry": "electronics",
@@ -595,32 +503,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
+        "stockCode": "279570",
+        "corpName": "케이뱅크",
+        "industry": "finance",
         "viaCode": "078340",
         "viaName": "컴투스",
         "hopDistance": 2
       },
       {
-        "stockCode": "089790",
-        "corpName": "제이티",
-        "industry": "semiconductor",
-        "viaCode": "200350",
-        "viaName": "아티스트스튜디오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "051910",
-        "corpName": "LG화학",
-        "industry": "chemical",
-        "viaCode": "004250",
-        "viaName": "엔피씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "261520",
-        "corpName": "이지스",
+        "stockCode": "328130",
+        "corpName": "루닛",
         "industry": "software",
         "viaCode": "004250",
         "viaName": "엔피씨",
@@ -635,25 +527,137 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "108860",
-        "viaName": "셀바스AI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
+        "stockCode": "373160",
+        "corpName": "데이원컴퍼니",
+        "industry": "education",
         "viaCode": "078340",
         "viaName": "컴투스",
         "hopDistance": 2
       },
       {
-        "stockCode": "038880",
-        "corpName": "아이에이",
+        "stockCode": "051910",
+        "corpName": "LG화학",
+        "industry": "chemical",
+        "viaCode": "004250",
+        "viaName": "엔피씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079950",
+        "corpName": "인베니아",
         "industry": "electronics",
+        "viaCode": "004250",
+        "viaName": "엔피씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "004250",
+        "viaName": "엔피씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "236810",
+        "corpName": "엔비티",
+        "industry": "software",
+        "viaCode": "063080",
+        "viaName": "컴투스홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "004250",
+        "viaName": "엔피씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "253450",
+        "corpName": "스튜디오드래곤",
+        "industry": "media",
+        "viaCode": "432430",
+        "viaName": "와이랩",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "375500",
+        "corpName": "DL이앤씨",
+        "industry": "construction",
+        "viaCode": "241840",
+        "viaName": "에이스토리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "331520",
+        "corpName": "밸로프",
+        "industry": "software",
+        "viaCode": "078340",
+        "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "241840",
+        "viaName": "에이스토리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
+        "viaCode": "078340",
+        "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011170",
+        "corpName": "롯데케미칼",
+        "industry": "chemical",
+        "viaCode": "004250",
+        "viaName": "엔피씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
+        "viaCode": "200350",
+        "viaName": "아티스트스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033270",
+        "corpName": "유나이티드",
+        "industry": "pharma",
+        "viaCode": "321820",
+        "viaName": "아티스트컴퍼니",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037460",
+        "corpName": "삼지전자",
+        "industry": "telecom",
+        "viaCode": "078340",
+        "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "238490",
+        "corpName": "힘스",
+        "industry": "electronics",
+        "viaCode": "108860",
+        "viaName": "셀바스AI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "194480",
+        "corpName": "데브시스터즈",
+        "industry": "software",
         "viaCode": "078340",
         "viaName": "컴투스",
         "hopDistance": 2
@@ -667,38 +671,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "011170",
-        "corpName": "롯데케미칼",
-        "industry": "chemical",
-        "viaCode": "004250",
-        "viaName": "엔피씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033830",
-        "corpName": "티비씨",
-        "industry": "media",
-        "viaCode": "200350",
-        "viaName": "아티스트스튜디오",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "041020",
         "corpName": "폴라리스오피스",
         "industry": "software",
@@ -707,17 +679,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "033270",
-        "corpName": "유나이티드",
-        "industry": "pharma",
-        "viaCode": "321820",
-        "viaName": "아티스트컴퍼니",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "331520",
-        "corpName": "밸로프",
-        "industry": "software",
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "078340",
         "viaName": "컴투스",
         "hopDistance": 2

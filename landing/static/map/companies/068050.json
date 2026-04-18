@@ -47,43 +47,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 30404771218.0,
-      "operating_profit": 1493706141.0,
-      "net_profit": 4001012660.0,
-      "total_assets": 111362540605.0
-    },
-    {
-      "year": "2022",
-      "sales": 25320813537.0,
-      "operating_profit": 926964239.0,
-      "net_profit": -622261774.0,
-      "total_assets": 116405629234.0
-    },
-    {
-      "year": "2023",
-      "sales": 123810641441.0,
-      "operating_profit": 4374570966.0,
-      "net_profit": 7575647925.0,
-      "total_assets": 111011561798.0
-    },
-    {
-      "year": "2024",
-      "sales": 34688548303.0,
-      "operating_profit": 128869846.0,
-      "net_profit": -3104498821.0,
-      "total_assets": 121133372014.0
-    },
-    {
-      "year": "2025",
-      "sales": 35178107167.0,
-      "operating_profit": -3472070031.0,
-      "net_profit": -8127844936.0,
-      "total_assets": 118184701576.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -135,6 +99,14 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "064260",
+        "viaName": "다날",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "018700",
         "corpName": "바른손",
         "industry": "retail",
@@ -143,17 +115,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "307930",
-        "corpName": "컴퍼니케이",
-        "industry": "finance",
-        "viaCode": "064260",
-        "viaName": "다날",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
         "viaCode": "064260",
         "viaName": "다날",
         "hopDistance": 2
@@ -167,17 +131,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "036690",
-        "corpName": "코맥스",
-        "industry": "electronics",
+        "stockCode": "307930",
+        "corpName": "컴퍼니케이",
+        "industry": "finance",
         "viaCode": "064260",
         "viaName": "다날",
         "hopDistance": 2
       },
       {
-        "stockCode": "017670",
-        "corpName": "SK텔레콤",
-        "industry": "telecom",
+        "stockCode": "036690",
+        "corpName": "코맥스",
+        "industry": "electronics",
         "viaCode": "064260",
         "viaName": "다날",
         "hopDistance": 2

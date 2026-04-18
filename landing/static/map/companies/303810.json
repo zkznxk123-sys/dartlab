@@ -78,15 +78,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2025",
-      "sales": 130343747512.0,
-      "operating_profit": 13045359378.0,
-      "net_profit": 8658257416.0,
-      "total_assets": 217626925229.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -147,27 +139,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "204840",
-        "corpName": "지엘팜텍",
-        "industry": "realestate",
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
         "viaCode": "086450",
         "viaName": "동국제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "086450",
-        "viaName": "동국제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001200",
-        "corpName": "유진증권",
-        "industry": "finance",
-        "viaCode": "0007J0",
-        "viaName": "인벤테라",
         "hopDistance": 2
       },
       {
@@ -179,16 +155,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001540",
-        "corpName": "안국약품",
-        "industry": "pharma",
-        "viaCode": "086450",
-        "viaName": "동국제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "304360",
-        "corpName": "에스바이오메딕스",
+        "stockCode": "204840",
+        "corpName": "지엘팜텍",
         "industry": "realestate",
         "viaCode": "086450",
         "viaName": "동국제약",
@@ -203,16 +171,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "086450",
-        "viaName": "동국제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "249420",
-        "corpName": "일동제약",
+        "stockCode": "001540",
+        "corpName": "안국약품",
         "industry": "pharma",
         "viaCode": "086450",
         "viaName": "동국제약",
@@ -227,9 +187,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004310",
-        "corpName": "현대약품",
+        "stockCode": "304360",
+        "corpName": "에스바이오메딕스",
+        "industry": "realestate",
+        "viaCode": "086450",
+        "viaName": "동국제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "249420",
+        "corpName": "일동제약",
         "industry": "pharma",
+        "viaCode": "086450",
+        "viaName": "동국제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "145020",
+        "corpName": "휴젤",
+        "industry": "pharma",
+        "viaCode": "086450",
+        "viaName": "동국제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001200",
+        "corpName": "유진증권",
+        "industry": "finance",
+        "viaCode": "0007J0",
+        "viaName": "인벤테라",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000810",
+        "corpName": "삼성화재해상보험",
+        "industry": "finance",
         "viaCode": "086450",
         "viaName": "동국제약",
         "hopDistance": 2
@@ -243,17 +235,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000810",
-        "corpName": "삼성화재해상보험",
-        "industry": "finance",
+        "stockCode": "004310",
+        "corpName": "현대약품",
+        "industry": "pharma",
         "viaCode": "086450",
         "viaName": "동국제약",
         "hopDistance": 2
       },
       {
-        "stockCode": "145020",
-        "corpName": "휴젤",
-        "industry": "pharma",
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "086450",
         "viaName": "동국제약",
         "hopDistance": 2

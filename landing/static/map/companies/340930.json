@@ -47,43 +47,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 29355057248.0,
-      "operating_profit": -5817195175.0,
-      "net_profit": -2361387624.0,
-      "total_assets": 88853255733.0
-    },
-    {
-      "year": "2022",
-      "sales": 47468577156.0,
-      "operating_profit": -19282004973.0,
-      "net_profit": 14477765505.0,
-      "total_assets": 156003228014.0
-    },
-    {
-      "year": "2023",
-      "sales": 38507805865.0,
-      "operating_profit": -10108980369.0,
-      "net_profit": -13224110578.0,
-      "total_assets": 174510680249.0
-    },
-    {
-      "year": "2024",
-      "sales": 59689568831.0,
-      "operating_profit": -16722746774.0,
-      "net_profit": -28707577238.0,
-      "total_assets": 168762499779.0
-    },
-    {
-      "year": "2025",
-      "sales": 60014953095.0,
-      "operating_profit": -2713122013.0,
-      "net_profit": 0.0,
-      "total_assets": 175737293292.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -135,9 +99,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
+        "stockCode": "315640",
+        "corpName": "딥노이드",
+        "industry": "software",
         "viaCode": "001720",
         "viaName": "신영증권",
         "hopDistance": 2
@@ -151,57 +115,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006400",
-        "corpName": "삼성SDI",
-        "industry": "chemical",
-        "viaCode": "001720",
-        "viaName": "신영증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000660",
-        "corpName": "SK하이닉스",
-        "industry": "semiconductor",
-        "viaCode": "001720",
-        "viaName": "신영증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078520",
-        "corpName": "에이블씨엔씨",
-        "industry": "realestate",
-        "viaCode": "001720",
-        "viaName": "신영증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003690",
-        "corpName": "코리안리",
-        "industry": "realestate",
-        "viaCode": "001720",
-        "viaName": "신영증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003200",
-        "corpName": "일신방직",
-        "industry": "textile",
-        "viaCode": "001720",
-        "viaName": "신영증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000100",
-        "corpName": "유한양행",
-        "industry": "pharma",
-        "viaCode": "001720",
-        "viaName": "신영증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "212560",
-        "corpName": "네오오토",
-        "industry": "auto",
+        "stockCode": "009580",
+        "corpName": "무림P&P",
+        "industry": "paper",
         "viaCode": "001720",
         "viaName": "신영증권",
         "hopDistance": 2
@@ -215,57 +131,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "036460",
-        "corpName": "한국가스공사",
-        "industry": "energy",
-        "viaCode": "001720",
-        "viaName": "신영증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003540",
-        "corpName": "대신증권",
-        "industry": "finance",
-        "viaCode": "001720",
-        "viaName": "신영증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010140",
-        "corpName": "삼성중공업",
-        "industry": "shipbuilding",
-        "viaCode": "001720",
-        "viaName": "신영증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009580",
-        "corpName": "무림P&P",
-        "industry": "paper",
-        "viaCode": "001720",
-        "viaName": "신영증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "457370",
-        "corpName": "한켐",
-        "industry": "electronics",
-        "viaCode": "001720",
-        "viaName": "신영증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "452400",
-        "corpName": "이닉스",
-        "industry": "semiconductor",
-        "viaCode": "001720",
-        "viaName": "신영증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "315640",
-        "corpName": "딥노이드",
-        "industry": "software",
+        "stockCode": "006400",
+        "corpName": "삼성SDI",
+        "industry": "chemical",
         "viaCode": "001720",
         "viaName": "신영증권",
         "hopDistance": 2
@@ -274,14 +142,6 @@
         "stockCode": "130740",
         "corpName": "티피씨글로벌",
         "industry": "semiconductor",
-        "viaCode": "001720",
-        "viaName": "신영증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
         "viaCode": "001720",
         "viaName": "신영증권",
         "hopDistance": 2
@@ -303,6 +163,102 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "000100",
+        "corpName": "유한양행",
+        "industry": "pharma",
+        "viaCode": "001720",
+        "viaName": "신영증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078520",
+        "corpName": "에이블씨엔씨",
+        "industry": "realestate",
+        "viaCode": "001720",
+        "viaName": "신영증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
+        "viaCode": "001720",
+        "viaName": "신영증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003690",
+        "corpName": "코리안리",
+        "industry": "realestate",
+        "viaCode": "001720",
+        "viaName": "신영증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010140",
+        "corpName": "삼성중공업",
+        "industry": "shipbuilding",
+        "viaCode": "001720",
+        "viaName": "신영증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
+        "viaCode": "001720",
+        "viaName": "신영증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "001720",
+        "viaName": "신영증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003200",
+        "corpName": "일신방직",
+        "industry": "textile",
+        "viaCode": "001720",
+        "viaName": "신영증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036460",
+        "corpName": "한국가스공사",
+        "industry": "energy",
+        "viaCode": "001720",
+        "viaName": "신영증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "212560",
+        "corpName": "네오오토",
+        "industry": "auto",
+        "viaCode": "001720",
+        "viaName": "신영증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003540",
+        "corpName": "대신증권",
+        "industry": "finance",
+        "viaCode": "001720",
+        "viaName": "신영증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "457370",
+        "corpName": "한켐",
+        "industry": "electronics",
+        "viaCode": "001720",
+        "viaName": "신영증권",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "102370",
         "corpName": "케이옥션",
         "industry": "retail",
@@ -314,6 +270,14 @@
         "stockCode": "011690",
         "corpName": "와이투솔루션",
         "industry": "electrical",
+        "viaCode": "001720",
+        "viaName": "신영증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "001720",
         "viaName": "신영증권",
         "hopDistance": 2

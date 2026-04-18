@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 72814044111.0,
-      "operating_profit": 975681046.0,
-      "net_profit": 91870683.0,
-      "total_assets": 50427381590.0
-    },
-    {
-      "year": "2022",
-      "sales": 90123541702.0,
-      "operating_profit": 3561139120.0,
-      "net_profit": 1867089453.0,
-      "total_assets": 56171310065.0
-    },
-    {
-      "year": "2023",
-      "sales": 111406314393.0,
-      "operating_profit": 12140843614.0,
-      "net_profit": 8269776212.0,
-      "total_assets": 68799934958.0
-    },
-    {
-      "year": "2024",
-      "sales": 100477953541.0,
-      "operating_profit": 2730347492.0,
-      "net_profit": 2047974314.0,
-      "total_assets": 68906078612.0
-    },
-    {
-      "year": "2025",
-      "sales": 81161016764.0,
-      "operating_profit": -2959160872.0,
-      "net_profit": -3504529410.0,
-      "total_assets": 59790459998.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -132,49 +96,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "007680",
-        "viaName": "대원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "296160",
-        "corpName": "프로젠",
-        "industry": "pharma",
-        "viaCode": "007680",
-        "viaName": "대원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032830",
-        "corpName": "삼성생명",
-        "industry": "finance",
-        "viaCode": "007680",
-        "viaName": "대원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "262260",
-        "corpName": "에이프로",
-        "industry": "electrical",
-        "viaCode": "007680",
-        "viaName": "대원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "460860",
-        "corpName": "동국제강",
-        "industry": "steel",
-        "viaCode": "007680",
-        "viaName": "대원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "260970",
-        "corpName": "에스앤디",
-        "industry": "pharma",
+        "stockCode": "023410",
+        "corpName": "유진기업",
+        "industry": "construction",
         "viaCode": "007680",
         "viaName": "대원",
         "hopDistance": 2
@@ -188,33 +112,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "023410",
-        "corpName": "유진기업",
-        "industry": "construction",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
         "viaCode": "007680",
         "viaName": "대원",
         "hopDistance": 2
       },
       {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "007680",
-        "viaName": "대원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007460",
-        "corpName": "에이프로젠",
-        "industry": "realestate",
-        "viaCode": "007680",
-        "viaName": "대원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "300720",
-        "corpName": "한일시멘트",
-        "industry": "construction",
+        "stockCode": "260970",
+        "corpName": "에스앤디",
+        "industry": "pharma",
         "viaCode": "007680",
         "viaName": "대원",
         "hopDistance": 2
@@ -231,6 +139,62 @@
         "stockCode": "007280",
         "corpName": "한국특강",
         "industry": "steel",
+        "viaCode": "007680",
+        "viaName": "대원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "300720",
+        "corpName": "한일시멘트",
+        "industry": "construction",
+        "viaCode": "007680",
+        "viaName": "대원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "296160",
+        "corpName": "프로젠",
+        "industry": "pharma",
+        "viaCode": "007680",
+        "viaName": "대원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007460",
+        "corpName": "에이프로젠",
+        "industry": "realestate",
+        "viaCode": "007680",
+        "viaName": "대원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032830",
+        "corpName": "삼성생명",
+        "industry": "finance",
+        "viaCode": "007680",
+        "viaName": "대원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "460860",
+        "corpName": "동국제강",
+        "industry": "steel",
+        "viaCode": "007680",
+        "viaName": "대원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "262260",
+        "corpName": "에이프로",
+        "industry": "electrical",
+        "viaCode": "007680",
+        "viaName": "대원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
         "viaCode": "007680",
         "viaName": "대원",
         "hopDistance": 2

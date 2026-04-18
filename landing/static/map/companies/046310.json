@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 156463304257.0,
-      "operating_profit": 9952773877.0,
-      "net_profit": 0.0,
-      "total_assets": 103285948178.0
-    },
-    {
-      "year": "2022",
-      "sales": 147603183932.0,
-      "operating_profit": 15339889216.0,
-      "net_profit": 0.0,
-      "total_assets": 119050331684.0
-    },
-    {
-      "year": "2023",
-      "sales": 170733617690.0,
-      "operating_profit": 17094548304.0,
-      "net_profit": 18683426462.0,
-      "total_assets": 139344947875.0
-    },
-    {
-      "year": "2024",
-      "sales": 152492730341.0,
-      "operating_profit": 12733328552.0,
-      "net_profit": 13252934554.0,
-      "total_assets": 132448341513.0
-    },
-    {
-      "year": "2025",
-      "sales": 148922256530.0,
-      "operating_profit": 6790460254.0,
-      "net_profit": 0.0,
-      "total_assets": 126288878155.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,9 +87,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "365900",
-        "corpName": "브이씨",
-        "industry": "leisure",
+        "stockCode": "331380",
+        "corpName": "포커스에이아이",
+        "industry": "machinery",
+        "viaCode": "318020",
+        "viaName": "포인트모바일",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "259630",
+        "corpName": "엠플러스",
+        "industry": "machinery",
+        "viaCode": "318020",
+        "viaName": "포인트모바일",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031330",
+        "corpName": "에스에이엠티",
+        "industry": "electronics",
         "viaCode": "318020",
         "viaName": "포인트모바일",
         "hopDistance": 2
@@ -147,33 +127,17 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "365900",
+        "corpName": "브이씨",
+        "industry": "leisure",
+        "viaCode": "318020",
+        "viaName": "포인트모바일",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "232530",
         "corpName": "이엠티",
         "industry": "semiconductor",
-        "viaCode": "318020",
-        "viaName": "포인트모바일",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "331380",
-        "corpName": "포커스에이아이",
-        "industry": "machinery",
-        "viaCode": "318020",
-        "viaName": "포인트모바일",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "259630",
-        "corpName": "엠플러스",
-        "industry": "machinery",
-        "viaCode": "318020",
-        "viaName": "포인트모바일",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031330",
-        "corpName": "에스에이엠티",
-        "industry": "electronics",
         "viaCode": "318020",
         "viaName": "포인트모바일",
         "hopDistance": 2

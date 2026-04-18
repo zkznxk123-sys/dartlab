@@ -142,43 +142,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 25873630109.0,
-      "operating_profit": -3834264355.0,
-      "net_profit": -6816592071.0,
-      "total_assets": 118522515486.0
-    },
-    {
-      "year": "2022",
-      "sales": 27801755545.0,
-      "operating_profit": -6224291882.0,
-      "net_profit": -12968026228.0,
-      "total_assets": 133914215716.0
-    },
-    {
-      "year": "2023",
-      "sales": 27008338286.0,
-      "operating_profit": -9463584731.0,
-      "net_profit": -721746907.0,
-      "total_assets": 97862900886.0
-    },
-    {
-      "year": "2024",
-      "sales": 35429798360.0,
-      "operating_profit": -1876477095.0,
-      "net_profit": -17932729839.0,
-      "total_assets": 146261606578.0
-    },
-    {
-      "year": "2025",
-      "sales": 43370322639.0,
-      "operating_profit": 1205667836.0,
-      "net_profit": 22897764050.0,
-      "total_assets": 135828589557.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -230,257 +194,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "067630",
-        "viaName": "HLB생명과학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "065450",
-        "corpName": "빅텍",
-        "industry": "machinery",
-        "viaCode": "028300",
-        "viaName": "HLB",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007660",
-        "corpName": "이수페타시스",
-        "industry": "electronics",
-        "viaCode": "086890",
-        "viaName": "이수앱지스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "067630",
-        "viaName": "HLB생명과학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "047820",
-        "corpName": "초록뱀미디어",
-        "industry": "telecom",
-        "viaCode": "003580",
-        "viaName": "HLB글로벌",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024850",
-        "corpName": "HLB이노베이션",
-        "industry": "semiconductor",
-        "viaCode": "067630",
-        "viaName": "HLB생명과학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "047920",
-        "corpName": "HLB제약",
-        "industry": "pharma",
-        "viaCode": "067630",
-        "viaName": "HLB생명과학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "241710",
-        "corpName": "코스메카코리아",
-        "industry": "cosmetics",
-        "viaCode": "003580",
-        "viaName": "HLB글로벌",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038530",
-        "corpName": "케이바이오",
-        "industry": "retail",
-        "viaCode": "067630",
-        "viaName": "HLB생명과학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038070",
-        "corpName": "서린바이오",
-        "industry": "retail",
-        "viaCode": "086890",
-        "viaName": "이수앱지스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001360",
-        "corpName": "삼성제약",
-        "industry": "food",
-        "viaCode": "028300",
-        "viaName": "HLB",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "225220",
-        "corpName": "제놀루션",
-        "industry": "software",
-        "viaCode": "046210",
-        "viaName": "HLB파나진",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "115450",
-        "corpName": "HLB테라퓨틱스",
-        "industry": "retail",
-        "viaCode": "067630",
-        "viaName": "HLB생명과학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "389650",
-        "corpName": "넥스트바이오메디컬",
-        "industry": "pharma",
-        "viaCode": "278650",
-        "viaName": "HLB바이오스텝",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "346010",
-        "corpName": "타이드",
-        "industry": "electronics",
-        "viaCode": "278650",
-        "viaName": "HLB바이오스텝",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002210",
-        "corpName": "동성제약",
-        "industry": "food",
-        "viaCode": "028300",
-        "viaName": "HLB",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "389470",
         "corpName": "인벤티지랩",
         "industry": "software",
-        "viaCode": "028300",
-        "viaName": "HLB",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003240",
-        "corpName": "태광산업",
-        "industry": "chemical",
-        "viaCode": "028300",
-        "viaName": "HLB",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "196300",
-        "corpName": "HLB펩",
-        "industry": "pharma",
-        "viaCode": "067630",
-        "viaName": "HLB생명과학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "352820",
-        "corpName": "하이브",
-        "industry": "media",
-        "viaCode": "086890",
-        "viaName": "이수앱지스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "226330",
-        "corpName": "신테카바이오",
-        "industry": "software",
-        "viaCode": "086890",
-        "viaName": "이수앱지스",
+        "viaCode": "278650",
+        "viaName": "HLB바이오스텝",
         "hopDistance": 2
       },
       {
         "stockCode": "217730",
         "corpName": "강스템바이오텍",
         "industry": "pharma",
-        "viaCode": "028300",
-        "viaName": "HLB",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101400",
-        "corpName": "엔시트론",
-        "industry": "semiconductor",
-        "viaCode": "003580",
-        "viaName": "HLB글로벌",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "457190",
-        "corpName": "이수스페셜티케미컬",
-        "industry": "chemical",
-        "viaCode": "086890",
-        "viaName": "이수앱지스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "214260",
-        "corpName": "라파스",
-        "industry": "pharma",
-        "viaCode": "278650",
-        "viaName": "HLB바이오스텝",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "109610",
-        "corpName": "에스와이",
-        "industry": "electronics",
-        "viaCode": "028300",
-        "viaName": "HLB",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "309960",
-        "corpName": "LB인베스트먼트",
-        "industry": "finance",
-        "viaCode": "067630",
-        "viaName": "HLB생명과학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "091120",
-        "corpName": "이엠텍",
-        "industry": "electronics",
-        "viaCode": "028300",
-        "viaName": "HLB",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
-        "viaCode": "028300",
-        "viaName": "HLB",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "261520",
-        "corpName": "이지스",
-        "industry": "software",
-        "viaCode": "086890",
-        "viaName": "이수앱지스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "067630",
-        "viaName": "HLB생명과학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
         "viaCode": "028300",
         "viaName": "HLB",
         "hopDistance": 2
@@ -494,6 +218,22 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "038070",
+        "corpName": "서린바이오",
+        "industry": "retail",
+        "viaCode": "086890",
+        "viaName": "이수앱지스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "225220",
+        "corpName": "제놀루션",
+        "industry": "software",
+        "viaCode": "046210",
+        "viaName": "HLB파나진",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "017890",
         "corpName": "한국알콜",
         "industry": "chemical",
@@ -502,9 +242,137 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "278650",
+        "viaName": "HLB바이오스텝",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "389650",
+        "corpName": "넥스트바이오메디컬",
+        "industry": "pharma",
+        "viaCode": "278650",
+        "viaName": "HLB바이오스텝",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001360",
+        "corpName": "삼성제약",
+        "industry": "food",
+        "viaCode": "028300",
+        "viaName": "HLB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "241710",
+        "corpName": "코스메카코리아",
+        "industry": "cosmetics",
+        "viaCode": "003580",
+        "viaName": "HLB글로벌",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352820",
+        "corpName": "하이브",
+        "industry": "media",
+        "viaCode": "086890",
+        "viaName": "이수앱지스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047920",
+        "corpName": "HLB제약",
+        "industry": "pharma",
+        "viaCode": "003580",
+        "viaName": "HLB글로벌",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "196300",
+        "corpName": "HLB펩",
+        "industry": "pharma",
+        "viaCode": "003580",
+        "viaName": "HLB글로벌",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "043220",
         "corpName": "티에스넥스젠",
         "industry": "energy",
+        "viaCode": "028300",
+        "viaName": "HLB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005950",
+        "corpName": "이수화학",
+        "industry": "food",
+        "viaCode": "086890",
+        "viaName": "이수앱지스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "028300",
+        "viaName": "HLB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "067630",
+        "viaName": "HLB생명과학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "086890",
+        "viaName": "이수앱지스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003240",
+        "corpName": "태광산업",
+        "industry": "chemical",
+        "viaCode": "028300",
+        "viaName": "HLB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "457190",
+        "corpName": "이수스페셜티케미컬",
+        "industry": "chemical",
+        "viaCode": "086890",
+        "viaName": "이수앱지스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
+        "viaCode": "028300",
+        "viaName": "HLB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091120",
+        "corpName": "이엠텍",
+        "industry": "electronics",
+        "viaCode": "028300",
+        "viaName": "HLB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
         "viaCode": "028300",
         "viaName": "HLB",
         "hopDistance": 2
@@ -526,9 +394,105 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005950",
-        "corpName": "이수화학",
+        "stockCode": "115450",
+        "corpName": "HLB테라퓨틱스",
+        "industry": "retail",
+        "viaCode": "003580",
+        "viaName": "HLB글로벌",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "003580",
+        "viaName": "HLB글로벌",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024850",
+        "corpName": "HLB이노베이션",
+        "industry": "semiconductor",
+        "viaCode": "003580",
+        "viaName": "HLB글로벌",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "309960",
+        "corpName": "LB인베스트먼트",
+        "industry": "finance",
+        "viaCode": "003580",
+        "viaName": "HLB글로벌",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002210",
+        "corpName": "동성제약",
         "industry": "food",
+        "viaCode": "028300",
+        "viaName": "HLB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038530",
+        "corpName": "케이바이오",
+        "industry": "retail",
+        "viaCode": "067630",
+        "viaName": "HLB생명과학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065450",
+        "corpName": "빅텍",
+        "industry": "machinery",
+        "viaCode": "028300",
+        "viaName": "HLB",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "346010",
+        "corpName": "타이드",
+        "industry": "electronics",
+        "viaCode": "003580",
+        "viaName": "HLB글로벌",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047820",
+        "corpName": "초록뱀미디어",
+        "industry": "telecom",
+        "viaCode": "003580",
+        "viaName": "HLB글로벌",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101400",
+        "corpName": "엔시트론",
+        "industry": "semiconductor",
+        "viaCode": "003580",
+        "viaName": "HLB글로벌",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214260",
+        "corpName": "라파스",
+        "industry": "pharma",
+        "viaCode": "278650",
+        "viaName": "HLB바이오스텝",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007660",
+        "corpName": "이수페타시스",
+        "industry": "electronics",
+        "viaCode": "086890",
+        "viaName": "이수앱지스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "226330",
+        "corpName": "신테카바이오",
+        "industry": "software",
         "viaCode": "086890",
         "viaName": "이수앱지스",
         "hopDistance": 2

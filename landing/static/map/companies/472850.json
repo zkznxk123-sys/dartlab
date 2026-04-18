@@ -78,29 +78,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2023",
-      "sales": 2781338079.0,
-      "operating_profit": 667627775.0,
-      "net_profit": 0.0,
-      "total_assets": 338705426606.0
-    },
-    {
-      "year": "2024",
-      "sales": 368653108555.0,
-      "operating_profit": 41322955438.0,
-      "net_profit": 1968366816.0,
-      "total_assets": 422742763482.0
-    },
-    {
-      "year": "2025",
-      "sales": 485569158574.0,
-      "operating_profit": 57377364737.0,
-      "net_profit": 0.0,
-      "total_assets": 483730995353.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -152,16 +130,24 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
+        "stockCode": "024110",
+        "corpName": "기업은행",
         "industry": "finance",
         "viaCode": "080420",
         "viaName": "모다이노칩",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "033290",
+        "viaName": "로젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
         "industry": "finance",
         "viaCode": "080420",
         "viaName": "모다이노칩",
@@ -173,14 +159,6 @@
         "industry": "semiconductor",
         "viaCode": "080420",
         "viaName": "모다이노칩",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "033290",
-        "viaName": "로젠",
         "hopDistance": 2
       },
       {

@@ -66,36 +66,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 13458885814.0,
-      "operating_profit": -11814911419.0,
-      "net_profit": -14696317737.0,
-      "total_assets": 21600497653.0
-    },
-    {
-      "year": "2022",
-      "sales": 21300638514.0,
-      "operating_profit": 827152649.0,
-      "net_profit": 504778223.0,
-      "total_assets": 22906097446.0
-    },
-    {
-      "year": "2023",
-      "sales": 14413036040.0,
-      "operating_profit": -3022997841.0,
-      "net_profit": -4027424144.0,
-      "total_assets": 24394158428.0
-    },
-    {
-      "year": "2025",
-      "sales": 3580740155.0,
-      "operating_profit": -3415077910.0,
-      "net_profit": -12761902790.0,
-      "total_assets": 18440910502.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -147,17 +118,33 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
+        "stockCode": "377030",
+        "corpName": "비트맥스",
+        "industry": "software",
         "viaCode": "223310",
         "viaName": "사토시홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
+        "viaCode": "060900",
+        "viaName": "에이전트AI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "098660",
+        "corpName": "에스티오",
+        "industry": "textile",
+        "viaCode": "223310",
+        "viaName": "사토시홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
         "viaCode": "223310",
         "viaName": "사토시홀딩스",
         "hopDistance": 2
@@ -171,17 +158,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "093510",
-        "corpName": "엔지브이아이",
-        "industry": "energy",
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
         "viaCode": "060900",
         "viaName": "에이전트AI",
         "hopDistance": 2
       },
       {
-        "stockCode": "109610",
-        "corpName": "에스와이",
-        "industry": "electronics",
+        "stockCode": "095910",
+        "corpName": "에스에너지",
+        "industry": "energy",
         "viaCode": "060900",
         "viaName": "에이전트AI",
         "hopDistance": 2
@@ -195,32 +182,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "377030",
-        "corpName": "비트맥스",
-        "industry": "software",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
         "viaCode": "223310",
         "viaName": "사토시홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "098660",
-        "corpName": "에스티오",
-        "industry": "textile",
-        "viaCode": "223310",
-        "viaName": "사토시홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
-        "viaCode": "060900",
-        "viaName": "에이전트AI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095910",
-        "corpName": "에스에너지",
+        "stockCode": "093510",
+        "corpName": "엔지브이아이",
         "industry": "energy",
         "viaCode": "060900",
         "viaName": "에이전트AI",

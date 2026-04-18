@@ -59,36 +59,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 11554370648.0,
-      "operating_profit": -4564202656.0,
-      "net_profit": 0.0,
-      "total_assets": 48398806920.0
-    },
-    {
-      "year": "2022",
-      "sales": 6217222081.0,
-      "operating_profit": -5914319418.0,
-      "net_profit": -7149077432.0,
-      "total_assets": 48835384515.0
-    },
-    {
-      "year": "2023",
-      "sales": 25029807561.0,
-      "operating_profit": -1062362267.0,
-      "net_profit": -2485154547.0,
-      "total_assets": 50901786770.0
-    },
-    {
-      "year": "2025",
-      "sales": 11082330000.0,
-      "operating_profit": -2124801207.0,
-      "net_profit": -7330579133.0,
-      "total_assets": 52886257303.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -149,46 +120,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "003470",
-        "corpName": "유안타증권",
-        "industry": "finance",
-        "viaCode": "137400",
-        "viaName": "피엔티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006040",
-        "corpName": "동원산업",
-        "industry": "finance",
-        "viaCode": "137400",
-        "viaName": "피엔티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005810",
-        "corpName": "풍산홀딩스",
-        "industry": "retail",
-        "viaCode": "137400",
-        "viaName": "피엔티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "103140",
-        "corpName": "풍산",
-        "industry": "steel",
-        "viaCode": "137400",
-        "viaName": "피엔티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011200",
-        "corpName": "HMM",
-        "industry": "shipbuilding",
-        "viaCode": "137400",
-        "viaName": "피엔티",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "270660",
         "corpName": "에브리봇",
         "industry": "machinery",
@@ -205,6 +136,22 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "018250",
+        "corpName": "애경산업",
+        "industry": "chemical",
+        "viaCode": "137400",
+        "viaName": "피엔티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011200",
+        "corpName": "HMM",
+        "industry": "shipbuilding",
+        "viaCode": "137400",
+        "viaName": "피엔티",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "014820",
         "corpName": "동원시스템즈",
         "industry": "plastic",
@@ -213,9 +160,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "018250",
-        "corpName": "애경산업",
-        "industry": "chemical",
+        "stockCode": "003470",
+        "corpName": "유안타증권",
+        "industry": "finance",
+        "viaCode": "137400",
+        "viaName": "피엔티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "103140",
+        "corpName": "풍산",
+        "industry": "steel",
+        "viaCode": "137400",
+        "viaName": "피엔티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006040",
+        "corpName": "동원산업",
+        "industry": "finance",
+        "viaCode": "137400",
+        "viaName": "피엔티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005810",
+        "corpName": "풍산홀딩스",
+        "industry": "retail",
         "viaCode": "137400",
         "viaName": "피엔티",
         "hopDistance": 2

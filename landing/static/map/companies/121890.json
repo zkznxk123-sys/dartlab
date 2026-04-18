@@ -35,36 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 21417406015.0,
-      "operating_profit": 1670521438.0,
-      "net_profit": 2408783097.0,
-      "total_assets": 14230200528.0
-    },
-    {
-      "year": "2022",
-      "sales": 22496607372.0,
-      "operating_profit": -730035431.0,
-      "net_profit": -602631970.0,
-      "total_assets": 13338530392.0
-    },
-    {
-      "year": "2023",
-      "sales": 21295259282.0,
-      "operating_profit": 1026101676.0,
-      "net_profit": 2637243723.0,
-      "total_assets": 14611073392.0
-    },
-    {
-      "year": "2025",
-      "sales": 28793598189.0,
-      "operating_profit": 1101090892.0,
-      "net_profit": 0.0,
-      "total_assets": 20151089281.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -116,6 +87,22 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "065950",
+        "corpName": "웰크론",
+        "industry": "electronics",
+        "viaCode": "114190",
+        "viaName": "강원에너지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "238090",
+        "corpName": "앤디포스",
+        "industry": "plastic",
+        "viaCode": "114190",
+        "viaName": "강원에너지",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "076080",
         "corpName": "웰크론한텍",
         "industry": "machinery",
@@ -132,14 +119,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "238090",
-        "corpName": "앤디포스",
-        "industry": "plastic",
-        "viaCode": "114190",
-        "viaName": "강원에너지",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "244460",
         "corpName": "올리패스",
         "industry": "software",
@@ -148,9 +127,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "065950",
-        "corpName": "웰크론",
-        "industry": "electronics",
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
         "viaCode": "114190",
         "viaName": "강원에너지",
         "hopDistance": 2
@@ -159,14 +138,6 @@
         "stockCode": "247540",
         "corpName": "에코프로비엠",
         "industry": "chemical",
-        "viaCode": "114190",
-        "viaName": "강원에너지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
         "viaCode": "114190",
         "viaName": "강원에너지",
         "hopDistance": 2

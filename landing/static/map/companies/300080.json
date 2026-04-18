@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 9338274470.0,
-      "operating_profit": -6143736170.0,
-      "net_profit": -5780518467.0,
-      "total_assets": 27908487263.0
-    },
-    {
-      "year": "2022",
-      "sales": 13639437063.0,
-      "operating_profit": -6595175443.0,
-      "net_profit": -5868323015.0,
-      "total_assets": 24767706232.0
-    },
-    {
-      "year": "2023",
-      "sales": 17761267682.0,
-      "operating_profit": -5094024751.0,
-      "net_profit": -6792796311.0,
-      "total_assets": 15771081295.0
-    },
-    {
-      "year": "2024",
-      "sales": 20300590454.0,
-      "operating_profit": -396344850.0,
-      "net_profit": 0.0,
-      "total_assets": 16537997958.0
-    },
-    {
-      "year": "2025",
-      "sales": 35979641976.0,
-      "operating_profit": 6153818311.0,
-      "net_profit": 6448160859.0,
-      "total_assets": 24575168335.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,33 +87,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "035900",
-        "viaName": "JYP Ent.",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060570",
-        "corpName": "드림어스컴퍼니",
-        "industry": "media",
-        "viaCode": "035900",
-        "viaName": "JYP Ent.",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "376300",
         "corpName": "디어유",
         "industry": "software",
-        "viaCode": "035900",
-        "viaName": "JYP Ent.",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
         "viaCode": "035900",
         "viaName": "JYP Ent.",
         "hopDistance": 2
@@ -166,6 +106,30 @@
         "stockCode": "389140",
         "corpName": "포바이포",
         "industry": "media",
+        "viaCode": "035900",
+        "viaName": "JYP Ent.",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060570",
+        "corpName": "드림어스컴퍼니",
+        "industry": "media",
+        "viaCode": "035900",
+        "viaName": "JYP Ent.",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "035900",
+        "viaName": "JYP Ent.",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "035900",
         "viaName": "JYP Ent.",
         "hopDistance": 2

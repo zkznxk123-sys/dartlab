@@ -66,36 +66,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2022",
-      "sales": 30646652687.0,
-      "operating_profit": 3325158156.0,
-      "net_profit": 1579351983.0,
-      "total_assets": 31574199785.0
-    },
-    {
-      "year": "2023",
-      "sales": 35972131511.0,
-      "operating_profit": 228744749.0,
-      "net_profit": 909220408.0,
-      "total_assets": 43878353788.0
-    },
-    {
-      "year": "2024",
-      "sales": 35589253012.0,
-      "operating_profit": -194541468.0,
-      "net_profit": 1714323656.0,
-      "total_assets": 45466335416.0
-    },
-    {
-      "year": "2025",
-      "sales": 37833534051.0,
-      "operating_profit": 2878432232.0,
-      "net_profit": null,
-      "total_assets": 56394234998.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -147,17 +118,41 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "279570",
-        "corpName": "케이뱅크",
-        "industry": "finance",
+        "stockCode": "462870",
+        "corpName": "시프트업",
+        "industry": "software",
+        "viaCode": "112040",
+        "viaName": "위메이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004250",
+        "corpName": "엔피씨",
+        "industry": "auto",
         "viaCode": "078340",
         "viaName": "컴투스",
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "078340",
+        "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038880",
+        "corpName": "아이에이",
+        "industry": "electronics",
+        "viaCode": "078340",
+        "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
         "viaCode": "078340",
         "viaName": "컴투스",
         "hopDistance": 2
@@ -179,168 +174,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "194480",
-        "corpName": "데브시스터즈",
-        "industry": "software",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "200350",
         "corpName": "아티스트스튜디오",
-        "industry": "media",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "121800",
-        "corpName": "비덴트",
-        "industry": "electronics",
-        "viaCode": "112040",
-        "viaName": "위메이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004250",
-        "corpName": "엔피씨",
-        "industry": "auto",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "112040",
-        "viaName": "위메이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037460",
-        "corpName": "삼지전자",
-        "industry": "telecom",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "373160",
-        "corpName": "데이원컴퍼니",
-        "industry": "education",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "361570",
-        "corpName": "알비더블유",
-        "industry": "media",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
-        "viaCode": "112040",
-        "viaName": "위메이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
-        "viaCode": "112040",
-        "viaName": "위메이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "291230",
-        "corpName": "엔피",
-        "industry": "textile",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017670",
-        "corpName": "SK텔레콤",
-        "industry": "telecom",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095660",
-        "corpName": "네오위즈",
-        "industry": "software",
-        "viaCode": "112040",
-        "viaName": "위메이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "063080",
-        "corpName": "컴투스홀딩스",
-        "industry": "software",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "462870",
-        "corpName": "시프트업",
-        "industry": "software",
-        "viaCode": "112040",
-        "viaName": "위메이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "069080",
-        "corpName": "웹젠",
-        "industry": "software",
-        "viaCode": "112040",
-        "viaName": "위메이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038880",
-        "corpName": "아이에이",
-        "industry": "electronics",
-        "viaCode": "078340",
-        "viaName": "컴투스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123420",
-        "corpName": "위메이드플레이",
-        "industry": "software",
-        "viaCode": "112040",
-        "viaName": "위메이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "299900",
-        "corpName": "위지윅스튜디오",
         "industry": "media",
         "viaCode": "078340",
         "viaName": "컴투스",
@@ -355,11 +190,123 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
+        "viaCode": "112040",
+        "viaName": "위메이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123420",
+        "corpName": "위메이드플레이",
+        "industry": "software",
+        "viaCode": "112040",
+        "viaName": "위메이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069080",
+        "corpName": "웹젠",
+        "industry": "software",
+        "viaCode": "112040",
+        "viaName": "위메이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "279570",
+        "corpName": "케이뱅크",
+        "industry": "finance",
         "viaCode": "078340",
         "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "063080",
+        "corpName": "컴투스홀딩스",
+        "industry": "software",
+        "viaCode": "078340",
+        "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "361570",
+        "corpName": "알비더블유",
+        "industry": "media",
+        "viaCode": "078340",
+        "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "373160",
+        "corpName": "데이원컴퍼니",
+        "industry": "education",
+        "viaCode": "078340",
+        "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "291230",
+        "corpName": "엔피",
+        "industry": "textile",
+        "viaCode": "078340",
+        "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "112040",
+        "viaName": "위메이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "112040",
+        "viaName": "위메이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "299900",
+        "corpName": "위지윅스튜디오",
+        "industry": "media",
+        "viaCode": "078340",
+        "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "078340",
+        "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
+        "viaCode": "078340",
+        "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "121800",
+        "corpName": "비덴트",
+        "industry": "electronics",
+        "viaCode": "112040",
+        "viaName": "위메이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095660",
+        "corpName": "네오위즈",
+        "industry": "software",
+        "viaCode": "112040",
+        "viaName": "위메이드",
         "hopDistance": 2
       },
       {
@@ -371,11 +318,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
+        "stockCode": "037460",
+        "corpName": "삼지전자",
+        "industry": "telecom",
+        "viaCode": "078340",
+        "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "194480",
+        "corpName": "데브시스터즈",
+        "industry": "software",
+        "viaCode": "078340",
+        "viaName": "컴투스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
         "viaCode": "112040",
         "viaName": "위메이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "078340",
+        "viaName": "컴투스",
         "hopDistance": 2
       }
     ],

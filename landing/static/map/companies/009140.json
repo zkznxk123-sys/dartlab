@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 27390668647.0,
-      "operating_profit": 1998761089.0,
-      "net_profit": 3699859217.0,
-      "total_assets": 65884752780.0
-    },
-    {
-      "year": "2022",
-      "sales": 20057915796.0,
-      "operating_profit": 110384573.0,
-      "net_profit": 2707450221.0,
-      "total_assets": 68385030301.0
-    },
-    {
-      "year": "2023",
-      "sales": null,
-      "operating_profit": 215548051.0,
-      "net_profit": 5784797087.0,
-      "total_assets": 75127255780.0
-    },
-    {
-      "year": "2024",
-      "sales": 22942422096.0,
-      "operating_profit": -1271401075.0,
-      "net_profit": 2560127735.0,
-      "total_assets": 80869826412.0
-    },
-    {
-      "year": "2025",
-      "sales": 6493838576.0,
-      "operating_profit": 1024070598.0,
-      "net_profit": 3827628783.0,
-      "total_assets": 87287055386.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -132,9 +96,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "382800",
-        "corpName": "지앤비에스 에코",
-        "industry": "machinery",
+        "stockCode": "393970",
+        "corpName": "대진첨단소재",
+        "industry": "chemical",
         "viaCode": "106080",
         "viaName": "케이이엠텍",
         "hopDistance": 2
@@ -148,9 +112,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "393970",
-        "corpName": "대진첨단소재",
-        "industry": "chemical",
+        "stockCode": "382800",
+        "corpName": "지앤비에스 에코",
+        "industry": "machinery",
         "viaCode": "106080",
         "viaName": "케이이엠텍",
         "hopDistance": 2

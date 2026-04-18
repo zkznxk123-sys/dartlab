@@ -123,43 +123,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 26667683520.0,
-      "operating_profit": 1536538708.0,
-      "net_profit": null,
-      "total_assets": 130055343642.0
-    },
-    {
-      "year": "2022",
-      "sales": 21796866525.0,
-      "operating_profit": -1910517180.0,
-      "net_profit": null,
-      "total_assets": 101284023121.0
-    },
-    {
-      "year": "2023",
-      "sales": 9916844608.0,
-      "operating_profit": -7013194952.0,
-      "net_profit": -37739346.0,
-      "total_assets": 122957570414.0
-    },
-    {
-      "year": "2024",
-      "sales": 25295387824.0,
-      "operating_profit": -9704012940.0,
-      "net_profit": -3592597930.0,
-      "total_assets": 104745553211.0
-    },
-    {
-      "year": "2025",
-      "sales": 4774718589.0,
-      "operating_profit": -5361474305.0,
-      "net_profit": -208139376.0,
-      "total_assets": 78940240228.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -211,6 +175,22 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "064800",
+        "corpName": "포니링크",
+        "industry": "textile",
+        "viaCode": "110790",
+        "viaName": "크리스에프앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "020150",
+        "corpName": "롯데에너지머티리얼즈",
+        "industry": "electronics",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "271940",
         "corpName": "일진하이솔루스",
         "industry": "railroad",
@@ -219,121 +199,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "008970",
-        "corpName": "KBI동양철관",
-        "industry": "construction",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "065370",
-        "corpName": "위세아이텍",
-        "industry": "software",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "103590",
-        "corpName": "일진전기",
-        "industry": "electrical",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "199430",
-        "corpName": "케이엔알시스템",
+        "stockCode": "455900",
+        "corpName": "엔젤로보틱스",
         "industry": "machinery",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "110790",
-        "viaName": "크리스에프앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "243870",
-        "corpName": "아이티센코어",
-        "industry": "software",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052860",
-        "corpName": "아이앤씨",
-        "industry": "semiconductor",
-        "viaCode": "085810",
-        "viaName": "알티캐스트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "015860",
-        "corpName": "일진홀딩스",
-        "industry": "electrical",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "140410",
-        "corpName": "메지온",
-        "industry": "pharma",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "122450",
-        "corpName": "KX",
-        "industry": "telecom",
-        "viaCode": "110790",
-        "viaName": "크리스에프앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "043910",
-        "corpName": "자연과환경",
-        "industry": "plastic",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "085810",
-        "viaName": "알티캐스트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "382480",
-        "corpName": "지아이텍",
-        "industry": "software",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010280",
-        "corpName": "아이티센엔텍",
-        "industry": "software",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031820",
-        "corpName": "아이티센씨티에스",
-        "industry": "telecom",
         "viaCode": "119830",
         "viaName": "아이텍",
         "hopDistance": 2
@@ -355,6 +223,38 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "115160",
+        "corpName": "휴맥스",
+        "industry": "electronics",
+        "viaCode": "085810",
+        "viaName": "알티캐스트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005320",
+        "corpName": "온타이드",
+        "industry": "realestate",
+        "viaCode": "110790",
+        "viaName": "크리스에프앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024840",
+        "corpName": "KBI메탈",
+        "industry": "auto",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "043910",
+        "corpName": "자연과환경",
+        "industry": "plastic",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "000640",
         "corpName": "동아쏘시오홀딩스",
         "industry": "pharma",
@@ -363,97 +263,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "023160",
-        "corpName": "태광",
-        "industry": "steel",
+        "stockCode": "081000",
+        "corpName": "일진다이아",
+        "industry": "retail",
         "viaCode": "119830",
         "viaName": "아이텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "299480",
-        "corpName": "지앤이헬스케어",
-        "industry": "textile",
+        "stockCode": "001620",
+        "corpName": "케이비아이동국실업",
+        "industry": "electronics",
         "viaCode": "119830",
         "viaName": "아이텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "337840",
-        "corpName": "유엑스엔",
-        "industry": "medicalDevice",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "119830",
         "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001360",
-        "corpName": "삼성제약",
-        "industry": "food",
-        "viaCode": "110790",
-        "viaName": "크리스에프앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "061040",
-        "corpName": "알에프텍",
-        "industry": "telecom",
-        "viaCode": "064090",
-        "viaName": "인크레더블버즈",
         "hopDistance": 2
       },
       {
         "stockCode": "232830",
         "corpName": "아이티센피엔에스",
         "industry": "software",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "093190",
-        "corpName": "빅솔론",
-        "industry": "electronics",
-        "viaCode": "085810",
-        "viaName": "알티캐스트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "020150",
-        "corpName": "롯데에너지머티리얼즈",
-        "industry": "electronics",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "346010",
-        "corpName": "타이드",
-        "industry": "electronics",
-        "viaCode": "291650",
-        "viaName": "압타머사이언스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "456010",
-        "corpName": "아이씨티케이",
-        "industry": "electronics",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "049630",
-        "corpName": "재영솔루텍",
-        "industry": "machinery",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "093240",
-        "corpName": "형지엘리트",
-        "industry": "food",
         "viaCode": "119830",
         "viaName": "아이텍",
         "hopDistance": 2
@@ -467,57 +303,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "064800",
-        "corpName": "포니링크",
-        "industry": "textile",
+        "stockCode": "179900",
+        "corpName": "유티아이",
+        "industry": "machinery",
+        "viaCode": "064090",
+        "viaName": "인크레더블버즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001360",
+        "corpName": "삼성제약",
+        "industry": "food",
         "viaCode": "110790",
         "viaName": "크리스에프앤씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "124500",
-        "corpName": "아이티센글로벌",
-        "industry": "software",
+        "stockCode": "052860",
+        "corpName": "아이앤씨",
+        "industry": "semiconductor",
+        "viaCode": "085810",
+        "viaName": "알티캐스트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "199430",
+        "corpName": "케이엔알시스템",
+        "industry": "machinery",
         "viaCode": "119830",
         "viaName": "아이텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "024840",
-        "corpName": "KBI메탈",
-        "industry": "auto",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "237690",
-        "corpName": "에스티팜",
+        "stockCode": "140410",
+        "corpName": "메지온",
         "industry": "pharma",
         "viaCode": "119830",
         "viaName": "아이텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "082270",
-        "corpName": "젬백스",
-        "industry": "software",
-        "viaCode": "110790",
-        "viaName": "크리스에프앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066670",
-        "corpName": "디티씨",
-        "industry": "electronics",
-        "viaCode": "110790",
-        "viaName": "크리스에프앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001620",
-        "corpName": "케이비아이동국실업",
-        "industry": "electronics",
+        "stockCode": "354390",
+        "corpName": "바스칸바이오제약",
+        "industry": "pharma",
         "viaCode": "119830",
         "viaName": "아이텍",
         "hopDistance": 2
@@ -531,17 +359,57 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "015860",
+        "corpName": "일진홀딩스",
+        "industry": "electrical",
         "viaCode": "119830",
         "viaName": "아이텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "380540",
-        "corpName": "옵티코어",
+        "stockCode": "010280",
+        "corpName": "아이티센엔텍",
+        "industry": "software",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066670",
+        "corpName": "디티씨",
         "industry": "electronics",
+        "viaCode": "110790",
+        "viaName": "크리스에프앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "020760",
+        "corpName": "일진디스플",
+        "industry": "electronics",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "085810",
+        "viaName": "알티캐스트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023160",
+        "corpName": "태광",
+        "industry": "steel",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008970",
+        "corpName": "KBI동양철관",
+        "industry": "construction",
         "viaCode": "119830",
         "viaName": "아이텍",
         "hopDistance": 2
@@ -563,73 +431,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005320",
-        "corpName": "온타이드",
-        "industry": "realestate",
-        "viaCode": "110790",
-        "viaName": "크리스에프앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041590",
-        "corpName": "플래스크",
-        "industry": "construction",
-        "viaCode": "110790",
-        "viaName": "크리스에프앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000860",
-        "corpName": "강남제비스코",
-        "industry": "chemical",
+        "stockCode": "031820",
+        "corpName": "아이티센씨티에스",
+        "industry": "telecom",
         "viaCode": "119830",
         "viaName": "아이텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "044180",
-        "corpName": "KD",
-        "industry": "construction",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "179900",
-        "corpName": "유티아이",
-        "industry": "machinery",
-        "viaCode": "064090",
-        "viaName": "인크레더블버즈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "354390",
-        "corpName": "바스칸바이오제약",
-        "industry": "pharma",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "455900",
-        "corpName": "엔젤로보틱스",
-        "industry": "machinery",
-        "viaCode": "119830",
-        "viaName": "아이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "020760",
-        "corpName": "일진디스플",
+        "stockCode": "093190",
+        "corpName": "빅솔론",
         "industry": "electronics",
+        "viaCode": "085810",
+        "viaName": "알티캐스트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "337840",
+        "corpName": "유엑스엔",
+        "industry": "medicalDevice",
         "viaCode": "119830",
         "viaName": "아이텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "081000",
-        "corpName": "일진다이아",
-        "industry": "retail",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "110790",
+        "viaName": "크리스에프앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "124500",
+        "corpName": "아이티센글로벌",
+        "industry": "software",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "380540",
+        "corpName": "옵티코어",
+        "industry": "electronics",
         "viaCode": "119830",
         "viaName": "아이텍",
         "hopDistance": 2
@@ -643,11 +487,131 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "115160",
-        "corpName": "휴맥스",
+        "stockCode": "237690",
+        "corpName": "에스티팜",
+        "industry": "pharma",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044180",
+        "corpName": "KD",
+        "industry": "construction",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "243870",
+        "corpName": "아이티센코어",
+        "industry": "software",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "049630",
+        "corpName": "재영솔루텍",
+        "industry": "machinery",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "122450",
+        "corpName": "KX",
+        "industry": "telecom",
+        "viaCode": "110790",
+        "viaName": "크리스에프앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041590",
+        "corpName": "플래스크",
+        "industry": "construction",
+        "viaCode": "110790",
+        "viaName": "크리스에프앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "299480",
+        "corpName": "지앤이헬스케어",
+        "industry": "textile",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000860",
+        "corpName": "강남제비스코",
+        "industry": "chemical",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "346010",
+        "corpName": "타이드",
         "industry": "electronics",
-        "viaCode": "085810",
-        "viaName": "알티캐스트",
+        "viaCode": "291650",
+        "viaName": "압타머사이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "061040",
+        "corpName": "알에프텍",
+        "industry": "telecom",
+        "viaCode": "064090",
+        "viaName": "인크레더블버즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456010",
+        "corpName": "아이씨티케이",
+        "industry": "electronics",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "103590",
+        "corpName": "일진전기",
+        "industry": "electrical",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "382480",
+        "corpName": "지아이텍",
+        "industry": "software",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082270",
+        "corpName": "젬백스",
+        "industry": "software",
+        "viaCode": "110790",
+        "viaName": "크리스에프앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "093240",
+        "corpName": "형지엘리트",
+        "industry": "food",
+        "viaCode": "119830",
+        "viaName": "아이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065370",
+        "corpName": "위세아이텍",
+        "industry": "software",
+        "viaCode": "119830",
+        "viaName": "아이텍",
         "hopDistance": 2
       }
     ],

@@ -59,43 +59,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 348701054310.0,
-      "operating_profit": 23510478004.0,
-      "net_profit": 0.0,
-      "total_assets": 327531637320.0
-    },
-    {
-      "year": "2022",
-      "sales": 371198280962.0,
-      "operating_profit": 11131354481.0,
-      "net_profit": 13100984701.0,
-      "total_assets": 350286507374.0
-    },
-    {
-      "year": "2023",
-      "sales": 383426040745.0,
-      "operating_profit": 9846452060.0,
-      "net_profit": 0.0,
-      "total_assets": 366709739033.0
-    },
-    {
-      "year": "2024",
-      "sales": 404881504598.0,
-      "operating_profit": 6460516653.0,
-      "net_profit": 0.0,
-      "total_assets": 369927923047.0
-    },
-    {
-      "year": "2025",
-      "sales": 408926546791.0,
-      "operating_profit": 24475787476.0,
-      "net_profit": 19946477839.0,
-      "total_assets": 380321140921.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -156,6 +120,14 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "007540",
+        "viaName": "샘표",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "008040",
         "corpName": "사조동아원",
         "industry": "food",
@@ -164,9 +136,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "267980",
-        "corpName": "매일유업",
-        "industry": "food",
+        "stockCode": "006040",
+        "corpName": "동원산업",
+        "industry": "finance",
         "viaCode": "007540",
         "viaName": "샘표",
         "hopDistance": 2
@@ -180,17 +152,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "089790",
-        "corpName": "제이티",
-        "industry": "semiconductor",
-        "viaCode": "007540",
-        "viaName": "샘표",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006040",
-        "corpName": "동원산업",
-        "industry": "finance",
+        "stockCode": "267980",
+        "corpName": "매일유업",
+        "industry": "food",
         "viaCode": "007540",
         "viaName": "샘표",
         "hopDistance": 2

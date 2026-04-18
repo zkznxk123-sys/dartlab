@@ -59,36 +59,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 57316372205.0,
-      "operating_profit": 10471810794.0,
-      "net_profit": 9891511278.0,
-      "total_assets": 140038412843.0
-    },
-    {
-      "year": "2022",
-      "sales": 58657537976.0,
-      "operating_profit": 5258041794.0,
-      "net_profit": 5011989964.0,
-      "total_assets": 136240302553.0
-    },
-    {
-      "year": "2023",
-      "sales": 72426447150.0,
-      "operating_profit": 8186594736.0,
-      "net_profit": 10760361468.0,
-      "total_assets": 149460342555.0
-    },
-    {
-      "year": "2025",
-      "sales": 87161378628.0,
-      "operating_profit": 8875109028.0,
-      "net_profit": 11357810363.0,
-      "total_assets": 191056547070.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -149,8 +120,24 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
+        "stockCode": "124560",
+        "corpName": "태웅로직스",
+        "industry": "logistics",
+        "viaCode": "000250",
+        "viaName": "삼천당제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017370",
+        "corpName": "우신시스템",
+        "industry": "electronics",
+        "viaCode": "000250",
+        "viaName": "삼천당제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
         "industry": "finance",
         "viaCode": "000250",
         "viaName": "삼천당제약",
@@ -165,25 +152,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
+        "stockCode": "001450",
+        "corpName": "현대해상",
         "industry": "finance",
-        "viaCode": "000250",
-        "viaName": "삼천당제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "124560",
-        "corpName": "태웅로직스",
-        "industry": "logistics",
-        "viaCode": "000250",
-        "viaName": "삼천당제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017370",
-        "corpName": "우신시스템",
-        "industry": "electronics",
         "viaCode": "000250",
         "viaName": "삼천당제약",
         "hopDistance": 2

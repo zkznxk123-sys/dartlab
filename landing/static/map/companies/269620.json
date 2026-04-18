@@ -59,43 +59,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 16969391158.0,
-      "operating_profit": -10585702065.0,
-      "net_profit": 0.0,
-      "total_assets": 93583385443.0
-    },
-    {
-      "year": "2022",
-      "sales": 26538567314.0,
-      "operating_profit": -12991640213.0,
-      "net_profit": -575024541.0,
-      "total_assets": 31958502143.0
-    },
-    {
-      "year": "2023",
-      "sales": 14496957782.0,
-      "operating_profit": -2995920216.0,
-      "net_profit": -6103683789.0,
-      "total_assets": 29047080220.0
-    },
-    {
-      "year": "2024",
-      "sales": 12863193552.0,
-      "operating_profit": -1840730986.0,
-      "net_profit": -9370898283.0,
-      "total_assets": 22499351116.0
-    },
-    {
-      "year": "2025",
-      "sales": 11033617511.0,
-      "operating_profit": -2569907083.0,
-      "net_profit": -5121272297.0,
-      "total_assets": 19660847175.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -147,17 +111,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "018290",
-        "corpName": "브이티",
-        "industry": "plastic",
+        "stockCode": "307930",
+        "corpName": "컴퍼니케이",
+        "industry": "finance",
         "viaCode": "030350",
         "viaName": "드래곤플라이",
         "hopDistance": 2
       },
       {
-        "stockCode": "307930",
-        "corpName": "컴퍼니케이",
-        "industry": "finance",
+        "stockCode": "076610",
+        "corpName": "해성옵틱스",
+        "industry": "electronics",
         "viaCode": "030350",
         "viaName": "드래곤플라이",
         "hopDistance": 2
@@ -171,9 +135,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "076610",
-        "corpName": "해성옵틱스",
-        "industry": "electronics",
+        "stockCode": "018290",
+        "corpName": "브이티",
+        "industry": "plastic",
         "viaCode": "030350",
         "viaName": "드래곤플라이",
         "hopDistance": 2

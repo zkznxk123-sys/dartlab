@@ -35,36 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2022",
-      "sales": 64370929731.0,
-      "operating_profit": 4116471652.0,
-      "net_profit": 3587093322.0,
-      "total_assets": 49996384367.0
-    },
-    {
-      "year": "2023",
-      "sales": 69222343617.0,
-      "operating_profit": 4317041782.0,
-      "net_profit": 4516515037.0,
-      "total_assets": 105765831774.0
-    },
-    {
-      "year": "2024",
-      "sales": 85921268349.0,
-      "operating_profit": 4514922845.0,
-      "net_profit": 4530555171.0,
-      "total_assets": 107758180207.0
-    },
-    {
-      "year": "2025",
-      "sales": 81789735978.0,
-      "operating_profit": -1485021320.0,
-      "net_profit": -3979663784.0,
-      "total_assets": 82236506027.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -125,25 +96,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "079960",
-        "viaName": "동양이엔피",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004710",
-        "corpName": "한솔테크닉스",
+        "stockCode": "009470",
+        "corpName": "삼화전기",
         "industry": "electronics",
-        "viaCode": "079960",
-        "viaName": "동양이엔피",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017040",
-        "corpName": "광명전기",
-        "industry": "machinery",
         "viaCode": "079960",
         "viaName": "동양이엔피",
         "hopDistance": 2
@@ -157,9 +112,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "232530",
-        "corpName": "이엠티",
-        "industry": "semiconductor",
+        "stockCode": "031330",
+        "corpName": "에스에이엠티",
+        "industry": "electronics",
+        "viaCode": "079960",
+        "viaName": "동양이엔피",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017040",
+        "corpName": "광명전기",
+        "industry": "machinery",
         "viaCode": "079960",
         "viaName": "동양이엔피",
         "hopDistance": 2
@@ -181,17 +144,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "031330",
-        "corpName": "에스에이엠티",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "079960",
+        "viaName": "동양이엔피",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004710",
+        "corpName": "한솔테크닉스",
         "industry": "electronics",
         "viaCode": "079960",
         "viaName": "동양이엔피",
         "hopDistance": 2
       },
       {
-        "stockCode": "009470",
-        "corpName": "삼화전기",
-        "industry": "electronics",
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
         "viaCode": "079960",
         "viaName": "동양이엔피",
         "hopDistance": 2

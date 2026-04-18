@@ -140,43 +140,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 261636393948.0,
-      "operating_profit": 15126656228.0,
-      "net_profit": 16966480417.0,
-      "total_assets": 293365978377.0
-    },
-    {
-      "year": "2022",
-      "sales": 275679212522.0,
-      "operating_profit": 173336109.0,
-      "net_profit": 276402475.0,
-      "total_assets": 266232857341.0
-    },
-    {
-      "year": "2023",
-      "sales": 233179269197.0,
-      "operating_profit": 452953609.0,
-      "net_profit": -10159276981.0,
-      "total_assets": 246997268553.0
-    },
-    {
-      "year": "2024",
-      "sales": 1229526508990.0,
-      "operating_profit": 27647640318.0,
-      "net_profit": 49493972263.0,
-      "total_assets": 981647961482.0
-    },
-    {
-      "year": "2025",
-      "sales": 1713611354765.0,
-      "operating_profit": 53323111520.0,
-      "net_profit": 5604764152.0,
-      "total_assets": 1079186018040.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 3,
     "customerCount": 0,
@@ -291,33 +255,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "013520",
-        "corpName": "화승코퍼레이션",
-        "industry": "plastic",
-        "viaCode": "005750",
-        "viaName": "대림바스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "012800",
-        "viaName": "대창",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005490",
-        "corpName": "POSCO홀딩스",
-        "industry": "steel",
-        "viaCode": "005160",
-        "viaName": "동국산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "189300",
-        "corpName": "인텔리안테크",
-        "industry": "telecom",
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
         "viaCode": "005750",
         "viaName": "대림바스",
         "hopDistance": 2
@@ -331,6 +271,30 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "091590",
+        "corpName": "남화토건",
+        "industry": "construction",
+        "viaCode": "005750",
+        "viaName": "대림바스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
+        "viaCode": "043340",
+        "viaName": "에쎈테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "012800",
+        "viaName": "대창",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "462520",
         "corpName": "조선내화",
         "industry": "buildingMaterials",
@@ -339,19 +303,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002030",
-        "corpName": "아세아",
-        "industry": "consulting",
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "industry": "buildingMaterials",
         "viaCode": "012800",
         "viaName": "대창",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004090",
-        "corpName": "한국석유공업",
-        "industry": "realestate",
-        "viaCode": "005750",
-        "viaName": "대림바스",
         "hopDistance": 2
       },
       {
@@ -363,19 +319,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "060480",
-        "corpName": "국일신동",
+        "stockCode": "460860",
+        "corpName": "동국제강",
         "industry": "steel",
-        "viaCode": "043340",
-        "viaName": "에쎈테크",
+        "viaCode": "005160",
+        "viaName": "동국산업",
         "hopDistance": 2
       },
       {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
-        "viaCode": "043340",
-        "viaName": "에쎈테크",
+        "stockCode": "013520",
+        "corpName": "화승코퍼레이션",
+        "industry": "plastic",
+        "viaCode": "005750",
+        "viaName": "대림바스",
         "hopDistance": 2
       },
       {
@@ -395,43 +351,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "460860",
-        "corpName": "동국제강",
-        "industry": "steel",
-        "viaCode": "005160",
-        "viaName": "동국산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "075970",
-        "corpName": "동국알앤에스",
-        "industry": "buildingMaterials",
-        "viaCode": "005160",
-        "viaName": "동국산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
+        "stockCode": "004090",
+        "corpName": "한국석유공업",
+        "industry": "realestate",
         "viaCode": "005750",
         "viaName": "대림바스",
         "hopDistance": 2
       },
       {
-        "stockCode": "000910",
-        "corpName": "유니온",
-        "industry": "buildingMaterials",
-        "viaCode": "043340",
-        "viaName": "에쎈테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "043340",
-        "viaName": "에쎈테크",
+        "stockCode": "005490",
+        "corpName": "POSCO홀딩스",
+        "industry": "steel",
+        "viaCode": "005160",
+        "viaName": "동국산업",
         "hopDistance": 2
       },
       {
@@ -443,11 +375,43 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "091590",
-        "corpName": "남화토건",
-        "industry": "construction",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "012800",
+        "viaName": "대창",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "189300",
+        "corpName": "인텔리안테크",
+        "industry": "telecom",
         "viaCode": "005750",
         "viaName": "대림바스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "075970",
+        "corpName": "동국알앤에스",
+        "industry": "buildingMaterials",
+        "viaCode": "005160",
+        "viaName": "동국산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060480",
+        "corpName": "국일신동",
+        "industry": "steel",
+        "viaCode": "043340",
+        "viaName": "에쎈테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002030",
+        "corpName": "아세아",
+        "industry": "consulting",
+        "viaCode": "012800",
+        "viaName": "대창",
         "hopDistance": 2
       }
     ],

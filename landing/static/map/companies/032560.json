@@ -152,43 +152,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 270982293281.0,
-      "operating_profit": 41155778151.0,
-      "net_profit": 29834488216.0,
-      "total_assets": 431568369719.0
-    },
-    {
-      "year": "2022",
-      "sales": 333445663904.0,
-      "operating_profit": 46505927767.0,
-      "net_profit": 46246868355.0,
-      "total_assets": 481912631966.0
-    },
-    {
-      "year": "2023",
-      "sales": 355142901174.0,
-      "operating_profit": 29280143234.0,
-      "net_profit": 29757396830.0,
-      "total_assets": 513527276106.0
-    },
-    {
-      "year": "2024",
-      "sales": 321091393225.0,
-      "operating_profit": 19372382177.0,
-      "net_profit": 16339501919.0,
-      "total_assets": 522556270523.0
-    },
-    {
-      "year": "2025",
-      "sales": 316529005034.0,
-      "operating_profit": 17988514289.0,
-      "net_profit": 18018535995.0,
-      "total_assets": 550476338694.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -269,25 +233,33 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "013030",
-        "corpName": "하이록코리아",
+        "stockCode": "004560",
+        "corpName": "현대비앤지스틸",
         "industry": "steel",
         "viaCode": "038010",
         "viaName": "제일테크노스",
         "hopDistance": 2
       },
       {
-        "stockCode": "327610",
-        "corpName": "펨토바이오메드",
-        "industry": "software",
+        "stockCode": "025900",
+        "corpName": "동화기업",
+        "industry": "paper",
+        "viaCode": "080010",
+        "viaName": "이상네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "316140",
+        "corpName": "우리금융지주",
+        "industry": "finance",
         "viaCode": "038010",
         "viaName": "제일테크노스",
         "hopDistance": 2
       },
       {
-        "stockCode": "000720",
-        "corpName": "현대건설",
-        "industry": "construction",
+        "stockCode": "213500",
+        "corpName": "한솔제지",
+        "industry": "paper",
         "viaCode": "038010",
         "viaName": "제일테크노스",
         "hopDistance": 2
@@ -301,25 +273,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000990",
-        "corpName": "DB하이텍",
-        "industry": "semiconductor",
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
         "viaCode": "038010",
         "viaName": "제일테크노스",
         "hopDistance": 2
       },
       {
-        "stockCode": "012630",
-        "corpName": "HDC",
+        "stockCode": "013030",
+        "corpName": "하이록코리아",
+        "industry": "steel",
+        "viaCode": "038010",
+        "viaName": "제일테크노스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001510",
+        "corpName": "SK증권",
+        "industry": "software",
+        "viaCode": "408920",
+        "viaName": "메쎄이상",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019570",
+        "corpName": "플루토스",
         "industry": "finance",
-        "viaCode": "038010",
-        "viaName": "제일테크노스",
+        "viaCode": "263770",
+        "viaName": "유에스티",
         "hopDistance": 2
       },
       {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "263770",
+        "viaName": "유에스티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
         "viaCode": "038010",
         "viaName": "제일테크노스",
         "hopDistance": 2
@@ -341,33 +337,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "375500",
-        "corpName": "DL이앤씨",
-        "industry": "construction",
-        "viaCode": "038010",
-        "viaName": "제일테크노스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "329180",
         "corpName": "HD현대중공업",
         "industry": "shipbuilding",
-        "viaCode": "038010",
-        "viaName": "제일테크노스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099410",
-        "corpName": "동방선기",
-        "industry": "shipbuilding",
-        "viaCode": "038010",
-        "viaName": "제일테크노스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004560",
-        "corpName": "현대비앤지스틸",
-        "industry": "steel",
         "viaCode": "038010",
         "viaName": "제일테크노스",
         "hopDistance": 2
@@ -381,38 +353,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
-        "viaCode": "038010",
-        "viaName": "제일테크노스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "294870",
-        "corpName": "IPARK현대산업개발",
-        "industry": "construction",
-        "viaCode": "038010",
-        "viaName": "제일테크노스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "402340",
-        "corpName": "SK스퀘어",
-        "industry": "software",
-        "viaCode": "038010",
-        "viaName": "제일테크노스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017670",
-        "corpName": "SK텔레콤",
-        "industry": "telecom",
-        "viaCode": "038010",
-        "viaName": "제일테크노스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "460860",
         "corpName": "동국제강",
         "industry": "steel",
@@ -421,73 +361,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "316140",
-        "corpName": "우리금융지주",
-        "industry": "finance",
-        "viaCode": "038010",
-        "viaName": "제일테크노스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267250",
-        "corpName": "HD현대",
-        "industry": "shipbuilding",
-        "viaCode": "038010",
-        "viaName": "제일테크노스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025900",
-        "corpName": "동화기업",
-        "industry": "paper",
-        "viaCode": "080010",
-        "viaName": "이상네트웍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001510",
-        "corpName": "SK증권",
+        "stockCode": "327610",
+        "corpName": "펨토바이오메드",
         "industry": "software",
-        "viaCode": "408920",
-        "viaName": "메쎄이상",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "417500",
-        "corpName": "제이아이테크",
-        "industry": "semiconductor",
         "viaCode": "038010",
         "viaName": "제일테크노스",
         "hopDistance": 2
       },
       {
-        "stockCode": "071970",
-        "corpName": "HD현대마린엔진",
-        "industry": "shipbuilding",
-        "viaCode": "038010",
-        "viaName": "제일테크노스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "263770",
-        "viaName": "유에스티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "213500",
-        "corpName": "한솔제지",
-        "industry": "paper",
-        "viaCode": "038010",
-        "viaName": "제일테크노스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082740",
-        "corpName": "한화엔진",
-        "industry": "aerospace",
+        "stockCode": "002240",
+        "corpName": "고려제강",
+        "industry": "steel",
         "viaCode": "038010",
         "viaName": "제일테크노스",
         "hopDistance": 2
@@ -501,6 +385,102 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "267250",
+        "corpName": "HD현대",
+        "industry": "shipbuilding",
+        "viaCode": "038010",
+        "viaName": "제일테크노스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "402340",
+        "corpName": "SK스퀘어",
+        "industry": "software",
+        "viaCode": "038010",
+        "viaName": "제일테크노스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "375500",
+        "corpName": "DL이앤씨",
+        "industry": "construction",
+        "viaCode": "038010",
+        "viaName": "제일테크노스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082740",
+        "corpName": "한화엔진",
+        "industry": "aerospace",
+        "viaCode": "038010",
+        "viaName": "제일테크노스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017670",
+        "corpName": "SK텔레콤",
+        "industry": "telecom",
+        "viaCode": "038010",
+        "viaName": "제일테크노스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071970",
+        "corpName": "HD현대마린엔진",
+        "industry": "shipbuilding",
+        "viaCode": "038010",
+        "viaName": "제일테크노스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "038010",
+        "viaName": "제일테크노스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012630",
+        "corpName": "HDC",
+        "industry": "finance",
+        "viaCode": "038010",
+        "viaName": "제일테크노스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "417500",
+        "corpName": "제이아이테크",
+        "industry": "semiconductor",
+        "viaCode": "038010",
+        "viaName": "제일테크노스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000990",
+        "corpName": "DB하이텍",
+        "industry": "semiconductor",
+        "viaCode": "038010",
+        "viaName": "제일테크노스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099410",
+        "corpName": "동방선기",
+        "industry": "shipbuilding",
+        "viaCode": "038010",
+        "viaName": "제일테크노스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "294870",
+        "corpName": "IPARK현대산업개발",
+        "industry": "construction",
+        "viaCode": "038010",
+        "viaName": "제일테크노스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "047050",
         "corpName": "포스코인터내셔널",
         "industry": "steel",
@@ -509,33 +489,17 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "038010",
+        "viaName": "제일테크노스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "086900",
         "corpName": "메디톡스",
         "industry": "food",
-        "viaCode": "038010",
-        "viaName": "제일테크노스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "019570",
-        "corpName": "플루토스",
-        "industry": "finance",
-        "viaCode": "263770",
-        "viaName": "유에스티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002240",
-        "corpName": "고려제강",
-        "industry": "steel",
-        "viaCode": "038010",
-        "viaName": "제일테크노스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
         "viaCode": "038010",
         "viaName": "제일테크노스",
         "hopDistance": 2

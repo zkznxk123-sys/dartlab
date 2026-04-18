@@ -97,43 +97,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 10480817714.0,
-      "operating_profit": -7932253132.0,
-      "net_profit": 94124949825.0,
-      "total_assets": 274474964053.0
-    },
-    {
-      "year": "2022",
-      "sales": 11403730922.0,
-      "operating_profit": -6332916874.0,
-      "net_profit": -117218208176.0,
-      "total_assets": 144283848412.0
-    },
-    {
-      "year": "2023",
-      "sales": 6240804636.0,
-      "operating_profit": -6151980412.0,
-      "net_profit": 11344109632.0,
-      "total_assets": 145703789452.0
-    },
-    {
-      "year": "2024",
-      "sales": 7041061562.0,
-      "operating_profit": -6093214907.0,
-      "net_profit": 16122333887.0,
-      "total_assets": 162730128455.0
-    },
-    {
-      "year": "2025",
-      "sales": 6296747709.0,
-      "operating_profit": -4332844227.0,
-      "net_profit": -1418662962.0,
-      "total_assets": 159993398792.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -185,17 +149,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "353810",
-        "corpName": "이지바이오",
-        "industry": "chemical",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
+        "stockCode": "222160",
+        "corpName": "NPX",
+        "industry": "electronics",
         "viaCode": "121800",
         "viaName": "비덴트",
         "hopDistance": 2
@@ -209,27 +165,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "047820",
-        "corpName": "초록뱀미디어",
-        "industry": "telecom",
-        "viaCode": "066410",
-        "viaName": "버킷스튜디오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035810",
-        "corpName": "이지홀딩스",
+        "stockCode": "195500",
+        "corpName": "마니커에프앤지",
         "industry": "food",
         "viaCode": "352940",
         "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "069460",
-        "corpName": "대호에이엘",
-        "industry": "retail",
-        "viaCode": "121800",
-        "viaName": "비덴트",
         "hopDistance": 2
       },
       {
@@ -241,9 +181,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "073560",
-        "corpName": "우리손에프앤지",
-        "industry": "food",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "352940",
         "viaName": "인바이오",
         "hopDistance": 2
@@ -257,40 +197,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "009810",
-        "corpName": "플레이그램",
-        "industry": "retail",
-        "viaCode": "066410",
-        "viaName": "버킷스튜디오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066980",
-        "corpName": "한성크린텍",
-        "industry": "environment",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "057680",
         "corpName": "티사이언티픽",
-        "industry": "software",
-        "viaCode": "066410",
-        "viaName": "버킷스튜디오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052300",
-        "corpName": "오션인더블유",
-        "industry": "logistics",
-        "viaCode": "121800",
-        "viaName": "비덴트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "321820",
-        "corpName": "아티스트컴퍼니",
         "industry": "software",
         "viaCode": "066410",
         "viaName": "버킷스튜디오",
@@ -313,6 +221,22 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "153710",
+        "corpName": "옵티팜",
+        "industry": "pharma",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009810",
+        "corpName": "플레이그램",
+        "industry": "retail",
+        "viaCode": "066410",
+        "viaName": "버킷스튜디오",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "095500",
         "corpName": "미래나노텍",
         "industry": "electronics",
@@ -321,19 +245,75 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "052300",
+        "corpName": "오션인더블유",
+        "industry": "logistics",
+        "viaCode": "121800",
+        "viaName": "비덴트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "353810",
+        "corpName": "이지바이오",
+        "industry": "chemical",
         "viaCode": "352940",
         "viaName": "인바이오",
         "hopDistance": 2
       },
       {
-        "stockCode": "222160",
-        "corpName": "NPX",
-        "industry": "electronics",
+        "stockCode": "069460",
+        "corpName": "대호에이엘",
+        "industry": "retail",
         "viaCode": "121800",
         "viaName": "비덴트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "321820",
+        "corpName": "아티스트컴퍼니",
+        "industry": "software",
+        "viaCode": "066410",
+        "viaName": "버킷스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035810",
+        "corpName": "이지홀딩스",
+        "industry": "food",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073560",
+        "corpName": "우리손에프앤지",
+        "industry": "food",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066980",
+        "corpName": "한성크린텍",
+        "industry": "environment",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "121800",
+        "viaName": "비덴트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047820",
+        "corpName": "초록뱀미디어",
+        "industry": "telecom",
+        "viaCode": "066410",
+        "viaName": "버킷스튜디오",
         "hopDistance": 2
       },
       {
@@ -345,25 +325,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "195500",
-        "corpName": "마니커에프앤지",
-        "industry": "food",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "027740",
         "corpName": "마니커",
         "industry": "realestate",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "153710",
-        "corpName": "옵티팜",
-        "industry": "pharma",
         "viaCode": "352940",
         "viaName": "인바이오",
         "hopDistance": 2

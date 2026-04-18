@@ -97,36 +97,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 4784367295.0,
-      "operating_profit": -2673802067.0,
-      "net_profit": -2244779240.0,
-      "total_assets": 39765837554.0
-    },
-    {
-      "year": "2022",
-      "sales": 3493950585.0,
-      "operating_profit": -5245703773.0,
-      "net_profit": -946471083.0,
-      "total_assets": 33855141804.0
-    },
-    {
-      "year": "2023",
-      "sales": 4941175060.0,
-      "operating_profit": -2990583502.0,
-      "net_profit": -6034420330.0,
-      "total_assets": 30923050329.0
-    },
-    {
-      "year": "2025",
-      "sales": 113733785377.0,
-      "operating_profit": 2762848941.0,
-      "net_profit": -7031913970.0,
-      "total_assets": 112813039360.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -178,65 +149,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "095500",
-        "corpName": "미래나노텍",
-        "industry": "electronics",
-        "viaCode": "039560",
-        "viaName": "다산네트웍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "039560",
-        "viaName": "다산네트웍스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "024110",
         "corpName": "기업은행",
         "industry": "finance",
-        "viaCode": "039560",
-        "viaName": "다산네트웍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "220180",
-        "corpName": "핸디소프트",
-        "industry": "software",
-        "viaCode": "039560",
-        "viaName": "다산네트웍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084110",
-        "corpName": "휴온스글로벌",
-        "industry": "pharma",
-        "viaCode": "039560",
-        "viaName": "다산네트웍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "452300",
-        "corpName": "캡스톤파트너스",
-        "industry": "finance",
-        "viaCode": "039560",
-        "viaName": "다산네트웍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "039560",
-        "viaName": "다산네트웍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033830",
-        "corpName": "티비씨",
-        "industry": "media",
         "viaCode": "039560",
         "viaName": "다산네트웍스",
         "hopDistance": 2
@@ -250,9 +165,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "452300",
+        "corpName": "캡스톤파트너스",
+        "industry": "finance",
         "viaCode": "039560",
         "viaName": "다산네트웍스",
         "hopDistance": 2
@@ -261,6 +184,54 @@
         "stockCode": "143160",
         "corpName": "아이디스",
         "industry": "telecom",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "220180",
+        "corpName": "핸디소프트",
+        "industry": "software",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095500",
+        "corpName": "미래나노텍",
+        "industry": "electronics",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
+        "viaCode": "039560",
+        "viaName": "다산네트웍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
         "viaCode": "039560",
         "viaName": "다산네트웍스",
         "hopDistance": 2

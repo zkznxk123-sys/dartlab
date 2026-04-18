@@ -109,15 +109,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2025",
-      "sales": 195910648546.0,
-      "operating_profit": 61763104721.0,
-      "net_profit": 49169465369.0,
-      "total_assets": 266824535765.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -169,6 +161,22 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
+        "viaCode": "002100",
+        "viaName": "경농",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "289010",
+        "viaName": "아이스크림에듀",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "015760",
         "corpName": "한국전력공사",
         "industry": "energy",
@@ -185,9 +193,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003670",
-        "corpName": "포스코퓨처엠",
-        "industry": "steel",
+        "stockCode": "006400",
+        "corpName": "삼성SDI",
+        "industry": "chemical",
         "viaCode": "020710",
         "viaName": "시공테크",
         "hopDistance": 2
@@ -201,6 +209,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "001470",
+        "corpName": "삼부토건",
+        "industry": "construction",
+        "viaCode": "002100",
+        "viaName": "경농",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "220180",
         "corpName": "핸디소프트",
         "industry": "software",
@@ -209,17 +225,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "034020",
-        "corpName": "두산에너빌리티",
-        "industry": "machinery",
-        "viaCode": "020710",
-        "viaName": "시공테크",
+        "stockCode": "003540",
+        "corpName": "대신증권",
+        "industry": "finance",
+        "viaCode": "002100",
+        "viaName": "경농",
         "hopDistance": 2
       },
       {
-        "stockCode": "006400",
-        "corpName": "삼성SDI",
-        "industry": "chemical",
+        "stockCode": "003670",
+        "corpName": "포스코퓨처엠",
+        "industry": "steel",
         "viaCode": "020710",
         "viaName": "시공테크",
         "hopDistance": 2
@@ -233,19 +249,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "033830",
-        "corpName": "티비씨",
-        "industry": "media",
-        "viaCode": "002100",
-        "viaName": "경농",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001470",
-        "corpName": "삼부토건",
-        "industry": "construction",
-        "viaCode": "002100",
-        "viaName": "경농",
+        "stockCode": "034020",
+        "corpName": "두산에너빌리티",
+        "industry": "machinery",
+        "viaCode": "020710",
+        "viaName": "시공테크",
         "hopDistance": 2
       },
       {
@@ -254,22 +262,6 @@
         "industry": "chemical",
         "viaCode": "002100",
         "viaName": "경농",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003540",
-        "corpName": "대신증권",
-        "industry": "finance",
-        "viaCode": "002100",
-        "viaName": "경농",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "289010",
-        "viaName": "아이스크림에듀",
         "hopDistance": 2
       }
     ],

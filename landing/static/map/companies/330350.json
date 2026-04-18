@@ -66,36 +66,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 57418806107.0,
-      "operating_profit": 4885972992.0,
-      "net_profit": 0.0,
-      "total_assets": 118979070437.0
-    },
-    {
-      "year": "2022",
-      "sales": 64680375722.0,
-      "operating_profit": 4877718076.0,
-      "net_profit": 0.0,
-      "total_assets": 119394796911.0
-    },
-    {
-      "year": "2023",
-      "sales": 80119449783.0,
-      "operating_profit": 7909423796.0,
-      "net_profit": 7959175100.0,
-      "total_assets": 130780016644.0
-    },
-    {
-      "year": "2025",
-      "sales": 106444236309.0,
-      "operating_profit": 5662694062.0,
-      "net_profit": 4967130859.0,
-      "total_assets": 136644571623.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -176,27 +147,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
-        "viaCode": "389470",
-        "viaName": "인벤티지랩",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "115160",
-        "corpName": "휴맥스",
-        "industry": "electronics",
+        "stockCode": "243070",
+        "corpName": "휴온스",
+        "industry": "pharma",
         "viaCode": "294090",
         "viaName": "이오플로우",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "028300",
-        "corpName": "HLB",
-        "industry": "pharma",
-        "viaCode": "389470",
-        "viaName": "인벤티지랩",
         "hopDistance": 2
       },
       {
@@ -208,24 +163,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "237690",
-        "corpName": "에스티팜",
-        "industry": "pharma",
-        "viaCode": "389470",
-        "viaName": "인벤티지랩",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "243070",
-        "corpName": "휴온스",
-        "industry": "pharma",
-        "viaCode": "294090",
-        "viaName": "이오플로우",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "348080",
-        "corpName": "큐라티스",
+        "stockCode": "206650",
+        "corpName": "유바이오로직스",
         "industry": "pharma",
         "viaCode": "389470",
         "viaName": "인벤티지랩",
@@ -240,11 +179,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "206650",
-        "corpName": "유바이오로직스",
-        "industry": "pharma",
-        "viaCode": "389470",
-        "viaName": "인벤티지랩",
+        "stockCode": "337840",
+        "corpName": "유엑스엔",
+        "industry": "medicalDevice",
+        "viaCode": "294090",
+        "viaName": "이오플로우",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "115160",
+        "corpName": "휴맥스",
+        "industry": "electronics",
+        "viaCode": "294090",
+        "viaName": "이오플로우",
         "hopDistance": 2
       },
       {
@@ -256,11 +203,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "337840",
-        "corpName": "유엑스엔",
-        "industry": "medicalDevice",
-        "viaCode": "294090",
-        "viaName": "이오플로우",
+        "stockCode": "348080",
+        "corpName": "큐라티스",
+        "industry": "pharma",
+        "viaCode": "389470",
+        "viaName": "인벤티지랩",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "237690",
+        "corpName": "에스티팜",
+        "industry": "pharma",
+        "viaCode": "389470",
+        "viaName": "인벤티지랩",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028300",
+        "corpName": "HLB",
+        "industry": "pharma",
+        "viaCode": "389470",
+        "viaName": "인벤티지랩",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "389470",
+        "viaName": "인벤티지랩",
         "hopDistance": 2
       }
     ],

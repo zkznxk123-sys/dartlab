@@ -66,43 +66,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 63084058003.0,
-      "operating_profit": -3973508109.0,
-      "net_profit": 0.0,
-      "total_assets": 126769757891.0
-    },
-    {
-      "year": "2022",
-      "sales": 132374925965.0,
-      "operating_profit": 5155194997.0,
-      "net_profit": 6047732872.0,
-      "total_assets": 325549405707.0
-    },
-    {
-      "year": "2023",
-      "sales": 193272169533.0,
-      "operating_profit": 12013961586.0,
-      "net_profit": 11294219950.0,
-      "total_assets": 366887049837.0
-    },
-    {
-      "year": "2024",
-      "sales": 256071097561.0,
-      "operating_profit": 38733545039.0,
-      "net_profit": 0.0,
-      "total_assets": 487204948999.0
-    },
-    {
-      "year": "2025",
-      "sales": 179316825078.0,
-      "operating_profit": -60239594834.0,
-      "net_profit": -61819864786.0,
-      "total_assets": 404480249030.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -162,14 +126,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "035080",
-        "corpName": "그래디언트",
-        "industry": "retail",
-        "viaCode": "018700",
-        "viaName": "바른손",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "081180",
         "corpName": "쎄크",
         "industry": "medicalDevice",
@@ -189,6 +145,14 @@
         "stockCode": "289170",
         "corpName": "바이오텐",
         "industry": "pharma",
+        "viaCode": "018700",
+        "viaName": "바른손",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035080",
+        "corpName": "그래디언트",
+        "industry": "retail",
         "viaCode": "018700",
         "viaName": "바른손",
         "hopDistance": 2

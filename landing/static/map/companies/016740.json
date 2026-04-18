@@ -54,43 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 495632646209.0,
-      "operating_profit": 25296758456.0,
-      "net_profit": 15551865628.0,
-      "total_assets": 424141554671.0
-    },
-    {
-      "year": "2022",
-      "sales": 565996038053.0,
-      "operating_profit": 13299644433.0,
-      "net_profit": 7511336573.0,
-      "total_assets": 462171290214.0
-    },
-    {
-      "year": "2023",
-      "sales": 753135642653.0,
-      "operating_profit": 44088244906.0,
-      "net_profit": 20831932708.0,
-      "total_assets": 477089681561.0
-    },
-    {
-      "year": "2024",
-      "sales": 773258596565.0,
-      "operating_profit": 42917631926.0,
-      "net_profit": 16135278695.0,
-      "total_assets": 514202251500.0
-    },
-    {
-      "year": "2025",
-      "sales": 796139348935.0,
-      "operating_profit": 48595353009.0,
-      "net_profit": 28836074190.0,
-      "total_assets": 549395675901.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -142,33 +106,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "011420",
-        "corpName": "갤럭시아에스엠",
-        "industry": "media",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090710",
-        "corpName": "휴림로봇",
-        "industry": "machinery",
-        "viaCode": "078590",
-        "viaName": "휴림에이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "029780",
-        "corpName": "삼성카드",
-        "industry": "aerospace",
+        "stockCode": "018260",
+        "corpName": "삼성에스디에스",
+        "industry": "shipbuilding",
         "viaCode": "083450",
         "viaName": "GST",
         "hopDistance": 2
@@ -182,59 +122,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006400",
-        "corpName": "삼성SDI",
-        "industry": "chemical",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067280",
-        "corpName": "멀티캠퍼스",
-        "industry": "education",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "094280",
-        "corpName": "효성 ITX",
-        "industry": "chemical",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "028260",
-        "corpName": "삼성물산",
-        "industry": "construction",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000810",
-        "corpName": "삼성화재해상보험",
-        "industry": "finance",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "365900",
-        "corpName": "브이씨",
-        "industry": "leisure",
-        "viaCode": "083450",
-        "viaName": "GST",
+        "stockCode": "105550",
+        "corpName": "엣지파운드리",
+        "industry": "machinery",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
         "hopDistance": 2
       },
       {
@@ -254,6 +146,38 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "030000",
+        "corpName": "제일기획",
+        "industry": "media",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298040",
+        "corpName": "효성중공업",
+        "industry": "chemical",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "029780",
+        "corpName": "삼성카드",
+        "industry": "aerospace",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298020",
+        "corpName": "효성티앤씨",
+        "industry": "chemical",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "044480",
         "corpName": "빌리언스",
         "industry": "plastic",
@@ -262,8 +186,48 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "032830",
-        "corpName": "삼성생명",
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298000",
+        "corpName": "효성화학",
+        "industry": "chemical",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006400",
+        "corpName": "삼성SDI",
+        "industry": "chemical",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028260",
+        "corpName": "삼성물산",
+        "industry": "construction",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "365900",
+        "corpName": "브이씨",
+        "industry": "leisure",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000810",
+        "corpName": "삼성화재해상보험",
         "industry": "finance",
         "viaCode": "083450",
         "viaName": "GST",
@@ -278,137 +242,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "105550",
-        "corpName": "엣지파운드리",
-        "industry": "machinery",
-        "viaCode": "078590",
-        "viaName": "휴림에이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004000",
-        "corpName": "롯데정밀화학",
-        "industry": "chemical",
+        "stockCode": "028050",
+        "corpName": "삼성E&A",
+        "industry": "construction",
         "viaCode": "083450",
         "viaName": "GST",
         "hopDistance": 2
       },
       {
-        "stockCode": "018260",
-        "corpName": "삼성에스디에스",
-        "industry": "shipbuilding",
+        "stockCode": "067280",
+        "corpName": "멀티캠퍼스",
+        "industry": "education",
         "viaCode": "083450",
         "viaName": "GST",
         "hopDistance": 2
       },
       {
-        "stockCode": "298040",
-        "corpName": "효성중공업",
-        "industry": "chemical",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030000",
-        "corpName": "제일기획",
+        "stockCode": "041510",
+        "corpName": "에스엠",
         "industry": "media",
         "viaCode": "083450",
         "viaName": "GST",
         "hopDistance": 2
       },
       {
-        "stockCode": "207940",
-        "corpName": "삼성바이오로직스",
-        "industry": "pharma",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004800",
-        "corpName": "효성",
-        "industry": "chemical",
-        "viaCode": "078590",
-        "viaName": "휴림에이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010140",
-        "corpName": "삼성중공업",
-        "industry": "shipbuilding",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "008290",
-        "corpName": "원풍물산",
-        "industry": "textile",
-        "viaCode": "078590",
-        "viaName": "휴림에이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009150",
-        "corpName": "삼성전기",
-        "industry": "electronics",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "078590",
-        "viaName": "휴림에이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "205470",
-        "corpName": "휴마시스",
-        "industry": "pharma",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "192410",
-        "corpName": "오늘이엔엠",
-        "industry": "telecom",
-        "viaCode": "078590",
-        "viaName": "휴림에이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "298000",
-        "corpName": "효성화학",
-        "industry": "chemical",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "298050",
-        "corpName": "HS효성첨단소재",
-        "industry": "chemical",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "056700",
-        "corpName": "신화인터텍",
-        "industry": "electronics",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012750",
-        "corpName": "에스원",
-        "industry": "electronics",
+        "stockCode": "011420",
+        "corpName": "갤럭시아에스엠",
+        "industry": "media",
         "viaCode": "083450",
         "viaName": "GST",
         "hopDistance": 2
@@ -422,25 +282,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "0126Z0",
-        "corpName": "삼성에피스홀딩스",
-        "industry": "finance",
+        "stockCode": "010140",
+        "corpName": "삼성중공업",
+        "industry": "shipbuilding",
         "viaCode": "083450",
         "viaName": "GST",
         "hopDistance": 2
       },
       {
-        "stockCode": "016360",
-        "corpName": "삼성증권",
-        "industry": "finance",
-        "viaCode": "083450",
-        "viaName": "GST",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "028050",
-        "corpName": "삼성E&A",
-        "industry": "construction",
+        "stockCode": "094280",
+        "corpName": "효성 ITX",
+        "industry": "chemical",
         "viaCode": "083450",
         "viaName": "GST",
         "hopDistance": 2
@@ -454,8 +306,120 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "298020",
-        "corpName": "효성티앤씨",
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298050",
+        "corpName": "HS효성첨단소재",
+        "industry": "chemical",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090710",
+        "corpName": "휴림로봇",
+        "industry": "machinery",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192410",
+        "corpName": "오늘이엔엠",
+        "industry": "telecom",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "0126Z0",
+        "corpName": "삼성에피스홀딩스",
+        "industry": "finance",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "207940",
+        "corpName": "삼성바이오로직스",
+        "industry": "pharma",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "056700",
+        "corpName": "신화인터텍",
+        "industry": "electronics",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004800",
+        "corpName": "효성",
+        "industry": "chemical",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016360",
+        "corpName": "삼성증권",
+        "industry": "finance",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032830",
+        "corpName": "삼성생명",
+        "industry": "finance",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009150",
+        "corpName": "삼성전기",
+        "industry": "electronics",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "205470",
+        "corpName": "휴마시스",
+        "industry": "pharma",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012750",
+        "corpName": "에스원",
+        "industry": "electronics",
+        "viaCode": "083450",
+        "viaName": "GST",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008290",
+        "corpName": "원풍물산",
+        "industry": "textile",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004000",
+        "corpName": "롯데정밀화학",
         "industry": "chemical",
         "viaCode": "083450",
         "viaName": "GST",

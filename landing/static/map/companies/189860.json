@@ -35,36 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 52454376545.0,
-      "operating_profit": -2598895109.0,
-      "net_profit": -2432245078.0,
-      "total_assets": 50633082378.0
-    },
-    {
-      "year": "2022",
-      "sales": 50680231233.0,
-      "operating_profit": -2909881446.0,
-      "net_profit": -3192919905.0,
-      "total_assets": 51009813439.0
-    },
-    {
-      "year": "2023",
-      "sales": 43256177267.0,
-      "operating_profit": -3459108384.0,
-      "net_profit": -3742368393.0,
-      "total_assets": 54600470561.0
-    },
-    {
-      "year": "2025",
-      "sales": 68106757182.0,
-      "operating_profit": -8800092301.0,
-      "net_profit": 6938627021.0,
-      "total_assets": 68881898419.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -125,24 +96,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "300720",
-        "corpName": "한일시멘트",
-        "industry": "construction",
-        "viaCode": "002460",
-        "viaName": "HS화성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "079430",
-        "corpName": "현대리바트",
-        "industry": "paper",
-        "viaCode": "002460",
-        "viaName": "HS화성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "104700",
-        "corpName": "한국철강",
+        "stockCode": "023410",
+        "corpName": "유진기업",
         "industry": "construction",
         "viaCode": "002460",
         "viaName": "HS화성",
@@ -157,94 +112,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "453340",
-        "corpName": "현대그린푸드",
-        "industry": "retail",
-        "viaCode": "002460",
-        "viaName": "HS화성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "460860",
-        "corpName": "동국제강",
-        "industry": "steel",
-        "viaCode": "002460",
-        "viaName": "HS화성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004020",
-        "corpName": "현대제철",
-        "industry": "steel",
-        "viaCode": "002460",
-        "viaName": "HS화성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089590",
-        "corpName": "제주항공",
-        "industry": "aerospace",
-        "viaCode": "002460",
-        "viaName": "HS화성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084010",
-        "corpName": "대한제강",
-        "industry": "construction",
-        "viaCode": "002460",
-        "viaName": "HS화성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001210",
-        "corpName": "금호전기",
-        "industry": "electrical",
-        "viaCode": "002460",
-        "viaName": "HS화성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039010",
-        "corpName": "현대에이치티",
-        "industry": "retail",
-        "viaCode": "002460",
-        "viaName": "HS화성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "261520",
-        "corpName": "이지스",
-        "industry": "software",
-        "viaCode": "002460",
-        "viaName": "HS화성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "117580",
-        "corpName": "대성에너지",
-        "industry": "energy",
-        "viaCode": "002460",
-        "viaName": "HS화성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "018310",
-        "corpName": "삼목에스폼",
-        "industry": "plastic",
-        "viaCode": "002460",
-        "viaName": "HS화성",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "023410",
-        "corpName": "유진기업",
-        "industry": "construction",
-        "viaCode": "002460",
-        "viaName": "HS화성",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "032640",
         "corpName": "LG유플러스",
         "industry": "telecom",
@@ -253,8 +120,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004170",
-        "corpName": "신세계",
+        "stockCode": "039010",
+        "corpName": "현대에이치티",
         "industry": "retail",
         "viaCode": "002460",
         "viaName": "HS화성",
@@ -269,9 +136,113 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "001210",
+        "corpName": "금호전기",
+        "industry": "electrical",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "014280",
         "corpName": "금강공업",
         "industry": "construction",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018310",
+        "corpName": "삼목에스폼",
+        "industry": "plastic",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "117580",
+        "corpName": "대성에너지",
+        "industry": "energy",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079430",
+        "corpName": "현대리바트",
+        "industry": "paper",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "300720",
+        "corpName": "한일시멘트",
+        "industry": "construction",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "460860",
+        "corpName": "동국제강",
+        "industry": "steel",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "453340",
+        "corpName": "현대그린푸드",
+        "industry": "retail",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "104700",
+        "corpName": "한국철강",
+        "industry": "construction",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084010",
+        "corpName": "대한제강",
+        "industry": "construction",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089590",
+        "corpName": "제주항공",
+        "industry": "aerospace",
+        "viaCode": "002460",
+        "viaName": "HS화성",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004170",
+        "corpName": "신세계",
+        "industry": "retail",
         "viaCode": "002460",
         "viaName": "HS화성",
         "hopDistance": 2

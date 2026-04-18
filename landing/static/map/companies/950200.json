@@ -47,43 +47,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 24983530.0,
-      "operating_profit": -6757879.0,
-      "net_profit": -6170351.0,
-      "total_assets": 41787363.0
-    },
-    {
-      "year": "2022",
-      "sales": 33572854.0,
-      "operating_profit": -1141416.0,
-      "net_profit": -811385.0,
-      "total_assets": 38825405.0
-    },
-    {
-      "year": "2023",
-      "sales": 24723776.0,
-      "operating_profit": -2721409.0,
-      "net_profit": -3365726.0,
-      "total_assets": 34587516.0
-    },
-    {
-      "year": "2024",
-      "sales": 32012115.0,
-      "operating_profit": -3834331.0,
-      "net_profit": -450118.0,
-      "total_assets": 37711587.0
-    },
-    {
-      "year": "2025",
-      "sales": 41619339.0,
-      "operating_profit": -1585454.0,
-      "net_profit": -2097338.0,
-      "total_assets": 34693791.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -135,6 +99,14 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "338840",
+        "corpName": "와이바이오로직스",
+        "industry": "pharma",
+        "viaCode": "038290",
+        "viaName": "마크로젠",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "084650",
         "corpName": "랩지노믹스",
         "industry": "pharma",
@@ -143,9 +115,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "180400",
-        "corpName": "DXVX",
-        "industry": "consulting",
+        "stockCode": "394800",
+        "corpName": "쓰리빌리언",
+        "industry": "pharma",
         "viaCode": "038290",
         "viaName": "마크로젠",
         "hopDistance": 2
@@ -167,17 +139,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "394800",
-        "corpName": "쓰리빌리언",
-        "industry": "pharma",
-        "viaCode": "038290",
-        "viaName": "마크로젠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "338840",
-        "corpName": "와이바이오로직스",
-        "industry": "pharma",
+        "stockCode": "180400",
+        "corpName": "DXVX",
+        "industry": "consulting",
         "viaCode": "038290",
         "viaName": "마크로젠",
         "hopDistance": 2

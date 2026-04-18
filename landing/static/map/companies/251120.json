@@ -35,36 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 11972174291.0,
-      "operating_profit": 3137537909.0,
-      "net_profit": 2907548419.0,
-      "total_assets": 23040032158.0
-    },
-    {
-      "year": "2022",
-      "sales": 15855322578.0,
-      "operating_profit": 4880635433.0,
-      "net_profit": null,
-      "total_assets": 59035811358.0
-    },
-    {
-      "year": "2023",
-      "sales": 15592090130.0,
-      "operating_profit": 5034000925.0,
-      "net_profit": 5585152519.0,
-      "total_assets": 62812540804.0
-    },
-    {
-      "year": "2025",
-      "sales": 19179051492.0,
-      "operating_profit": 6252759756.0,
-      "net_profit": 6666197113.0,
-      "total_assets": 73449600502.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -116,6 +87,46 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "338840",
+        "viaName": "와이바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053030",
+        "corpName": "바이넥스",
+        "industry": "pharma",
+        "viaCode": "338840",
+        "viaName": "와이바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095700",
+        "corpName": "제넥신",
+        "industry": "pharma",
+        "viaCode": "338840",
+        "viaName": "와이바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "195940",
+        "corpName": "HK이노엔",
+        "industry": "pharma",
+        "viaCode": "338840",
+        "viaName": "와이바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038290",
+        "corpName": "마크로젠",
+        "industry": "consulting",
+        "viaCode": "338840",
+        "viaName": "와이바이오로직스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "003470",
         "corpName": "유안타증권",
         "industry": "finance",
@@ -132,49 +143,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "095700",
-        "corpName": "제넥신",
-        "industry": "pharma",
-        "viaCode": "338840",
-        "viaName": "와이바이오로직스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "006800",
         "corpName": "미래에셋증권",
         "industry": "finance",
-        "viaCode": "338840",
-        "viaName": "와이바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "044780",
-        "corpName": "에이치케이",
-        "industry": "medicalDevice",
-        "viaCode": "338840",
-        "viaName": "와이바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038290",
-        "corpName": "마크로젠",
-        "industry": "consulting",
-        "viaCode": "338840",
-        "viaName": "와이바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "195940",
-        "corpName": "HK이노엔",
-        "industry": "pharma",
-        "viaCode": "338840",
-        "viaName": "와이바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053030",
-        "corpName": "바이넥스",
-        "industry": "pharma",
         "viaCode": "338840",
         "viaName": "와이바이오로직스",
         "hopDistance": 2

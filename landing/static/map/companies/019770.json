@@ -78,43 +78,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 153501081951.0,
-      "operating_profit": 7484023603.0,
-      "net_profit": 3801680465.0,
-      "total_assets": 124346687389.0
-    },
-    {
-      "year": "2022",
-      "sales": 164178182253.0,
-      "operating_profit": 2807000983.0,
-      "net_profit": 0.0,
-      "total_assets": 132448676013.0
-    },
-    {
-      "year": "2023",
-      "sales": 173052825577.0,
-      "operating_profit": 6949154558.0,
-      "net_profit": 0.0,
-      "total_assets": 141596056672.0
-    },
-    {
-      "year": "2024",
-      "sales": 182361573211.0,
-      "operating_profit": 9257114848.0,
-      "net_profit": 9308387287.0,
-      "total_assets": 149784795708.0
-    },
-    {
-      "year": "2025",
-      "sales": 207061838044.0,
-      "operating_profit": 11911500625.0,
-      "net_profit": 9298678233.0,
-      "total_assets": 182743215836.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -166,17 +130,41 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "000490",
-        "corpName": "대동",
-        "industry": "electronics",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "007860",
         "viaName": "서연",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "265520",
+        "corpName": "AP시스템",
+        "industry": "electronics",
+        "viaCode": "200880",
+        "viaName": "서연이화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "130500",
+        "corpName": "GH신소재",
+        "industry": "textile",
+        "viaCode": "007860",
+        "viaName": "서연",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067570",
+        "corpName": "엔브이에이치코리아",
+        "industry": "electronics",
+        "viaCode": "200880",
+        "viaName": "서연이화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000490",
+        "corpName": "대동",
+        "industry": "electronics",
         "viaCode": "007860",
         "viaName": "서연",
         "hopDistance": 2
@@ -193,30 +181,6 @@
         "stockCode": "101330",
         "corpName": "모베이스",
         "industry": "telecom",
-        "viaCode": "007860",
-        "viaName": "서연",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067570",
-        "corpName": "엔브이에이치코리아",
-        "industry": "electronics",
-        "viaCode": "200880",
-        "viaName": "서연이화",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "265520",
-        "corpName": "AP시스템",
-        "industry": "electronics",
-        "viaCode": "200880",
-        "viaName": "서연이화",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "130500",
-        "corpName": "GH신소재",
-        "industry": "textile",
         "viaCode": "007860",
         "viaName": "서연",
         "hopDistance": 2

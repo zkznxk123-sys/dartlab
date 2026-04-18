@@ -73,43 +73,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 90500181369.0,
-      "operating_profit": 32949401572.0,
-      "net_profit": 40550724819.0,
-      "total_assets": 139482862166.0
-    },
-    {
-      "year": "2022",
-      "sales": 110494315651.0,
-      "operating_profit": 26470752477.0,
-      "net_profit": 16602852140.0,
-      "total_assets": 145602337751.0
-    },
-    {
-      "year": "2023",
-      "sales": 92421026753.0,
-      "operating_profit": 25608083180.0,
-      "net_profit": 29641335472.0,
-      "total_assets": 169245887588.0
-    },
-    {
-      "year": "2024",
-      "sales": 65812403810.0,
-      "operating_profit": 12611340935.0,
-      "net_profit": 17319594437.0,
-      "total_assets": 183390239460.0
-    },
-    {
-      "year": "2025",
-      "sales": 55589851496.0,
-      "operating_profit": 6700053223.0,
-      "net_profit": 17714157896.0,
-      "total_assets": 173989291355.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -164,129 +128,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "001520",
-        "corpName": "동양",
-        "industry": "construction",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001790",
-        "corpName": "대한제당",
-        "industry": "food",
-        "viaCode": "035810",
-        "viaName": "이지홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "353810",
-        "corpName": "이지바이오",
+        "stockCode": "017860",
+        "corpName": "DS단석",
         "industry": "chemical",
         "viaCode": "035810",
         "viaName": "이지홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "079430",
-        "corpName": "현대리바트",
-        "industry": "paper",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "215200",
-        "corpName": "메가스터디교육",
-        "industry": "education",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017510",
-        "corpName": "세명전기",
-        "industry": "textile",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031820",
-        "corpName": "아이티센씨티에스",
-        "industry": "telecom",
-        "viaCode": "035810",
-        "viaName": "이지홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001500",
-        "corpName": "현대차증권",
-        "industry": "realestate",
-        "viaCode": "035810",
-        "viaName": "이지홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "051600",
-        "corpName": "한전KPS",
-        "industry": "construction",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "299480",
-        "corpName": "지앤이헬스케어",
-        "industry": "textile",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "028260",
-        "corpName": "삼성물산",
-        "industry": "construction",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "375500",
-        "corpName": "DL이앤씨",
-        "industry": "construction",
-        "viaCode": "016800",
-        "viaName": "퍼시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000210",
-        "corpName": "DL",
-        "industry": "construction",
-        "viaCode": "016800",
-        "viaName": "퍼시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001130",
-        "corpName": "대한제분",
+        "stockCode": "195500",
+        "corpName": "마니커에프앤지",
         "industry": "food",
         "viaCode": "035810",
         "viaName": "이지홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "225430",
-        "corpName": "케이엠제약",
-        "industry": "cosmetics",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "073560",
-        "corpName": "우리손에프앤지",
-        "industry": "food",
+        "stockCode": "084180",
+        "corpName": "수성웹툰",
+        "industry": "machinery",
         "viaCode": "035810",
         "viaName": "이지홀딩스",
         "hopDistance": 2
@@ -300,88 +160,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "093190",
-        "corpName": "빅솔론",
-        "industry": "electronics",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052690",
-        "corpName": "한전기술",
-        "industry": "construction",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "352940",
-        "corpName": "인바이오",
-        "industry": "chemical",
-        "viaCode": "035810",
-        "viaName": "이지홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088800",
-        "corpName": "에이스테크",
-        "industry": "telecom",
-        "viaCode": "016800",
-        "viaName": "퍼시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036460",
-        "corpName": "한국가스공사",
-        "industry": "energy",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000680",
-        "corpName": "LS네트웍스",
-        "industry": "machinery",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "134790",
-        "corpName": "시디즈",
-        "industry": "paper",
-        "viaCode": "016800",
-        "viaName": "퍼시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024910",
-        "corpName": "경창산업",
-        "industry": "electronics",
-        "viaCode": "016800",
-        "viaName": "퍼시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003620",
-        "corpName": "KG모빌리티",
-        "industry": "electronics",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017860",
-        "corpName": "DS단석",
+        "stockCode": "161000",
+        "corpName": "애경케미칼",
         "industry": "chemical",
         "viaCode": "015760",
         "viaName": "한국전력공사",
@@ -396,123 +176,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "124500",
-        "corpName": "아이티센글로벌",
-        "industry": "software",
-        "viaCode": "035810",
-        "viaName": "이지홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030210",
-        "corpName": "다올투자증권",
-        "industry": "realestate",
-        "viaCode": "035810",
-        "viaName": "이지홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "199150",
-        "corpName": "데이터스트림즈",
-        "industry": "software",
-        "viaCode": "016800",
-        "viaName": "퍼시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037950",
-        "corpName": "엘컴텍",
-        "industry": "medicalDevice",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "027710",
-        "corpName": "팜스토리",
-        "industry": "food",
-        "viaCode": "035810",
-        "viaName": "이지홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "340570",
-        "corpName": "티앤엘",
-        "industry": "pharma",
-        "viaCode": "035810",
-        "viaName": "이지홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016090",
-        "corpName": "대현",
-        "industry": "retail",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033530",
-        "corpName": "SJG세종",
-        "industry": "electronics",
-        "viaCode": "035810",
-        "viaName": "이지홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "071320",
-        "corpName": "지역난방공사",
-        "industry": "energy",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "046120",
-        "corpName": "오르비텍",
-        "industry": "electronics",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001470",
-        "corpName": "삼부토건",
+        "stockCode": "360070",
+        "corpName": "탑머티리얼",
         "industry": "construction",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024910",
+        "corpName": "경창산업",
+        "industry": "electronics",
         "viaCode": "016800",
         "viaName": "퍼시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084180",
-        "corpName": "수성웹툰",
-        "industry": "machinery",
-        "viaCode": "035810",
-        "viaName": "이지홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011810",
-        "corpName": "STX",
-        "industry": "food",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003610",
-        "corpName": "방림",
-        "industry": "shipbuilding",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "285130",
-        "corpName": "SK케미칼",
-        "industry": "software",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
         "hopDistance": 2
       },
       {
@@ -524,64 +200,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002100",
-        "corpName": "경농",
-        "industry": "chemical",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "040300",
-        "corpName": "YTN",
-        "industry": "media",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "161000",
-        "corpName": "애경케미칼",
-        "industry": "chemical",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101970",
-        "corpName": "우양에이치씨",
-        "industry": "construction",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025750",
-        "corpName": "한솔홈데코",
-        "industry": "paper",
-        "viaCode": "016800",
-        "viaName": "퍼시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "208140",
-        "corpName": "정다운",
-        "industry": "food",
-        "viaCode": "035810",
-        "viaName": "이지홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "360070",
-        "corpName": "탑머티리얼",
-        "industry": "construction",
-        "viaCode": "015760",
-        "viaName": "한국전력공사",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "195500",
-        "corpName": "마니커에프앤지",
+        "stockCode": "001130",
+        "corpName": "대한제분",
         "industry": "food",
         "viaCode": "035810",
         "viaName": "이지홀딩스",
@@ -596,17 +216,361 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "027740",
-        "corpName": "마니커",
+        "stockCode": "352940",
+        "corpName": "인바이오",
+        "industry": "chemical",
+        "viaCode": "035810",
+        "viaName": "이지홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033530",
+        "corpName": "SJG세종",
+        "industry": "electronics",
+        "viaCode": "035810",
+        "viaName": "이지홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "040300",
+        "corpName": "YTN",
+        "industry": "media",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027710",
+        "corpName": "팜스토리",
+        "industry": "food",
+        "viaCode": "035810",
+        "viaName": "이지홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001500",
+        "corpName": "현대차증권",
         "industry": "realestate",
         "viaCode": "035810",
         "viaName": "이지홀딩스",
         "hopDistance": 2
       },
       {
+        "stockCode": "215200",
+        "corpName": "메가스터디교육",
+        "industry": "education",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "153710",
         "corpName": "옵티팜",
         "industry": "pharma",
+        "viaCode": "035810",
+        "viaName": "이지홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "046120",
+        "corpName": "오르비텍",
+        "industry": "electronics",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "134790",
+        "corpName": "시디즈",
+        "industry": "paper",
+        "viaCode": "016800",
+        "viaName": "퍼시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101970",
+        "corpName": "우양에이치씨",
+        "industry": "construction",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017510",
+        "corpName": "세명전기",
+        "industry": "textile",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016090",
+        "corpName": "대현",
+        "industry": "retail",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001790",
+        "corpName": "대한제당",
+        "industry": "food",
+        "viaCode": "035810",
+        "viaName": "이지홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079430",
+        "corpName": "현대리바트",
+        "industry": "paper",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028260",
+        "corpName": "삼성물산",
+        "industry": "construction",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "199150",
+        "corpName": "데이터스트림즈",
+        "industry": "software",
+        "viaCode": "016800",
+        "viaName": "퍼시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "353810",
+        "corpName": "이지바이오",
+        "industry": "chemical",
+        "viaCode": "035810",
+        "viaName": "이지홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051600",
+        "corpName": "한전KPS",
+        "industry": "construction",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003610",
+        "corpName": "방림",
+        "industry": "shipbuilding",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088800",
+        "corpName": "에이스테크",
+        "industry": "telecom",
+        "viaCode": "016800",
+        "viaName": "퍼시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025750",
+        "corpName": "한솔홈데코",
+        "industry": "paper",
+        "viaCode": "016800",
+        "viaName": "퍼시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030210",
+        "corpName": "다올투자증권",
+        "industry": "realestate",
+        "viaCode": "035810",
+        "viaName": "이지홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031820",
+        "corpName": "아이티센씨티에스",
+        "industry": "telecom",
+        "viaCode": "035810",
+        "viaName": "이지홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "375500",
+        "corpName": "DL이앤씨",
+        "industry": "construction",
+        "viaCode": "016800",
+        "viaName": "퍼시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "093190",
+        "corpName": "빅솔론",
+        "industry": "electronics",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003620",
+        "corpName": "KG모빌리티",
+        "industry": "electronics",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "340570",
+        "corpName": "티앤엘",
+        "industry": "pharma",
+        "viaCode": "035810",
+        "viaName": "이지홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "124500",
+        "corpName": "아이티센글로벌",
+        "industry": "software",
+        "viaCode": "035810",
+        "viaName": "이지홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001470",
+        "corpName": "삼부토건",
+        "industry": "construction",
+        "viaCode": "016800",
+        "viaName": "퍼시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "225430",
+        "corpName": "케이엠제약",
+        "industry": "cosmetics",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002100",
+        "corpName": "경농",
+        "industry": "chemical",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073560",
+        "corpName": "우리손에프앤지",
+        "industry": "food",
+        "viaCode": "035810",
+        "viaName": "이지홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037950",
+        "corpName": "엘컴텍",
+        "industry": "medicalDevice",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052690",
+        "corpName": "한전기술",
+        "industry": "construction",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071320",
+        "corpName": "지역난방공사",
+        "industry": "energy",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011810",
+        "corpName": "STX",
+        "industry": "food",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "285130",
+        "corpName": "SK케미칼",
+        "industry": "software",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "299480",
+        "corpName": "지앤이헬스케어",
+        "industry": "textile",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036460",
+        "corpName": "한국가스공사",
+        "industry": "energy",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001520",
+        "corpName": "동양",
+        "industry": "construction",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000210",
+        "corpName": "DL",
+        "industry": "construction",
+        "viaCode": "016800",
+        "viaName": "퍼시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "208140",
+        "corpName": "정다운",
+        "industry": "food",
+        "viaCode": "035810",
+        "viaName": "이지홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000680",
+        "corpName": "LS네트웍스",
+        "industry": "machinery",
+        "viaCode": "015760",
+        "viaName": "한국전력공사",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027740",
+        "corpName": "마니커",
+        "industry": "realestate",
         "viaCode": "035810",
         "viaName": "이지홀딩스",
         "hopDistance": 2

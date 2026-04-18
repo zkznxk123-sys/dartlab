@@ -237,43 +237,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 326505279504.0,
-      "operating_profit": 28653226539.0,
-      "net_profit": 45100864949.0,
-      "total_assets": 575484571263.0
-    },
-    {
-      "year": "2022",
-      "sales": 381251130841.0,
-      "operating_profit": 32658637873.0,
-      "net_profit": 5876766413.0,
-      "total_assets": 544804538072.0
-    },
-    {
-      "year": "2023",
-      "sales": 362905625021.0,
-      "operating_profit": 35235683418.0,
-      "net_profit": 66895995467.0,
-      "total_assets": 597603859832.0
-    },
-    {
-      "year": "2024",
-      "sales": 385705375506.0,
-      "operating_profit": 21476407888.0,
-      "net_profit": 0.0,
-      "total_assets": 643928604574.0
-    },
-    {
-      "year": "2025",
-      "sales": 358199545192.0,
-      "operating_profit": 5737130312.0,
-      "net_profit": 0.0,
-      "total_assets": 670149044709.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 4,
     "customerCount": 0,
@@ -433,43 +397,27 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "090710",
-        "corpName": "휴림로봇",
-        "industry": "machinery",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
+        "stockCode": "004150",
+        "corpName": "한솔홀딩스",
+        "industry": "consulting",
         "viaCode": "025750",
         "viaName": "한솔홈데코",
         "hopDistance": 2
       },
       {
-        "stockCode": "004270",
-        "corpName": "남성",
-        "industry": "telecom",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
+        "stockCode": "023900",
+        "corpName": "풍국주정",
+        "industry": "pharma",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "017480",
-        "corpName": "삼현철강",
-        "industry": "steel",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "199150",
-        "viaName": "데이터스트림즈",
+        "stockCode": "001440",
+        "corpName": "대한전선",
+        "industry": "electrical",
+        "viaCode": "091590",
+        "viaName": "남화토건",
         "hopDistance": 2
       },
       {
@@ -481,238 +429,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "120030",
-        "corpName": "조선선재",
-        "industry": "steel",
-        "viaCode": "375500",
-        "viaName": "DL이앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "049430",
-        "corpName": "코메론",
-        "industry": "machinery",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002030",
-        "corpName": "아세아",
-        "industry": "consulting",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "068790",
-        "corpName": "DMS",
-        "industry": "electronics",
-        "viaCode": "375500",
-        "viaName": "DL이앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010780",
-        "corpName": "아이에스동서",
-        "industry": "food",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058400",
-        "corpName": "KNN",
-        "industry": "telecom",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003540",
-        "corpName": "대신증권",
-        "industry": "finance",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "059120",
-        "corpName": "아진엑스텍",
-        "industry": "semiconductor",
-        "viaCode": "088800",
-        "viaName": "에이스테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004440",
-        "corpName": "삼일씨엔에스",
-        "industry": "buildingMaterials",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "055490",
-        "corpName": "테이팩스",
-        "industry": "plastic",
-        "viaCode": "025750",
-        "viaName": "한솔홈데코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006340",
-        "corpName": "대원전선",
-        "industry": "electrical",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000180",
-        "corpName": "성창기업지주",
-        "industry": "consulting",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
-        "viaCode": "024910",
-        "viaName": "경창산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004980",
-        "corpName": "성신양회",
-        "industry": "construction",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006650",
-        "corpName": "대한유화",
-        "industry": "chemical",
-        "viaCode": "000210",
-        "viaName": "DL",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "013570",
-        "corpName": "디와이",
-        "industry": "electronics",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009410",
-        "corpName": "태영건설",
-        "industry": "construction",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082640",
-        "corpName": "동양생명",
-        "industry": "finance",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007210",
-        "corpName": "벽산",
-        "industry": "auto",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "088800",
-        "viaName": "에이스테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002100",
-        "corpName": "경농",
-        "industry": "chemical",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053980",
-        "corpName": "오상자이엘",
-        "industry": "software",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "023410",
-        "corpName": "유진기업",
-        "industry": "construction",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016610",
-        "corpName": "DB증권",
-        "industry": "finance",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "300720",
-        "corpName": "한일시멘트",
-        "industry": "construction",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "348350",
-        "corpName": "위드텍",
-        "industry": "electronics",
-        "viaCode": "024910",
-        "viaName": "경창산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "071950",
-        "corpName": "코아스",
-        "industry": "food",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035890",
-        "corpName": "서희건설",
-        "industry": "realestate",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "111710",
-        "corpName": "남화산업",
-        "industry": "leisure",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "023350",
         "corpName": "한국종합기술",
         "industry": "construction",
@@ -721,9 +437,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "092790",
-        "corpName": "넥스틸",
-        "industry": "medicalDevice",
+        "stockCode": "009620",
+        "corpName": "삼보산업",
+        "industry": "steel",
+        "viaCode": "134790",
+        "viaName": "시디즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095570",
+        "corpName": "AJ네트웍스",
+        "industry": "construction",
         "viaCode": "001470",
         "viaName": "삼부토건",
         "hopDistance": 2
@@ -737,123 +461,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "104700",
-        "corpName": "한국철강",
-        "industry": "construction",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038500",
-        "corpName": "삼표시멘트",
-        "industry": "construction",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038010",
-        "corpName": "제일테크노스",
-        "industry": "semiconductor",
-        "viaCode": "375500",
-        "viaName": "DL이앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "241840",
-        "corpName": "에이스토리",
-        "industry": "telecom",
-        "viaCode": "375500",
-        "viaName": "DL이앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "070590",
-        "corpName": "인티큐브",
-        "industry": "telecom",
-        "viaCode": "025750",
-        "viaName": "한솔홈데코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "352820",
-        "corpName": "하이브",
-        "industry": "media",
-        "viaCode": "024910",
-        "viaName": "경창산업",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "095910",
         "corpName": "에스에너지",
         "industry": "energy",
         "viaCode": "004910",
         "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "460860",
-        "corpName": "동국제강",
-        "industry": "steel",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005750",
-        "corpName": "대림바스",
-        "industry": "realestate",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034120",
-        "corpName": "SBS",
-        "industry": "electronics",
-        "viaCode": "000210",
-        "viaName": "DL",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024840",
-        "corpName": "KBI메탈",
-        "industry": "auto",
-        "viaCode": "088800",
-        "viaName": "에이스테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "219550",
-        "corpName": "디와이디",
-        "industry": "cosmetics",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004960",
-        "corpName": "한신공영",
-        "industry": "construction",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "261520",
-        "corpName": "이지스",
-        "industry": "software",
-        "viaCode": "375500",
-        "viaName": "DL이앤씨",
         "hopDistance": 2
       },
       {
@@ -865,110 +477,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "015760",
-        "corpName": "한국전력공사",
-        "industry": "energy",
-        "viaCode": "285490",
-        "viaName": "노바텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "199150",
-        "viaName": "데이터스트림즈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "213500",
-        "corpName": "한솔제지",
-        "industry": "paper",
-        "viaCode": "025750",
-        "viaName": "한솔홈데코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "014680",
-        "corpName": "한솔케미칼",
-        "industry": "machinery",
-        "viaCode": "025750",
-        "viaName": "한솔홈데코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004100",
-        "corpName": "태양금속공업",
-        "industry": "electronics",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011090",
-        "corpName": "에넥스",
-        "industry": "paper",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "447690",
-        "corpName": "아이오바이오",
-        "industry": "pharma",
-        "viaCode": "134790",
-        "viaName": "시디즈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "271560",
-        "corpName": "오리온",
-        "industry": "food",
-        "viaCode": "025750",
-        "viaName": "한솔홈데코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004710",
-        "corpName": "한솔테크닉스",
-        "industry": "electronics",
-        "viaCode": "025750",
-        "viaName": "한솔홈데코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "228340",
-        "corpName": "동양파일",
-        "industry": "buildingMaterials",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "079430",
-        "corpName": "현대리바트",
-        "industry": "paper",
-        "viaCode": "025750",
-        "viaName": "한솔홈데코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095570",
-        "corpName": "AJ네트웍스",
-        "industry": "construction",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "079650",
-        "corpName": "서산",
-        "industry": "construction",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "306200",
         "corpName": "세아제강",
         "industry": "steel",
@@ -977,25 +485,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "012630",
-        "corpName": "HDC",
-        "industry": "finance",
-        "viaCode": "025750",
-        "viaName": "한솔홈데코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058730",
-        "corpName": "다스코",
-        "industry": "construction",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "015230",
-        "corpName": "대창단조",
+        "stockCode": "034120",
+        "corpName": "SBS",
         "industry": "electronics",
+        "viaCode": "000210",
+        "viaName": "DL",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "049430",
+        "corpName": "코메론",
+        "industry": "machinery",
         "viaCode": "004910",
         "viaName": "조광페인트",
         "hopDistance": 2
@@ -1009,51 +509,51 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "070300",
-        "corpName": "엑스큐어",
-        "industry": "software",
-        "viaCode": "025750",
-        "viaName": "한솔홈데코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089590",
-        "corpName": "제주항공",
-        "industry": "aerospace",
-        "viaCode": "375500",
-        "viaName": "DL이앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004020",
-        "corpName": "현대제철",
+        "stockCode": "460860",
+        "corpName": "동국제강",
         "industry": "steel",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
         "viaCode": "375500",
         "viaName": "DL이앤씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "023900",
-        "corpName": "풍국주정",
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
         "industry": "pharma",
         "viaCode": "375500",
         "viaName": "DL이앤씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "105840",
-        "corpName": "우진",
-        "industry": "machinery",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "199150",
+        "viaName": "데이터스트림즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "241840",
+        "corpName": "에이스토리",
+        "industry": "telecom",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348350",
+        "corpName": "위드텍",
+        "industry": "electronics",
+        "viaCode": "024910",
+        "viaName": "경창산업",
         "hopDistance": 2
       },
       {
@@ -1065,27 +565,67 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "016360",
-        "corpName": "삼성증권",
-        "industry": "finance",
+        "stockCode": "006340",
+        "corpName": "대원전선",
+        "industry": "electrical",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005750",
+        "corpName": "대림바스",
+        "industry": "realestate",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "059120",
+        "corpName": "아진엑스텍",
+        "industry": "semiconductor",
+        "viaCode": "088800",
+        "viaName": "에이스테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038010",
+        "corpName": "제일테크노스",
+        "industry": "semiconductor",
         "viaCode": "375500",
         "viaName": "DL이앤씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "009180",
-        "corpName": "한솔로지스틱스",
-        "industry": "logistics",
+        "stockCode": "104700",
+        "corpName": "한국철강",
+        "industry": "construction",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089590",
+        "corpName": "제주항공",
+        "industry": "aerospace",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012630",
+        "corpName": "HDC",
+        "industry": "finance",
         "viaCode": "025750",
         "viaName": "한솔홈데코",
         "hopDistance": 2
       },
       {
-        "stockCode": "114810",
-        "corpName": "한솔아이원스",
-        "industry": "electronics",
-        "viaCode": "025750",
-        "viaName": "한솔홈데코",
+        "stockCode": "079650",
+        "corpName": "서산",
+        "industry": "construction",
+        "viaCode": "091590",
+        "viaName": "남화토건",
         "hopDistance": 2
       },
       {
@@ -1097,33 +637,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "008970",
-        "corpName": "KBI동양철관",
+        "stockCode": "068790",
+        "corpName": "DMS",
+        "industry": "electronics",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "294870",
+        "corpName": "IPARK현대산업개발",
         "industry": "construction",
-        "viaCode": "088800",
-        "viaName": "에이스테크",
+        "viaCode": "025750",
+        "viaName": "한솔홈데코",
         "hopDistance": 2
       },
       {
-        "stockCode": "001630",
-        "corpName": "종근당홀딩스",
-        "industry": "pharma",
-        "viaCode": "088800",
-        "viaName": "에이스테크",
+        "stockCode": "006650",
+        "corpName": "대한유화",
+        "industry": "chemical",
+        "viaCode": "000210",
+        "viaName": "DL",
         "hopDistance": 2
       },
       {
-        "stockCode": "006360",
-        "corpName": "GS건설",
+        "stockCode": "023410",
+        "corpName": "유진기업",
         "industry": "construction",
-        "viaCode": "001470",
-        "viaName": "삼부토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
         "viaCode": "375500",
         "viaName": "DL이앤씨",
         "hopDistance": 2
@@ -1137,65 +677,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000810",
-        "corpName": "삼성화재해상보험",
-        "industry": "finance",
-        "viaCode": "375500",
-        "viaName": "DL이앤씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009620",
-        "corpName": "삼보산업",
-        "industry": "steel",
-        "viaCode": "134790",
-        "viaName": "시디즈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035810",
-        "corpName": "이지홀딩스",
-        "industry": "food",
-        "viaCode": "285490",
-        "viaName": "노바텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000320",
-        "corpName": "노루홀딩스",
-        "industry": "finance",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "294870",
-        "corpName": "IPARK현대산업개발",
+        "stockCode": "058730",
+        "corpName": "다스코",
         "industry": "construction",
-        "viaCode": "025750",
-        "viaName": "한솔홈데코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004150",
-        "corpName": "한솔홀딩스",
-        "industry": "consulting",
-        "viaCode": "025750",
-        "viaName": "한솔홈데코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005960",
-        "corpName": "동부건설",
-        "industry": "aerospace",
-        "viaCode": "000210",
-        "viaName": "DL",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039020",
-        "corpName": "이건홀딩스",
-        "industry": "paper",
         "viaCode": "091590",
         "viaName": "남화토건",
         "hopDistance": 2
@@ -1209,11 +693,219 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "004710",
+        "corpName": "한솔테크닉스",
+        "industry": "electronics",
+        "viaCode": "025750",
+        "viaName": "한솔홈데코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007210",
+        "corpName": "벽산",
+        "industry": "auto",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014680",
+        "corpName": "한솔케미칼",
+        "industry": "machinery",
+        "viaCode": "025750",
+        "viaName": "한솔홈데코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352820",
+        "corpName": "하이브",
+        "industry": "media",
+        "viaCode": "024910",
+        "viaName": "경창산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058400",
+        "corpName": "KNN",
+        "industry": "telecom",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082640",
+        "corpName": "동양생명",
+        "industry": "finance",
+        "viaCode": "001470",
+        "viaName": "삼부토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005380",
+        "corpName": "현대자동차",
+        "industry": "auto",
+        "viaCode": "024910",
+        "viaName": "경창산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "001470",
+        "viaName": "삼부토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006360",
+        "corpName": "GS건설",
+        "industry": "construction",
+        "viaCode": "001470",
+        "viaName": "삼부토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "120030",
+        "corpName": "조선선재",
+        "industry": "steel",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "055490",
+        "corpName": "테이팩스",
+        "industry": "plastic",
+        "viaCode": "025750",
+        "viaName": "한솔홈데코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "114810",
+        "corpName": "한솔아이원스",
+        "industry": "electronics",
+        "viaCode": "025750",
+        "viaName": "한솔홈데코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002100",
+        "corpName": "경농",
+        "industry": "chemical",
+        "viaCode": "001470",
+        "viaName": "삼부토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039020",
+        "corpName": "이건홀딩스",
+        "industry": "paper",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005960",
+        "corpName": "동부건설",
+        "industry": "aerospace",
+        "viaCode": "000210",
+        "viaName": "DL",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "084010",
         "corpName": "대한제강",
         "industry": "construction",
         "viaCode": "091590",
         "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "493330",
+        "corpName": "지에프아이",
+        "industry": "machinery",
+        "viaCode": "088800",
+        "viaName": "에이스테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015760",
+        "corpName": "한국전력공사",
+        "industry": "energy",
+        "viaCode": "285490",
+        "viaName": "노바텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000860",
+        "corpName": "강남제비스코",
+        "industry": "chemical",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "447690",
+        "corpName": "아이오바이오",
+        "industry": "pharma",
+        "viaCode": "134790",
+        "viaName": "시디즈",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013570",
+        "corpName": "디와이",
+        "industry": "electronics",
+        "viaCode": "001470",
+        "viaName": "삼부토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016360",
+        "corpName": "삼성증권",
+        "industry": "finance",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "070590",
+        "corpName": "인티큐브",
+        "industry": "telecom",
+        "viaCode": "025750",
+        "viaName": "한솔홈데코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017480",
+        "corpName": "삼현철강",
+        "industry": "steel",
+        "viaCode": "001470",
+        "viaName": "삼부토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
         "hopDistance": 2
       },
       {
@@ -1225,11 +917,283 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "228340",
+        "corpName": "동양파일",
+        "industry": "buildingMaterials",
+        "viaCode": "001470",
+        "viaName": "삼부토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "024910",
+        "viaName": "경창산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092790",
+        "corpName": "넥스틸",
+        "industry": "medicalDevice",
+        "viaCode": "001470",
+        "viaName": "삼부토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010780",
+        "corpName": "아이에스동서",
+        "industry": "food",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "111710",
+        "corpName": "남화산업",
+        "industry": "leisure",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000180",
+        "corpName": "성창기업지주",
+        "industry": "consulting",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024840",
+        "corpName": "KBI메탈",
+        "industry": "auto",
+        "viaCode": "088800",
+        "viaName": "에이스테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "070300",
+        "corpName": "엑스큐어",
+        "industry": "software",
+        "viaCode": "025750",
+        "viaName": "한솔홈데코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011090",
+        "corpName": "에넥스",
+        "industry": "paper",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079430",
+        "corpName": "현대리바트",
+        "industry": "paper",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015230",
+        "corpName": "대창단조",
+        "industry": "electronics",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "047040",
         "corpName": "대우건설",
         "industry": "construction",
         "viaCode": "001470",
         "viaName": "삼부토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000810",
+        "corpName": "삼성화재해상보험",
+        "industry": "finance",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008970",
+        "corpName": "KBI동양철관",
+        "industry": "construction",
+        "viaCode": "088800",
+        "viaName": "에이스테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000320",
+        "corpName": "노루홀딩스",
+        "industry": "finance",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035810",
+        "corpName": "이지홀딩스",
+        "industry": "food",
+        "viaCode": "285490",
+        "viaName": "노바텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071950",
+        "corpName": "코아스",
+        "industry": "food",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "183190",
+        "corpName": "아세아시멘트",
+        "industry": "construction",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "271560",
+        "corpName": "오리온",
+        "industry": "food",
+        "viaCode": "025750",
+        "viaName": "한솔홈데코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004440",
+        "corpName": "삼일씨엔에스",
+        "industry": "buildingMaterials",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002030",
+        "corpName": "아세아",
+        "industry": "consulting",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009180",
+        "corpName": "한솔로지스틱스",
+        "industry": "logistics",
+        "viaCode": "025750",
+        "viaName": "한솔홈데코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005440",
+        "corpName": "현대지에프홀딩스",
+        "industry": "realestate",
+        "viaCode": "025750",
+        "viaName": "한솔홈데코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004960",
+        "corpName": "한신공영",
+        "industry": "construction",
+        "viaCode": "001470",
+        "viaName": "삼부토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004270",
+        "corpName": "남성",
+        "industry": "telecom",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "219550",
+        "corpName": "디와이디",
+        "industry": "cosmetics",
+        "viaCode": "001470",
+        "viaName": "삼부토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "213500",
+        "corpName": "한솔제지",
+        "industry": "paper",
+        "viaCode": "025750",
+        "viaName": "한솔홈데코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "105840",
+        "corpName": "우진",
+        "industry": "machinery",
+        "viaCode": "001470",
+        "viaName": "삼부토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038500",
+        "corpName": "삼표시멘트",
+        "industry": "construction",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004100",
+        "corpName": "태양금속공업",
+        "industry": "electronics",
+        "viaCode": "001470",
+        "viaName": "삼부토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001620",
+        "corpName": "케이비아이동국실업",
+        "industry": "electronics",
+        "viaCode": "088800",
+        "viaName": "에이스테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004980",
+        "corpName": "성신양회",
+        "industry": "construction",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "300720",
+        "corpName": "한일시멘트",
+        "industry": "construction",
+        "viaCode": "375500",
+        "viaName": "DL이앤씨",
         "hopDistance": 2
       }
     ],

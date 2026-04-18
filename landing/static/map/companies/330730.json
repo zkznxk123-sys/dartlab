@@ -35,36 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 42411460417.0,
-      "operating_profit": 27485737009.0,
-      "net_profit": 22377888079.0,
-      "total_assets": 80896612833.0
-    },
-    {
-      "year": "2022",
-      "sales": 29580726671.0,
-      "operating_profit": 7785826246.0,
-      "net_profit": 7140255522.0,
-      "total_assets": 98075908766.0
-    },
-    {
-      "year": "2023",
-      "sales": 19002056584.0,
-      "operating_profit": 6440509588.0,
-      "net_profit": 6186941884.0,
-      "total_assets": 98342622930.0
-    },
-    {
-      "year": "2025",
-      "sales": 25549170407.0,
-      "operating_profit": 13461156317.0,
-      "net_profit": 11111516329.0,
-      "total_assets": 102820526748.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -116,9 +87,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "036420",
-        "corpName": "콘텐트리중앙",
-        "industry": "media",
+        "stockCode": "043710",
+        "corpName": "서울리거",
+        "industry": "pharma",
+        "viaCode": "373160",
+        "viaName": "데이원컴퍼니",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078340",
+        "corpName": "컴투스",
+        "industry": "software",
         "viaCode": "373160",
         "viaName": "데이원컴퍼니",
         "hopDistance": 2
@@ -140,17 +119,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "043710",
-        "corpName": "서울리거",
-        "industry": "pharma",
-        "viaCode": "373160",
-        "viaName": "데이원컴퍼니",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078340",
-        "corpName": "컴투스",
-        "industry": "software",
+        "stockCode": "036420",
+        "corpName": "콘텐트리중앙",
+        "industry": "media",
         "viaCode": "373160",
         "viaName": "데이원컴퍼니",
         "hopDistance": 2

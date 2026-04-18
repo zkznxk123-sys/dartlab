@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 77180373944.0,
-      "operating_profit": 13846592556.0,
-      "net_profit": 11127915571.0,
-      "total_assets": 74470156322.0
-    },
-    {
-      "year": "2022",
-      "sales": 72931360641.0,
-      "operating_profit": 8546470484.0,
-      "net_profit": 7880853243.0,
-      "total_assets": 74517962393.0
-    },
-    {
-      "year": "2023",
-      "sales": 95650538591.0,
-      "operating_profit": 8017318466.0,
-      "net_profit": 6964669912.0,
-      "total_assets": 99103198099.0
-    },
-    {
-      "year": "2024",
-      "sales": 69184238320.0,
-      "operating_profit": -5608802365.0,
-      "net_profit": -197223585.0,
-      "total_assets": 85940029006.0
-    },
-    {
-      "year": "2025",
-      "sales": 82379163292.0,
-      "operating_profit": 17391515095.0,
-      "net_profit": 13203597556.0,
-      "total_assets": 92264013118.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,17 +87,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
+        "stockCode": "213420",
+        "corpName": "덕산네오룩스",
+        "industry": "electronics",
         "viaCode": "317330",
         "viaName": "덕산테코피아",
         "hopDistance": 2
       },
       {
-        "stockCode": "213420",
-        "corpName": "덕산네오룩스",
-        "industry": "electronics",
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
         "viaCode": "317330",
         "viaName": "덕산테코피아",
         "hopDistance": 2

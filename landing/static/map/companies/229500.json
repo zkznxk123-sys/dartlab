@@ -144,89 +144,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "028260",
-        "corpName": "삼성물산",
+        "stockCode": "001260",
+        "corpName": "남광토건",
         "industry": "construction",
-        "viaCode": "120240",
-        "viaName": "대정화금",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064820",
-        "corpName": "케이프",
-        "industry": "auto",
-        "viaCode": "122450",
-        "viaName": "KX",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "219750",
-        "corpName": "한국비티비",
-        "industry": "pharma",
-        "viaCode": "256840",
-        "viaName": "한국비엔씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "453860",
-        "corpName": "에이에스텍",
-        "industry": "food",
-        "viaCode": "120240",
-        "viaName": "대정화금",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "352940",
-        "corpName": "인바이오",
-        "industry": "chemical",
-        "viaCode": "256840",
-        "viaName": "한국비엔씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "346010",
-        "corpName": "타이드",
-        "industry": "electronics",
-        "viaCode": "256840",
-        "viaName": "한국비엔씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "196300",
-        "corpName": "HLB펩",
-        "industry": "pharma",
-        "viaCode": "120240",
-        "viaName": "대정화금",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "127710",
-        "corpName": "아시아경제",
-        "industry": "media",
-        "viaCode": "122450",
-        "viaName": "KX",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "122450",
-        "viaName": "KX",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "232530",
-        "corpName": "이엠티",
-        "industry": "semiconductor",
-        "viaCode": "122450",
-        "viaName": "KX",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "166090",
-        "corpName": "하나머티리얼즈",
-        "industry": "semiconductor",
         "viaCode": "122450",
         "viaName": "KX",
         "hopDistance": 2
@@ -237,54 +157,6 @@
         "industry": "machinery",
         "viaCode": "120240",
         "viaName": "대정화금",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "388870",
-        "corpName": "파로스아이바이오",
-        "industry": "pharma",
-        "viaCode": "120240",
-        "viaName": "대정화금",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
-        "viaCode": "122450",
-        "viaName": "KX",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003530",
-        "corpName": "한화투자증권",
-        "industry": "aerospace",
-        "viaCode": "256840",
-        "viaName": "한국비엔씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "120240",
-        "viaName": "대정화금",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037760",
-        "corpName": "쎄니트",
-        "industry": "steel",
-        "viaCode": "120240",
-        "viaName": "대정화금",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001260",
-        "corpName": "남광토건",
-        "industry": "construction",
-        "viaCode": "122450",
-        "viaName": "KX",
         "hopDistance": 2
       },
       {
@@ -304,9 +176,137 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "166090",
+        "corpName": "하나머티리얼즈",
+        "industry": "semiconductor",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "120240",
+        "viaName": "대정화금",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352940",
+        "corpName": "인바이오",
+        "industry": "chemical",
+        "viaCode": "256840",
+        "viaName": "한국비엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "453860",
+        "corpName": "에이에스텍",
+        "industry": "food",
+        "viaCode": "120240",
+        "viaName": "대정화금",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003530",
+        "corpName": "한화투자증권",
+        "industry": "aerospace",
+        "viaCode": "256840",
+        "viaName": "한국비엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028260",
+        "corpName": "삼성물산",
+        "industry": "construction",
+        "viaCode": "120240",
+        "viaName": "대정화금",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "196300",
+        "corpName": "HLB펩",
+        "industry": "pharma",
+        "viaCode": "120240",
+        "viaName": "대정화금",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "310200",
         "corpName": "애니플러스",
         "industry": "telecom",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064820",
+        "corpName": "케이프",
+        "industry": "auto",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "219750",
+        "corpName": "한국비티비",
+        "industry": "pharma",
+        "viaCode": "256840",
+        "viaName": "한국비엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "346010",
+        "corpName": "타이드",
+        "industry": "electronics",
+        "viaCode": "256840",
+        "viaName": "한국비엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "127710",
+        "corpName": "아시아경제",
+        "industry": "media",
+        "viaCode": "122450",
+        "viaName": "KX",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "388870",
+        "corpName": "파로스아이바이오",
+        "industry": "pharma",
+        "viaCode": "120240",
+        "viaName": "대정화금",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037760",
+        "corpName": "쎄니트",
+        "industry": "steel",
+        "viaCode": "120240",
+        "viaName": "대정화금",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
         "viaCode": "122450",
         "viaName": "KX",
         "hopDistance": 2

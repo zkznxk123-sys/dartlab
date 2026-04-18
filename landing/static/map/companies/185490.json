@@ -104,43 +104,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 3242116197.0,
-      "operating_profit": -35003744404.0,
-      "net_profit": -34568955021.0,
-      "total_assets": 104991144724.0
-    },
-    {
-      "year": "2022",
-      "sales": 5293453594.0,
-      "operating_profit": -24088859112.0,
-      "net_profit": -536360290.0,
-      "total_assets": 80381230693.0
-    },
-    {
-      "year": "2023",
-      "sales": 3125394060.0,
-      "operating_profit": -27085530763.0,
-      "net_profit": null,
-      "total_assets": 78102743380.0
-    },
-    {
-      "year": "2024",
-      "sales": 3355764039.0,
-      "operating_profit": -13253741738.0,
-      "net_profit": -12128140663.0,
-      "total_assets": 65305811618.0
-    },
-    {
-      "year": "2025",
-      "sales": 3566784886.0,
-      "operating_profit": -9850606922.0,
-      "net_profit": -3370716512.0,
-      "total_assets": 68051360344.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -212,230 +176,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "065660",
-        "corpName": "안트로젠",
-        "industry": "pharma",
-        "viaCode": "003000",
-        "viaName": "부광약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "019550",
-        "corpName": "SBI인베스트먼트",
-        "industry": "finance",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095610",
-        "corpName": "테스",
-        "industry": "semiconductor",
-        "viaCode": "206950",
-        "viaName": "볼빅",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "289080",
-        "corpName": "SV인베스트먼트",
-        "industry": "finance",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "222080",
-        "corpName": "씨아이에스",
-        "industry": "machinery",
-        "viaCode": "003000",
-        "viaName": "부광약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "045520",
-        "corpName": "크린앤사이언스",
-        "industry": "machinery",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "206950",
-        "viaName": "볼빅",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010060",
-        "corpName": "OCI홀딩스",
-        "industry": "chemical",
-        "viaCode": "003000",
-        "viaName": "부광약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "171120",
-        "corpName": "라이온켐텍",
-        "industry": "chemical",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "014830",
-        "corpName": "유니드",
-        "industry": "food",
-        "viaCode": "003000",
-        "viaName": "부광약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "121440",
-        "corpName": "골프존홀딩스",
-        "industry": "leisure",
-        "viaCode": "206950",
-        "viaName": "볼빅",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "418550",
-        "corpName": "제이오",
-        "industry": "consulting",
-        "viaCode": "206950",
-        "viaName": "볼빅",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "137310",
-        "corpName": "에스디바이오센서",
-        "industry": "pharma",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012450",
-        "corpName": "한화에어로스페이스",
-        "industry": "aerospace",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "122870",
-        "corpName": "와이지엔터테인먼트",
-        "industry": "media",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "321550",
-        "corpName": "티움바이오",
-        "industry": "textile",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "222670",
-        "corpName": "플럼라인생명과학",
-        "industry": "pharma",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005090",
-        "corpName": "SGC에너지",
-        "industry": "energy",
-        "viaCode": "003000",
-        "viaName": "부광약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009810",
-        "corpName": "플레이그램",
-        "industry": "retail",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016250",
-        "corpName": "SGC E&C",
-        "industry": "construction",
-        "viaCode": "003000",
-        "viaName": "부광약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
-        "viaCode": "206950",
-        "viaName": "볼빅",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "456040",
-        "corpName": "OCI",
-        "industry": "chemical",
-        "viaCode": "003000",
-        "viaName": "부광약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "045660",
-        "corpName": "에이텍",
-        "industry": "electronics",
-        "viaCode": "003000",
-        "viaName": "부광약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "018290",
-        "corpName": "브이티",
-        "industry": "plastic",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "389470",
         "corpName": "인벤티지랩",
         "industry": "software",
@@ -444,121 +184,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "092040",
-        "corpName": "아미코젠",
-        "industry": "food",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034730",
-        "corpName": "SK",
-        "industry": "software",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "377740",
-        "corpName": "바이오노트",
-        "industry": "pharma",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084110",
-        "corpName": "휴온스글로벌",
-        "industry": "pharma",
-        "viaCode": "003000",
-        "viaName": "부광약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030210",
-        "corpName": "다올투자증권",
-        "industry": "realestate",
-        "viaCode": "206950",
-        "viaName": "볼빅",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "251270",
-        "corpName": "넷마블",
-        "industry": "software",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005500",
-        "corpName": "삼진제약",
-        "industry": "retail",
-        "viaCode": "003000",
-        "viaName": "부광약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006280",
-        "corpName": "녹십자",
-        "industry": "pharma",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "186230",
-        "corpName": "그린플러스",
-        "industry": "construction",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064550",
-        "corpName": "바이오니아",
-        "industry": "pharma",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "214330",
-        "corpName": "금호에이치티",
-        "industry": "electronics",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024090",
-        "corpName": "디씨엠",
-        "industry": "construction",
-        "viaCode": "206950",
-        "viaName": "볼빅",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "261520",
-        "corpName": "이지스",
-        "industry": "software",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000250",
-        "corpName": "삼천당제약",
-        "industry": "pharma",
-        "viaCode": "073570",
-        "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "087010",
-        "corpName": "펩트론",
-        "industry": "pharma",
+        "stockCode": "053610",
+        "corpName": "프로텍",
+        "industry": "chemical",
         "viaCode": "073570",
         "viaName": "리튬포어스",
         "hopDistance": 2
@@ -572,17 +200,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "009830",
-        "corpName": "한화솔루션",
+        "stockCode": "016250",
+        "corpName": "SGC E&C",
+        "industry": "construction",
+        "viaCode": "003000",
+        "viaName": "부광약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034730",
+        "corpName": "SK",
+        "industry": "software",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018290",
+        "corpName": "브이티",
+        "industry": "plastic",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "171120",
+        "corpName": "라이온켐텍",
         "industry": "chemical",
         "viaCode": "073570",
         "viaName": "리튬포어스",
         "hopDistance": 2
       },
       {
-        "stockCode": "446070",
-        "corpName": "유니드비티플러스",
-        "industry": "paper",
+        "stockCode": "137310",
+        "corpName": "에스디바이오센서",
+        "industry": "pharma",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014830",
+        "corpName": "유니드",
+        "industry": "food",
         "viaCode": "003000",
         "viaName": "부광약품",
         "hopDistance": 2
@@ -596,11 +256,67 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "042700",
-        "corpName": "한미반도체",
-        "industry": "semiconductor",
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
+        "viaCode": "003000",
+        "viaName": "부광약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "045660",
+        "corpName": "에이텍",
+        "industry": "electronics",
+        "viaCode": "003000",
+        "viaName": "부광약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
         "viaCode": "206950",
         "viaName": "볼빅",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "186230",
+        "corpName": "그린플러스",
+        "industry": "construction",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012450",
+        "corpName": "한화에어로스페이스",
+        "industry": "aerospace",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "087010",
+        "corpName": "펩트론",
+        "industry": "pharma",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "045520",
+        "corpName": "크린앤사이언스",
+        "industry": "machinery",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "446070",
+        "corpName": "유니드비티플러스",
+        "industry": "paper",
+        "viaCode": "003000",
+        "viaName": "부광약품",
         "hopDistance": 2
       },
       {
@@ -612,19 +328,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "053610",
-        "corpName": "프로텍",
-        "industry": "chemical",
+        "stockCode": "122870",
+        "corpName": "와이지엔터테인먼트",
+        "industry": "media",
         "viaCode": "073570",
         "viaName": "리튬포어스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "200670",
-        "corpName": "휴메딕스",
-        "industry": "pharma",
-        "viaCode": "206650",
-        "viaName": "유바이오로직스",
         "hopDistance": 2
       },
       {
@@ -636,11 +344,267 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "009810",
+        "corpName": "플레이그램",
+        "industry": "retail",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "289080",
+        "corpName": "SV인베스트먼트",
+        "industry": "finance",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005500",
+        "corpName": "삼진제약",
+        "industry": "retail",
+        "viaCode": "003000",
+        "viaName": "부광약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064550",
+        "corpName": "바이오니아",
+        "industry": "pharma",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092040",
+        "corpName": "아미코젠",
+        "industry": "food",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "206950",
+        "viaName": "볼빅",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200670",
+        "corpName": "휴메딕스",
+        "industry": "pharma",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030210",
+        "corpName": "다올투자증권",
+        "industry": "realestate",
+        "viaCode": "206950",
+        "viaName": "볼빅",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005090",
+        "corpName": "SGC에너지",
+        "industry": "energy",
+        "viaCode": "003000",
+        "viaName": "부광약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000250",
+        "corpName": "삼천당제약",
+        "industry": "pharma",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095610",
+        "corpName": "테스",
+        "industry": "semiconductor",
+        "viaCode": "206950",
+        "viaName": "볼빅",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "101670",
         "corpName": "하이드로리튬",
         "industry": "electrical",
         "viaCode": "073570",
         "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "251270",
+        "corpName": "넷마블",
+        "industry": "software",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009830",
+        "corpName": "한화솔루션",
+        "industry": "chemical",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019550",
+        "corpName": "SBI인베스트먼트",
+        "industry": "finance",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010060",
+        "corpName": "OCI홀딩스",
+        "industry": "chemical",
+        "viaCode": "003000",
+        "viaName": "부광약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006280",
+        "corpName": "녹십자",
+        "industry": "pharma",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024090",
+        "corpName": "디씨엠",
+        "industry": "construction",
+        "viaCode": "206950",
+        "viaName": "볼빅",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065660",
+        "corpName": "안트로젠",
+        "industry": "pharma",
+        "viaCode": "003000",
+        "viaName": "부광약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
+        "viaCode": "003000",
+        "viaName": "부광약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377740",
+        "corpName": "바이오노트",
+        "industry": "pharma",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "321550",
+        "corpName": "티움바이오",
+        "industry": "textile",
+        "viaCode": "073570",
+        "viaName": "리튬포어스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "121440",
+        "corpName": "골프존홀딩스",
+        "industry": "leisure",
+        "viaCode": "206950",
+        "viaName": "볼빅",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "222080",
+        "corpName": "씨아이에스",
+        "industry": "machinery",
+        "viaCode": "003000",
+        "viaName": "부광약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "042700",
+        "corpName": "한미반도체",
+        "industry": "semiconductor",
+        "viaCode": "206950",
+        "viaName": "볼빅",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214330",
+        "corpName": "금호에이치티",
+        "industry": "electronics",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "222670",
+        "corpName": "플럼라인생명과학",
+        "industry": "pharma",
+        "viaCode": "206650",
+        "viaName": "유바이오로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "418550",
+        "corpName": "제이오",
+        "industry": "consulting",
+        "viaCode": "206950",
+        "viaName": "볼빅",
         "hopDistance": 2
       }
     ],

@@ -19,12 +19,12 @@
           "revenue": 2380,
           "confidence": 1.0,
           "source": "docs",
-          "roe": -13.6,
-          "opMargin": 17.6,
-          "debtRatio": 73.1,
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
           "revCagr": null,
-          "profGrade": "양호",
-          "debtGrade": "안전",
+          "profGrade": "",
+          "debtGrade": "",
           "growthGrade": ""
         },
         {
@@ -36,13 +36,13 @@
           "revenue": 1726,
           "confidence": 0.7,
           "source": "product",
-          "roe": 5.1,
-          "opMargin": 4.2,
-          "debtRatio": 139.1,
-          "revCagr": 6.7,
-          "profGrade": "보통",
-          "debtGrade": "관찰",
-          "growthGrade": "정체"
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
+          "revCagr": null,
+          "profGrade": "",
+          "debtGrade": "",
+          "growthGrade": ""
         },
         {
           "stockCode": "054050",
@@ -53,13 +53,13 @@
           "revenue": 1588,
           "confidence": 1.0,
           "source": "docs",
-          "roe": 4.4,
-          "opMargin": 17.4,
-          "debtRatio": 26.8,
-          "revCagr": 6.0,
-          "profGrade": "양호",
-          "debtGrade": "관찰",
-          "growthGrade": "정체"
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
+          "revCagr": null,
+          "profGrade": "",
+          "debtGrade": "",
+          "growthGrade": ""
         },
         {
           "stockCode": "475460",
@@ -70,11 +70,11 @@
           "revenue": 1356,
           "confidence": 0.7,
           "source": "product",
-          "roe": -1.1,
-          "opMargin": 0.2,
-          "debtRatio": 161.9,
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
           "revCagr": null,
-          "profGrade": "저수익",
+          "profGrade": "",
           "debtGrade": "관찰",
           "growthGrade": ""
         },
@@ -87,13 +87,13 @@
           "revenue": 35,
           "confidence": 1.0,
           "source": "docs",
-          "roe": -5.7,
-          "opMargin": -28.1,
-          "debtRatio": 72.2,
-          "revCagr": -4.5,
-          "profGrade": "적자",
-          "debtGrade": "주의",
-          "growthGrade": "역성장"
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
+          "revCagr": null,
+          "profGrade": "",
+          "debtGrade": "",
+          "growthGrade": ""
         }
       ]
     }

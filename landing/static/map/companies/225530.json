@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 71898463686.0,
-      "operating_profit": 13214491053.0,
-      "net_profit": 10111336092.0,
-      "total_assets": 146064509233.0
-    },
-    {
-      "year": "2022",
-      "sales": 87471227933.0,
-      "operating_profit": 15372295022.0,
-      "net_profit": 12074741153.0,
-      "total_assets": 145980361650.0
-    },
-    {
-      "year": "2023",
-      "sales": 85460172473.0,
-      "operating_profit": 18912752031.0,
-      "net_profit": 0.0,
-      "total_assets": 165717975257.0
-    },
-    {
-      "year": "2024",
-      "sales": 63877146203.0,
-      "operating_profit": 8863028851.0,
-      "net_profit": 0.0,
-      "total_assets": 179145646984.0
-    },
-    {
-      "year": "2025",
-      "sales": 38493462752.0,
-      "operating_profit": -4871625215.0,
-      "net_profit": -2492104615.0,
-      "total_assets": 175263808874.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,16 +87,16 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
+        "stockCode": "024110",
+        "corpName": "기업은행",
         "industry": "finance",
         "viaCode": "060560",
         "viaName": "HC홈센타",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
         "industry": "finance",
         "viaCode": "060560",
         "viaName": "HC홈센타",
@@ -147,17 +111,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
+        "stockCode": "006570",
+        "corpName": "대림통상",
+        "industry": "buildingMaterials",
         "viaCode": "060560",
         "viaName": "HC홈센타",
         "hopDistance": 2
       },
       {
-        "stockCode": "006570",
-        "corpName": "대림통상",
-        "industry": "buildingMaterials",
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
         "viaCode": "060560",
         "viaName": "HC홈센타",
         "hopDistance": 2

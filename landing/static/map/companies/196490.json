@@ -66,43 +66,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 45400415835.0,
-      "operating_profit": -12713483050.0,
-      "net_profit": null,
-      "total_assets": 148383494374.0
-    },
-    {
-      "year": "2022",
-      "sales": 53205792749.0,
-      "operating_profit": -17723435553.0,
-      "net_profit": -24695008421.0,
-      "total_assets": 131393124358.0
-    },
-    {
-      "year": "2023",
-      "sales": 89534954324.0,
-      "operating_profit": -44459455735.0,
-      "net_profit": -53417979441.0,
-      "total_assets": 150124404623.0
-    },
-    {
-      "year": "2024",
-      "sales": 43289271846.0,
-      "operating_profit": -22564569836.0,
-      "net_profit": -63786526859.0,
-      "total_assets": 58471901617.0
-    },
-    {
-      "year": "2025",
-      "sales": 33322099931.0,
-      "operating_profit": -6461214449.0,
-      "net_profit": -8651483041.0,
-      "total_assets": 38920061959.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -154,49 +118,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "033640",
-        "viaName": "네패스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "033640",
-        "viaName": "네패스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "377300",
-        "corpName": "카카오페이",
-        "industry": "finance",
-        "viaCode": "005010",
-        "viaName": "휴스틸",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "068790",
-        "corpName": "DMS",
-        "industry": "electronics",
-        "viaCode": "033640",
-        "viaName": "네패스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004020",
-        "corpName": "현대제철",
-        "industry": "steel",
-        "viaCode": "005010",
-        "viaName": "휴스틸",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
+        "stockCode": "056730",
+        "corpName": "CNT85",
+        "industry": "construction",
         "viaCode": "005010",
         "viaName": "휴스틸",
         "hopDistance": 2
@@ -210,11 +134,43 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "056730",
-        "corpName": "CNT85",
-        "industry": "construction",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "033640",
+        "viaName": "네패스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
         "viaCode": "005010",
         "viaName": "휴스틸",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377300",
+        "corpName": "카카오페이",
+        "industry": "finance",
+        "viaCode": "005010",
+        "viaName": "휴스틸",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "005010",
+        "viaName": "휴스틸",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068790",
+        "corpName": "DMS",
+        "industry": "electronics",
+        "viaCode": "033640",
+        "viaName": "네패스",
         "hopDistance": 2
       },
       {
@@ -229,6 +185,14 @@
         "stockCode": "464500",
         "corpName": "아이언디바이스",
         "industry": "semiconductor",
+        "viaCode": "033640",
+        "viaName": "네패스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "033640",
         "viaName": "네패스",
         "hopDistance": 2

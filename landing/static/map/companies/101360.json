@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 77443553598.0,
-      "operating_profit": 7639012152.0,
-      "net_profit": 15850124.0,
-      "total_assets": 120195165706.0
-    },
-    {
-      "year": "2022",
-      "sales": 60522326102.0,
-      "operating_profit": 2252730403.0,
-      "net_profit": 70221458.0,
-      "total_assets": 139449222196.0
-    },
-    {
-      "year": "2023",
-      "sales": 51455287308.0,
-      "operating_profit": -2967415404.0,
-      "net_profit": -10150669449.0,
-      "total_assets": 154242178124.0
-    },
-    {
-      "year": "2024",
-      "sales": 104901418831.0,
-      "operating_profit": 487160660.0,
-      "net_profit": 13546335309.0,
-      "total_assets": 405770507399.0
-    },
-    {
-      "year": "2025",
-      "sales": 141958412396.0,
-      "operating_profit": -610261853.0,
-      "net_profit": -8596919787.0,
-      "total_assets": 464749775946.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -139,17 +103,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
+        "stockCode": "352820",
+        "corpName": "하이브",
+        "industry": "media",
         "viaCode": "365340",
         "viaName": "성일하이텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "352820",
-        "corpName": "하이브",
-        "industry": "media",
+        "stockCode": "028260",
+        "corpName": "삼성물산",
+        "industry": "construction",
         "viaCode": "365340",
         "viaName": "성일하이텍",
         "hopDistance": 2
@@ -163,9 +127,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "028260",
-        "corpName": "삼성물산",
-        "industry": "construction",
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
         "viaCode": "365340",
         "viaName": "성일하이텍",
         "hopDistance": 2

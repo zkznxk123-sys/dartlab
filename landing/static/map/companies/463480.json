@@ -35,15 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2025",
-      "sales": 67411311418.0,
-      "operating_profit": -1723075249.0,
-      "net_profit": -112694601.0,
-      "total_assets": 63994451509.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -115,16 +107,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "066670",
-        "corpName": "디티씨",
-        "industry": "electronics",
-        "viaCode": "011230",
-        "viaName": "삼화전자공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001820",
-        "corpName": "삼화콘덴서공업",
+        "stockCode": "009470",
+        "corpName": "삼화전기",
         "industry": "electronics",
         "viaCode": "011230",
         "viaName": "삼화전자공업",
@@ -139,8 +123,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "009470",
-        "corpName": "삼화전기",
+        "stockCode": "066670",
+        "corpName": "디티씨",
+        "industry": "electronics",
+        "viaCode": "011230",
+        "viaName": "삼화전자공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001820",
+        "corpName": "삼화콘덴서공업",
         "industry": "electronics",
         "viaCode": "011230",
         "viaName": "삼화전자공업",

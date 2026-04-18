@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 54365248586.0,
-      "operating_profit": 5160637787.0,
-      "net_profit": 0.0,
-      "total_assets": 101149022157.0
-    },
-    {
-      "year": "2022",
-      "sales": 56039955371.0,
-      "operating_profit": -9083502590.0,
-      "net_profit": -8674611683.0,
-      "total_assets": 111781491697.0
-    },
-    {
-      "year": "2023",
-      "sales": 61254832221.0,
-      "operating_profit": -56581282.0,
-      "net_profit": 3730729860.0,
-      "total_assets": 115855540311.0
-    },
-    {
-      "year": "2024",
-      "sales": 63085257262.0,
-      "operating_profit": -567399357.0,
-      "net_profit": 1319008.0,
-      "total_assets": 126559129343.0
-    },
-    {
-      "year": "2025",
-      "sales": 52718857507.0,
-      "operating_profit": -1477530957.0,
-      "net_profit": -40312.0,
-      "total_assets": 120169071957.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -143,14 +107,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "339950",
-        "corpName": "아이비김영",
-        "industry": "education",
-        "viaCode": "002960",
-        "viaName": "한국쉘석유",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "005380",
         "corpName": "현대자동차",
         "industry": "auto",
@@ -162,6 +118,14 @@
         "stockCode": "010950",
         "corpName": "S-Oil",
         "industry": "chemical",
+        "viaCode": "002960",
+        "viaName": "한국쉘석유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "339950",
+        "corpName": "아이비김영",
+        "industry": "education",
         "viaCode": "002960",
         "viaName": "한국쉘석유",
         "hopDistance": 2

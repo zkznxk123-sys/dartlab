@@ -35,29 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2023",
-      "sales": 85325300237.0,
-      "operating_profit": 196480866.0,
-      "net_profit": -1104873844.0,
-      "total_assets": 131253791919.0
-    },
-    {
-      "year": "2024",
-      "sales": 82707219799.0,
-      "operating_profit": -3478071657.0,
-      "net_profit": -5711202453.0,
-      "total_assets": 128241345564.0
-    },
-    {
-      "year": "2025",
-      "sales": 82108561843.0,
-      "operating_profit": 984309945.0,
-      "net_profit": -29993357.0,
-      "total_assets": 119832196883.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -117,8 +95,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "084690",
-        "corpName": "대상홀딩스",
+        "stockCode": "012630",
+        "corpName": "HDC",
         "industry": "finance",
         "viaCode": "010780",
         "viaName": "아이에스동서",
@@ -133,9 +111,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "217590",
-        "corpName": "티엠씨",
-        "industry": "electrical",
+        "stockCode": "060380",
+        "corpName": "동양에스텍",
+        "industry": "steel",
+        "viaCode": "010780",
+        "viaName": "아이에스동서",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "375500",
+        "corpName": "DL이앤씨",
+        "industry": "construction",
+        "viaCode": "010780",
+        "viaName": "아이에스동서",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298690",
+        "corpName": "에어부산",
+        "industry": "aerospace",
         "viaCode": "010780",
         "viaName": "아이에스동서",
         "hopDistance": 2
@@ -149,40 +143,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "060380",
-        "corpName": "동양에스텍",
-        "industry": "steel",
-        "viaCode": "010780",
-        "viaName": "아이에스동서",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "097230",
-        "corpName": "HJ중공업",
-        "industry": "construction",
-        "viaCode": "010780",
-        "viaName": "아이에스동서",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "091590",
         "corpName": "남화토건",
-        "industry": "construction",
-        "viaCode": "010780",
-        "viaName": "아이에스동서",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012630",
-        "corpName": "HDC",
-        "industry": "finance",
-        "viaCode": "010780",
-        "viaName": "아이에스동서",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "375500",
-        "corpName": "DL이앤씨",
         "industry": "construction",
         "viaCode": "010780",
         "viaName": "아이에스동서",
@@ -197,6 +159,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "097230",
+        "corpName": "HJ중공업",
+        "industry": "construction",
+        "viaCode": "010780",
+        "viaName": "아이에스동서",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "000210",
         "corpName": "DL",
         "industry": "construction",
@@ -205,9 +175,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "298690",
-        "corpName": "에어부산",
-        "industry": "aerospace",
+        "stockCode": "217590",
+        "corpName": "티엠씨",
+        "industry": "electrical",
+        "viaCode": "010780",
+        "viaName": "아이에스동서",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084690",
+        "corpName": "대상홀딩스",
+        "industry": "finance",
         "viaCode": "010780",
         "viaName": "아이에스동서",
         "hopDistance": 2

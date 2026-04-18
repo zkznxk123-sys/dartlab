@@ -47,36 +47,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 25893224088.0,
-      "operating_profit": 13828657220.0,
-      "net_profit": 13736701601.0,
-      "total_assets": 166982770974.0
-    },
-    {
-      "year": "2022",
-      "sales": 30435802726.0,
-      "operating_profit": 17721459369.0,
-      "net_profit": 20643476480.0,
-      "total_assets": 182680026557.0
-    },
-    {
-      "year": "2023",
-      "sales": 24670582732.0,
-      "operating_profit": 11794142261.0,
-      "net_profit": 17655540121.0,
-      "total_assets": 193071860537.0
-    },
-    {
-      "year": "2025",
-      "sales": 16771010459.0,
-      "operating_profit": 4093920849.0,
-      "net_profit": 6671954168.0,
-      "total_assets": 202321203420.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -128,32 +99,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "079430",
-        "corpName": "현대리바트",
-        "industry": "paper",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "079650",
-        "corpName": "서산",
-        "industry": "construction",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "104700",
-        "corpName": "한국철강",
-        "industry": "construction",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038500",
-        "corpName": "삼표시멘트",
+        "stockCode": "023410",
+        "corpName": "유진기업",
         "industry": "construction",
         "viaCode": "091590",
         "viaName": "남화토건",
@@ -168,81 +115,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002030",
-        "corpName": "아세아",
-        "industry": "consulting",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "010780",
         "corpName": "아이에스동서",
         "industry": "food",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039020",
-        "corpName": "이건홀딩스",
-        "industry": "paper",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005750",
-        "corpName": "대림바스",
-        "industry": "realestate",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004020",
-        "corpName": "현대제철",
-        "industry": "steel",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "460860",
-        "corpName": "동국제강",
-        "industry": "steel",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084010",
-        "corpName": "대한제강",
-        "industry": "construction",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006340",
-        "corpName": "대원전선",
-        "industry": "electrical",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016800",
-        "corpName": "퍼시스",
-        "industry": "paper",
-        "viaCode": "091590",
-        "viaName": "남화토건",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004980",
-        "corpName": "성신양회",
-        "industry": "construction",
         "viaCode": "091590",
         "viaName": "남화토건",
         "hopDistance": 2
@@ -256,9 +131,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "023410",
-        "corpName": "유진기업",
+        "stockCode": "011090",
+        "corpName": "에넥스",
+        "industry": "paper",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038500",
+        "corpName": "삼표시멘트",
         "industry": "construction",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004980",
+        "corpName": "성신양회",
+        "industry": "construction",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079430",
+        "corpName": "현대리바트",
+        "industry": "paper",
         "viaCode": "091590",
         "viaName": "남화토건",
         "hopDistance": 2
@@ -272,17 +171,73 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "183190",
-        "corpName": "아세아시멘트",
+        "stockCode": "460860",
+        "corpName": "동국제강",
+        "industry": "steel",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006340",
+        "corpName": "대원전선",
+        "industry": "electrical",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005750",
+        "corpName": "대림바스",
+        "industry": "realestate",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039020",
+        "corpName": "이건홀딩스",
+        "industry": "paper",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "104700",
+        "corpName": "한국철강",
         "industry": "construction",
         "viaCode": "091590",
         "viaName": "남화토건",
         "hopDistance": 2
       },
       {
-        "stockCode": "011090",
-        "corpName": "에넥스",
+        "stockCode": "084010",
+        "corpName": "대한제강",
+        "industry": "construction",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016800",
+        "corpName": "퍼시스",
         "industry": "paper",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079650",
+        "corpName": "서산",
+        "industry": "construction",
         "viaCode": "091590",
         "viaName": "남화토건",
         "hopDistance": 2
@@ -291,6 +246,22 @@
         "stockCode": "071950",
         "corpName": "코아스",
         "industry": "food",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "183190",
+        "corpName": "아세아시멘트",
+        "industry": "construction",
+        "viaCode": "091590",
+        "viaName": "남화토건",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002030",
+        "corpName": "아세아",
+        "industry": "consulting",
         "viaCode": "091590",
         "viaName": "남화토건",
         "hopDistance": 2

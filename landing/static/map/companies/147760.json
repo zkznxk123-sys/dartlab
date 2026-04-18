@@ -47,43 +47,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 60501218907.0,
-      "operating_profit": 10241953345.0,
-      "net_profit": 7858305762.0,
-      "total_assets": 70123223246.0
-    },
-    {
-      "year": "2022",
-      "sales": 38244471105.0,
-      "operating_profit": -5229422480.0,
-      "net_profit": -3921143691.0,
-      "total_assets": 62870063684.0
-    },
-    {
-      "year": "2023",
-      "sales": 33042724100.0,
-      "operating_profit": -5266408445.0,
-      "net_profit": -5550874255.0,
-      "total_assets": 68427460229.0
-    },
-    {
-      "year": "2024",
-      "sales": 24393115333.0,
-      "operating_profit": -13100490473.0,
-      "net_profit": -14229761878.0,
-      "total_assets": 60021374575.0
-    },
-    {
-      "year": "2025",
-      "sales": 25287736817.0,
-      "operating_profit": -20395564718.0,
-      "net_profit": -22477252523.0,
-      "total_assets": 53456916573.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -152,40 +116,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "089970",
-        "corpName": "브이엠",
-        "industry": "machinery",
-        "viaCode": "053610",
-        "viaName": "프로텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000240",
-        "corpName": "한국앤컴퍼니",
-        "industry": "finance",
-        "viaCode": "053610",
-        "viaName": "프로텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "073570",
-        "corpName": "리튬포어스",
-        "industry": "misc",
-        "viaCode": "053610",
-        "viaName": "프로텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
-        "viaCode": "053610",
-        "viaName": "프로텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "098120",
-        "corpName": "마이크로컨텍솔",
+        "stockCode": "089790",
+        "corpName": "제이티",
         "industry": "semiconductor",
         "viaCode": "053610",
         "viaName": "프로텍",
@@ -200,9 +132,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "089790",
-        "corpName": "제이티",
+        "stockCode": "098120",
+        "corpName": "마이크로컨텍솔",
         "industry": "semiconductor",
+        "viaCode": "053610",
+        "viaName": "프로텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "053610",
+        "viaName": "프로텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002390",
+        "corpName": "한독",
+        "industry": "realestate",
         "viaCode": "053610",
         "viaName": "프로텍",
         "hopDistance": 2
@@ -216,9 +164,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002390",
-        "corpName": "한독",
-        "industry": "realestate",
+        "stockCode": "000240",
+        "corpName": "한국앤컴퍼니",
+        "industry": "finance",
+        "viaCode": "053610",
+        "viaName": "프로텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089970",
+        "corpName": "브이엠",
+        "industry": "machinery",
+        "viaCode": "053610",
+        "viaName": "프로텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073570",
+        "corpName": "리튬포어스",
+        "industry": "misc",
         "viaCode": "053610",
         "viaName": "프로텍",
         "hopDistance": 2

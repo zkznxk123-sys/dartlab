@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 71531049300.0,
-      "operating_profit": 6695133134.0,
-      "net_profit": 6320226693.0,
-      "total_assets": 131941369926.0
-    },
-    {
-      "year": "2022",
-      "sales": 97251566947.0,
-      "operating_profit": 10482425626.0,
-      "net_profit": 11895839816.0,
-      "total_assets": 210544880941.0
-    },
-    {
-      "year": "2023",
-      "sales": 101121012105.0,
-      "operating_profit": 10258667370.0,
-      "net_profit": 0.0,
-      "total_assets": 212424450477.0
-    },
-    {
-      "year": "2024",
-      "sales": 102624064718.0,
-      "operating_profit": 10742388621.0,
-      "net_profit": 5128728868.0,
-      "total_assets": 221083288201.0
-    },
-    {
-      "year": "2025",
-      "sales": 99378439543.0,
-      "operating_profit": 8532024436.0,
-      "net_profit": 7986681935.0,
-      "total_assets": 225773290519.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,6 +87,70 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "052860",
+        "corpName": "아이앤씨",
+        "industry": "semiconductor",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "102460",
+        "corpName": "이연제약",
+        "industry": "pharma",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192080",
+        "corpName": "더블유게임즈",
+        "industry": "software",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "258790",
+        "corpName": "소프트캠프",
+        "industry": "software",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "112610",
+        "corpName": "씨에스윈드",
+        "industry": "energy",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "185750",
+        "corpName": "종근당",
+        "industry": "pharma",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006280",
+        "corpName": "녹십자",
+        "industry": "pharma",
+        "viaCode": "065570",
+        "viaName": "삼영이엔씨",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "348370",
         "corpName": "엔켐",
         "industry": "battery",
@@ -139,73 +167,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "112610",
-        "corpName": "씨에스윈드",
-        "industry": "energy",
-        "viaCode": "065570",
-        "viaName": "삼영이엔씨",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "307180",
         "corpName": "아이엘",
         "industry": "chemical",
-        "viaCode": "065570",
-        "viaName": "삼영이엔씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052860",
-        "corpName": "아이앤씨",
-        "industry": "semiconductor",
-        "viaCode": "065570",
-        "viaName": "삼영이엔씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "192080",
-        "corpName": "더블유게임즈",
-        "industry": "software",
-        "viaCode": "065570",
-        "viaName": "삼영이엔씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "185750",
-        "corpName": "종근당",
-        "industry": "pharma",
-        "viaCode": "065570",
-        "viaName": "삼영이엔씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001630",
-        "corpName": "종근당홀딩스",
-        "industry": "pharma",
-        "viaCode": "065570",
-        "viaName": "삼영이엔씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "102460",
-        "corpName": "이연제약",
-        "industry": "pharma",
-        "viaCode": "065570",
-        "viaName": "삼영이엔씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006280",
-        "corpName": "녹십자",
-        "industry": "pharma",
-        "viaCode": "065570",
-        "viaName": "삼영이엔씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "258790",
-        "corpName": "소프트캠프",
-        "industry": "software",
         "viaCode": "065570",
         "viaName": "삼영이엔씨",
         "hopDistance": 2

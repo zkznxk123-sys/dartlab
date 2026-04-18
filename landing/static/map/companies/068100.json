@@ -54,29 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2023",
-      "sales": 14688005816.0,
-      "operating_profit": -2468833010.0,
-      "net_profit": 30171120.0,
-      "total_assets": 14781460238.0
-    },
-    {
-      "year": "2024",
-      "sales": 15586967912.0,
-      "operating_profit": -2062350246.0,
-      "net_profit": -1877139029.0,
-      "total_assets": 18828687407.0
-    },
-    {
-      "year": "2025",
-      "sales": 17691551363.0,
-      "operating_profit": -1732031425.0,
-      "net_profit": 0.0,
-      "total_assets": 16360308964.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -128,41 +106,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "044990",
-        "corpName": "에이치엔에스하이텍",
-        "industry": "electronics",
-        "viaCode": "027360",
-        "viaName": "아주IB투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "357580",
-        "corpName": "아모센스",
-        "industry": "auto",
-        "viaCode": "027360",
-        "viaName": "아주IB투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084440",
-        "corpName": "유비온",
-        "industry": "education",
-        "viaCode": "027360",
-        "viaName": "아주IB투자",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "060850",
         "corpName": "영림원소프트랩",
         "industry": "software",
-        "viaCode": "027360",
-        "viaName": "아주IB투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
         "viaCode": "027360",
         "viaName": "아주IB투자",
         "hopDistance": 2
@@ -184,9 +130,41 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "044990",
+        "corpName": "에이치엔에스하이텍",
+        "industry": "electronics",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "125210",
         "corpName": "아모그린텍",
         "industry": "electronics",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084440",
+        "corpName": "유비온",
+        "industry": "education",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "357580",
+        "corpName": "아모센스",
+        "industry": "auto",
         "viaCode": "027360",
         "viaName": "아주IB투자",
         "hopDistance": 2

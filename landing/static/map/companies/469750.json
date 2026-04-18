@@ -35,15 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2025",
-      "sales": 23001097577.0,
-      "operating_profit": -390839029.0,
-      "net_profit": 0.0,
-      "total_assets": 46547985710.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -95,16 +87,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "364950",
-        "corpName": "에이아이코리아",
-        "industry": "battery",
-        "viaCode": "267320",
-        "viaName": "나인테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "348210",
-        "corpName": "넥스틴",
+        "stockCode": "005930",
+        "corpName": "삼성전자",
         "industry": "semiconductor",
         "viaCode": "267320",
         "viaName": "나인테크",
@@ -119,6 +103,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "364950",
+        "corpName": "에이아이코리아",
+        "industry": "battery",
+        "viaCode": "267320",
+        "viaName": "나인테크",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "092790",
         "corpName": "넥스틸",
         "industry": "medicalDevice",
@@ -127,17 +119,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "030610",
-        "corpName": "교보증권",
-        "industry": "finance",
+        "stockCode": "348210",
+        "corpName": "넥스틴",
+        "industry": "semiconductor",
         "viaCode": "267320",
         "viaName": "나인테크",
         "hopDistance": 2
       },
       {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
+        "stockCode": "030610",
+        "corpName": "교보증권",
+        "industry": "finance",
         "viaCode": "267320",
         "viaName": "나인테크",
         "hopDistance": 2

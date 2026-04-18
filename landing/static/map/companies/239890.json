@@ -35,36 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 24058981006.0,
-      "operating_profit": 3653358543.0,
-      "net_profit": 0.0,
-      "total_assets": 34211666932.0
-    },
-    {
-      "year": "2022",
-      "sales": 35043741542.0,
-      "operating_profit": 4803053619.0,
-      "net_profit": 7563900649.0,
-      "total_assets": 62552305467.0
-    },
-    {
-      "year": "2023",
-      "sales": 40181180331.0,
-      "operating_profit": 6506488174.0,
-      "net_profit": 5621975904.0,
-      "total_assets": 71095525178.0
-    },
-    {
-      "year": "2025",
-      "sales": 30119070313.0,
-      "operating_profit": 2194119359.0,
-      "net_profit": 2870442435.0,
-      "total_assets": 67213925448.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -125,33 +96,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "017390",
-        "corpName": "서울도시가스",
-        "industry": "energy",
+        "stockCode": "053030",
+        "corpName": "바이넥스",
+        "industry": "pharma",
         "viaCode": "016710",
         "viaName": "대성홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "089970",
-        "corpName": "브이엠",
-        "industry": "machinery",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "293490",
-        "corpName": "카카오게임즈",
-        "industry": "software",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "092730",
-        "corpName": "네오팜",
-        "industry": "chemical",
+        "stockCode": "021080",
+        "corpName": "에이티넘인베스트",
+        "industry": "finance",
         "viaCode": "016710",
         "viaName": "대성홀딩스",
         "hopDistance": 2
@@ -165,17 +120,185 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "018500",
-        "corpName": "동원금속",
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "950130",
+        "corpName": "엑세스바이오",
+        "industry": "pharma",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "293490",
+        "corpName": "카카오게임즈",
+        "industry": "software",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "483650",
+        "corpName": "달바글로벌",
+        "industry": "pharma",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101390",
+        "corpName": "아이엠",
         "industry": "electronics",
         "viaCode": "016710",
         "viaName": "대성홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "021080",
-        "corpName": "에이티넘인베스트",
+        "stockCode": "128820",
+        "corpName": "대성산업",
+        "industry": "retail",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "117580",
+        "corpName": "대성에너지",
+        "industry": "energy",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456570",
+        "corpName": "아이엠지티",
+        "industry": "pharma",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017390",
+        "corpName": "서울도시가스",
+        "industry": "energy",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
         "industry": "finance",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092730",
+        "corpName": "네오팜",
+        "industry": "chemical",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "191420",
+        "corpName": "테고사이언스",
+        "industry": "pharma",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "059120",
+        "corpName": "아진엑스텍",
+        "industry": "semiconductor",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009830",
+        "corpName": "한화솔루션",
+        "industry": "chemical",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "309960",
+        "corpName": "LB인베스트먼트",
+        "industry": "finance",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052690",
+        "corpName": "한전기술",
+        "industry": "construction",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071320",
+        "corpName": "지역난방공사",
+        "industry": "energy",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027830",
+        "corpName": "대성창투",
+        "industry": "finance",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011810",
+        "corpName": "STX",
+        "industry": "food",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "294090",
+        "corpName": "이오플로우",
+        "industry": "machinery",
+        "viaCode": "016710",
+        "viaName": "대성홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036460",
+        "corpName": "한국가스공사",
+        "industry": "energy",
         "viaCode": "016710",
         "viaName": "대성홀딩스",
         "hopDistance": 2
@@ -205,22 +328,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "294090",
-        "corpName": "이오플로우",
-        "industry": "machinery",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "054950",
         "corpName": "제이브이엠",
         "industry": "machinery",
@@ -229,153 +336,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "191420",
-        "corpName": "테고사이언스",
-        "industry": "pharma",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "128820",
-        "corpName": "대성산업",
-        "industry": "retail",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "044780",
-        "corpName": "에이치케이",
-        "industry": "medicalDevice",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101390",
-        "corpName": "아이엠",
+        "stockCode": "018500",
+        "corpName": "동원금속",
         "industry": "electronics",
         "viaCode": "016710",
         "viaName": "대성홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "052690",
-        "corpName": "한전기술",
-        "industry": "construction",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036460",
-        "corpName": "한국가스공사",
-        "industry": "energy",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "059120",
-        "corpName": "아진엑스텍",
-        "industry": "semiconductor",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "483650",
-        "corpName": "달바글로벌",
-        "industry": "pharma",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "309960",
-        "corpName": "LB인베스트먼트",
-        "industry": "finance",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "071320",
-        "corpName": "지역난방공사",
-        "industry": "energy",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011810",
-        "corpName": "STX",
-        "industry": "food",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009830",
-        "corpName": "한화솔루션",
-        "industry": "chemical",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "117580",
-        "corpName": "대성에너지",
-        "industry": "energy",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "950130",
-        "corpName": "엑세스바이오",
-        "industry": "pharma",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "027830",
-        "corpName": "대성창투",
-        "industry": "finance",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "456570",
-        "corpName": "아이엠지티",
-        "industry": "pharma",
-        "viaCode": "016710",
-        "viaName": "대성홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053030",
-        "corpName": "바이넥스",
-        "industry": "pharma",
+        "stockCode": "089970",
+        "corpName": "브이엠",
+        "industry": "machinery",
         "viaCode": "016710",
         "viaName": "대성홀딩스",
         "hopDistance": 2

@@ -14,22 +14,7 @@
   "edges": [],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2023",
-      "sales": 20516634627.0,
-      "operating_profit": 10605665105.0,
-      "net_profit": 8880952160.0,
-      "total_assets": 65337629813.0
-    },
-    {
-      "year": "2025",
-      "sales": 17401010000.0,
-      "operating_profit": 7258048422.0,
-      "net_profit": 6140289348.0,
-      "total_assets": 94797807265.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,

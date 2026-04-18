@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 371076932571.0,
-      "operating_profit": 23245153400.0,
-      "net_profit": 19167631768.0,
-      "total_assets": 330162573232.0
-    },
-    {
-      "year": "2022",
-      "sales": 475895240622.0,
-      "operating_profit": 50295977243.0,
-      "net_profit": 45287347682.0,
-      "total_assets": 338873471894.0
-    },
-    {
-      "year": "2023",
-      "sales": 417721809967.0,
-      "operating_profit": 53146153914.0,
-      "net_profit": -755250348.0,
-      "total_assets": 351920466967.0
-    },
-    {
-      "year": "2024",
-      "sales": 496957597172.0,
-      "operating_profit": 76531450918.0,
-      "net_profit": -859113943.0,
-      "total_assets": 457884953600.0
-    },
-    {
-      "year": "2025",
-      "sales": 504921990788.0,
-      "operating_profit": 53601098786.0,
-      "net_profit": 33192565571.0,
-      "total_assets": 446657454582.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,86 +87,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "094840",
-        "corpName": "슈프리마에이치큐",
-        "industry": "telecom",
-        "viaCode": "236200",
-        "viaName": "슈프리마",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000910",
-        "corpName": "유니온",
-        "industry": "buildingMaterials",
-        "viaCode": "236200",
-        "viaName": "슈프리마",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "236200",
-        "viaName": "슈프리마",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "236200",
-        "viaName": "슈프리마",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052860",
-        "corpName": "아이앤씨",
-        "industry": "semiconductor",
-        "viaCode": "236200",
-        "viaName": "슈프리마",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "317770",
-        "corpName": "엑스페릭스",
-        "industry": "electronics",
-        "viaCode": "236200",
-        "viaName": "슈프리마",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009810",
-        "corpName": "플레이그램",
-        "industry": "retail",
-        "viaCode": "236200",
-        "viaName": "슈프리마",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001630",
-        "corpName": "종근당홀딩스",
-        "industry": "pharma",
-        "viaCode": "236200",
-        "viaName": "슈프리마",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035420",
-        "corpName": "NAVER",
-        "industry": "software",
-        "viaCode": "236200",
-        "viaName": "슈프리마",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "203450",
-        "corpName": "유니온바이오메트릭스",
-        "industry": "telecom",
-        "viaCode": "236200",
-        "viaName": "슈프리마",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "149980",
         "corpName": "하이로닉",
         "industry": "pharma",
@@ -211,9 +95,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "207940",
-        "corpName": "삼성바이오로직스",
-        "industry": "pharma",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "236200",
         "viaName": "슈프리마",
         "hopDistance": 2
@@ -230,6 +114,86 @@
         "stockCode": "000660",
         "corpName": "SK하이닉스",
         "industry": "semiconductor",
+        "viaCode": "236200",
+        "viaName": "슈프리마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035420",
+        "corpName": "NAVER",
+        "industry": "software",
+        "viaCode": "236200",
+        "viaName": "슈프리마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052860",
+        "corpName": "아이앤씨",
+        "industry": "semiconductor",
+        "viaCode": "236200",
+        "viaName": "슈프리마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009810",
+        "corpName": "플레이그램",
+        "industry": "retail",
+        "viaCode": "236200",
+        "viaName": "슈프리마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "industry": "buildingMaterials",
+        "viaCode": "236200",
+        "viaName": "슈프리마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "207940",
+        "corpName": "삼성바이오로직스",
+        "industry": "pharma",
+        "viaCode": "236200",
+        "viaName": "슈프리마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "094840",
+        "corpName": "슈프리마에이치큐",
+        "industry": "telecom",
+        "viaCode": "236200",
+        "viaName": "슈프리마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "317770",
+        "corpName": "엑스페릭스",
+        "industry": "electronics",
+        "viaCode": "236200",
+        "viaName": "슈프리마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "236200",
+        "viaName": "슈프리마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "203450",
+        "corpName": "유니온바이오메트릭스",
+        "industry": "telecom",
+        "viaCode": "236200",
+        "viaName": "슈프리마",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "236200",
         "viaName": "슈프리마",
         "hopDistance": 2

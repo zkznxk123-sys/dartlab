@@ -73,43 +73,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 16237227747.0,
-      "operating_profit": 9063861690.0,
-      "net_profit": 0.0,
-      "total_assets": 194738254040.0
-    },
-    {
-      "year": "2022",
-      "sales": 178029520688.0,
-      "operating_profit": 2682218552.0,
-      "net_profit": 0.0,
-      "total_assets": 240522145627.0
-    },
-    {
-      "year": "2023",
-      "sales": 105267292372.0,
-      "operating_profit": 9142102686.0,
-      "net_profit": 7404407309.0,
-      "total_assets": 253960586979.0
-    },
-    {
-      "year": "2024",
-      "sales": 80462164868.0,
-      "operating_profit": 14157545456.0,
-      "net_profit": 7274399159.0,
-      "total_assets": 262939817516.0
-    },
-    {
-      "year": "2025",
-      "sales": 241713123892.0,
-      "operating_profit": 17552440394.0,
-      "net_profit": 0.0,
-      "total_assets": 250662335905.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -178,17 +142,89 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "003550",
-        "corpName": "LG",
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "006040",
+        "viaName": "동원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017860",
+        "corpName": "DS단석",
+        "industry": "chemical",
+        "viaCode": "183490",
+        "viaName": "엔지켐생명과학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "006040",
+        "viaName": "동원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064400",
+        "corpName": "LG씨엔에스",
         "industry": "electronics",
         "viaCode": "119850",
         "viaName": "지엔씨에너지",
         "hopDistance": 2
       },
       {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
+        "stockCode": "039310",
+        "corpName": "세중",
+        "industry": "software",
+        "viaCode": "006040",
+        "viaName": "동원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "270520",
+        "corpName": "앱튼",
+        "industry": "consulting",
+        "viaCode": "119850",
+        "viaName": "지엔씨에너지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "237750",
+        "corpName": "피앤씨테크",
+        "industry": "machinery",
+        "viaCode": "119850",
+        "viaName": "지엔씨에너지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090410",
+        "corpName": "덕신이피씨",
+        "industry": "steel",
+        "viaCode": "183490",
+        "viaName": "엔지켐생명과학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "006040",
+        "viaName": "동원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "145990",
+        "corpName": "삼양사",
+        "industry": "food",
+        "viaCode": "006040",
+        "viaName": "동원산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007540",
+        "corpName": "샘표",
+        "industry": "retail",
         "viaCode": "006040",
         "viaName": "동원산업",
         "hopDistance": 2
@@ -202,17 +238,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "010060",
-        "corpName": "OCI홀딩스",
-        "industry": "chemical",
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
         "viaCode": "006040",
         "viaName": "동원산업",
         "hopDistance": 2
       },
       {
-        "stockCode": "018470",
-        "corpName": "조일알미늄",
-        "industry": "food",
+        "stockCode": "003550",
+        "corpName": "LG",
+        "industry": "electronics",
+        "viaCode": "119850",
+        "viaName": "지엔씨에너지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014820",
+        "corpName": "동원시스템즈",
+        "industry": "plastic",
         "viaCode": "006040",
         "viaName": "동원산업",
         "hopDistance": 2
@@ -226,43 +270,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "456040",
-        "corpName": "OCI",
-        "industry": "chemical",
+        "stockCode": "018470",
+        "corpName": "조일알미늄",
+        "industry": "food",
         "viaCode": "006040",
         "viaName": "동원산업",
         "hopDistance": 2
       },
       {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
+        "stockCode": "137400",
+        "corpName": "피엔티",
+        "industry": "machinery",
         "viaCode": "006040",
         "viaName": "동원산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039310",
-        "corpName": "세중",
-        "industry": "software",
-        "viaCode": "006040",
-        "viaName": "동원산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005960",
-        "corpName": "동부건설",
-        "industry": "aerospace",
-        "viaCode": "006040",
-        "viaName": "동원산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017860",
-        "corpName": "DS단석",
-        "industry": "chemical",
-        "viaCode": "183490",
-        "viaName": "엔지켐생명과학",
         "hopDistance": 2
       },
       {
@@ -282,59 +302,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "145990",
-        "corpName": "삼양사",
-        "industry": "food",
+        "stockCode": "009830",
+        "corpName": "한화솔루션",
+        "industry": "chemical",
         "viaCode": "006040",
         "viaName": "동원산업",
         "hopDistance": 2
       },
       {
-        "stockCode": "090410",
-        "corpName": "덕신이피씨",
-        "industry": "steel",
-        "viaCode": "183490",
-        "viaName": "엔지켐생명과학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "137400",
-        "corpName": "피엔티",
-        "industry": "machinery",
+        "stockCode": "005960",
+        "corpName": "동부건설",
+        "industry": "aerospace",
         "viaCode": "006040",
         "viaName": "동원산업",
         "hopDistance": 2
       },
       {
-        "stockCode": "007540",
-        "corpName": "샘표",
-        "industry": "retail",
+        "stockCode": "010060",
+        "corpName": "OCI홀딩스",
+        "industry": "chemical",
         "viaCode": "006040",
         "viaName": "동원산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "014820",
-        "corpName": "동원시스템즈",
-        "industry": "plastic",
-        "viaCode": "006040",
-        "viaName": "동원산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "237750",
-        "corpName": "피앤씨테크",
-        "industry": "machinery",
-        "viaCode": "119850",
-        "viaName": "지엔씨에너지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "270520",
-        "corpName": "앱튼",
-        "industry": "consulting",
-        "viaCode": "119850",
-        "viaName": "지엔씨에너지",
         "hopDistance": 2
       },
       {
@@ -346,9 +334,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
         "viaCode": "006040",
         "viaName": "동원산업",
         "hopDistance": 2
@@ -359,22 +347,6 @@
         "industry": "software",
         "viaCode": "183490",
         "viaName": "엔지켐생명과학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009830",
-        "corpName": "한화솔루션",
-        "industry": "chemical",
-        "viaCode": "006040",
-        "viaName": "동원산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064400",
-        "corpName": "LG씨엔에스",
-        "industry": "electronics",
-        "viaCode": "119850",
-        "viaName": "지엔씨에너지",
         "hopDistance": 2
       },
       {
@@ -397,14 +369,6 @@
         "stockCode": "011170",
         "corpName": "롯데케미칼",
         "industry": "chemical",
-        "viaCode": "006040",
-        "viaName": "동원산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
         "viaCode": "006040",
         "viaName": "동원산업",
         "hopDistance": 2

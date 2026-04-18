@@ -47,22 +47,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2024",
-      "sales": 75886180614.0,
-      "operating_profit": -369253550.0,
-      "net_profit": -1092879556.0,
-      "total_assets": 120185301263.0
-    },
-    {
-      "year": "2025",
-      "sales": 73543971242.0,
-      "operating_profit": -8908556551.0,
-      "net_profit": 0.0,
-      "total_assets": 166522218018.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -114,6 +99,22 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "001720",
+        "corpName": "신영증권",
+        "industry": "finance",
+        "viaCode": "003200",
+        "viaName": "일신방직",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "111770",
+        "corpName": "영원무역",
+        "industry": "textile",
+        "viaCode": "003200",
+        "viaName": "일신방직",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "000950",
         "corpName": "전방",
         "industry": "textile",
@@ -122,9 +123,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "053050",
-        "corpName": "지에스이",
-        "industry": "energy",
+        "stockCode": "145990",
+        "corpName": "삼양사",
+        "industry": "food",
         "viaCode": "003200",
         "viaName": "일신방직",
         "hopDistance": 2
@@ -146,25 +147,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "145990",
-        "corpName": "삼양사",
-        "industry": "food",
-        "viaCode": "003200",
-        "viaName": "일신방직",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "111770",
-        "corpName": "영원무역",
-        "industry": "textile",
-        "viaCode": "003200",
-        "viaName": "일신방직",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001720",
-        "corpName": "신영증권",
-        "industry": "finance",
+        "stockCode": "053050",
+        "corpName": "지에스이",
+        "industry": "energy",
         "viaCode": "003200",
         "viaName": "일신방직",
         "hopDistance": 2

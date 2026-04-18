@@ -52,43 +52,7 @@
     "createdAt": "1775430966.5446925"
   },
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 182235773870.0,
-      "operating_profit": 7872984392.0,
-      "net_profit": 8250673190.0,
-      "total_assets": 180512781409.0
-    },
-    {
-      "year": "2022",
-      "sales": 196757615383.0,
-      "operating_profit": 2456929950.0,
-      "net_profit": 3345149095.0,
-      "total_assets": 179708719037.0
-    },
-    {
-      "year": "2023",
-      "sales": 180812604441.0,
-      "operating_profit": -2912558609.0,
-      "net_profit": -3159795782.0,
-      "total_assets": 179232275038.0
-    },
-    {
-      "year": "2024",
-      "sales": 151116114567.0,
-      "operating_profit": -5798526499.0,
-      "net_profit": -483718262.0,
-      "total_assets": 171801171723.0
-    },
-    {
-      "year": "2025",
-      "sales": 147345604058.0,
-      "operating_profit": -3510789127.0,
-      "net_profit": 1350334834.0,
-      "total_assets": 176425911154.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -140,14 +104,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "048470",
-        "corpName": "대동스틸",
-        "industry": "steel",
-        "viaCode": "018310",
-        "viaName": "삼목에스폼",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "000720",
         "corpName": "현대건설",
         "industry": "construction",
@@ -164,6 +120,22 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "048470",
+        "corpName": "대동스틸",
+        "industry": "steel",
+        "viaCode": "018310",
+        "viaName": "삼목에스폼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007330",
+        "corpName": "푸른저축은행",
+        "industry": "finance",
+        "viaCode": "018310",
+        "viaName": "삼목에스폼",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "099220",
         "corpName": "SDN",
         "industry": "energy",
@@ -175,14 +147,6 @@
         "stockCode": "097230",
         "corpName": "HJ중공업",
         "industry": "construction",
-        "viaCode": "018310",
-        "viaName": "삼목에스폼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007330",
-        "corpName": "푸른저축은행",
-        "industry": "finance",
         "viaCode": "018310",
         "viaName": "삼목에스폼",
         "hopDistance": 2

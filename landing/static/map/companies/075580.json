@@ -154,43 +154,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 250380851313.0,
-      "operating_profit": 3715273239.0,
-      "net_profit": 14059998585.0,
-      "total_assets": 570404297293.0
-    },
-    {
-      "year": "2022",
-      "sales": 410053666579.0,
-      "operating_profit": 24899662472.0,
-      "net_profit": 13357564878.0,
-      "total_assets": 551849173753.0
-    },
-    {
-      "year": "2023",
-      "sales": 384796445852.0,
-      "operating_profit": 33554734501.0,
-      "net_profit": 0.0,
-      "total_assets": 544018916698.0
-    },
-    {
-      "year": "2024",
-      "sales": 352376572888.0,
-      "operating_profit": 35979489245.0,
-      "net_profit": 0.0,
-      "total_assets": 620877554527.0
-    },
-    {
-      "year": "2025",
-      "sales": 402686260726.0,
-      "operating_profit": 73388632210.0,
-      "net_profit": 59844468153.0,
-      "total_assets": 637763654084.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -242,6 +206,54 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "101930",
+        "corpName": "인화정공",
+        "industry": "electronics",
+        "viaCode": "071970",
+        "viaName": "HD현대마린엔진",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "322000",
+        "corpName": "HD현대에너지솔루션",
+        "industry": "shipbuilding",
+        "viaCode": "071970",
+        "viaName": "HD현대마린엔진",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
+        "viaCode": "469610",
+        "viaName": "이노테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267270",
+        "corpName": "HD건설기계",
+        "industry": "auto",
+        "viaCode": "071970",
+        "viaName": "HD현대마린엔진",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "443060",
+        "corpName": "HD현대마린솔루션",
+        "industry": "shipbuilding",
+        "viaCode": "333430",
+        "viaName": "일승",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025530",
+        "corpName": "에스제이엠홀딩스",
+        "industry": "retail",
+        "viaCode": "123700",
+        "viaName": "에스제이엠",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "002220",
         "corpName": "한일철강",
         "industry": "electronics",
@@ -250,27 +262,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000720",
-        "corpName": "현대건설",
-        "industry": "construction",
-        "viaCode": "071970",
-        "viaName": "HD현대마린엔진",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "469610",
+        "viaName": "이노테크",
         "hopDistance": 2
       },
       {
-        "stockCode": "104700",
-        "corpName": "한국철강",
-        "industry": "construction",
-        "viaCode": "071970",
-        "viaName": "HD현대마린엔진",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
-        "viaCode": "101000",
-        "viaName": "KS인더스트리",
+        "stockCode": "033530",
+        "corpName": "SJG세종",
+        "industry": "electronics",
+        "viaCode": "123700",
+        "viaName": "에스제이엠",
         "hopDistance": 2
       },
       {
@@ -282,41 +286,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "101930",
-        "corpName": "인화정공",
-        "industry": "electronics",
-        "viaCode": "071970",
-        "viaName": "HD현대마린엔진",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "329180",
-        "corpName": "HD현대중공업",
-        "industry": "shipbuilding",
-        "viaCode": "071970",
-        "viaName": "HD현대마린엔진",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038010",
-        "corpName": "제일테크노스",
-        "industry": "semiconductor",
-        "viaCode": "071970",
-        "viaName": "HD현대마린엔진",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267260",
-        "corpName": "HD현대일렉트릭",
-        "industry": "shipbuilding",
-        "viaCode": "071970",
-        "viaName": "HD현대마린엔진",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267270",
-        "corpName": "HD건설기계",
-        "industry": "auto",
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
         "viaCode": "071970",
         "viaName": "HD현대마린엔진",
         "hopDistance": 2
@@ -330,81 +302,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "308170",
-        "corpName": "씨티알모빌리티",
-        "industry": "auto",
-        "viaCode": "469610",
-        "viaName": "이노테크",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "099220",
         "corpName": "SDN",
         "industry": "energy",
-        "viaCode": "123700",
-        "viaName": "에스제이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "322000",
-        "corpName": "HD현대에너지솔루션",
-        "industry": "shipbuilding",
-        "viaCode": "071970",
-        "viaName": "HD현대마린엔진",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "347700",
-        "corpName": "스피어",
-        "industry": "electronics",
         "viaCode": "101000",
         "viaName": "KS인더스트리",
         "hopDistance": 2
       },
       {
-        "stockCode": "267250",
-        "corpName": "HD현대",
+        "stockCode": "329180",
+        "corpName": "HD현대중공업",
         "industry": "shipbuilding",
         "viaCode": "071970",
         "viaName": "HD현대마린엔진",
         "hopDistance": 2
       },
       {
-        "stockCode": "001290",
-        "corpName": "상상인증권",
-        "industry": "finance",
-        "viaCode": "101000",
-        "viaName": "KS인더스트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "443060",
-        "corpName": "HD현대마린솔루션",
+        "stockCode": "009540",
+        "corpName": "HD한국조선해양",
         "industry": "shipbuilding",
-        "viaCode": "071970",
-        "viaName": "HD현대마린엔진",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033530",
-        "corpName": "SJG세종",
-        "industry": "electronics",
-        "viaCode": "123700",
-        "viaName": "에스제이엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
-        "viaCode": "469610",
-        "viaName": "이노테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011810",
-        "corpName": "STX",
-        "industry": "food",
         "viaCode": "071970",
         "viaName": "HD현대마린엔진",
         "hopDistance": 2
@@ -418,19 +334,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "009540",
-        "corpName": "HD한국조선해양",
+        "stockCode": "267250",
+        "corpName": "HD현대",
         "industry": "shipbuilding",
         "viaCode": "071970",
         "viaName": "HD현대마린엔진",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "469610",
-        "viaName": "이노테크",
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "101000",
+        "viaName": "KS인더스트리",
         "hopDistance": 2
       },
       {
@@ -442,11 +358,59 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "025530",
-        "corpName": "에스제이엠홀딩스",
-        "industry": "retail",
-        "viaCode": "123700",
-        "viaName": "에스제이엠",
+        "stockCode": "347700",
+        "corpName": "스피어",
+        "industry": "electronics",
+        "viaCode": "101000",
+        "viaName": "KS인더스트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038010",
+        "corpName": "제일테크노스",
+        "industry": "semiconductor",
+        "viaCode": "099410",
+        "viaName": "동방선기",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "104700",
+        "corpName": "한국철강",
+        "industry": "construction",
+        "viaCode": "071970",
+        "viaName": "HD현대마린엔진",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011810",
+        "corpName": "STX",
+        "industry": "food",
+        "viaCode": "071970",
+        "viaName": "HD현대마린엔진",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "308170",
+        "corpName": "씨티알모빌리티",
+        "industry": "auto",
+        "viaCode": "469610",
+        "viaName": "이노테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267260",
+        "corpName": "HD현대일렉트릭",
+        "industry": "shipbuilding",
+        "viaCode": "071970",
+        "viaName": "HD현대마린엔진",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001290",
+        "corpName": "상상인증권",
+        "industry": "finance",
+        "viaCode": "101000",
+        "viaName": "KS인더스트리",
         "hopDistance": 2
       }
     ],

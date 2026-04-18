@@ -90,43 +90,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 378775972995.0,
-      "operating_profit": 18346300211.0,
-      "net_profit": 16831863398.0,
-      "total_assets": 451115063748.0
-    },
-    {
-      "year": "2022",
-      "sales": 477142893660.0,
-      "operating_profit": -11395530339.0,
-      "net_profit": -8329417290.0,
-      "total_assets": 503022501999.0
-    },
-    {
-      "year": "2023",
-      "sales": 398256036328.0,
-      "operating_profit": -31751419911.0,
-      "net_profit": -30208157901.0,
-      "total_assets": 472601990302.0
-    },
-    {
-      "year": "2024",
-      "sales": 165779489924.0,
-      "operating_profit": -5534041323.0,
-      "net_profit": 0.0,
-      "total_assets": 310764184164.0
-    },
-    {
-      "year": "2025",
-      "sales": 119684884783.0,
-      "operating_profit": 6944254857.0,
-      "net_profit": -1670905549.0,
-      "total_assets": 256327957251.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -187,22 +151,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "021050",
-        "corpName": "서원",
-        "industry": "food",
-        "viaCode": "005160",
-        "viaName": "동국산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "460860",
-        "corpName": "동국제강",
-        "industry": "steel",
-        "viaCode": "075970",
-        "viaName": "동국알앤에스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "005490",
         "corpName": "POSCO홀딩스",
         "industry": "steel",
@@ -211,11 +159,35 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "021050",
+        "corpName": "서원",
+        "industry": "food",
+        "viaCode": "005160",
+        "viaName": "동국산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007280",
+        "corpName": "한국특강",
+        "industry": "steel",
+        "viaCode": "075970",
+        "viaName": "동국알앤에스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "001940",
         "corpName": "KISCO홀딩스",
         "industry": "steel",
         "viaCode": "075970",
         "viaName": "동국알앤에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "460860",
+        "corpName": "동국제강",
+        "industry": "steel",
+        "viaCode": "005160",
+        "viaName": "동국산업",
         "hopDistance": 2
       },
       {
@@ -230,14 +202,6 @@
         "stockCode": "104700",
         "corpName": "한국철강",
         "industry": "construction",
-        "viaCode": "075970",
-        "viaName": "동국알앤에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007280",
-        "corpName": "한국특강",
-        "industry": "steel",
         "viaCode": "075970",
         "viaName": "동국알앤에스",
         "hopDistance": 2

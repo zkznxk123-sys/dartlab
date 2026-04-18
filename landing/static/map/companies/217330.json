@@ -142,43 +142,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 347845637.0,
-      "operating_profit": -12860919794.0,
-      "net_profit": -10870612221.0,
-      "total_assets": 55527739574.0
-    },
-    {
-      "year": "2022",
-      "sales": 760777445.0,
-      "operating_profit": -11497462671.0,
-      "net_profit": -18771226009.0,
-      "total_assets": 41220347999.0
-    },
-    {
-      "year": "2023",
-      "sales": 3184360751.0,
-      "operating_profit": -11791605783.0,
-      "net_profit": -15769500591.0,
-      "total_assets": 74450069700.0
-    },
-    {
-      "year": "2024",
-      "sales": 10910643036.0,
-      "operating_profit": -10665601019.0,
-      "net_profit": -17116101889.0,
-      "total_assets": 72478061994.0
-    },
-    {
-      "year": "2025",
-      "sales": 26054851084.0,
-      "operating_profit": -8163323622.0,
-      "net_profit": -12339826935.0,
-      "total_assets": 62240155860.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -230,6 +194,278 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "337930",
+        "corpName": "젝시믹스",
+        "industry": "textile",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039560",
+        "corpName": "다산네트웍스",
+        "industry": "telecom",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "192410",
+        "viaName": "오늘이엔엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033540",
+        "corpName": "파라텍",
+        "industry": "machinery",
+        "viaCode": "192410",
+        "viaName": "오늘이엔엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067770",
+        "corpName": "세진티에스",
+        "industry": "electronics",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "066700",
+        "viaName": "테라젠이텍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "045660",
+        "corpName": "에이텍",
+        "industry": "electronics",
+        "viaCode": "192410",
+        "viaName": "오늘이엔엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "066700",
+        "viaName": "테라젠이텍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352940",
+        "corpName": "인바이오",
+        "industry": "chemical",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016710",
+        "corpName": "대성홀딩스",
+        "industry": "realestate",
+        "viaCode": "950130",
+        "viaName": "엑세스바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "247540",
+        "corpName": "에코프로비엠",
+        "industry": "chemical",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "097950",
+        "corpName": "CJ제일제당",
+        "industry": "food",
+        "viaCode": "066700",
+        "viaName": "테라젠이텍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092590",
+        "corpName": "럭스피아",
+        "industry": "electronics",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085660",
+        "corpName": "차바이오텍",
+        "industry": "pharma",
+        "viaCode": "066700",
+        "viaName": "테라젠이텍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064350",
+        "corpName": "현대로템",
+        "industry": "railroad",
+        "viaCode": "054180",
+        "viaName": "메디콕스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "304360",
+        "corpName": "에스바이오메딕스",
+        "industry": "realestate",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "950130",
+        "viaName": "엑세스바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000100",
+        "corpName": "유한양행",
+        "industry": "pharma",
+        "viaCode": "066700",
+        "viaName": "테라젠이텍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "066700",
+        "viaName": "테라젠이텍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "060230",
+        "viaName": "제이케이시냅스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032980",
+        "corpName": "바이온",
+        "industry": "electronics",
+        "viaCode": "054180",
+        "viaName": "메디콕스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086520",
+        "corpName": "에코프로",
+        "industry": "chemical",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "192410",
+        "viaName": "오늘이엔엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "265740",
+        "corpName": "엔에프씨",
+        "industry": "cosmetics",
+        "viaCode": "060230",
+        "viaName": "제이케이시냅스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023760",
+        "corpName": "한국캐피탈",
+        "industry": "finance",
+        "viaCode": "192410",
+        "viaName": "오늘이엔엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "418250",
+        "corpName": "시큐레터",
+        "industry": "software",
+        "viaCode": "192410",
+        "viaName": "오늘이엔엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027830",
+        "corpName": "대성창투",
+        "industry": "finance",
+        "viaCode": "950130",
+        "viaName": "엑세스바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "093640",
+        "corpName": "케이알엠",
+        "industry": "semiconductor",
+        "viaCode": "060230",
+        "viaName": "제이케이시냅스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "263810",
+        "corpName": "상신전자",
+        "industry": "electronics",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004720",
+        "corpName": "팜젠사이언스",
+        "industry": "pharma",
+        "viaCode": "950130",
+        "viaName": "엑세스바이오",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "240550",
         "corpName": "동방메디컬",
         "industry": "medicalDevice",
@@ -246,291 +482,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "093640",
-        "corpName": "케이알엠",
-        "industry": "semiconductor",
-        "viaCode": "060230",
-        "viaName": "제이케이시냅스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "192410",
-        "viaName": "오늘이엔엠",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "271560",
         "corpName": "오리온",
         "industry": "food",
         "viaCode": "192410",
         "viaName": "오늘이엔엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "235980",
-        "corpName": "메드팩토",
-        "industry": "pharma",
-        "viaCode": "066700",
-        "viaName": "테라젠이텍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078590",
-        "corpName": "휴림에이텍",
-        "industry": "auto",
-        "viaCode": "192410",
-        "viaName": "오늘이엔엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067770",
-        "corpName": "세진티에스",
-        "industry": "electronics",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "950130",
-        "viaName": "엑세스바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "097950",
-        "corpName": "CJ제일제당",
-        "industry": "food",
-        "viaCode": "066700",
-        "viaName": "테라젠이텍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
-        "viaCode": "060230",
-        "viaName": "제이케이시냅스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064350",
-        "corpName": "현대로템",
-        "industry": "railroad",
-        "viaCode": "054180",
-        "viaName": "메디콕스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004720",
-        "corpName": "팜젠사이언스",
-        "industry": "pharma",
-        "viaCode": "950130",
-        "viaName": "엑세스바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "265740",
-        "corpName": "엔에프씨",
-        "industry": "cosmetics",
-        "viaCode": "060230",
-        "viaName": "제이케이시냅스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033540",
-        "corpName": "파라텍",
-        "industry": "machinery",
-        "viaCode": "054180",
-        "viaName": "메디콕스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000100",
-        "corpName": "유한양행",
-        "industry": "pharma",
-        "viaCode": "066700",
-        "viaName": "테라젠이텍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "192410",
-        "viaName": "오늘이엔엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "085660",
-        "corpName": "차바이오텍",
-        "industry": "pharma",
-        "viaCode": "066700",
-        "viaName": "테라젠이텍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "304360",
-        "corpName": "에스바이오메딕스",
-        "industry": "realestate",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "337930",
-        "corpName": "젝시믹스",
-        "industry": "textile",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "045660",
-        "corpName": "에이텍",
-        "industry": "electronics",
-        "viaCode": "192410",
-        "viaName": "오늘이엔엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032980",
-        "corpName": "바이온",
-        "industry": "electronics",
-        "viaCode": "054180",
-        "viaName": "메디콕스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "352940",
-        "corpName": "인바이오",
-        "industry": "chemical",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "247540",
-        "corpName": "에코프로비엠",
-        "industry": "chemical",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "023760",
-        "corpName": "한국캐피탈",
-        "industry": "finance",
-        "viaCode": "192410",
-        "viaName": "오늘이엔엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "069510",
-        "corpName": "에스텍",
-        "industry": "electronics",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "086520",
-        "corpName": "에코프로",
-        "industry": "chemical",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084110",
-        "corpName": "휴온스글로벌",
-        "industry": "pharma",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039560",
-        "corpName": "다산네트웍스",
-        "industry": "telecom",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "418250",
-        "corpName": "시큐레터",
-        "industry": "software",
-        "viaCode": "192410",
-        "viaName": "오늘이엔엠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "092590",
-        "corpName": "럭스피아",
-        "industry": "electronics",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "244920",
-        "corpName": "에이플러스에셋",
-        "industry": "finance",
-        "viaCode": "066700",
-        "viaName": "테라젠이텍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "263810",
-        "corpName": "상신전자",
-        "industry": "electronics",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016360",
-        "corpName": "삼성증권",
-        "industry": "finance",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "066700",
-        "viaName": "테라젠이텍스",
         "hopDistance": 2
       },
       {
@@ -542,27 +498,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "027830",
-        "corpName": "대성창투",
+        "stockCode": "016360",
+        "corpName": "삼성증권",
         "industry": "finance",
-        "viaCode": "950130",
-        "viaName": "엑세스바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "066700",
-        "viaName": "테라젠이텍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016710",
-        "corpName": "대성홀딩스",
-        "industry": "realestate",
-        "viaCode": "950130",
-        "viaName": "엑세스바이오",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
         "hopDistance": 2
       },
       {
@@ -571,6 +511,30 @@
         "industry": "electronics",
         "viaCode": "095500",
         "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078590",
+        "corpName": "휴림에이텍",
+        "industry": "auto",
+        "viaCode": "192410",
+        "viaName": "오늘이엔엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "244920",
+        "corpName": "에이플러스에셋",
+        "industry": "finance",
+        "viaCode": "066700",
+        "viaName": "테라젠이텍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "235980",
+        "corpName": "메드팩토",
+        "industry": "pharma",
+        "viaCode": "066700",
+        "viaName": "테라젠이텍스",
         "hopDistance": 2
       }
     ],

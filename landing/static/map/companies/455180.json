@@ -59,15 +59,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2025",
-      "sales": 18123087764.0,
-      "operating_profit": -3688242971.0,
-      "net_profit": -9629348496.0,
-      "total_assets": 101840993284.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -119,8 +111,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "065130",
-        "corpName": "탑엔지니어링",
+        "stockCode": "282880",
+        "corpName": "코윈테크",
         "industry": "electronics",
         "viaCode": "360070",
         "viaName": "탑머티리얼",
@@ -135,8 +127,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "282880",
-        "corpName": "코윈테크",
+        "stockCode": "279060",
+        "corpName": "이노벡스",
+        "industry": "electronics",
+        "viaCode": "360070",
+        "viaName": "탑머티리얼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065130",
+        "corpName": "탑엔지니어링",
         "industry": "electronics",
         "viaCode": "360070",
         "viaName": "탑머티리얼",
@@ -145,14 +145,6 @@
       {
         "stockCode": "047310",
         "corpName": "파워로직스",
-        "industry": "electronics",
-        "viaCode": "360070",
-        "viaName": "탑머티리얼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "279060",
-        "corpName": "이노벡스",
         "industry": "electronics",
         "viaCode": "360070",
         "viaName": "탑머티리얼",

@@ -35,15 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2025",
-      "sales": 85550263958.0,
-      "operating_profit": 1040762216.0,
-      "net_profit": 4905740773.0,
-      "total_assets": 246593655310.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -95,16 +87,16 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "091700",
-        "corpName": "파트론",
+        "stockCode": "069510",
+        "corpName": "에스텍",
         "industry": "electronics",
         "viaCode": "081580",
         "viaName": "성우전자",
         "hopDistance": 2
       },
       {
-        "stockCode": "069510",
-        "corpName": "에스텍",
+        "stockCode": "091700",
+        "corpName": "파트론",
         "industry": "electronics",
         "viaCode": "081580",
         "viaName": "성우전자",

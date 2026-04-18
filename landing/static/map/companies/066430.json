@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 37301461684.0,
-      "operating_profit": 419639275.0,
-      "net_profit": 0.0,
-      "total_assets": 39089639907.0
-    },
-    {
-      "year": "2022",
-      "sales": 37411357602.0,
-      "operating_profit": 219378636.0,
-      "net_profit": 575800311.0,
-      "total_assets": 56346841270.0
-    },
-    {
-      "year": "2023",
-      "sales": 35778569046.0,
-      "operating_profit": 125627765.0,
-      "net_profit": 2799955819.0,
-      "total_assets": 55520194353.0
-    },
-    {
-      "year": "2024",
-      "sales": 36145453798.0,
-      "operating_profit": 934623490.0,
-      "net_profit": 0.0,
-      "total_assets": 51246912389.0
-    },
-    {
-      "year": "2025",
-      "sales": 36426291956.0,
-      "operating_profit": 169877798.0,
-      "net_profit": 0.0,
-      "total_assets": 51073992359.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,14 +87,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "094940",
-        "viaName": "푸른기술",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "003160",
         "corpName": "디아이",
         "industry": "realestate",
@@ -142,6 +98,14 @@
         "stockCode": "340810",
         "corpName": "시선AI",
         "industry": "software",
+        "viaCode": "094940",
+        "viaName": "푸른기술",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
         "viaCode": "094940",
         "viaName": "푸른기술",
         "hopDistance": 2

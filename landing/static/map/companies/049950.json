@@ -78,43 +78,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 116380646887.0,
-      "operating_profit": 4595755580.0,
-      "net_profit": 6426767073.0,
-      "total_assets": 160687515841.0
-    },
-    {
-      "year": "2022",
-      "sales": 154857082271.0,
-      "operating_profit": 25522241546.0,
-      "net_profit": 29293724901.0,
-      "total_assets": 170947643095.0
-    },
-    {
-      "year": "2023",
-      "sales": 109474293439.0,
-      "operating_profit": -1745963585.0,
-      "net_profit": 0.0,
-      "total_assets": 155294714723.0
-    },
-    {
-      "year": "2024",
-      "sales": 67278649399.0,
-      "operating_profit": -16814682582.0,
-      "net_profit": -7141990639.0,
-      "total_assets": 149198685706.0
-    },
-    {
-      "year": "2025",
-      "sales": 40897794013.0,
-      "operating_profit": -24695644553.0,
-      "net_profit": 0.0,
-      "total_assets": 121863202289.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -166,6 +130,14 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "458870",
+        "corpName": "씨어스테크놀로지",
+        "industry": "electronics",
+        "viaCode": "228670",
+        "viaName": "레이",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "319660",
         "corpName": "피에스케이",
         "industry": "semiconductor",
@@ -174,9 +146,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "012750",
-        "corpName": "에스원",
-        "industry": "electronics",
+        "stockCode": "100120",
+        "corpName": "뷰웍스",
+        "industry": "medicalDevice",
+        "viaCode": "228670",
+        "viaName": "레이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "318060",
+        "corpName": "그래피",
+        "industry": "chemical",
         "viaCode": "228670",
         "viaName": "레이",
         "hopDistance": 2
@@ -187,6 +167,30 @@
         "industry": "finance",
         "viaCode": "354320",
         "viaName": "알멕",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011760",
+        "corpName": "현대코퍼레이션",
+        "industry": "construction",
+        "viaCode": "354320",
+        "viaName": "알멕",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007330",
+        "corpName": "푸른저축은행",
+        "industry": "finance",
+        "viaCode": "354320",
+        "viaName": "알멕",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012750",
+        "corpName": "에스원",
+        "industry": "electronics",
+        "viaCode": "228670",
+        "viaName": "레이",
         "hopDistance": 2
       },
       {
@@ -203,46 +207,6 @@
         "industry": "aerospace",
         "viaCode": "228670",
         "viaName": "레이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011760",
-        "corpName": "현대코퍼레이션",
-        "industry": "construction",
-        "viaCode": "354320",
-        "viaName": "알멕",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "100120",
-        "corpName": "뷰웍스",
-        "industry": "medicalDevice",
-        "viaCode": "228670",
-        "viaName": "레이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "458870",
-        "corpName": "씨어스테크놀로지",
-        "industry": "electronics",
-        "viaCode": "228670",
-        "viaName": "레이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "318060",
-        "corpName": "그래피",
-        "industry": "chemical",
-        "viaCode": "228670",
-        "viaName": "레이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007330",
-        "corpName": "푸른저축은행",
-        "industry": "finance",
-        "viaCode": "354320",
-        "viaName": "알멕",
         "hopDistance": 2
       }
     ],

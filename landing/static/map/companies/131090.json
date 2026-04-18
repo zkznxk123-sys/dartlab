@@ -35,36 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 13198408789.0,
-      "operating_profit": 5483437281.0,
-      "net_profit": 4859881424.0,
-      "total_assets": 41483197664.0
-    },
-    {
-      "year": "2022",
-      "sales": 13702794762.0,
-      "operating_profit": 5304365069.0,
-      "net_profit": 4825964033.0,
-      "total_assets": 46751099188.0
-    },
-    {
-      "year": "2023",
-      "sales": 14445671814.0,
-      "operating_profit": 4453118488.0,
-      "net_profit": 5786793032.0,
-      "total_assets": 48914948975.0
-    },
-    {
-      "year": "2025",
-      "sales": 13438054169.0,
-      "operating_profit": 4313922657.0,
-      "net_profit": 4698796110.0,
-      "total_assets": 52952662310.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -125,14 +96,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "032680",
-        "corpName": "소프트센",
-        "industry": "software",
-        "viaCode": "232830",
-        "viaName": "아이티센피엔에스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "024110",
         "corpName": "기업은행",
         "industry": "finance",
@@ -141,8 +104,40 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "243870",
-        "corpName": "아이티센코어",
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "232830",
+        "viaName": "아이티센피엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "232830",
+        "viaName": "아이티센피엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052860",
+        "corpName": "아이앤씨",
+        "industry": "semiconductor",
+        "viaCode": "232830",
+        "viaName": "아이티센피엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031820",
+        "corpName": "아이티센씨티에스",
+        "industry": "telecom",
+        "viaCode": "232830",
+        "viaName": "아이티센피엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032680",
+        "corpName": "소프트센",
         "industry": "software",
         "viaCode": "232830",
         "viaName": "아이티센피엔에스",
@@ -165,24 +160,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "052860",
-        "corpName": "아이앤씨",
-        "industry": "semiconductor",
-        "viaCode": "232830",
-        "viaName": "아이티센피엔에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "042510",
-        "corpName": "라온시큐어",
-        "industry": "realestate",
-        "viaCode": "232830",
-        "viaName": "아이티센피엔에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067010",
-        "corpName": "이씨에스",
+        "stockCode": "010280",
+        "corpName": "아이티센엔텍",
         "industry": "software",
         "viaCode": "232830",
         "viaName": "아이티센피엔에스",
@@ -197,33 +176,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
-        "viaCode": "232830",
-        "viaName": "아이티센피엔에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010280",
-        "corpName": "아이티센엔텍",
+        "stockCode": "067010",
+        "corpName": "이씨에스",
         "industry": "software",
         "viaCode": "232830",
         "viaName": "아이티센피엔에스",
         "hopDistance": 2
       },
       {
-        "stockCode": "031820",
-        "corpName": "아이티센씨티에스",
-        "industry": "telecom",
-        "viaCode": "232830",
-        "viaName": "아이티센피엔에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "290270",
-        "corpName": "휴네시온",
-        "industry": "software",
+        "stockCode": "042510",
+        "corpName": "라온시큐어",
+        "industry": "realestate",
         "viaCode": "232830",
         "viaName": "아이티센피엔에스",
         "hopDistance": 2
@@ -237,9 +200,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
+        "stockCode": "290270",
+        "corpName": "휴네시온",
+        "industry": "software",
+        "viaCode": "232830",
+        "viaName": "아이티센피엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "243870",
+        "corpName": "아이티센코어",
+        "industry": "software",
         "viaCode": "232830",
         "viaName": "아이티센피엔에스",
         "hopDistance": 2

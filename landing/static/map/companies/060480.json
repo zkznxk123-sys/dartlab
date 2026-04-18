@@ -78,36 +78,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 21357080343.0,
-      "operating_profit": 950586822.0,
-      "net_profit": 867990172.0,
-      "total_assets": 53022841045.0
-    },
-    {
-      "year": "2022",
-      "sales": 20047963446.0,
-      "operating_profit": 385392950.0,
-      "net_profit": 1006345773.0,
-      "total_assets": 52204389695.0
-    },
-    {
-      "year": "2023",
-      "sales": 13809431020.0,
-      "operating_profit": -2191984516.0,
-      "net_profit": -1221030329.0,
-      "total_assets": 49814874013.0
-    },
-    {
-      "year": "2025",
-      "sales": 29767954540.0,
-      "operating_profit": -209964265.0,
-      "net_profit": 97340749.0,
-      "total_assets": 46633517222.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -188,19 +159,19 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "000910",
-        "corpName": "유니온",
-        "industry": "buildingMaterials",
-        "viaCode": "043340",
-        "viaName": "에쎈테크",
+        "stockCode": "006660",
+        "corpName": "삼성공조",
+        "industry": "electronics",
+        "viaCode": "025820",
+        "viaName": "이구산업",
         "hopDistance": 2
       },
       {
         "stockCode": "024110",
         "corpName": "기업은행",
         "industry": "finance",
-        "viaCode": "043340",
-        "viaName": "에쎈테크",
+        "viaCode": "025820",
+        "viaName": "이구산업",
         "hopDistance": 2
       },
       {
@@ -212,33 +183,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "025820",
-        "viaName": "이구산업",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "107640",
         "corpName": "한중엔시에스",
         "industry": "battery",
-        "viaCode": "025820",
-        "viaName": "이구산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101390",
-        "corpName": "아이엠",
-        "industry": "electronics",
-        "viaCode": "043340",
-        "viaName": "에쎈테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010130",
-        "corpName": "고려아연",
-        "industry": "steel",
         "viaCode": "025820",
         "viaName": "이구산업",
         "hopDistance": 2
@@ -252,11 +199,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006660",
-        "corpName": "삼성공조",
-        "industry": "electronics",
-        "viaCode": "025820",
-        "viaName": "이구산업",
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "industry": "buildingMaterials",
+        "viaCode": "043340",
+        "viaName": "에쎈테크",
         "hopDistance": 2
       },
       {
@@ -268,9 +215,33 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "025820",
+        "viaName": "이구산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010130",
+        "corpName": "고려아연",
+        "industry": "steel",
+        "viaCode": "025820",
+        "viaName": "이구산업",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "012800",
         "corpName": "대창",
         "industry": "steel",
+        "viaCode": "043340",
+        "viaName": "에쎈테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
         "viaCode": "043340",
         "viaName": "에쎈테크",
         "hopDistance": 2

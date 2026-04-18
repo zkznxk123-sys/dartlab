@@ -54,43 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 141243567304.0,
-      "operating_profit": -17614992211.0,
-      "net_profit": -15325546707.0,
-      "total_assets": 251690601782.0
-    },
-    {
-      "year": "2022",
-      "sales": 182019080085.0,
-      "operating_profit": -10763713221.0,
-      "net_profit": -6180291122.0,
-      "total_assets": 257878393921.0
-    },
-    {
-      "year": "2023",
-      "sales": 172901541864.0,
-      "operating_profit": -9205389585.0,
-      "net_profit": -16101857829.0,
-      "total_assets": 226932459163.0
-    },
-    {
-      "year": "2024",
-      "sales": 158512372176.0,
-      "operating_profit": -10019542792.0,
-      "net_profit": -9413953869.0,
-      "total_assets": 210147975531.0
-    },
-    {
-      "year": "2025",
-      "sales": 155324721018.0,
-      "operating_profit": -6273778201.0,
-      "net_profit": -21320914893.0,
-      "total_assets": 183718362055.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -162,24 +126,32 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "215600",
-        "corpName": "신라젠",
-        "industry": "pharma",
+        "stockCode": "000500",
+        "corpName": "가온전선",
+        "industry": "retail",
         "viaCode": "015360",
         "viaName": "INVENI",
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
         "viaCode": "015360",
         "viaName": "INVENI",
         "hopDistance": 2
       },
       {
-        "stockCode": "322180",
-        "corpName": "LS티라유텍",
+        "stockCode": "316140",
+        "corpName": "우리금융지주",
+        "industry": "finance",
+        "viaCode": "015360",
+        "viaName": "INVENI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060370",
+        "corpName": "LS마린솔루션",
         "industry": "machinery",
         "viaCode": "015360",
         "viaName": "INVENI",
@@ -194,11 +166,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "177830",
-        "corpName": "파버나인",
-        "industry": "electronics",
-        "viaCode": "162300",
-        "viaName": "신스틸",
+        "stockCode": "010120",
+        "corpName": "엘에스일렉트릭",
+        "industry": "electrical",
+        "viaCode": "015360",
+        "viaName": "INVENI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "417200",
+        "corpName": "LS머트리얼즈",
+        "industry": "machinery",
+        "viaCode": "015360",
+        "viaName": "INVENI",
         "hopDistance": 2
       },
       {
@@ -210,9 +190,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "060370",
-        "corpName": "LS마린솔루션",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "015360",
+        "viaName": "INVENI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "322180",
+        "corpName": "LS티라유텍",
         "industry": "machinery",
+        "viaCode": "015360",
+        "viaName": "INVENI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "015360",
+        "viaName": "INVENI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "015360",
+        "viaName": "INVENI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078930",
+        "corpName": "GS",
+        "industry": "chemical",
         "viaCode": "015360",
         "viaName": "INVENI",
         "hopDistance": 2
@@ -234,70 +246,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "015360",
-        "viaName": "INVENI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
-        "viaCode": "015360",
-        "viaName": "INVENI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036460",
-        "corpName": "한국가스공사",
-        "industry": "energy",
-        "viaCode": "015360",
-        "viaName": "INVENI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003540",
-        "corpName": "대신증권",
-        "industry": "finance",
-        "viaCode": "015360",
-        "viaName": "INVENI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000680",
-        "corpName": "LS네트웍스",
-        "industry": "machinery",
-        "viaCode": "015360",
-        "viaName": "INVENI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078930",
-        "corpName": "GS",
-        "industry": "chemical",
-        "viaCode": "015360",
-        "viaName": "INVENI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "015360",
-        "viaName": "INVENI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "417200",
-        "corpName": "LS머트리얼즈",
-        "industry": "machinery",
-        "viaCode": "015360",
-        "viaName": "INVENI",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "030210",
         "corpName": "다올투자증권",
         "industry": "realestate",
@@ -306,17 +254,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "316140",
-        "corpName": "우리금융지주",
-        "industry": "finance",
-        "viaCode": "015360",
-        "viaName": "INVENI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "440110",
-        "corpName": "파두",
-        "industry": "semiconductor",
+        "stockCode": "069960",
+        "corpName": "현대백화점",
+        "industry": "retail",
         "viaCode": "015360",
         "viaName": "INVENI",
         "hopDistance": 2
@@ -330,16 +270,56 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "229640",
-        "corpName": "LS에코에너지",
-        "industry": "machinery",
+        "stockCode": "177830",
+        "corpName": "파버나인",
+        "industry": "electronics",
+        "viaCode": "162300",
+        "viaName": "신스틸",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
         "viaCode": "015360",
         "viaName": "INVENI",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
+        "stockCode": "066970",
+        "corpName": "엘앤에프",
+        "industry": "battery",
+        "viaCode": "015360",
+        "viaName": "INVENI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "215600",
+        "corpName": "신라젠",
+        "industry": "pharma",
+        "viaCode": "015360",
+        "viaName": "INVENI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036460",
+        "corpName": "한국가스공사",
+        "industry": "energy",
+        "viaCode": "015360",
+        "viaName": "INVENI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "440110",
+        "corpName": "파두",
+        "industry": "semiconductor",
+        "viaCode": "015360",
+        "viaName": "INVENI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003540",
+        "corpName": "대신증권",
         "industry": "finance",
         "viaCode": "015360",
         "viaName": "INVENI",
@@ -354,9 +334,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "069960",
-        "corpName": "현대백화점",
-        "industry": "retail",
+        "stockCode": "229640",
+        "corpName": "LS에코에너지",
+        "industry": "machinery",
         "viaCode": "015360",
         "viaName": "INVENI",
         "hopDistance": 2
@@ -370,25 +350,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "010120",
-        "corpName": "엘에스일렉트릭",
-        "industry": "electrical",
-        "viaCode": "015360",
-        "viaName": "INVENI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000500",
-        "corpName": "가온전선",
-        "industry": "retail",
-        "viaCode": "015360",
-        "viaName": "INVENI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066970",
-        "corpName": "엘앤에프",
-        "industry": "battery",
+        "stockCode": "000680",
+        "corpName": "LS네트웍스",
+        "industry": "machinery",
         "viaCode": "015360",
         "viaName": "INVENI",
         "hopDistance": 2

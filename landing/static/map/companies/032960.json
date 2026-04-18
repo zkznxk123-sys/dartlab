@@ -54,43 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 25293149620.0,
-      "operating_profit": 75149058.0,
-      "net_profit": 7766279615.0,
-      "total_assets": 66265155540.0
-    },
-    {
-      "year": "2022",
-      "sales": 1048031529.0,
-      "operating_profit": 1101722833.0,
-      "net_profit": 1046846747.0,
-      "total_assets": 66427509101.0
-    },
-    {
-      "year": "2023",
-      "sales": 826403305.0,
-      "operating_profit": 422580762.0,
-      "net_profit": 0.0,
-      "total_assets": 67979697406.0
-    },
-    {
-      "year": "2024",
-      "sales": 772674269.0,
-      "operating_profit": 191505571.0,
-      "net_profit": 1179532.0,
-      "total_assets": 69371193791.0
-    },
-    {
-      "year": "2025",
-      "sales": 615828026.0,
-      "operating_profit": -61855477.0,
-      "net_profit": 6482384822.0,
-      "total_assets": 68619261553.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 2,
     "customerCount": 0,
@@ -179,14 +143,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "025820",
-        "viaName": "이구산업",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "107640",
         "corpName": "한중엔시에스",
         "industry": "battery",
@@ -195,73 +151,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000720",
-        "corpName": "현대건설",
+        "stockCode": "024840",
+        "corpName": "KBI메탈",
+        "industry": "auto",
+        "viaCode": "001440",
+        "viaName": "대한전선",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091590",
+        "corpName": "남화토건",
         "industry": "construction",
-        "viaCode": "001440",
-        "viaName": "대한전선",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
-        "viaCode": "001440",
-        "viaName": "대한전선",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037330",
-        "corpName": "인지디스플레",
-        "industry": "electronics",
-        "viaCode": "001440",
-        "viaName": "대한전선",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "001440",
-        "viaName": "대한전선",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "028260",
-        "corpName": "삼성물산",
-        "industry": "construction",
-        "viaCode": "025820",
-        "viaName": "이구산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078520",
-        "corpName": "에이블씨엔씨",
-        "industry": "realestate",
-        "viaCode": "001440",
-        "viaName": "대한전선",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267260",
-        "corpName": "HD현대일렉트릭",
-        "industry": "shipbuilding",
-        "viaCode": "001440",
-        "viaName": "대한전선",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060480",
-        "corpName": "국일신동",
-        "industry": "steel",
-        "viaCode": "025820",
-        "viaName": "이구산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010170",
-        "corpName": "대한광통신",
-        "industry": "textile",
         "viaCode": "001440",
         "viaName": "대한전선",
         "hopDistance": 2
@@ -275,33 +175,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "267250",
-        "corpName": "HD현대",
-        "industry": "shipbuilding",
-        "viaCode": "001440",
-        "viaName": "대한전선",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010130",
-        "corpName": "고려아연",
-        "industry": "steel",
-        "viaCode": "025820",
-        "viaName": "이구산업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006340",
-        "corpName": "대원전선",
-        "industry": "electrical",
-        "viaCode": "001440",
-        "viaName": "대한전선",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024840",
-        "corpName": "KBI메탈",
-        "industry": "auto",
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
         "viaCode": "001440",
         "viaName": "대한전선",
         "hopDistance": 2
@@ -315,6 +191,62 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "028260",
+        "corpName": "삼성물산",
+        "industry": "construction",
+        "viaCode": "025820",
+        "viaName": "이구산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "001440",
+        "viaName": "대한전선",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267250",
+        "corpName": "HD현대",
+        "industry": "shipbuilding",
+        "viaCode": "001440",
+        "viaName": "대한전선",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078520",
+        "corpName": "에이블씨엔씨",
+        "industry": "realestate",
+        "viaCode": "001440",
+        "viaName": "대한전선",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006340",
+        "corpName": "대원전선",
+        "industry": "electrical",
+        "viaCode": "001440",
+        "viaName": "대한전선",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "025820",
+        "viaName": "이구산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010130",
+        "corpName": "고려아연",
+        "industry": "steel",
+        "viaCode": "025820",
+        "viaName": "이구산업",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "015590",
         "corpName": "DKME",
         "industry": "machinery",
@@ -323,17 +255,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "217590",
-        "corpName": "티엠씨",
-        "industry": "electrical",
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
         "viaCode": "001440",
         "viaName": "대한전선",
         "hopDistance": 2
       },
       {
-        "stockCode": "091590",
-        "corpName": "남화토건",
-        "industry": "construction",
+        "stockCode": "010170",
+        "corpName": "대한광통신",
+        "industry": "textile",
+        "viaCode": "001440",
+        "viaName": "대한전선",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267260",
+        "corpName": "HD현대일렉트릭",
+        "industry": "shipbuilding",
+        "viaCode": "001440",
+        "viaName": "대한전선",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037330",
+        "corpName": "인지디스플레",
+        "industry": "electronics",
+        "viaCode": "001440",
+        "viaName": "대한전선",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060480",
+        "corpName": "국일신동",
+        "industry": "steel",
+        "viaCode": "025820",
+        "viaName": "이구산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217590",
+        "corpName": "티엠씨",
+        "industry": "electrical",
         "viaCode": "001440",
         "viaName": "대한전선",
         "hopDistance": 2

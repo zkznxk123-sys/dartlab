@@ -54,43 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 46873312425.0,
-      "operating_profit": 7256551585.0,
-      "net_profit": 10383409717.0,
-      "total_assets": 112876709778.0
-    },
-    {
-      "year": "2022",
-      "sales": 50525748850.0,
-      "operating_profit": 6051491931.0,
-      "net_profit": 8280650359.0,
-      "total_assets": 115838640670.0
-    },
-    {
-      "year": "2023",
-      "sales": 53787388529.0,
-      "operating_profit": 2195388266.0,
-      "net_profit": 6303719062.0,
-      "total_assets": 117640674312.0
-    },
-    {
-      "year": "2024",
-      "sales": 49912668669.0,
-      "operating_profit": 6795969136.0,
-      "net_profit": 15126719646.0,
-      "total_assets": 130397880695.0
-    },
-    {
-      "year": "2025",
-      "sales": 53125673480.0,
-      "operating_profit": 7913762782.0,
-      "net_profit": 10125185361.0,
-      "total_assets": 136572393107.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -151,9 +115,73 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "159580",
+        "corpName": "제로투세븐",
+        "industry": "retail",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "388790",
         "corpName": "라이콤",
         "industry": "medicalDevice",
+        "viaCode": "017810",
+        "viaName": "풀무원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "222040",
+        "corpName": "코스맥스엔비티",
+        "industry": "pharma",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005990",
+        "corpName": "매일홀딩스",
+        "industry": "food",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084690",
+        "corpName": "대상홀딩스",
+        "industry": "finance",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "311960",
+        "corpName": "인터로이드",
+        "industry": "pharma",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "272550",
+        "corpName": "삼양패키징",
+        "industry": "chemical",
         "viaCode": "017810",
         "viaName": "풀무원",
         "hopDistance": 2
@@ -167,9 +195,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "039490",
-        "corpName": "키움증권",
+        "stockCode": "097950",
+        "corpName": "CJ제일제당",
+        "industry": "food",
+        "viaCode": "017810",
+        "viaName": "풀무원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003530",
+        "corpName": "한화투자증권",
+        "industry": "aerospace",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "145990",
+        "corpName": "삼양사",
+        "industry": "food",
+        "viaCode": "017810",
+        "viaName": "풀무원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
         "industry": "finance",
+        "viaCode": "017810",
+        "viaName": "풀무원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267980",
+        "corpName": "매일유업",
+        "industry": "food",
         "viaCode": "270870",
         "viaName": "뉴트리",
         "hopDistance": 2
@@ -177,6 +237,30 @@
       {
         "stockCode": "214420",
         "corpName": "토니모리",
+        "industry": "cosmetics",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031440",
+        "corpName": "신세계푸드",
+        "industry": "retail",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044820",
+        "corpName": "코스맥스비티아이",
+        "industry": "food",
+        "viaCode": "270870",
+        "viaName": "뉴트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192820",
+        "corpName": "코스맥스",
         "industry": "cosmetics",
         "viaCode": "270870",
         "viaName": "뉴트리",
@@ -191,129 +275,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "192820",
-        "corpName": "코스맥스",
-        "industry": "cosmetics",
-        "viaCode": "270870",
-        "viaName": "뉴트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "222040",
-        "corpName": "코스맥스엔비티",
-        "industry": "pharma",
-        "viaCode": "270870",
-        "viaName": "뉴트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "097950",
-        "corpName": "CJ제일제당",
-        "industry": "food",
-        "viaCode": "017810",
-        "viaName": "풀무원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "044820",
-        "corpName": "코스맥스비티아이",
-        "industry": "food",
-        "viaCode": "270870",
-        "viaName": "뉴트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267980",
-        "corpName": "매일유업",
-        "industry": "food",
-        "viaCode": "270870",
-        "viaName": "뉴트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "272550",
-        "corpName": "삼양패키징",
-        "industry": "chemical",
-        "viaCode": "017810",
-        "viaName": "풀무원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005990",
-        "corpName": "매일홀딩스",
-        "industry": "food",
-        "viaCode": "270870",
-        "viaName": "뉴트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006800",
-        "corpName": "미래에셋증권",
+        "stockCode": "039490",
+        "corpName": "키움증권",
         "industry": "finance",
-        "viaCode": "270870",
-        "viaName": "뉴트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084690",
-        "corpName": "대상홀딩스",
-        "industry": "finance",
-        "viaCode": "270870",
-        "viaName": "뉴트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "145990",
-        "corpName": "삼양사",
-        "industry": "food",
-        "viaCode": "017810",
-        "viaName": "풀무원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "159580",
-        "corpName": "제로투세븐",
-        "industry": "retail",
-        "viaCode": "270870",
-        "viaName": "뉴트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003530",
-        "corpName": "한화투자증권",
-        "industry": "aerospace",
-        "viaCode": "270870",
-        "viaName": "뉴트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031440",
-        "corpName": "신세계푸드",
-        "industry": "retail",
-        "viaCode": "270870",
-        "viaName": "뉴트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "017810",
-        "viaName": "풀무원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "270870",
-        "viaName": "뉴트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "311960",
-        "corpName": "인터로이드",
-        "industry": "pharma",
         "viaCode": "270870",
         "viaName": "뉴트리",
         "hopDistance": 2

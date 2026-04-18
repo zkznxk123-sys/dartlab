@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 74290405220.0,
-      "operating_profit": 14967736890.0,
-      "net_profit": 14322855375.0,
-      "total_assets": 99371985073.0
-    },
-    {
-      "year": "2022",
-      "sales": 82604106563.0,
-      "operating_profit": 14917969338.0,
-      "net_profit": 13900299511.0,
-      "total_assets": 106198126576.0
-    },
-    {
-      "year": "2023",
-      "sales": 97897440573.0,
-      "operating_profit": 12757041199.0,
-      "net_profit": -130225545.0,
-      "total_assets": 124269683998.0
-    },
-    {
-      "year": "2024",
-      "sales": 106981860603.0,
-      "operating_profit": 6509094243.0,
-      "net_profit": -2536540303.0,
-      "total_assets": 123444458454.0
-    },
-    {
-      "year": "2025",
-      "sales": 108042067262.0,
-      "operating_profit": -243289025.0,
-      "net_profit": 628482519.0,
-      "total_assets": 131228150026.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,17 +87,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
+        "stockCode": "216080",
+        "corpName": "제테마",
+        "industry": "pharma",
         "viaCode": "251630",
         "viaName": "브이원텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "216080",
-        "corpName": "제테마",
-        "industry": "pharma",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
         "viaCode": "251630",
         "viaName": "브이원텍",
         "hopDistance": 2

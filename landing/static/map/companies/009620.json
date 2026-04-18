@@ -54,43 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 356025450406.0,
-      "operating_profit": 14591971502.0,
-      "net_profit": 1874760142.0,
-      "total_assets": 330137101614.0
-    },
-    {
-      "year": "2022",
-      "sales": 455016352333.0,
-      "operating_profit": 8377263593.0,
-      "net_profit": 0.0,
-      "total_assets": 338442672031.0
-    },
-    {
-      "year": "2023",
-      "sales": 427122516114.0,
-      "operating_profit": -620207119.0,
-      "net_profit": 0.0,
-      "total_assets": 341270065360.0
-    },
-    {
-      "year": "2024",
-      "sales": 340974508783.0,
-      "operating_profit": 628510028.0,
-      "net_profit": -22570715111.0,
-      "total_assets": 295754193989.0
-    },
-    {
-      "year": "2025",
-      "sales": 285655693776.0,
-      "operating_profit": 7887542740.0,
-      "net_profit": -5210502759.0,
-      "total_assets": 323447212982.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -159,11 +123,19 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "131400",
-        "corpName": "이브이첨단소재",
+        "stockCode": "025560",
+        "corpName": "미래산업",
         "industry": "electronics",
         "viaCode": "145210",
         "viaName": "다이나믹디자인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016800",
+        "corpName": "퍼시스",
+        "industry": "paper",
+        "viaCode": "134790",
+        "viaName": "시디즈",
         "hopDistance": 2
       },
       {
@@ -199,16 +171,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "016800",
-        "corpName": "퍼시스",
-        "industry": "paper",
-        "viaCode": "134790",
-        "viaName": "시디즈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025560",
-        "corpName": "미래산업",
+        "stockCode": "131400",
+        "corpName": "이브이첨단소재",
         "industry": "electronics",
         "viaCode": "145210",
         "viaName": "다이나믹디자인",

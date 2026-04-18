@@ -97,43 +97,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 503616350065.0,
-      "operating_profit": 70234764724.0,
-      "net_profit": 0.0,
-      "total_assets": 681794910337.0
-    },
-    {
-      "year": "2022",
-      "sales": 582010939428.0,
-      "operating_profit": 67586885009.0,
-      "net_profit": 7272377389.0,
-      "total_assets": 709406380201.0
-    },
-    {
-      "year": "2023",
-      "sales": 555628853462.0,
-      "operating_profit": 67368809282.0,
-      "net_profit": 53454200309.0,
-      "total_assets": 761778497105.0
-    },
-    {
-      "year": "2024",
-      "sales": 558291565532.0,
-      "operating_profit": 38726562940.0,
-      "net_profit": 0.0,
-      "total_assets": 813670270893.0
-    },
-    {
-      "year": "2025",
-      "sales": 539865414411.0,
-      "operating_profit": 29908685759.0,
-      "net_profit": 0.0,
-      "total_assets": 858872719177.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -222,11 +186,19 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "033920",
-        "corpName": "무학",
+        "stockCode": "280360",
+        "corpName": "롯데웰푸드",
         "industry": "food",
-        "viaCode": "004450",
-        "viaName": "삼화왕관",
+        "viaCode": "005610",
+        "viaName": "SPC삼립",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052600",
+        "corpName": "한네트",
+        "industry": "finance",
+        "viaCode": "005610",
+        "viaName": "SPC삼립",
         "hopDistance": 2
       },
       {
@@ -238,14 +210,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001630",
-        "corpName": "종근당홀딩스",
-        "industry": "pharma",
-        "viaCode": "005610",
-        "viaName": "SPC삼립",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "000640",
         "corpName": "동아쏘시오홀딩스",
         "industry": "pharma",
@@ -254,33 +218,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004990",
-        "corpName": "롯데지주",
-        "industry": "finance",
-        "viaCode": "004450",
-        "viaName": "삼화왕관",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "008870",
-        "corpName": "금비",
-        "industry": "construction",
-        "viaCode": "004450",
-        "viaName": "삼화왕관",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009290",
-        "corpName": "광동제약",
-        "industry": "food",
-        "viaCode": "004450",
-        "viaName": "삼화왕관",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003800",
-        "corpName": "에이스침대",
-        "industry": "paper",
+        "stockCode": "002820",
+        "corpName": "SUN&L",
+        "industry": "realestate",
         "viaCode": "004450",
         "viaName": "삼화왕관",
         "hopDistance": 2
@@ -294,49 +234,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002820",
-        "corpName": "SUN&L",
-        "industry": "realestate",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "004450",
         "viaName": "삼화왕관",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "145990",
+        "corpName": "삼양사",
+        "industry": "food",
+        "viaCode": "005610",
+        "viaName": "SPC삼립",
         "hopDistance": 2
       },
       {
         "stockCode": "099220",
         "corpName": "SDN",
         "industry": "energy",
-        "viaCode": "005610",
-        "viaName": "SPC삼립",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "280360",
-        "corpName": "롯데웰푸드",
-        "industry": "food",
-        "viaCode": "005610",
-        "viaName": "SPC삼립",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005300",
-        "corpName": "롯데칠성음료",
-        "industry": "food",
-        "viaCode": "004450",
-        "viaName": "삼화왕관",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "052600",
-        "corpName": "한네트",
-        "industry": "finance",
-        "viaCode": "005610",
-        "viaName": "SPC삼립",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002200",
-        "corpName": "한국수출포장공업",
-        "industry": "paper",
         "viaCode": "005610",
         "viaName": "SPC삼립",
         "hopDistance": 2
@@ -350,9 +266,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002710",
-        "corpName": "TCC스틸",
-        "industry": "steel",
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "005610",
+        "viaName": "SPC삼립",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003800",
+        "corpName": "에이스침대",
+        "industry": "paper",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004990",
+        "corpName": "롯데지주",
+        "industry": "finance",
         "viaCode": "004450",
         "viaName": "삼화왕관",
         "hopDistance": 2
@@ -366,25 +298,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "145990",
-        "corpName": "삼양사",
-        "industry": "food",
-        "viaCode": "005610",
-        "viaName": "SPC삼립",
+        "stockCode": "002710",
+        "corpName": "TCC스틸",
+        "industry": "steel",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
         "hopDistance": 2
       },
       {
-        "stockCode": "001680",
-        "corpName": "대상",
+        "stockCode": "018120",
+        "corpName": "진로발효",
         "industry": "food",
-        "viaCode": "005610",
-        "viaName": "SPC삼립",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "005300",
+        "corpName": "롯데칠성음료",
+        "industry": "food",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002200",
+        "corpName": "한국수출포장공업",
+        "industry": "paper",
         "viaCode": "005610",
         "viaName": "SPC삼립",
         "hopDistance": 2
@@ -398,9 +338,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "018120",
-        "corpName": "진로발효",
+        "stockCode": "001680",
+        "corpName": "대상",
         "industry": "food",
+        "viaCode": "005610",
+        "viaName": "SPC삼립",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009290",
+        "corpName": "광동제약",
+        "industry": "food",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033920",
+        "corpName": "무학",
+        "industry": "food",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008870",
+        "corpName": "금비",
+        "industry": "construction",
         "viaCode": "004450",
         "viaName": "삼화왕관",
         "hopDistance": 2
@@ -408,7 +372,7 @@
     ],
     "hop2Edges": [
       {
-        "from": "145990",
+        "from": "001680",
         "to": "005610",
         "type": "supplier",
         "amount": 8068920.0,
@@ -418,7 +382,7 @@
         "source": "docs_table"
       },
       {
-        "from": "001680",
+        "from": "145990",
         "to": "005610",
         "type": "supplier",
         "amount": 8068920.0,

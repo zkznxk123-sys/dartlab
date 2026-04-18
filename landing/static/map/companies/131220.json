@@ -73,43 +73,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 66280825526.0,
-      "operating_profit": 5864721294.0,
-      "net_profit": 5015014629.0,
-      "total_assets": 54919854759.0
-    },
-    {
-      "year": "2022",
-      "sales": 72279688057.0,
-      "operating_profit": 7224466955.0,
-      "net_profit": 1540477014.0,
-      "total_assets": 59452771880.0
-    },
-    {
-      "year": "2023",
-      "sales": 73702238899.0,
-      "operating_profit": 6167121379.0,
-      "net_profit": 1376604558.0,
-      "total_assets": 63996496016.0
-    },
-    {
-      "year": "2024",
-      "sales": 71694370061.0,
-      "operating_profit": 4225309258.0,
-      "net_profit": 3925682769.0,
-      "total_assets": 67813733551.0
-    },
-    {
-      "year": "2025",
-      "sales": 81117767870.0,
-      "operating_profit": 5530676716.0,
-      "net_profit": 3281324679.0,
-      "total_assets": 72225298002.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -178,25 +142,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "038070",
-        "corpName": "서린바이오",
-        "industry": "retail",
+        "stockCode": "001800",
+        "corpName": "오리온홀딩스",
+        "industry": "food",
         "viaCode": "228760",
         "viaName": "지노믹트리",
         "hopDistance": 2
       },
       {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
-        "viaCode": "450950",
-        "viaName": "아스테라시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "068330",
-        "corpName": "일신바이오",
-        "industry": "machinery",
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
         "viaCode": "337840",
         "viaName": "유엑스엔",
         "hopDistance": 2
@@ -210,81 +166,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "377740",
-        "corpName": "바이오노트",
-        "industry": "pharma",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "259630",
         "corpName": "엠플러스",
         "industry": "machinery",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "452400",
-        "corpName": "이닉스",
-        "industry": "semiconductor",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099430",
-        "corpName": "바이오플러스",
-        "industry": "pharma",
-        "viaCode": "228760",
-        "viaName": "지노믹트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001800",
-        "corpName": "오리온홀딩스",
-        "industry": "food",
-        "viaCode": "228760",
-        "viaName": "지노믹트리",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "278990",
-        "corpName": "EMB",
-        "industry": "battery",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "119830",
-        "corpName": "아이텍",
-        "industry": "semiconductor",
-        "viaCode": "337840",
-        "viaName": "유엑스엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "418550",
-        "corpName": "제이오",
-        "industry": "consulting",
         "viaCode": "337840",
         "viaName": "유엑스엔",
         "hopDistance": 2
@@ -298,17 +182,97 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
+        "stockCode": "377740",
+        "corpName": "바이오노트",
+        "industry": "pharma",
         "viaCode": "337840",
         "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068330",
+        "corpName": "일신바이오",
+        "industry": "machinery",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "278990",
+        "corpName": "EMB",
+        "industry": "battery",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099430",
+        "corpName": "바이오플러스",
+        "industry": "pharma",
+        "viaCode": "228760",
+        "viaName": "지노믹트리",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038070",
+        "corpName": "서린바이오",
+        "industry": "retail",
+        "viaCode": "228760",
+        "viaName": "지노믹트리",
         "hopDistance": 2
       },
       {
         "stockCode": "137310",
         "corpName": "에스디바이오센서",
         "industry": "pharma",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "418550",
+        "corpName": "제이오",
+        "industry": "consulting",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "119830",
+        "corpName": "아이텍",
+        "industry": "semiconductor",
+        "viaCode": "337840",
+        "viaName": "유엑스엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "450950",
+        "viaName": "아스테라시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
         "viaCode": "337840",
         "viaName": "유엑스엔",
         "hopDistance": 2

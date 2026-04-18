@@ -109,36 +109,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 44874160526.0,
-      "operating_profit": 565876509.0,
-      "net_profit": 1273084279.0,
-      "total_assets": 72991174412.0
-    },
-    {
-      "year": "2022",
-      "sales": 50418205177.0,
-      "operating_profit": 1610872010.0,
-      "net_profit": 2177351739.0,
-      "total_assets": 75646629085.0
-    },
-    {
-      "year": "2023",
-      "sales": 45836974166.0,
-      "operating_profit": 613607689.0,
-      "net_profit": 1926790260.0,
-      "total_assets": 75802841107.0
-    },
-    {
-      "year": "2025",
-      "sales": 46501236360.0,
-      "operating_profit": 44269957.0,
-      "net_profit": 13718871.0,
-      "total_assets": 82779614547.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -190,25 +161,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "011210",
-        "corpName": "현대위아",
-        "industry": "auto",
-        "viaCode": "010660",
-        "viaName": "화천기계",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "200580",
-        "corpName": "메디쎄이",
-        "industry": "medicalDevice",
-        "viaCode": "010660",
-        "viaName": "화천기계",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "030210",
         "corpName": "다올투자증권",
         "industry": "realestate",
+        "viaCode": "010660",
+        "viaName": "화천기계",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
         "viaCode": "010660",
         "viaName": "화천기계",
         "hopDistance": 2
@@ -222,9 +185,25 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "200580",
+        "corpName": "메디쎄이",
+        "industry": "medicalDevice",
+        "viaCode": "010660",
+        "viaName": "화천기계",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "033830",
         "corpName": "티비씨",
         "industry": "media",
+        "viaCode": "010660",
+        "viaName": "화천기계",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011210",
+        "corpName": "현대위아",
+        "industry": "auto",
         "viaCode": "010660",
         "viaName": "화천기계",
         "hopDistance": 2
@@ -235,14 +214,6 @@
         "industry": "machinery",
         "viaCode": "000850",
         "viaName": "화천기공",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089790",
-        "corpName": "제이티",
-        "industry": "semiconductor",
-        "viaCode": "010660",
-        "viaName": "화천기계",
         "hopDistance": 2
       }
     ],

@@ -116,43 +116,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 510185095507.0,
-      "operating_profit": 48569477615.0,
-      "net_profit": 65898905421.0,
-      "total_assets": 423089951776.0
-    },
-    {
-      "year": "2022",
-      "sales": 484291225781.0,
-      "operating_profit": 13990246944.0,
-      "net_profit": 12067999270.0,
-      "total_assets": 424608629316.0
-    },
-    {
-      "year": "2023",
-      "sales": 456325697481.0,
-      "operating_profit": 20384146359.0,
-      "net_profit": 17420022071.0,
-      "total_assets": 434108102058.0
-    },
-    {
-      "year": "2024",
-      "sales": 419416899335.0,
-      "operating_profit": 15445910306.0,
-      "net_profit": 14347893535.0,
-      "total_assets": 429705980847.0
-    },
-    {
-      "year": "2025",
-      "sales": 406620008497.0,
-      "operating_profit": 13295560073.0,
-      "net_profit": 16965249242.0,
-      "total_assets": 435616657290.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -224,155 +188,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "035890",
-        "corpName": "서희건설",
-        "industry": "realestate",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "093640",
-        "corpName": "케이알엠",
-        "industry": "semiconductor",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031310",
-        "corpName": "아이즈비전",
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
         "industry": "chemical",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000720",
-        "corpName": "현대건설",
-        "industry": "construction",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000050",
-        "corpName": "경방",
-        "industry": "retail",
         "viaCode": "058650",
         "viaName": "세아홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "065450",
-        "corpName": "빅텍",
-        "industry": "machinery",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "306200",
-        "corpName": "세아제강",
-        "industry": "steel",
-        "viaCode": "058650",
-        "viaName": "세아홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "065950",
-        "corpName": "웰크론",
-        "industry": "electronics",
-        "viaCode": "001770",
-        "viaName": "SHD",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "085310",
-        "corpName": "엔케이",
-        "industry": "food",
-        "viaCode": "058650",
-        "viaName": "세아홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002350",
-        "corpName": "넥센타이어",
-        "industry": "plastic",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002030",
-        "corpName": "아세아",
-        "industry": "consulting",
-        "viaCode": "058650",
-        "viaName": "세아홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012210",
-        "corpName": "삼미금속",
-        "industry": "electronics",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006980",
-        "corpName": "우성",
-        "industry": "realestate",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033500",
-        "corpName": "동성화인텍",
-        "industry": "chemical",
-        "viaCode": "001770",
-        "viaName": "SHD",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039310",
-        "corpName": "세중",
-        "industry": "software",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009780",
-        "corpName": "엠에스씨",
-        "industry": "food",
-        "viaCode": "058400",
-        "viaName": "KNN",
         "hopDistance": 2
       },
       {
@@ -384,105 +204,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002460",
-        "corpName": "HS화성",
-        "industry": "construction",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "096770",
-        "corpName": "SK이노베이션",
-        "industry": "chemical",
-        "viaCode": "058650",
-        "viaName": "세아홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034120",
-        "corpName": "SBS",
-        "industry": "electronics",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010130",
-        "corpName": "고려아연",
-        "industry": "steel",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053260",
-        "corpName": "금강철강",
-        "industry": "steel",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002310",
-        "corpName": "아세아제지",
-        "industry": "paper",
-        "viaCode": "058650",
-        "viaName": "세아홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009410",
-        "corpName": "태영건설",
-        "industry": "construction",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011810",
-        "corpName": "STX",
+        "stockCode": "085310",
+        "corpName": "엔케이",
         "industry": "food",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001430",
-        "corpName": "세아베스틸지주",
-        "industry": "electronics",
         "viaCode": "058650",
         "viaName": "세아홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "011390",
-        "corpName": "부산산업",
-        "industry": "construction",
-        "viaCode": "058400",
-        "viaName": "KNN",
+        "stockCode": "307950",
+        "corpName": "현대오토에버",
+        "industry": "software",
+        "viaCode": "058650",
+        "viaName": "세아홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "000590",
-        "corpName": "CS홀딩스",
-        "industry": "textile",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "076080",
-        "corpName": "웰크론한텍",
-        "industry": "machinery",
-        "viaCode": "001770",
-        "viaName": "SHD",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003610",
-        "corpName": "방림",
-        "industry": "shipbuilding",
+        "stockCode": "039310",
+        "corpName": "세중",
+        "industry": "software",
         "viaCode": "014280",
         "viaName": "금강공업",
         "hopDistance": 2
@@ -496,11 +236,123 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002140",
-        "corpName": "고려산업",
-        "industry": "realestate",
+        "stockCode": "002310",
+        "corpName": "아세아제지",
+        "industry": "paper",
+        "viaCode": "058650",
+        "viaName": "세아홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000720",
+        "corpName": "현대건설",
+        "industry": "construction",
         "viaCode": "014280",
         "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006980",
+        "corpName": "우성",
+        "industry": "realestate",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012210",
+        "corpName": "삼미금속",
+        "industry": "electronics",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "306200",
+        "corpName": "세아제강",
+        "industry": "steel",
+        "viaCode": "058650",
+        "viaName": "세아홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005720",
+        "corpName": "넥센",
+        "industry": "plastic",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000050",
+        "corpName": "경방",
+        "industry": "retail",
+        "viaCode": "058650",
+        "viaName": "세아홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034120",
+        "corpName": "SBS",
+        "industry": "electronics",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003610",
+        "corpName": "방림",
+        "industry": "shipbuilding",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002350",
+        "corpName": "넥센타이어",
+        "industry": "plastic",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011390",
+        "corpName": "부산산업",
+        "industry": "construction",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002460",
+        "corpName": "HS화성",
+        "industry": "construction",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064820",
+        "corpName": "케이프",
+        "industry": "auto",
+        "viaCode": "058650",
+        "viaName": "세아홀딩스",
         "hopDistance": 2
       },
       {
@@ -520,19 +372,91 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "307950",
-        "corpName": "현대오토에버",
-        "industry": "software",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001430",
+        "corpName": "세아베스틸지주",
+        "industry": "electronics",
         "viaCode": "058650",
         "viaName": "세아홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "005720",
-        "corpName": "넥센",
-        "industry": "plastic",
+        "stockCode": "010130",
+        "corpName": "고려아연",
+        "industry": "steel",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000590",
+        "corpName": "CS홀딩스",
+        "industry": "textile",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065950",
+        "corpName": "웰크론",
+        "industry": "electronics",
+        "viaCode": "001770",
+        "viaName": "SHD",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053260",
+        "corpName": "금강철강",
+        "industry": "steel",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009780",
+        "corpName": "엠에스씨",
+        "industry": "food",
         "viaCode": "058400",
         "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015750",
+        "corpName": "성우하이텍",
+        "industry": "auto",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031310",
+        "corpName": "아이즈비전",
+        "industry": "chemical",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "093640",
+        "corpName": "케이알엠",
+        "industry": "semiconductor",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011810",
+        "corpName": "STX",
+        "industry": "food",
+        "viaCode": "014280",
+        "viaName": "금강공업",
         "hopDistance": 2
       },
       {
@@ -544,19 +468,59 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "064820",
-        "corpName": "케이프",
-        "industry": "auto",
-        "viaCode": "058650",
-        "viaName": "세아홀딩스",
+        "stockCode": "065450",
+        "corpName": "빅텍",
+        "industry": "machinery",
+        "viaCode": "058400",
+        "viaName": "KNN",
         "hopDistance": 2
       },
       {
-        "stockCode": "015750",
-        "corpName": "성우하이텍",
-        "industry": "auto",
+        "stockCode": "076080",
+        "corpName": "웰크론한텍",
+        "industry": "machinery",
+        "viaCode": "001770",
+        "viaName": "SHD",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002140",
+        "corpName": "고려산업",
+        "industry": "realestate",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009410",
+        "corpName": "태영건설",
+        "industry": "construction",
         "viaCode": "058400",
         "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035890",
+        "corpName": "서희건설",
+        "industry": "realestate",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033500",
+        "corpName": "동성화인텍",
+        "industry": "chemical",
+        "viaCode": "001770",
+        "viaName": "SHD",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002030",
+        "corpName": "아세아",
+        "industry": "consulting",
+        "viaCode": "058650",
+        "viaName": "세아홀딩스",
         "hopDistance": 2
       }
     ],

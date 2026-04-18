@@ -85,43 +85,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 126928339596.0,
-      "operating_profit": -890929326.0,
-      "net_profit": -16036159365.0,
-      "total_assets": 646644149778.0
-    },
-    {
-      "year": "2022",
-      "sales": 152832444811.0,
-      "operating_profit": 15643137742.0,
-      "net_profit": -13202293134.0,
-      "total_assets": 605739795014.0
-    },
-    {
-      "year": "2023",
-      "sales": 146573700822.0,
-      "operating_profit": 16162941974.0,
-      "net_profit": 65425861817.0,
-      "total_assets": 639327517358.0
-    },
-    {
-      "year": "2024",
-      "sales": 152059251251.0,
-      "operating_profit": 16875863184.0,
-      "net_profit": 48421929363.0,
-      "total_assets": 680447311689.0
-    },
-    {
-      "year": "2025",
-      "sales": 143830395069.0,
-      "operating_profit": 10235140357.0,
-      "net_profit": 50321647540.0,
-      "total_assets": 719917915104.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -173,51 +137,19 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "016880",
-        "corpName": "웅진",
-        "industry": "education",
-        "viaCode": "004450",
-        "viaName": "삼화왕관",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036830",
-        "corpName": "솔브레인홀딩스",
-        "industry": "electronics",
-        "viaCode": "092070",
-        "viaName": "디엔에프",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "023600",
-        "corpName": "삼보판지",
-        "industry": "paper",
-        "viaCode": "004450",
-        "viaName": "삼화왕관",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "104700",
-        "corpName": "한국철강",
-        "industry": "construction",
+        "stockCode": "007280",
+        "corpName": "한국특강",
+        "industry": "steel",
         "viaCode": "001940",
         "viaName": "KISCO홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "092070",
-        "viaName": "디엔에프",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "451250",
-        "corpName": "삐아",
-        "industry": "cosmetics",
-        "viaCode": "092070",
-        "viaName": "디엔에프",
+        "stockCode": "016880",
+        "corpName": "웅진",
+        "industry": "education",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
         "hopDistance": 2
       },
       {
@@ -229,62 +161,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004990",
-        "corpName": "롯데지주",
-        "industry": "finance",
-        "viaCode": "004450",
-        "viaName": "삼화왕관",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007280",
-        "corpName": "한국특강",
-        "industry": "steel",
-        "viaCode": "001940",
-        "viaName": "KISCO홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "008870",
-        "corpName": "금비",
-        "industry": "construction",
-        "viaCode": "004450",
-        "viaName": "삼화왕관",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009290",
-        "corpName": "광동제약",
-        "industry": "food",
-        "viaCode": "004450",
-        "viaName": "삼화왕관",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
-        "viaCode": "092070",
-        "viaName": "디엔에프",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003800",
-        "corpName": "에이스침대",
-        "industry": "paper",
-        "viaCode": "004450",
-        "viaName": "삼화왕관",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012160",
-        "corpName": "영흥",
-        "industry": "steel",
-        "viaCode": "001940",
-        "viaName": "KISCO홀딩스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "002820",
         "corpName": "SUN&L",
         "industry": "realestate",
@@ -293,9 +169,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
+        "stockCode": "123330",
+        "corpName": "제닉",
+        "industry": "cosmetics",
         "viaCode": "092070",
         "viaName": "디엔에프",
         "hopDistance": 2
@@ -309,19 +185,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005300",
-        "corpName": "롯데칠성음료",
-        "industry": "food",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "004450",
         "viaName": "삼화왕관",
         "hopDistance": 2
       },
       {
-        "stockCode": "002070",
-        "corpName": "비비안",
-        "industry": "realestate",
-        "viaCode": "004450",
-        "viaName": "삼화왕관",
+        "stockCode": "012160",
+        "corpName": "영흥",
+        "industry": "steel",
+        "viaCode": "001940",
+        "viaName": "KISCO홀딩스",
         "hopDistance": 2
       },
       {
@@ -333,49 +209,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "267250",
-        "corpName": "HD현대",
-        "industry": "shipbuilding",
-        "viaCode": "001940",
-        "viaName": "KISCO홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009160",
-        "corpName": "SIMPAC",
-        "industry": "auto",
-        "viaCode": "001940",
-        "viaName": "KISCO홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002710",
-        "corpName": "TCC스틸",
-        "industry": "steel",
-        "viaCode": "004450",
-        "viaName": "삼화왕관",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "075970",
-        "corpName": "동국알앤에스",
-        "industry": "buildingMaterials",
-        "viaCode": "001940",
-        "viaName": "KISCO홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "293580",
-        "corpName": "나우IB",
-        "industry": "chemical",
+        "stockCode": "101970",
+        "corpName": "우양에이치씨",
+        "industry": "construction",
         "viaCode": "092070",
         "viaName": "디엔에프",
         "hopDistance": 2
       },
       {
-        "stockCode": "123330",
-        "corpName": "제닉",
+        "stockCode": "451250",
+        "corpName": "삐아",
         "industry": "cosmetics",
+        "viaCode": "092070",
+        "viaName": "디엔에프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "092070",
+        "viaName": "디엔에프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002070",
+        "corpName": "비비안",
+        "industry": "realestate",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
         "viaCode": "092070",
         "viaName": "디엔에프",
         "hopDistance": 2
@@ -397,33 +265,73 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "004450",
-        "viaName": "삼화왕관",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000860",
-        "corpName": "강남제비스코",
-        "industry": "chemical",
-        "viaCode": "004450",
-        "viaName": "삼화왕관",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101970",
-        "corpName": "우양에이치씨",
-        "industry": "construction",
-        "viaCode": "092070",
-        "viaName": "디엔에프",
+        "stockCode": "267250",
+        "corpName": "HD현대",
+        "industry": "shipbuilding",
+        "viaCode": "001940",
+        "viaName": "KISCO홀딩스",
         "hopDistance": 2
       },
       {
         "stockCode": "001230",
         "corpName": "동국홀딩스",
         "industry": "steel",
+        "viaCode": "001940",
+        "viaName": "KISCO홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003800",
+        "corpName": "에이스침대",
+        "industry": "paper",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004990",
+        "corpName": "롯데지주",
+        "industry": "finance",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002710",
+        "corpName": "TCC스틸",
+        "industry": "steel",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023600",
+        "corpName": "삼보판지",
+        "industry": "paper",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036830",
+        "corpName": "솔브레인홀딩스",
+        "industry": "electronics",
+        "viaCode": "092070",
+        "viaName": "디엔에프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "357780",
+        "corpName": "솔브레인",
+        "industry": "electronics",
+        "viaCode": "092070",
+        "viaName": "디엔에프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009160",
+        "corpName": "SIMPAC",
+        "industry": "auto",
         "viaCode": "001940",
         "viaName": "KISCO홀딩스",
         "hopDistance": 2
@@ -437,11 +345,67 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "357780",
-        "corpName": "솔브레인",
-        "industry": "electronics",
+        "stockCode": "005300",
+        "corpName": "롯데칠성음료",
+        "industry": "food",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "104700",
+        "corpName": "한국철강",
+        "industry": "construction",
+        "viaCode": "001940",
+        "viaName": "KISCO홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
         "viaCode": "092070",
         "viaName": "디엔에프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "293580",
+        "corpName": "나우IB",
+        "industry": "chemical",
+        "viaCode": "092070",
+        "viaName": "디엔에프",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000860",
+        "corpName": "강남제비스코",
+        "industry": "chemical",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "075970",
+        "corpName": "동국알앤에스",
+        "industry": "buildingMaterials",
+        "viaCode": "001940",
+        "viaName": "KISCO홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009290",
+        "corpName": "광동제약",
+        "industry": "food",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008870",
+        "corpName": "금비",
+        "industry": "construction",
+        "viaCode": "004450",
+        "viaName": "삼화왕관",
         "hopDistance": 2
       }
     ],

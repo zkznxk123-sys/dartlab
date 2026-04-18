@@ -35,22 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2023",
-      "sales": 837151079.0,
-      "operating_profit": -1942506461.0,
-      "net_profit": -3064560027.0,
-      "total_assets": 7790204392.0
-    },
-    {
-      "year": "2025",
-      "sales": 215008.0,
-      "operating_profit": -756045574.0,
-      "net_profit": -3142877007.0,
-      "total_assets": 27073748185.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,

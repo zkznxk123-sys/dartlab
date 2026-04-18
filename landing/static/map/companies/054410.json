@@ -97,36 +97,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 16240471370.0,
-      "operating_profit": 1159428077.0,
-      "net_profit": 6067632132.0,
-      "total_assets": 73666725515.0
-    },
-    {
-      "year": "2022",
-      "sales": 12378151956.0,
-      "operating_profit": 1387679090.0,
-      "net_profit": 2019877448.0,
-      "total_assets": 82432574890.0
-    },
-    {
-      "year": "2023",
-      "sales": 17912038543.0,
-      "operating_profit": 846737754.0,
-      "net_profit": 2859808434.0,
-      "total_assets": 92337574121.0
-    },
-    {
-      "year": "2025",
-      "sales": 15782995385.0,
-      "operating_profit": 1388163794.0,
-      "net_profit": 2209954098.0,
-      "total_assets": 95767222927.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 2,
     "customerCount": 0,
@@ -211,14 +182,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "001780",
-        "viaName": "알루코",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "024110",
         "corpName": "기업은행",
         "industry": "finance",
@@ -235,27 +198,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004020",
-        "corpName": "현대제철",
-        "industry": "steel",
+        "stockCode": "001000",
+        "corpName": "신라섬유",
+        "industry": "realestate",
         "viaCode": "012620",
         "viaName": "원일특강",
         "hopDistance": 2
       },
       {
-        "stockCode": "260970",
-        "corpName": "에스앤디",
-        "industry": "pharma",
-        "viaCode": "012620",
-        "viaName": "원일특강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034020",
-        "corpName": "두산에너빌리티",
-        "industry": "machinery",
-        "viaCode": "012620",
-        "viaName": "원일특강",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "001780",
+        "viaName": "알루코",
         "hopDistance": 2
       },
       {
@@ -267,57 +222,33 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "260970",
+        "corpName": "에스앤디",
+        "industry": "pharma",
+        "viaCode": "012620",
+        "viaName": "원일특강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "012620",
+        "viaName": "원일특강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064350",
+        "corpName": "현대로템",
+        "industry": "railroad",
+        "viaCode": "001780",
+        "viaName": "알루코",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "025870",
         "corpName": "신라에스지",
         "industry": "food",
-        "viaCode": "012620",
-        "viaName": "원일특강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083310",
-        "corpName": "엘오티베큠",
-        "industry": "machinery",
-        "viaCode": "001780",
-        "viaName": "알루코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "001780",
-        "viaName": "알루코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004970",
-        "corpName": "신라교역",
-        "industry": "auto",
-        "viaCode": "012620",
-        "viaName": "원일특강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001000",
-        "corpName": "신라섬유",
-        "industry": "realestate",
-        "viaCode": "012620",
-        "viaName": "원일특강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002600",
-        "corpName": "조흥",
-        "industry": "construction",
-        "viaCode": "012620",
-        "viaName": "원일특강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024090",
-        "corpName": "디씨엠",
-        "industry": "construction",
         "viaCode": "012620",
         "viaName": "원일특강",
         "hopDistance": 2
@@ -331,6 +262,30 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "002600",
+        "corpName": "조흥",
+        "industry": "construction",
+        "viaCode": "012620",
+        "viaName": "원일특강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083310",
+        "corpName": "엘오티베큠",
+        "industry": "machinery",
+        "viaCode": "001780",
+        "viaName": "알루코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004970",
+        "corpName": "신라교역",
+        "industry": "auto",
+        "viaCode": "012620",
+        "viaName": "원일특강",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "010140",
         "corpName": "삼성중공업",
         "industry": "shipbuilding",
@@ -339,11 +294,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "064350",
-        "corpName": "현대로템",
-        "industry": "railroad",
-        "viaCode": "001780",
-        "viaName": "알루코",
+        "stockCode": "034020",
+        "corpName": "두산에너빌리티",
+        "industry": "machinery",
+        "viaCode": "012620",
+        "viaName": "원일특강",
         "hopDistance": 2
       },
       {
@@ -352,6 +307,22 @@
         "industry": "finance",
         "viaCode": "001780",
         "viaName": "알루코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "001780",
+        "viaName": "알루코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024090",
+        "corpName": "디씨엠",
+        "industry": "construction",
+        "viaCode": "012620",
+        "viaName": "원일특강",
         "hopDistance": 2
       }
     ],

@@ -66,36 +66,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 54363053720.0,
-      "operating_profit": 3135620551.0,
-      "net_profit": 2819217341.0,
-      "total_assets": 59134278455.0
-    },
-    {
-      "year": "2022",
-      "sales": 58935626488.0,
-      "operating_profit": 3920387898.0,
-      "net_profit": 3380873831.0,
-      "total_assets": 69923176212.0
-    },
-    {
-      "year": "2023",
-      "sales": 53543737975.0,
-      "operating_profit": 4162931035.0,
-      "net_profit": 3573686700.0,
-      "total_assets": 73917714059.0
-    },
-    {
-      "year": "2025",
-      "sales": 49677044033.0,
-      "operating_profit": 310443458.0,
-      "net_profit": 512953736.0,
-      "total_assets": 62159073060.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -156,57 +127,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "007070",
-        "corpName": "GS리테일",
-        "industry": "retail",
-        "viaCode": "279570",
-        "viaName": "케이뱅크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
+        "stockCode": "043610",
+        "corpName": "KT지니뮤직",
         "industry": "telecom",
         "viaCode": "279570",
         "viaName": "케이뱅크",
         "hopDistance": 2
       },
       {
-        "stockCode": "100030",
-        "corpName": "인지소프트",
-        "industry": "software",
-        "viaCode": "279570",
-        "viaName": "케이뱅크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010280",
-        "corpName": "아이티센엔텍",
+        "stockCode": "083640",
+        "corpName": "인콘",
         "industry": "software",
         "viaCode": "336060",
         "viaName": "웨이버스",
         "hopDistance": 2
       },
       {
-        "stockCode": "115310",
-        "corpName": "인포바인",
-        "industry": "telecom",
-        "viaCode": "279570",
-        "viaName": "케이뱅크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "418470",
-        "corpName": "KT밀리의서재",
-        "industry": "telecom",
-        "viaCode": "279570",
-        "viaName": "케이뱅크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089600",
-        "corpName": "KT나스미디어",
-        "industry": "telecom",
+        "stockCode": "022100",
+        "corpName": "포스코DX",
+        "industry": "steel",
         "viaCode": "279570",
         "viaName": "케이뱅크",
         "hopDistance": 2
@@ -220,25 +159,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "214180",
-        "corpName": "헥토이노베이션",
-        "industry": "software",
-        "viaCode": "279570",
-        "viaName": "케이뱅크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "140430",
-        "corpName": "카티스",
-        "industry": "software",
-        "viaCode": "336060",
-        "viaName": "웨이버스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "046440",
-        "corpName": "KG모빌리언스",
-        "industry": "finance",
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
         "viaCode": "279570",
         "viaName": "케이뱅크",
         "hopDistance": 2
@@ -252,9 +175,89 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "053210",
-        "corpName": "케이티스카이라이프",
+        "stockCode": "036030",
+        "corpName": "케이티알파",
+        "industry": "medicalDevice",
+        "viaCode": "279570",
+        "viaName": "케이뱅크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100030",
+        "corpName": "인지소프트",
+        "industry": "software",
+        "viaCode": "279570",
+        "viaName": "케이뱅크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000240",
+        "corpName": "한국앤컴퍼니",
+        "industry": "finance",
+        "viaCode": "336060",
+        "viaName": "웨이버스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214180",
+        "corpName": "헥토이노베이션",
+        "industry": "software",
+        "viaCode": "279570",
+        "viaName": "케이뱅크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089600",
+        "corpName": "KT나스미디어",
         "industry": "telecom",
+        "viaCode": "279570",
+        "viaName": "케이뱅크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078340",
+        "corpName": "컴투스",
+        "industry": "software",
+        "viaCode": "279570",
+        "viaName": "케이뱅크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007070",
+        "corpName": "GS리테일",
+        "industry": "retail",
+        "viaCode": "279570",
+        "viaName": "케이뱅크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010280",
+        "corpName": "아이티센엔텍",
+        "industry": "software",
+        "viaCode": "336060",
+        "viaName": "웨이버스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035600",
+        "corpName": "KG이니시스",
+        "industry": "software",
+        "viaCode": "279570",
+        "viaName": "케이뱅크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058850",
+        "corpName": "KTcs",
+        "industry": "telecom",
+        "viaCode": "279570",
+        "viaName": "케이뱅크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "046440",
+        "corpName": "KG모빌리언스",
+        "industry": "finance",
         "viaCode": "279570",
         "viaName": "케이뱅크",
         "hopDistance": 2
@@ -268,11 +271,67 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000240",
-        "corpName": "한국앤컴퍼니",
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "279570",
+        "viaName": "케이뱅크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030210",
+        "corpName": "다올투자증권",
+        "industry": "realestate",
+        "viaCode": "279570",
+        "viaName": "케이뱅크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005940",
+        "corpName": "NH투자증권",
         "industry": "finance",
+        "viaCode": "279570",
+        "viaName": "케이뱅크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161390",
+        "corpName": "한국타이어앤테크놀로지",
+        "industry": "auto",
         "viaCode": "336060",
         "viaName": "웨이버스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025770",
+        "corpName": "한국정보통신",
+        "industry": "finance",
+        "viaCode": "279570",
+        "viaName": "케이뱅크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "140430",
+        "corpName": "카티스",
+        "industry": "software",
+        "viaCode": "336060",
+        "viaName": "웨이버스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053210",
+        "corpName": "케이티스카이라이프",
+        "industry": "telecom",
+        "viaCode": "279570",
+        "viaName": "케이뱅크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "115310",
+        "corpName": "인포바인",
+        "industry": "telecom",
+        "viaCode": "279570",
+        "viaName": "케이뱅크",
         "hopDistance": 2
       },
       {
@@ -292,97 +351,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "030210",
-        "corpName": "다올투자증권",
-        "industry": "realestate",
-        "viaCode": "279570",
-        "viaName": "케이뱅크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "161390",
-        "corpName": "한국타이어앤테크놀로지",
-        "industry": "auto",
-        "viaCode": "336060",
-        "viaName": "웨이버스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083640",
-        "corpName": "인콘",
-        "industry": "software",
-        "viaCode": "336060",
-        "viaName": "웨이버스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058850",
-        "corpName": "KTcs",
+        "stockCode": "418470",
+        "corpName": "KT밀리의서재",
         "industry": "telecom",
-        "viaCode": "279570",
-        "viaName": "케이뱅크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078340",
-        "corpName": "컴투스",
-        "industry": "software",
-        "viaCode": "279570",
-        "viaName": "케이뱅크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "043610",
-        "corpName": "KT지니뮤직",
-        "industry": "telecom",
-        "viaCode": "279570",
-        "viaName": "케이뱅크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005940",
-        "corpName": "NH투자증권",
-        "industry": "finance",
-        "viaCode": "279570",
-        "viaName": "케이뱅크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036030",
-        "corpName": "케이티알파",
-        "industry": "medicalDevice",
-        "viaCode": "279570",
-        "viaName": "케이뱅크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025770",
-        "corpName": "한국정보통신",
-        "industry": "finance",
-        "viaCode": "279570",
-        "viaName": "케이뱅크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "279570",
-        "viaName": "케이뱅크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "022100",
-        "corpName": "포스코DX",
-        "industry": "steel",
-        "viaCode": "279570",
-        "viaName": "케이뱅크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035600",
-        "corpName": "KG이니시스",
-        "industry": "software",
         "viaCode": "279570",
         "viaName": "케이뱅크",
         "hopDistance": 2

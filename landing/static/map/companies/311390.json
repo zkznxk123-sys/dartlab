@@ -128,43 +128,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 29886729419.0,
-      "operating_profit": 1368718533.0,
-      "net_profit": 1793298915.0,
-      "total_assets": 51294322715.0
-    },
-    {
-      "year": "2022",
-      "sales": 26702893112000.0,
-      "operating_profit": 1420451374000.0,
-      "net_profit": -1837548495000.0,
-      "total_assets": 77318521415000.0
-    },
-    {
-      "year": "2023",
-      "sales": 24866771855.0,
-      "operating_profit": 278868999.0,
-      "net_profit": null,
-      "total_assets": 71136283622.0
-    },
-    {
-      "year": "2024",
-      "sales": 40313599873.0,
-      "operating_profit": -690734776.0,
-      "net_profit": null,
-      "total_assets": 178338004403.0
-    },
-    {
-      "year": "2025",
-      "sales": 81943689101.0,
-      "operating_profit": 5408789313.0,
-      "net_profit": 2191027684.0,
-      "total_assets": 181836812241.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 2,
     "customerCount": 0,
@@ -262,193 +226,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "009460",
-        "corpName": "한창제지",
-        "industry": "paper",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "121800",
-        "corpName": "비덴트",
-        "industry": "electronics",
-        "viaCode": "069460",
-        "viaName": "대호에이엘",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "460850",
-        "corpName": "동국씨엠",
-        "industry": "steel",
-        "viaCode": "069460",
-        "viaName": "대호에이엘",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002790",
-        "corpName": "아모레퍼시픽홀딩스",
+        "stockCode": "277070",
+        "corpName": "린드먼아시아",
         "industry": "chemical",
-        "viaCode": "318410",
-        "viaName": "비비씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "120030",
-        "corpName": "조선선재",
-        "industry": "steel",
         "viaCode": "033780",
         "viaName": "케이티앤지",
         "hopDistance": 2
       },
       {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078140",
-        "corpName": "대봉엘에스",
-        "industry": "cosmetics",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "418550",
-        "corpName": "제이오",
-        "industry": "consulting",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
-        "viaCode": "069460",
-        "viaName": "대호에이엘",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002900",
-        "corpName": "TYM",
-        "industry": "retail",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "065570",
-        "corpName": "삼영이엔씨",
-        "industry": "telecom",
-        "viaCode": "069460",
-        "viaName": "대호에이엘",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "085310",
-        "corpName": "엔케이",
-        "industry": "food",
-        "viaCode": "318410",
-        "viaName": "비비씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001360",
-        "corpName": "삼성제약",
-        "industry": "food",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "180400",
-        "corpName": "DXVX",
-        "industry": "consulting",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003520",
-        "corpName": "영진약품",
-        "industry": "pharma",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "321550",
-        "corpName": "티움바이오",
-        "industry": "textile",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032830",
-        "corpName": "삼성생명",
-        "industry": "finance",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090370",
-        "corpName": "메타랩스",
-        "industry": "textile",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "128940",
-        "corpName": "한미약품",
-        "industry": "pharma",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "388610",
-        "corpName": "지에프씨생명과학",
-        "industry": "chemical",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "214370",
-        "corpName": "케어젠",
-        "industry": "pharma",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004000",
-        "corpName": "롯데정밀화학",
-        "industry": "chemical",
+        "stockCode": "110790",
+        "corpName": "크리스에프앤씨",
+        "industry": "leisure",
         "viaCode": "346010",
         "viaName": "타이드",
         "hopDistance": 2
@@ -462,9 +250,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
+        "stockCode": "214370",
+        "corpName": "케어젠",
+        "industry": "pharma",
         "viaCode": "346010",
         "viaName": "타이드",
         "hopDistance": 2
@@ -475,6 +263,14 @@
         "industry": "retail",
         "viaCode": "069460",
         "viaName": "대호에이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005320",
+        "corpName": "온타이드",
+        "industry": "realestate",
+        "viaCode": "346010",
+        "viaName": "타이드",
         "hopDistance": 2
       },
       {
@@ -494,59 +290,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "196300",
-        "corpName": "HLB펩",
-        "industry": "pharma",
+        "stockCode": "085310",
+        "corpName": "엔케이",
+        "industry": "food",
+        "viaCode": "318410",
+        "viaName": "비비씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "180400",
+        "corpName": "DXVX",
+        "industry": "consulting",
         "viaCode": "346010",
         "viaName": "타이드",
         "hopDistance": 2
       },
       {
-        "stockCode": "021240",
-        "corpName": "코웨이",
+        "stockCode": "091580",
+        "corpName": "상신이디피",
         "industry": "electronics",
         "viaCode": "069460",
         "viaName": "대호에이엘",
         "hopDistance": 2
       },
       {
-        "stockCode": "006110",
-        "corpName": "삼아알미늄",
-        "industry": "food",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "353190",
-        "corpName": "휴럼",
-        "industry": "food",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "304840",
-        "corpName": "피플바이오",
-        "industry": "pharma",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "069460",
-        "viaName": "대호에이엘",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "278650",
-        "corpName": "HLB바이오스텝",
-        "industry": "pharma",
-        "viaCode": "346010",
-        "viaName": "타이드",
+        "stockCode": "002790",
+        "corpName": "아모레퍼시픽홀딩스",
+        "industry": "chemical",
+        "viaCode": "318410",
+        "viaName": "비비씨",
         "hopDistance": 2
       },
       {
@@ -558,57 +330,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "010130",
-        "corpName": "고려아연",
-        "industry": "steel",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "251970",
-        "corpName": "펌텍코리아",
+        "stockCode": "175250",
+        "corpName": "아이큐어",
         "industry": "cosmetics",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
+        "viaCode": "346010",
+        "viaName": "타이드",
         "hopDistance": 2
       },
       {
-        "stockCode": "291650",
-        "corpName": "압타머사이언스",
+        "stockCode": "087010",
+        "corpName": "펩트론",
         "industry": "pharma",
         "viaCode": "346010",
         "viaName": "타이드",
         "hopDistance": 2
       },
       {
-        "stockCode": "214390",
-        "corpName": "경보제약",
-        "industry": "pharma",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003580",
-        "corpName": "HLB글로벌",
-        "industry": "food",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "054210",
-        "corpName": "이랜텍",
+        "stockCode": "012750",
+        "corpName": "에스원",
         "industry": "electronics",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "237690",
-        "corpName": "에스티팜",
-        "industry": "pharma",
         "viaCode": "346010",
         "viaName": "타이드",
         "hopDistance": 2
@@ -622,59 +362,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "277070",
-        "corpName": "린드먼아시아",
-        "industry": "chemical",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082270",
-        "corpName": "젬백스",
-        "industry": "software",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039200",
-        "corpName": "오스코텍",
-        "industry": "pharma",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "175250",
-        "corpName": "아이큐어",
-        "industry": "cosmetics",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "008490",
-        "corpName": "서흥",
-        "industry": "chemical",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "109610",
-        "corpName": "에스와이",
+        "stockCode": "005850",
+        "corpName": "에스엘",
         "industry": "electronics",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "091120",
-        "corpName": "이엠텍",
-        "industry": "electronics",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
+        "viaCode": "069460",
+        "viaName": "대호에이엘",
         "hopDistance": 2
       },
       {
@@ -686,27 +378,51 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "261520",
-        "corpName": "이지스",
-        "industry": "software",
+        "stockCode": "291650",
+        "corpName": "압타머사이언스",
+        "industry": "pharma",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "033780",
         "viaName": "케이티앤지",
         "hopDistance": 2
       },
       {
-        "stockCode": "271980",
-        "corpName": "제일약품",
+        "stockCode": "040300",
+        "corpName": "YTN",
+        "industry": "media",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001360",
+        "corpName": "삼성제약",
+        "industry": "food",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003520",
+        "corpName": "영진약품",
         "industry": "pharma",
         "viaCode": "033780",
         "viaName": "케이티앤지",
         "hopDistance": 2
       },
       {
-        "stockCode": "012750",
-        "corpName": "에스원",
-        "industry": "electronics",
-        "viaCode": "346010",
-        "viaName": "타이드",
+        "stockCode": "078140",
+        "corpName": "대봉엘에스",
+        "industry": "cosmetics",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
         "hopDistance": 2
       },
       {
@@ -726,49 +442,57 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "033780",
-        "viaName": "케이티앤지",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "318410",
-        "viaName": "비비씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "380540",
-        "corpName": "옵티코어",
-        "industry": "electronics",
+        "stockCode": "460850",
+        "corpName": "동국씨엠",
+        "industry": "steel",
         "viaCode": "069460",
         "viaName": "대호에이엘",
         "hopDistance": 2
       },
       {
-        "stockCode": "087010",
-        "corpName": "펩트론",
+        "stockCode": "271980",
+        "corpName": "제일약품",
         "industry": "pharma",
-        "viaCode": "346010",
-        "viaName": "타이드",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
         "hopDistance": 2
       },
       {
-        "stockCode": "090430",
-        "corpName": "아모레퍼시픽",
-        "industry": "cosmetics",
-        "viaCode": "318410",
-        "viaName": "비비씨",
+        "stockCode": "011040",
+        "corpName": "경동제약",
+        "industry": "pharma",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
         "hopDistance": 2
       },
       {
-        "stockCode": "005320",
-        "corpName": "온타이드",
-        "industry": "realestate",
+        "stockCode": "009460",
+        "corpName": "한창제지",
+        "industry": "paper",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "128940",
+        "corpName": "한미약품",
+        "industry": "pharma",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008490",
+        "corpName": "서흥",
+        "industry": "chemical",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "196300",
+        "corpName": "HLB펩",
+        "industry": "pharma",
         "viaCode": "346010",
         "viaName": "타이드",
         "hopDistance": 2
@@ -782,9 +506,217 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "040300",
-        "corpName": "YTN",
-        "industry": "media",
+        "stockCode": "304840",
+        "corpName": "피플바이오",
+        "industry": "pharma",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090430",
+        "corpName": "아모레퍼시픽",
+        "industry": "cosmetics",
+        "viaCode": "318410",
+        "viaName": "비비씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "261520",
+        "corpName": "이지스",
+        "industry": "software",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109610",
+        "corpName": "에스와이",
+        "industry": "electronics",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "139990",
+        "corpName": "아주스틸",
+        "industry": "electronics",
+        "viaCode": "069460",
+        "viaName": "대호에이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "318410",
+        "viaName": "비비씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "069460",
+        "viaName": "대호에이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003580",
+        "corpName": "HLB글로벌",
+        "industry": "food",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "278650",
+        "corpName": "HLB바이오스텝",
+        "industry": "pharma",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "091120",
+        "corpName": "이엠텍",
+        "industry": "electronics",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000520",
+        "corpName": "삼일제약",
+        "industry": "food",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "251970",
+        "corpName": "펌텍코리아",
+        "industry": "cosmetics",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "380540",
+        "corpName": "옵티코어",
+        "industry": "electronics",
+        "viaCode": "069460",
+        "viaName": "대호에이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010130",
+        "corpName": "고려아연",
+        "industry": "steel",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006110",
+        "corpName": "삼아알미늄",
+        "industry": "food",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "120030",
+        "corpName": "조선선재",
+        "industry": "steel",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "121800",
+        "corpName": "비덴트",
+        "industry": "electronics",
+        "viaCode": "069460",
+        "viaName": "대호에이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "237690",
+        "corpName": "에스티팜",
+        "industry": "pharma",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065570",
+        "corpName": "삼영이엔씨",
+        "industry": "telecom",
+        "viaCode": "069460",
+        "viaName": "대호에이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004310",
+        "corpName": "현대약품",
+        "industry": "pharma",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "021240",
+        "corpName": "코웨이",
+        "industry": "electronics",
+        "viaCode": "069460",
+        "viaName": "대호에이엘",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "321550",
+        "corpName": "티움바이오",
+        "industry": "textile",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054210",
+        "corpName": "이랜텍",
+        "industry": "electronics",
         "viaCode": "033780",
         "viaName": "케이티앤지",
         "hopDistance": 2
@@ -798,51 +730,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "139990",
-        "corpName": "아주스틸",
-        "industry": "electronics",
-        "viaCode": "069460",
-        "viaName": "대호에이엘",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "091580",
-        "corpName": "상신이디피",
-        "industry": "electronics",
-        "viaCode": "069460",
-        "viaName": "대호에이엘",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000520",
-        "corpName": "삼일제약",
-        "industry": "food",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004310",
-        "corpName": "현대약품",
-        "industry": "pharma",
-        "viaCode": "346010",
-        "viaName": "타이드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011040",
-        "corpName": "경동제약",
-        "industry": "pharma",
+        "stockCode": "134380",
+        "corpName": "미원화학",
+        "industry": "cosmetics",
         "viaCode": "033780",
         "viaName": "케이티앤지",
         "hopDistance": 2
       },
       {
-        "stockCode": "110790",
-        "corpName": "크리스에프앤씨",
-        "industry": "leisure",
+        "stockCode": "032830",
+        "corpName": "삼성생명",
+        "industry": "finance",
         "viaCode": "346010",
         "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "388610",
+        "corpName": "지에프씨생명과학",
+        "industry": "chemical",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "353190",
+        "corpName": "휴럼",
+        "industry": "food",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
         "hopDistance": 2
       },
       {
@@ -854,17 +770,65 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "134380",
-        "corpName": "미원화학",
-        "industry": "cosmetics",
+        "stockCode": "039200",
+        "corpName": "오스코텍",
+        "industry": "pharma",
         "viaCode": "033780",
         "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002900",
+        "corpName": "TYM",
+        "industry": "retail",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "418550",
+        "corpName": "제이오",
+        "industry": "consulting",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082270",
+        "corpName": "젬백스",
+        "industry": "software",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214390",
+        "corpName": "경보제약",
+        "industry": "pharma",
+        "viaCode": "033780",
+        "viaName": "케이티앤지",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004000",
+        "corpName": "롯데정밀화학",
+        "industry": "chemical",
+        "viaCode": "346010",
+        "viaName": "타이드",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090370",
+        "corpName": "메타랩스",
+        "industry": "textile",
+        "viaCode": "346010",
+        "viaName": "타이드",
         "hopDistance": 2
       }
     ],
     "hop2Edges": [
       {
-        "from": "078140",
+        "from": "002840",
         "to": "033780",
         "type": "supplier",
         "amount": 35080.0,
@@ -874,7 +838,7 @@
         "source": "docs_table"
       },
       {
-        "from": "002840",
+        "from": "078140",
         "to": "033780",
         "type": "supplier",
         "amount": 35080.0,

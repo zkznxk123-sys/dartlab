@@ -140,43 +140,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 29089193742.0,
-      "operating_profit": 3412372392.0,
-      "net_profit": 2471595166.0,
-      "total_assets": 48984055111.0
-    },
-    {
-      "year": "2022",
-      "sales": 27685710222.0,
-      "operating_profit": 2319433587.0,
-      "net_profit": 0.0,
-      "total_assets": 45107321235.0
-    },
-    {
-      "year": "2023",
-      "sales": 29812771015.0,
-      "operating_profit": 3345879719.0,
-      "net_profit": 0.0,
-      "total_assets": 66680224017.0
-    },
-    {
-      "year": "2024",
-      "sales": 31702268070.0,
-      "operating_profit": 3273928848.0,
-      "net_profit": 0.0,
-      "total_assets": 70223345563.0
-    },
-    {
-      "year": "2025",
-      "sales": 30824695858.0,
-      "operating_profit": -161563032.0,
-      "net_profit": 3889027539.0,
-      "total_assets": 78988210572.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -237,6 +201,14 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "018880",
+        "corpName": "한온시스템",
+        "industry": "auto",
+        "viaCode": "041020",
+        "viaName": "폴라리스오피스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "123010",
         "corpName": "알엔티엑스",
         "industry": "semiconductor",
@@ -245,129 +217,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "234100",
-        "corpName": "폴라리스세원",
-        "industry": "electronics",
-        "viaCode": "041020",
-        "viaName": "폴라리스오피스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "204270",
-        "corpName": "제이앤티씨",
-        "industry": "electronics",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "408900",
-        "corpName": "스튜디오미르",
-        "industry": "media",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "389030",
-        "corpName": "지니너스",
-        "industry": "pharma",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083500",
-        "corpName": "에프엔에스테크",
-        "industry": "electronics",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000660",
-        "corpName": "SK하이닉스",
-        "industry": "semiconductor",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "240810",
-        "corpName": "원익IPS",
-        "industry": "semiconductor",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267260",
-        "corpName": "HD현대일렉트릭",
-        "industry": "shipbuilding",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "298040",
-        "corpName": "효성중공업",
-        "industry": "chemical",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095340",
-        "corpName": "ISC",
-        "industry": "retail",
-        "viaCode": "108860",
-        "viaName": "셀바스AI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039980",
-        "corpName": "폴라리스AI",
-        "industry": "software",
-        "viaCode": "041020",
-        "viaName": "폴라리스오피스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "207940",
-        "corpName": "삼성바이오로직스",
-        "industry": "pharma",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "227840",
-        "corpName": "현대코퍼레이션홀딩스",
-        "industry": "textile",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060720",
-        "corpName": "KH바텍",
-        "industry": "electronics",
-        "viaCode": "238490",
-        "viaName": "힘스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "074600",
-        "corpName": "원익QnC",
-        "industry": "construction",
+        "stockCode": "489790",
+        "corpName": "한화비전",
+        "industry": "aerospace",
         "viaCode": "238490",
         "viaName": "힘스",
         "hopDistance": 2
@@ -381,24 +233,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "041910",
-        "corpName": "폴라리스AI파마",
-        "industry": "pharma",
-        "viaCode": "041020",
-        "viaName": "폴라리스오피스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "245620",
-        "corpName": "EDGC",
-        "industry": "pharma",
+        "stockCode": "088390",
+        "corpName": "이녹스",
+        "industry": "railroad",
         "viaCode": "238490",
         "viaName": "힘스",
         "hopDistance": 2
       },
       {
-        "stockCode": "371950",
-        "corpName": "풍원정밀",
+        "stockCode": "122640",
+        "corpName": "예스티",
         "industry": "electronics",
         "viaCode": "238490",
         "viaName": "힘스",
@@ -413,9 +257,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "088390",
-        "corpName": "이녹스",
-        "industry": "railroad",
+        "stockCode": "038880",
+        "corpName": "아이에이",
+        "industry": "electronics",
+        "viaCode": "041020",
+        "viaName": "폴라리스오피스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "220180",
+        "corpName": "핸디소프트",
+        "industry": "software",
+        "viaCode": "041020",
+        "viaName": "폴라리스오피스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298040",
+        "corpName": "효성중공업",
+        "industry": "chemical",
         "viaCode": "238490",
         "viaName": "힘스",
         "hopDistance": 2
@@ -429,19 +289,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "090150",
-        "corpName": "아이윈",
-        "industry": "auto",
+        "stockCode": "039980",
+        "corpName": "폴라리스AI",
+        "industry": "software",
         "viaCode": "041020",
         "viaName": "폴라리스오피스",
         "hopDistance": 2
       },
       {
-        "stockCode": "009540",
-        "corpName": "HD한국조선해양",
-        "industry": "shipbuilding",
+        "stockCode": "095340",
+        "corpName": "ISC",
+        "industry": "retail",
+        "viaCode": "041920",
+        "viaName": "메디아나",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "371950",
+        "corpName": "풍원정밀",
+        "industry": "electronics",
         "viaCode": "238490",
         "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "114630",
+        "corpName": "폴라리스우노",
+        "industry": "chemical",
+        "viaCode": "041020",
+        "viaName": "폴라리스오피스",
         "hopDistance": 2
       },
       {
@@ -453,6 +329,70 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "227840",
+        "corpName": "현대코퍼레이션홀딩스",
+        "industry": "textile",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "097520",
+        "corpName": "엠씨넥스",
+        "industry": "electronics",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "074600",
+        "corpName": "원익QnC",
+        "industry": "construction",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "240810",
+        "corpName": "원익IPS",
+        "industry": "semiconductor",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009540",
+        "corpName": "HD한국조선해양",
+        "industry": "shipbuilding",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "389030",
+        "corpName": "지니너스",
+        "industry": "pharma",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041910",
+        "corpName": "폴라리스AI파마",
+        "industry": "pharma",
+        "viaCode": "041020",
+        "viaName": "폴라리스오피스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "204270",
+        "corpName": "제이앤티씨",
+        "industry": "electronics",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "084650",
         "corpName": "랩지노믹스",
         "industry": "pharma",
@@ -461,8 +401,32 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "038880",
-        "corpName": "아이에이",
+        "stockCode": "245620",
+        "corpName": "EDGC",
+        "industry": "pharma",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "299900",
+        "corpName": "위지윅스튜디오",
+        "industry": "media",
+        "viaCode": "108860",
+        "viaName": "셀바스AI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "234100",
+        "corpName": "폴라리스세원",
         "industry": "electronics",
         "viaCode": "041020",
         "viaName": "폴라리스오피스",
@@ -477,57 +441,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "018880",
-        "corpName": "한온시스템",
+        "stockCode": "090150",
+        "corpName": "아이윈",
         "industry": "auto",
         "viaCode": "041020",
         "viaName": "폴라리스오피스",
         "hopDistance": 2
       },
       {
-        "stockCode": "220180",
-        "corpName": "핸디소프트",
-        "industry": "software",
-        "viaCode": "041020",
-        "viaName": "폴라리스오피스",
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "238490",
+        "viaName": "힘스",
         "hopDistance": 2
       },
       {
-        "stockCode": "299900",
-        "corpName": "위지윅스튜디오",
+        "stockCode": "408900",
+        "corpName": "스튜디오미르",
         "industry": "media",
-        "viaCode": "108860",
-        "viaName": "셀바스AI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "114630",
-        "corpName": "폴라리스우노",
-        "industry": "chemical",
-        "viaCode": "041020",
-        "viaName": "폴라리스오피스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "489790",
-        "corpName": "한화비전",
-        "industry": "aerospace",
         "viaCode": "238490",
         "viaName": "힘스",
         "hopDistance": 2
       },
       {
-        "stockCode": "097520",
-        "corpName": "엠씨넥스",
+        "stockCode": "060720",
+        "corpName": "KH바텍",
         "industry": "electronics",
         "viaCode": "238490",
         "viaName": "힘스",
         "hopDistance": 2
       },
       {
-        "stockCode": "122640",
-        "corpName": "예스티",
-        "industry": "electronics",
+        "stockCode": "207940",
+        "corpName": "삼성바이오로직스",
+        "industry": "pharma",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267260",
+        "corpName": "HD현대일렉트릭",
+        "industry": "shipbuilding",
         "viaCode": "238490",
         "viaName": "힘스",
         "hopDistance": 2
@@ -535,6 +491,14 @@
       {
         "stockCode": "272290",
         "corpName": "이녹스첨단소재",
+        "industry": "electronics",
+        "viaCode": "238490",
+        "viaName": "힘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083500",
+        "corpName": "에프엔에스테크",
         "industry": "electronics",
         "viaCode": "238490",
         "viaName": "힘스",

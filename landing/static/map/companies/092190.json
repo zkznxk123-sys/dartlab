@@ -59,43 +59,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 488676724768.0,
-      "operating_profit": 22269724367.0,
-      "net_profit": 20888475660.0,
-      "total_assets": 775635294214.0
-    },
-    {
-      "year": "2022",
-      "sales": 438791591285.0,
-      "operating_profit": -62117967238.0,
-      "net_profit": -93690297846.0,
-      "total_assets": 755995137277.0
-    },
-    {
-      "year": "2023",
-      "sales": 503960846284.0,
-      "operating_profit": -72949875244.0,
-      "net_profit": -88922175299.0,
-      "total_assets": 733423744990.0
-    },
-    {
-      "year": "2024",
-      "sales": 699232725004.0,
-      "operating_profit": 3487592223.0,
-      "net_profit": 18090606055.0,
-      "total_assets": 795813855619.0
-    },
-    {
-      "year": "2025",
-      "sales": 763809147116.0,
-      "operating_profit": 225831786.0,
-      "net_profit": -15423704562.0,
-      "total_assets": 717773205486.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -156,25 +120,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "046890",
-        "viaName": "서울반도체",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "024110",
         "corpName": "기업은행",
         "industry": "finance",
-        "viaCode": "046890",
-        "viaName": "서울반도체",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004270",
-        "corpName": "남성",
-        "industry": "telecom",
         "viaCode": "046890",
         "viaName": "서울반도체",
         "hopDistance": 2
@@ -188,9 +136,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
+        "stockCode": "022100",
+        "corpName": "포스코DX",
+        "industry": "steel",
+        "viaCode": "046890",
+        "viaName": "서울반도체",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004270",
+        "corpName": "남성",
+        "industry": "telecom",
+        "viaCode": "046890",
+        "viaName": "서울반도체",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "103230",
+        "corpName": "에스앤더블류",
+        "industry": "electronics",
         "viaCode": "046890",
         "viaName": "서울반도체",
         "hopDistance": 2
@@ -204,17 +168,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "022100",
-        "corpName": "포스코DX",
-        "industry": "steel",
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
         "viaCode": "046890",
         "viaName": "서울반도체",
         "hopDistance": 2
       },
       {
-        "stockCode": "103230",
-        "corpName": "에스앤더블류",
-        "industry": "electronics",
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "046890",
         "viaName": "서울반도체",
         "hopDistance": 2

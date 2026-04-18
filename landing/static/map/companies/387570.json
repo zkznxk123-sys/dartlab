@@ -47,15 +47,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2025",
-      "sales": 9522704304.0,
-      "operating_profit": -2580325297.0,
-      "net_profit": -1877915520.0,
-      "total_assets": 25521054978.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -107,17 +99,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "365900",
-        "corpName": "브이씨",
-        "industry": "leisure",
+        "stockCode": "002020",
+        "corpName": "코오롱",
+        "industry": "finance",
         "viaCode": "246960",
         "viaName": "SCL사이언스",
         "hopDistance": 2
       },
       {
-        "stockCode": "045660",
-        "corpName": "에이텍",
-        "industry": "electronics",
+        "stockCode": "007330",
+        "corpName": "푸른저축은행",
+        "industry": "finance",
         "viaCode": "246960",
         "viaName": "SCL사이언스",
         "hopDistance": 2
@@ -131,17 +123,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002020",
-        "corpName": "코오롱",
-        "industry": "finance",
+        "stockCode": "365900",
+        "corpName": "브이씨",
+        "industry": "leisure",
         "viaCode": "246960",
         "viaName": "SCL사이언스",
         "hopDistance": 2
       },
       {
-        "stockCode": "007330",
-        "corpName": "푸른저축은행",
-        "industry": "finance",
+        "stockCode": "045660",
+        "corpName": "에이텍",
+        "industry": "electronics",
         "viaCode": "246960",
         "viaName": "SCL사이언스",
         "hopDistance": 2

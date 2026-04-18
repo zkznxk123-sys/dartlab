@@ -35,15 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2025",
-      "sales": 51187435857.0,
-      "operating_profit": 5139610703.0,
-      "net_profit": 4583735251.0,
-      "total_assets": 51597360836.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -115,25 +107,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "131290",
-        "corpName": "티에스이",
-        "industry": "semiconductor",
-        "viaCode": "172670",
-        "viaName": "에이엘티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "118000",
-        "corpName": "메타케어",
-        "industry": "pharma",
-        "viaCode": "172670",
-        "viaName": "에이엘티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "175140",
-        "corpName": "휴먼테크놀로지",
-        "industry": "telecom",
+        "stockCode": "095340",
+        "corpName": "ISC",
+        "industry": "retail",
         "viaCode": "172670",
         "viaName": "에이엘티",
         "hopDistance": 2
@@ -147,9 +123,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "095340",
-        "corpName": "ISC",
-        "industry": "retail",
+        "stockCode": "118000",
+        "corpName": "메타케어",
+        "industry": "pharma",
         "viaCode": "172670",
         "viaName": "에이엘티",
         "hopDistance": 2
@@ -171,6 +147,22 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "052300",
+        "corpName": "오션인더블유",
+        "industry": "logistics",
+        "viaCode": "172670",
+        "viaName": "에이엘티",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "131290",
+        "corpName": "티에스이",
+        "industry": "semiconductor",
+        "viaCode": "172670",
+        "viaName": "에이엘티",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "083550",
         "corpName": "케이엠",
         "industry": "chemical",
@@ -179,9 +171,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "052300",
-        "corpName": "오션인더블유",
-        "industry": "logistics",
+        "stockCode": "175140",
+        "corpName": "휴먼테크놀로지",
+        "industry": "telecom",
         "viaCode": "172670",
         "viaName": "에이엘티",
         "hopDistance": 2

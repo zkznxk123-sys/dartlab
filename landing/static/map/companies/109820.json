@@ -66,36 +66,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 12106152777.0,
-      "operating_profit": -1225046037.0,
-      "net_profit": -987676789.0,
-      "total_assets": 39532094008.0
-    },
-    {
-      "year": "2022",
-      "sales": 9786630343.0,
-      "operating_profit": -1522926015.0,
-      "net_profit": -8111332377.0,
-      "total_assets": 31902311804.0
-    },
-    {
-      "year": "2023",
-      "sales": 17500000.0,
-      "operating_profit": -2548038790.0,
-      "net_profit": -894937562.0,
-      "total_assets": 31353937319.0
-    },
-    {
-      "year": "2025",
-      "sales": 1075883277.0,
-      "operating_profit": -679131166.0,
-      "net_profit": -3748057576.0,
-      "total_assets": 27271330776.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -156,16 +127,40 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "014710",
-        "corpName": "사조씨푸드",
-        "industry": "agriculture",
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
         "viaCode": "008040",
         "viaName": "사조동아원",
         "hopDistance": 2
       },
       {
-        "stockCode": "001790",
-        "corpName": "대한제당",
+        "stockCode": "101530",
+        "corpName": "해태제과식품",
+        "industry": "food",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "280360",
+        "corpName": "롯데웰푸드",
+        "industry": "food",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214680",
+        "corpName": "디알텍",
+        "industry": "medicalDevice",
+        "viaCode": "096760",
+        "viaName": "JW홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005740",
+        "corpName": "크라운해태홀딩스",
         "industry": "food",
         "viaCode": "008040",
         "viaName": "사조동아원",
@@ -180,43 +175,67 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "039490",
-        "corpName": "키움증권",
-        "industry": "finance",
+        "stockCode": "004370",
+        "corpName": "농심",
+        "industry": "food",
         "viaCode": "008040",
         "viaName": "사조동아원",
         "hopDistance": 2
       },
       {
-        "stockCode": "234080",
-        "corpName": "JW생명과학",
-        "industry": "pharma",
+        "stockCode": "001060",
+        "corpName": "JW중외제약",
+        "industry": "food",
         "viaCode": "096760",
         "viaName": "JW홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "094280",
-        "corpName": "효성 ITX",
-        "industry": "chemical",
+        "stockCode": "145990",
+        "corpName": "삼양사",
+        "industry": "food",
+        "viaCode": "096760",
+        "viaName": "JW홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001790",
+        "corpName": "대한제당",
+        "industry": "food",
         "viaCode": "008040",
         "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "318060",
-        "corpName": "그래피",
-        "industry": "chemical",
-        "viaCode": "096760",
-        "viaName": "JW홀딩스",
         "hopDistance": 2
       },
       {
         "stockCode": "007330",
         "corpName": "푸른저축은행",
         "industry": "finance",
+        "viaCode": "096760",
+        "viaName": "JW홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007540",
+        "corpName": "샘표",
+        "industry": "retail",
         "viaCode": "008040",
         "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006090",
+        "corpName": "사조오양",
+        "industry": "realestate",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "096760",
+        "viaName": "JW홀딩스",
         "hopDistance": 2
       },
       {
@@ -236,107 +255,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "280360",
-        "corpName": "롯데웰푸드",
-        "industry": "food",
+        "stockCode": "014710",
+        "corpName": "사조씨푸드",
+        "industry": "agriculture",
         "viaCode": "008040",
         "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005740",
-        "corpName": "크라운해태홀딩스",
-        "industry": "food",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006090",
-        "corpName": "사조오양",
-        "industry": "realestate",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001060",
-        "corpName": "JW중외제약",
-        "industry": "food",
-        "viaCode": "096760",
-        "viaName": "JW홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "214680",
-        "corpName": "디알텍",
-        "industry": "medicalDevice",
-        "viaCode": "096760",
-        "viaName": "JW홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "145990",
-        "corpName": "삼양사",
-        "industry": "food",
-        "viaCode": "096760",
-        "viaName": "JW홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089790",
-        "corpName": "제이티",
-        "industry": "semiconductor",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007540",
-        "corpName": "샘표",
-        "industry": "retail",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101530",
-        "corpName": "해태제과식품",
-        "industry": "food",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067290",
-        "corpName": "JW신약",
-        "industry": "pharma",
-        "viaCode": "096760",
-        "viaName": "JW홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031440",
-        "corpName": "신세계푸드",
-        "industry": "retail",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003960",
-        "corpName": "사조대림",
-        "industry": "food",
-        "viaCode": "008040",
-        "viaName": "사조동아원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "096760",
-        "viaName": "JW홀딩스",
         "hopDistance": 2
       },
       {
@@ -348,9 +271,57 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004370",
-        "corpName": "농심",
+        "stockCode": "094280",
+        "corpName": "효성 ITX",
+        "industry": "chemical",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031440",
+        "corpName": "신세계푸드",
+        "industry": "retail",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "318060",
+        "corpName": "그래피",
+        "industry": "chemical",
+        "viaCode": "096760",
+        "viaName": "JW홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067290",
+        "corpName": "JW신약",
+        "industry": "pharma",
+        "viaCode": "096760",
+        "viaName": "JW홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003960",
+        "corpName": "사조대림",
         "industry": "food",
+        "viaCode": "008040",
+        "viaName": "사조동아원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "234080",
+        "corpName": "JW생명과학",
+        "industry": "pharma",
+        "viaCode": "096760",
+        "viaName": "JW홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
         "viaCode": "008040",
         "viaName": "사조동아원",
         "hopDistance": 2

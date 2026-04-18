@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 355783598582.0,
-      "operating_profit": 13619069878.0,
-      "net_profit": 7213007456.0,
-      "total_assets": 175091150250.0
-    },
-    {
-      "year": "2022",
-      "sales": 408316564865.0,
-      "operating_profit": -8242501275.0,
-      "net_profit": -14191182402.0,
-      "total_assets": 187888569362.0
-    },
-    {
-      "year": "2023",
-      "sales": 396938179132.0,
-      "operating_profit": 1767518597.0,
-      "net_profit": 115269307240.0,
-      "total_assets": 241515900189.0
-    },
-    {
-      "year": "2024",
-      "sales": 430978104202.0,
-      "operating_profit": 3696238401.0,
-      "net_profit": -18407723.0,
-      "total_assets": 207581085972.0
-    },
-    {
-      "year": "2025",
-      "sales": 454852166662.0,
-      "operating_profit": 5861470994.0,
-      "net_profit": 6376868459.0,
-      "total_assets": 209428791267.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,57 +87,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "210120",
-        "corpName": "캔버스엔",
-        "industry": "telecom",
-        "viaCode": "383220",
-        "viaName": "F&F",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "145170",
-        "corpName": "노브랜드",
-        "industry": "textile",
-        "viaCode": "383220",
-        "viaName": "F&F",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "136480",
         "corpName": "하림",
         "industry": "food",
-        "viaCode": "383220",
-        "viaName": "F&F",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007700",
-        "corpName": "F&F 홀딩스",
-        "industry": "finance",
-        "viaCode": "383220",
-        "viaName": "F&F",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "383220",
-        "viaName": "F&F",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "383220",
-        "viaName": "F&F",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003380",
-        "corpName": "하림지주",
-        "industry": "finance",
         "viaCode": "383220",
         "viaName": "F&F",
         "hopDistance": 2
@@ -190,6 +106,54 @@
         "stockCode": "036580",
         "corpName": "팜스코",
         "industry": "food",
+        "viaCode": "383220",
+        "viaName": "F&F",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "210120",
+        "corpName": "캔버스엔",
+        "industry": "telecom",
+        "viaCode": "383220",
+        "viaName": "F&F",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003380",
+        "corpName": "하림지주",
+        "industry": "finance",
+        "viaCode": "383220",
+        "viaName": "F&F",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "383220",
+        "viaName": "F&F",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "145170",
+        "corpName": "노브랜드",
+        "industry": "textile",
+        "viaCode": "383220",
+        "viaName": "F&F",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "383220",
+        "viaName": "F&F",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007700",
+        "corpName": "F&F 홀딩스",
+        "industry": "finance",
         "viaCode": "383220",
         "viaName": "F&F",
         "hopDistance": 2

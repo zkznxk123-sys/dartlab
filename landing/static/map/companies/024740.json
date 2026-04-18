@@ -54,43 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 152471478934.0,
-      "operating_profit": -3353121692.0,
-      "net_profit": -8675809923.0,
-      "total_assets": 224005894093.0
-    },
-    {
-      "year": "2022",
-      "sales": 177364538405.0,
-      "operating_profit": 14579806106.0,
-      "net_profit": 7213556464.0,
-      "total_assets": 258205621470.0
-    },
-    {
-      "year": "2023",
-      "sales": 178166776876.0,
-      "operating_profit": 15168146222.0,
-      "net_profit": 7759017223.0,
-      "total_assets": 257607226354.0
-    },
-    {
-      "year": "2024",
-      "sales": 139379274208.0,
-      "operating_profit": 8288832921.0,
-      "net_profit": 6685577427.0,
-      "total_assets": 264965637648.0
-    },
-    {
-      "year": "2025",
-      "sales": 126595207214.0,
-      "operating_profit": 3519821207.0,
-      "net_profit": 1866767149.0,
-      "total_assets": 254277906955.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -159,19 +123,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "010100",
-        "corpName": "한국무브넥스",
-        "industry": "electronics",
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
         "viaCode": "005030",
         "viaName": "부산주공",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004020",
-        "corpName": "현대제철",
-        "industry": "steel",
-        "viaCode": "126640",
-        "viaName": "화신정공",
         "hopDistance": 2
       },
       {
@@ -183,16 +139,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
-        "viaCode": "005030",
-        "viaName": "부산주공",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101390",
-        "corpName": "아이엠",
+        "stockCode": "010100",
+        "corpName": "한국무브넥스",
         "industry": "electronics",
         "viaCode": "005030",
         "viaName": "부산주공",
@@ -204,6 +152,22 @@
         "industry": "electronics",
         "viaCode": "126640",
         "viaName": "화신정공",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "126640",
+        "viaName": "화신정공",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101390",
+        "corpName": "아이엠",
+        "industry": "electronics",
+        "viaCode": "005030",
+        "viaName": "부산주공",
         "hopDistance": 2
       }
     ],

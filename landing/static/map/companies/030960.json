@@ -73,36 +73,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2020",
-      "sales": 20649384057.0,
-      "operating_profit": 453002205.0,
-      "net_profit": 1154691789.0,
-      "total_assets": 206331783988.0
-    },
-    {
-      "year": "2022",
-      "sales": 28220170142.0,
-      "operating_profit": 1662041363.0,
-      "net_profit": 1885391377.0,
-      "total_assets": 202184851063.0
-    },
-    {
-      "year": "2023",
-      "sales": 26747150620.0,
-      "operating_profit": 2552988807.0,
-      "net_profit": 3237014746.0,
-      "total_assets": 210063728409.0
-    },
-    {
-      "year": "2024",
-      "sales": 25059590866.0,
-      "operating_profit": 1321788953.0,
-      "net_profit": 1762785894.0,
-      "total_assets": 217624508477.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -179,33 +150,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "035890",
-        "corpName": "서희건설",
-        "industry": "realestate",
-        "viaCode": "024800",
-        "viaName": "유성티엔에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
         "viaCode": "009070",
         "viaName": "케이씨티시",
         "hopDistance": 2
       },
       {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
+        "stockCode": "000480",
+        "corpName": "시알홀딩스",
+        "industry": "buildingMaterials",
         "viaCode": "024800",
         "viaName": "유성티엔에스",
         "hopDistance": 2
       },
       {
-        "stockCode": "089150",
-        "corpName": "케이씨티",
-        "industry": "software",
+        "stockCode": "000120",
+        "corpName": "CJ대한통운",
+        "industry": "food",
         "viaCode": "009070",
         "viaName": "케이씨티시",
         "hopDistance": 2
@@ -227,8 +190,32 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "032830",
-        "corpName": "삼성생명",
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
+        "viaCode": "009070",
+        "viaName": "케이씨티시",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "023590",
+        "corpName": "다우기술",
+        "industry": "realestate",
+        "viaCode": "024800",
+        "viaName": "유성티엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002390",
+        "corpName": "한독",
+        "industry": "realestate",
+        "viaCode": "245620",
+        "viaName": "EDGC",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
         "industry": "finance",
         "viaCode": "024800",
         "viaName": "유성티엔에스",
@@ -243,19 +230,43 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
+        "stockCode": "004020",
+        "corpName": "현대제철",
+        "industry": "steel",
+        "viaCode": "024800",
+        "viaName": "유성티엔에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
         "viaCode": "009070",
         "viaName": "케이씨티시",
         "hopDistance": 2
       },
       {
-        "stockCode": "002390",
-        "corpName": "한독",
-        "industry": "realestate",
+        "stockCode": "034310",
+        "corpName": "NICE",
+        "industry": "finance",
         "viaCode": "245620",
         "viaName": "EDGC",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089150",
+        "corpName": "케이씨티",
+        "industry": "software",
+        "viaCode": "009070",
+        "viaName": "케이씨티시",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "024800",
+        "viaName": "유성티엔에스",
         "hopDistance": 2
       },
       {
@@ -267,33 +278,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000120",
-        "corpName": "CJ대한통운",
-        "industry": "food",
-        "viaCode": "009070",
-        "viaName": "케이씨티시",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004020",
-        "corpName": "현대제철",
-        "industry": "steel",
-        "viaCode": "024800",
-        "viaName": "유성티엔에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "232530",
-        "corpName": "이엠티",
-        "industry": "semiconductor",
-        "viaCode": "009070",
-        "viaName": "케이씨티시",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000480",
-        "corpName": "시알홀딩스",
-        "industry": "buildingMaterials",
+        "stockCode": "032830",
+        "corpName": "삼성생명",
+        "industry": "finance",
         "viaCode": "024800",
         "viaName": "유성티엔에스",
         "hopDistance": 2
@@ -307,35 +294,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
-        "viaCode": "009070",
-        "viaName": "케이씨티시",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "024800",
-        "viaName": "유성티엔에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "023590",
-        "corpName": "다우기술",
+        "stockCode": "035890",
+        "corpName": "서희건설",
         "industry": "realestate",
         "viaCode": "024800",
         "viaName": "유성티엔에스",
         "hopDistance": 2
       },
       {
-        "stockCode": "034310",
-        "corpName": "NICE",
-        "industry": "finance",
-        "viaCode": "245620",
-        "viaName": "EDGC",
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
+        "viaCode": "009070",
+        "viaName": "케이씨티시",
         "hopDistance": 2
       }
     ],

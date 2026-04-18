@@ -35,15 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2025",
-      "sales": 24601049961.0,
-      "operating_profit": 1467303588.0,
-      "net_profit": 935047721.0,
-      "total_assets": 40505560917.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -104,9 +96,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "025770",
+        "corpName": "한국정보통신",
+        "industry": "finance",
+        "viaCode": "032850",
+        "viaName": "비트컴퓨터",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "069510",
         "corpName": "에스텍",
         "industry": "electronics",
+        "viaCode": "032850",
+        "viaName": "비트컴퓨터",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099750",
+        "corpName": "이지케어텍",
+        "industry": "software",
         "viaCode": "032850",
         "viaName": "비트컴퓨터",
         "hopDistance": 2
@@ -120,25 +128,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "025770",
-        "corpName": "한국정보통신",
-        "industry": "finance",
-        "viaCode": "032850",
-        "viaName": "비트컴퓨터",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "200670",
         "corpName": "휴메딕스",
         "industry": "pharma",
-        "viaCode": "032850",
-        "viaName": "비트컴퓨터",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099750",
-        "corpName": "이지케어텍",
-        "industry": "software",
         "viaCode": "032850",
         "viaName": "비트컴퓨터",
         "hopDistance": 2

@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 55297650655.0,
-      "operating_profit": -3630399932.0,
-      "net_profit": -5778364194.0,
-      "total_assets": 72278883781.0
-    },
-    {
-      "year": "2022",
-      "sales": 64349405690.0,
-      "operating_profit": 1310279754.0,
-      "net_profit": 675962890.0,
-      "total_assets": 70853362024.0
-    },
-    {
-      "year": "2023",
-      "sales": 64784789661.0,
-      "operating_profit": 586533680.0,
-      "net_profit": -572589191.0,
-      "total_assets": 70814890787.0
-    },
-    {
-      "year": "2024",
-      "sales": 58588657427.0,
-      "operating_profit": -2232262628.0,
-      "net_profit": -2987007773.0,
-      "total_assets": 66307712853.0
-    },
-    {
-      "year": "2025",
-      "sales": 68603497542.0,
-      "operating_profit": -459735590.0,
-      "net_profit": -1603157075.0,
-      "total_assets": 72849156691.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -143,17 +107,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "035810",
-        "corpName": "이지홀딩스",
-        "industry": "food",
-        "viaCode": "001130",
-        "viaName": "대한제분",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "072710",
-        "corpName": "농심홀딩스",
-        "industry": "food",
+        "stockCode": "105560",
+        "corpName": "KB금융",
+        "industry": "finance",
         "viaCode": "001130",
         "viaName": "대한제분",
         "hopDistance": 2
@@ -167,57 +123,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "353810",
-        "corpName": "이지바이오",
-        "industry": "chemical",
-        "viaCode": "001130",
-        "viaName": "대한제분",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034120",
-        "corpName": "SBS",
-        "industry": "electronics",
-        "viaCode": "001130",
-        "viaName": "대한제분",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004700",
-        "corpName": "조광피혁",
-        "industry": "auto",
-        "viaCode": "001130",
-        "viaName": "대한제분",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "105560",
-        "corpName": "KB금융",
-        "industry": "finance",
-        "viaCode": "001130",
-        "viaName": "대한제분",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004370",
-        "corpName": "농심",
+        "stockCode": "072710",
+        "corpName": "농심홀딩스",
         "industry": "food",
         "viaCode": "001130",
         "viaName": "대한제분",
         "hopDistance": 2
       },
       {
-        "stockCode": "208140",
-        "corpName": "정다운",
+        "stockCode": "035810",
+        "corpName": "이지홀딩스",
         "industry": "food",
-        "viaCode": "001130",
-        "viaName": "대한제분",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004980",
-        "corpName": "성신양회",
-        "industry": "construction",
         "viaCode": "001130",
         "viaName": "대한제분",
         "hopDistance": 2
@@ -239,9 +155,57 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "004370",
+        "corpName": "농심",
+        "industry": "food",
+        "viaCode": "001130",
+        "viaName": "대한제분",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004980",
+        "corpName": "성신양회",
+        "industry": "construction",
+        "viaCode": "001130",
+        "viaName": "대한제분",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034120",
+        "corpName": "SBS",
+        "industry": "electronics",
+        "viaCode": "001130",
+        "viaName": "대한제분",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "208140",
+        "corpName": "정다운",
+        "industry": "food",
+        "viaCode": "001130",
+        "viaName": "대한제분",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "017670",
         "corpName": "SK텔레콤",
         "industry": "telecom",
+        "viaCode": "001130",
+        "viaName": "대한제분",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "353810",
+        "corpName": "이지바이오",
+        "industry": "chemical",
+        "viaCode": "001130",
+        "viaName": "대한제분",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004700",
+        "corpName": "조광피혁",
+        "industry": "auto",
         "viaCode": "001130",
         "viaName": "대한제분",
         "hopDistance": 2

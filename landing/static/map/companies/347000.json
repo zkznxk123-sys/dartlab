@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 27589913370.0,
-      "operating_profit": 2639839721.0,
-      "net_profit": 2874171645.0,
-      "total_assets": 73299254939.0
-    },
-    {
-      "year": "2022",
-      "sales": 40803201331.0,
-      "operating_profit": 2757333155.0,
-      "net_profit": 979861383.0,
-      "total_assets": 76783952864.0
-    },
-    {
-      "year": "2023",
-      "sales": 33952242199.0,
-      "operating_profit": 2245775452.0,
-      "net_profit": -1161720602.0,
-      "total_assets": 69624568954.0
-    },
-    {
-      "year": "2024",
-      "sales": 35862109477.0,
-      "operating_profit": 2718008245.0,
-      "net_profit": 2529398796.0,
-      "total_assets": 67017008333.0
-    },
-    {
-      "year": "2025",
-      "sales": 36725295188.0,
-      "operating_profit": 2504690284.0,
-      "net_profit": 4715209101.0,
-      "total_assets": 71324160320.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -151,9 +115,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "054220",
-        "corpName": "비츠로시스",
-        "industry": "electrical",
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "082920",
+        "viaName": "비츠로셀",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "103140",
+        "corpName": "풍산",
+        "industry": "steel",
         "viaCode": "082920",
         "viaName": "비츠로셀",
         "hopDistance": 2
@@ -167,14 +139,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "044780",
-        "corpName": "에이치케이",
-        "industry": "medicalDevice",
-        "viaCode": "082920",
-        "viaName": "비츠로셀",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "005810",
         "corpName": "풍산홀딩스",
         "industry": "retail",
@@ -183,9 +147,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "103140",
-        "corpName": "풍산",
-        "industry": "steel",
+        "stockCode": "054220",
+        "corpName": "비츠로시스",
+        "industry": "electrical",
         "viaCode": "082920",
         "viaName": "비츠로셀",
         "hopDistance": 2

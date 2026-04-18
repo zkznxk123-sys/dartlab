@@ -54,43 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 67113800410.0,
-      "operating_profit": 7278740713.0,
-      "net_profit": 0.0,
-      "total_assets": 88834446070.0
-    },
-    {
-      "year": "2022",
-      "sales": 83806870222.0,
-      "operating_profit": 1116180076.0,
-      "net_profit": 0.0,
-      "total_assets": 94039727810.0
-    },
-    {
-      "year": "2023",
-      "sales": 85256117009.0,
-      "operating_profit": 2597066496.0,
-      "net_profit": -705699750.0,
-      "total_assets": 86518224625.0
-    },
-    {
-      "year": "2024",
-      "sales": 60716608625.0,
-      "operating_profit": -4871584740.0,
-      "net_profit": -5653239304.0,
-      "total_assets": 80654047535.0
-    },
-    {
-      "year": "2025",
-      "sales": 63383012048.0,
-      "operating_profit": -6113556216.0,
-      "net_profit": -8224206271.0,
-      "total_assets": 80907326307.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -162,33 +126,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "001520",
-        "corpName": "동양",
+        "stockCode": "023410",
+        "corpName": "유진기업",
         "industry": "construction",
-        "viaCode": "0007C0",
-        "viaName": "아크릴",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "900270",
-        "corpName": "헝셩그룹",
-        "industry": "finance",
-        "viaCode": "0007C0",
-        "viaName": "아크릴",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003550",
-        "corpName": "LG",
-        "industry": "electronics",
-        "viaCode": "0007C0",
-        "viaName": "아크릴",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004990",
-        "corpName": "롯데지주",
-        "industry": "finance",
         "viaCode": "0007C0",
         "viaName": "아크릴",
         "hopDistance": 2
@@ -202,11 +142,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "079950",
-        "corpName": "인베니아",
-        "industry": "electronics",
-        "viaCode": "036090",
-        "viaName": "위지트",
+        "stockCode": "034730",
+        "corpName": "SK",
+        "industry": "software",
+        "viaCode": "0007C0",
+        "viaName": "아크릴",
         "hopDistance": 2
       },
       {
@@ -218,81 +158,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "038460",
-        "corpName": "바이오스마트",
-        "industry": "electronics",
-        "viaCode": "036090",
-        "viaName": "위지트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
-        "viaCode": "0007C0",
-        "viaName": "아크릴",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066980",
-        "corpName": "한성크린텍",
-        "industry": "environment",
-        "viaCode": "036090",
-        "viaName": "위지트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "057680",
-        "corpName": "티사이언티픽",
-        "industry": "software",
-        "viaCode": "036090",
-        "viaName": "위지트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034730",
-        "corpName": "SK",
-        "industry": "software",
-        "viaCode": "0007C0",
-        "viaName": "아크릴",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "290690",
         "corpName": "소룩스",
         "industry": "electrical",
-        "viaCode": "0007C0",
-        "viaName": "아크릴",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "204620",
-        "corpName": "글로벌텍스프리",
-        "industry": "finance",
-        "viaCode": "036090",
-        "viaName": "위지트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001460",
-        "corpName": "BYC",
-        "industry": "realestate",
-        "viaCode": "0007C0",
-        "viaName": "아크릴",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "055490",
-        "corpName": "테이팩스",
-        "industry": "plastic",
-        "viaCode": "0007C0",
-        "viaName": "아크릴",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "161390",
-        "corpName": "한국타이어앤테크놀로지",
-        "industry": "auto",
         "viaCode": "0007C0",
         "viaName": "아크릴",
         "hopDistance": 2
@@ -306,19 +174,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "086960",
-        "corpName": "MDS테크",
-        "industry": "realestate",
+        "stockCode": "900270",
+        "corpName": "헝셩그룹",
+        "industry": "finance",
+        "viaCode": "0007C0",
+        "viaName": "아크릴",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "057680",
+        "corpName": "티사이언티픽",
+        "industry": "software",
         "viaCode": "036090",
         "viaName": "위지트",
         "hopDistance": 2
       },
       {
-        "stockCode": "417970",
-        "corpName": "모델솔루션",
+        "stockCode": "014680",
+        "corpName": "한솔케미칼",
         "industry": "machinery",
         "viaCode": "0007C0",
         "viaName": "아크릴",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100590",
+        "corpName": "머큐리",
+        "industry": "telecom",
+        "viaCode": "036090",
+        "viaName": "위지트",
         "hopDistance": 2
       },
       {
@@ -330,9 +214,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "290650",
-        "corpName": "엘앤씨바이오",
-        "industry": "pharma",
+        "stockCode": "079950",
+        "corpName": "인베니아",
+        "industry": "electronics",
+        "viaCode": "036090",
+        "viaName": "위지트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "161390",
+        "corpName": "한국타이어앤테크놀로지",
+        "industry": "auto",
+        "viaCode": "0007C0",
+        "viaName": "아크릴",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "0007C0",
+        "viaName": "아크릴",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003550",
+        "corpName": "LG",
+        "industry": "electronics",
         "viaCode": "0007C0",
         "viaName": "아크릴",
         "hopDistance": 2
@@ -346,17 +254,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "037030",
-        "corpName": "파워넷",
-        "industry": "electrical",
-        "viaCode": "036090",
-        "viaName": "위지트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "108380",
-        "corpName": "대양전기공업",
-        "industry": "electrical",
+        "stockCode": "004990",
+        "corpName": "롯데지주",
+        "industry": "finance",
         "viaCode": "0007C0",
         "viaName": "아크릴",
         "hopDistance": 2
@@ -370,9 +270,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "023410",
-        "corpName": "유진기업",
-        "industry": "construction",
+        "stockCode": "038460",
+        "corpName": "바이오스마트",
+        "industry": "electronics",
+        "viaCode": "036090",
+        "viaName": "위지트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "055490",
+        "corpName": "테이팩스",
+        "industry": "plastic",
         "viaCode": "0007C0",
         "viaName": "아크릴",
         "hopDistance": 2
@@ -386,14 +294,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "014680",
-        "corpName": "한솔케미칼",
-        "industry": "machinery",
-        "viaCode": "0007C0",
-        "viaName": "아크릴",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "031310",
         "corpName": "아이즈비전",
         "industry": "chemical",
@@ -402,9 +302,73 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "100590",
-        "corpName": "머큐리",
-        "industry": "telecom",
+        "stockCode": "290650",
+        "corpName": "엘앤씨바이오",
+        "industry": "pharma",
+        "viaCode": "0007C0",
+        "viaName": "아크릴",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037030",
+        "corpName": "파워넷",
+        "industry": "electrical",
+        "viaCode": "036090",
+        "viaName": "위지트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066980",
+        "corpName": "한성크린텍",
+        "industry": "environment",
+        "viaCode": "036090",
+        "viaName": "위지트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "108380",
+        "corpName": "대양전기공업",
+        "industry": "electrical",
+        "viaCode": "0007C0",
+        "viaName": "아크릴",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086960",
+        "corpName": "MDS테크",
+        "industry": "realestate",
+        "viaCode": "036090",
+        "viaName": "위지트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001520",
+        "corpName": "동양",
+        "industry": "construction",
+        "viaCode": "0007C0",
+        "viaName": "아크릴",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "417970",
+        "corpName": "모델솔루션",
+        "industry": "machinery",
+        "viaCode": "0007C0",
+        "viaName": "아크릴",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001460",
+        "corpName": "BYC",
+        "industry": "realestate",
+        "viaCode": "0007C0",
+        "viaName": "아크릴",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "204620",
+        "corpName": "글로벌텍스프리",
+        "industry": "finance",
         "viaCode": "036090",
         "viaName": "위지트",
         "hopDistance": 2

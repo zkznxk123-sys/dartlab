@@ -54,36 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 15858694120.0,
-      "operating_profit": 1314347866.0,
-      "net_profit": 1518323648.0,
-      "total_assets": 107975201171.0
-    },
-    {
-      "year": "2022",
-      "sales": 13418819175.0,
-      "operating_profit": -1074633601.0,
-      "net_profit": 4178060330.0,
-      "total_assets": 113328272430.0
-    },
-    {
-      "year": "2023",
-      "sales": 14523739748.0,
-      "operating_profit": 14416773.0,
-      "net_profit": 8203000379.0,
-      "total_assets": 121048443385.0
-    },
-    {
-      "year": "2025",
-      "sales": 31707375183.0,
-      "operating_profit": 2367143405.0,
-      "net_profit": 10910332774.0,
-      "total_assets": 162859122159.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -135,22 +106,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "038530",
-        "corpName": "케이바이오",
-        "industry": "retail",
-        "viaCode": "053950",
-        "viaName": "경남제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "223310",
-        "corpName": "사토시홀딩스",
-        "industry": "pharma",
-        "viaCode": "053950",
-        "viaName": "경남제약",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "044480",
         "corpName": "빌리언스",
         "industry": "plastic",
@@ -161,6 +116,38 @@
       {
         "stockCode": "007120",
         "corpName": "미래아이앤지",
+        "industry": "electronics",
+        "viaCode": "053950",
+        "viaName": "경남제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083640",
+        "corpName": "인콘",
+        "industry": "software",
+        "viaCode": "053950",
+        "viaName": "경남제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038530",
+        "corpName": "케이바이오",
+        "industry": "retail",
+        "viaCode": "053950",
+        "viaName": "경남제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032800",
+        "corpName": "판타지오",
+        "industry": "media",
+        "viaCode": "053950",
+        "viaName": "경남제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058450",
+        "corpName": "한주에이알티",
         "industry": "electronics",
         "viaCode": "053950",
         "viaName": "경남제약",
@@ -183,25 +170,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "083640",
-        "corpName": "인콘",
-        "industry": "software",
-        "viaCode": "053950",
-        "viaName": "경남제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058450",
-        "corpName": "한주에이알티",
-        "industry": "electronics",
-        "viaCode": "053950",
-        "viaName": "경남제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032800",
-        "corpName": "판타지오",
-        "industry": "media",
+        "stockCode": "223310",
+        "corpName": "사토시홀딩스",
+        "industry": "pharma",
         "viaCode": "053950",
         "viaName": "경남제약",
         "hopDistance": 2

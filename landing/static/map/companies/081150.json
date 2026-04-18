@@ -35,36 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 189544183775.0,
-      "operating_profit": 16821458054.0,
-      "net_profit": 10431503924.0,
-      "total_assets": 209217565645.0
-    },
-    {
-      "year": "2022",
-      "sales": 257740285760.0,
-      "operating_profit": 21294823441.0,
-      "net_profit": 15648186653.0,
-      "total_assets": 237927722632.0
-    },
-    {
-      "year": "2023",
-      "sales": 251061348197.0,
-      "operating_profit": -1532496395.0,
-      "net_profit": -2234754466.0,
-      "total_assets": 235024036183.0
-    },
-    {
-      "year": "2025",
-      "sales": 209235195605.0,
-      "operating_profit": 5237447536.0,
-      "net_profit": 3197393388.0,
-      "total_assets": 235117561913.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -116,33 +87,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "307930",
-        "corpName": "컴퍼니케이",
-        "industry": "finance",
-        "viaCode": "036420",
-        "viaName": "콘텐트리중앙",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "036420",
-        "viaName": "콘텐트리중앙",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "241840",
         "corpName": "에이스토리",
         "industry": "telecom",
-        "viaCode": "036420",
-        "viaName": "콘텐트리중앙",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033830",
-        "corpName": "티비씨",
-        "industry": "media",
         "viaCode": "036420",
         "viaName": "콘텐트리중앙",
         "hopDistance": 2
@@ -156,9 +103,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004170",
-        "corpName": "신세계",
-        "industry": "retail",
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
         "viaCode": "036420",
         "viaName": "콘텐트리중앙",
         "hopDistance": 2
@@ -167,6 +114,30 @@
         "stockCode": "373160",
         "corpName": "데이원컴퍼니",
         "industry": "education",
+        "viaCode": "036420",
+        "viaName": "콘텐트리중앙",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004170",
+        "corpName": "신세계",
+        "industry": "retail",
+        "viaCode": "036420",
+        "viaName": "콘텐트리중앙",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307930",
+        "corpName": "컴퍼니케이",
+        "industry": "finance",
+        "viaCode": "036420",
+        "viaName": "콘텐트리중앙",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
         "viaCode": "036420",
         "viaName": "콘텐트리중앙",
         "hopDistance": 2

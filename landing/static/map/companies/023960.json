@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 75724704653.0,
-      "operating_profit": -6633227964.0,
-      "net_profit": 0.0,
-      "total_assets": 116426812581.0
-    },
-    {
-      "year": "2022",
-      "sales": 137224812696.0,
-      "operating_profit": 7784423400.0,
-      "net_profit": 7136627339.0,
-      "total_assets": 106506525380.0
-    },
-    {
-      "year": "2023",
-      "sales": 135981756853.0,
-      "operating_profit": 982905544.0,
-      "net_profit": -2364589340.0,
-      "total_assets": 99303952812.0
-    },
-    {
-      "year": "2024",
-      "sales": 179878880096.0,
-      "operating_profit": 6562997795.0,
-      "net_profit": 0.0,
-      "total_assets": 111856083779.0
-    },
-    {
-      "year": "2025",
-      "sales": 172318415172.0,
-      "operating_profit": -4958849671.0,
-      "net_profit": -4751050659.0,
-      "total_assets": 136355564807.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,33 +87,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "145210",
-        "corpName": "다이나믹디자인",
-        "industry": "auto",
-        "viaCode": "131400",
-        "viaName": "이브이첨단소재",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009830",
-        "corpName": "한화솔루션",
-        "industry": "chemical",
-        "viaCode": "131400",
-        "viaName": "이브이첨단소재",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089140",
-        "corpName": "넥스턴앤롤코리아",
-        "industry": "machinery",
-        "viaCode": "131400",
-        "viaName": "이브이첨단소재",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "096770",
         "corpName": "SK이노베이션",
         "industry": "chemical",
+        "viaCode": "131400",
+        "viaName": "이브이첨단소재",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
         "viaCode": "131400",
         "viaName": "이브이첨단소재",
         "hopDistance": 2
@@ -171,6 +119,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "145210",
+        "corpName": "다이나믹디자인",
+        "industry": "auto",
+        "viaCode": "131400",
+        "viaName": "이브이첨단소재",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "017960",
         "corpName": "한국카본",
         "industry": "chemical",
@@ -179,9 +135,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
+        "stockCode": "089140",
+        "corpName": "넥스턴앤롤코리아",
+        "industry": "machinery",
+        "viaCode": "131400",
+        "viaName": "이브이첨단소재",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009830",
+        "corpName": "한화솔루션",
+        "industry": "chemical",
         "viaCode": "131400",
         "viaName": "이브이첨단소재",
         "hopDistance": 2

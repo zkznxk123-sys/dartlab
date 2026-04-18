@@ -85,43 +85,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 15887167812.0,
-      "operating_profit": -4269467129.0,
-      "net_profit": -4152248836.0,
-      "total_assets": 55718355910.0
-    },
-    {
-      "year": "2022",
-      "sales": 20458017811.0,
-      "operating_profit": -4500034137.0,
-      "net_profit": 0.0,
-      "total_assets": 59009538881.0
-    },
-    {
-      "year": "2023",
-      "sales": 20391168324.0,
-      "operating_profit": -4810588506.0,
-      "net_profit": 0.0,
-      "total_assets": 62478116634.0
-    },
-    {
-      "year": "2024",
-      "sales": 19134127922.0,
-      "operating_profit": -5366154453.0,
-      "net_profit": 0.0,
-      "total_assets": 52039023615.0
-    },
-    {
-      "year": "2025",
-      "sales": 19925825433.0,
-      "operating_profit": -5381489055.0,
-      "net_profit": 0.0,
-      "total_assets": 53074290379.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -173,30 +137,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "006880",
-        "corpName": "신송홀딩스",
-        "industry": "retail",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "099190",
-        "viaName": "아이센스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003090",
-        "corpName": "대웅",
-        "industry": "pharma",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "142760",
         "corpName": "모아라이프플러스",
         "industry": "pharma",
@@ -205,59 +145,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "084110",
-        "corpName": "휴온스글로벌",
-        "industry": "pharma",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "065170",
-        "corpName": "비엘팜텍",
-        "industry": "retail",
-        "viaCode": "086220",
-        "viaName": "광동헬스바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004450",
-        "corpName": "삼화왕관",
-        "industry": "steel",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "029460",
         "corpName": "케이씨",
         "industry": "energy",
         "viaCode": "009290",
         "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "286940",
-        "corpName": "롯데이노베이트",
-        "industry": "software",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "099190",
-        "viaName": "아이센스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "099190",
-        "viaName": "아이센스",
         "hopDistance": 2
       },
       {
@@ -285,11 +177,83 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "003090",
+        "corpName": "대웅",
+        "industry": "pharma",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "099190",
+        "viaName": "아이센스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006880",
+        "corpName": "신송홀딩스",
+        "industry": "retail",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "464490",
         "corpName": "쿼드메디슨",
         "industry": "pharma",
         "viaCode": "009290",
         "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004450",
+        "corpName": "삼화왕관",
+        "industry": "steel",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "286940",
+        "corpName": "롯데이노베이트",
+        "industry": "software",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "099190",
+        "viaName": "아이센스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065170",
+        "corpName": "비엘팜텍",
+        "industry": "retail",
+        "viaCode": "086220",
+        "viaName": "광동헬스바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "099190",
+        "viaName": "아이센스",
         "hopDistance": 2
       }
     ],

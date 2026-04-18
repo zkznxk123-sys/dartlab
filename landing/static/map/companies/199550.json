@@ -35,29 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2023",
-      "sales": 34352053954.0,
-      "operating_profit": 4480826362.0,
-      "net_profit": 0.0,
-      "total_assets": 29810023922.0
-    },
-    {
-      "year": "2024",
-      "sales": 33037915734.0,
-      "operating_profit": -196045064.0,
-      "net_profit": -783254818.0,
-      "total_assets": 45349724810.0
-    },
-    {
-      "year": "2025",
-      "sales": 25695436108.0,
-      "operating_profit": -12044971203.0,
-      "net_profit": null,
-      "total_assets": 36551429474.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -145,17 +123,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "095910",
-        "corpName": "에스에너지",
-        "industry": "energy",
+        "stockCode": "078930",
+        "corpName": "GS",
+        "industry": "chemical",
         "viaCode": "003680",
         "viaName": "한성기업",
         "hopDistance": 2
       },
       {
-        "stockCode": "078930",
-        "corpName": "GS",
-        "industry": "chemical",
+        "stockCode": "095910",
+        "corpName": "에스에너지",
+        "industry": "energy",
         "viaCode": "003680",
         "viaName": "한성기업",
         "hopDistance": 2

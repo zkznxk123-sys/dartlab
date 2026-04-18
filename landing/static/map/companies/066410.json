@@ -204,43 +204,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 26399116481.0,
-      "operating_profit": -2084640421.0,
-      "net_profit": 50868341429.0,
-      "total_assets": 302314817478.0
-    },
-    {
-      "year": "2022",
-      "sales": 44648236827.0,
-      "operating_profit": -7319088759.0,
-      "net_profit": -188694041283.0,
-      "total_assets": 316011694175.0
-    },
-    {
-      "year": "2023",
-      "sales": 18890365556.0,
-      "operating_profit": -6521048976.0,
-      "net_profit": 3816357907.0,
-      "total_assets": 256894027916.0
-    },
-    {
-      "year": "2024",
-      "sales": 17461234199.0,
-      "operating_profit": -8262313074.0,
-      "net_profit": 3713563654.0,
-      "total_assets": 190720457988.0
-    },
-    {
-      "year": "2025",
-      "sales": 17273408347.0,
-      "operating_profit": -6182990399.0,
-      "net_profit": -38255148483.0,
-      "total_assets": 173190399977.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -292,193 +256,41 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031310",
-        "corpName": "아이즈비전",
-        "industry": "chemical",
-        "viaCode": "057680",
-        "viaName": "티사이언티픽",
+        "stockCode": "007120",
+        "corpName": "미래아이앤지",
+        "industry": "electronics",
+        "viaCode": "009810",
+        "viaName": "플레이그램",
         "hopDistance": 2
       },
       {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
+        "stockCode": "018680",
+        "corpName": "서울제약",
+        "industry": "pharma",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "222160",
+        "corpName": "NPX",
+        "industry": "electronics",
         "viaCode": "121800",
         "viaName": "비덴트",
         "hopDistance": 2
       },
       {
-        "stockCode": "200350",
-        "corpName": "아티스트스튜디오",
-        "industry": "media",
-        "viaCode": "321820",
-        "viaName": "아티스트컴퍼니",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "353810",
-        "corpName": "이지바이오",
-        "industry": "chemical",
-        "viaCode": "352940",
-        "viaName": "인바이오",
+        "stockCode": "083640",
+        "corpName": "인콘",
+        "industry": "software",
+        "viaCode": "118000",
+        "viaName": "메타케어",
         "hopDistance": 2
       },
       {
         "stockCode": "036090",
         "corpName": "위지트",
         "industry": "electronics",
-        "viaCode": "057680",
-        "viaName": "티사이언티픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "085310",
-        "corpName": "엔케이",
-        "industry": "food",
-        "viaCode": "009810",
-        "viaName": "플레이그램",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035810",
-        "corpName": "이지홀딩스",
-        "industry": "food",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "069460",
-        "corpName": "대호에이엘",
-        "industry": "retail",
-        "viaCode": "121800",
-        "viaName": "비덴트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "112040",
-        "corpName": "위메이드",
-        "industry": "software",
-        "viaCode": "121800",
-        "viaName": "비덴트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090370",
-        "corpName": "메타랩스",
-        "industry": "textile",
-        "viaCode": "118000",
-        "viaName": "메타케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "262260",
-        "corpName": "에이프로",
-        "industry": "electrical",
-        "viaCode": "047820",
-        "viaName": "초록뱀미디어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "073560",
-        "corpName": "우리손에프앤지",
-        "industry": "food",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "142760",
-        "corpName": "모아라이프플러스",
-        "industry": "pharma",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "065060",
-        "corpName": "지엔코",
-        "industry": "textile",
-        "viaCode": "047820",
-        "viaName": "초록뱀미디어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "044780",
-        "corpName": "에이치케이",
-        "industry": "medicalDevice",
-        "viaCode": "118000",
-        "viaName": "메타케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078860",
-        "corpName": "스테이지원엔터",
-        "industry": "media",
-        "viaCode": "047820",
-        "viaName": "초록뱀미디어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "236200",
-        "corpName": "슈프리마",
-        "industry": "telecom",
-        "viaCode": "009810",
-        "viaName": "플레이그램",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "238090",
-        "corpName": "앤디포스",
-        "industry": "plastic",
-        "viaCode": "047820",
-        "viaName": "초록뱀미디어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "040350",
-        "corpName": "크레오에스지",
-        "industry": "software",
-        "viaCode": "047820",
-        "viaName": "초록뱀미디어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025560",
-        "corpName": "미래산업",
-        "industry": "electronics",
-        "viaCode": "009810",
-        "viaName": "플레이그램",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066980",
-        "corpName": "한성크린텍",
-        "industry": "environment",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "057680",
-        "viaName": "티사이언티픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032800",
-        "corpName": "판타지오",
-        "industry": "media",
-        "viaCode": "009810",
-        "viaName": "플레이그램",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058630",
-        "corpName": "엠게임",
-        "industry": "software",
         "viaCode": "057680",
         "viaName": "티사이언티픽",
         "hopDistance": 2
@@ -492,65 +304,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "052300",
-        "corpName": "오션인더블유",
-        "industry": "logistics",
-        "viaCode": "121800",
-        "viaName": "비덴트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030520",
-        "corpName": "한글과컴퓨터",
-        "industry": "software",
-        "viaCode": "009810",
-        "viaName": "플레이그램",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037270",
-        "corpName": "YG PLUS",
-        "industry": "media",
-        "viaCode": "047820",
-        "viaName": "초록뱀미디어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031860",
-        "corpName": "디에이치엑스컴퍼니",
-        "industry": "retail",
-        "viaCode": "047820",
-        "viaName": "초록뱀미디어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "175140",
-        "corpName": "휴먼테크놀로지",
-        "industry": "telecom",
-        "viaCode": "118000",
-        "viaName": "메타케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083640",
-        "corpName": "인콘",
-        "industry": "software",
-        "viaCode": "118000",
-        "viaName": "메타케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "027710",
-        "corpName": "팜스토리",
-        "industry": "food",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003580",
-        "corpName": "HLB글로벌",
-        "industry": "food",
+        "stockCode": "007460",
+        "corpName": "에이프로젠",
+        "industry": "realestate",
         "viaCode": "047820",
         "viaName": "초록뱀미디어",
         "hopDistance": 2
@@ -564,91 +320,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "256840",
-        "corpName": "한국비엔씨",
-        "industry": "realestate",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "086960",
-        "corpName": "MDS테크",
-        "industry": "realestate",
+        "stockCode": "085310",
+        "corpName": "엔케이",
+        "industry": "food",
         "viaCode": "009810",
         "viaName": "플레이그램",
         "hopDistance": 2
       },
       {
-        "stockCode": "172670",
-        "corpName": "에이엘티",
-        "industry": "semiconductor",
-        "viaCode": "118000",
-        "viaName": "메타케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "046120",
-        "corpName": "오르비텍",
-        "industry": "electronics",
-        "viaCode": "009810",
-        "viaName": "플레이그램",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039830",
-        "corpName": "오로라",
-        "industry": "consulting",
-        "viaCode": "118000",
-        "viaName": "메타케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037030",
-        "corpName": "파워넷",
-        "industry": "electrical",
-        "viaCode": "009810",
-        "viaName": "플레이그램",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095500",
-        "corpName": "미래나노텍",
-        "industry": "electronics",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "222160",
-        "corpName": "NPX",
-        "industry": "electronics",
+        "stockCode": "112040",
+        "corpName": "위메이드",
+        "industry": "software",
         "viaCode": "121800",
         "viaName": "비덴트",
         "hopDistance": 2
       },
       {
-        "stockCode": "296160",
-        "corpName": "프로젠",
-        "industry": "pharma",
-        "viaCode": "047820",
-        "viaName": "초록뱀미디어",
+        "stockCode": "236200",
+        "corpName": "슈프리마",
+        "industry": "telecom",
+        "viaCode": "009810",
+        "viaName": "플레이그램",
         "hopDistance": 2
       },
       {
-        "stockCode": "007120",
-        "corpName": "미래아이앤지",
-        "industry": "electronics",
-        "viaCode": "009810",
-        "viaName": "플레이그램",
+        "stockCode": "200350",
+        "corpName": "아티스트스튜디오",
+        "industry": "media",
+        "viaCode": "321820",
+        "viaName": "아티스트컴퍼니",
         "hopDistance": 2
       },
       {
@@ -668,27 +368,43 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "065650",
-        "corpName": "하이퍼코퍼레이션",
-        "industry": "retail",
-        "viaCode": "057680",
-        "viaName": "티사이언티픽",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "299900",
-        "corpName": "위지윅스튜디오",
-        "industry": "media",
-        "viaCode": "321820",
-        "viaName": "아티스트컴퍼니",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "131100",
-        "corpName": "티엔엔터테인먼트",
-        "industry": "food",
+        "stockCode": "175140",
+        "corpName": "휴먼테크놀로지",
+        "industry": "telecom",
         "viaCode": "118000",
         "viaName": "메타케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "142760",
+        "corpName": "모아라이프플러스",
+        "industry": "pharma",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "256840",
+        "corpName": "한국비엔씨",
+        "industry": "realestate",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027710",
+        "corpName": "팜스토리",
+        "industry": "food",
+        "viaCode": "352940",
+        "viaName": "인바이오",
         "hopDistance": 2
       },
       {
@@ -700,11 +416,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "016670",
-        "corpName": "디모아",
-        "industry": "realestate",
-        "viaCode": "009810",
-        "viaName": "플레이그램",
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "118000",
+        "viaName": "메타케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "153710",
+        "corpName": "옵티팜",
+        "industry": "pharma",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "131100",
+        "corpName": "티엔엔터테인먼트",
+        "industry": "food",
+        "viaCode": "118000",
+        "viaName": "메타케어",
         "hopDistance": 2
       },
       {
@@ -716,6 +448,94 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "030520",
+        "corpName": "한글과컴퓨터",
+        "industry": "software",
+        "viaCode": "009810",
+        "viaName": "플레이그램",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "046120",
+        "corpName": "오르비텍",
+        "industry": "electronics",
+        "viaCode": "009810",
+        "viaName": "플레이그램",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "238090",
+        "corpName": "앤디포스",
+        "industry": "plastic",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100590",
+        "corpName": "머큐리",
+        "industry": "telecom",
+        "viaCode": "057680",
+        "viaName": "티사이언티픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031860",
+        "corpName": "디에이치엑스컴퍼니",
+        "industry": "retail",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "057680",
+        "viaName": "티사이언티픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095500",
+        "corpName": "미래나노텍",
+        "industry": "electronics",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052300",
+        "corpName": "오션인더블유",
+        "industry": "logistics",
+        "viaCode": "118000",
+        "viaName": "메타케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "353810",
+        "corpName": "이지바이오",
+        "industry": "chemical",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "262260",
+        "corpName": "에이프로",
+        "industry": "electrical",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069460",
+        "corpName": "대호에이엘",
+        "industry": "retail",
+        "viaCode": "121800",
+        "viaName": "비덴트",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "051780",
         "corpName": "큐로홀딩스",
         "industry": "electronics",
@@ -724,19 +544,115 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "208140",
-        "corpName": "정다운",
+        "stockCode": "040350",
+        "corpName": "크레오에스지",
+        "industry": "software",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065060",
+        "corpName": "지엔코",
+        "industry": "textile",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003580",
+        "corpName": "HLB글로벌",
+        "industry": "food",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025560",
+        "corpName": "미래산업",
+        "industry": "electronics",
+        "viaCode": "009810",
+        "viaName": "플레이그램",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035810",
+        "corpName": "이지홀딩스",
         "industry": "food",
         "viaCode": "352940",
         "viaName": "인바이오",
         "hopDistance": 2
       },
       {
-        "stockCode": "007460",
-        "corpName": "에이프로젠",
-        "industry": "realestate",
+        "stockCode": "299900",
+        "corpName": "위지윅스튜디오",
+        "industry": "media",
+        "viaCode": "321820",
+        "viaName": "아티스트컴퍼니",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039830",
+        "corpName": "오로라",
+        "industry": "consulting",
+        "viaCode": "118000",
+        "viaName": "메타케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "065650",
+        "corpName": "하이퍼코퍼레이션",
+        "industry": "retail",
+        "viaCode": "057680",
+        "viaName": "티사이언티픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "296160",
+        "corpName": "프로젠",
+        "industry": "pharma",
         "viaCode": "047820",
         "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031310",
+        "corpName": "아이즈비전",
+        "industry": "chemical",
+        "viaCode": "057680",
+        "viaName": "티사이언티픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073560",
+        "corpName": "우리손에프앤지",
+        "industry": "food",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016670",
+        "corpName": "디모아",
+        "industry": "realestate",
+        "viaCode": "009810",
+        "viaName": "플레이그램",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037030",
+        "corpName": "파워넷",
+        "industry": "electrical",
+        "viaCode": "057680",
+        "viaName": "티사이언티픽",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066980",
+        "corpName": "한성크린텍",
+        "industry": "environment",
+        "viaCode": "352940",
+        "viaName": "인바이오",
         "hopDistance": 2
       },
       {
@@ -748,9 +664,65 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "100590",
-        "corpName": "머큐리",
-        "industry": "telecom",
+        "stockCode": "172670",
+        "corpName": "에이엘티",
+        "industry": "semiconductor",
+        "viaCode": "118000",
+        "viaName": "메타케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "121800",
+        "viaName": "비덴트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078860",
+        "corpName": "스테이지원엔터",
+        "industry": "media",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086960",
+        "corpName": "MDS테크",
+        "industry": "realestate",
+        "viaCode": "009810",
+        "viaName": "플레이그램",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037270",
+        "corpName": "YG PLUS",
+        "industry": "media",
+        "viaCode": "047820",
+        "viaName": "초록뱀미디어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032800",
+        "corpName": "판타지오",
+        "industry": "media",
+        "viaCode": "009810",
+        "viaName": "플레이그램",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "208140",
+        "corpName": "정다운",
+        "industry": "food",
+        "viaCode": "352940",
+        "viaName": "인바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058630",
+        "corpName": "엠게임",
+        "industry": "software",
         "viaCode": "057680",
         "viaName": "티사이언티픽",
         "hopDistance": 2
@@ -764,19 +736,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "153710",
-        "corpName": "옵티팜",
-        "industry": "pharma",
-        "viaCode": "352940",
-        "viaName": "인바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "018680",
-        "corpName": "서울제약",
-        "industry": "pharma",
-        "viaCode": "047820",
-        "viaName": "초록뱀미디어",
+        "stockCode": "090370",
+        "corpName": "메타랩스",
+        "industry": "textile",
+        "viaCode": "118000",
+        "viaName": "메타케어",
         "hopDistance": 2
       }
     ],

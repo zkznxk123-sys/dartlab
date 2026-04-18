@@ -145,43 +145,7 @@
     "createdAt": "1775430966.5310457"
   },
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 203972289491.0,
-      "operating_profit": 3322539254.0,
-      "net_profit": 9313607545.0,
-      "total_assets": 425436857316.0
-    },
-    {
-      "year": "2022",
-      "sales": 244093710786.0,
-      "operating_profit": 8182884639.0,
-      "net_profit": 37485626338.0,
-      "total_assets": 474032615936.0
-    },
-    {
-      "year": "2023",
-      "sales": 225720429438.0,
-      "operating_profit": 4560057509.0,
-      "net_profit": 10563122927.0,
-      "total_assets": 463885406068.0
-    },
-    {
-      "year": "2024",
-      "sales": 222200718833.0,
-      "operating_profit": -741138094.0,
-      "net_profit": 8654343281.0,
-      "total_assets": 428809811685.0
-    },
-    {
-      "year": "2025",
-      "sales": 221755533963.0,
-      "operating_profit": 4216907667.0,
-      "net_profit": 11380353753.0,
-      "total_assets": 420411492511.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -242,30 +206,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "365900",
-        "corpName": "브이씨",
-        "industry": "leisure",
-        "viaCode": "105840",
-        "viaName": "우진",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011210",
-        "corpName": "현대위아",
-        "industry": "auto",
-        "viaCode": "010660",
-        "viaName": "화천기계",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "200580",
-        "corpName": "메디쎄이",
-        "industry": "medicalDevice",
-        "viaCode": "010660",
-        "viaName": "화천기계",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "030210",
         "corpName": "다올투자증권",
         "industry": "realestate",
@@ -274,17 +214,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "015260",
-        "corpName": "에이엔피",
-        "industry": "electronics",
-        "viaCode": "105840",
-        "viaName": "우진",
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
+        "viaCode": "010660",
+        "viaName": "화천기계",
         "hopDistance": 2
       },
       {
-        "stockCode": "009160",
-        "corpName": "SIMPAC",
-        "industry": "auto",
+        "stockCode": "457550",
+        "corpName": "우진엔텍",
+        "industry": "machinery",
         "viaCode": "105840",
         "viaName": "우진",
         "hopDistance": 2
@@ -298,27 +238,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "033830",
-        "corpName": "티비씨",
-        "industry": "media",
-        "viaCode": "010660",
-        "viaName": "화천기계",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "950170",
-        "corpName": "JTC",
-        "industry": "cosmetics",
+        "stockCode": "015260",
+        "corpName": "에이엔피",
+        "industry": "electronics",
         "viaCode": "105840",
         "viaName": "우진",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089790",
-        "corpName": "제이티",
-        "industry": "semiconductor",
-        "viaCode": "010660",
-        "viaName": "화천기계",
         "hopDistance": 2
       },
       {
@@ -330,11 +254,51 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "457550",
-        "corpName": "우진엔텍",
-        "industry": "machinery",
+        "stockCode": "950170",
+        "corpName": "JTC",
+        "industry": "cosmetics",
         "viaCode": "105840",
         "viaName": "우진",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200580",
+        "corpName": "메디쎄이",
+        "industry": "medicalDevice",
+        "viaCode": "010660",
+        "viaName": "화천기계",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "365900",
+        "corpName": "브이씨",
+        "industry": "leisure",
+        "viaCode": "105840",
+        "viaName": "우진",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033830",
+        "corpName": "티비씨",
+        "industry": "media",
+        "viaCode": "010660",
+        "viaName": "화천기계",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009160",
+        "corpName": "SIMPAC",
+        "industry": "auto",
+        "viaCode": "105840",
+        "viaName": "우진",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011210",
+        "corpName": "현대위아",
+        "industry": "auto",
+        "viaCode": "010660",
+        "viaName": "화천기계",
         "hopDistance": 2
       }
     ],

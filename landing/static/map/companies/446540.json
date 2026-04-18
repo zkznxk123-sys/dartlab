@@ -121,22 +121,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2023",
-      "sales": 50143416324.0,
-      "operating_profit": -252673138.0,
-      "net_profit": -88210647.0,
-      "total_assets": 66726648141.0
-    },
-    {
-      "year": "2025",
-      "sales": 43240176069.0,
-      "operating_profit": -4174619354.0,
-      "net_profit": -2858918739.0,
-      "total_assets": 62610628208.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -197,11 +182,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "203690",
-        "corpName": "아크솔루션스",
-        "industry": "cosmetics",
-        "viaCode": "096870",
-        "viaName": "엘디티",
+        "stockCode": "413300",
+        "corpName": "티엘엔지니어링",
+        "industry": "construction",
+        "viaCode": "131290",
+        "viaName": "티에스이",
         "hopDistance": 2
       },
       {
@@ -210,6 +195,22 @@
         "industry": "realestate",
         "viaCode": "131290",
         "viaName": "티에스이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "172670",
+        "corpName": "에이엘티",
+        "industry": "semiconductor",
+        "viaCode": "131290",
+        "viaName": "티에스이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "203690",
+        "corpName": "아크솔루션스",
+        "industry": "cosmetics",
+        "viaCode": "096870",
+        "viaName": "엘디티",
         "hopDistance": 2
       },
       {
@@ -229,11 +230,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "413300",
-        "corpName": "티엘엔지니어링",
-        "industry": "construction",
-        "viaCode": "131290",
-        "viaName": "티에스이",
+        "stockCode": "092870",
+        "corpName": "엑시콘",
+        "industry": "semiconductor",
+        "viaCode": "219130",
+        "viaName": "타이거일렉",
         "hopDistance": 2
       },
       {
@@ -245,27 +246,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "172670",
-        "corpName": "에이엘티",
-        "industry": "semiconductor",
-        "viaCode": "131290",
-        "viaName": "티에스이",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "068760",
         "corpName": "셀트리온제약",
         "industry": "pharma",
         "viaCode": "131290",
         "viaName": "티에스이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "092870",
-        "corpName": "엑시콘",
-        "industry": "semiconductor",
-        "viaCode": "219130",
-        "viaName": "타이거일렉",
         "hopDistance": 2
       }
     ],

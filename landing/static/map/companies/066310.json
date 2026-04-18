@@ -85,43 +85,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 29379599348.0,
-      "operating_profit": 2705150295.0,
-      "net_profit": 1558611923.0,
-      "total_assets": 80842475367.0
-    },
-    {
-      "year": "2022",
-      "sales": 22699451677.0,
-      "operating_profit": 1845150544.0,
-      "net_profit": 7008373110.0,
-      "total_assets": 85988611688.0
-    },
-    {
-      "year": "2023",
-      "sales": 18687093091.0,
-      "operating_profit": -4243012697.0,
-      "net_profit": 0.0,
-      "total_assets": 87730180857.0
-    },
-    {
-      "year": "2024",
-      "sales": 21363283641.0,
-      "operating_profit": 1184535478.0,
-      "net_profit": 0.0,
-      "total_assets": 88543626839.0
-    },
-    {
-      "year": "2025",
-      "sales": 23282562121.0,
-      "operating_profit": 293849147.0,
-      "net_profit": 2515736234.0,
-      "total_assets": 93019579690.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -193,112 +157,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "406820",
-        "corpName": "뷰티스킨",
-        "industry": "cosmetics",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "008060",
-        "corpName": "대덕",
-        "industry": "electronics",
-        "viaCode": "091700",
-        "viaName": "파트론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "091700",
-        "viaName": "파트론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053450",
-        "corpName": "세코닉스",
-        "industry": "machinery",
-        "viaCode": "091700",
-        "viaName": "파트론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004710",
-        "corpName": "한솔테크닉스",
-        "industry": "electronics",
-        "viaCode": "091700",
-        "viaName": "파트론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "278470",
-        "corpName": "에이피알",
-        "industry": "cosmetics",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "207760",
-        "corpName": "미스터블루",
-        "industry": "media",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033240",
-        "corpName": "자화전자",
-        "industry": "electronics",
-        "viaCode": "091700",
-        "viaName": "파트론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "204270",
-        "corpName": "제이앤티씨",
-        "industry": "electronics",
-        "viaCode": "091700",
-        "viaName": "파트론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "263050",
-        "corpName": "유틸렉스",
-        "industry": "pharma",
-        "viaCode": "091700",
-        "viaName": "파트론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "091700",
-        "viaName": "파트론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082210",
-        "corpName": "옵트론텍",
-        "industry": "machinery",
-        "viaCode": "091700",
-        "viaName": "파트론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000990",
-        "corpName": "DB하이텍",
-        "industry": "semiconductor",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123040",
-        "corpName": "엠에스오토텍",
+        "stockCode": "452160",
+        "corpName": "제이엔비",
         "industry": "electronics",
         "viaCode": "016610",
         "viaName": "DB증권",
@@ -313,33 +173,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "452160",
-        "corpName": "제이엔비",
-        "industry": "electronics",
+        "stockCode": "012030",
+        "corpName": "DB",
+        "industry": "semiconductor",
         "viaCode": "016610",
         "viaName": "DB증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
+        "stockCode": "004710",
+        "corpName": "한솔테크닉스",
+        "industry": "electronics",
         "viaCode": "091700",
         "viaName": "파트론",
         "hopDistance": 2
       },
       {
-        "stockCode": "006840",
-        "corpName": "AK홀딩스",
-        "industry": "finance",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012030",
-        "corpName": "DB",
-        "industry": "semiconductor",
+        "stockCode": "250030",
+        "corpName": "진코스텍",
+        "industry": "textile",
         "viaCode": "016610",
         "viaName": "DB증권",
         "hopDistance": 2
@@ -353,11 +205,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "317120",
-        "corpName": "라닉스",
-        "industry": "software",
-        "viaCode": "091700",
-        "viaName": "파트론",
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "016610",
+        "viaName": "DB증권",
         "hopDistance": 2
       },
       {
@@ -369,33 +221,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "013700",
-        "corpName": "까뮤이앤씨",
-        "industry": "realestate",
-        "viaCode": "091700",
-        "viaName": "파트론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "049630",
-        "corpName": "재영솔루텍",
-        "industry": "machinery",
-        "viaCode": "091700",
-        "viaName": "파트론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009150",
-        "corpName": "삼성전기",
+        "stockCode": "123040",
+        "corpName": "엠에스오토텍",
         "industry": "electronics",
-        "viaCode": "091700",
-        "viaName": "파트론",
+        "viaCode": "016610",
+        "viaName": "DB증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "033160",
-        "corpName": "엠케이전자",
-        "industry": "electronics",
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
         "viaCode": "091700",
         "viaName": "파트론",
         "hopDistance": 2
@@ -403,6 +239,86 @@
       {
         "stockCode": "005850",
         "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "091700",
+        "viaName": "파트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038060",
+        "corpName": "루멘스",
+        "industry": "realestate",
+        "viaCode": "080520",
+        "viaName": "오디텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033240",
+        "corpName": "자화전자",
+        "industry": "electronics",
+        "viaCode": "091700",
+        "viaName": "파트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085670",
+        "corpName": "뉴프렉스",
+        "industry": "electronics",
+        "viaCode": "091700",
+        "viaName": "파트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "317120",
+        "corpName": "라닉스",
+        "industry": "software",
+        "viaCode": "091700",
+        "viaName": "파트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "049800",
+        "corpName": "우진플라임",
+        "industry": "machinery",
+        "viaCode": "091700",
+        "viaName": "파트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082210",
+        "corpName": "옵트론텍",
+        "industry": "machinery",
+        "viaCode": "091700",
+        "viaName": "파트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "250060",
+        "corpName": "모비스",
+        "industry": "auto",
+        "viaCode": "091700",
+        "viaName": "파트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "091700",
+        "viaName": "파트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "207760",
+        "corpName": "미스터블루",
+        "industry": "media",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "204270",
+        "corpName": "제이앤티씨",
         "industry": "electronics",
         "viaCode": "091700",
         "viaName": "파트론",
@@ -417,17 +333,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "214260",
-        "corpName": "라파스",
+        "stockCode": "263050",
+        "corpName": "유틸렉스",
         "industry": "pharma",
+        "viaCode": "091700",
+        "viaName": "파트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001470",
+        "corpName": "삼부토건",
+        "industry": "construction",
         "viaCode": "016610",
         "viaName": "DB증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "232530",
-        "corpName": "이엠티",
-        "industry": "semiconductor",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "091700",
+        "viaName": "파트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012330",
+        "corpName": "현대모비스",
+        "industry": "auto",
+        "viaCode": "091700",
+        "viaName": "파트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053450",
+        "corpName": "세코닉스",
+        "industry": "machinery",
         "viaCode": "091700",
         "viaName": "파트론",
         "hopDistance": 2
@@ -449,41 +389,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001470",
-        "corpName": "삼부토건",
-        "industry": "construction",
+        "stockCode": "278470",
+        "corpName": "에이피알",
+        "industry": "cosmetics",
         "viaCode": "016610",
         "viaName": "DB증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "038060",
-        "corpName": "루멘스",
-        "industry": "realestate",
-        "viaCode": "080520",
-        "viaName": "오디텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
+        "stockCode": "049630",
+        "corpName": "재영솔루텍",
+        "industry": "machinery",
         "viaCode": "091700",
         "viaName": "파트론",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
         "viaCode": "091700",
         "viaName": "파트론",
         "hopDistance": 2
       },
       {
-        "stockCode": "085670",
-        "corpName": "뉴프렉스",
+        "stockCode": "031330",
+        "corpName": "에스에이엠티",
         "industry": "electronics",
+        "viaCode": "091700",
+        "viaName": "파트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013700",
+        "corpName": "까뮤이앤씨",
+        "industry": "realestate",
         "viaCode": "091700",
         "viaName": "파트론",
         "hopDistance": 2
@@ -497,16 +437,32 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "049800",
-        "corpName": "우진플라임",
-        "industry": "machinery",
+        "stockCode": "406820",
+        "corpName": "뷰티스킨",
+        "industry": "cosmetics",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "122990",
+        "corpName": "와이솔",
+        "industry": "electronics",
         "viaCode": "091700",
         "viaName": "파트론",
         "hopDistance": 2
       },
       {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
+        "stockCode": "000990",
+        "corpName": "DB하이텍",
+        "industry": "semiconductor",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006840",
+        "corpName": "AK홀딩스",
         "industry": "finance",
         "viaCode": "016610",
         "viaName": "DB증권",
@@ -521,41 +477,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "012330",
-        "corpName": "현대모비스",
-        "industry": "auto",
+        "stockCode": "008060",
+        "corpName": "대덕",
+        "industry": "electronics",
         "viaCode": "091700",
         "viaName": "파트론",
         "hopDistance": 2
       },
       {
-        "stockCode": "250030",
-        "corpName": "진코스텍",
-        "industry": "textile",
+        "stockCode": "033160",
+        "corpName": "엠케이전자",
+        "industry": "electronics",
+        "viaCode": "091700",
+        "viaName": "파트론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214260",
+        "corpName": "라파스",
+        "industry": "pharma",
         "viaCode": "016610",
         "viaName": "DB증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "031330",
-        "corpName": "에스에이엠티",
+        "stockCode": "009150",
+        "corpName": "삼성전기",
         "industry": "electronics",
         "viaCode": "091700",
         "viaName": "파트론",
         "hopDistance": 2
       },
       {
-        "stockCode": "250060",
-        "corpName": "모비스",
-        "industry": "auto",
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
         "viaCode": "091700",
         "viaName": "파트론",
         "hopDistance": 2
       },
       {
-        "stockCode": "122990",
-        "corpName": "와이솔",
-        "industry": "electronics",
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "091700",
         "viaName": "파트론",
         "hopDistance": 2

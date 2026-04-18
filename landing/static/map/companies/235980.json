@@ -85,43 +85,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 0.0,
-      "operating_profit": -29459122356.0,
-      "net_profit": -17039774054.0,
-      "total_assets": 133345766644.0
-    },
-    {
-      "year": "2022",
-      "sales": 0.0,
-      "operating_profit": -37193012232.0,
-      "net_profit": -35753227225.0,
-      "total_assets": 107687183354.0
-    },
-    {
-      "year": "2023",
-      "sales": 0.0,
-      "operating_profit": -28757985751.0,
-      "net_profit": 0.0,
-      "total_assets": 80474385512.0
-    },
-    {
-      "year": "2024",
-      "sales": 0.0,
-      "operating_profit": -21815962051.0,
-      "net_profit": -20140350644.0,
-      "total_assets": 60785298595.0
-    },
-    {
-      "year": "2025",
-      "sales": 3898477868.0,
-      "operating_profit": -14018507792.0,
-      "net_profit": -12810783521.0,
-      "total_assets": 48663157624.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -173,216 +137,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "278470",
-        "corpName": "에이피알",
-        "industry": "cosmetics",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034230",
-        "corpName": "파라다이스",
-        "industry": "leisure",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011200",
-        "corpName": "HMM",
-        "industry": "shipbuilding",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "217330",
-        "corpName": "싸이토젠",
-        "industry": "software",
-        "viaCode": "066700",
-        "viaName": "테라젠이텍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "097950",
-        "corpName": "CJ제일제당",
-        "industry": "food",
-        "viaCode": "066700",
-        "viaName": "테라젠이텍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003280",
-        "corpName": "흥아해운",
-        "industry": "semiconductor",
-        "viaCode": "124560",
-        "viaName": "태웅로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "274400",
-        "corpName": "이노시뮬레이션",
-        "industry": "retail",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "253450",
-        "corpName": "스튜디오드래곤",
-        "industry": "media",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "034220",
         "corpName": "LG디스플레이",
-        "industry": "electronics",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "080220",
-        "corpName": "제주반도체",
-        "industry": "semiconductor",
-        "viaCode": "124560",
-        "viaName": "태웅로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000270",
-        "corpName": "기아",
-        "industry": "auto",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000100",
-        "corpName": "유한양행",
-        "industry": "pharma",
-        "viaCode": "066700",
-        "viaName": "테라젠이텍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "085660",
-        "corpName": "차바이오텍",
-        "industry": "pharma",
-        "viaCode": "066700",
-        "viaName": "테라젠이텍스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "310210",
-        "corpName": "보로노이",
-        "industry": "pharma",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "124560",
-        "viaName": "태웅로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "236810",
-        "corpName": "엔비티",
-        "industry": "software",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "207940",
-        "corpName": "삼성바이오로직스",
-        "industry": "pharma",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "328130",
-        "corpName": "루닛",
-        "industry": "software",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "331740",
-        "corpName": "아우토크립트",
-        "industry": "software",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "373220",
-        "corpName": "LG에너지솔루션",
-        "industry": "chemical",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090460",
-        "corpName": "비에이치",
-        "industry": "electronics",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "464080",
-        "corpName": "에스오에스랩",
-        "industry": "machinery",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "289930",
-        "corpName": "웨이비스",
-        "industry": "electronics",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
         "industry": "electronics",
         "viaCode": "190650",
         "viaName": "코리아에셋투자증권",
@@ -397,22 +153,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "251270",
-        "corpName": "넷마블",
-        "industry": "software",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "0008Z0",
-        "corpName": "에스엔시스",
-        "industry": "electrical",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "178320",
         "corpName": "서진시스템",
         "industry": "electronics",
@@ -421,8 +161,40 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "244920",
-        "corpName": "에이플러스에셋",
+        "stockCode": "455900",
+        "corpName": "엔젤로보틱스",
+        "industry": "machinery",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "364950",
+        "corpName": "에이아이코리아",
+        "industry": "battery",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090460",
+        "corpName": "비에이치",
+        "industry": "electronics",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298690",
+        "corpName": "에어부산",
+        "industry": "aerospace",
+        "viaCode": "124560",
+        "viaName": "태웅로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
         "industry": "finance",
         "viaCode": "066700",
         "viaName": "테라젠이텍스",
@@ -437,51 +209,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "298690",
-        "corpName": "에어부산",
-        "industry": "aerospace",
-        "viaCode": "124560",
-        "viaName": "태웅로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000250",
-        "corpName": "삼천당제약",
-        "industry": "pharma",
-        "viaCode": "124560",
-        "viaName": "태웅로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "364950",
-        "corpName": "에이아이코리아",
-        "industry": "battery",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "285130",
-        "corpName": "SK케미칼",
-        "industry": "software",
-        "viaCode": "190650",
-        "viaName": "코리아에셋투자증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
+        "stockCode": "244920",
+        "corpName": "에이플러스에셋",
         "industry": "finance",
-        "viaCode": "124560",
-        "viaName": "태웅로직스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "221840",
-        "corpName": "하이즈항공",
-        "industry": "aerospace",
-        "viaCode": "124560",
-        "viaName": "태웅로직스",
+        "viaCode": "066700",
+        "viaName": "테라젠이텍스",
         "hopDistance": 2
       },
       {
@@ -493,6 +225,38 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "0008Z0",
+        "corpName": "에스엔시스",
+        "industry": "electrical",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011200",
+        "corpName": "HMM",
+        "industry": "shipbuilding",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "302440",
+        "corpName": "SK바이오사이언스",
+        "industry": "pharma",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "246250",
         "corpName": "에스엘에스바이오",
         "industry": "pharma",
@@ -501,17 +265,57 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "260870",
-        "corpName": "SK시그넷",
+        "stockCode": "328130",
+        "corpName": "루닛",
         "industry": "software",
         "viaCode": "190650",
         "viaName": "코리아에셋투자증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "062040",
-        "corpName": "산일전기",
-        "industry": "electrical",
+        "stockCode": "097950",
+        "corpName": "CJ제일제당",
+        "industry": "food",
+        "viaCode": "066700",
+        "viaName": "테라젠이텍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085660",
+        "corpName": "차바이오텍",
+        "industry": "pharma",
+        "viaCode": "066700",
+        "viaName": "테라젠이텍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "124560",
+        "viaName": "태웅로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003280",
+        "corpName": "흥아해운",
+        "industry": "semiconductor",
+        "viaCode": "124560",
+        "viaName": "태웅로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "236810",
+        "corpName": "엔비티",
+        "industry": "software",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "373220",
+        "corpName": "LG에너지솔루션",
+        "industry": "chemical",
         "viaCode": "190650",
         "viaName": "코리아에셋투자증권",
         "hopDistance": 2
@@ -525,6 +329,86 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "034230",
+        "corpName": "파라다이스",
+        "industry": "leisure",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000100",
+        "corpName": "유한양행",
+        "industry": "pharma",
+        "viaCode": "066700",
+        "viaName": "테라젠이텍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "066700",
+        "viaName": "테라젠이텍스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "253450",
+        "corpName": "스튜디오드래곤",
+        "industry": "media",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "062040",
+        "corpName": "산일전기",
+        "industry": "electrical",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "221840",
+        "corpName": "하이즈항공",
+        "industry": "aerospace",
+        "viaCode": "124560",
+        "viaName": "태웅로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "331740",
+        "corpName": "아우토크립트",
+        "industry": "software",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "310210",
+        "corpName": "보로노이",
+        "industry": "pharma",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000250",
+        "corpName": "삼천당제약",
+        "industry": "pharma",
+        "viaCode": "124560",
+        "viaName": "태웅로직스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "011170",
         "corpName": "롯데케미칼",
         "industry": "chemical",
@@ -533,25 +417,105 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
+        "stockCode": "251270",
+        "corpName": "넷마블",
+        "industry": "software",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "260870",
+        "corpName": "SK시그넷",
+        "industry": "software",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "278470",
+        "corpName": "에이피알",
+        "industry": "cosmetics",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "289930",
+        "corpName": "웨이비스",
+        "industry": "electronics",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "285130",
+        "corpName": "SK케미칼",
+        "industry": "software",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "080220",
+        "corpName": "제주반도체",
+        "industry": "semiconductor",
+        "viaCode": "124560",
+        "viaName": "태웅로직스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "274400",
+        "corpName": "이노시뮬레이션",
+        "industry": "retail",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217330",
+        "corpName": "싸이토젠",
+        "industry": "software",
         "viaCode": "066700",
         "viaName": "테라젠이텍스",
         "hopDistance": 2
       },
       {
-        "stockCode": "455900",
-        "corpName": "엔젤로보틱스",
+        "stockCode": "207940",
+        "corpName": "삼성바이오로직스",
+        "industry": "pharma",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000270",
+        "corpName": "기아",
+        "industry": "auto",
+        "viaCode": "190650",
+        "viaName": "코리아에셋투자증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "464080",
+        "corpName": "에스오에스랩",
         "industry": "machinery",
         "viaCode": "190650",
         "viaName": "코리아에셋투자증권",
         "hopDistance": 2
       },
       {
-        "stockCode": "302440",
-        "corpName": "SK바이오사이언스",
-        "industry": "pharma",
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
         "viaCode": "190650",
         "viaName": "코리아에셋투자증권",
         "hopDistance": 2

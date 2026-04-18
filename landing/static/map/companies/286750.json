@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 7004484412.0,
-      "operating_profit": -1635040163.0,
-      "net_profit": -2824300484.0,
-      "total_assets": 32994830622.0
-    },
-    {
-      "year": "2022",
-      "sales": 7139299058.0,
-      "operating_profit": -3593951350.0,
-      "net_profit": -2398820425.0,
-      "total_assets": 28135673158.0
-    },
-    {
-      "year": "2023",
-      "sales": 6459076533.0,
-      "operating_profit": -2482020008.0,
-      "net_profit": -6284184495.0,
-      "total_assets": 28767401676.0
-    },
-    {
-      "year": "2024",
-      "sales": 5278777668.0,
-      "operating_profit": -3439815714.0,
-      "net_profit": 238348937.0,
-      "total_assets": 28082033901.0
-    },
-    {
-      "year": "2025",
-      "sales": 5976639350.0,
-      "operating_profit": -6580662725.0,
-      "net_profit": 0.0,
-      "total_assets": 44973138429.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -143,22 +107,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "121600",
-        "viaName": "나노신소재",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003650",
-        "corpName": "미창석유공업",
-        "industry": "plastic",
-        "viaCode": "121600",
-        "viaName": "나노신소재",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "000370",
         "corpName": "한화손해보험",
         "industry": "aerospace",
@@ -178,6 +126,22 @@
         "stockCode": "123890",
         "corpName": "한국자산신탁",
         "industry": "realestate",
+        "viaCode": "121600",
+        "viaName": "나노신소재",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003650",
+        "corpName": "미창석유공업",
+        "industry": "plastic",
+        "viaCode": "121600",
+        "viaName": "나노신소재",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "121600",
         "viaName": "나노신소재",
         "hopDistance": 2

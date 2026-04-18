@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 69071327051.0,
-      "operating_profit": 333741174.0,
-      "net_profit": 355135232.0,
-      "total_assets": 81154360527.0
-    },
-    {
-      "year": "2022",
-      "sales": 75321857688.0,
-      "operating_profit": -8215725104.0,
-      "net_profit": -9632469826.0,
-      "total_assets": 81430747815.0
-    },
-    {
-      "year": "2023",
-      "sales": 79095170753.0,
-      "operating_profit": -11092591218.0,
-      "net_profit": null,
-      "total_assets": 76180706291.0
-    },
-    {
-      "year": "2024",
-      "sales": 79500274284.0,
-      "operating_profit": -5858956128.0,
-      "net_profit": null,
-      "total_assets": 75749063228.0
-    },
-    {
-      "year": "2025",
-      "sales": 82799344609.0,
-      "operating_profit": -7227647056.0,
-      "net_profit": null,
-      "total_assets": 73083870115.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,9 +87,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "001520",
-        "corpName": "동양",
-        "industry": "construction",
+        "stockCode": "101000",
+        "corpName": "KS인더스트리",
+        "industry": "realestate",
         "viaCode": "002220",
         "viaName": "한일철강",
         "hopDistance": 2
@@ -133,6 +97,30 @@
       {
         "stockCode": "000720",
         "corpName": "현대건설",
+        "industry": "construction",
+        "viaCode": "002220",
+        "viaName": "한일철강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005490",
+        "corpName": "POSCO홀딩스",
+        "industry": "steel",
+        "viaCode": "002220",
+        "viaName": "한일철강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "002220",
+        "viaName": "한일철강",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001520",
+        "corpName": "동양",
         "industry": "construction",
         "viaCode": "002220",
         "viaName": "한일철강",
@@ -147,33 +135,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005490",
-        "corpName": "POSCO홀딩스",
-        "industry": "steel",
-        "viaCode": "002220",
-        "viaName": "한일철강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101000",
-        "corpName": "KS인더스트리",
-        "industry": "realestate",
-        "viaCode": "002220",
-        "viaName": "한일철강",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "071090",
         "corpName": "하이스틸",
         "industry": "food",
-        "viaCode": "002220",
-        "viaName": "한일철강",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
         "viaCode": "002220",
         "viaName": "한일철강",
         "hopDistance": 2

@@ -90,15 +90,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2025",
-      "sales": 53391845897.0,
-      "operating_profit": 12619100519.0,
-      "net_profit": 0.0,
-      "total_assets": 75706519973.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -178,11 +170,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "012750",
-        "corpName": "에스원",
-        "industry": "electronics",
-        "viaCode": "002620",
-        "viaName": "제일파마홀딩스",
+        "stockCode": "002020",
+        "corpName": "코오롱",
+        "industry": "finance",
+        "viaCode": "271980",
+        "viaName": "제일약품",
         "hopDistance": 2
       },
       {
@@ -202,11 +194,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002020",
-        "corpName": "코오롱",
-        "industry": "finance",
-        "viaCode": "271980",
-        "viaName": "제일약품",
+        "stockCode": "012750",
+        "corpName": "에스원",
+        "industry": "electronics",
+        "viaCode": "002620",
+        "viaName": "제일파마홀딩스",
         "hopDistance": 2
       }
     ],

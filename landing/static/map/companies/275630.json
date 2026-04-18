@@ -66,43 +66,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 10667534100.0,
-      "operating_profit": 1628063468.0,
-      "net_profit": 1649775741.0,
-      "total_assets": 28219911685.0
-    },
-    {
-      "year": "2022",
-      "sales": 12509384182.0,
-      "operating_profit": 2386211078.0,
-      "net_profit": 1897479803.0,
-      "total_assets": 31529002150.0
-    },
-    {
-      "year": "2023",
-      "sales": 12157598516.0,
-      "operating_profit": 1604365988.0,
-      "net_profit": 1716863112.0,
-      "total_assets": 30394566399.0
-    },
-    {
-      "year": "2024",
-      "sales": 11608134979.0,
-      "operating_profit": -312162423.0,
-      "net_profit": -252174132.0,
-      "total_assets": 30883052612.0
-    },
-    {
-      "year": "2025",
-      "sales": 13049423998.0,
-      "operating_profit": 320820566.0,
-      "net_profit": -1664471190.0,
-      "total_assets": 28781563281.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -154,6 +118,30 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "101000",
+        "corpName": "KS인더스트리",
+        "industry": "realestate",
+        "viaCode": "347700",
+        "viaName": "스피어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "347700",
+        "viaName": "스피어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "338220",
+        "corpName": "뷰노",
+        "industry": "software",
+        "viaCode": "347700",
+        "viaName": "스피어",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "140430",
         "corpName": "카티스",
         "industry": "software",
@@ -170,25 +158,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003220",
-        "corpName": "대원제약",
+        "stockCode": "082800",
+        "corpName": "비보존 제약",
         "industry": "pharma",
         "viaCode": "347700",
         "viaName": "스피어",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "347700",
-        "viaName": "스피어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101000",
-        "corpName": "KS인더스트리",
-        "industry": "realestate",
+        "stockCode": "295310",
+        "corpName": "에이치브이엠",
+        "industry": "semiconductor",
         "viaCode": "347700",
         "viaName": "스피어",
         "hopDistance": 2
@@ -202,32 +182,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "338220",
-        "corpName": "뷰노",
-        "industry": "software",
-        "viaCode": "347700",
-        "viaName": "스피어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "434480",
-        "corpName": "모니터랩",
-        "industry": "software",
-        "viaCode": "208350",
-        "viaName": "지란지교시큐리티",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "347700",
-        "viaName": "스피어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082800",
-        "corpName": "비보존 제약",
+        "stockCode": "003220",
+        "corpName": "대원제약",
         "industry": "pharma",
         "viaCode": "347700",
         "viaName": "스피어",
@@ -242,11 +198,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "295310",
-        "corpName": "에이치브이엠",
+        "stockCode": "187870",
+        "corpName": "디바이스",
         "industry": "semiconductor",
         "viaCode": "347700",
         "viaName": "스피어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "434480",
+        "corpName": "모니터랩",
+        "industry": "software",
+        "viaCode": "208350",
+        "viaName": "지란지교시큐리티",
         "hopDistance": 2
       }
     ],

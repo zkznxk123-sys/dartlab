@@ -78,36 +78,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 114206894182.0,
-      "operating_profit": 26919155918.0,
-      "net_profit": 24596454071.0,
-      "total_assets": 417541242845.0
-    },
-    {
-      "year": "2022",
-      "sales": 153861205199.0,
-      "operating_profit": 22528425096.0,
-      "net_profit": 25695164285.0,
-      "total_assets": 457968266975.0
-    },
-    {
-      "year": "2023",
-      "sales": 126089387410.0,
-      "operating_profit": -6915791712.0,
-      "net_profit": 0.0,
-      "total_assets": 395684602821.0
-    },
-    {
-      "year": "2025",
-      "sales": 114089898549.0,
-      "operating_profit": 4755777221.0,
-      "net_profit": 3416216656.0,
-      "total_assets": 291571947914.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -188,19 +159,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "058470",
-        "viaName": "리노공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "058470",
-        "viaName": "리노공업",
+        "stockCode": "060260",
+        "corpName": "뉴보텍",
+        "industry": "chemical",
+        "viaCode": "033640",
+        "viaName": "네패스",
         "hopDistance": 2
       },
       {
@@ -212,25 +175,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004270",
-        "corpName": "남성",
-        "industry": "telecom",
-        "viaCode": "058470",
-        "viaName": "리노공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "068790",
-        "corpName": "DMS",
-        "industry": "electronics",
-        "viaCode": "033640",
-        "viaName": "네패스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "424980",
-        "corpName": "마이크로투나노",
-        "industry": "semiconductor",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
         "viaCode": "058470",
         "viaName": "리노공업",
         "hopDistance": 2
@@ -244,6 +191,30 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "004270",
+        "corpName": "남성",
+        "industry": "telecom",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003540",
+        "corpName": "대신증권",
+        "industry": "finance",
+        "viaCode": "058470",
+        "viaName": "리노공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "068790",
+        "corpName": "DMS",
+        "industry": "electronics",
+        "viaCode": "033640",
+        "viaName": "네패스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "088350",
         "corpName": "한화생명",
         "industry": "aerospace",
@@ -252,17 +223,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "060260",
-        "corpName": "뉴보텍",
-        "industry": "chemical",
-        "viaCode": "033640",
-        "viaName": "네패스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003540",
-        "corpName": "대신증권",
-        "industry": "finance",
+        "stockCode": "424980",
+        "corpName": "마이크로투나노",
+        "industry": "semiconductor",
         "viaCode": "058470",
         "viaName": "리노공업",
         "hopDistance": 2
@@ -281,6 +244,14 @@
         "industry": "semiconductor",
         "viaCode": "033640",
         "viaName": "네패스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
+        "viaCode": "058470",
+        "viaName": "리노공업",
         "hopDistance": 2
       }
     ],

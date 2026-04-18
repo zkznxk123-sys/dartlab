@@ -54,29 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2023",
-      "sales": 16501343055.0,
-      "operating_profit": 3268355911.0,
-      "net_profit": 2602076258.0,
-      "total_assets": 71337367292.0
-    },
-    {
-      "year": "2024",
-      "sales": 18498939484.0,
-      "operating_profit": 1071726412.0,
-      "net_profit": 2405609515.0,
-      "total_assets": 111842711182.0
-    },
-    {
-      "year": "2025",
-      "sales": 102155379135.0,
-      "operating_profit": 6032761230.0,
-      "net_profit": 10540367883.0,
-      "total_assets": 147237264962.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -137,9 +115,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "016360",
-        "corpName": "삼성증권",
-        "industry": "finance",
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "226590",
+        "viaName": "엠디바이스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
         "viaCode": "226590",
         "viaName": "엠디바이스",
         "hopDistance": 2
@@ -153,16 +139,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "452400",
-        "corpName": "이닉스",
-        "industry": "semiconductor",
+        "stockCode": "016360",
+        "corpName": "삼성증권",
+        "industry": "finance",
         "viaCode": "226590",
         "viaName": "엠디바이스",
         "hopDistance": 2
       },
       {
-        "stockCode": "187870",
-        "corpName": "디바이스",
+        "stockCode": "452400",
+        "corpName": "이닉스",
         "industry": "semiconductor",
         "viaCode": "226590",
         "viaName": "엠디바이스",
@@ -177,16 +163,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000660",
-        "corpName": "SK하이닉스",
-        "industry": "semiconductor",
-        "viaCode": "226590",
-        "viaName": "엠디바이스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
+        "stockCode": "187870",
+        "corpName": "디바이스",
         "industry": "semiconductor",
         "viaCode": "226590",
         "viaName": "엠디바이스",

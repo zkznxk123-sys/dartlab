@@ -140,43 +140,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 122067716364.0,
-      "operating_profit": 1764863519.0,
-      "net_profit": 2684870477.0,
-      "total_assets": 114295024277.0
-    },
-    {
-      "year": "2022",
-      "sales": 142128437632.0,
-      "operating_profit": 8835373822.0,
-      "net_profit": 11415403120.0,
-      "total_assets": 143145316108.0
-    },
-    {
-      "year": "2023",
-      "sales": 147600020643.0,
-      "operating_profit": 12286582302.0,
-      "net_profit": 13021008448.0,
-      "total_assets": 172505587568.0
-    },
-    {
-      "year": "2024",
-      "sales": 128565520649.0,
-      "operating_profit": 4470894722.0,
-      "net_profit": 2120431486.0,
-      "total_assets": 174621954955.0
-    },
-    {
-      "year": "2025",
-      "sales": 130600692643.0,
-      "operating_profit": 9383031410.0,
-      "net_profit": 5895865277.0,
-      "total_assets": 189711045041.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -237,105 +201,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "089860",
-        "corpName": "롯데렌탈",
-        "industry": "logistics",
-        "viaCode": "038680",
-        "viaName": "에스넷",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084440",
-        "corpName": "유비온",
-        "industry": "education",
+        "stockCode": "103660",
+        "corpName": "씨앗",
+        "industry": "chemical",
         "viaCode": "027360",
         "viaName": "아주IB투자",
         "hopDistance": 2
       },
       {
-        "stockCode": "023530",
-        "corpName": "롯데쇼핑",
-        "industry": "textile",
-        "viaCode": "038680",
-        "viaName": "에스넷",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007070",
-        "corpName": "GS리테일",
-        "industry": "retail",
-        "viaCode": "038680",
-        "viaName": "에스넷",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060850",
-        "corpName": "영림원소프트랩",
-        "industry": "software",
-        "viaCode": "027360",
-        "viaName": "아주IB투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006360",
-        "corpName": "GS건설",
-        "industry": "construction",
-        "viaCode": "038680",
-        "viaName": "에스넷",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "027360",
-        "viaName": "아주IB투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "286940",
-        "corpName": "롯데이노베이트",
-        "industry": "software",
-        "viaCode": "038680",
-        "viaName": "에스넷",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "187870",
-        "corpName": "디바이스",
-        "industry": "semiconductor",
-        "viaCode": "357580",
-        "viaName": "아모센스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037460",
-        "corpName": "삼지전자",
-        "industry": "telecom",
-        "viaCode": "038680",
-        "viaName": "에스넷",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004990",
-        "corpName": "롯데지주",
-        "industry": "finance",
-        "viaCode": "038680",
-        "viaName": "에스넷",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "317400",
-        "corpName": "자이에스앤디",
-        "industry": "construction",
-        "viaCode": "038680",
-        "viaName": "에스넷",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "152550",
-        "corpName": "한국ANKOR유전",
-        "industry": "finance",
+        "stockCode": "280360",
+        "corpName": "롯데웰푸드",
+        "industry": "food",
         "viaCode": "038680",
         "viaName": "에스넷",
         "hopDistance": 2
@@ -349,6 +225,22 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "052710",
+        "viaName": "아모텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095340",
+        "corpName": "ISC",
+        "industry": "retail",
+        "viaCode": "038680",
+        "viaName": "에스넷",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "101390",
         "corpName": "아이엠",
         "industry": "electronics",
@@ -357,17 +249,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004000",
-        "corpName": "롯데정밀화학",
-        "industry": "chemical",
-        "viaCode": "038680",
-        "viaName": "에스넷",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095340",
-        "corpName": "ISC",
-        "industry": "retail",
+        "stockCode": "089860",
+        "corpName": "롯데렌탈",
+        "industry": "logistics",
         "viaCode": "038680",
         "viaName": "에스넷",
         "hopDistance": 2
@@ -381,22 +265,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005300",
-        "corpName": "롯데칠성음료",
-        "industry": "food",
-        "viaCode": "038680",
-        "viaName": "에스넷",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "027410",
-        "corpName": "BGF",
-        "industry": "retail",
-        "viaCode": "038680",
-        "viaName": "에스넷",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "068100",
         "corpName": "케이웨더",
         "industry": "machinery",
@@ -405,41 +273,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001250",
-        "corpName": "GS글로벌",
-        "industry": "chemical",
-        "viaCode": "038680",
-        "viaName": "에스넷",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "280360",
-        "corpName": "롯데웰푸드",
-        "industry": "food",
-        "viaCode": "038680",
-        "viaName": "에스넷",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "071840",
-        "corpName": "롯데하이마트",
+        "stockCode": "007070",
+        "corpName": "GS리테일",
         "industry": "retail",
         "viaCode": "038680",
         "viaName": "에스넷",
         "hopDistance": 2
       },
       {
-        "stockCode": "002170",
-        "corpName": "삼양통상",
-        "industry": "textile",
+        "stockCode": "152550",
+        "corpName": "한국ANKOR유전",
+        "industry": "finance",
         "viaCode": "038680",
         "viaName": "에스넷",
         "hopDistance": 2
       },
       {
-        "stockCode": "078000",
-        "corpName": "텔코웨어",
-        "industry": "food",
+        "stockCode": "078600",
+        "corpName": "대주전자재료",
+        "industry": "battery",
+        "viaCode": "052710",
+        "viaName": "아모텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "044990",
+        "corpName": "에이치엔에스하이텍",
+        "industry": "electronics",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027410",
+        "corpName": "BGF",
+        "industry": "retail",
         "viaCode": "038680",
         "viaName": "에스넷",
         "hopDistance": 2
@@ -453,40 +321,104 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "145020",
-        "corpName": "휴젤",
-        "industry": "pharma",
+        "stockCode": "084440",
+        "corpName": "유비온",
+        "industry": "education",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "027360",
+        "viaName": "아주IB투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "187870",
+        "corpName": "디바이스",
+        "industry": "semiconductor",
+        "viaCode": "052710",
+        "viaName": "아모텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002170",
+        "corpName": "삼양통상",
+        "industry": "textile",
         "viaCode": "038680",
         "viaName": "에스넷",
         "hopDistance": 2
       },
       {
-        "stockCode": "044990",
-        "corpName": "에이치엔에스하이텍",
-        "industry": "electronics",
+        "stockCode": "053980",
+        "corpName": "오상자이엘",
+        "industry": "software",
+        "viaCode": "052710",
+        "viaName": "아모텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "060850",
+        "corpName": "영림원소프트랩",
+        "industry": "software",
         "viaCode": "027360",
         "viaName": "아주IB투자",
         "hopDistance": 2
       },
       {
-        "stockCode": "103660",
-        "corpName": "씨앗",
+        "stockCode": "001250",
+        "corpName": "GS글로벌",
         "industry": "chemical",
-        "viaCode": "027360",
-        "viaName": "아주IB투자",
+        "viaCode": "038680",
+        "viaName": "에스넷",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "071840",
+        "corpName": "롯데하이마트",
+        "industry": "retail",
+        "viaCode": "038680",
+        "viaName": "에스넷",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004990",
+        "corpName": "롯데지주",
+        "industry": "finance",
+        "viaCode": "038680",
+        "viaName": "에스넷",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006360",
+        "corpName": "GS건설",
+        "industry": "construction",
+        "viaCode": "038680",
+        "viaName": "에스넷",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012330",
+        "corpName": "현대모비스",
+        "industry": "auto",
+        "viaCode": "052710",
+        "viaName": "아모텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "317400",
+        "corpName": "자이에스앤디",
+        "industry": "construction",
+        "viaCode": "038680",
+        "viaName": "에스넷",
         "hopDistance": 2
       },
       {
         "stockCode": "069410",
         "corpName": "엔텔스",
-        "industry": "software",
-        "viaCode": "038680",
-        "viaName": "에스넷",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033230",
-        "corpName": "인성정보",
         "industry": "software",
         "viaCode": "038680",
         "viaName": "에스넷",
@@ -501,17 +433,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "053980",
-        "corpName": "오상자이엘",
-        "industry": "software",
-        "viaCode": "052710",
-        "viaName": "아모텍",
+        "stockCode": "005300",
+        "corpName": "롯데칠성음료",
+        "industry": "food",
+        "viaCode": "038680",
+        "viaName": "에스넷",
         "hopDistance": 2
       },
       {
-        "stockCode": "011170",
-        "corpName": "롯데케미칼",
-        "industry": "chemical",
+        "stockCode": "078000",
+        "corpName": "텔코웨어",
+        "industry": "food",
         "viaCode": "038680",
         "viaName": "에스넷",
         "hopDistance": 2
@@ -525,41 +457,65 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "052710",
-        "viaName": "아모텍",
+        "stockCode": "031330",
+        "corpName": "에스에이엠티",
+        "industry": "electronics",
+        "viaCode": "038680",
+        "viaName": "에스넷",
         "hopDistance": 2
       },
       {
-        "stockCode": "012330",
-        "corpName": "현대모비스",
-        "industry": "auto",
-        "viaCode": "052710",
-        "viaName": "아모텍",
+        "stockCode": "037460",
+        "corpName": "삼지전자",
+        "industry": "telecom",
+        "viaCode": "038680",
+        "viaName": "에스넷",
         "hopDistance": 2
       },
       {
-        "stockCode": "078600",
-        "corpName": "대주전자재료",
-        "industry": "battery",
-        "viaCode": "052710",
-        "viaName": "아모텍",
+        "stockCode": "023530",
+        "corpName": "롯데쇼핑",
+        "industry": "textile",
+        "viaCode": "038680",
+        "viaName": "에스넷",
         "hopDistance": 2
       },
       {
-        "stockCode": "499790",
-        "corpName": "GS피앤엘",
+        "stockCode": "145020",
+        "corpName": "휴젤",
+        "industry": "pharma",
+        "viaCode": "038680",
+        "viaName": "에스넷",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011170",
+        "corpName": "롯데케미칼",
         "industry": "chemical",
         "viaCode": "038680",
         "viaName": "에스넷",
         "hopDistance": 2
       },
       {
-        "stockCode": "031330",
-        "corpName": "에스에이엠티",
-        "industry": "electronics",
+        "stockCode": "033230",
+        "corpName": "인성정보",
+        "industry": "software",
+        "viaCode": "038680",
+        "viaName": "에스넷",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "286940",
+        "corpName": "롯데이노베이트",
+        "industry": "software",
+        "viaCode": "038680",
+        "viaName": "에스넷",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004000",
+        "corpName": "롯데정밀화학",
+        "industry": "chemical",
         "viaCode": "038680",
         "viaName": "에스넷",
         "hopDistance": 2
@@ -570,6 +526,14 @@
         "industry": "auto",
         "viaCode": "052710",
         "viaName": "아모텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "499790",
+        "corpName": "GS피앤엘",
+        "industry": "chemical",
+        "viaCode": "038680",
+        "viaName": "에스넷",
         "hopDistance": 2
       }
     ],

@@ -47,36 +47,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2022",
-      "sales": 18829443327.0,
-      "operating_profit": 3418167444.0,
-      "net_profit": -1731270003.0,
-      "total_assets": 39702377410.0
-    },
-    {
-      "year": "2023",
-      "sales": 19386431576.0,
-      "operating_profit": 2616602601.0,
-      "net_profit": 2851494746.0,
-      "total_assets": 40704009174.0
-    },
-    {
-      "year": "2024",
-      "sales": 32943669332.0,
-      "operating_profit": 7206689949.0,
-      "net_profit": 7152320255.0,
-      "total_assets": 49861488962.0
-    },
-    {
-      "year": "2025",
-      "sales": 43472321309.0,
-      "operating_profit": 10117199890.0,
-      "net_profit": 9309096266.0,
-      "total_assets": 60717374739.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -128,9 +99,73 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "228850",
-        "corpName": "레이언스",
-        "industry": "medicalDevice",
+        "stockCode": "011930",
+        "corpName": "신성이엔지",
+        "industry": "energy",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "342870",
+        "corpName": "오아",
+        "industry": "electronics",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "189350",
+        "corpName": "코셋",
+        "industry": "telecom",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "194700",
+        "corpName": "노바렉스",
+        "industry": "pharma",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "287840",
+        "corpName": "인투셀",
+        "industry": "software",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024880",
+        "corpName": "케이피에프",
+        "industry": "steel",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "160980",
+        "corpName": "싸이맥스",
+        "industry": "machinery",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "462980",
+        "corpName": "아이지넷",
+        "industry": "finance",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "140860",
+        "corpName": "파크시스템스",
+        "industry": "machinery",
         "viaCode": "041190",
         "viaName": "우리기술투자",
         "hopDistance": 2
@@ -138,6 +173,14 @@
       {
         "stockCode": "041510",
         "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "216050",
+        "corpName": "인크로스",
         "industry": "media",
         "viaCode": "041190",
         "viaName": "우리기술투자",
@@ -152,25 +195,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "160980",
-        "corpName": "싸이맥스",
-        "industry": "machinery",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011930",
-        "corpName": "신성이엔지",
-        "industry": "energy",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "032820",
-        "corpName": "우리기술",
-        "industry": "electrical",
+        "stockCode": "373160",
+        "corpName": "데이원컴퍼니",
+        "industry": "education",
         "viaCode": "041190",
         "viaName": "우리기술투자",
         "hopDistance": 2
@@ -184,81 +211,25 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "228850",
+        "corpName": "레이언스",
+        "industry": "medicalDevice",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "032820",
+        "corpName": "우리기술",
+        "industry": "electrical",
+        "viaCode": "041190",
+        "viaName": "우리기술투자",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "278470",
         "corpName": "에이피알",
         "industry": "cosmetics",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "342870",
-        "corpName": "오아",
-        "industry": "electronics",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "140860",
-        "corpName": "파크시스템스",
-        "industry": "machinery",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "287840",
-        "corpName": "인투셀",
-        "industry": "software",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "462980",
-        "corpName": "아이지넷",
-        "industry": "finance",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024880",
-        "corpName": "케이피에프",
-        "industry": "steel",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "194700",
-        "corpName": "노바렉스",
-        "industry": "pharma",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "189350",
-        "corpName": "코셋",
-        "industry": "telecom",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "373160",
-        "corpName": "데이원컴퍼니",
-        "industry": "education",
-        "viaCode": "041190",
-        "viaName": "우리기술투자",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "216050",
-        "corpName": "인크로스",
-        "industry": "media",
         "viaCode": "041190",
         "viaName": "우리기술투자",
         "hopDistance": 2

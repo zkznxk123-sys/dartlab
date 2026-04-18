@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 160550729271.0,
-      "operating_profit": 5788634409.0,
-      "net_profit": null,
-      "total_assets": 161233133369.0
-    },
-    {
-      "year": "2022",
-      "sales": 168362798218.0,
-      "operating_profit": 4389154378.0,
-      "net_profit": 0.0,
-      "total_assets": 174809152299.0
-    },
-    {
-      "year": "2023",
-      "sales": 156031555991.0,
-      "operating_profit": 4957740460.0,
-      "net_profit": 0.0,
-      "total_assets": 162474778093.0
-    },
-    {
-      "year": "2024",
-      "sales": 156004130939.0,
-      "operating_profit": 3609514029.0,
-      "net_profit": 1310845236.0,
-      "total_assets": 172759361728.0
-    },
-    {
-      "year": "2025",
-      "sales": 161073686528.0,
-      "operating_profit": 2014876260.0,
-      "net_profit": 0.0,
-      "total_assets": 165660436153.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -132,17 +96,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "002030",
-        "corpName": "아세아",
-        "industry": "consulting",
+        "stockCode": "200130",
+        "corpName": "콜마비앤에이치",
+        "industry": "pharma",
         "viaCode": "277410",
         "viaName": "인산가",
         "hopDistance": 2
       },
       {
-        "stockCode": "009450",
-        "corpName": "경동나비엔",
-        "industry": "energy",
+        "stockCode": "254120",
+        "corpName": "자비스",
+        "industry": "machinery",
         "viaCode": "277410",
         "viaName": "인산가",
         "hopDistance": 2
@@ -164,17 +128,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "200130",
-        "corpName": "콜마비앤에이치",
-        "industry": "pharma",
+        "stockCode": "009450",
+        "corpName": "경동나비엔",
+        "industry": "energy",
         "viaCode": "277410",
         "viaName": "인산가",
         "hopDistance": 2
       },
       {
-        "stockCode": "254120",
-        "corpName": "자비스",
-        "industry": "machinery",
+        "stockCode": "002030",
+        "corpName": "아세아",
+        "industry": "consulting",
         "viaCode": "277410",
         "viaName": "인산가",
         "hopDistance": 2

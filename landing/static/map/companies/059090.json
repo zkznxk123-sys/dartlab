@@ -147,43 +147,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 365490680610.0,
-      "operating_profit": 69667993298.0,
-      "net_profit": 21811609332.0,
-      "total_assets": 721538023067.0
-    },
-    {
-      "year": "2022",
-      "sales": 414832269255.0,
-      "operating_profit": 64273149352.0,
-      "net_profit": -55231159403.0,
-      "total_assets": 731153086148.0
-    },
-    {
-      "year": "2023",
-      "sales": 387340942797.0,
-      "operating_profit": 21111259627.0,
-      "net_profit": -2036721583.0,
-      "total_assets": 833895121319.0
-    },
-    {
-      "year": "2024",
-      "sales": 540504643904.0,
-      "operating_profit": 94633945006.0,
-      "net_profit": 18115776142.0,
-      "total_assets": 1392676089676.0
-    },
-    {
-      "year": "2025",
-      "sales": 977036793661.0,
-      "operating_profit": 101004245476.0,
-      "net_profit": 0.0,
-      "total_assets": 2264573968886.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -244,209 +208,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "021880",
-        "corpName": "메이슨캐피탈",
-        "industry": "finance",
-        "viaCode": "033310",
-        "viaName": "엠투엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "215600",
-        "corpName": "신라젠",
-        "industry": "pharma",
-        "viaCode": "033310",
-        "viaName": "엠투엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "019550",
-        "corpName": "SBI인베스트먼트",
-        "industry": "finance",
-        "viaCode": "033310",
-        "viaName": "엠투엔",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "100840",
         "corpName": "SNT에너지",
         "industry": "machinery",
-        "viaCode": "036530",
-        "viaName": "SNT홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099440",
-        "corpName": "스맥",
-        "industry": "machinery",
-        "viaCode": "036530",
-        "viaName": "SNT홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "206640",
-        "corpName": "바디텍메드",
-        "industry": "medicalDevice",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "028300",
-        "corpName": "HLB",
-        "industry": "pharma",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "388210",
-        "corpName": "씨엠티엑스",
-        "industry": "semiconductor",
-        "viaCode": "183300",
-        "viaName": "코미코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "115500",
-        "corpName": "케이씨에스",
-        "industry": "railroad",
-        "viaCode": "033310",
-        "viaName": "엠투엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007660",
-        "corpName": "이수페타시스",
-        "industry": "electronics",
-        "viaCode": "033310",
-        "viaName": "엠투엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003570",
-        "corpName": "SNT다이내믹스",
-        "industry": "machinery",
-        "viaCode": "036530",
-        "viaName": "SNT홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "214430",
-        "corpName": "아이쓰리시스템",
-        "industry": "machinery",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010950",
-        "corpName": "S-Oil",
-        "industry": "chemical",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012700",
-        "corpName": "리드코프",
-        "industry": "retail",
-        "viaCode": "033310",
-        "viaName": "엠투엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
-        "viaCode": "033310",
-        "viaName": "엠투엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007330",
-        "corpName": "푸른저축은행",
-        "industry": "finance",
-        "viaCode": "183300",
-        "viaName": "코미코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "036530",
-        "viaName": "SNT홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "013810",
-        "corpName": "스페코",
-        "industry": "construction",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012450",
-        "corpName": "한화에어로스페이스",
-        "industry": "aerospace",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064960",
-        "corpName": "SNT모티브",
-        "industry": "electronics",
-        "viaCode": "036530",
-        "viaName": "SNT홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "079190",
-        "corpName": "케스피온",
-        "industry": "telecom",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058470",
-        "corpName": "리노공업",
-        "industry": "semiconductor",
-        "viaCode": "033310",
-        "viaName": "엠투엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058400",
-        "corpName": "KNN",
-        "industry": "telecom",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090370",
-        "corpName": "메타랩스",
-        "industry": "textile",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "096610",
-        "corpName": "알에프세미",
-        "industry": "electronics",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006840",
-        "corpName": "AK홀딩스",
-        "industry": "finance",
         "viaCode": "036530",
         "viaName": "SNT홀딩스",
         "hopDistance": 2
@@ -460,56 +224,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "181710",
-        "corpName": "NHN",
-        "industry": "software",
-        "viaCode": "183300",
-        "viaName": "코미코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "278990",
-        "corpName": "EMB",
-        "industry": "battery",
-        "viaCode": "036530",
-        "viaName": "SNT홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "078930",
-        "corpName": "GS",
-        "industry": "chemical",
-        "viaCode": "036530",
-        "viaName": "SNT홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033160",
-        "corpName": "엠케이전자",
-        "industry": "electronics",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001290",
-        "corpName": "상상인증권",
-        "industry": "finance",
-        "viaCode": "033310",
-        "viaName": "엠투엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000880",
-        "corpName": "한화",
-        "industry": "aerospace",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011150",
-        "corpName": "CJ씨푸드",
+        "stockCode": "016580",
+        "corpName": "환인제약",
         "industry": "food",
         "viaCode": "065450",
         "viaName": "빅텍",
@@ -524,25 +240,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "272210",
-        "corpName": "한화시스템",
-        "industry": "aerospace",
+        "stockCode": "028300",
+        "corpName": "HLB",
+        "industry": "pharma",
         "viaCode": "065450",
         "viaName": "빅텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "013570",
-        "corpName": "디와이",
-        "industry": "electronics",
-        "viaCode": "033310",
-        "viaName": "엠투엔",
+        "stockCode": "206640",
+        "corpName": "바디텍메드",
+        "industry": "medicalDevice",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003570",
+        "corpName": "SNT다이내믹스",
+        "industry": "machinery",
+        "viaCode": "036530",
+        "viaName": "SNT홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011150",
+        "corpName": "CJ씨푸드",
+        "industry": "food",
+        "viaCode": "065450",
+        "viaName": "빅텍",
         "hopDistance": 2
       },
       {
         "stockCode": "069080",
         "corpName": "웹젠",
         "industry": "software",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012450",
+        "corpName": "한화에어로스페이스",
+        "industry": "aerospace",
         "viaCode": "065450",
         "viaName": "빅텍",
         "hopDistance": 2
@@ -556,43 +296,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "104200",
-        "corpName": "NHN벅스",
-        "industry": "media",
-        "viaCode": "183300",
-        "viaName": "코미코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016580",
-        "corpName": "환인제약",
-        "industry": "food",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "047050",
-        "corpName": "포스코인터내셔널",
-        "industry": "steel",
+        "stockCode": "099440",
+        "corpName": "스맥",
+        "industry": "machinery",
         "viaCode": "036530",
         "viaName": "SNT홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067010",
-        "corpName": "이씨에스",
-        "industry": "software",
-        "viaCode": "033310",
-        "viaName": "엠투엔",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "051780",
-        "corpName": "큐로홀딩스",
-        "industry": "electronics",
-        "viaCode": "065450",
-        "viaName": "빅텍",
         "hopDistance": 2
       },
       {
@@ -604,11 +312,59 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "041020",
-        "corpName": "폴라리스오피스",
-        "industry": "software",
+        "stockCode": "104200",
+        "corpName": "NHN벅스",
+        "industry": "media",
+        "viaCode": "183300",
+        "viaName": "코미코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058400",
+        "corpName": "KNN",
+        "industry": "telecom",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "278990",
+        "corpName": "EMB",
+        "industry": "battery",
+        "viaCode": "036530",
+        "viaName": "SNT홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007330",
+        "corpName": "푸른저축은행",
+        "industry": "finance",
+        "viaCode": "183300",
+        "viaName": "코미코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "115500",
+        "corpName": "케이씨에스",
+        "industry": "railroad",
         "viaCode": "033310",
         "viaName": "엠투엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "078930",
+        "corpName": "GS",
+        "industry": "chemical",
+        "viaCode": "036530",
+        "viaName": "SNT홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "272210",
+        "corpName": "한화시스템",
+        "industry": "aerospace",
+        "viaCode": "065450",
+        "viaName": "빅텍",
         "hopDistance": 2
       },
       {
@@ -620,6 +376,22 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "051780",
+        "corpName": "큐로홀딩스",
+        "industry": "electronics",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064960",
+        "corpName": "SNT모티브",
+        "industry": "electronics",
+        "viaCode": "036530",
+        "viaName": "SNT홀딩스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "058820",
         "corpName": "CMG제약",
         "industry": "pharma",
@@ -628,9 +400,201 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "000880",
+        "corpName": "한화",
+        "industry": "aerospace",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "033310",
+        "viaName": "엠투엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058470",
+        "corpName": "리노공업",
+        "industry": "semiconductor",
+        "viaCode": "033310",
+        "viaName": "엠투엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079190",
+        "corpName": "케스피온",
+        "industry": "telecom",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "181710",
+        "corpName": "NHN",
+        "industry": "software",
+        "viaCode": "183300",
+        "viaName": "코미코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096610",
+        "corpName": "알에프세미",
+        "industry": "electronics",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067010",
+        "corpName": "이씨에스",
+        "industry": "software",
+        "viaCode": "033310",
+        "viaName": "엠투엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019550",
+        "corpName": "SBI인베스트먼트",
+        "industry": "finance",
+        "viaCode": "033310",
+        "viaName": "엠투엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010950",
+        "corpName": "S-Oil",
+        "industry": "chemical",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "021880",
+        "corpName": "메이슨캐피탈",
+        "industry": "finance",
+        "viaCode": "033310",
+        "viaName": "엠투엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012700",
+        "corpName": "리드코프",
+        "industry": "retail",
+        "viaCode": "033310",
+        "viaName": "엠투엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "215600",
+        "corpName": "신라젠",
+        "industry": "pharma",
+        "viaCode": "033310",
+        "viaName": "엠투엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "388210",
+        "corpName": "씨엠티엑스",
+        "industry": "semiconductor",
+        "viaCode": "183300",
+        "viaName": "코미코",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "050890",
         "corpName": "쏠리드",
         "industry": "telecom",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006840",
+        "corpName": "AK홀딩스",
+        "industry": "finance",
+        "viaCode": "036530",
+        "viaName": "SNT홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033160",
+        "corpName": "엠케이전자",
+        "industry": "electronics",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214430",
+        "corpName": "아이쓰리시스템",
+        "industry": "machinery",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013570",
+        "corpName": "디와이",
+        "industry": "electronics",
+        "viaCode": "033310",
+        "viaName": "엠투엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013810",
+        "corpName": "스페코",
+        "industry": "construction",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007660",
+        "corpName": "이수페타시스",
+        "industry": "electronics",
+        "viaCode": "033310",
+        "viaName": "엠투엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047050",
+        "corpName": "포스코인터내셔널",
+        "industry": "steel",
+        "viaCode": "036530",
+        "viaName": "SNT홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001290",
+        "corpName": "상상인증권",
+        "industry": "finance",
+        "viaCode": "033310",
+        "viaName": "엠투엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041020",
+        "corpName": "폴라리스오피스",
+        "industry": "software",
+        "viaCode": "033310",
+        "viaName": "엠투엔",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090370",
+        "corpName": "메타랩스",
+        "industry": "textile",
         "viaCode": "065450",
         "viaName": "빅텍",
         "hopDistance": 2

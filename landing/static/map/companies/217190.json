@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 59727438928.0,
-      "operating_profit": 5633158912.0,
-      "net_profit": 5242456964.0,
-      "total_assets": 67876468201.0
-    },
-    {
-      "year": "2022",
-      "sales": 59602938075.0,
-      "operating_profit": 8518688194.0,
-      "net_profit": 12233055714.0,
-      "total_assets": 79175397714.0
-    },
-    {
-      "year": "2023",
-      "sales": 56453761125.0,
-      "operating_profit": 3561812639.0,
-      "net_profit": 3725353463.0,
-      "total_assets": 77782385254.0
-    },
-    {
-      "year": "2024",
-      "sales": 68738086291.0,
-      "operating_profit": 6541441909.0,
-      "net_profit": 36908866.0,
-      "total_assets": 86382041318.0
-    },
-    {
-      "year": "2025",
-      "sales": 56757244825.0,
-      "operating_profit": 1029264332.0,
-      "net_profit": 12231814.0,
-      "total_assets": null
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -131,8 +95,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "297890",
-        "corpName": "HB솔루션",
+        "stockCode": "192650",
+        "corpName": "드림텍",
+        "industry": "electronics",
+        "viaCode": "067310",
+        "viaName": "하나마이크론",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "332570",
+        "corpName": "PS일렉트로닉스",
         "industry": "electronics",
         "viaCode": "067310",
         "viaName": "하나마이크론",
@@ -155,16 +127,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "192650",
-        "corpName": "드림텍",
-        "industry": "electronics",
-        "viaCode": "067310",
-        "viaName": "하나마이크론",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "332570",
-        "corpName": "PS일렉트로닉스",
+        "stockCode": "297890",
+        "corpName": "HB솔루션",
         "industry": "electronics",
         "viaCode": "067310",
         "viaName": "하나마이크론",

@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 121756063316.0,
-      "operating_profit": 5796708441.0,
-      "net_profit": 0.0,
-      "total_assets": 76887115863.0
-    },
-    {
-      "year": "2022",
-      "sales": 170585406981.0,
-      "operating_profit": 8523778870.0,
-      "net_profit": 6068542107.0,
-      "total_assets": 119291361210.0
-    },
-    {
-      "year": "2023",
-      "sales": 224980562132.0,
-      "operating_profit": 13950555536.0,
-      "net_profit": 6194159.0,
-      "total_assets": 125993769991.0
-    },
-    {
-      "year": "2024",
-      "sales": 192885362327.0,
-      "operating_profit": 10651501416.0,
-      "net_profit": 0.0,
-      "total_assets": 138071038763.0
-    },
-    {
-      "year": "2025",
-      "sales": 233294461420.0,
-      "operating_profit": 14044634082.0,
-      "net_profit": 12014819475.0,
-      "total_assets": 149069140402.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -132,17 +96,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
+        "stockCode": "001740",
+        "corpName": "SK네트웍스",
+        "industry": "software",
         "viaCode": "078000",
         "viaName": "텔코웨어",
         "hopDistance": 2
       },
       {
-        "stockCode": "001740",
-        "corpName": "SK네트웍스",
-        "industry": "software",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
         "viaCode": "078000",
         "viaName": "텔코웨어",
         "hopDistance": 2

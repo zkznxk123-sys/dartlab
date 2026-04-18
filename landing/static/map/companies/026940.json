@@ -54,36 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 195734222688.0,
-      "operating_profit": 8055575084.0,
-      "net_profit": 0.0,
-      "total_assets": 150684042688.0
-    },
-    {
-      "year": "2022",
-      "sales": 209727335869.0,
-      "operating_profit": 5922305967.0,
-      "net_profit": 7102655812.0,
-      "total_assets": 153622003905.0
-    },
-    {
-      "year": "2023",
-      "sales": 191434539427.0,
-      "operating_profit": 2416388602.0,
-      "net_profit": 3624750827.0,
-      "total_assets": 156095854681.0
-    },
-    {
-      "year": "2025",
-      "sales": 179910680270.0,
-      "operating_profit": 262298378.0,
-      "net_profit": 2150579102.0,
-      "total_assets": 152062864116.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -152,24 +123,16 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "002170",
-        "corpName": "삼양통상",
-        "industry": "textile",
+        "stockCode": "377460",
+        "corpName": "위니아에이드",
+        "industry": "shipbuilding",
         "viaCode": "000300",
         "viaName": "DH오토넥스",
         "hopDistance": 2
       },
       {
-        "stockCode": "041520",
-        "corpName": "이엘씨",
-        "industry": "semiconductor",
-        "viaCode": "290120",
-        "viaName": "DH오토리드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "069510",
-        "corpName": "에스텍",
+        "stockCode": "005850",
+        "corpName": "에스엘",
         "industry": "electronics",
         "viaCode": "000300",
         "viaName": "DH오토넥스",
@@ -184,51 +147,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "256150",
-        "corpName": "한독크린텍",
-        "industry": "electronics",
+        "stockCode": "001500",
+        "corpName": "현대차증권",
+        "industry": "realestate",
         "viaCode": "000300",
         "viaName": "DH오토넥스",
         "hopDistance": 2
       },
       {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "290120",
-        "viaName": "DH오토리드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "377460",
-        "corpName": "위니아에이드",
-        "industry": "shipbuilding",
-        "viaCode": "290120",
-        "viaName": "DH오토리드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012860",
-        "corpName": "모베이스전자",
-        "industry": "telecom",
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
         "viaCode": "000300",
         "viaName": "DH오토넥스",
         "hopDistance": 2
       },
       {
-        "stockCode": "045660",
-        "corpName": "에이텍",
-        "industry": "electronics",
-        "viaCode": "290120",
-        "viaName": "DH오토리드",
+        "stockCode": "041520",
+        "corpName": "이엘씨",
+        "industry": "semiconductor",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
         "hopDistance": 2
       },
       {
-        "stockCode": "002880",
-        "corpName": "대유에이텍",
-        "industry": "electronics",
-        "viaCode": "290120",
-        "viaName": "DH오토리드",
+        "stockCode": "012630",
+        "corpName": "HDC",
+        "industry": "finance",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
         "hopDistance": 2
       },
       {
@@ -240,25 +187,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "115440",
-        "corpName": "우리넷",
+        "stockCode": "089470",
+        "corpName": "HDC현대EP",
         "industry": "chemical",
         "viaCode": "000300",
         "viaName": "DH오토넥스",
         "hopDistance": 2
       },
       {
-        "stockCode": "101330",
-        "corpName": "모베이스",
-        "industry": "telecom",
-        "viaCode": "000300",
-        "viaName": "DH오토넥스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001500",
-        "corpName": "현대차증권",
-        "industry": "realestate",
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
         "viaCode": "000300",
         "viaName": "DH오토넥스",
         "hopDistance": 2
@@ -272,27 +211,59 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "012630",
-        "corpName": "HDC",
-        "industry": "finance",
-        "viaCode": "290120",
-        "viaName": "DH오토리드",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
+        "stockCode": "256150",
+        "corpName": "한독크린텍",
+        "industry": "electronics",
         "viaCode": "000300",
         "viaName": "DH오토넥스",
         "hopDistance": 2
       },
       {
-        "stockCode": "089470",
-        "corpName": "HDC현대EP",
+        "stockCode": "115440",
+        "corpName": "우리넷",
         "industry": "chemical",
-        "viaCode": "290120",
-        "viaName": "DH오토리드",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002170",
+        "corpName": "삼양통상",
+        "industry": "textile",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012860",
+        "corpName": "모베이스전자",
+        "industry": "telecom",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002880",
+        "corpName": "대유에이텍",
+        "industry": "electronics",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "101330",
+        "corpName": "모베이스",
+        "industry": "telecom",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "045660",
+        "corpName": "에이텍",
+        "industry": "electronics",
+        "viaCode": "000300",
+        "viaName": "DH오토넥스",
         "hopDistance": 2
       }
     ],

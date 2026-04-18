@@ -35,29 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2023",
-      "sales": 94629881285.0,
-      "operating_profit": -3222736589.0,
-      "net_profit": -18336595867.0,
-      "total_assets": 132100559590.0
-    },
-    {
-      "year": "2024",
-      "sales": 97368182311.0,
-      "operating_profit": 18811003153.0,
-      "net_profit": 7935984213.0,
-      "total_assets": 129584693779.0
-    },
-    {
-      "year": "2025",
-      "sales": 93861865441.0,
-      "operating_profit": 19362248868.0,
-      "net_profit": 18155857742.0,
-      "total_assets": 203902425258.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -109,17 +87,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "213500",
-        "corpName": "한솔제지",
-        "industry": "paper",
+        "stockCode": "023410",
+        "corpName": "유진기업",
+        "industry": "construction",
         "viaCode": "068290",
         "viaName": "삼성출판사",
         "hopDistance": 2
       },
       {
-        "stockCode": "023410",
-        "corpName": "유진기업",
-        "industry": "construction",
+        "stockCode": "213500",
+        "corpName": "한솔제지",
+        "industry": "paper",
         "viaCode": "068290",
         "viaName": "삼성출판사",
         "hopDistance": 2

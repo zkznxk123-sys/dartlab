@@ -35,29 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2023",
-      "sales": 4100632868.0,
-      "operating_profit": -11656276687.0,
-      "net_profit": -14082727158.0,
-      "total_assets": 15861941171.0
-    },
-    {
-      "year": "2024",
-      "sales": 3929182690.0,
-      "operating_profit": -13779081599.0,
-      "net_profit": -14137902346.0,
-      "total_assets": 24664846746.0
-    },
-    {
-      "year": "2025",
-      "sales": 4283668051.0,
-      "operating_profit": -13444847755.0,
-      "net_profit": -14496260923.0,
-      "total_assets": 40792632929.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -109,6 +87,22 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "006620",
+        "corpName": "동구바이오제약",
+        "industry": "pharma",
+        "viaCode": "338220",
+        "viaName": "뷰노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "389650",
+        "corpName": "넥스트바이오메디컬",
+        "industry": "pharma",
+        "viaCode": "338220",
+        "viaName": "뷰노",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "005250",
         "corpName": "녹십자홀딩스",
         "industry": "pharma",
@@ -125,30 +119,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "389650",
-        "corpName": "넥스트바이오메디컬",
-        "industry": "pharma",
-        "viaCode": "338220",
-        "viaName": "뷰노",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006620",
-        "corpName": "동구바이오제약",
-        "industry": "pharma",
-        "viaCode": "338220",
-        "viaName": "뷰노",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "142280",
-        "corpName": "녹십자엠에스",
-        "industry": "pharma",
-        "viaCode": "338220",
-        "viaName": "뷰노",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "006280",
         "corpName": "녹십자",
         "industry": "pharma",
@@ -160,6 +130,14 @@
         "stockCode": "000020",
         "corpName": "동화약품",
         "industry": "retail",
+        "viaCode": "338220",
+        "viaName": "뷰노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "142280",
+        "corpName": "녹십자엠에스",
+        "industry": "pharma",
         "viaCode": "338220",
         "viaName": "뷰노",
         "hopDistance": 2

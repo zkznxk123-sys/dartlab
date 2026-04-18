@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 98227065032.0,
-      "operating_profit": -14005588.0,
-      "net_profit": 0.0,
-      "total_assets": 96778572137.0
-    },
-    {
-      "year": "2022",
-      "sales": 91869520499.0,
-      "operating_profit": -3307478717.0,
-      "net_profit": -1235995462.0,
-      "total_assets": 96234087568.0
-    },
-    {
-      "year": "2023",
-      "sales": 101060228361.0,
-      "operating_profit": 1540087069.0,
-      "net_profit": 1448541830.0,
-      "total_assets": 94386509294.0
-    },
-    {
-      "year": "2024",
-      "sales": 106182807740.0,
-      "operating_profit": 231513742.0,
-      "net_profit": 1690244491.0,
-      "total_assets": 105007314176.0
-    },
-    {
-      "year": "2025",
-      "sales": 120761096176.0,
-      "operating_profit": 1812628245.0,
-      "net_profit": 1560278310.0,
-      "total_assets": 100355166513.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -132,25 +96,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "003060",
-        "corpName": "에이프로젠바이오로직스",
-        "industry": "pharma",
+        "stockCode": "336260",
+        "corpName": "두산퓨얼셀",
+        "industry": "machinery",
         "viaCode": "270520",
         "viaName": "앱튼",
         "hopDistance": 2
       },
       {
-        "stockCode": "109960",
-        "corpName": "앱토크롬",
-        "industry": "software",
-        "viaCode": "270520",
-        "viaName": "앱튼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "296160",
-        "corpName": "프로젠",
-        "industry": "pharma",
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
         "viaCode": "270520",
         "viaName": "앱튼",
         "hopDistance": 2
@@ -164,9 +120,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "262260",
-        "corpName": "에이프로",
-        "industry": "electrical",
+        "stockCode": "003060",
+        "corpName": "에이프로젠바이오로직스",
+        "industry": "pharma",
         "viaCode": "270520",
         "viaName": "앱튼",
         "hopDistance": 2
@@ -174,14 +130,6 @@
       {
         "stockCode": "052860",
         "corpName": "아이앤씨",
-        "industry": "semiconductor",
-        "viaCode": "270520",
-        "viaName": "앱튼",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "227950",
-        "corpName": "엔투텍",
         "industry": "semiconductor",
         "viaCode": "270520",
         "viaName": "앱튼",
@@ -204,16 +152,32 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "336260",
-        "corpName": "두산퓨얼셀",
-        "industry": "machinery",
+        "stockCode": "296160",
+        "corpName": "프로젠",
+        "industry": "pharma",
         "viaCode": "270520",
         "viaName": "앱튼",
         "hopDistance": 2
       },
       {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
+        "stockCode": "109960",
+        "corpName": "앱토크롬",
+        "industry": "software",
+        "viaCode": "270520",
+        "viaName": "앱튼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "262260",
+        "corpName": "에이프로",
+        "industry": "electrical",
+        "viaCode": "270520",
+        "viaName": "앱튼",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "227950",
+        "corpName": "엔투텍",
         "industry": "semiconductor",
         "viaCode": "270520",
         "viaName": "앱튼",

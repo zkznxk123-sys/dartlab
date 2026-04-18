@@ -73,15 +73,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2025",
-      "sales": 160555762764.0,
-      "operating_profit": 51781944189.0,
-      "net_profit": -25055373345.0,
-      "total_assets": 275447075073.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -141,41 +133,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "214610",
-        "corpName": "롤링스톤",
-        "industry": "pharma",
-        "viaCode": "183300",
-        "viaName": "코미코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "104200",
-        "corpName": "NHN벅스",
-        "industry": "media",
-        "viaCode": "183300",
-        "viaName": "코미코",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "029480",
-        "corpName": "광무",
-        "industry": "telecom",
-        "viaCode": "138360",
-        "viaName": "앤로보틱스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "051980",
-        "corpName": "중앙첨단소재",
-        "industry": "telecom",
-        "viaCode": "004920",
-        "viaName": "씨아이테크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "042940",
-        "corpName": "상지건설",
-        "industry": "construction",
+        "stockCode": "091120",
+        "corpName": "이엠텍",
+        "industry": "electronics",
         "viaCode": "138360",
         "viaName": "앤로보틱스",
         "hopDistance": 2
@@ -189,6 +149,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "029480",
+        "corpName": "광무",
+        "industry": "telecom",
+        "viaCode": "004920",
+        "viaName": "씨아이테크",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "060250",
         "corpName": "NHN KCP",
         "industry": "finance",
@@ -197,9 +165,33 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "042940",
+        "corpName": "상지건설",
+        "industry": "construction",
+        "viaCode": "004920",
+        "viaName": "씨아이테크",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "059090",
         "corpName": "미코",
         "industry": "electronics",
+        "viaCode": "183300",
+        "viaName": "코미코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "104200",
+        "corpName": "NHN벅스",
+        "industry": "media",
+        "viaCode": "183300",
+        "viaName": "코미코",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "214610",
+        "corpName": "롤링스톤",
+        "industry": "pharma",
         "viaCode": "183300",
         "viaName": "코미코",
         "hopDistance": 2
@@ -213,14 +205,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
-        "viaCode": "183300",
-        "viaName": "코미코",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "007330",
         "corpName": "푸른저축은행",
         "industry": "finance",
@@ -229,17 +213,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "091120",
-        "corpName": "이엠텍",
-        "industry": "electronics",
-        "viaCode": "138360",
-        "viaName": "앤로보틱스",
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "183300",
+        "viaName": "코미코",
         "hopDistance": 2
       },
       {
         "stockCode": "083550",
         "corpName": "케이엠",
         "industry": "chemical",
+        "viaCode": "004920",
+        "viaName": "씨아이테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051980",
+        "corpName": "중앙첨단소재",
+        "industry": "telecom",
         "viaCode": "004920",
         "viaName": "씨아이테크",
         "hopDistance": 2

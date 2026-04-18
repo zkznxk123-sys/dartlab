@@ -54,36 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 909090909.0,
-      "operating_profit": -13010877723.0,
-      "net_profit": null,
-      "total_assets": 58256319253.0
-    },
-    {
-      "year": "2022",
-      "sales": 480000000.0,
-      "operating_profit": -14911333804.0,
-      "net_profit": null,
-      "total_assets": 45857390754.0
-    },
-    {
-      "year": "2023",
-      "sales": null,
-      "operating_profit": -12197950643.0,
-      "net_profit": null,
-      "total_assets": 63922241987.0
-    },
-    {
-      "year": "2025",
-      "sales": 8841828282.0,
-      "operating_profit": -11343055983.0,
-      "net_profit": -12069197070.0,
-      "total_assets": 110869307903.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -135,25 +106,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "092040",
-        "viaName": "아미코젠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "238200",
-        "corpName": "비피도",
-        "industry": "food",
-        "viaCode": "092040",
-        "viaName": "아미코젠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "337840",
-        "corpName": "유엑스엔",
-        "industry": "medicalDevice",
+        "stockCode": "217950",
+        "corpName": "파마리서치바이오",
+        "industry": "pharma",
         "viaCode": "377740",
         "viaName": "바이오노트",
         "hopDistance": 2
@@ -167,11 +122,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006620",
-        "corpName": "동구바이오제약",
+        "stockCode": "238200",
+        "corpName": "비피도",
+        "industry": "food",
+        "viaCode": "092040",
+        "viaName": "아미코젠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "206650",
+        "corpName": "유바이오로직스",
         "industry": "pharma",
-        "viaCode": "377740",
-        "viaName": "바이오노트",
+        "viaCode": "092040",
+        "viaName": "아미코젠",
         "hopDistance": 2
       },
       {
@@ -183,16 +146,48 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
+        "stockCode": "006620",
+        "corpName": "동구바이오제약",
+        "industry": "pharma",
+        "viaCode": "377740",
+        "viaName": "바이오노트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "337840",
+        "corpName": "유엑스엔",
+        "industry": "medicalDevice",
+        "viaCode": "377740",
+        "viaName": "바이오노트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082640",
+        "corpName": "동양생명",
+        "industry": "finance",
         "viaCode": "092040",
         "viaName": "아미코젠",
         "hopDistance": 2
       },
       {
+        "stockCode": "007330",
+        "corpName": "푸른저축은행",
+        "industry": "finance",
+        "viaCode": "377740",
+        "viaName": "바이오노트",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "214450",
         "corpName": "파마리서치",
+        "industry": "pharma",
+        "viaCode": "377740",
+        "viaName": "바이오노트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "137310",
+        "corpName": "에스디바이오센서",
         "industry": "pharma",
         "viaCode": "377740",
         "viaName": "바이오노트",
@@ -207,43 +202,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "007330",
-        "corpName": "푸른저축은행",
-        "industry": "finance",
-        "viaCode": "377740",
-        "viaName": "바이오노트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "206650",
-        "corpName": "유바이오로직스",
-        "industry": "pharma",
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
         "viaCode": "092040",
         "viaName": "아미코젠",
         "hopDistance": 2
       },
       {
-        "stockCode": "217950",
-        "corpName": "파마리서치바이오",
-        "industry": "pharma",
-        "viaCode": "377740",
-        "viaName": "바이오노트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "082640",
-        "corpName": "동양생명",
+        "stockCode": "001450",
+        "corpName": "현대해상",
         "industry": "finance",
         "viaCode": "092040",
         "viaName": "아미코젠",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "137310",
-        "corpName": "에스디바이오센서",
-        "industry": "pharma",
-        "viaCode": "377740",
-        "viaName": "바이오노트",
         "hopDistance": 2
       }
     ],

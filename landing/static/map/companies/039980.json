@@ -185,43 +185,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 85919851224.0,
-      "operating_profit": 1468689021.0,
-      "net_profit": 996525552.0,
-      "total_assets": 92069170255.0
-    },
-    {
-      "year": "2022",
-      "sales": 80853888097.0,
-      "operating_profit": -2360088791.0,
-      "net_profit": -2833125729.0,
-      "total_assets": 98339776475.0
-    },
-    {
-      "year": "2023",
-      "sales": 59435979925.0,
-      "operating_profit": 1458860744.0,
-      "net_profit": 611301755.0,
-      "total_assets": 95541836084.0
-    },
-    {
-      "year": "2024",
-      "sales": 53068929661.0,
-      "operating_profit": -1311143643.0,
-      "net_profit": 1115089782.0,
-      "total_assets": 115959879822.0
-    },
-    {
-      "year": "2025",
-      "sales": 43636226860.0,
-      "operating_profit": -4689716221.0,
-      "net_profit": null,
-      "total_assets": 106953014956.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -273,89 +237,49 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "001520",
-        "corpName": "동양",
+        "stockCode": "023410",
+        "corpName": "유진기업",
         "industry": "construction",
         "viaCode": "222080",
         "viaName": "씨아이에스",
         "hopDistance": 2
       },
       {
+        "stockCode": "018880",
+        "corpName": "한온시스템",
+        "industry": "auto",
+        "viaCode": "234100",
+        "viaName": "폴라리스세원",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "123010",
         "corpName": "알엔티엑스",
         "industry": "semiconductor",
-        "viaCode": "234100",
-        "viaName": "폴라리스세원",
+        "viaCode": "114630",
+        "viaName": "폴라리스우노",
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "223250",
-        "viaName": "드림씨아이에스",
+        "stockCode": "016250",
+        "corpName": "SGC E&C",
+        "industry": "construction",
+        "viaCode": "222080",
+        "viaName": "씨아이에스",
         "hopDistance": 2
       },
       {
-        "stockCode": "092200",
-        "corpName": "디아이씨",
-        "industry": "electronics",
-        "viaCode": "234100",
-        "viaName": "폴라리스세원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
-        "viaCode": "234100",
-        "viaName": "폴라리스세원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "020710",
-        "corpName": "시공테크",
-        "industry": "consulting",
+        "stockCode": "039560",
+        "corpName": "다산네트웍스",
+        "industry": "telecom",
         "viaCode": "220180",
         "viaName": "핸디소프트",
         "hopDistance": 2
       },
       {
-        "stockCode": "039490",
-        "corpName": "키움증권",
-        "industry": "finance",
-        "viaCode": "222080",
-        "viaName": "씨아이에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010060",
-        "corpName": "OCI홀딩스",
-        "industry": "chemical",
-        "viaCode": "222080",
-        "viaName": "씨아이에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036540",
-        "corpName": "SFA반도체",
-        "industry": "semiconductor",
-        "viaCode": "222080",
-        "viaName": "씨아이에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "014830",
-        "corpName": "유니드",
-        "industry": "food",
-        "viaCode": "222080",
-        "viaName": "씨아이에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "294630",
-        "corpName": "서남",
-        "industry": "steel",
+        "stockCode": "038880",
+        "corpName": "아이에이",
+        "industry": "electronics",
         "viaCode": "114630",
         "viaName": "폴라리스우노",
         "hopDistance": 2
@@ -369,19 +293,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "066310",
-        "corpName": "큐에스아이",
-        "industry": "medicalDevice",
-        "viaCode": "080520",
-        "viaName": "오디텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005090",
-        "corpName": "SGC에너지",
-        "industry": "energy",
-        "viaCode": "222080",
-        "viaName": "씨아이에스",
+        "stockCode": "208370",
+        "corpName": "셀바스헬스케어",
+        "industry": "telecom",
+        "viaCode": "041020",
+        "viaName": "폴라리스오피스",
         "hopDistance": 2
       },
       {
@@ -393,9 +309,249 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "016250",
-        "corpName": "SGC E&C",
+        "stockCode": "092200",
+        "corpName": "디아이씨",
+        "industry": "electronics",
+        "viaCode": "234100",
+        "viaName": "폴라리스세원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033310",
+        "corpName": "엠투엔",
+        "industry": "electronics",
+        "viaCode": "041020",
+        "viaName": "폴라리스오피스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "014830",
+        "corpName": "유니드",
+        "industry": "food",
+        "viaCode": "222080",
+        "viaName": "씨아이에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "087010",
+        "corpName": "펩트론",
+        "industry": "pharma",
+        "viaCode": "114630",
+        "viaName": "폴라리스우노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "220180",
+        "viaName": "핸디소프트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "246710",
+        "corpName": "티앤알바이오팹",
+        "industry": "pharma",
+        "viaCode": "223250",
+        "viaName": "드림씨아이에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038060",
+        "corpName": "루멘스",
+        "industry": "realestate",
+        "viaCode": "080520",
+        "viaName": "오디텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "446070",
+        "corpName": "유니드비티플러스",
+        "industry": "paper",
+        "viaCode": "222080",
+        "viaName": "씨아이에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "108860",
+        "corpName": "셀바스AI",
+        "industry": "software",
+        "viaCode": "041020",
+        "viaName": "폴라리스오피스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "223250",
+        "viaName": "드림씨아이에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "222080",
+        "viaName": "씨아이에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "056190",
+        "corpName": "에스에프에이",
+        "industry": "electronics",
+        "viaCode": "222080",
+        "viaName": "씨아이에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041910",
+        "corpName": "폴라리스AI파마",
+        "industry": "pharma",
+        "viaCode": "114630",
+        "viaName": "폴라리스우노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "348350",
+        "corpName": "위드텍",
+        "industry": "electronics",
+        "viaCode": "222080",
+        "viaName": "씨아이에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005090",
+        "corpName": "SGC에너지",
+        "industry": "energy",
+        "viaCode": "222080",
+        "viaName": "씨아이에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "220180",
+        "viaName": "핸디소프트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053980",
+        "corpName": "오상자이엘",
+        "industry": "software",
+        "viaCode": "220180",
+        "viaName": "핸디소프트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "294630",
+        "corpName": "서남",
+        "industry": "steel",
+        "viaCode": "114630",
+        "viaName": "폴라리스우노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "223250",
+        "viaName": "드림씨아이에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036540",
+        "corpName": "SFA반도체",
+        "industry": "semiconductor",
+        "viaCode": "222080",
+        "viaName": "씨아이에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "067010",
+        "corpName": "이씨에스",
+        "industry": "software",
+        "viaCode": "234100",
+        "viaName": "폴라리스세원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "020710",
+        "corpName": "시공테크",
+        "industry": "consulting",
+        "viaCode": "220180",
+        "viaName": "핸디소프트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010060",
+        "corpName": "OCI홀딩스",
+        "industry": "chemical",
+        "viaCode": "222080",
+        "viaName": "씨아이에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090150",
+        "corpName": "아이윈",
+        "industry": "auto",
+        "viaCode": "114630",
+        "viaName": "폴라리스우노",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
+        "viaCode": "222080",
+        "viaName": "씨아이에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
+        "viaCode": "234100",
+        "viaName": "폴라리스세원",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001520",
+        "corpName": "동양",
         "industry": "construction",
+        "viaCode": "222080",
+        "viaName": "씨아이에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "013570",
+        "corpName": "디와이",
+        "industry": "electronics",
+        "viaCode": "222080",
+        "viaName": "씨아이에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066310",
+        "corpName": "큐에스아이",
+        "industry": "medicalDevice",
+        "viaCode": "080520",
+        "viaName": "오디텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "238490",
+        "corpName": "힘스",
+        "industry": "electronics",
+        "viaCode": "041020",
+        "viaName": "폴라리스오피스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003000",
+        "corpName": "부광약품",
+        "industry": "pharma",
         "viaCode": "222080",
         "viaName": "씨아이에스",
         "hopDistance": 2
@@ -409,19 +565,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "456040",
-        "corpName": "OCI",
-        "industry": "chemical",
-        "viaCode": "222080",
-        "viaName": "씨아이에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "246710",
-        "corpName": "티앤알바이오팹",
-        "industry": "pharma",
-        "viaCode": "223250",
-        "viaName": "드림씨아이에스",
+        "stockCode": "036220",
+        "corpName": "오상헬스케어",
+        "industry": "medicalDevice",
+        "viaCode": "220180",
+        "viaName": "핸디소프트",
         "hopDistance": 2
       },
       {
@@ -433,46 +581,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "223250",
-        "viaName": "드림씨아이에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "208370",
-        "corpName": "셀바스헬스케어",
-        "industry": "telecom",
-        "viaCode": "041020",
-        "viaName": "폴라리스오피스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "056190",
-        "corpName": "에스에프에이",
-        "industry": "electronics",
-        "viaCode": "222080",
-        "viaName": "씨아이에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "238490",
-        "corpName": "힘스",
-        "industry": "electronics",
-        "viaCode": "041020",
-        "viaName": "폴라리스오피스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041910",
-        "corpName": "폴라리스AI파마",
-        "industry": "pharma",
-        "viaCode": "234100",
-        "viaName": "폴라리스세원",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "456160",
         "corpName": "지투지바이오",
         "industry": "realestate",
@@ -481,153 +589,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "039560",
-        "corpName": "다산네트웍스",
-        "industry": "telecom",
-        "viaCode": "220180",
-        "viaName": "핸디소프트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036220",
-        "corpName": "오상헬스케어",
-        "industry": "medicalDevice",
-        "viaCode": "220180",
-        "viaName": "핸디소프트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033310",
-        "corpName": "엠투엔",
-        "industry": "electronics",
-        "viaCode": "041020",
-        "viaName": "폴라리스오피스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038060",
-        "corpName": "루멘스",
-        "industry": "realestate",
-        "viaCode": "080520",
-        "viaName": "오디텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "013570",
-        "corpName": "디와이",
-        "industry": "electronics",
-        "viaCode": "222080",
-        "viaName": "씨아이에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090150",
-        "corpName": "아이윈",
-        "industry": "auto",
-        "viaCode": "234100",
-        "viaName": "폴라리스세원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "108860",
-        "corpName": "셀바스AI",
-        "industry": "software",
-        "viaCode": "041020",
-        "viaName": "폴라리스오피스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
+        "stockCode": "039490",
+        "corpName": "키움증권",
         "industry": "finance",
-        "viaCode": "220180",
-        "viaName": "핸디소프트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038880",
-        "corpName": "아이에이",
-        "industry": "electronics",
-        "viaCode": "234100",
-        "viaName": "폴라리스세원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "220180",
-        "viaName": "핸디소프트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "087010",
-        "corpName": "펩트론",
-        "industry": "pharma",
-        "viaCode": "114630",
-        "viaName": "폴라리스우노",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "018880",
-        "corpName": "한온시스템",
-        "industry": "auto",
-        "viaCode": "234100",
-        "viaName": "폴라리스세원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "446070",
-        "corpName": "유니드비티플러스",
-        "industry": "paper",
-        "viaCode": "222080",
-        "viaName": "씨아이에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "023410",
-        "corpName": "유진기업",
-        "industry": "construction",
-        "viaCode": "222080",
-        "viaName": "씨아이에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053980",
-        "corpName": "오상자이엘",
-        "industry": "software",
-        "viaCode": "220180",
-        "viaName": "핸디소프트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "067010",
-        "corpName": "이씨에스",
-        "industry": "software",
-        "viaCode": "234100",
-        "viaName": "폴라리스세원",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
-        "viaCode": "222080",
-        "viaName": "씨아이에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "348350",
-        "corpName": "위드텍",
-        "industry": "electronics",
-        "viaCode": "222080",
-        "viaName": "씨아이에스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003000",
-        "corpName": "부광약품",
-        "industry": "pharma",
         "viaCode": "222080",
         "viaName": "씨아이에스",
         "hopDistance": 2

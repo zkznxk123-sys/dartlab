@@ -35,29 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2023",
-      "sales": 15313114696.0,
-      "operating_profit": 3289323223.0,
-      "net_profit": -2542800502.0,
-      "total_assets": 59802138646.0
-    },
-    {
-      "year": "2024",
-      "sales": 16032973792.0,
-      "operating_profit": 3364526992.0,
-      "net_profit": 1987259743.0,
-      "total_assets": 65450969138.0
-    },
-    {
-      "year": "2025",
-      "sales": 14901644432.0,
-      "operating_profit": 175123344.0,
-      "net_profit": -347932422.0,
-      "total_assets": 72158963348.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -109,73 +87,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "123040",
+        "corpName": "엠에스오토텍",
+        "industry": "electronics",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "406820",
         "corpName": "뷰티스킨",
         "industry": "cosmetics",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066310",
-        "corpName": "큐에스아이",
-        "industry": "medicalDevice",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "278470",
-        "corpName": "에이피알",
-        "industry": "cosmetics",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "207760",
-        "corpName": "미스터블루",
-        "industry": "media",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "214260",
-        "corpName": "라파스",
-        "industry": "pharma",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006840",
-        "corpName": "AK홀딩스",
-        "industry": "finance",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012030",
-        "corpName": "DB",
-        "industry": "semiconductor",
-        "viaCode": "016610",
-        "viaName": "DB증권",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084680",
-        "corpName": "이월드",
-        "industry": "realestate",
         "viaCode": "016610",
         "viaName": "DB증권",
         "hopDistance": 2
@@ -189,9 +111,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "123040",
-        "corpName": "엠에스오토텍",
-        "industry": "electronics",
+        "stockCode": "006840",
+        "corpName": "AK홀딩스",
+        "industry": "finance",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066310",
+        "corpName": "큐에스아이",
+        "industry": "medicalDevice",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084680",
+        "corpName": "이월드",
+        "industry": "realestate",
         "viaCode": "016610",
         "viaName": "DB증권",
         "hopDistance": 2
@@ -205,6 +143,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "012030",
+        "corpName": "DB",
+        "industry": "semiconductor",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "452190",
         "corpName": "한빛레이저",
         "industry": "medicalDevice",
@@ -213,9 +159,41 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "214260",
+        "corpName": "라파스",
+        "industry": "pharma",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "250030",
         "corpName": "진코스텍",
         "industry": "textile",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "207760",
+        "corpName": "미스터블루",
+        "industry": "media",
+        "viaCode": "016610",
+        "viaName": "DB증권",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "278470",
+        "corpName": "에이피알",
+        "industry": "cosmetics",
         "viaCode": "016610",
         "viaName": "DB증권",
         "hopDistance": 2

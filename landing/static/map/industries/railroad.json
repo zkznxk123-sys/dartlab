@@ -19,13 +19,13 @@
           "revenue": 58390,
           "confidence": 1.0,
           "source": "docs",
-          "roe": 35.9,
-          "opMargin": 12.5,
-          "debtRatio": 206.4,
-          "revCagr": 27.3,
-          "profGrade": "우수",
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
+          "revCagr": null,
+          "profGrade": "",
           "debtGrade": "주의",
-          "growthGrade": "고성장"
+          "growthGrade": ""
         },
         {
           "stockCode": "045390",
@@ -36,13 +36,13 @@
           "revenue": 1532,
           "confidence": 1.0,
           "source": "product",
-          "roe": 14.8,
-          "opMargin": 25.0,
-          "debtRatio": 118.4,
-          "revCagr": 15.7,
-          "profGrade": "우수",
-          "debtGrade": "관찰",
-          "growthGrade": "고성장"
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
+          "revCagr": null,
+          "profGrade": "",
+          "debtGrade": "",
+          "growthGrade": ""
         },
         {
           "stockCode": "271940",
@@ -53,12 +53,12 @@
           "revenue": 816,
           "confidence": 1.0,
           "source": "docs",
-          "roe": -0.6,
-          "opMargin": -13.7,
-          "debtRatio": 10.4,
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
           "revCagr": null,
-          "profGrade": "적자",
-          "debtGrade": "주의",
+          "profGrade": "",
+          "debtGrade": "",
           "growthGrade": ""
         },
         {
@@ -91,13 +91,13 @@
       "revenue": 591,
       "confidence": 0.7,
       "source": "kindlist",
-      "roe": 1.6,
-      "opMargin": 14.4,
-      "debtRatio": 53.0,
-      "revCagr": -37.3,
-      "profGrade": "양호",
+      "roe": null,
+      "opMargin": null,
+      "debtRatio": null,
+      "revCagr": null,
+      "profGrade": "",
       "debtGrade": "관찰",
-      "growthGrade": "급감"
+      "growthGrade": ""
     },
     {
       "stockCode": "123750",
@@ -108,13 +108,13 @@
       "revenue": 322,
       "confidence": 0.7,
       "source": "kindlist",
-      "roe": -1.8,
-      "opMargin": 0.7,
-      "debtRatio": 63.9,
-      "revCagr": 33.6,
-      "profGrade": "저수익",
-      "debtGrade": "주의",
-      "growthGrade": "고성장"
+      "roe": null,
+      "opMargin": null,
+      "debtRatio": null,
+      "revCagr": null,
+      "profGrade": "",
+      "debtGrade": "",
+      "growthGrade": ""
     }
   ],
   "edges": [

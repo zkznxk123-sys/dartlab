@@ -78,22 +78,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2023",
-      "sales": 40682712915.0,
-      "operating_profit": 5893114729.0,
-      "net_profit": 5266178665.0,
-      "total_assets": 39456899439.0
-    },
-    {
-      "year": "2025",
-      "sales": 44807184983.0,
-      "operating_profit": 5058171927.0,
-      "net_profit": 0.0,
-      "total_assets": 57632129914.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -145,38 +130,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "001430",
-        "corpName": "세아베스틸지주",
-        "industry": "electronics",
-        "viaCode": "009160",
-        "viaName": "SIMPAC",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "365900",
-        "corpName": "브이씨",
-        "industry": "leisure",
-        "viaCode": "105840",
-        "viaName": "우진",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000850",
-        "corpName": "화천기공",
-        "industry": "machinery",
-        "viaCode": "105840",
-        "viaName": "우진",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "307180",
-        "corpName": "아이엘",
-        "industry": "chemical",
-        "viaCode": "009160",
-        "viaName": "SIMPAC",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "084010",
         "corpName": "대한제강",
         "industry": "construction",
@@ -201,9 +154,33 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "000850",
+        "corpName": "화천기공",
+        "industry": "machinery",
+        "viaCode": "105840",
+        "viaName": "우진",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001430",
+        "corpName": "세아베스틸지주",
+        "industry": "electronics",
+        "viaCode": "009160",
+        "viaName": "SIMPAC",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "950170",
         "corpName": "JTC",
         "industry": "cosmetics",
+        "viaCode": "105840",
+        "viaName": "우진",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001470",
+        "corpName": "삼부토건",
+        "industry": "construction",
         "viaCode": "105840",
         "viaName": "우진",
         "hopDistance": 2
@@ -217,11 +194,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001470",
-        "corpName": "삼부토건",
-        "industry": "construction",
+        "stockCode": "365900",
+        "corpName": "브이씨",
+        "industry": "leisure",
         "viaCode": "105840",
         "viaName": "우진",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "307180",
+        "corpName": "아이엘",
+        "industry": "chemical",
+        "viaCode": "009160",
+        "viaName": "SIMPAC",
         "hopDistance": 2
       }
     ],

@@ -66,43 +66,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 480475197521.0,
-      "operating_profit": 912419721.0,
-      "net_profit": -5842439821.0,
-      "total_assets": 344617740768.0
-    },
-    {
-      "year": "2022",
-      "sales": 612322385130.0,
-      "operating_profit": -607442610.0,
-      "net_profit": 126061430.0,
-      "total_assets": 401969273009.0
-    },
-    {
-      "year": "2023",
-      "sales": 634838094173.0,
-      "operating_profit": 5680812539.0,
-      "net_profit": 11055745204.0,
-      "total_assets": 425327563943.0
-    },
-    {
-      "year": "2024",
-      "sales": 606198677648.0,
-      "operating_profit": 8591748464.0,
-      "net_profit": 19691475361.0,
-      "total_assets": 430591478194.0
-    },
-    {
-      "year": "2025",
-      "sales": 613023508125.0,
-      "operating_profit": 19373123437.0,
-      "net_profit": 12933762577.0,
-      "total_assets": 462306101255.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -154,6 +118,14 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "203650",
+        "corpName": "드림시큐리티",
+        "industry": "software",
+        "viaCode": "023760",
+        "viaName": "한국캐피탈",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "011390",
         "corpName": "부산산업",
         "industry": "construction",
@@ -162,19 +134,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000970",
-        "corpName": "한국주철관공업",
-        "industry": "steel",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "058400",
-        "viaName": "KNN",
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "023760",
+        "viaName": "한국캐피탈",
         "hopDistance": 2
       },
       {
@@ -194,40 +158,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "044780",
-        "corpName": "에이치케이",
-        "industry": "medicalDevice",
-        "viaCode": "023760",
-        "viaName": "한국캐피탈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034120",
-        "corpName": "SBS",
-        "industry": "electronics",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "203650",
-        "corpName": "드림시큐리티",
-        "industry": "software",
-        "viaCode": "023760",
-        "viaName": "한국캐피탈",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "058400",
-        "viaName": "KNN",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009780",
-        "corpName": "엠에스씨",
+        "stockCode": "004910",
+        "corpName": "조광페인트",
         "industry": "food",
         "viaCode": "058400",
         "viaName": "KNN",
@@ -242,9 +174,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "031310",
-        "corpName": "아이즈비전",
-        "industry": "chemical",
+        "stockCode": "034120",
+        "corpName": "SBS",
+        "industry": "electronics",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
         "viaCode": "058400",
         "viaName": "KNN",
         "hopDistance": 2
@@ -258,6 +198,30 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000970",
+        "corpName": "한국주철관공업",
+        "industry": "steel",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009780",
+        "corpName": "엠에스씨",
+        "industry": "food",
+        "viaCode": "058400",
+        "viaName": "KNN",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "015750",
         "corpName": "성우하이텍",
         "industry": "auto",
@@ -266,17 +230,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "002350",
-        "corpName": "넥센타이어",
-        "industry": "plastic",
+        "stockCode": "031310",
+        "corpName": "아이즈비전",
+        "industry": "chemical",
         "viaCode": "058400",
         "viaName": "KNN",
         "hopDistance": 2
       },
       {
-        "stockCode": "004910",
-        "corpName": "조광페인트",
-        "industry": "food",
+        "stockCode": "002350",
+        "corpName": "넥센타이어",
+        "industry": "plastic",
         "viaCode": "058400",
         "viaName": "KNN",
         "hopDistance": 2

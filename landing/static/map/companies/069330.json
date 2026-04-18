@@ -54,43 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 62149741.0,
-      "operating_profit": 6023033337.0,
-      "net_profit": 0.0,
-      "total_assets": 36962369365.0
-    },
-    {
-      "year": "2022",
-      "sales": 23119848.0,
-      "operating_profit": 3867134237.0,
-      "net_profit": 0.0,
-      "total_assets": 37089622729.0
-    },
-    {
-      "year": "2023",
-      "sales": 125690650.0,
-      "operating_profit": -325392074.0,
-      "net_profit": -167072503.0,
-      "total_assets": 43479678131.0
-    },
-    {
-      "year": "2024",
-      "sales": 387746806.0,
-      "operating_profit": 244020616.0,
-      "net_profit": 0.0,
-      "total_assets": 43229983991.0
-    },
-    {
-      "year": "2025",
-      "sales": 211315950.0,
-      "operating_profit": 1301726619.0,
-      "net_profit": 1285612509.0,
-      "total_assets": 45806496740.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -167,9 +131,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
+        "stockCode": "162300",
+        "corpName": "신스틸",
+        "industry": "steel",
+        "viaCode": "177830",
+        "viaName": "파버나인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
+        "viaCode": "177830",
+        "viaName": "파버나인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "143160",
+        "corpName": "아이디스",
+        "industry": "telecom",
         "viaCode": "179900",
         "viaName": "유티아이",
         "hopDistance": 2
@@ -183,11 +163,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "069510",
-        "corpName": "에스텍",
+        "stockCode": "066570",
+        "corpName": "LG전자",
         "industry": "electronics",
-        "viaCode": "177830",
-        "viaName": "파버나인",
+        "viaCode": "179900",
+        "viaName": "유티아이",
         "hopDistance": 2
       },
       {
@@ -199,19 +179,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
         "viaCode": "179900",
         "viaName": "유티아이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099520",
-        "corpName": "DGI",
-        "industry": "retail",
-        "viaCode": "177830",
-        "viaName": "파버나인",
         "hopDistance": 2
       },
       {
@@ -223,19 +195,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "162300",
-        "corpName": "신스틸",
-        "industry": "steel",
+        "stockCode": "099520",
+        "corpName": "DGI",
+        "industry": "retail",
         "viaCode": "177830",
         "viaName": "파버나인",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "143160",
-        "corpName": "아이디스",
-        "industry": "telecom",
-        "viaCode": "179900",
-        "viaName": "유티아이",
         "hopDistance": 2
       }
     ],

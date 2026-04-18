@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 319767433431.0,
-      "operating_profit": -4330515940.0,
-      "net_profit": null,
-      "total_assets": 346311070672.0
-    },
-    {
-      "year": "2022",
-      "sales": 338458898642.0,
-      "operating_profit": 915792675.0,
-      "net_profit": 31240536755.0,
-      "total_assets": 368514352079.0
-    },
-    {
-      "year": "2023",
-      "sales": 331046894011.0,
-      "operating_profit": -342355688.0,
-      "net_profit": -26004983702.0,
-      "total_assets": 299873288165.0
-    },
-    {
-      "year": "2024",
-      "sales": 348186460187.0,
-      "operating_profit": 4873277070.0,
-      "net_profit": 11519268610.0,
-      "total_assets": 317267769482.0
-    },
-    {
-      "year": "2025",
-      "sales": 319483898417.0,
-      "operating_profit": 1752619977.0,
-      "net_profit": 2327596992.0,
-      "total_assets": 249762179008.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -139,16 +103,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "083650",
-        "corpName": "비에이치아이",
-        "industry": "machinery",
+        "stockCode": "001250",
+        "corpName": "GS글로벌",
+        "industry": "chemical",
         "viaCode": "036640",
         "viaName": "HRS",
         "hopDistance": 2
       },
       {
-        "stockCode": "015590",
-        "corpName": "DKME",
+        "stockCode": "083650",
+        "corpName": "비에이치아이",
         "industry": "machinery",
         "viaCode": "036640",
         "viaName": "HRS",
@@ -163,24 +127,24 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006650",
-        "corpName": "대한유화",
-        "industry": "chemical",
-        "viaCode": "036640",
-        "viaName": "HRS",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001250",
-        "corpName": "GS글로벌",
-        "industry": "chemical",
-        "viaCode": "036640",
-        "viaName": "HRS",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "078930",
         "corpName": "GS",
+        "industry": "chemical",
+        "viaCode": "036640",
+        "viaName": "HRS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "015590",
+        "corpName": "DKME",
+        "industry": "machinery",
+        "viaCode": "036640",
+        "viaName": "HRS",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006650",
+        "corpName": "대한유화",
         "industry": "chemical",
         "viaCode": "036640",
         "viaName": "HRS",

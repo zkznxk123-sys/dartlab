@@ -109,43 +109,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 132202326153.0,
-      "operating_profit": 6100549787.0,
-      "net_profit": 0.0,
-      "total_assets": null
-    },
-    {
-      "year": "2022",
-      "sales": 153455101045.0,
-      "operating_profit": -7181518153.0,
-      "net_profit": 0.0,
-      "total_assets": null
-    },
-    {
-      "year": "2023",
-      "sales": 162093712069.0,
-      "operating_profit": -7289718026.0,
-      "net_profit": 0.0,
-      "total_assets": null
-    },
-    {
-      "year": "2024",
-      "sales": 176865812368.0,
-      "operating_profit": 658491068.0,
-      "net_profit": 0.0,
-      "total_assets": null
-    },
-    {
-      "year": "2025",
-      "sales": 205670598437.0,
-      "operating_profit": 1777567506.0,
-      "net_profit": -1670710404.0,
-      "total_assets": 343812153418.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 2,
     "customerCount": 0,
@@ -234,118 +198,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "009460",
-        "corpName": "한창제지",
-        "industry": "paper",
-        "viaCode": "009580",
-        "viaName": "무림P&P",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001630",
-        "corpName": "종근당홀딩스",
-        "industry": "pharma",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002990",
-        "corpName": "금호건설",
-        "industry": "realestate",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003380",
-        "corpName": "하림지주",
-        "industry": "finance",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010060",
-        "corpName": "OCI홀딩스",
-        "industry": "chemical",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012630",
-        "corpName": "HDC",
-        "industry": "finance",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001720",
-        "corpName": "신영증권",
-        "industry": "finance",
-        "viaCode": "009580",
-        "viaName": "무림P&P",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002350",
-        "corpName": "넥센타이어",
-        "industry": "plastic",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089470",
-        "corpName": "HDC현대EP",
-        "industry": "chemical",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "020560",
-        "corpName": "아시아나항공",
-        "industry": "aerospace",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "093190",
-        "corpName": "빅솔론",
-        "industry": "electronics",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "456040",
-        "corpName": "OCI",
-        "industry": "chemical",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "034810",
-        "corpName": "해성산업",
-        "industry": "realestate",
-        "viaCode": "009580",
-        "viaName": "무림P&P",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001120",
-        "corpName": "LX인터내셔널",
-        "industry": "textile",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "027970",
         "corpName": "한국제지",
         "industry": "paper",
@@ -354,65 +206,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "012860",
-        "corpName": "모베이스전자",
-        "industry": "telecom",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "340570",
-        "corpName": "티앤엘",
-        "industry": "pharma",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "047040",
-        "corpName": "대우건설",
-        "industry": "construction",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016360",
-        "corpName": "삼성증권",
-        "industry": "finance",
-        "viaCode": "009580",
-        "viaName": "무림P&P",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003470",
-        "corpName": "유안타증권",
-        "industry": "finance",
-        "viaCode": "009580",
-        "viaName": "무림P&P",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267850",
-        "corpName": "아시아나IDT",
-        "industry": "software",
-        "viaCode": "011780",
-        "viaName": "금호석유화학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "073240",
-        "corpName": "금호타이어",
-        "industry": "retail",
+        "stockCode": "020560",
+        "corpName": "아시아나항공",
+        "industry": "aerospace",
         "viaCode": "011780",
         "viaName": "금호석유화학",
         "hopDistance": 2
@@ -426,16 +222,80 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001270",
-        "corpName": "부국증권",
+        "stockCode": "002990",
+        "corpName": "금호건설",
+        "industry": "realestate",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012860",
+        "corpName": "모베이스전자",
+        "industry": "telecom",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069260",
+        "corpName": "티케이지휴켐스",
+        "industry": "chemical",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003380",
+        "corpName": "하림지주",
         "industry": "finance",
-        "viaCode": "009580",
-        "viaName": "무림P&P",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
         "hopDistance": 2
       },
       {
         "stockCode": "005720",
         "corpName": "넥센",
+        "industry": "plastic",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009460",
+        "corpName": "한창제지",
+        "industry": "paper",
+        "viaCode": "009580",
+        "viaName": "무림P&P",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047040",
+        "corpName": "대우건설",
+        "industry": "construction",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073240",
+        "corpName": "금호타이어",
+        "industry": "retail",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002350",
+        "corpName": "넥센타이어",
         "industry": "plastic",
         "viaCode": "011780",
         "viaName": "금호석유화학",
@@ -450,9 +310,113 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "069260",
-        "corpName": "티케이지휴켐스",
+        "stockCode": "034810",
+        "corpName": "해성산업",
+        "industry": "realestate",
+        "viaCode": "009580",
+        "viaName": "무림P&P",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "093190",
+        "corpName": "빅솔론",
+        "industry": "electronics",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003470",
+        "corpName": "유안타증권",
+        "industry": "finance",
+        "viaCode": "009580",
+        "viaName": "무림P&P",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "340570",
+        "corpName": "티앤엘",
+        "industry": "pharma",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001120",
+        "corpName": "LX인터내셔널",
+        "industry": "textile",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001270",
+        "corpName": "부국증권",
+        "industry": "finance",
+        "viaCode": "009580",
+        "viaName": "무림P&P",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010060",
+        "corpName": "OCI홀딩스",
         "industry": "chemical",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "456040",
+        "corpName": "OCI",
+        "industry": "chemical",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012630",
+        "corpName": "HDC",
+        "industry": "finance",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267850",
+        "corpName": "아시아나IDT",
+        "industry": "software",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001720",
+        "corpName": "신영증권",
+        "industry": "finance",
+        "viaCode": "009580",
+        "viaName": "무림P&P",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089470",
+        "corpName": "HDC현대EP",
+        "industry": "chemical",
+        "viaCode": "011780",
+        "viaName": "금호석유화학",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016360",
+        "corpName": "삼성증권",
+        "industry": "finance",
+        "viaCode": "009580",
+        "viaName": "무림P&P",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "011780",
         "viaName": "금호석유화학",
         "hopDistance": 2

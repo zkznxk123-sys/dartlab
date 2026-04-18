@@ -78,43 +78,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 33222759331.0,
-      "operating_profit": 2278946076.0,
-      "net_profit": 0.0,
-      "total_assets": 147925225081.0
-    },
-    {
-      "year": "2022",
-      "sales": 45993818218.0,
-      "operating_profit": 4005811892.0,
-      "net_profit": null,
-      "total_assets": 188353597818.0
-    },
-    {
-      "year": "2023",
-      "sales": 58716076773.0,
-      "operating_profit": 2633639012.0,
-      "net_profit": 13965914305.0,
-      "total_assets": 244228998208.0
-    },
-    {
-      "year": "2024",
-      "sales": 68520182954.0,
-      "operating_profit": 4110925721.0,
-      "net_profit": -188252851.0,
-      "total_assets": 222716913359.0
-    },
-    {
-      "year": "2025",
-      "sales": 76902884066.0,
-      "operating_profit": 3819154313.0,
-      "net_profit": -6602741705.0,
-      "total_assets": 209135993481.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -166,9 +130,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "260930",
-        "corpName": "씨티케이",
-        "industry": "cosmetics",
+        "stockCode": "382150",
+        "corpName": "온코크로스",
+        "industry": "software",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "338220",
+        "corpName": "뷰노",
+        "industry": "software",
         "viaCode": "000020",
         "viaName": "동화약품",
         "hopDistance": 2
@@ -182,17 +154,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "122310",
-        "corpName": "제노레이",
-        "industry": "medicalDevice",
-        "viaCode": "251630",
-        "viaName": "브이원텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "382150",
-        "corpName": "온코크로스",
-        "industry": "software",
+        "stockCode": "016580",
+        "corpName": "환인제약",
+        "industry": "food",
         "viaCode": "000020",
         "viaName": "동화약품",
         "hopDistance": 2
@@ -201,30 +165,6 @@
         "stockCode": "095700",
         "corpName": "제넥신",
         "industry": "pharma",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "053620",
-        "corpName": "태양",
-        "industry": "energy",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "200580",
-        "corpName": "메디쎄이",
-        "industry": "medicalDevice",
-        "viaCode": "000020",
-        "viaName": "동화약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016580",
-        "corpName": "환인제약",
-        "industry": "food",
         "viaCode": "000020",
         "viaName": "동화약품",
         "hopDistance": 2
@@ -270,17 +210,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "338220",
-        "corpName": "뷰노",
-        "industry": "software",
+        "stockCode": "122310",
+        "corpName": "제노레이",
+        "industry": "medicalDevice",
+        "viaCode": "251630",
+        "viaName": "브이원텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085310",
+        "corpName": "엔케이",
+        "industry": "food",
         "viaCode": "000020",
         "viaName": "동화약품",
         "hopDistance": 2
       },
       {
-        "stockCode": "491000",
-        "corpName": "리브스메드",
+        "stockCode": "200580",
+        "corpName": "메디쎄이",
         "industry": "medicalDevice",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053620",
+        "corpName": "태양",
+        "industry": "energy",
         "viaCode": "000020",
         "viaName": "동화약품",
         "hopDistance": 2
@@ -294,9 +250,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "085310",
-        "corpName": "엔케이",
-        "industry": "food",
+        "stockCode": "491000",
+        "corpName": "리브스메드",
+        "industry": "medicalDevice",
+        "viaCode": "000020",
+        "viaName": "동화약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "260930",
+        "corpName": "씨티케이",
+        "industry": "cosmetics",
         "viaCode": "000020",
         "viaName": "동화약품",
         "hopDistance": 2

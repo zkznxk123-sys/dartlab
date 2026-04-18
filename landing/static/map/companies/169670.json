@@ -95,17 +95,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "452400",
-        "corpName": "이닉스",
-        "industry": "semiconductor",
+        "stockCode": "050890",
+        "corpName": "쏠리드",
+        "industry": "telecom",
         "viaCode": "039740",
         "viaName": "한국정보공학",
         "hopDistance": 2
       },
       {
-        "stockCode": "050890",
-        "corpName": "쏠리드",
-        "industry": "telecom",
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
         "viaCode": "039740",
         "viaName": "한국정보공학",
         "hopDistance": 2

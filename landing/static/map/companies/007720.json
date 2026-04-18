@@ -90,43 +90,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 150390721188.0,
-      "operating_profit": -20881940085.0,
-      "net_profit": -22717245224.0,
-      "total_assets": 190514709786.0
-    },
-    {
-      "year": "2022",
-      "sales": 170972649935.0,
-      "operating_profit": -18503823286.0,
-      "net_profit": -17961953753.0,
-      "total_assets": 168960317915.0
-    },
-    {
-      "year": "2023",
-      "sales": 159946400719.0,
-      "operating_profit": -1589433754.0,
-      "net_profit": -48767506.0,
-      "total_assets": 168786753850.0
-    },
-    {
-      "year": "2024",
-      "sales": 133458255008.0,
-      "operating_profit": 656024469.0,
-      "net_profit": -10195549304.0,
-      "total_assets": 146944172764.0
-    },
-    {
-      "year": "2025",
-      "sales": 162871417133.0,
-      "operating_profit": 1396947928.0,
-      "net_profit": -2701367881.0,
-      "total_assets": 126647087699.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -178,17 +142,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "028670",
-        "corpName": "팬오션",
-        "industry": "logistics",
-        "viaCode": "091810",
-        "viaName": "티웨이항공",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036000",
-        "corpName": "예림당",
-        "industry": "telecom",
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
         "viaCode": "004870",
         "viaName": "티웨이홀딩스",
         "hopDistance": 2
@@ -202,19 +158,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001630",
-        "corpName": "종근당홀딩스",
-        "industry": "pharma",
-        "viaCode": "091810",
-        "viaName": "티웨이항공",
+        "stockCode": "036000",
+        "corpName": "예림당",
+        "industry": "telecom",
+        "viaCode": "004870",
+        "viaName": "티웨이홀딩스",
         "hopDistance": 2
       },
       {
-        "stockCode": "010950",
-        "corpName": "S-Oil",
-        "industry": "chemical",
-        "viaCode": "004870",
-        "viaName": "티웨이홀딩스",
+        "stockCode": "028670",
+        "corpName": "팬오션",
+        "industry": "logistics",
+        "viaCode": "091810",
+        "viaName": "티웨이항공",
         "hopDistance": 2
       },
       {
@@ -234,9 +190,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
+        "viaCode": "091810",
+        "viaName": "티웨이항공",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "010950",
+        "corpName": "S-Oil",
+        "industry": "chemical",
         "viaCode": "004870",
         "viaName": "티웨이홀딩스",
         "hopDistance": 2

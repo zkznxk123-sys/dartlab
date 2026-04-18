@@ -54,43 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 1662425507.0,
-      "operating_profit": -11219274373.0,
-      "net_profit": -16225404831.0,
-      "total_assets": 41956762393.0
-    },
-    {
-      "year": "2022",
-      "sales": 130024441.0,
-      "operating_profit": -16155656398.0,
-      "net_profit": -15913941243.0,
-      "total_assets": 38982480685.0
-    },
-    {
-      "year": "2023",
-      "sales": 267311985.0,
-      "operating_profit": -16811614766.0,
-      "net_profit": -4223612.0,
-      "total_assets": 20985105999.0
-    },
-    {
-      "year": "2024",
-      "sales": 590366156.0,
-      "operating_profit": -12327872668.0,
-      "net_profit": -12190154740.0,
-      "total_assets": 10741788152.0
-    },
-    {
-      "year": "2025",
-      "sales": 1171631910.0,
-      "operating_profit": -6438933559.0,
-      "net_profit": 0.0,
-      "total_assets": 6617374960.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -142,8 +106,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "199730",
-        "corpName": "바이오인프라",
+        "stockCode": "087010",
+        "corpName": "펩트론",
         "industry": "pharma",
         "viaCode": "011320",
         "viaName": "유니크",
@@ -158,6 +122,30 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "338220",
+        "corpName": "뷰노",
+        "industry": "software",
+        "viaCode": "389650",
+        "viaName": "넥스트바이오메디컬",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "278650",
+        "corpName": "HLB바이오스텝",
+        "industry": "pharma",
+        "viaCode": "389650",
+        "viaName": "넥스트바이오메디컬",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "199730",
+        "corpName": "바이오인프라",
+        "industry": "pharma",
+        "viaCode": "011320",
+        "viaName": "유니크",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "005710",
         "corpName": "대원산업",
         "industry": "auto",
@@ -166,17 +154,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003220",
-        "corpName": "대원제약",
-        "industry": "pharma",
+        "stockCode": "093190",
+        "corpName": "빅솔론",
+        "industry": "electronics",
+        "viaCode": "011320",
+        "viaName": "유니크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000430",
+        "corpName": "대원강업",
+        "industry": "auto",
+        "viaCode": "011320",
+        "viaName": "유니크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "347740",
+        "corpName": "피엔케이피부임상연구센타",
+        "industry": "consulting",
         "viaCode": "389650",
         "viaName": "넥스트바이오메디컬",
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
+        "stockCode": "003620",
+        "corpName": "KG모빌리티",
+        "industry": "electronics",
         "viaCode": "011320",
         "viaName": "유니크",
         "hopDistance": 2
@@ -190,16 +194,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "087010",
-        "corpName": "펩트론",
-        "industry": "pharma",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
         "viaCode": "011320",
         "viaName": "유니크",
         "hopDistance": 2
       },
       {
-        "stockCode": "278650",
-        "corpName": "HLB바이오스텝",
+        "stockCode": "003220",
+        "corpName": "대원제약",
         "industry": "pharma",
         "viaCode": "389650",
         "viaName": "넥스트바이오메디컬",
@@ -214,49 +218,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "227950",
-        "corpName": "엔투텍",
-        "industry": "semiconductor",
-        "viaCode": "011320",
-        "viaName": "유니크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "093190",
-        "corpName": "빅솔론",
-        "industry": "electronics",
-        "viaCode": "011320",
-        "viaName": "유니크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "338220",
-        "corpName": "뷰노",
-        "industry": "software",
-        "viaCode": "389650",
-        "viaName": "넥스트바이오메디컬",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "347740",
-        "corpName": "피엔케이피부임상연구센타",
-        "industry": "consulting",
-        "viaCode": "389650",
-        "viaName": "넥스트바이오메디컬",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "196170",
         "corpName": "알테오젠",
         "industry": "pharma",
-        "viaCode": "011320",
-        "viaName": "유니크",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000430",
-        "corpName": "대원강업",
-        "industry": "auto",
         "viaCode": "011320",
         "viaName": "유니크",
         "hopDistance": 2
@@ -278,9 +242,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003620",
-        "corpName": "KG모빌리티",
-        "industry": "electronics",
+        "stockCode": "227950",
+        "corpName": "엔투텍",
+        "industry": "semiconductor",
         "viaCode": "011320",
         "viaName": "유니크",
         "hopDistance": 2

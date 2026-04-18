@@ -90,43 +90,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 100199408929.0,
-      "operating_profit": 15663181185.0,
-      "net_profit": 29967230965.0,
-      "total_assets": 256070415241.0
-    },
-    {
-      "year": "2022",
-      "sales": 93816087048.0,
-      "operating_profit": -26845562593.0,
-      "net_profit": -41916606098.0,
-      "total_assets": 220671725870.0
-    },
-    {
-      "year": "2023",
-      "sales": 123382776486.0,
-      "operating_profit": 31759409160.0,
-      "net_profit": 38249378713.0,
-      "total_assets": 275835991994.0
-    },
-    {
-      "year": "2024",
-      "sales": 121901155445.0,
-      "operating_profit": 27340583130.0,
-      "net_profit": 60494621255.0,
-      "total_assets": 351354141871.0
-    },
-    {
-      "year": "2025",
-      "sales": 120651025450.0,
-      "operating_profit": 24620979407.0,
-      "net_profit": 20869284844.0,
-      "total_assets": 374525990937.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -187,17 +151,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "009270",
-        "corpName": "신원",
-        "industry": "retail",
-        "viaCode": "071200",
-        "viaName": "인피니트헬스케어",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000150",
-        "corpName": "두산",
-        "industry": "machinery",
+        "stockCode": "032850",
+        "corpName": "비트컴퓨터",
+        "industry": "software",
         "viaCode": "071200",
         "viaName": "인피니트헬스케어",
         "hopDistance": 2
@@ -206,6 +162,14 @@
         "stockCode": "333620",
         "corpName": "엔시스",
         "industry": "electrical",
+        "viaCode": "071200",
+        "viaName": "인피니트헬스케어",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009270",
+        "corpName": "신원",
+        "industry": "retail",
         "viaCode": "071200",
         "viaName": "인피니트헬스케어",
         "hopDistance": 2
@@ -227,9 +191,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "032850",
-        "corpName": "비트컴퓨터",
-        "industry": "software",
+        "stockCode": "000150",
+        "corpName": "두산",
+        "industry": "machinery",
         "viaCode": "071200",
         "viaName": "인피니트헬스케어",
         "hopDistance": 2

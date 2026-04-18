@@ -47,15 +47,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2025",
-      "sales": 113536899863.0,
-      "operating_profit": 17005218832.0,
-      "net_profit": 11442051299.0,
-      "total_assets": 186529397919.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -107,14 +99,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "024110",
         "corpName": "기업은행",
         "industry": "finance",
@@ -123,16 +107,48 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "016360",
-        "corpName": "삼성증권",
-        "industry": "finance",
+        "stockCode": "263810",
+        "corpName": "상신전자",
+        "industry": "electronics",
         "viaCode": "095500",
         "viaName": "미래나노텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "069510",
-        "corpName": "에스텍",
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "352940",
+        "corpName": "인바이오",
+        "industry": "chemical",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "337930",
+        "corpName": "젝시믹스",
+        "industry": "textile",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039560",
+        "corpName": "다산네트웍스",
+        "industry": "telecom",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092590",
+        "corpName": "럭스피아",
         "industry": "electronics",
         "viaCode": "095500",
         "viaName": "미래나노텍",
@@ -147,17 +163,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "084110",
-        "corpName": "휴온스글로벌",
-        "industry": "pharma",
+        "stockCode": "217330",
+        "corpName": "싸이토젠",
+        "industry": "software",
         "viaCode": "095500",
         "viaName": "미래나노텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "039560",
-        "corpName": "다산네트웍스",
-        "industry": "telecom",
+        "stockCode": "069510",
+        "corpName": "에스텍",
+        "industry": "electronics",
         "viaCode": "095500",
         "viaName": "미래나노텍",
         "hopDistance": 2
@@ -171,9 +187,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "337930",
-        "corpName": "젝시믹스",
-        "industry": "textile",
+        "stockCode": "016360",
+        "corpName": "삼성증권",
+        "industry": "finance",
+        "viaCode": "095500",
+        "viaName": "미래나노텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084850",
+        "corpName": "아이티엠반도체",
+        "industry": "electronics",
         "viaCode": "095500",
         "viaName": "미래나노텍",
         "hopDistance": 2
@@ -181,38 +205,6 @@
       {
         "stockCode": "067770",
         "corpName": "세진티에스",
-        "industry": "electronics",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "352940",
-        "corpName": "인바이오",
-        "industry": "chemical",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "217330",
-        "corpName": "싸이토젠",
-        "industry": "software",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
-        "viaCode": "095500",
-        "viaName": "미래나노텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "092590",
-        "corpName": "럭스피아",
         "industry": "electronics",
         "viaCode": "095500",
         "viaName": "미래나노텍",
@@ -227,17 +219,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "084850",
-        "corpName": "아이티엠반도체",
-        "industry": "electronics",
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
         "viaCode": "095500",
         "viaName": "미래나노텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "263810",
-        "corpName": "상신전자",
-        "industry": "electronics",
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
         "viaCode": "095500",
         "viaName": "미래나노텍",
         "hopDistance": 2

@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 228932661347.0,
-      "operating_profit": 20469193641.0,
-      "net_profit": 12091045735.0,
-      "total_assets": 489685302919.0
-    },
-    {
-      "year": "2022",
-      "sales": 262064785478.0,
-      "operating_profit": 36321615765.0,
-      "net_profit": 21235274767.0,
-      "total_assets": 621855923430.0
-    },
-    {
-      "year": "2023",
-      "sales": 338183142415.0,
-      "operating_profit": 38770681338.0,
-      "net_profit": 0.0,
-      "total_assets": 742762504229.0
-    },
-    {
-      "year": "2024",
-      "sales": 358876963707.0,
-      "operating_profit": 43565664081.0,
-      "net_profit": 0.0,
-      "total_assets": 697234577881.0
-    },
-    {
-      "year": "2025",
-      "sales": 365552937696.0,
-      "operating_profit": 46775282613.0,
-      "net_profit": 23682586713.0,
-      "total_assets": 710291517359.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,6 +87,30 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "228850",
+        "viaName": "레이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005940",
+        "corpName": "NH투자증권",
+        "industry": "finance",
+        "viaCode": "228850",
+        "viaName": "레이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037230",
+        "corpName": "한국팩키지",
+        "industry": "paper",
+        "viaCode": "228850",
+        "viaName": "레이언스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "031210",
         "corpName": "서울보증보험",
         "industry": "finance",
@@ -131,17 +119,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
+        "stockCode": "000990",
+        "corpName": "DB하이텍",
+        "industry": "semiconductor",
+        "viaCode": "228850",
+        "viaName": "레이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041190",
+        "corpName": "우리기술투자",
         "industry": "finance",
         "viaCode": "228850",
         "viaName": "레이언스",
         "hopDistance": 2
       },
       {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
+        "stockCode": "001120",
+        "corpName": "LX인터내셔널",
+        "industry": "textile",
+        "viaCode": "228850",
+        "viaName": "레이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "099220",
+        "corpName": "SDN",
+        "industry": "energy",
+        "viaCode": "228850",
+        "viaName": "레이언스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
         "viaCode": "228850",
         "viaName": "레이언스",
         "hopDistance": 2
@@ -163,57 +175,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001120",
-        "corpName": "LX인터내셔널",
-        "industry": "textile",
-        "viaCode": "228850",
-        "viaName": "레이언스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005940",
-        "corpName": "NH투자증권",
+        "stockCode": "001450",
+        "corpName": "현대해상",
         "industry": "finance",
-        "viaCode": "228850",
-        "viaName": "레이언스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041190",
-        "corpName": "우리기술투자",
-        "industry": "finance",
-        "viaCode": "228850",
-        "viaName": "레이언스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "099220",
-        "corpName": "SDN",
-        "industry": "energy",
-        "viaCode": "228850",
-        "viaName": "레이언스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037230",
-        "corpName": "한국팩키지",
-        "industry": "paper",
-        "viaCode": "228850",
-        "viaName": "레이언스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000990",
-        "corpName": "DB하이텍",
-        "industry": "semiconductor",
-        "viaCode": "228850",
-        "viaName": "레이언스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
         "viaCode": "228850",
         "viaName": "레이언스",
         "hopDistance": 2

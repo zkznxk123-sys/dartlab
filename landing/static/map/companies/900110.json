@@ -35,29 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 286588297.0,
-      "operating_profit": 25345996.0,
-      "net_profit": 14727877.0,
-      "total_assets": 1368762330.0
-    },
-    {
-      "year": "2022",
-      "sales": 282760945.0,
-      "operating_profit": 19113676.0,
-      "net_profit": 15145391.0,
-      "total_assets": 1515946187.0
-    },
-    {
-      "year": "2023",
-      "sales": 339379595.0,
-      "operating_profit": 30676045.0,
-      "net_profit": 17616872.0,
-      "total_assets": 1650887908.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -109,9 +87,25 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "054780",
-        "corpName": "키이스트",
-        "industry": "software",
+        "stockCode": "090460",
+        "corpName": "비에이치",
+        "industry": "electronics",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "063440",
+        "corpName": "SM Life Design",
+        "industry": "media",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "061090",
+        "corpName": "세나테크놀로지",
+        "industry": "retail",
         "viaCode": "376300",
         "viaName": "디어유",
         "hopDistance": 2
@@ -125,8 +119,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
+        "stockCode": "060570",
+        "corpName": "드림어스컴퍼니",
         "industry": "media",
         "viaCode": "376300",
         "viaName": "디어유",
@@ -141,41 +135,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "458350",
-        "corpName": "에스팀",
-        "industry": "media",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "217270",
-        "corpName": "넵튠",
-        "industry": "software",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "061090",
-        "corpName": "세나테크놀로지",
-        "industry": "retail",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "060570",
-        "corpName": "드림어스컴퍼니",
-        "industry": "media",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035720",
-        "corpName": "카카오",
-        "industry": "software",
+        "stockCode": "083550",
+        "corpName": "케이엠",
+        "industry": "chemical",
         "viaCode": "376300",
         "viaName": "디어유",
         "hopDistance": 2
@@ -189,49 +151,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "090460",
-        "corpName": "비에이치",
-        "industry": "electronics",
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
         "viaCode": "376300",
         "viaName": "디어유",
         "hopDistance": 2
       },
       {
-        "stockCode": "377300",
-        "corpName": "카카오페이",
-        "industry": "finance",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "373200",
-        "corpName": "엑스플러스",
-        "industry": "misc",
-        "viaCode": "376300",
-        "viaName": "디어유",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "048550",
-        "corpName": "SM C&C",
+        "stockCode": "041510",
+        "corpName": "에스엠",
         "industry": "media",
         "viaCode": "376300",
         "viaName": "디어유",
         "hopDistance": 2
       },
       {
-        "stockCode": "083550",
-        "corpName": "케이엠",
-        "industry": "chemical",
+        "stockCode": "054780",
+        "corpName": "키이스트",
+        "industry": "software",
         "viaCode": "376300",
         "viaName": "디어유",
         "hopDistance": 2
       },
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
+        "stockCode": "217270",
+        "corpName": "넵튠",
+        "industry": "software",
         "viaCode": "376300",
         "viaName": "디어유",
         "hopDistance": 2
@@ -253,9 +199,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "063440",
-        "corpName": "SM Life Design",
+        "stockCode": "377300",
+        "corpName": "카카오페이",
+        "industry": "finance",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "048550",
+        "corpName": "SM C&C",
         "industry": "media",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "458350",
+        "corpName": "에스팀",
+        "industry": "media",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "373200",
+        "corpName": "엑스플러스",
+        "industry": "misc",
+        "viaCode": "376300",
+        "viaName": "디어유",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "376300",
         "viaName": "디어유",
         "hopDistance": 2

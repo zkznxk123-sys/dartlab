@@ -54,36 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2022",
-      "sales": 381031986592.0,
-      "operating_profit": 15869285462.0,
-      "net_profit": 5887782591.0,
-      "total_assets": 161576062240.0
-    },
-    {
-      "year": "2023",
-      "sales": 323817908414.0,
-      "operating_profit": 13051719126.0,
-      "net_profit": 0.0,
-      "total_assets": 184968396469.0
-    },
-    {
-      "year": "2024",
-      "sales": 386554918254.0,
-      "operating_profit": 10467207712.0,
-      "net_profit": 0.0,
-      "total_assets": 229702813949.0
-    },
-    {
-      "year": "2025",
-      "sales": 352171696187.0,
-      "operating_profit": 3047366796.0,
-      "net_profit": 0.0,
-      "total_assets": 200339797835.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -176,17 +147,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "099520",
-        "corpName": "DGI",
-        "industry": "retail",
+        "stockCode": "217590",
+        "corpName": "티엠씨",
+        "industry": "electrical",
         "viaCode": "177830",
         "viaName": "파버나인",
         "hopDistance": 2
       },
       {
-        "stockCode": "217590",
-        "corpName": "티엠씨",
-        "industry": "electrical",
+        "stockCode": "099520",
+        "corpName": "DGI",
+        "industry": "retail",
         "viaCode": "177830",
         "viaName": "파버나인",
         "hopDistance": 2

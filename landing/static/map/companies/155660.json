@@ -78,43 +78,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 272417651710.0,
-      "operating_profit": 13454431587.0,
-      "net_profit": 12538612095.0,
-      "total_assets": 302598631429.0
-    },
-    {
-      "year": "2022",
-      "sales": 367456836231.0,
-      "operating_profit": 35774891408.0,
-      "net_profit": 24547772313.0,
-      "total_assets": 364710386862.0
-    },
-    {
-      "year": "2023",
-      "sales": 291095086618.0,
-      "operating_profit": 24261853627.0,
-      "net_profit": 0.0,
-      "total_assets": 343481015258.0
-    },
-    {
-      "year": "2024",
-      "sales": 299809123352.0,
-      "operating_profit": 15340514051.0,
-      "net_profit": 14512806208.0,
-      "total_assets": 363394228331.0
-    },
-    {
-      "year": "2025",
-      "sales": 302389824368.0,
-      "operating_profit": 19291739606.0,
-      "net_profit": 14961441937.0,
-      "total_assets": 391592277418.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -195,56 +159,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "003720",
-        "corpName": "삼영",
-        "industry": "chemical",
-        "viaCode": "006650",
-        "viaName": "대한유화",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "006650",
-        "viaName": "대한유화",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012630",
-        "corpName": "HDC",
-        "industry": "finance",
-        "viaCode": "006650",
-        "viaName": "대한유화",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037460",
-        "corpName": "삼지전자",
-        "industry": "telecom",
-        "viaCode": "006650",
-        "viaName": "대한유화",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000210",
-        "corpName": "DL",
-        "industry": "construction",
-        "viaCode": "006650",
-        "viaName": "대한유화",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "089470",
-        "corpName": "HDC현대EP",
-        "industry": "chemical",
-        "viaCode": "006650",
-        "viaName": "대한유화",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004800",
-        "corpName": "효성",
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
         "industry": "chemical",
         "viaCode": "006650",
         "viaName": "대한유화",
@@ -259,8 +175,32 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "096770",
-        "corpName": "SK이노베이션",
+        "stockCode": "036640",
+        "corpName": "HRS",
+        "industry": "chemical",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "298020",
+        "corpName": "효성티앤씨",
+        "industry": "chemical",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003720",
+        "corpName": "삼영",
         "industry": "chemical",
         "viaCode": "006650",
         "viaName": "대한유화",
@@ -283,9 +223,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "012750",
-        "corpName": "에스원",
-        "industry": "electronics",
+        "stockCode": "393890",
+        "corpName": "더블유씨피",
+        "industry": "battery",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009830",
+        "corpName": "한화솔루션",
+        "industry": "chemical",
         "viaCode": "006650",
         "viaName": "대한유화",
         "hopDistance": 2
@@ -299,8 +247,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
+        "stockCode": "012630",
+        "corpName": "HDC",
         "industry": "finance",
         "viaCode": "006650",
         "viaName": "대한유화",
@@ -315,41 +263,57 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "393890",
-        "corpName": "더블유씨피",
-        "industry": "battery",
+        "stockCode": "037460",
+        "corpName": "삼지전자",
+        "industry": "telecom",
         "viaCode": "006650",
         "viaName": "대한유화",
         "hopDistance": 2
       },
       {
-        "stockCode": "036640",
-        "corpName": "HRS",
+        "stockCode": "089470",
+        "corpName": "HDC현대EP",
         "industry": "chemical",
         "viaCode": "006650",
         "viaName": "대한유화",
         "hopDistance": 2
       },
       {
-        "stockCode": "009830",
-        "corpName": "한화솔루션",
+        "stockCode": "004800",
+        "corpName": "효성",
         "industry": "chemical",
         "viaCode": "006650",
         "viaName": "대한유화",
         "hopDistance": 2
       },
       {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
+        "stockCode": "012750",
+        "corpName": "에스원",
+        "industry": "electronics",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000210",
+        "corpName": "DL",
+        "industry": "construction",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "006650",
+        "viaName": "대한유화",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001450",
+        "corpName": "현대해상",
         "industry": "finance",
-        "viaCode": "006650",
-        "viaName": "대한유화",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "298020",
-        "corpName": "효성티앤씨",
-        "industry": "chemical",
         "viaCode": "006650",
         "viaName": "대한유화",
         "hopDistance": 2

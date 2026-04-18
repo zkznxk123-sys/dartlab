@@ -85,43 +85,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 54427039739.0,
-      "operating_profit": 4789226966.0,
-      "net_profit": 4104485697.0,
-      "total_assets": 145443710932.0
-    },
-    {
-      "year": "2022",
-      "sales": 40389289878.0,
-      "operating_profit": -3371639793.0,
-      "net_profit": -4054767542.0,
-      "total_assets": 135571022652.0
-    },
-    {
-      "year": "2023",
-      "sales": 34964165951.0,
-      "operating_profit": -4252771289.0,
-      "net_profit": 2950848792.0,
-      "total_assets": 138037594061.0
-    },
-    {
-      "year": "2024",
-      "sales": 37001931925.0,
-      "operating_profit": -6361445277.0,
-      "net_profit": 5471824408.0,
-      "total_assets": 136975371245.0
-    },
-    {
-      "year": "2025",
-      "sales": 37959545863.0,
-      "operating_profit": -2276892782.0,
-      "net_profit": 890599267.0,
-      "total_assets": 134145170682.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -182,11 +146,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "038060",
-        "viaName": "루멘스",
+        "stockCode": "114630",
+        "corpName": "폴라리스우노",
+        "industry": "chemical",
+        "viaCode": "039980",
+        "viaName": "폴라리스AI",
         "hopDistance": 2
       },
       {
@@ -198,9 +162,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "234100",
-        "corpName": "폴라리스세원",
-        "industry": "electronics",
+        "stockCode": "016610",
+        "corpName": "DB증권",
+        "industry": "finance",
+        "viaCode": "066310",
+        "viaName": "큐에스아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "038060",
+        "viaName": "루멘스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "223250",
+        "corpName": "드림씨아이에스",
+        "industry": "pharma",
         "viaCode": "039980",
         "viaName": "폴라리스AI",
         "hopDistance": 2
@@ -214,11 +194,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "100220",
-        "corpName": "비상교육",
-        "industry": "media",
-        "viaCode": "038060",
-        "viaName": "루멘스",
+        "stockCode": "234100",
+        "corpName": "폴라리스세원",
+        "industry": "electronics",
+        "viaCode": "039980",
+        "viaName": "폴라리스AI",
         "hopDistance": 2
       },
       {
@@ -230,43 +210,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "091700",
-        "corpName": "파트론",
-        "industry": "electronics",
-        "viaCode": "066310",
-        "viaName": "큐에스아이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "223250",
-        "corpName": "드림씨아이에스",
-        "industry": "pharma",
-        "viaCode": "039980",
-        "viaName": "폴라리스AI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016610",
-        "corpName": "DB증권",
-        "industry": "finance",
-        "viaCode": "066310",
-        "viaName": "큐에스아이",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "114630",
-        "corpName": "폴라리스우노",
-        "industry": "chemical",
-        "viaCode": "039980",
-        "viaName": "폴라리스AI",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041020",
-        "corpName": "폴라리스오피스",
-        "industry": "software",
-        "viaCode": "039980",
-        "viaName": "폴라리스AI",
+        "stockCode": "085310",
+        "corpName": "엔케이",
+        "industry": "food",
+        "viaCode": "038060",
+        "viaName": "루멘스",
         "hopDistance": 2
       },
       {
@@ -278,9 +226,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "085310",
-        "corpName": "엔케이",
-        "industry": "food",
+        "stockCode": "091700",
+        "corpName": "파트론",
+        "industry": "electronics",
+        "viaCode": "066310",
+        "viaName": "큐에스아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041020",
+        "corpName": "폴라리스오피스",
+        "industry": "software",
+        "viaCode": "039980",
+        "viaName": "폴라리스AI",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100220",
+        "corpName": "비상교육",
+        "industry": "media",
         "viaCode": "038060",
         "viaName": "루멘스",
         "hopDistance": 2

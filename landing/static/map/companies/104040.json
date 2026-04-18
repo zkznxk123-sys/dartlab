@@ -47,36 +47,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 32850559765.0,
-      "operating_profit": 1070834765.0,
-      "net_profit": null,
-      "total_assets": 83415841666.0
-    },
-    {
-      "year": "2022",
-      "sales": 27255182909.0,
-      "operating_profit": -2322588214.0,
-      "net_profit": -3086249870.0,
-      "total_assets": 80094472879.0
-    },
-    {
-      "year": "2023",
-      "sales": 29404450802.0,
-      "operating_profit": -2019748251.0,
-      "net_profit": 0.0,
-      "total_assets": 74807678869.0
-    },
-    {
-      "year": "2025",
-      "sales": 28477611667.0,
-      "operating_profit": -7925464915.0,
-      "net_profit": 2015700512.0,
-      "total_assets": 231175219070.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -148,14 +119,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "017900",
-        "corpName": "광전자",
-        "industry": "semiconductor",
-        "viaCode": "131760",
-        "viaName": "파인텍",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "024110",
         "corpName": "기업은행",
         "industry": "finance",
@@ -164,17 +127,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "089970",
-        "corpName": "브이엠",
-        "industry": "machinery",
+        "stockCode": "018290",
+        "corpName": "브이티",
+        "industry": "plastic",
         "viaCode": "131760",
         "viaName": "파인텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "018290",
-        "corpName": "브이티",
-        "industry": "plastic",
+        "stockCode": "017900",
+        "corpName": "광전자",
+        "industry": "semiconductor",
+        "viaCode": "131760",
+        "viaName": "파인텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089970",
+        "corpName": "브이엠",
+        "industry": "machinery",
         "viaCode": "131760",
         "viaName": "파인텍",
         "hopDistance": 2

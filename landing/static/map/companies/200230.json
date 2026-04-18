@@ -116,43 +116,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 37841150315.0,
-      "operating_profit": -2741321059.0,
-      "net_profit": -23206847983.0,
-      "total_assets": 168029661150.0
-    },
-    {
-      "year": "2022",
-      "sales": 27829999169.0,
-      "operating_profit": -4062993478.0,
-      "net_profit": -42117159483.0,
-      "total_assets": 119254912219.0
-    },
-    {
-      "year": "2023",
-      "sales": 36307203781.0,
-      "operating_profit": 965315608.0,
-      "net_profit": 42339130.0,
-      "total_assets": 140414916719.0
-    },
-    {
-      "year": "2024",
-      "sales": 37865282088.0,
-      "operating_profit": -70548303.0,
-      "net_profit": -26319870062.0,
-      "total_assets": 153588079745.0
-    },
-    {
-      "year": "2025",
-      "sales": 43161795161.0,
-      "operating_profit": 718589452.0,
-      "net_profit": -11431375552.0,
-      "total_assets": 156668061672.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -224,147 +188,11 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "378800",
-        "corpName": "샤페론",
-        "industry": "pharma",
-        "viaCode": "307750",
-        "viaName": "국전약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "260660",
-        "corpName": "알리코제약",
-        "industry": "pharma",
-        "viaCode": "307750",
-        "viaName": "국전약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "007070",
-        "corpName": "GS리테일",
-        "industry": "retail",
-        "viaCode": "123840",
-        "viaName": "뉴온",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006620",
-        "corpName": "동구바이오제약",
-        "industry": "pharma",
-        "viaCode": "307750",
-        "viaName": "국전약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "222040",
-        "corpName": "코스맥스엔비티",
-        "industry": "pharma",
-        "viaCode": "123840",
-        "viaName": "뉴온",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "192820",
-        "corpName": "코스맥스",
-        "industry": "cosmetics",
-        "viaCode": "123840",
-        "viaName": "뉴온",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038540",
-        "corpName": "상상인",
-        "industry": "software",
-        "viaCode": "123840",
-        "viaName": "뉴온",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "069620",
-        "corpName": "대웅제약",
-        "industry": "pharma",
-        "viaCode": "307750",
-        "viaName": "국전약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "085310",
-        "corpName": "엔케이",
-        "industry": "food",
-        "viaCode": "123840",
-        "viaName": "뉴온",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000100",
-        "corpName": "유한양행",
-        "industry": "pharma",
-        "viaCode": "307750",
-        "viaName": "국전약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003090",
-        "corpName": "대웅",
-        "industry": "pharma",
-        "viaCode": "307750",
-        "viaName": "국전약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "239610",
-        "corpName": "에이치엘사이언스",
-        "industry": "pharma",
-        "viaCode": "123840",
-        "viaName": "뉴온",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "314140",
-        "corpName": "알피바이오",
-        "industry": "pharma",
-        "viaCode": "123840",
-        "viaName": "뉴온",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "029460",
         "corpName": "케이씨",
         "industry": "energy",
         "viaCode": "123840",
         "viaName": "뉴온",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "236810",
-        "corpName": "엔비티",
-        "industry": "software",
-        "viaCode": "123840",
-        "viaName": "뉴온",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002210",
-        "corpName": "동성제약",
-        "industry": "food",
-        "viaCode": "307750",
-        "viaName": "국전약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006800",
-        "corpName": "미래에셋증권",
-        "industry": "finance",
-        "viaCode": "203400",
-        "viaName": "에이비온",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005500",
-        "corpName": "삼진제약",
-        "industry": "retail",
-        "viaCode": "307750",
-        "viaName": "국전약품",
         "hopDistance": 2
       },
       {
@@ -376,41 +204,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "008490",
-        "corpName": "서흥",
-        "industry": "chemical",
+        "stockCode": "222040",
+        "corpName": "코스맥스엔비티",
+        "industry": "pharma",
         "viaCode": "123840",
         "viaName": "뉴온",
         "hopDistance": 2
       },
       {
-        "stockCode": "017180",
-        "corpName": "명문제약",
-        "industry": "pharma",
-        "viaCode": "307750",
-        "viaName": "국전약품",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "084650",
-        "corpName": "랩지노믹스",
-        "industry": "pharma",
-        "viaCode": "203400",
-        "viaName": "에이비온",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "123840",
-        "viaName": "뉴온",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "200130",
-        "corpName": "콜마비앤에이치",
-        "industry": "pharma",
+        "stockCode": "085310",
+        "corpName": "엔케이",
+        "industry": "food",
         "viaCode": "123840",
         "viaName": "뉴온",
         "hopDistance": 2
@@ -432,9 +236,121 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
+        "viaCode": "203400",
+        "viaName": "에이비온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "123840",
+        "viaName": "뉴온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200130",
+        "corpName": "콜마비앤에이치",
+        "industry": "pharma",
+        "viaCode": "123840",
+        "viaName": "뉴온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007070",
+        "corpName": "GS리테일",
+        "industry": "retail",
+        "viaCode": "123840",
+        "viaName": "뉴온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069620",
+        "corpName": "대웅제약",
+        "industry": "pharma",
+        "viaCode": "307750",
+        "viaName": "국전약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008490",
+        "corpName": "서흥",
+        "industry": "chemical",
+        "viaCode": "123840",
+        "viaName": "뉴온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "236810",
+        "corpName": "엔비티",
+        "industry": "software",
+        "viaCode": "123840",
+        "viaName": "뉴온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005500",
+        "corpName": "삼진제약",
+        "industry": "retail",
+        "viaCode": "307750",
+        "viaName": "국전약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012800",
+        "corpName": "대창",
+        "industry": "steel",
+        "viaCode": "042040",
+        "viaName": "케이피엠테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "084650",
+        "corpName": "랩지노믹스",
+        "industry": "pharma",
+        "viaCode": "203400",
+        "viaName": "에이비온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000100",
+        "corpName": "유한양행",
+        "industry": "pharma",
+        "viaCode": "307750",
+        "viaName": "국전약품",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "002720",
         "corpName": "국제약품",
         "industry": "food",
+        "viaCode": "307750",
+        "viaName": "국전약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038540",
+        "corpName": "상상인",
+        "industry": "software",
+        "viaCode": "123840",
+        "viaName": "뉴온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "314140",
+        "corpName": "알피바이오",
+        "industry": "pharma",
+        "viaCode": "123840",
+        "viaName": "뉴온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017180",
+        "corpName": "명문제약",
+        "industry": "pharma",
         "viaCode": "307750",
         "viaName": "국전약품",
         "hopDistance": 2
@@ -448,11 +364,59 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "012800",
-        "corpName": "대창",
-        "industry": "steel",
-        "viaCode": "042040",
-        "viaName": "케이피엠테크",
+        "stockCode": "003090",
+        "corpName": "대웅",
+        "industry": "pharma",
+        "viaCode": "307750",
+        "viaName": "국전약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "378800",
+        "corpName": "샤페론",
+        "industry": "pharma",
+        "viaCode": "307750",
+        "viaName": "국전약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002210",
+        "corpName": "동성제약",
+        "industry": "food",
+        "viaCode": "307750",
+        "viaName": "국전약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "260660",
+        "corpName": "알리코제약",
+        "industry": "pharma",
+        "viaCode": "307750",
+        "viaName": "국전약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006620",
+        "corpName": "동구바이오제약",
+        "industry": "pharma",
+        "viaCode": "307750",
+        "viaName": "국전약품",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192820",
+        "corpName": "코스맥스",
+        "industry": "cosmetics",
+        "viaCode": "123840",
+        "viaName": "뉴온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "239610",
+        "corpName": "에이치엘사이언스",
+        "industry": "pharma",
+        "viaCode": "123840",
+        "viaName": "뉴온",
         "hopDistance": 2
       }
     ],

@@ -152,43 +152,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 90904348393.0,
-      "operating_profit": 13876915140.0,
-      "net_profit": 11486174453.0,
-      "total_assets": 128972657972.0
-    },
-    {
-      "year": "2022",
-      "sales": 218237744878.0,
-      "operating_profit": 41420546422.0,
-      "net_profit": 32362895640.0,
-      "total_assets": 184089524865.0
-    },
-    {
-      "year": "2023",
-      "sales": 228946023204.0,
-      "operating_profit": 41780811675.0,
-      "net_profit": 33546467256.0,
-      "total_assets": 225812641050.0
-    },
-    {
-      "year": "2024",
-      "sales": 234500459609.0,
-      "operating_profit": 24226100708.0,
-      "net_profit": 21548434961.0,
-      "total_assets": 466652782080.0
-    },
-    {
-      "year": "2025",
-      "sales": 141057118027.0,
-      "operating_profit": 11709586777.0,
-      "net_profit": 0.0,
-      "total_assets": 458920378557.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -269,65 +233,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "039490",
-        "corpName": "키움증권",
-        "industry": "finance",
-        "viaCode": "086520",
-        "viaName": "에코프로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090080",
-        "corpName": "평화산업",
-        "industry": "electronics",
-        "viaCode": "086520",
-        "viaName": "에코프로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003650",
-        "corpName": "미창석유공업",
-        "industry": "plastic",
-        "viaCode": "086520",
-        "viaName": "에코프로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "006400",
-        "corpName": "삼성SDI",
+        "stockCode": "096770",
+        "corpName": "SK이노베이션",
         "industry": "chemical",
-        "viaCode": "086520",
-        "viaName": "에코프로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "086520",
-        "viaName": "에코프로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "065350",
-        "corpName": "신성델타테크",
-        "industry": "electronics",
-        "viaCode": "004080",
-        "viaName": "신흥",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "160550",
-        "corpName": "NEW",
-        "industry": "finance",
-        "viaCode": "086520",
-        "viaName": "에코프로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "114190",
-        "corpName": "강원에너지",
-        "industry": "construction",
         "viaCode": "247540",
         "viaName": "에코프로비엠",
         "hopDistance": 2
@@ -349,11 +257,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "096770",
-        "corpName": "SK이노베이션",
-        "industry": "chemical",
-        "viaCode": "086520",
-        "viaName": "에코프로",
+        "stockCode": "160550",
+        "corpName": "NEW",
+        "industry": "finance",
+        "viaCode": "247540",
+        "viaName": "에코프로비엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "247540",
+        "viaName": "에코프로비엠",
         "hopDistance": 2
       },
       {
@@ -365,11 +281,99 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "086520",
+        "viaName": "에코프로",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007210",
+        "corpName": "벽산",
+        "industry": "auto",
+        "viaCode": "247540",
+        "viaName": "에코프로비엠",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "090410",
         "corpName": "덕신이피씨",
         "industry": "steel",
         "viaCode": "247540",
         "viaName": "에코프로비엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
+        "industry": "finance",
+        "viaCode": "086520",
+        "viaName": "에코프로",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006400",
+        "corpName": "삼성SDI",
+        "industry": "chemical",
+        "viaCode": "247540",
+        "viaName": "에코프로비엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "082640",
+        "corpName": "동양생명",
+        "industry": "finance",
+        "viaCode": "247540",
+        "viaName": "에코프로비엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011040",
+        "corpName": "경동제약",
+        "industry": "pharma",
+        "viaCode": "086520",
+        "viaName": "에코프로",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095500",
+        "corpName": "미래나노텍",
+        "industry": "electronics",
+        "viaCode": "247540",
+        "viaName": "에코프로비엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "090080",
+        "corpName": "평화산업",
+        "industry": "electronics",
+        "viaCode": "247540",
+        "viaName": "에코프로비엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
+        "industry": "aerospace",
+        "viaCode": "086520",
+        "viaName": "에코프로",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "247540",
+        "viaName": "에코프로비엠",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "322970",
+        "corpName": "무진메디",
+        "industry": "pharma",
+        "viaCode": "004080",
+        "viaName": "신흥",
         "hopDistance": 2
       },
       {
@@ -389,27 +393,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "082640",
-        "corpName": "동양생명",
-        "industry": "finance",
-        "viaCode": "086520",
-        "viaName": "에코프로",
+        "stockCode": "114190",
+        "corpName": "강원에너지",
+        "industry": "construction",
+        "viaCode": "247540",
+        "viaName": "에코프로비엠",
         "hopDistance": 2
       },
       {
-        "stockCode": "007210",
-        "corpName": "벽산",
-        "industry": "auto",
-        "viaCode": "086520",
-        "viaName": "에코프로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095500",
-        "corpName": "미래나노텍",
+        "stockCode": "065350",
+        "corpName": "신성델타테크",
         "industry": "electronics",
+        "viaCode": "004080",
+        "viaName": "신흥",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003650",
+        "corpName": "미창석유공업",
+        "industry": "plastic",
         "viaCode": "086520",
         "viaName": "에코프로",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
+        "viaCode": "247540",
+        "viaName": "에코프로비엠",
         "hopDistance": 2
       },
       {
@@ -418,54 +430,6 @@
         "industry": "finance",
         "viaCode": "086520",
         "viaName": "에코프로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "086520",
-        "viaName": "에코프로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "086520",
-        "viaName": "에코프로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
-        "viaCode": "086520",
-        "viaName": "에코프로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "086520",
-        "viaName": "에코프로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011040",
-        "corpName": "경동제약",
-        "industry": "pharma",
-        "viaCode": "086520",
-        "viaName": "에코프로",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "322970",
-        "corpName": "무진메디",
-        "industry": "pharma",
-        "viaCode": "004080",
-        "viaName": "신흥",
         "hopDistance": 2
       }
     ],

@@ -35,29 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2022",
-      "sales": 9139386732.0,
-      "operating_profit": 1487584298.0,
-      "net_profit": 1339325234.0,
-      "total_assets": 7949480110.0
-    },
-    {
-      "year": "2023",
-      "sales": 10101040486.0,
-      "operating_profit": 1226337763.0,
-      "net_profit": 0.0,
-      "total_assets": 17200456179.0
-    },
-    {
-      "year": "2025",
-      "sales": 8213447247.0,
-      "operating_profit": 4492321.0,
-      "net_profit": 287876652.0,
-      "total_assets": 15028602394.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -137,14 +115,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "084110",
-        "corpName": "휴온스글로벌",
-        "industry": "pharma",
-        "viaCode": "078140",
-        "viaName": "대봉엘에스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "347740",
         "corpName": "피엔케이피부임상연구센타",
         "industry": "consulting",
@@ -161,9 +131,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "200670",
-        "corpName": "휴메딕스",
-        "industry": "pharma",
+        "stockCode": "085310",
+        "corpName": "엔케이",
+        "industry": "food",
         "viaCode": "078140",
         "viaName": "대봉엘에스",
         "hopDistance": 2
@@ -177,9 +147,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "085310",
-        "corpName": "엔케이",
-        "industry": "food",
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
+        "viaCode": "078140",
+        "viaName": "대봉엘에스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "200670",
+        "corpName": "휴메딕스",
+        "industry": "pharma",
         "viaCode": "078140",
         "viaName": "대봉엘에스",
         "hopDistance": 2

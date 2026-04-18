@@ -90,43 +90,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 159017955309.0,
-      "operating_profit": 19647701659.0,
-      "net_profit": 14664297206.0,
-      "total_assets": 353716995747.0
-    },
-    {
-      "year": "2022",
-      "sales": 175266452048.0,
-      "operating_profit": 15632045335.0,
-      "net_profit": 18788497648.0,
-      "total_assets": 364121570785.0
-    },
-    {
-      "year": "2023",
-      "sales": 171965239524.0,
-      "operating_profit": 19128717935.0,
-      "net_profit": 22145557927.0,
-      "total_assets": 383909710687.0
-    },
-    {
-      "year": "2024",
-      "sales": 141950747269.0,
-      "operating_profit": 22314081505.0,
-      "net_profit": 37853224906.0,
-      "total_assets": 412586797943.0
-    },
-    {
-      "year": "2025",
-      "sales": 134870815287.0,
-      "operating_profit": 20215270547.0,
-      "net_profit": 20996079784.0,
-      "total_assets": 425396197381.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -198,22 +162,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "035890",
-        "corpName": "서희건설",
-        "industry": "realestate",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "093640",
-        "corpName": "케이알엠",
-        "industry": "semiconductor",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "100840",
         "corpName": "SNT에너지",
         "industry": "machinery",
@@ -222,35 +170,27 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "000970",
+        "corpName": "한국주철관공업",
+        "industry": "steel",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039310",
+        "corpName": "세중",
+        "industry": "software",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "000720",
         "corpName": "현대건설",
         "industry": "construction",
         "viaCode": "014280",
         "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "375500",
-        "corpName": "DL이앤씨",
-        "industry": "construction",
-        "viaCode": "120030",
-        "viaName": "조선선재",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033780",
-        "corpName": "케이티앤지",
-        "industry": "food",
-        "viaCode": "120030",
-        "viaName": "조선선재",
         "hopDistance": 2
       },
       {
@@ -270,9 +210,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "039310",
-        "corpName": "세중",
-        "industry": "software",
+        "stockCode": "003610",
+        "corpName": "방림",
+        "industry": "shipbuilding",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
         "viaCode": "014280",
         "viaName": "금강공업",
         "hopDistance": 2
@@ -283,6 +231,30 @@
         "industry": "construction",
         "viaCode": "014280",
         "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "073010",
+        "corpName": "케이에스피",
+        "industry": "auto",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "138930",
+        "corpName": "BNK금융지주",
+        "industry": "finance",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "375500",
+        "corpName": "DL이앤씨",
+        "industry": "construction",
+        "viaCode": "120030",
+        "viaName": "조선선재",
         "hopDistance": 2
       },
       {
@@ -302,25 +274,17 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "093640",
+        "corpName": "케이알엠",
+        "industry": "semiconductor",
+        "viaCode": "014280",
+        "viaName": "금강공업",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "011810",
         "corpName": "STX",
         "industry": "food",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000970",
-        "corpName": "한국주철관공업",
-        "industry": "steel",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003610",
-        "corpName": "방림",
-        "industry": "shipbuilding",
         "viaCode": "014280",
         "viaName": "금강공업",
         "hopDistance": 2
@@ -334,6 +298,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "033780",
+        "corpName": "케이티앤지",
+        "industry": "food",
+        "viaCode": "120030",
+        "viaName": "조선선재",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "002140",
         "corpName": "고려산업",
         "industry": "realestate",
@@ -342,17 +314,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "073010",
-        "corpName": "케이에스피",
-        "industry": "auto",
-        "viaCode": "014280",
-        "viaName": "금강공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "138930",
-        "corpName": "BNK금융지주",
-        "industry": "finance",
+        "stockCode": "035890",
+        "corpName": "서희건설",
+        "industry": "realestate",
         "viaCode": "014280",
         "viaName": "금강공업",
         "hopDistance": 2

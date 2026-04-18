@@ -85,43 +85,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 22256958341.0,
-      "operating_profit": -4826955807.0,
-      "net_profit": -3893845588.0,
-      "total_assets": 55294572757.0
-    },
-    {
-      "year": "2022",
-      "sales": 22615183360.0,
-      "operating_profit": 341102831.0,
-      "net_profit": -3028958668.0,
-      "total_assets": 58867894045.0
-    },
-    {
-      "year": "2023",
-      "sales": 19178342271.0,
-      "operating_profit": -2653050366.0,
-      "net_profit": -11865220642.0,
-      "total_assets": 41870851622.0
-    },
-    {
-      "year": "2024",
-      "sales": 23340259807.0,
-      "operating_profit": -3726430593.0,
-      "net_profit": -4723548955.0,
-      "total_assets": 38557960524.0
-    },
-    {
-      "year": "2025",
-      "sales": 48604543452.0,
-      "operating_profit": 3670011557.0,
-      "net_profit": -2324402052.0,
-      "total_assets": 60367477963.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -173,9 +137,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "053300",
-        "corpName": "한국정보인증",
-        "industry": "software",
+        "stockCode": "003160",
+        "corpName": "디아이",
+        "industry": "realestate",
         "viaCode": "020120",
         "viaName": "키다리스튜디오",
         "hopDistance": 2
@@ -197,33 +161,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003160",
-        "corpName": "디아이",
-        "industry": "realestate",
+        "stockCode": "032190",
+        "corpName": "다우데이타",
+        "industry": "retail",
         "viaCode": "020120",
         "viaName": "키다리스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053300",
+        "corpName": "한국정보인증",
+        "industry": "software",
+        "viaCode": "020120",
+        "viaName": "키다리스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "273060",
+        "corpName": "와이즈버즈",
+        "industry": "media",
+        "viaCode": "020120",
+        "viaName": "키다리스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109070",
+        "corpName": "주성코퍼레이션",
+        "industry": "telecom",
+        "viaCode": "032980",
+        "viaName": "바이온",
         "hopDistance": 2
       },
       {
         "stockCode": "023590",
         "corpName": "다우기술",
         "industry": "realestate",
-        "viaCode": "020120",
-        "viaName": "키다리스튜디오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "039490",
-        "corpName": "키움증권",
-        "industry": "finance",
-        "viaCode": "020120",
-        "viaName": "키다리스튜디오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "036570",
-        "corpName": "엔씨소프트",
-        "industry": "software",
         "viaCode": "020120",
         "viaName": "키다리스튜디오",
         "hopDistance": 2
@@ -245,46 +217,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "032190",
-        "corpName": "다우데이타",
-        "industry": "retail",
-        "viaCode": "020120",
-        "viaName": "키다리스튜디오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "258610",
-        "corpName": "케일럼",
-        "industry": "aerospace",
-        "viaCode": "064240",
-        "viaName": "홈캐스트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "109070",
-        "corpName": "주성코퍼레이션",
-        "industry": "telecom",
-        "viaCode": "032980",
-        "viaName": "바이온",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "197140",
-        "corpName": "디지캡",
-        "industry": "telecom",
-        "viaCode": "032980",
-        "viaName": "바이온",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "273060",
-        "corpName": "와이즈버즈",
-        "industry": "media",
-        "viaCode": "020120",
-        "viaName": "키다리스튜디오",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "143240",
         "corpName": "사람인",
         "industry": "software",
@@ -301,9 +233,41 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "258610",
+        "corpName": "케일럼",
+        "industry": "aerospace",
+        "viaCode": "064240",
+        "viaName": "홈캐스트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "036570",
+        "corpName": "엔씨소프트",
+        "industry": "software",
+        "viaCode": "020120",
+        "viaName": "키다리스튜디오",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "261520",
         "corpName": "이지스",
         "industry": "software",
+        "viaCode": "032980",
+        "viaName": "바이온",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039490",
+        "corpName": "키움증권",
+        "industry": "finance",
+        "viaCode": "020120",
+        "viaName": "키다리스튜디오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "197140",
+        "corpName": "디지캡",
+        "industry": "telecom",
         "viaCode": "032980",
         "viaName": "바이온",
         "hopDistance": 2

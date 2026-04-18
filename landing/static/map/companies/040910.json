@@ -54,43 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 115769377778.0,
-      "operating_profit": 1710641109.0,
-      "net_profit": 761807004.0,
-      "total_assets": 232848927889.0
-    },
-    {
-      "year": "2022",
-      "sales": 150944906368.0,
-      "operating_profit": -5051610239.0,
-      "net_profit": -5419303169.0,
-      "total_assets": 202500364340.0
-    },
-    {
-      "year": "2023",
-      "sales": 62273750997.0,
-      "operating_profit": -37213580426.0,
-      "net_profit": -37407373008.0,
-      "total_assets": 209531475481.0
-    },
-    {
-      "year": "2024",
-      "sales": 147615670947.0,
-      "operating_profit": -26684100904.0,
-      "net_profit": -28290711622.0,
-      "total_assets": 191149953618.0
-    },
-    {
-      "year": "2025",
-      "sales": 197041477697.0,
-      "operating_profit": 4452297110.0,
-      "net_profit": -1982766035.0,
-      "total_assets": 144397432698.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -162,11 +126,59 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "057540",
+        "corpName": "옴니시스템",
+        "industry": "energy",
+        "viaCode": "036090",
+        "viaName": "위지트",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "000720",
         "corpName": "현대건설",
         "industry": "construction",
         "viaCode": "004360",
         "viaName": "세방",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "057680",
+        "corpName": "티사이언티픽",
+        "industry": "software",
+        "viaCode": "036090",
+        "viaName": "위지트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005850",
+        "corpName": "에스엘",
+        "industry": "electronics",
+        "viaCode": "004360",
+        "viaName": "세방",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "100590",
+        "corpName": "머큐리",
+        "industry": "telecom",
+        "viaCode": "036090",
+        "viaName": "위지트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "347770",
+        "corpName": "핌스",
+        "industry": "electronics",
+        "viaCode": "036090",
+        "viaName": "위지트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079950",
+        "corpName": "인베니아",
+        "industry": "electronics",
+        "viaCode": "036090",
+        "viaName": "위지트",
         "hopDistance": 2
       },
       {
@@ -186,102 +198,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "079950",
-        "corpName": "인베니아",
-        "industry": "electronics",
-        "viaCode": "036090",
-        "viaName": "위지트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "028670",
-        "corpName": "팬오션",
-        "industry": "logistics",
-        "viaCode": "004360",
-        "viaName": "세방",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "057540",
-        "corpName": "옴니시스템",
-        "industry": "energy",
-        "viaCode": "036090",
-        "viaName": "위지트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "347770",
-        "corpName": "핌스",
-        "industry": "electronics",
-        "viaCode": "036090",
-        "viaName": "위지트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "038460",
-        "corpName": "바이오스마트",
-        "industry": "electronics",
-        "viaCode": "036090",
-        "viaName": "위지트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066980",
-        "corpName": "한성크린텍",
-        "industry": "environment",
-        "viaCode": "004360",
-        "viaName": "세방",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "057680",
-        "corpName": "티사이언티픽",
-        "industry": "software",
-        "viaCode": "036090",
-        "viaName": "위지트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "204620",
-        "corpName": "글로벌텍스프리",
-        "industry": "finance",
-        "viaCode": "036090",
-        "viaName": "위지트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005850",
-        "corpName": "에스엘",
-        "industry": "electronics",
-        "viaCode": "004360",
-        "viaName": "세방",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "086960",
-        "corpName": "MDS테크",
-        "industry": "realestate",
-        "viaCode": "036090",
-        "viaName": "위지트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "011810",
-        "corpName": "STX",
-        "industry": "food",
-        "viaCode": "004360",
-        "viaName": "세방",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037030",
-        "corpName": "파워넷",
-        "industry": "electrical",
-        "viaCode": "036090",
-        "viaName": "위지트",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "003470",
         "corpName": "유안타증권",
         "industry": "finance",
@@ -298,6 +214,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "038460",
+        "corpName": "바이오스마트",
+        "industry": "electronics",
+        "viaCode": "036090",
+        "viaName": "위지트",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "031310",
         "corpName": "아이즈비전",
         "industry": "chemical",
@@ -306,9 +230,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "100590",
-        "corpName": "머큐리",
-        "industry": "telecom",
+        "stockCode": "037030",
+        "corpName": "파워넷",
+        "industry": "electrical",
+        "viaCode": "036090",
+        "viaName": "위지트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066980",
+        "corpName": "한성크린텍",
+        "industry": "environment",
+        "viaCode": "036090",
+        "viaName": "위지트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011810",
+        "corpName": "STX",
+        "industry": "food",
+        "viaCode": "004360",
+        "viaName": "세방",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086960",
+        "corpName": "MDS테크",
+        "industry": "realestate",
+        "viaCode": "036090",
+        "viaName": "위지트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "028670",
+        "corpName": "팬오션",
+        "industry": "logistics",
+        "viaCode": "004360",
+        "viaName": "세방",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "204620",
+        "corpName": "글로벌텍스프리",
+        "industry": "finance",
         "viaCode": "036090",
         "viaName": "위지트",
         "hopDistance": 2

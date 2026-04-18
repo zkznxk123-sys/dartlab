@@ -54,36 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 1902394224458.0,
-      "operating_profit": 71108716318.0,
-      "net_profit": 0.0,
-      "total_assets": 550023979312.0
-    },
-    {
-      "year": "2022",
-      "sales": 2177261973592.0,
-      "operating_profit": 50047663225.0,
-      "net_profit": 30363688765.0,
-      "total_assets": 534356690809.0
-    },
-    {
-      "year": "2023",
-      "sales": 2047566232203.0,
-      "operating_profit": 59013290449.0,
-      "net_profit": 0.0,
-      "total_assets": 554118292957.0
-    },
-    {
-      "year": "2025",
-      "sales": 2438838573193.0,
-      "operating_profit": 75973592094.0,
-      "net_profit": 0.0,
-      "total_assets": 534570098866.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -164,65 +135,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "001520",
-        "corpName": "동양",
+        "stockCode": "023410",
+        "corpName": "유진기업",
         "industry": "construction",
         "viaCode": "259630",
         "viaName": "엠플러스",
         "hopDistance": 2
       },
       {
-        "stockCode": "011420",
-        "corpName": "갤럭시아에스엠",
-        "industry": "media",
-        "viaCode": "259630",
-        "viaName": "엠플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "008060",
-        "corpName": "대덕",
-        "industry": "electronics",
-        "viaCode": "259630",
-        "viaName": "엠플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "092730",
-        "corpName": "네오팜",
+        "stockCode": "161000",
+        "corpName": "애경케미칼",
         "industry": "chemical",
-        "viaCode": "259630",
-        "viaName": "엠플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "211270",
-        "corpName": "AP위성",
-        "industry": "telecom",
-        "viaCode": "259630",
-        "viaName": "엠플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "094280",
-        "corpName": "효성 ITX",
-        "industry": "chemical",
-        "viaCode": "259630",
-        "viaName": "엠플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "018250",
-        "corpName": "애경산업",
-        "industry": "chemical",
-        "viaCode": "259630",
-        "viaName": "엠플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "337840",
-        "corpName": "유엑스엔",
-        "industry": "medicalDevice",
         "viaCode": "259630",
         "viaName": "엠플러스",
         "hopDistance": 2
@@ -236,9 +159,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "094480",
-        "corpName": "갤럭시아머니트리",
-        "industry": "finance",
+        "stockCode": "372910",
+        "corpName": "한컴라이프케어",
+        "industry": "medicalDevice",
         "viaCode": "259630",
         "viaName": "엠플러스",
         "hopDistance": 2
@@ -252,14 +175,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "318020",
-        "corpName": "포인트모바일",
-        "industry": "electronics",
-        "viaCode": "259630",
-        "viaName": "엠플러스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "298040",
         "corpName": "효성중공업",
         "industry": "chemical",
@@ -268,25 +183,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006840",
-        "corpName": "AK홀딩스",
+        "stockCode": "084690",
+        "corpName": "대상홀딩스",
         "industry": "finance",
-        "viaCode": "259630",
-        "viaName": "엠플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "080160",
-        "corpName": "모두투어",
-        "industry": "logistics",
-        "viaCode": "259630",
-        "viaName": "엠플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004800",
-        "corpName": "효성",
-        "industry": "chemical",
         "viaCode": "259630",
         "viaName": "엠플러스",
         "hopDistance": 2
@@ -300,6 +199,14 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "298020",
+        "corpName": "효성티앤씨",
+        "industry": "chemical",
+        "viaCode": "259630",
+        "viaName": "엠플러스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "030520",
         "corpName": "한글과컴퓨터",
         "industry": "software",
@@ -308,9 +215,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "089590",
-        "corpName": "제주항공",
-        "industry": "aerospace",
+        "stockCode": "040300",
+        "corpName": "YTN",
+        "industry": "media",
         "viaCode": "259630",
         "viaName": "엠플러스",
         "hopDistance": 2
@@ -332,6 +239,110 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "259630",
+        "viaName": "엠플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "092730",
+        "corpName": "네오팜",
+        "industry": "chemical",
+        "viaCode": "259630",
+        "viaName": "엠플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "054920",
+        "corpName": "한컴위드",
+        "industry": "software",
+        "viaCode": "259630",
+        "viaName": "엠플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005380",
+        "corpName": "현대자동차",
+        "industry": "auto",
+        "viaCode": "456190",
+        "viaName": "큐라켐",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "094480",
+        "corpName": "갤럭시아머니트리",
+        "industry": "finance",
+        "viaCode": "259630",
+        "viaName": "엠플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "337840",
+        "corpName": "유엑스엔",
+        "industry": "medicalDevice",
+        "viaCode": "259630",
+        "viaName": "엠플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011420",
+        "corpName": "갤럭시아에스엠",
+        "industry": "media",
+        "viaCode": "259630",
+        "viaName": "엠플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002780",
+        "corpName": "진흥기업",
+        "industry": "construction",
+        "viaCode": "259630",
+        "viaName": "엠플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "094280",
+        "corpName": "효성 ITX",
+        "industry": "chemical",
+        "viaCode": "259630",
+        "viaName": "엠플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "089590",
+        "corpName": "제주항공",
+        "industry": "aerospace",
+        "viaCode": "259630",
+        "viaName": "엠플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "487570",
+        "corpName": "HS효성",
+        "industry": "chemical",
+        "viaCode": "259630",
+        "viaName": "엠플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "318020",
+        "corpName": "포인트모바일",
+        "industry": "electronics",
+        "viaCode": "259630",
+        "viaName": "엠플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "018250",
+        "corpName": "애경산업",
+        "industry": "chemical",
+        "viaCode": "259630",
+        "viaName": "엠플러스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "298050",
         "corpName": "HS효성첨단소재",
         "industry": "chemical",
@@ -340,9 +351,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "084690",
-        "corpName": "대상홀딩스",
-        "industry": "finance",
+        "stockCode": "001520",
+        "corpName": "동양",
+        "industry": "construction",
         "viaCode": "259630",
         "viaName": "엠플러스",
         "hopDistance": 2
@@ -350,6 +361,22 @@
       {
         "stockCode": "122990",
         "corpName": "와이솔",
+        "industry": "electronics",
+        "viaCode": "259630",
+        "viaName": "엠플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006840",
+        "corpName": "AK홀딩스",
+        "industry": "finance",
+        "viaCode": "259630",
+        "viaName": "엠플러스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "008060",
+        "corpName": "대덕",
         "industry": "electronics",
         "viaCode": "259630",
         "viaName": "엠플러스",
@@ -364,25 +391,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "372910",
-        "corpName": "한컴라이프케어",
-        "industry": "medicalDevice",
+        "stockCode": "211270",
+        "corpName": "AP위성",
+        "industry": "telecom",
         "viaCode": "259630",
         "viaName": "엠플러스",
         "hopDistance": 2
       },
       {
-        "stockCode": "054920",
-        "corpName": "한컴위드",
-        "industry": "software",
+        "stockCode": "004800",
+        "corpName": "효성",
+        "industry": "chemical",
         "viaCode": "259630",
         "viaName": "엠플러스",
         "hopDistance": 2
       },
       {
-        "stockCode": "002780",
-        "corpName": "진흥기업",
-        "industry": "construction",
+        "stockCode": "080160",
+        "corpName": "모두투어",
+        "industry": "logistics",
         "viaCode": "259630",
         "viaName": "엠플러스",
         "hopDistance": 2
@@ -391,62 +418,6 @@
         "stockCode": "484810",
         "corpName": "티엑스알로보틱스",
         "industry": "machinery",
-        "viaCode": "259630",
-        "viaName": "엠플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "040300",
-        "corpName": "YTN",
-        "industry": "media",
-        "viaCode": "259630",
-        "viaName": "엠플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005380",
-        "corpName": "현대자동차",
-        "industry": "auto",
-        "viaCode": "456190",
-        "viaName": "큐라켐",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "023410",
-        "corpName": "유진기업",
-        "industry": "construction",
-        "viaCode": "259630",
-        "viaName": "엠플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "161000",
-        "corpName": "애경케미칼",
-        "industry": "chemical",
-        "viaCode": "259630",
-        "viaName": "엠플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "487570",
-        "corpName": "HS효성",
-        "industry": "chemical",
-        "viaCode": "259630",
-        "viaName": "엠플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
-        "viaCode": "259630",
-        "viaName": "엠플러스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "298020",
-        "corpName": "효성티앤씨",
-        "industry": "chemical",
         "viaCode": "259630",
         "viaName": "엠플러스",
         "hopDistance": 2

@@ -140,43 +140,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 100966106272.0,
-      "operating_profit": 3426120278.0,
-      "net_profit": 837181610.0,
-      "total_assets": 92004196463.0
-    },
-    {
-      "year": "2022",
-      "sales": 102710439010.0,
-      "operating_profit": 4287385271.0,
-      "net_profit": 1378413531.0,
-      "total_assets": 94093947351.0
-    },
-    {
-      "year": "2023",
-      "sales": 104234950412.0,
-      "operating_profit": 5627697721.0,
-      "net_profit": -44845041.0,
-      "total_assets": 65618557729.0
-    },
-    {
-      "year": "2024",
-      "sales": 93013748432.0,
-      "operating_profit": 9952528451.0,
-      "net_profit": -4566434.0,
-      "total_assets": 63035402938.0
-    },
-    {
-      "year": "2025",
-      "sales": 81043717132.0,
-      "operating_profit": 7455451177.0,
-      "net_profit": 15656730846.0,
-      "total_assets": 58241070091.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -237,38 +201,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "096760",
-        "viaName": "JW홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001790",
-        "corpName": "대한제당",
-        "industry": "food",
-        "viaCode": "264900",
-        "viaName": "크라운제과",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005180",
-        "corpName": "빙그레",
-        "industry": "food",
-        "viaCode": "264900",
-        "viaName": "크라운제과",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "027970",
-        "corpName": "한국제지",
-        "industry": "paper",
-        "viaCode": "264900",
-        "viaName": "크라운제과",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "005740",
         "corpName": "크라운해태홀딩스",
         "industry": "food",
@@ -277,9 +209,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "214680",
-        "corpName": "디알텍",
-        "industry": "medicalDevice",
+        "stockCode": "101530",
+        "corpName": "해태제과식품",
+        "industry": "food",
+        "viaCode": "264900",
+        "viaName": "크라운제과",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
+        "viaCode": "096760",
+        "viaName": "JW홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "109820",
+        "corpName": "진매트릭스",
+        "industry": "pharma",
         "viaCode": "096760",
         "viaName": "JW홀딩스",
         "hopDistance": 2
@@ -293,9 +241,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005830",
-        "corpName": "DB손해보험",
-        "industry": "finance",
+        "stockCode": "005180",
+        "corpName": "빙그레",
+        "industry": "food",
+        "viaCode": "264900",
+        "viaName": "크라운제과",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002720",
+        "corpName": "국제약품",
+        "industry": "food",
+        "viaCode": "001060",
+        "viaName": "JW중외제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "318060",
+        "corpName": "그래피",
+        "industry": "chemical",
+        "viaCode": "096760",
+        "viaName": "JW홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "027970",
+        "corpName": "한국제지",
+        "industry": "paper",
         "viaCode": "264900",
         "viaName": "크라운제과",
         "hopDistance": 2
@@ -309,33 +281,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
-        "viaCode": "234080",
-        "viaName": "JW생명과학",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "109820",
-        "corpName": "진매트릭스",
-        "industry": "pharma",
-        "viaCode": "096760",
-        "viaName": "JW홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "318060",
-        "corpName": "그래피",
-        "industry": "chemical",
-        "viaCode": "096760",
-        "viaName": "JW홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "002720",
-        "corpName": "국제약품",
+        "stockCode": "001790",
+        "corpName": "대한제당",
         "industry": "food",
+        "viaCode": "264900",
+        "viaName": "크라운제과",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003530",
+        "corpName": "한화투자증권",
+        "industry": "aerospace",
         "viaCode": "001060",
         "viaName": "JW중외제약",
         "hopDistance": 2
@@ -349,19 +305,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "101530",
-        "corpName": "해태제과식품",
-        "industry": "food",
-        "viaCode": "264900",
-        "viaName": "크라운제과",
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "234080",
+        "viaName": "JW생명과학",
         "hopDistance": 2
       },
       {
-        "stockCode": "003530",
-        "corpName": "한화투자증권",
-        "industry": "aerospace",
-        "viaCode": "001060",
-        "viaName": "JW중외제약",
+        "stockCode": "214680",
+        "corpName": "디알텍",
+        "industry": "medicalDevice",
+        "viaCode": "096760",
+        "viaName": "JW홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005830",
+        "corpName": "DB손해보험",
+        "industry": "finance",
+        "viaCode": "264900",
+        "viaName": "크라운제과",
         "hopDistance": 2
       }
     ],

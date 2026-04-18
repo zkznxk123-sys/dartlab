@@ -66,43 +66,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 159434998431.0,
-      "operating_profit": 22840949360.0,
-      "net_profit": 16464918673.0,
-      "total_assets": 181067219968.0
-    },
-    {
-      "year": "2022",
-      "sales": 195978389205.0,
-      "operating_profit": 17475680841.0,
-      "net_profit": 14460551224.0,
-      "total_assets": 182404342806.0
-    },
-    {
-      "year": "2023",
-      "sales": 232025910017.0,
-      "operating_profit": 22059569867.0,
-      "net_profit": 15158518440.0,
-      "total_assets": 215521764443.0
-    },
-    {
-      "year": "2024",
-      "sales": 242830801884.0,
-      "operating_profit": 7992532690.0,
-      "net_profit": 6431058456.0,
-      "total_assets": 248112378127.0
-    },
-    {
-      "year": "2025",
-      "sales": 258188615006.0,
-      "operating_profit": 13546055668.0,
-      "net_profit": 9009362462.0,
-      "total_assets": 257095039561.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -154,9 +118,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "293780",
-        "corpName": "압타바이오",
-        "industry": "pharma",
+        "stockCode": "161890",
+        "corpName": "한국콜마",
+        "industry": "cosmetics",
         "viaCode": "194700",
         "viaName": "노바렉스",
         "hopDistance": 2
@@ -170,25 +134,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "019550",
-        "corpName": "SBI인베스트먼트",
-        "industry": "finance",
-        "viaCode": "194700",
-        "viaName": "노바렉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "471820",
-        "corpName": "셀로맥스사이언스",
-        "industry": "pharma",
-        "viaCode": "194700",
-        "viaName": "노바렉스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "142760",
         "corpName": "모아라이프플러스",
         "industry": "pharma",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "195940",
+        "corpName": "HK이노엔",
+        "industry": "pharma",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024720",
+        "corpName": "콜마홀딩스",
+        "industry": "retail",
         "viaCode": "194700",
         "viaName": "노바렉스",
         "hopDistance": 2
@@ -202,8 +166,40 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "195940",
-        "corpName": "HK이노엔",
+        "stockCode": "217480",
+        "corpName": "에스디생명공학",
+        "industry": "cosmetics",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "377220",
+        "corpName": "프롬바이오",
+        "industry": "pharma",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019550",
+        "corpName": "SBI인베스트먼트",
+        "industry": "finance",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "479960",
+        "corpName": "위너스",
+        "industry": "telecom",
+        "viaCode": "194700",
+        "viaName": "노바렉스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "471820",
+        "corpName": "셀로맥스사이언스",
         "industry": "pharma",
         "viaCode": "194700",
         "viaName": "노바렉스",
@@ -218,41 +214,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "024720",
-        "corpName": "콜마홀딩스",
-        "industry": "retail",
-        "viaCode": "194700",
-        "viaName": "노바렉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "377220",
-        "corpName": "프롬바이오",
+        "stockCode": "293780",
+        "corpName": "압타바이오",
         "industry": "pharma",
-        "viaCode": "194700",
-        "viaName": "노바렉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "479960",
-        "corpName": "위너스",
-        "industry": "telecom",
-        "viaCode": "194700",
-        "viaName": "노바렉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "217480",
-        "corpName": "에스디생명공학",
-        "industry": "cosmetics",
-        "viaCode": "194700",
-        "viaName": "노바렉스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "161890",
-        "corpName": "한국콜마",
-        "industry": "cosmetics",
         "viaCode": "194700",
         "viaName": "노바렉스",
         "hopDistance": 2

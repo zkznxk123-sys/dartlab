@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 22848959782.0,
-      "operating_profit": 4103891652.0,
-      "net_profit": 5359831439.0,
-      "total_assets": 65242516783.0
-    },
-    {
-      "year": "2022",
-      "sales": 27336928096.0,
-      "operating_profit": 7034645185.0,
-      "net_profit": -7281655556.0,
-      "total_assets": 55582183751.0
-    },
-    {
-      "year": "2023",
-      "sales": 20886622718.0,
-      "operating_profit": 1462016016.0,
-      "net_profit": 2436162713.0,
-      "total_assets": 57668069282.0
-    },
-    {
-      "year": "2024",
-      "sales": 16790273164.0,
-      "operating_profit": -2153048279.0,
-      "net_profit": -1620020950.0,
-      "total_assets": 56789152176.0
-    },
-    {
-      "year": "2025",
-      "sales": 22020233503.0,
-      "operating_profit": 3593847277.0,
-      "net_profit": 3521555424.0,
-      "total_assets": 84178004615.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,48 +87,8 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "038070",
-        "corpName": "서린바이오",
-        "industry": "retail",
-        "viaCode": "358570",
-        "viaName": "지아이이노베이션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "180400",
-        "corpName": "DXVX",
-        "industry": "consulting",
-        "viaCode": "358570",
-        "viaName": "지아이이노베이션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "263700",
-        "corpName": "케어랩스",
-        "industry": "software",
-        "viaCode": "358570",
-        "viaName": "지아이이노베이션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000100",
-        "corpName": "유한양행",
-        "industry": "pharma",
-        "viaCode": "358570",
-        "viaName": "지아이이노베이션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000050",
-        "corpName": "경방",
-        "industry": "retail",
-        "viaCode": "358570",
-        "viaName": "지아이이노베이션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095700",
-        "corpName": "제넥신",
+        "stockCode": "338840",
+        "corpName": "와이바이오로직스",
         "industry": "pharma",
         "viaCode": "358570",
         "viaName": "지아이이노베이션",
@@ -179,41 +103,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "001630",
-        "corpName": "종근당홀딩스",
+        "stockCode": "000100",
+        "corpName": "유한양행",
         "industry": "pharma",
         "viaCode": "358570",
         "viaName": "지아이이노베이션",
         "hopDistance": 2
       },
       {
-        "stockCode": "039010",
-        "corpName": "현대에이치티",
-        "industry": "retail",
-        "viaCode": "358570",
-        "viaName": "지아이이노베이션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "207940",
-        "corpName": "삼성바이오로직스",
-        "industry": "pharma",
-        "viaCode": "358570",
-        "viaName": "지아이이노베이션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "338840",
-        "corpName": "와이바이오로직스",
-        "industry": "pharma",
-        "viaCode": "358570",
-        "viaName": "지아이이노베이션",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066670",
-        "corpName": "디티씨",
-        "industry": "electronics",
+        "stockCode": "263700",
+        "corpName": "케어랩스",
+        "industry": "software",
         "viaCode": "358570",
         "viaName": "지아이이노베이션",
         "hopDistance": 2
@@ -227,6 +127,38 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "095700",
+        "corpName": "제넥신",
+        "industry": "pharma",
+        "viaCode": "358570",
+        "viaName": "지아이이노베이션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "207940",
+        "corpName": "삼성바이오로직스",
+        "industry": "pharma",
+        "viaCode": "358570",
+        "viaName": "지아이이노베이션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000050",
+        "corpName": "경방",
+        "industry": "retail",
+        "viaCode": "358570",
+        "viaName": "지아이이노베이션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "034730",
+        "corpName": "SK",
+        "industry": "software",
+        "viaCode": "358570",
+        "viaName": "지아이이노베이션",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "007330",
         "corpName": "푸른저축은행",
         "industry": "finance",
@@ -235,9 +167,41 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "122900",
-        "corpName": "아이마켓코리아",
+        "stockCode": "038070",
+        "corpName": "서린바이오",
         "industry": "retail",
+        "viaCode": "358570",
+        "viaName": "지아이이노베이션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039010",
+        "corpName": "현대에이치티",
+        "industry": "retail",
+        "viaCode": "358570",
+        "viaName": "지아이이노베이션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066670",
+        "corpName": "디티씨",
+        "industry": "electronics",
+        "viaCode": "358570",
+        "viaName": "지아이이노베이션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "180400",
+        "corpName": "DXVX",
+        "industry": "consulting",
+        "viaCode": "358570",
+        "viaName": "지아이이노베이션",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "001630",
+        "corpName": "종근당홀딩스",
+        "industry": "pharma",
         "viaCode": "358570",
         "viaName": "지아이이노베이션",
         "hopDistance": 2
@@ -251,9 +215,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "034730",
-        "corpName": "SK",
-        "industry": "software",
+        "stockCode": "122900",
+        "corpName": "아이마켓코리아",
+        "industry": "retail",
         "viaCode": "358570",
         "viaName": "지아이이노베이션",
         "hopDistance": 2

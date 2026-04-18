@@ -147,43 +147,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 44342176391.0,
-      "operating_profit": -3986875661.0,
-      "net_profit": -3926677702.0,
-      "total_assets": 66900329255.0
-    },
-    {
-      "year": "2022",
-      "sales": 48326219525.0,
-      "operating_profit": -4295416659.0,
-      "net_profit": -5887658788.0,
-      "total_assets": 68742292985.0
-    },
-    {
-      "year": "2023",
-      "sales": 41906999638.0,
-      "operating_profit": -5003290248.0,
-      "net_profit": -6371619997.0,
-      "total_assets": 73014231901.0
-    },
-    {
-      "year": "2024",
-      "sales": 33397439064.0,
-      "operating_profit": -7272936114.0,
-      "net_profit": -7745577691.0,
-      "total_assets": 70192709528.0
-    },
-    {
-      "year": "2025",
-      "sales": 29632415122.0,
-      "operating_profit": -7775962013.0,
-      "net_profit": 0.0,
-      "total_assets": 75421002916.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -252,41 +216,41 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "217820",
-        "corpName": "원익피앤이",
-        "industry": "machinery",
+        "stockCode": "110790",
+        "corpName": "크리스에프앤씨",
+        "industry": "leisure",
         "viaCode": "066670",
         "viaName": "디티씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "136410",
-        "corpName": "아셈스",
-        "industry": "plastic",
+        "stockCode": "126700",
+        "corpName": "하이비젼시스템",
+        "industry": "electronics",
         "viaCode": "066670",
         "viaName": "디티씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "196170",
-        "corpName": "알테오젠",
+        "stockCode": "143160",
+        "corpName": "아이디스",
+        "industry": "telecom",
+        "viaCode": "066670",
+        "viaName": "디티씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "213500",
+        "corpName": "한솔제지",
+        "industry": "paper",
+        "viaCode": "001820",
+        "viaName": "삼화콘덴서공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "358570",
+        "corpName": "지아이이노베이션",
         "industry": "pharma",
-        "viaCode": "066670",
-        "viaName": "디티씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000660",
-        "corpName": "SK하이닉스",
-        "industry": "semiconductor",
-        "viaCode": "066670",
-        "viaName": "디티씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "030530",
-        "corpName": "원익홀딩스",
-        "industry": "energy",
         "viaCode": "066670",
         "viaName": "디티씨",
         "hopDistance": 2
@@ -300,43 +264,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "014190",
-        "corpName": "원익큐브",
-        "industry": "chemical",
-        "viaCode": "066670",
-        "viaName": "디티씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "240810",
-        "corpName": "원익IPS",
-        "industry": "semiconductor",
-        "viaCode": "066670",
-        "viaName": "디티씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000100",
-        "corpName": "유한양행",
+        "stockCode": "196170",
+        "corpName": "알테오젠",
         "industry": "pharma",
         "viaCode": "066670",
         "viaName": "디티씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "358570",
-        "corpName": "지아이이노베이션",
-        "industry": "pharma",
-        "viaCode": "066670",
-        "viaName": "디티씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
-        "viaCode": "009470",
-        "viaName": "삼화전기",
         "hopDistance": 2
       },
       {
@@ -348,8 +280,48 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "142210",
-        "corpName": "유니트론텍",
+        "stockCode": "357550",
+        "corpName": "석경에이티",
+        "industry": "chemical",
+        "viaCode": "066670",
+        "viaName": "디티씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "038060",
+        "corpName": "루멘스",
+        "industry": "realestate",
+        "viaCode": "066670",
+        "viaName": "디티씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "104830",
+        "corpName": "원익머트리얼즈",
+        "industry": "energy",
+        "viaCode": "066670",
+        "viaName": "디티씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "217820",
+        "corpName": "원익피앤이",
+        "industry": "machinery",
+        "viaCode": "066670",
+        "viaName": "디티씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079960",
+        "corpName": "동양이엔피",
+        "industry": "electronics",
+        "viaCode": "009470",
+        "viaName": "삼화전기",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "317870",
+        "corpName": "엔바이오니아",
         "industry": "electronics",
         "viaCode": "066670",
         "viaName": "디티씨",
@@ -364,24 +336,32 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006110",
-        "corpName": "삼아알미늄",
-        "industry": "food",
-        "viaCode": "001820",
-        "viaName": "삼화콘덴서공업",
+        "stockCode": "240810",
+        "corpName": "원익IPS",
+        "industry": "semiconductor",
+        "viaCode": "066670",
+        "viaName": "디티씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "025540",
-        "corpName": "한국단자공업",
-        "industry": "electronics",
-        "viaCode": "009470",
-        "viaName": "삼화전기",
+        "stockCode": "136410",
+        "corpName": "아셈스",
+        "industry": "plastic",
+        "viaCode": "066670",
+        "viaName": "디티씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "032940",
-        "corpName": "원익",
+        "stockCode": "000100",
+        "corpName": "유한양행",
+        "industry": "pharma",
+        "viaCode": "066670",
+        "viaName": "디티씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
         "industry": "semiconductor",
         "viaCode": "066670",
         "viaName": "디티씨",
@@ -396,17 +376,33 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "039200",
-        "corpName": "오스코텍",
-        "industry": "pharma",
+        "stockCode": "006110",
+        "corpName": "삼아알미늄",
+        "industry": "food",
+        "viaCode": "001820",
+        "viaName": "삼화콘덴서공업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "037030",
+        "corpName": "파워넷",
+        "industry": "electrical",
+        "viaCode": "009470",
+        "viaName": "삼화전기",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030530",
+        "corpName": "원익홀딩스",
+        "industry": "energy",
         "viaCode": "066670",
         "viaName": "디티씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "038060",
-        "corpName": "루멘스",
-        "industry": "realestate",
+        "stockCode": "142210",
+        "corpName": "유니트론텍",
+        "industry": "electronics",
         "viaCode": "066670",
         "viaName": "디티씨",
         "hopDistance": 2
@@ -420,81 +416,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "079960",
-        "corpName": "동양이엔피",
-        "industry": "electronics",
-        "viaCode": "009470",
-        "viaName": "삼화전기",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037030",
-        "corpName": "파워넷",
-        "industry": "electrical",
-        "viaCode": "009470",
-        "viaName": "삼화전기",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "213500",
-        "corpName": "한솔제지",
-        "industry": "paper",
-        "viaCode": "001820",
-        "viaName": "삼화콘덴서공업",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "126700",
-        "corpName": "하이비젼시스템",
-        "industry": "electronics",
+        "stockCode": "032940",
+        "corpName": "원익",
+        "industry": "semiconductor",
         "viaCode": "066670",
         "viaName": "디티씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "086900",
-        "corpName": "메디톡스",
-        "industry": "food",
-        "viaCode": "066670",
-        "viaName": "디티씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "110790",
-        "corpName": "크리스에프앤씨",
-        "industry": "leisure",
-        "viaCode": "066670",
-        "viaName": "디티씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "317870",
-        "corpName": "엔바이오니아",
-        "industry": "electronics",
-        "viaCode": "066670",
-        "viaName": "디티씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "104830",
-        "corpName": "원익머트리얼즈",
-        "industry": "energy",
-        "viaCode": "066670",
-        "viaName": "디티씨",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "357550",
-        "corpName": "석경에이티",
+        "stockCode": "014190",
+        "corpName": "원익큐브",
         "industry": "chemical",
         "viaCode": "066670",
         "viaName": "디티씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "143160",
-        "corpName": "아이디스",
-        "industry": "telecom",
+        "stockCode": "025540",
+        "corpName": "한국단자공업",
+        "industry": "electronics",
+        "viaCode": "009470",
+        "viaName": "삼화전기",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "039200",
+        "corpName": "오스코텍",
+        "industry": "pharma",
+        "viaCode": "066670",
+        "viaName": "디티씨",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "009470",
+        "viaName": "삼화전기",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086900",
+        "corpName": "메디톡스",
+        "industry": "food",
         "viaCode": "066670",
         "viaName": "디티씨",
         "hopDistance": 2

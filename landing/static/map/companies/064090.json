@@ -73,43 +73,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 30300618072.0,
-      "operating_profit": -7850172376.0,
-      "net_profit": null,
-      "total_assets": 22862786680.0
-    },
-    {
-      "year": "2022",
-      "sales": 29367045498.0,
-      "operating_profit": -13229119702.0,
-      "net_profit": 0.0,
-      "total_assets": 8640387576.0
-    },
-    {
-      "year": "2023",
-      "sales": 6900744761.0,
-      "operating_profit": -568633743.0,
-      "net_profit": -6989588143.0,
-      "total_assets": 60237586878.0
-    },
-    {
-      "year": "2024",
-      "sales": 4560824449.0,
-      "operating_profit": -3535124234.0,
-      "net_profit": 19027885730.0,
-      "total_assets": 99822167362.0
-    },
-    {
-      "year": "2025",
-      "sales": 7211902064.0,
-      "operating_profit": -6078614066.0,
-      "net_profit": -30204179171.0,
-      "total_assets": 70958916483.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -169,24 +133,56 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "100790",
-        "corpName": "미래에셋벤처투자",
-        "industry": "finance",
-        "viaCode": "179900",
-        "viaName": "유티아이",
+        "stockCode": "291650",
+        "corpName": "압타머사이언스",
+        "industry": "pharma",
+        "viaCode": "206400",
+        "viaName": "베노티앤알",
         "hopDistance": 2
       },
       {
-        "stockCode": "019550",
-        "corpName": "SBI인베스트먼트",
-        "industry": "finance",
-        "viaCode": "179900",
-        "viaName": "유티아이",
+        "stockCode": "110790",
+        "corpName": "크리스에프앤씨",
+        "industry": "leisure",
+        "viaCode": "206400",
+        "viaName": "베노티앤알",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "085810",
+        "corpName": "알티캐스트",
+        "industry": "telecom",
+        "viaCode": "206400",
+        "viaName": "베노티앤알",
         "hopDistance": 2
       },
       {
         "stockCode": "143540",
         "corpName": "영우디에스피",
+        "industry": "electronics",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "143160",
+        "corpName": "아이디스",
+        "industry": "telecom",
+        "viaCode": "179900",
+        "viaName": "유티아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058450",
+        "corpName": "한주에이알티",
         "industry": "electronics",
         "viaCode": "061040",
         "viaName": "알에프텍",
@@ -201,72 +197,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "025620",
-        "corpName": "차AI헬스케어",
-        "industry": "cosmetics",
-        "viaCode": "061040",
-        "viaName": "알에프텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "085810",
-        "corpName": "알티캐스트",
-        "industry": "telecom",
-        "viaCode": "206400",
-        "viaName": "베노티앤알",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
+        "stockCode": "019550",
+        "corpName": "SBI인베스트먼트",
+        "industry": "finance",
         "viaCode": "179900",
         "viaName": "유티아이",
         "hopDistance": 2
       },
       {
-        "stockCode": "291650",
-        "corpName": "압타머사이언스",
-        "industry": "pharma",
-        "viaCode": "206400",
-        "viaName": "베노티앤알",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "232530",
-        "corpName": "이엠티",
-        "industry": "semiconductor",
-        "viaCode": "061040",
-        "viaName": "알에프텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "351870",
-        "corpName": "차이커뮤니케이션",
-        "industry": "media",
-        "viaCode": "061040",
-        "viaName": "알에프텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058450",
-        "corpName": "한주에이알티",
-        "industry": "electronics",
-        "viaCode": "061040",
-        "viaName": "알에프텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "110790",
-        "corpName": "크리스에프앤씨",
-        "industry": "leisure",
-        "viaCode": "206400",
-        "viaName": "베노티앤알",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "069330",
-        "corpName": "유아이디",
+        "stockCode": "066570",
+        "corpName": "LG전자",
         "industry": "electronics",
         "viaCode": "179900",
         "viaName": "유티아이",
@@ -281,6 +221,30 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "100790",
+        "corpName": "미래에셋벤처투자",
+        "industry": "finance",
+        "viaCode": "179900",
+        "viaName": "유티아이",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025620",
+        "corpName": "차AI헬스케어",
+        "industry": "cosmetics",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069330",
+        "corpName": "유아이디",
+        "industry": "electronics",
+        "viaCode": "179900",
+        "viaName": "유티아이",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "024090",
         "corpName": "디씨엠",
         "industry": "construction",
@@ -289,11 +253,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "143160",
-        "corpName": "아이디스",
-        "industry": "telecom",
-        "viaCode": "179900",
-        "viaName": "유티아이",
+        "stockCode": "351870",
+        "corpName": "차이커뮤니케이션",
+        "industry": "media",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
         "hopDistance": 2
       }
     ],

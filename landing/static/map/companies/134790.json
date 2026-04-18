@@ -85,43 +85,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 251936903361.0,
-      "operating_profit": 12698998352.0,
-      "net_profit": 12935477217.0,
-      "total_assets": 84805500508.0
-    },
-    {
-      "year": "2022",
-      "sales": 243320658371.0,
-      "operating_profit": 40885780.0,
-      "net_profit": 2544939298.0,
-      "total_assets": 85063020141.0
-    },
-    {
-      "year": "2023",
-      "sales": 200135778002.0,
-      "operating_profit": -1927437377.0,
-      "net_profit": 2443800601.0,
-      "total_assets": 95079294654.0
-    },
-    {
-      "year": "2024",
-      "sales": 208408238360.0,
-      "operating_profit": -3363725188.0,
-      "net_profit": 908215204.0,
-      "total_assets": 98603256829.0
-    },
-    {
-      "year": "2025",
-      "sales": 195719724417.0,
-      "operating_profit": -6682962310.0,
-      "net_profit": -2261162145.0,
-      "total_assets": 97876438949.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 1,
     "customerCount": 0,
@@ -202,9 +166,49 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "447690",
+        "viaName": "아이오바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035420",
+        "corpName": "NAVER",
+        "industry": "software",
+        "viaCode": "447690",
+        "viaName": "아이오바이오",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "375500",
+        "corpName": "DL이앤씨",
+        "industry": "construction",
+        "viaCode": "016800",
+        "viaName": "퍼시스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "285490",
         "corpName": "노바텍",
         "industry": "misc",
+        "viaCode": "016800",
+        "viaName": "퍼시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "145210",
+        "corpName": "다이나믹디자인",
+        "industry": "auto",
+        "viaCode": "009620",
+        "viaName": "삼보산업",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004910",
+        "corpName": "조광페인트",
+        "industry": "food",
         "viaCode": "016800",
         "viaName": "퍼시스",
         "hopDistance": 2
@@ -218,11 +222,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "145210",
-        "corpName": "다이나믹디자인",
-        "industry": "auto",
-        "viaCode": "009620",
-        "viaName": "삼보산업",
+        "stockCode": "001470",
+        "corpName": "삼부토건",
+        "industry": "construction",
+        "viaCode": "016800",
+        "viaName": "퍼시스",
         "hopDistance": 2
       },
       {
@@ -242,56 +246,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "035420",
-        "corpName": "NAVER",
-        "industry": "software",
-        "viaCode": "447690",
-        "viaName": "아이오바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "088800",
-        "corpName": "에이스테크",
-        "industry": "telecom",
-        "viaCode": "016800",
-        "viaName": "퍼시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025750",
-        "corpName": "한솔홈데코",
-        "industry": "paper",
-        "viaCode": "016800",
-        "viaName": "퍼시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "001470",
-        "corpName": "삼부토건",
-        "industry": "construction",
-        "viaCode": "016800",
-        "viaName": "퍼시스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "091590",
         "corpName": "남화토건",
-        "industry": "construction",
-        "viaCode": "016800",
-        "viaName": "퍼시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "447690",
-        "viaName": "아이오바이오",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "375500",
-        "corpName": "DL이앤씨",
         "industry": "construction",
         "viaCode": "016800",
         "viaName": "퍼시스",
@@ -306,9 +262,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "004910",
-        "corpName": "조광페인트",
-        "industry": "food",
+        "stockCode": "088800",
+        "corpName": "에이스테크",
+        "industry": "telecom",
+        "viaCode": "016800",
+        "viaName": "퍼시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025750",
+        "corpName": "한솔홈데코",
+        "industry": "paper",
         "viaCode": "016800",
         "viaName": "퍼시스",
         "hopDistance": 2

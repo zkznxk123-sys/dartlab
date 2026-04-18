@@ -73,43 +73,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 207272160249.0,
-      "operating_profit": 22930036754.0,
-      "net_profit": 42162431416.0,
-      "total_assets": 338208336825.0
-    },
-    {
-      "year": "2022",
-      "sales": 227975280500.0,
-      "operating_profit": 26987237453.0,
-      "net_profit": 14174781497.0,
-      "total_assets": 345012452317.0
-    },
-    {
-      "year": "2023",
-      "sales": 239201057076.0,
-      "operating_profit": 26422531585.0,
-      "net_profit": 35827276209.0,
-      "total_assets": 375384295785.0
-    },
-    {
-      "year": "2024",
-      "sales": 260569413451.0,
-      "operating_profit": 27682476881.0,
-      "net_profit": 32395312129.0,
-      "total_assets": 464664131084.0
-    },
-    {
-      "year": "2025",
-      "sales": 267656916942.0,
-      "operating_profit": 33276653034.0,
-      "net_profit": 0.0,
-      "total_assets": 487574291112.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -170,14 +134,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "070300",
-        "corpName": "엑스큐어",
-        "industry": "software",
-        "viaCode": "121060",
-        "viaName": "유니포인트",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "024110",
         "corpName": "기업은행",
         "industry": "finance",
@@ -202,27 +158,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "030200",
-        "corpName": "케이티",
-        "industry": "telecom",
-        "viaCode": "121060",
-        "viaName": "유니포인트",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "001260",
         "corpName": "남광토건",
         "industry": "construction",
         "viaCode": "121060",
         "viaName": "유니포인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "208350",
-        "corpName": "지란지교시큐리티",
-        "industry": "software",
-        "viaCode": "434480",
-        "viaName": "모니터랩",
         "hopDistance": 2
       },
       {
@@ -239,6 +179,30 @@
         "industry": "food",
         "viaCode": "121060",
         "viaName": "유니포인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "070300",
+        "corpName": "엑스큐어",
+        "industry": "software",
+        "viaCode": "121060",
+        "viaName": "유니포인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "030200",
+        "corpName": "케이티",
+        "industry": "telecom",
+        "viaCode": "121060",
+        "viaName": "유니포인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "208350",
+        "corpName": "지란지교시큐리티",
+        "industry": "software",
+        "viaCode": "434480",
+        "viaName": "모니터랩",
         "hopDistance": 2
       }
     ],

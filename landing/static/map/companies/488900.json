@@ -97,15 +97,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2025",
-      "sales": 36790989927.0,
-      "operating_profit": -7364263584.0,
-      "net_profit": -6596724887.0,
-      "total_assets": 113784541586.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -157,11 +149,27 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "044780",
+        "corpName": "에이치케이",
+        "industry": "medicalDevice",
+        "viaCode": "082920",
+        "viaName": "비츠로셀",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "031210",
         "corpName": "서울보증보험",
         "industry": "finance",
         "viaCode": "054220",
         "viaName": "비츠로시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "103140",
+        "corpName": "풍산",
+        "industry": "steel",
+        "viaCode": "082920",
+        "viaName": "비츠로셀",
         "hopDistance": 2
       },
       {
@@ -173,25 +181,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "044780",
-        "corpName": "에이치케이",
-        "industry": "medicalDevice",
-        "viaCode": "082920",
-        "viaName": "비츠로셀",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "005810",
         "corpName": "풍산홀딩스",
         "industry": "retail",
-        "viaCode": "082920",
-        "viaName": "비츠로셀",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "103140",
-        "corpName": "풍산",
-        "industry": "steel",
         "viaCode": "082920",
         "viaName": "비츠로셀",
         "hopDistance": 2

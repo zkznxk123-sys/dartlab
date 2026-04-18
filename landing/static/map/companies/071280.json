@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 110200154977.0,
-      "operating_profit": 13317744743.0,
-      "net_profit": 9457161902.0,
-      "total_assets": 123549040943.0
-    },
-    {
-      "year": "2022",
-      "sales": 144576199490.0,
-      "operating_profit": 26435799764.0,
-      "net_profit": 20251025219.0,
-      "total_assets": 133763132702.0
-    },
-    {
-      "year": "2023",
-      "sales": 105268915966.0,
-      "operating_profit": 11926044601.0,
-      "net_profit": 8866161027.0,
-      "total_assets": 136781013912.0
-    },
-    {
-      "year": "2024",
-      "sales": 160076968925.0,
-      "operating_profit": 19776572725.0,
-      "net_profit": 12113375809.0,
-      "total_assets": 157469280717.0
-    },
-    {
-      "year": "2025",
-      "sales": 124870173744.0,
-      "operating_profit": 14423291900.0,
-      "net_profit": 12257535043.0,
-      "total_assets": 162369748610.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,17 +87,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "278990",
-        "corpName": "EMB",
-        "industry": "battery",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
         "viaCode": "033250",
         "viaName": "체시스",
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
+        "stockCode": "278990",
+        "corpName": "EMB",
+        "industry": "battery",
         "viaCode": "033250",
         "viaName": "체시스",
         "hopDistance": 2

@@ -35,22 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2024",
-      "sales": 58777951391.0,
-      "operating_profit": 3547196022.0,
-      "net_profit": -314516197.0,
-      "total_assets": 156108599723.0
-    },
-    {
-      "year": "2025",
-      "sales": 66474697200.0,
-      "operating_profit": 4435474598.0,
-      "net_profit": 2521483697.0,
-      "total_assets": 170418246751.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -110,6 +95,22 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "232530",
+        "corpName": "이엠티",
+        "industry": "semiconductor",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058450",
+        "corpName": "한주에이알티",
+        "industry": "electronics",
+        "viaCode": "061040",
+        "viaName": "알에프텍",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "004710",
         "corpName": "한솔테크닉스",
         "industry": "electronics",
@@ -129,22 +130,6 @@
         "stockCode": "025620",
         "corpName": "차AI헬스케어",
         "industry": "cosmetics",
-        "viaCode": "061040",
-        "viaName": "알에프텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "232530",
-        "corpName": "이엠티",
-        "industry": "semiconductor",
-        "viaCode": "061040",
-        "viaName": "알에프텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058450",
-        "corpName": "한주에이알티",
-        "industry": "electronics",
         "viaCode": "061040",
         "viaName": "알에프텍",
         "hopDistance": 2

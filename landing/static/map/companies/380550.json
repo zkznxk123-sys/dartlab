@@ -35,15 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2025",
-      "sales": 2615085161.0,
-      "operating_profit": -16549206057.0,
-      "net_profit": null,
-      "total_assets": 26884456527.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -95,17 +87,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "293780",
-        "corpName": "압타바이오",
-        "industry": "pharma",
+        "stockCode": "089790",
+        "corpName": "제이티",
+        "industry": "semiconductor",
         "viaCode": "005500",
         "viaName": "삼진제약",
         "hopDistance": 2
       },
       {
-        "stockCode": "307750",
-        "corpName": "국전약품",
-        "industry": "pharma",
+        "stockCode": "453860",
+        "corpName": "에이에스텍",
+        "industry": "food",
         "viaCode": "005500",
         "viaName": "삼진제약",
         "hopDistance": 2
@@ -127,16 +119,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "453860",
-        "corpName": "에이에스텍",
-        "industry": "food",
+        "stockCode": "003000",
+        "corpName": "부광약품",
+        "industry": "pharma",
         "viaCode": "005500",
         "viaName": "삼진제약",
         "hopDistance": 2
       },
       {
-        "stockCode": "432980",
-        "corpName": "엠에프씨",
+        "stockCode": "307750",
+        "corpName": "국전약품",
         "industry": "pharma",
         "viaCode": "005500",
         "viaName": "삼진제약",
@@ -159,16 +151,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "089790",
-        "corpName": "제이티",
-        "industry": "semiconductor",
+        "stockCode": "432980",
+        "corpName": "엠에프씨",
+        "industry": "pharma",
         "viaCode": "005500",
         "viaName": "삼진제약",
         "hopDistance": 2
       },
       {
-        "stockCode": "003000",
-        "corpName": "부광약품",
+        "stockCode": "293780",
+        "corpName": "압타바이오",
         "industry": "pharma",
         "viaCode": "005500",
         "viaName": "삼진제약",

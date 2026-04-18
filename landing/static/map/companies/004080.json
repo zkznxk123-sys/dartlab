@@ -92,43 +92,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 37655099944.0,
-      "operating_profit": 13042805671.0,
-      "net_profit": 13449679792.0,
-      "total_assets": 138612212480.0
-    },
-    {
-      "year": "2022",
-      "sales": 118176546667.0,
-      "operating_profit": 10458300238.0,
-      "net_profit": 8463560875.0,
-      "total_assets": 140622549545.0
-    },
-    {
-      "year": "2023",
-      "sales": 112442780476.0,
-      "operating_profit": 11356003801.0,
-      "net_profit": 9230504923.0,
-      "total_assets": 140331352601.0
-    },
-    {
-      "year": "2024",
-      "sales": 27768227817.0,
-      "operating_profit": 6277866223.0,
-      "net_profit": 5228581708.0,
-      "total_assets": 141427657791.0
-    },
-    {
-      "year": "2025",
-      "sales": 68454751057.0,
-      "operating_profit": 7091121461.0,
-      "net_profit": 2822442973.0,
-      "total_assets": 149632465395.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -180,17 +144,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "031210",
-        "corpName": "서울보증보험",
-        "industry": "finance",
-        "viaCode": "003100",
-        "viaName": "선광",
+        "stockCode": "278650",
+        "corpName": "HLB바이오스텝",
+        "industry": "pharma",
+        "viaCode": "322970",
+        "viaName": "무진메디",
         "hopDistance": 2
       },
       {
-        "stockCode": "002320",
-        "corpName": "한진",
-        "industry": "logistics",
+        "stockCode": "031210",
+        "corpName": "서울보증보험",
+        "industry": "finance",
         "viaCode": "003100",
         "viaName": "선광",
         "hopDistance": 2
@@ -204,14 +168,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "278650",
-        "corpName": "HLB바이오스텝",
-        "industry": "pharma",
-        "viaCode": "322970",
-        "viaName": "무진메디",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "450080",
         "corpName": "에코프로머티",
         "industry": "chemical",
@@ -220,11 +176,19 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "416180",
-        "corpName": "신성에스티",
-        "industry": "electronics",
+        "stockCode": "308080",
+        "corpName": "바이젠셀",
+        "industry": "pharma",
         "viaCode": "065350",
         "viaName": "신성델타테크",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "002320",
+        "corpName": "한진",
+        "industry": "logistics",
+        "viaCode": "003100",
+        "viaName": "선광",
         "hopDistance": 2
       },
       {
@@ -236,9 +200,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "308080",
-        "corpName": "바이젠셀",
-        "industry": "pharma",
+        "stockCode": "416180",
+        "corpName": "신성에스티",
+        "industry": "electronics",
         "viaCode": "065350",
         "viaName": "신성델타테크",
         "hopDistance": 2

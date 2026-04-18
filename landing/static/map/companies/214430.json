@@ -54,36 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 79723131606.0,
-      "operating_profit": 1410841017.0,
-      "net_profit": 3357324317.0,
-      "total_assets": 107674147733.0
-    },
-    {
-      "year": "2022",
-      "sales": 83845591819.0,
-      "operating_profit": 5686971942.0,
-      "net_profit": 6183187601.0,
-      "total_assets": 113325990425.0
-    },
-    {
-      "year": "2023",
-      "sales": 121539205459.0,
-      "operating_profit": 12204489179.0,
-      "net_profit": 12561262924.0,
-      "total_assets": 131191933136.0
-    },
-    {
-      "year": "2025",
-      "sales": 124275749815.0,
-      "operating_profit": 16458043794.0,
-      "net_profit": 18783320910.0,
-      "total_assets": 189547523513.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -135,19 +106,27 @@
   "hop2": {
     "hop2Neighbors": [
       {
+        "stockCode": "016580",
+        "corpName": "환인제약",
+        "industry": "food",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "041930",
+        "corpName": "동아화성",
+        "industry": "electronics",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "123010",
         "corpName": "알엔티엑스",
         "industry": "semiconductor",
         "viaCode": "082210",
         "viaName": "옵트론텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "206640",
-        "corpName": "바디텍메드",
-        "industry": "medicalDevice",
-        "viaCode": "065450",
-        "viaName": "빅텍",
         "hopDistance": 2
       },
       {
@@ -159,9 +138,153 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "206640",
+        "corpName": "바디텍메드",
+        "industry": "medicalDevice",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "011150",
+        "corpName": "CJ씨푸드",
+        "industry": "food",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "017900",
+        "corpName": "광전자",
+        "industry": "semiconductor",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "069080",
+        "corpName": "웹젠",
+        "industry": "software",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "012450",
+        "corpName": "한화에어로스페이스",
+        "industry": "aerospace",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019570",
+        "corpName": "플루토스",
+        "industry": "finance",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "059090",
+        "corpName": "미코",
+        "industry": "electronics",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "076610",
+        "corpName": "해성옵틱스",
+        "industry": "electronics",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "302550",
+        "corpName": "리메드",
+        "industry": "medicalDevice",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058400",
+        "corpName": "KNN",
+        "industry": "telecom",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "365900",
+        "corpName": "브이씨",
+        "industry": "leisure",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "272210",
+        "corpName": "한화시스템",
+        "industry": "aerospace",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "051780",
+        "corpName": "큐로홀딩스",
+        "industry": "electronics",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "058820",
+        "corpName": "CMG제약",
+        "industry": "pharma",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "065150",
         "corpName": "대산F&B",
         "industry": "leisure",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000880",
+        "corpName": "한화",
+        "industry": "aerospace",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "079190",
+        "corpName": "케스피온",
+        "industry": "telecom",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "096610",
+        "corpName": "알에프세미",
+        "industry": "electronics",
+        "viaCode": "065450",
+        "viaName": "빅텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "190510",
+        "corpName": "나무가",
+        "industry": "electronics",
         "viaCode": "082210",
         "viaName": "옵트론텍",
         "hopDistance": 2
@@ -183,83 +306,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "013810",
-        "corpName": "스페코",
-        "industry": "construction",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "012450",
-        "corpName": "한화에어로스페이스",
-        "industry": "aerospace",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "365900",
-        "corpName": "브이씨",
-        "industry": "leisure",
-        "viaCode": "082210",
-        "viaName": "옵트론텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "079190",
-        "corpName": "케스피온",
+        "stockCode": "050890",
+        "corpName": "쏠리드",
         "industry": "telecom",
         "viaCode": "065450",
         "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058400",
-        "corpName": "KNN",
-        "industry": "telecom",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090370",
-        "corpName": "메타랩스",
-        "industry": "textile",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "076610",
-        "corpName": "해성옵틱스",
-        "industry": "electronics",
-        "viaCode": "082210",
-        "viaName": "옵트론텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "096610",
-        "corpName": "알에프세미",
-        "industry": "electronics",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "059090",
-        "corpName": "미코",
-        "industry": "electronics",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "101400",
-        "corpName": "엔시트론",
-        "industry": "semiconductor",
-        "viaCode": "082210",
-        "viaName": "옵트론텍",
         "hopDistance": 2
       },
       {
@@ -271,72 +322,24 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "241520",
-        "corpName": "DSC인베스트먼트",
-        "industry": "finance",
-        "viaCode": "082210",
-        "viaName": "옵트론텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000880",
-        "corpName": "한화",
-        "industry": "aerospace",
+        "stockCode": "013810",
+        "corpName": "스페코",
+        "industry": "construction",
         "viaCode": "065450",
         "viaName": "빅텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "011150",
-        "corpName": "CJ씨푸드",
-        "industry": "food",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "041930",
-        "corpName": "동아화성",
-        "industry": "electronics",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "297890",
-        "corpName": "HB솔루션",
-        "industry": "electronics",
-        "viaCode": "082210",
-        "viaName": "옵트론텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "272210",
-        "corpName": "한화시스템",
-        "industry": "aerospace",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "069080",
-        "corpName": "웹젠",
+        "stockCode": "139050",
+        "corpName": "BF랩스",
         "industry": "software",
-        "viaCode": "065450",
-        "viaName": "빅텍",
+        "viaCode": "082210",
+        "viaName": "옵트론텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "016580",
-        "corpName": "환인제약",
-        "industry": "food",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "017900",
-        "corpName": "광전자",
+        "stockCode": "101400",
+        "corpName": "엔시트론",
         "industry": "semiconductor",
         "viaCode": "082210",
         "viaName": "옵트론텍",
@@ -351,57 +354,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "302550",
-        "corpName": "리메드",
-        "industry": "medicalDevice",
+        "stockCode": "297890",
+        "corpName": "HB솔루션",
+        "industry": "electronics",
         "viaCode": "082210",
         "viaName": "옵트론텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "051780",
-        "corpName": "큐로홀딩스",
-        "industry": "electronics",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "019570",
-        "corpName": "플루토스",
+        "stockCode": "241520",
+        "corpName": "DSC인베스트먼트",
         "industry": "finance",
         "viaCode": "082210",
         "viaName": "옵트론텍",
         "hopDistance": 2
       },
       {
-        "stockCode": "190510",
-        "corpName": "나무가",
-        "industry": "electronics",
-        "viaCode": "082210",
-        "viaName": "옵트론텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058820",
-        "corpName": "CMG제약",
-        "industry": "pharma",
-        "viaCode": "065450",
-        "viaName": "빅텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "139050",
-        "corpName": "BF랩스",
-        "industry": "software",
-        "viaCode": "082210",
-        "viaName": "옵트론텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "050890",
-        "corpName": "쏠리드",
-        "industry": "telecom",
+        "stockCode": "090370",
+        "corpName": "메타랩스",
+        "industry": "textile",
         "viaCode": "065450",
         "viaName": "빅텍",
         "hopDistance": 2

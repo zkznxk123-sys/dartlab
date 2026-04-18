@@ -66,43 +66,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 186444266263.0,
-      "operating_profit": 6867678554.0,
-      "net_profit": 7420973021.0,
-      "total_assets": 248190231392.0
-    },
-    {
-      "year": "2022",
-      "sales": 209403828091.0,
-      "operating_profit": 8574416656.0,
-      "net_profit": 78955378.0,
-      "total_assets": 242350721393.0
-    },
-    {
-      "year": "2023",
-      "sales": 193419654722.0,
-      "operating_profit": 8381489448.0,
-      "net_profit": 8831541142.0,
-      "total_assets": 242937272679.0
-    },
-    {
-      "year": "2024",
-      "sales": 164580506815.0,
-      "operating_profit": 8401885993.0,
-      "net_profit": 5495211137.0,
-      "total_assets": 254881524377.0
-    },
-    {
-      "year": "2025",
-      "sales": 187759398480.0,
-      "operating_profit": 10311259918.0,
-      "net_profit": 3539082936.0,
-      "total_assets": 274528083479.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -154,73 +118,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "460870",
-        "corpName": "에스엠씨지",
-        "industry": "construction",
-        "viaCode": "251270",
-        "viaName": "넷마블",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016880",
-        "corpName": "웅진",
-        "industry": "education",
-        "viaCode": "251270",
-        "viaName": "넷마블",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "293490",
-        "corpName": "카카오게임즈",
-        "industry": "software",
-        "viaCode": "251270",
-        "viaName": "넷마블",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000540",
-        "corpName": "흥국화재",
-        "industry": "finance",
-        "viaCode": "251270",
-        "viaName": "넷마블",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000370",
-        "corpName": "한화손해보험",
-        "industry": "aerospace",
-        "viaCode": "251270",
-        "viaName": "넷마블",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "086220",
-        "corpName": "광동헬스바이오",
-        "industry": "pharma",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "286940",
-        "corpName": "롯데이노베이트",
-        "industry": "software",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035760",
-        "corpName": "CJ ENM",
-        "industry": "media",
-        "viaCode": "251270",
-        "viaName": "넷마블",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "037460",
-        "corpName": "삼지전자",
-        "industry": "telecom",
+        "stockCode": "029460",
+        "corpName": "케이씨",
+        "industry": "energy",
         "viaCode": "009290",
         "viaName": "광동제약",
         "hopDistance": 2
@@ -234,6 +134,38 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "083640",
+        "corpName": "인콘",
+        "industry": "software",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "053030",
+        "corpName": "바이넥스",
+        "industry": "pharma",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016880",
+        "corpName": "웅진",
+        "industry": "education",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "085310",
         "corpName": "엔케이",
         "industry": "food",
@@ -242,56 +174,48 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "335810",
-        "corpName": "프리시젼바이오",
-        "industry": "pharma",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "193250",
-        "corpName": "링크드",
-        "industry": "auto",
-        "viaCode": "251270",
-        "viaName": "넷마블",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "003090",
-        "corpName": "대웅",
-        "industry": "pharma",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035720",
-        "corpName": "카카오",
+        "stockCode": "293490",
+        "corpName": "카카오게임즈",
         "industry": "software",
         "viaCode": "251270",
         "viaName": "넷마블",
         "hopDistance": 2
       },
       {
-        "stockCode": "029460",
-        "corpName": "케이씨",
-        "industry": "energy",
+        "stockCode": "084110",
+        "corpName": "휴온스글로벌",
+        "industry": "pharma",
         "viaCode": "009290",
         "viaName": "광동제약",
         "hopDistance": 2
       },
       {
-        "stockCode": "003070",
-        "corpName": "코오롱글로벌",
-        "industry": "construction",
+        "stockCode": "073570",
+        "corpName": "리튬포어스",
+        "industry": "misc",
         "viaCode": "251270",
         "viaName": "넷마블",
         "hopDistance": 2
       },
       {
-        "stockCode": "002020",
-        "corpName": "코오롱",
+        "stockCode": "035760",
+        "corpName": "CJ ENM",
+        "industry": "media",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "086220",
+        "corpName": "광동헬스바이오",
+        "industry": "pharma",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "024110",
+        "corpName": "기업은행",
         "industry": "finance",
         "viaCode": "251270",
         "viaName": "넷마블",
@@ -306,17 +230,97 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "058630",
-        "corpName": "엠게임",
-        "industry": "software",
+        "stockCode": "003530",
+        "corpName": "한화투자증권",
+        "industry": "aerospace",
         "viaCode": "251270",
         "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "047040",
+        "corpName": "대우건설",
+        "industry": "construction",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "460870",
+        "corpName": "에스엠씨지",
+        "industry": "construction",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "123890",
+        "corpName": "한국자산신탁",
+        "industry": "realestate",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "335810",
+        "corpName": "프리시젼바이오",
+        "industry": "pharma",
+        "viaCode": "009290",
+        "viaName": "광동제약",
         "hopDistance": 2
       },
       {
         "stockCode": "323410",
         "corpName": "카카오뱅크",
         "industry": "finance",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "035720",
+        "corpName": "카카오",
+        "industry": "software",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003090",
+        "corpName": "대웅",
+        "industry": "pharma",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000540",
+        "corpName": "흥국화재",
+        "industry": "finance",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "052790",
+        "corpName": "액토즈소프트",
+        "industry": "software",
+        "viaCode": "251270",
+        "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "004450",
+        "corpName": "삼화왕관",
+        "industry": "steel",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "193250",
+        "corpName": "링크드",
+        "industry": "auto",
         "viaCode": "251270",
         "viaName": "넷마블",
         "hopDistance": 2
@@ -338,8 +342,8 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "190650",
-        "corpName": "코리아에셋투자증권",
+        "stockCode": "002020",
+        "corpName": "코오롱",
         "industry": "finance",
         "viaCode": "251270",
         "viaName": "넷마블",
@@ -354,35 +358,35 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "084110",
-        "corpName": "휴온스글로벌",
-        "industry": "pharma",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "004450",
-        "corpName": "삼화왕관",
-        "industry": "steel",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "083640",
-        "corpName": "인콘",
-        "industry": "software",
+        "stockCode": "190650",
+        "corpName": "코리아에셋투자증권",
+        "industry": "finance",
         "viaCode": "251270",
         "viaName": "넷마블",
         "hopDistance": 2
       },
       {
-        "stockCode": "047040",
-        "corpName": "대우건설",
+        "stockCode": "037460",
+        "corpName": "삼지전자",
+        "industry": "telecom",
+        "viaCode": "009290",
+        "viaName": "광동제약",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003070",
+        "corpName": "코오롱글로벌",
         "industry": "construction",
         "viaCode": "251270",
         "viaName": "넷마블",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "286940",
+        "corpName": "롯데이노베이트",
+        "industry": "software",
+        "viaCode": "009290",
+        "viaName": "광동제약",
         "hopDistance": 2
       },
       {
@@ -394,41 +398,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003530",
-        "corpName": "한화투자증권",
-        "industry": "aerospace",
-        "viaCode": "251270",
-        "viaName": "넷마블",
+        "stockCode": "464490",
+        "corpName": "쿼드메디슨",
+        "industry": "pharma",
+        "viaCode": "009290",
+        "viaName": "광동제약",
         "hopDistance": 2
       },
       {
-        "stockCode": "001450",
-        "corpName": "현대해상",
-        "industry": "finance",
-        "viaCode": "251270",
-        "viaName": "넷마블",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "024110",
-        "corpName": "기업은행",
-        "industry": "finance",
-        "viaCode": "251270",
-        "viaName": "넷마블",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "073570",
-        "corpName": "리튬포어스",
-        "industry": "misc",
-        "viaCode": "251270",
-        "viaName": "넷마블",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "091700",
-        "corpName": "파트론",
-        "industry": "electronics",
+        "stockCode": "058630",
+        "corpName": "엠게임",
+        "industry": "software",
         "viaCode": "251270",
         "viaName": "넷마블",
         "hopDistance": 2
@@ -442,43 +422,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "052790",
-        "corpName": "액토즈소프트",
-        "industry": "software",
+        "stockCode": "091700",
+        "corpName": "파트론",
+        "industry": "electronics",
         "viaCode": "251270",
         "viaName": "넷마블",
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
+        "stockCode": "000370",
+        "corpName": "한화손해보험",
         "industry": "aerospace",
         "viaCode": "251270",
         "viaName": "넷마블",
         "hopDistance": 2
       },
       {
-        "stockCode": "053030",
-        "corpName": "바이넥스",
-        "industry": "pharma",
-        "viaCode": "009290",
-        "viaName": "광동제약",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "123890",
-        "corpName": "한국자산신탁",
-        "industry": "realestate",
+        "stockCode": "001450",
+        "corpName": "현대해상",
+        "industry": "finance",
         "viaCode": "251270",
         "viaName": "넷마블",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "464490",
-        "corpName": "쿼드메디슨",
-        "industry": "pharma",
-        "viaCode": "009290",
-        "viaName": "광동제약",
         "hopDistance": 2
       }
     ],

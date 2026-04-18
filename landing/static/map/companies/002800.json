@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 74007577820.0,
-      "operating_profit": -1342541851.0,
-      "net_profit": 26467434.0,
-      "total_assets": 114307218425.0
-    },
-    {
-      "year": "2022",
-      "sales": 91925822969.0,
-      "operating_profit": 5426211394.0,
-      "net_profit": 4355233565.0,
-      "total_assets": 121213081078.0
-    },
-    {
-      "year": "2023",
-      "sales": 102585576212.0,
-      "operating_profit": 6003846310.0,
-      "net_profit": 4679929247.0,
-      "total_assets": 124409301998.0
-    },
-    {
-      "year": "2024",
-      "sales": 106387869012.0,
-      "operating_profit": 6890119518.0,
-      "net_profit": 4811443128.0,
-      "total_assets": 129484086140.0
-    },
-    {
-      "year": "2025",
-      "sales": 113778253746.0,
-      "operating_profit": 10790159371.0,
-      "net_profit": 9282489579.0,
-      "total_assets": 137497263987.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -131,9 +95,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "378800",
-        "corpName": "샤페론",
-        "industry": "pharma",
+        "stockCode": "003540",
+        "corpName": "대신증권",
+        "industry": "finance",
         "viaCode": "308430",
         "viaName": "셀비온",
         "hopDistance": 2
@@ -147,9 +111,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003540",
-        "corpName": "대신증권",
-        "industry": "finance",
+        "stockCode": "378800",
+        "corpName": "샤페론",
+        "industry": "pharma",
         "viaCode": "308430",
         "viaName": "셀비온",
         "hopDistance": 2

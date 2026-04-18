@@ -19,13 +19,13 @@
           "revenue": 19305,
           "confidence": 1.0,
           "source": "docs",
-          "roe": 2.2,
-          "opMargin": 2.5,
-          "debtRatio": 60.0,
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
           "revCagr": null,
-          "profGrade": "저수익",
+          "profGrade": "",
           "debtGrade": "주의",
-          "growthGrade": "급감"
+          "growthGrade": ""
         },
         {
           "stockCode": "000480",
@@ -36,13 +36,13 @@
           "revenue": 8278,
           "confidence": 0.7,
           "source": "product",
-          "roe": -0.3,
-          "opMargin": 3.3,
-          "debtRatio": 96.5,
-          "revCagr": 1.0,
-          "profGrade": "저수익",
-          "debtGrade": "주의",
-          "growthGrade": "정체"
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
+          "revCagr": null,
+          "profGrade": "",
+          "debtGrade": "",
+          "growthGrade": ""
         },
         {
           "stockCode": "462520",
@@ -53,12 +53,12 @@
           "revenue": 5320,
           "confidence": 0.7,
           "source": "product",
-          "roe": -0.9,
-          "opMargin": 7.5,
-          "debtRatio": 131.5,
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
           "revCagr": null,
-          "profGrade": "보통",
-          "debtGrade": "주의",
+          "profGrade": "",
+          "debtGrade": "",
           "growthGrade": ""
         },
         {
@@ -70,13 +70,13 @@
           "revenue": 4063,
           "confidence": 1.0,
           "source": "docs",
-          "roe": 5.7,
-          "opMargin": 0.7,
-          "debtRatio": 93.7,
-          "revCagr": 61.4,
-          "profGrade": "보통",
-          "debtGrade": "안전",
-          "growthGrade": "고성장"
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
+          "revCagr": null,
+          "profGrade": "",
+          "debtGrade": "",
+          "growthGrade": ""
         },
         {
           "stockCode": "004440",
@@ -89,10 +89,10 @@
           "source": "docs",
           "roe": null,
           "opMargin": null,
-          "debtRatio": 32.1,
+          "debtRatio": null,
           "revCagr": null,
           "profGrade": "",
-          "debtGrade": "관찰",
+          "debtGrade": "",
           "growthGrade": ""
         },
         {
@@ -104,13 +104,13 @@
           "revenue": 2024,
           "confidence": 1.0,
           "source": "product",
-          "roe": 3.4,
-          "opMargin": 3.6,
-          "debtRatio": 164.0,
-          "revCagr": -2.6,
-          "profGrade": "저수익",
-          "debtGrade": "주의",
-          "growthGrade": "고성장"
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
+          "revCagr": null,
+          "profGrade": "",
+          "debtGrade": "",
+          "growthGrade": ""
         },
         {
           "stockCode": "075970",
@@ -121,13 +121,13 @@
           "revenue": 1107,
           "confidence": 1.0,
           "source": "docs",
-          "roe": 1.0,
-          "opMargin": 11.6,
-          "debtRatio": 56.8,
-          "revCagr": -37.3,
-          "profGrade": "양호",
-          "debtGrade": "안전",
-          "growthGrade": "고성장"
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
+          "revCagr": null,
+          "profGrade": "",
+          "debtGrade": "",
+          "growthGrade": ""
         },
         {
           "stockCode": "255220",
@@ -138,13 +138,13 @@
           "revenue": 1022,
           "confidence": 1.0,
           "source": "docs",
-          "roe": 1.6,
-          "opMargin": 2.1,
-          "debtRatio": 130.6,
-          "revCagr": 4.4,
-          "profGrade": "저수익",
-          "debtGrade": "주의",
-          "growthGrade": "고성장"
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
+          "revCagr": null,
+          "profGrade": "",
+          "debtGrade": "관찰",
+          "growthGrade": ""
         },
         {
           "stockCode": "252990",
@@ -206,13 +206,13 @@
           "revenue": 17,
           "confidence": 0.7,
           "source": "product",
-          "roe": -10.6,
-          "opMargin": -12.1,
-          "debtRatio": 208.0,
-          "revCagr": -10.1,
-          "profGrade": "적자",
-          "debtGrade": "주의",
-          "growthGrade": "급감"
+          "roe": null,
+          "opMargin": null,
+          "debtRatio": null,
+          "revCagr": null,
+          "profGrade": "",
+          "debtGrade": "",
+          "growthGrade": ""
         },
         {
           "stockCode": "112190",
@@ -228,7 +228,7 @@
           "debtRatio": null,
           "revCagr": null,
           "profGrade": "",
-          "debtGrade": "주의",
+          "debtGrade": "",
           "growthGrade": ""
         }
       ]

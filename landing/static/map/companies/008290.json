@@ -54,43 +54,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 30870988865.0,
-      "operating_profit": -1292420141.0,
-      "net_profit": -9328854968.0,
-      "total_assets": 39684289972.0
-    },
-    {
-      "year": "2022",
-      "sales": 33300032711.0,
-      "operating_profit": 210181442.0,
-      "net_profit": -3507733198.0,
-      "total_assets": 33088296547.0
-    },
-    {
-      "year": "2023",
-      "sales": 28937832608.0,
-      "operating_profit": -1916462598.0,
-      "net_profit": 0.0,
-      "total_assets": 33444831395.0
-    },
-    {
-      "year": "2024",
-      "sales": 22721808986.0,
-      "operating_profit": -4699113271.0,
-      "net_profit": 0.0,
-      "total_assets": 52346111760.0
-    },
-    {
-      "year": "2025",
-      "sales": 16935208093.0,
-      "operating_profit": -7199478124.0,
-      "net_profit": -7575315076.0,
-      "total_assets": 19815736437.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -159,41 +123,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "083420",
-        "corpName": "그린케미칼",
-        "industry": "food",
-        "viaCode": "100250",
-        "viaName": "진양홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "118990",
-        "corpName": "모트렉스",
-        "industry": "auto",
-        "viaCode": "078590",
-        "viaName": "휴림에이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "033540",
-        "corpName": "파라텍",
-        "industry": "machinery",
-        "viaCode": "078590",
-        "viaName": "휴림에이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "090710",
-        "corpName": "휴림로봇",
-        "industry": "machinery",
-        "viaCode": "078590",
-        "viaName": "휴림에이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "009830",
-        "corpName": "한화솔루션",
-        "industry": "chemical",
+        "stockCode": "010640",
+        "corpName": "진양폴리우레탄",
+        "industry": "plastic",
         "viaCode": "100250",
         "viaName": "진양홀딩스",
         "hopDistance": 2
@@ -207,19 +139,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "192410",
-        "corpName": "오늘이엔엠",
-        "industry": "telecom",
+        "stockCode": "016740",
+        "corpName": "두올",
+        "industry": "auto",
         "viaCode": "078590",
         "viaName": "휴림에이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "010640",
-        "corpName": "진양폴리우레탄",
-        "industry": "plastic",
-        "viaCode": "100250",
-        "viaName": "진양홀딩스",
         "hopDistance": 2
       },
       {
@@ -231,30 +155,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "016740",
-        "corpName": "두올",
-        "industry": "auto",
-        "viaCode": "078590",
-        "viaName": "휴림에이텍",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "025000",
-        "corpName": "KPX케미칼",
-        "industry": "software",
-        "viaCode": "100250",
-        "viaName": "진양홀딩스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "092230",
-        "corpName": "KPX홀딩스",
-        "industry": "chemical",
-        "viaCode": "100250",
-        "viaName": "진양홀딩스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "000480",
         "corpName": "시알홀딩스",
         "industry": "buildingMaterials",
@@ -263,9 +163,57 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "090710",
+        "corpName": "휴림로봇",
+        "industry": "machinery",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "118990",
+        "corpName": "모트렉스",
+        "industry": "auto",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "003780",
+        "corpName": "진양산업",
+        "industry": "retail",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192410",
+        "corpName": "오늘이엔엠",
+        "industry": "telecom",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "051630",
         "corpName": "진양화학",
         "industry": "plastic",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "033540",
+        "corpName": "파라텍",
+        "industry": "machinery",
+        "viaCode": "078590",
+        "viaName": "휴림에이텍",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "025000",
+        "corpName": "KPX케미칼",
+        "industry": "software",
         "viaCode": "100250",
         "viaName": "진양홀딩스",
         "hopDistance": 2
@@ -287,9 +235,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "003780",
-        "corpName": "진양산업",
-        "industry": "retail",
+        "stockCode": "092230",
+        "corpName": "KPX홀딩스",
+        "industry": "chemical",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "009830",
+        "corpName": "한화솔루션",
+        "industry": "chemical",
+        "viaCode": "100250",
+        "viaName": "진양홀딩스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "083420",
+        "corpName": "그린케미칼",
+        "industry": "food",
         "viaCode": "100250",
         "viaName": "진양홀딩스",
         "hopDistance": 2

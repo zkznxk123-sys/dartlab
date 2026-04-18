@@ -47,43 +47,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 248212749463.0,
-      "operating_profit": 31201431595.0,
-      "net_profit": 22054807252.0,
-      "total_assets": 341056807158.0
-    },
-    {
-      "year": "2022",
-      "sales": 355390202149.0,
-      "operating_profit": 67734933424.0,
-      "net_profit": 48789612395.0,
-      "total_assets": 397444642902.0
-    },
-    {
-      "year": "2023",
-      "sales": 382911138805.0,
-      "operating_profit": 70660872774.0,
-      "net_profit": 50209592821.0,
-      "total_assets": 447987063260.0
-    },
-    {
-      "year": "2024",
-      "sales": 275274102150.0,
-      "operating_profit": 37132983882.0,
-      "net_profit": 25722065611.0,
-      "total_assets": 473689516733.0
-    },
-    {
-      "year": "2025",
-      "sales": 247943373789.0,
-      "operating_profit": 30115120165.0,
-      "net_profit": 18971462998.0,
-      "total_assets": 515938949317.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -135,16 +99,16 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "005490",
-        "corpName": "POSCO홀딩스",
+        "stockCode": "060380",
+        "corpName": "동양에스텍",
         "industry": "steel",
         "viaCode": "008420",
         "viaName": "문배철강",
         "hopDistance": 2
       },
       {
-        "stockCode": "060380",
-        "corpName": "동양에스텍",
+        "stockCode": "005490",
+        "corpName": "POSCO홀딩스",
         "industry": "steel",
         "viaCode": "008420",
         "viaName": "문배철강",

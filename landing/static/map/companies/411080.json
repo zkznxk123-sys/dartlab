@@ -47,29 +47,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2022",
-      "sales": 9299538168.0,
-      "operating_profit": 2089463274.0,
-      "net_profit": 2155039572.0,
-      "total_assets": 9776465377.0
-    },
-    {
-      "year": "2023",
-      "sales": 11721914034.0,
-      "operating_profit": -883678732.0,
-      "net_profit": 438727045.0,
-      "total_assets": 46362311664.0
-    },
-    {
-      "year": "2025",
-      "sales": 11612082342.0,
-      "operating_profit": -1770367370.0,
-      "net_profit": 0.0,
-      "total_assets": 58015638290.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -121,14 +99,6 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "208350",
-        "corpName": "지란지교시큐리티",
-        "industry": "software",
-        "viaCode": "192250",
-        "viaName": "케이사인",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "001290",
         "corpName": "상상인증권",
         "industry": "finance",
@@ -140,6 +110,14 @@
         "stockCode": "088350",
         "corpName": "한화생명",
         "industry": "aerospace",
+        "viaCode": "192250",
+        "viaName": "케이사인",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "208350",
+        "corpName": "지란지교시큐리티",
+        "industry": "software",
         "viaCode": "192250",
         "viaName": "케이사인",
         "hopDistance": 2

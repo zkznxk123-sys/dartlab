@@ -35,36 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 857683857.0,
-      "operating_profit": null,
-      "net_profit": 0.0,
-      "total_assets": 12870198853.0
-    },
-    {
-      "year": "2022",
-      "sales": 16887886334.0,
-      "operating_profit": 1703656654.0,
-      "net_profit": 1134279330.0,
-      "total_assets": 15365190579.0
-    },
-    {
-      "year": "2023",
-      "sales": 9327995227.0,
-      "operating_profit": -2247901834.0,
-      "net_profit": -1807378175.0,
-      "total_assets": 33261152836.0
-    },
-    {
-      "year": "2025",
-      "sales": 29407048584.0,
-      "operating_profit": 735362538.0,
-      "net_profit": 0.0,
-      "total_assets": 33782617156.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -124,46 +95,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "006800",
-        "corpName": "미래에셋증권",
-        "industry": "finance",
-        "viaCode": "333620",
-        "viaName": "엔시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "064400",
-        "corpName": "LG씨엔에스",
-        "industry": "electronics",
-        "viaCode": "333620",
-        "viaName": "엔시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "071200",
-        "corpName": "인피니트헬스케어",
-        "industry": "pharma",
-        "viaCode": "333620",
-        "viaName": "엔시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "066570",
-        "corpName": "LG전자",
-        "industry": "electronics",
-        "viaCode": "333620",
-        "viaName": "엔시스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "045510",
-        "corpName": "정원엔시스",
-        "industry": "software",
-        "viaCode": "333620",
-        "viaName": "엔시스",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "051900",
         "corpName": "LG생활건강",
         "industry": "electronics",
@@ -188,9 +119,49 @@
         "hopDistance": 2
       },
       {
+        "stockCode": "071200",
+        "corpName": "인피니트헬스케어",
+        "industry": "pharma",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "064400",
+        "corpName": "LG씨엔에스",
+        "industry": "electronics",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "066570",
+        "corpName": "LG전자",
+        "industry": "electronics",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "045510",
+        "corpName": "정원엔시스",
+        "industry": "software",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
         "stockCode": "010140",
         "corpName": "삼성중공업",
         "industry": "shipbuilding",
+        "viaCode": "333620",
+        "viaName": "엔시스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "006800",
+        "corpName": "미래에셋증권",
+        "industry": "finance",
         "viaCode": "333620",
         "viaName": "엔시스",
         "hopDistance": 2

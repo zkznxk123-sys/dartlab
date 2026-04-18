@@ -35,43 +35,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 16408490531.0,
-      "operating_profit": 1782881472.0,
-      "net_profit": 4503538293.0,
-      "total_assets": 77185258102.0
-    },
-    {
-      "year": "2022",
-      "sales": 17441063486.0,
-      "operating_profit": 1685945860.0,
-      "net_profit": 5036812370.0,
-      "total_assets": 76509689752.0
-    },
-    {
-      "year": "2023",
-      "sales": 12759842344.0,
-      "operating_profit": 901749708.0,
-      "net_profit": 3864294306.0,
-      "total_assets": 82497512373.0
-    },
-    {
-      "year": "2024",
-      "sales": 12809512519.0,
-      "operating_profit": 2576381536.0,
-      "net_profit": 4397579372.0,
-      "total_assets": 85143471743.0
-    },
-    {
-      "year": "2025",
-      "sales": 12360625475.0,
-      "operating_profit": 2200952273.0,
-      "net_profit": 3627600280.0,
-      "total_assets": 86017322502.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -123,17 +87,9 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "005930",
-        "corpName": "삼성전자",
-        "industry": "semiconductor",
-        "viaCode": "203450",
-        "viaName": "유니온바이오메트릭스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000910",
-        "corpName": "유니온",
-        "industry": "buildingMaterials",
+        "stockCode": "393210",
+        "corpName": "토마토시스템",
+        "industry": "software",
         "viaCode": "203450",
         "viaName": "유니온바이오메트릭스",
         "hopDistance": 2
@@ -147,9 +103,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "148150",
-        "corpName": "세경하이테크",
-        "industry": "chemical",
+        "stockCode": "005930",
+        "corpName": "삼성전자",
+        "industry": "semiconductor",
+        "viaCode": "203450",
+        "viaName": "유니온바이오메트릭스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "163730",
+        "corpName": "핑거",
+        "industry": "software",
+        "viaCode": "203450",
+        "viaName": "유니온바이오메트릭스",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "408470",
+        "corpName": "한패스",
+        "industry": "finance",
         "viaCode": "203450",
         "viaName": "유니온바이오메트릭스",
         "hopDistance": 2
@@ -163,17 +135,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "236200",
-        "corpName": "슈프리마",
-        "industry": "telecom",
+        "stockCode": "000910",
+        "corpName": "유니온",
+        "industry": "buildingMaterials",
         "viaCode": "203450",
         "viaName": "유니온바이오메트릭스",
         "hopDistance": 2
       },
       {
-        "stockCode": "163730",
-        "corpName": "핑거",
-        "industry": "software",
+        "stockCode": "148150",
+        "corpName": "세경하이테크",
+        "industry": "chemical",
         "viaCode": "203450",
         "viaName": "유니온바이오메트릭스",
         "hopDistance": 2
@@ -195,17 +167,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "393210",
-        "corpName": "토마토시스템",
-        "industry": "software",
-        "viaCode": "203450",
-        "viaName": "유니온바이오메트릭스",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095340",
-        "corpName": "ISC",
-        "industry": "retail",
+        "stockCode": "236200",
+        "corpName": "슈프리마",
+        "industry": "telecom",
         "viaCode": "203450",
         "viaName": "유니온바이오메트릭스",
         "hopDistance": 2
@@ -219,9 +183,9 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "408470",
-        "corpName": "한패스",
-        "industry": "finance",
+        "stockCode": "095340",
+        "corpName": "ISC",
+        "industry": "retail",
         "viaCode": "203450",
         "viaName": "유니온바이오메트릭스",
         "hopDistance": 2

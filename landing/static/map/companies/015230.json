@@ -85,43 +85,7 @@
   ],
   "aiInsight": null,
   "blogPosts": [],
-  "financials5y": [
-    {
-      "year": "2021",
-      "sales": 354439661796.0,
-      "operating_profit": 29506417898.0,
-      "net_profit": 0.0,
-      "total_assets": 298478418840.0
-    },
-    {
-      "year": "2022",
-      "sales": 421497657834.0,
-      "operating_profit": 49857119260.0,
-      "net_profit": 36703566757.0,
-      "total_assets": 338228490208.0
-    },
-    {
-      "year": "2023",
-      "sales": 372122590244.0,
-      "operating_profit": 46442960961.0,
-      "net_profit": 0.0,
-      "total_assets": 334751849114.0
-    },
-    {
-      "year": "2024",
-      "sales": 322237329620.0,
-      "operating_profit": 30073913587.0,
-      "net_profit": 32945243186.0,
-      "total_assets": 372341113498.0
-    },
-    {
-      "year": "2025",
-      "sales": 346267051157.0,
-      "operating_profit": 38033603172.0,
-      "net_profit": 0.0,
-      "total_assets": 401820257799.0
-    }
-  ],
+  "financials5y": [],
   "supplyInsights": {
     "supplierCount": 0,
     "customerCount": 0,
@@ -182,17 +146,57 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "019550",
-        "corpName": "SBI인베스트먼트",
-        "industry": "finance",
-        "viaCode": "103230",
-        "viaName": "에스앤더블류",
+        "stockCode": "090350",
+        "corpName": "노루페인트",
+        "industry": "chemical",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
         "hopDistance": 2
       },
       {
         "stockCode": "004270",
         "corpName": "남성",
         "industry": "telecom",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "088350",
+        "corpName": "한화생명",
+        "industry": "aerospace",
+        "viaCode": "159580",
+        "viaName": "제로투세븐",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000180",
+        "corpName": "성창기업지주",
+        "industry": "consulting",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "005990",
+        "corpName": "매일홀딩스",
+        "industry": "food",
+        "viaCode": "159580",
+        "viaName": "제로투세븐",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "007210",
+        "corpName": "벽산",
+        "industry": "auto",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "095910",
+        "corpName": "에스에너지",
+        "industry": "energy",
         "viaCode": "004910",
         "viaName": "조광페인트",
         "hopDistance": 2
@@ -206,17 +210,17 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "192820",
-        "corpName": "코스맥스",
-        "industry": "cosmetics",
-        "viaCode": "159580",
-        "viaName": "제로투세븐",
+        "stockCode": "007690",
+        "corpName": "국도화학",
+        "industry": "chemical",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
         "hopDistance": 2
       },
       {
-        "stockCode": "090350",
-        "corpName": "노루페인트",
-        "industry": "chemical",
+        "stockCode": "058400",
+        "corpName": "KNN",
+        "industry": "telecom",
         "viaCode": "004910",
         "viaName": "조광페인트",
         "hopDistance": 2
@@ -230,46 +234,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000660",
-        "corpName": "SK하이닉스",
-        "industry": "semiconductor",
-        "viaCode": "103230",
-        "viaName": "에스앤더블류",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "046890",
-        "corpName": "서울반도체",
-        "industry": "semiconductor",
-        "viaCode": "103230",
-        "viaName": "에스앤더블류",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "058400",
-        "corpName": "KNN",
-        "industry": "telecom",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000320",
-        "corpName": "노루홀딩스",
-        "industry": "finance",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "267980",
-        "corpName": "매일유업",
-        "industry": "food",
-        "viaCode": "159580",
-        "viaName": "제로투세븐",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "027040",
         "corpName": "서울전자통신",
         "industry": "retail",
@@ -278,59 +242,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "005990",
-        "corpName": "매일홀딩스",
-        "industry": "food",
-        "viaCode": "159580",
-        "viaName": "제로투세븐",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "095910",
-        "corpName": "에스에너지",
-        "industry": "energy",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "035510",
-        "corpName": "신세계I&C",
-        "industry": "retail",
-        "viaCode": "159580",
-        "viaName": "제로투세븐",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "452400",
-        "corpName": "이닉스",
-        "industry": "semiconductor",
-        "viaCode": "103230",
-        "viaName": "에스앤더블류",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "016800",
-        "corpName": "퍼시스",
-        "industry": "paper",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "000180",
-        "corpName": "성창기업지주",
-        "industry": "consulting",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "083550",
         "corpName": "케이엠",
         "industry": "chemical",
-        "viaCode": "103230",
-        "viaName": "에스앤더블류",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
         "hopDistance": 2
       },
       {
@@ -342,17 +258,25 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "007690",
-        "corpName": "국도화학",
-        "industry": "chemical",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
+        "stockCode": "035510",
+        "corpName": "신세계I&C",
+        "industry": "retail",
+        "viaCode": "159580",
+        "viaName": "제로투세븐",
         "hopDistance": 2
       },
       {
-        "stockCode": "007210",
-        "corpName": "벽산",
-        "industry": "auto",
+        "stockCode": "000660",
+        "corpName": "SK하이닉스",
+        "industry": "semiconductor",
+        "viaCode": "103230",
+        "viaName": "에스앤더블류",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000320",
+        "corpName": "노루홀딩스",
+        "industry": "finance",
         "viaCode": "004910",
         "viaName": "조광페인트",
         "hopDistance": 2
@@ -366,11 +290,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "000860",
-        "corpName": "강남제비스코",
-        "industry": "chemical",
-        "viaCode": "004910",
-        "viaName": "조광페인트",
+        "stockCode": "046890",
+        "corpName": "서울반도체",
+        "industry": "semiconductor",
+        "viaCode": "103230",
+        "viaName": "에스앤더블류",
         "hopDistance": 2
       },
       {
@@ -382,9 +306,49 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "088350",
-        "corpName": "한화생명",
-        "industry": "aerospace",
+        "stockCode": "452400",
+        "corpName": "이닉스",
+        "industry": "semiconductor",
+        "viaCode": "103230",
+        "viaName": "에스앤더블류",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "019550",
+        "corpName": "SBI인베스트먼트",
+        "industry": "finance",
+        "viaCode": "103230",
+        "viaName": "에스앤더블류",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "267980",
+        "corpName": "매일유업",
+        "industry": "food",
+        "viaCode": "159580",
+        "viaName": "제로투세븐",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "016800",
+        "corpName": "퍼시스",
+        "industry": "paper",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "000860",
+        "corpName": "강남제비스코",
+        "industry": "chemical",
+        "viaCode": "004910",
+        "viaName": "조광페인트",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "192820",
+        "corpName": "코스맥스",
+        "industry": "cosmetics",
         "viaCode": "159580",
         "viaName": "제로투세븐",
         "hopDistance": 2

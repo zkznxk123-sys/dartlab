@@ -87,17 +87,17 @@
   "hop2": {
     "hop2Neighbors": [
       {
-        "stockCode": "052860",
-        "corpName": "아이앤씨",
-        "industry": "semiconductor",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
         "viaCode": "478560",
         "viaName": "블랙야크아이앤씨",
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
+        "stockCode": "052860",
+        "corpName": "아이앤씨",
+        "industry": "semiconductor",
         "viaCode": "478560",
         "viaName": "블랙야크아이앤씨",
         "hopDistance": 2

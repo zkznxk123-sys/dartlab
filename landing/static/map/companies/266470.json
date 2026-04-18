@@ -153,8 +153,16 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "234690",
-        "corpName": "녹십자웰빙",
+        "stockCode": "142280",
+        "corpName": "녹십자엠에스",
+        "industry": "pharma",
+        "viaCode": "199730",
+        "viaName": "바이오인프라",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "144510",
+        "corpName": "지씨셀",
         "industry": "pharma",
         "viaCode": "199730",
         "viaName": "바이오인프라",
@@ -169,22 +177,6 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "041510",
-        "corpName": "에스엠",
-        "industry": "media",
-        "viaCode": "359090",
-        "viaName": "씨엔알리서치",
-        "hopDistance": 2
-      },
-      {
-        "stockCode": "144510",
-        "corpName": "지씨셀",
-        "industry": "pharma",
-        "viaCode": "199730",
-        "viaName": "바이오인프라",
-        "hopDistance": 2
-      },
-      {
         "stockCode": "039490",
         "corpName": "키움증권",
         "industry": "finance",
@@ -193,19 +185,27 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "142280",
-        "corpName": "녹십자엠에스",
+        "stockCode": "234690",
+        "corpName": "녹십자웰빙",
         "industry": "pharma",
         "viaCode": "199730",
         "viaName": "바이오인프라",
         "hopDistance": 2
       },
       {
-        "stockCode": "032620",
-        "corpName": "GC메디아이",
-        "industry": "software",
-        "viaCode": "199730",
-        "viaName": "바이오인프라",
+        "stockCode": "041510",
+        "corpName": "에스엠",
+        "industry": "media",
+        "viaCode": "359090",
+        "viaName": "씨엔알리서치",
+        "hopDistance": 2
+      },
+      {
+        "stockCode": "388870",
+        "corpName": "파로스아이바이오",
+        "industry": "pharma",
+        "viaCode": "359090",
+        "viaName": "씨엔알리서치",
         "hopDistance": 2
       },
       {
@@ -225,11 +225,11 @@
         "hopDistance": 2
       },
       {
-        "stockCode": "388870",
-        "corpName": "파로스아이바이오",
-        "industry": "pharma",
-        "viaCode": "359090",
-        "viaName": "씨엔알리서치",
+        "stockCode": "032620",
+        "corpName": "GC메디아이",
+        "industry": "software",
+        "viaCode": "199730",
+        "viaName": "바이오인프라",
         "hopDistance": 2
       }
     ],
