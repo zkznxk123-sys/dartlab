@@ -163,18 +163,20 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
     if len(years) < 3:
         return None
 
-    # 업종 최적 3지표
-    optimal = getExogenousIndicators(stockCode=stockCode)
-
-    # 범용 3지표 — KR/US 자동 분기
+    # KR/US 자동 분기 — currency 우선, 없으면 KR 기본
     currency = getattr(company, "currency", "KRW")
+
     if currency == "USD":
+        # US 종목: getExogenousIndicators는 KR 전용이므로 스킵, 범용 FRED 지표만 사용
+        optimal = []
         generic = [
             ExogenousIndicator("FEDFUNDS", "fred", "Federal Funds Rate", "financial"),
             ExogenousIndicator("DTWEXBGS", "fred", "USD Index", "fx"),
             ExogenousIndicator("INDPRO", "fred", "Industrial Production", "domestic"),
         ]
     else:
+        # KR 종목: 업종 최적 3지표 + 범용 ECOS 3지표
+        optimal = getExogenousIndicators(stockCode=stockCode)
         generic = [
             ExogenousIndicator("BASE_RATE", "ecos", "기준금리", "financial"),
             ExogenousIndicator("USDKRW", "ecos", "원/달러", "fx"),

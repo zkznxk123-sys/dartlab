@@ -32,7 +32,7 @@ DOMAIN_POLICY: dict[str, DomainConfig] = {
     # 해외 — 네이버 글로벌
     "api.stock.naver.com": DomainConfig(rpm=30, concurrency=2, jitter_min=0.5, jitter_max=2.0),
     # 해외 — Yahoo v8 Chart API
-    "query2.finance.yahoo.com": DomainConfig(rpm=20, concurrency=2, jitter_min=0.5, jitter_max=2.0),
+    "query2.finance.yahoo.com": DomainConfig(rpm=10, concurrency=1, jitter_min=1.0, jitter_max=3.0),
     # 해외 — FMP (fallback)
     "financialmodelingprep.com": DomainConfig(rpm=4, concurrency=1, timeout=15.0, jitter_min=1.0, jitter_max=3.0),
     # 뉴스

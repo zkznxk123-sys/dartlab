@@ -102,9 +102,21 @@ async def _fetchAll(codes: list[str], verbose: bool) -> dict[str, dict]:
 
 
 def scanValuation(*, verbose: bool = True) -> pl.DataFrame:
-    """전종목 밸류에이션 스캔 -- PER/PBR/PSR + 등급.
+    """전종목 밸류에이션 스캔 — PER/PBR/PSR + 등급 (**KR 전용**).
 
-    네이버 API에서 실시간 수집. 2700종목 기준 2-3분 소요.
+    네이버 API에서 실시간 수집. KR 2700종목 기준 2~3분 소요.
+
+    AI 사용 가이드:
+        - **KR 종목 컨텍스트에서만 호출**하라. US/글로벌 종목 분석 중에는 금지.
+        - US 종목의 가치평가는 ``Company.analysis("가치평가")`` 또는
+          ``quant("valuation", stockCode)`` 사용.
+        - scan은 "전종목 횡단분석"이므로 단일 종목 분석에는 부적합.
+          종목 1개 가치평가 목적이면 ``quant("value", stockCode)`` 호출.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode/종목명/marketCap/per/pbr/psr/grade 컬럼. KR 2700종목.
     """
     if verbose:
         print("밸류에이션 스캔: 상장사 목록 수집...")

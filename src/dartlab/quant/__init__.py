@@ -409,6 +409,8 @@ _ALIASES: dict[str, str] = {
     "품질": "quality",
     "가치": "value",
     "밸류": "value",
+    "valuation": "value",
+    "valueFactor": "value",
     "이익모멘텀": "earnings",
     "SUE": "earnings",
     "PEAD": "earnings",
@@ -523,8 +525,15 @@ class Quant:
     ) -> pl.DataFrame | dict | Any:
         """정량분석 실행.
 
+        AI 사용 가이드:
+            - axis는 반드시 가용 축 또는 별칭 중 하나. None이면 가이드 반환.
+            - 가치평가는 ``"value"`` 또는 ``"valuation"`` (별칭). ``quant("valuation")`` OK.
+            - 모르는 축이면 ``quant()`` 무인자로 가용 축 목록 확인.
+            - 종목코드는 두 번째 인자: ``quant("모멘텀", "005930")``.
+            - market은 자동 감지 (6자리 숫자→KR, 알파벳→US). 명시 불필요.
+
         Args:
-            axis: 분석 축 (None이면 가이드). 종목코드도 가능 (하위호환).
+            axis: 분석 축 (None이면 가이드). 별칭 지원 (한글/영문).
             stockCode: 종목코드/ticker 또는 종목 리스트.
             **kwargs: 축별 추가 파라미터.
 

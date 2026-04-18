@@ -918,7 +918,7 @@ class Gather:
                 return fred.series(indicator, **kwargs)
             return fred.compare(self._MACRO_US, **kwargs)
         except (KeyError, ValueError, OSError, FredError) as exc:
-            log.warning("macro US 실패: %s", exc)
+            log.warning("macro US 실패 (indicator=%s): %s", indicator or "ALL", exc)
             return None
 
     # ── 전체 병렬 수집 ──

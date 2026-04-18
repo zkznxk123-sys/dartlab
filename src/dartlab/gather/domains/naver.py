@@ -123,19 +123,22 @@ def _cleanSuffix(text: str, *suffixes: str) -> str:
 
 
 async def fetch_price(stock_code: str, client, **kwargs) -> PriceSnapshot | None:
-    """네이버 -> 현재가 + PER/PBR + 52주 범위 + 시총.
+    """네이버 -> 현재가 + PER/PBR + 52주 범위 + 시총 (KR 전용).
+
+    KR 종목코드(6자리 숫자)가 아니면 None 반환 — naver KR API에 잘못된
+    티커를 보내 409 에러가 나는 것을 차단.
 
     Parameters
     ----------
     stock_code : str
-        종목코드 (예: ``"005930"``).
+        종목코드 (예: ``"005930"``). 6자리 숫자만 처리.
     client
         비동기 HTTP 클라이언트.
 
     Returns
     -------
     PriceSnapshot | None
-        현재가 스냅샷. 주요 필드:
+        현재가 스냅샷. KR 종목코드 아니면 None. 주요 필드:
 
         - current : float — 현재가 (원)
         - change : float — 전일 대비 변동액 (원)
@@ -151,6 +154,10 @@ async def fetch_price(stock_code: str, client, **kwargs) -> PriceSnapshot | None
 
         API 실패 또는 현재가 없으면 None.
     """
+    # KR 종목코드 검증 — 6자리 숫자 아니면 차단 (US/글로벌 티커 → naver_global로)
+    if not (stock_code and stock_code.strip().isdigit() and len(stock_code.strip()) == 6):
+        return None
+
     # basic: 현재가, 등락
     url = f"{_API_BASE}/{stock_code}/basic"
     try:
@@ -231,6 +238,10 @@ async def fetch_consensus(stock_code: str, client) -> ConsensusData | None:
 
         API 실패 또는 컨센서스 없으면 None.
     """
+    # KR 종목코드 검증
+    if not (stock_code and stock_code.strip().isdigit() and len(stock_code.strip()) == 6):
+        return None
+
     url = f"{_API_BASE}/{stock_code}/integration"
     try:
         resp = await client.get(url, headers={"Accept": "application/json"})
@@ -307,6 +318,10 @@ async def fetch_flow(stock_code: str, client) -> list[dict] | None:
 
         데이터 없으면 None.
     """
+    # KR 종목코드 검증
+    if not (stock_code and stock_code.strip().isdigit() and len(stock_code.strip()) == 6):
+        return None
+
     url = f"{_API_BASE}/{stock_code}/integration"
     try:
         resp = await client.get(url, headers={"Accept": "application/json"})
@@ -402,6 +417,10 @@ async def fetch_revenue_consensus(stock_code: str, client) -> list[RevenueConsen
 
         API 실패 또는 데이터 없으면 빈 리스트.
     """
+    # KR 종목코드 검증
+    if not (stock_code and stock_code.strip().isdigit() and len(stock_code.strip()) == 6):
+        return []
+
     url = f"{_API_BASE}/{stock_code}/finance/annual"
     try:
         resp = await client.get(url, headers={"Accept": "application/json"})
@@ -475,6 +494,10 @@ async def fetch_sector_per(stock_code: str, client) -> float | None:
     float | None
         동종업종 평균 PER (배). API 실패 또는 데이터 없으면 None.
     """
+    # KR 종목코드 검증
+    if not (stock_code and stock_code.strip().isdigit() and len(stock_code.strip()) == 6):
+        return None
+
     url = f"{_API_BASE}/{stock_code}/integration"
     try:
         resp = await client.get(url, headers={"Accept": "application/json"})
@@ -573,6 +596,9 @@ async def fetch_intraday(
     """
     if market != "KR":
         return []
+    # KR 종목코드 검증
+    if not (stock_code and stock_code.strip().isdigit() and len(stock_code.strip()) == 6):
+        return []
 
     url = _INTRADAY_URL.format(code=stock_code)
     try:
@@ -644,6 +670,10 @@ async def fetch_history(
         KR 외 시장이거나 조회 실패 시 빈 리스트.
     """
     if market != "KR":
+        return []
+    # KR 종목코드 검증 (지수 심볼 KOSPI/KOSDAQ 등도 허용)
+    sc = stock_code.strip() if stock_code else ""
+    if not (sc.isdigit() and len(sc) == 6) and sc not in ("KOSPI", "KOSDAQ", "KPI200"):
         return []
     import re
 

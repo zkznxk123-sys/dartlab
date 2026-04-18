@@ -8,11 +8,18 @@ log = logging.getLogger(__name__)
 
 
 def analyze_summary(*, market: str = "US", as_of: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
-    """매크로 전체 종합 판정.
+    """매크로 전체 종합 판정 — **종목 분석 시 macro 호출은 이 함수 1회로 끝낸다**.
 
     11개 축(cycle, rates, assets, sentiment, liquidity, forecast, crisis,
     inventory, trade, corporate, scenario)을 독립 호출하여 종합 스코어와
     자산배분, 투자전략 대시보드를 산출한다.
+
+    AI 사용 가이드:
+        - 종목/회사 분석 컨텍스트에서는 **이 함수 1회**만 호출하라.
+          단일 축(cycle/rates/liquidity 등) 11번 반복 호출 금지.
+        - 결과 dict의 `cycle`, `rates`, `liquidity` 등 11축이 이미 포함됨.
+        - 단일 축 호출은 사용자가 "금리만 자세히" 같이 명시했을 때만.
+        - market은 종목의 currency에 맞게 — KR 종목은 "KR", US 종목은 "US".
 
     Parameters
     ----------
