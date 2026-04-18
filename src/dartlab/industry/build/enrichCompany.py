@@ -73,7 +73,7 @@ def _loadBlogIndex() -> dict[str, list[dict]]:
 
         ai = fm.get("ai", {}) or {}
         entry = {
-            "slug": postDir.name,
+            "slug": re.sub(r"^\d+-", "", postDir.name),
             "title": fm.get("title", ""),
             "description": fm.get("description", ""),
             "date": str(fm.get("date", "")),
