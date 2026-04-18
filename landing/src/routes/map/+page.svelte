@@ -1213,7 +1213,7 @@
 					color: indColorMap.get(ind.id) || '#9ca3af'
 				}))}
 				flows={data.atlas.flows}
-				onSelect={(ind: any) => { sectorHealthId = ind.id; sectorHealthName = ind.name || ind.id; }}
+				onSelect={(ind: any) => enterIndustry(ind.id)}
 				{colorMetric}
 				industryStats={(data as any).industryStats || {}}
 			/>
