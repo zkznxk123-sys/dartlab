@@ -11,7 +11,7 @@ storyTemplate: "턴어라운드"
 grade: "dCR-BB"
 tags: [CG인바이츠, "083790", 게임, 모바일게임, 턴어라운드, 적자, 재무분석, 자본잠식, 유상증자, 전자공시]
 thumbnail: /avatar-chart.png
-ogImage: /avatar-chart.png
+ogImage: /thumbnails/083790-cg-invites.webp
 youtubeId: ""
 ai:
   verdict: "7년 적자를 유상증자로 메운 게임사. 2025년 매출 4배 반등은 신작 효과지만 OPM -87%, 자본잠식 경계선 위에 서 있다."

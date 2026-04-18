@@ -21,7 +21,7 @@ tags:
   - 자회사
   - 지주구조
 thumbnail: /avatar-chart.png
-ogImage: /avatar-chart.png
+ogImage: /thumbnails/035420-naver.webp
 youtubeId: ""
 ai:
   verdict: "별도 OPM 75%의 검색 플랫폼이 연결 시 18%로 떨어지는 구조 — 57%p는 자회사·투자가 흡수"

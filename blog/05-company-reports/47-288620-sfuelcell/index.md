@@ -21,7 +21,7 @@ tags:
   - 매출원가율
   - 에너지전환
 thumbnail: /avatar-chart.png
-ogImage: /avatar-chart.png
+ogImage: /thumbnails/288620-sfuelcell.webp
 youtubeId: ""
 ai:
   verdict: "매출원가율 127%의 구조적 역마진 — 인증 없는 탈탄소 적자는 소멸로 향한다"

@@ -11,7 +11,7 @@ storyTemplate: "성장"
 grade: "dCR-A"
 tags: [NuScale Power, SMR, 소형모듈원전, 원자력, NRC, AI전력수요, EDGAR, 재무분석]
 thumbnail: /avatar-chart.png
-ogImage: /avatar-chart.png
+ogImage: /thumbnails/SMR-nuscale-power.webp
 youtubeId: ""
 ai:
   verdict: "NRC 인증은 있으나 경제성 미검증. 현금 $1.25B로 시간을 샀다."

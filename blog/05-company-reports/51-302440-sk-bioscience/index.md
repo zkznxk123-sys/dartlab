@@ -21,7 +21,7 @@ tags:
   - 투자사이클
   - 삼성바이오로직스
 thumbnail: /avatar-chart.png
-ogImage: /avatar-chart.png
+ogImage: /thumbnails/302440-sk-bioscience.webp
 youtubeId: ""
 ai:
   verdict: "매출은 돌아왔다, 마진은 안 돌아왔다 — CAPEX 2,604억 투자 사이클이 끝나야 답이 나온다"

@@ -11,7 +11,7 @@ storyTemplate: "성장"
 grade: "dCR-AA"
 tags: [NVIDIA, NVDA, 엔비디아, AI반도체, 팹리스, GPU, 데이터센터, EDGAR]
 thumbnail: /avatar-chart.png
-ogImage: /avatar-chart.png
+ogImage: /thumbnails/NVDA-nvidia.webp
 youtubeId: ""
 ai:
   verdict: "팹리스 + AI 수요 독점 = OPM 62%. 역사상 가장 빠른 대형주 성장."

@@ -19,7 +19,7 @@ tags:
   - 턴어라운드
   - 전자공시
 thumbnail: /avatar-chart.png
-ogImage: /avatar-chart.png
+ogImage: /thumbnails/064350-hyundai-rotem.webp
 youtubeId: ""
 ai:
   verdict: "국내 전용 적자 방산 → K2 수출 변곡점 → 자본 경량 구조에서 OPM 17% 폭발."

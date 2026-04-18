@@ -21,7 +21,7 @@ tags:
   - 프랜차이즈
   - 내수식품
 thumbnail: /avatar-chart.png
-ogImage: /avatar-chart.png
+ogImage: /thumbnails/007310-ottogi.webp
 youtubeId: ""
 ai:
   verdict: "내수 식품의 OPM 천장은 5% — 해외 비중 15%인 오뚜기는 삼양의 구조를 따라갈 수 없다"

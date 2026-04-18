@@ -21,7 +21,7 @@ tags:
   - 수주잔고
   - 턴어라운드
 thumbnail: /avatar-chart.png
-ogImage: /avatar-chart.png
+ogImage: /thumbnails/042660-hanwha-ocean.webp
 youtubeId: ""
 ai:
   verdict: "저가 수주 탈출 완료, OPM 9.1% 회복 — 방산 프리미엄은 아직 마진에 찍히지 않았다"

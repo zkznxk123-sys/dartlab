@@ -11,7 +11,7 @@ storyTemplate: "지주"
 grade: "dCR-AA"
 tags: [카카오, "035720", 카카오톡, 플랫폼, 자회사, SM엔터테인먼트, 네이버, 전자공시]
 thumbnail: /avatar-chart.png
-ogImage: /avatar-chart.png
+ogImage: /thumbnails/035720-kakao.webp
 youtubeId: ""
 ai:
   verdict: "3,000만 DAU를 자회사 수십 개로 수익화한 구조가 OPM 한 자릿수의 원인"
