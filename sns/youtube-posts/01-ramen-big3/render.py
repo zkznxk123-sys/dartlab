@@ -6,9 +6,24 @@ from PIL import Image, ImageDraw, ImageFont
 W, H = 1080, 1080
 OUT = Path(__file__).parent / "slides"
 OUT.mkdir(exist_ok=True)
+AVATAR_DIR = Path(r"c:/Users/MSI/OneDrive/Desktop/sideProject/dartlab/landing/static")
 
 FONT_BOLD = "C:/Windows/Fonts/malgunbd.ttf"
 FONT_REG = "C:/Windows/Fonts/malgun.ttf"
+
+# 역할별 아바타 매핑
+AVATARS = {
+    "hook": "avatar-curious.png",      # 후크 — 질문하는 표정
+    "discovery": "avatar-chart.png",    # 발견 — 차트 분석
+    "twist": "avatar-detective.png",    # 반전 — 탐정
+    "cta": "avatar-code.png",          # CTA — 코드
+}
+
+def load_avatar(role, size=120):
+    path = AVATAR_DIR / AVATARS[role]
+    av = Image.open(path).convert("RGBA")
+    av = av.resize((size, size), Image.LANCZOS)
+    return av
 
 def rgb(h):
     h = h.lstrip("#")
@@ -87,9 +102,17 @@ def draw_chart_frame(n):
     plot(nongshim, YELLOW)
     plot(ottogi, RED)
 
+    # 아바타 (우하단)
+    av = load_avatar("hook", 100)
+    # RGBA → RGB 합성
+    temp = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    temp.paste(av, (W - 140, H - 140), av)
+    img = Image.alpha_composite(img.convert("RGBA"), temp).convert("RGB")
+    d = ImageDraw.Draw(img)
+
     # 하단
     d.text((60, H - 60), "dartlab 실측 2026-04-18", fill=MUTED, font=fl)
-    d.text((W - 60, H - 60), "dartlab", fill=MUTED, font=fs, anchor="ra")
+    d.text((W - 180, H - 60), "dartlab", fill=MUTED, font=fs, anchor="ra")
     return img
 
 
@@ -148,7 +171,13 @@ d2.text(
 
 d2.rectangle([0, 900, W, 910], fill=ACCENT)
 d2.text((60, 940), "dartlab 실측 2026-04-18", fill=MUTED, font=fl2)
-d2.text((W - 60, 940), "dartlab", fill=MUTED, font=fs2, anchor="ra")
+d2.text((W - 200, 940), "dartlab", fill=MUTED, font=fs2, anchor="ra")
+
+# 아바타
+av2 = load_avatar("discovery", 100)
+img2 = img2.convert("RGBA")
+img2.paste(av2, (W - 130, 920), av2)
+img2 = img2.convert("RGB")
 
 img2.save(OUT / "02-cost-compare.webp", "WEBP", quality=95)
 print("Slide 02")
@@ -205,7 +234,12 @@ d3.text(
 
 d3.rectangle([0, 900, W, 910], fill=ACCENT)
 d3.text((60, 940), "dartlab 실측", fill=MUTED, font=fl3)
-d3.text((W - 60, 940), "dartlab", fill=MUTED, font=fs2, anchor="ra")
+d3.text((W - 200, 940), "dartlab", fill=MUTED, font=fs2, anchor="ra")
+
+av3 = load_avatar("twist", 100)
+img3 = img3.convert("RGBA")
+img3.paste(av3, (W - 130, 920), av3)
+img3 = img3.convert("RGB")
 
 img3.save(OUT / "03-china-trap.webp", "WEBP", quality=95)
 print("Slide 03")
@@ -267,12 +301,17 @@ d4.text(
 
 d4.text((60, 1000), "dartlab", fill=MUTED, font=fs2)
 d4.text(
-    (W - 60, 1000),
+    (W - 200, 1000),
     "#dartlab #기업분석 #라면",
     fill=DIM,
     font=fl3,
     anchor="ra",
 )
+
+av4 = load_avatar("cta", 100)
+img4 = img4.convert("RGBA")
+img4.paste(av4, (W - 130, 950), av4)
+img4 = img4.convert("RGB")
 
 img4.save(OUT / "04-cta.webp", "WEBP", quality=95)
 print("Slide 04")
