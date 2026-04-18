@@ -1,0 +1,15 @@
+삼양식품 22%, 농심 5.2%, 오뚜기 4.8%.
+
+같은 라면을 만드는데 영업이익률이 4배 차이 납니다. 왜일까요?
+
+dartlab으로 9년치 재무제표를 나란히 놓으면 답이 보입니다 — 해외 매출 비중입니다. 삼양 77%, 농심 66%, 오뚜기 15%. 해외에서는 한국 라면에 프리미엄을 붙여 팔 수 있지만, 국내에서는 원가율 84%를 벗어나지 못합니다.
+
+그런데 농심은 해외 66%인데도 OPM 5%입니다. 중국 시장(해외의 17%)이 마진을 깎기 때문입니다.
+
+"해외에 나갔다"와 "해외에서 돈을 벌었다"는 다릅니다.
+
+블로그 전문: https://eddmpython.github.io/dartlab/blog/ottogi
+삼양식품편: https://eddmpython.github.io/dartlab/blog/samyang-foods
+농심편: https://eddmpython.github.io/dartlab/blog/nongshim
+
+#dartlab #기업분석 #재무제표 #오뚜기 #삼양식품 #농심 #라면 #불닭 #진라면 #신라면

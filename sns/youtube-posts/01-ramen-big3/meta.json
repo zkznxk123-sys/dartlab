@@ -1,0 +1,13 @@
+{
+  "title": "라면 빅3 — 같은 라면인데 OPM 22% vs 5% vs 5%",
+  "date": "2026-04-18",
+  "blogSlug": "ottogi",
+  "relatedBlogs": ["samyang-foods", "nongshim"],
+  "videoId": "",
+  "slides": [
+    {"file": "01-hook-opm-race.gif", "type": "gif", "role": "hook"},
+    {"file": "02-cost-compare.webp", "type": "image", "role": "discovery"},
+    {"file": "03-china-trap.webp", "type": "image", "role": "twist"},
+    {"file": "04-cta.webp", "type": "image", "role": "cta"}
+  ]
+}
