@@ -425,65 +425,112 @@ def _roundOrNone(v, digits: int = 1):
         return None
 
 
-def _computeLayout(nodes, taxonomy) -> dict[str, tuple[float, float]]:
-    """34개 산업 중심점을 원형 배치 → 산업 내 노드를 중심 주변 나선 배치.
+def _computeLayout(nodes, taxonomy, atlasFlows=None) -> dict[str, tuple[float, float]]:
+    """관계 기반 2단계 hierarchical layout.
+
+    L1 (산업 배치): atlasFlows를 가중치로 networkx Kamada-Kawai + PageRank 허브 중앙.
+        강하게 연결된 산업끼리 가깝고, 허브 산업이 중심.
+    L2 (산업 내 회사): 산업 중심 주변 golden spiral 배치 (매출 큰 순 = 안쪽).
+
+    Parameters
+    ----------
+    nodes : list
+        전종목 IndustryNode
+    taxonomy : dict
+        industry 분류
+    atlasFlows : list[dict] | None
+        atlas.json flows ({fromIndustry, toIndustry, edgeCount, amount})
+        None이면 nodes 엣지로부터 집계 (fallback)
 
     Returns
     -------
     dict
-        stockCode → (x, y) 좌표 매핑
+        stockCode → (x, y) 좌표
     """
     import math
+    import networkx as nx
 
     # 1. 산업별 그룹핑
     byIndustry: dict[str, list] = {}
     for n in nodes:
         byIndustry.setdefault(n.industry, []).append(n)
 
-    # 2. 산업 중심점: 나선형 배치 (안쪽 = 큰 산업, 바깥 = 작은 산업)
-    # 매출 큰 산업 순으로 정렬
-    indOrder = sorted(
-        byIndustry.keys(),
-        key=lambda k: sum(n.revenue or 0 for n in byIndustry[k]),
-        reverse=True,
-    )
+    allInds = list(byIndustry.keys())
 
-    # 각 산업의 spread 사전 계산 (이웃 간 최소 거리 결정)
+    # 2. 산업 간 그래프 (flows 기반)
+    G = nx.Graph()
+    G.add_nodes_from(allInds)
+    if atlasFlows:
+        for f in atlasFlows:
+            src = f.get("fromIndustry")
+            dst = f.get("toIndustry")
+            if src == dst or src not in byIndustry or dst not in byIndustry:
+                continue
+            # 가중치: amount 우선, 없으면 edgeCount
+            w = f.get("amount") or (f.get("edgeCount", 1) * 1e9)
+            # log 스케일로 편향 방지
+            w = math.log1p(w / 1e9)
+            if G.has_edge(src, dst):
+                G[src][dst]["weight"] += w
+            else:
+                G.add_edge(src, dst, weight=w)
+
+    # 3. PageRank로 허브 산업 식별
+    if G.number_of_edges() > 0:
+        pr = nx.pagerank(G, weight="weight")
+    else:
+        pr = {k: 0 for k in allInds}
+
+    # 4. Kamada-Kawai 레이아웃 (flows 반영)
+    # 고립 노드(엣지 없는 산업)는 임시로 원주에 배치 후 Kamada-Kawai 적용
+    if G.number_of_edges() > 0:
+        try:
+            pos = nx.kamada_kawai_layout(G, weight="weight", scale=5000)
+        except Exception:
+            pos = nx.spring_layout(G, weight="weight", k=2.0, iterations=200, seed=42, scale=5000)
+    else:
+        # flows 전혀 없으면 원형 fallback
+        pos = nx.circular_layout(G, scale=5000)
+
+    # 5. 중심점 스케일 보정 + 허브 중앙 정렬
+    # pos는 단위원 기준 좌표. 허브 상위 3개의 중심을 (0,0)으로 시프트
+    topHubs = sorted(pr, key=pr.get, reverse=True)[:3]
+    if topHubs:
+        hubCx = sum(pos[h][0] for h in topHubs) / len(topHubs)
+        hubCy = sum(pos[h][1] for h in topHubs) / len(topHubs)
+        for k in pos:
+            pos[k] = (pos[k][0] - hubCx, pos[k][1] - hubCy)
+
+    centers: dict[str, tuple[float, float]] = {k: (float(v[0]), float(v[1])) for k, v in pos.items()}
+
+    # 6. 산업 간 최소 거리 보정 (회사 수 √ 기반 spread)
     indSpreads: dict[str, float] = {}
-    for ind_id in indOrder:
+    for ind_id in allInds:
         cnt = len(byIndustry[ind_id])
-        indSpreads[ind_id] = max(150, min(800, 30 * math.sqrt(cnt)))
+        indSpreads[ind_id] = max(200, min(900, 45 * math.sqrt(cnt)))
 
-    # 나선형 배치 + 강제 충돌 방지
-    centers: dict[str, tuple[float, float]] = {}
-    golden = math.pi * (3 - math.sqrt(5))
-    baseRadius = 4000
-    for i, ind_id in enumerate(indOrder):
-        angle = golden * i - math.pi / 2
-        r = baseRadius + 800 * math.sqrt(i)
-        centers[ind_id] = (r * math.cos(angle), r * math.sin(angle))
-
-    # 충돌 밀어내기: 최소 거리 = 양쪽 spread 합 × 1.5 + 300
-    for _ in range(50):
+    # 충돌 밀어내기: 최소 거리 = 양쪽 spread 합 + 200
+    for _ in range(80):
         moved = False
-        cids = list(centers.keys())
-        for a in range(len(cids)):
-            for b in range(a + 1, len(cids)):
-                ax, ay = centers[cids[a]]
-                bx, by = centers[cids[b]]
+        for a in range(len(allInds)):
+            for b in range(a + 1, len(allInds)):
+                ka, kb = allInds[a], allInds[b]
+                ax, ay = centers[ka]
+                bx, by = centers[kb]
                 dx, dy = bx - ax, by - ay
                 dist = math.sqrt(dx * dx + dy * dy) or 1
-                minDist = (indSpreads[cids[a]] + indSpreads[cids[b]]) * 1.5 + 300
+                minDist = indSpreads[ka] + indSpreads[kb] + 200
                 if dist < minDist:
-                    push = (minDist - dist) / 2 + 50
-                    nx, ny = dx / dist, dy / dist
-                    centers[cids[a]] = (ax - nx * push, ay - ny * push)
-                    centers[cids[b]] = (bx + nx * push, by + ny * push)
+                    push = (minDist - dist) / 2 + 20
+                    ux, uy = dx / dist, dy / dist
+                    centers[ka] = (ax - ux * push, ay - uy * push)
+                    centers[kb] = (bx + ux * push, by + uy * push)
                     moved = True
         if not moved:
             break
 
-    # 3. 산업 내 노드: 매출 큰 순으로 나선 배치
+    # 7. 산업 내 노드: 매출 큰 순 golden spiral
+    golden = math.pi * (3 - math.sqrt(5))
     coords: dict[str, tuple[float, float]] = {}
     for ind_id, members in byIndustry.items():
         cx, cy = centers[ind_id]
@@ -571,6 +618,7 @@ def buildEcosystem(
     scanMetrics: dict[str, dict] | None = None,
     yoyDeltas: dict[str, dict] | None = None,
     insiderMetrics: dict[str, dict] | None = None,
+    atlasFlows: list[dict] | None = None,
 ) -> dict:
     """전체 생태계 한 파일 — Cosmograph용 (nodes + links).
 
@@ -653,8 +701,8 @@ def buildEcosystem(
                 return s.name
         return stageKey
 
-    # 좌표 사전 계산 (진짜 지도 — 고정 위치)
-    coords = _computeLayout(nodes, taxonomy)
+    # 좌표 사전 계산 (관계 기반 — 고정 위치)
+    coords = _computeLayout(nodes, taxonomy, atlasFlows=atlasFlows)
 
     # 노드 (Cosmograph 포맷)
     nodeList = []
@@ -1190,17 +1238,17 @@ def main() -> None:
     yoyDeltas = computeYoyDelta()
     print(f"  - YoY delta 커버: {len(yoyDeltas)}종목")
 
-    # 생태계 (Cosmograph용)
-    print("[Ecosystem] ecosystem.json 생성...")
-    eco = buildEcosystem(scanMetrics, yoyDeltas, insiderMetrics)
-    (OUT_DIR / "ecosystem.json").write_text(json.dumps(eco, ensure_ascii=False), encoding="utf-8")
-    print(f"  - {len(eco['nodes'])} 노드, {len(eco['links'])} 엣지, {len(eco['industries'])} 산업")
-
-    # L1 Atlas
+    # L1 Atlas (먼저 — ecosystem 레이아웃이 flows 사용)
     print("[L1] atlas.json 생성...")
     atlas = buildAtlas()
     (OUT_DIR / "atlas.json").write_text(json.dumps(atlas, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"  - {len(atlas['industries'])}개 산업, {len(atlas['flows'])}개 플로우")
+
+    # 생태계 (Cosmograph용) — flows 기반 관계 레이아웃
+    print("[Ecosystem] ecosystem.json 생성...")
+    eco = buildEcosystem(scanMetrics, yoyDeltas, insiderMetrics, atlasFlows=atlas.get("flows", []))
+    (OUT_DIR / "ecosystem.json").write_text(json.dumps(eco, ensure_ascii=False), encoding="utf-8")
+    print(f"  - {len(eco['nodes'])} 노드, {len(eco['links'])} 엣지, {len(eco['industries'])} 산업")
 
     # L2 Industries
     print("[L2] 산업 상세...")
