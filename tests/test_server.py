@@ -732,10 +732,10 @@ class TestAsk:
                     return pl.DataFrame({"topic": ["businessOverview"]})
                 return None
 
-        async def _fake_stream(company, question, **kwargs):
-            assert company.stockCode == "000000"
+        async def _fake_stream(question, **kwargs):
             assert "businessOverview" in question
             assert kwargs["view_context"]["topic"] == "businessOverview"
+            assert kwargs["view_context"]["company"]["stockCode"] == "000000"
             yield {"event": "context", "data": '{"module":"_focus","text":"ctx"}'}
             yield {"event": "chunk", "data": '{"text":"summary"}'}
 

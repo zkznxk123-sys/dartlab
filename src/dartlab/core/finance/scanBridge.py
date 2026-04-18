@@ -150,7 +150,7 @@ def _getAccountEdgar(df: pl.DataFrame, account: str, *, year: str | None = None)
 
 def _getAccountDart(df: pl.DataFrame, account: str, *, year: str | None = None) -> dict[str, float]:
     """DART: account_nm 매칭으로 추출."""
-    from dartlab.scan._helpers import parse_num
+    from dartlab.core.finance.helpers import parseNumStr as parse_num
 
     # 영문이면 한글 목록으로 변환
     if account in _REVERSE_MAP:
@@ -229,7 +229,7 @@ def _sumEdgar(df: pl.DataFrame, account: str) -> pl.DataFrame:
 
 def _sumDart(df: pl.DataFrame, account: str) -> pl.DataFrame:
     """DART: sj_div + account_nm 필터 후 group_by."""
-    from dartlab.scan._helpers import parse_num
+    from dartlab.core.finance.helpers import parseNumStr as parse_num
 
     if account in _REVERSE_MAP:
         names = set(_REVERSE_MAP[account])
