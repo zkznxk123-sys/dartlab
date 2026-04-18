@@ -6,19 +6,20 @@
 	<div class="inner">
 		<div class="left">
 			<div class="kicker">Live Visualization</div>
-			<h2 id="map-cta-title">한국 상장사들이 서로 어떻게 얽혀 있는지, <br />10초 안에 보는 지도</h2>
+			<h2 id="map-cta-title">See how 2,664 listed companies <br />are connected — in 10 seconds</h2>
 			<p class="lead">
-				2,664개 상장사 · 34개 산업 · 공급망 18,418개 관계를 한 화면에서. 버블 클릭으로
-				산업 내부 드릴다운, 회사 선택 시 5년 재무·공급망 HHI·AI 분석·심층 리포트
-				한 카드에. <strong>이번 회계연도 급변 회사도 자동 감지.</strong>
+				2,664 companies · 34 industries · 18,418 supply-chain relationships on one screen.
+				Click a bubble to drill into an industry, select a company for 5-year financials,
+				supply-chain HHI, AI analysis, and deep-dive reports — all in a single card.
+				<strong>Automatic detection of sudden changes this fiscal year.</strong>
 			</p>
 			<div class="ctas">
-				<a class="primary" href="{base}/map">산업지도 열기 →</a>
-				<a class="ghost" href="{base}/changes">이번 분기 급변 보기</a>
+				<a class="primary" href="{base}/map">Open Industry Map →</a>
+				<a class="ghost" href="{base}/changes">View Recent Changes</a>
 			</div>
 			<p class="disclaimer">
-				dartlab 은 공시·재무 데이터를 시각화합니다. 투자 자문 아닙니다.
-				해석은 DART 원본·증권사 리포트와 함께 내리세요.
+				dartlab visualizes disclosure and financial data. Not investment advice.
+				Always cross-check with original DART filings and analyst reports.
 			</p>
 		</div>
 		<div class="right">
@@ -47,9 +48,9 @@
 						</svg>
 					</div>
 					<div class="preview-chips">
-						<span class="chip g">● 데이터 3h 전</span>
-						<span class="chip n">반도체 · 348사</span>
-						<span class="chip w">⚠ 이번 분기 급변 12사</span>
+						<span class="chip g">● Data 3h ago</span>
+						<span class="chip n">Semiconductor · 348</span>
+						<span class="chip w">⚠ 12 sudden changes</span>
 					</div>
 				</div>
 			</div>
