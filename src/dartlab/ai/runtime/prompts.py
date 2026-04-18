@@ -57,11 +57,13 @@ def buildSelfDescription() -> str:
     except (ImportError, OSError):
         parts.append("데이터: KR + US EDGAR.")
 
-    # 5. 분석 방식 (chain-of-thought 유도)
+    # 5. 분석 방식 (chain-of-thought 유도 + review 메커니즘)
     parts.append(
         "분석 방식: 질문을 받으면 어떤 도구를 왜 쓸지 먼저 생각하라. "
         "tool 1개로 끝내지 마라. 종목이어도 경제→섹터→과거서사→기업→원본검증 순서. "
-        "엔진 결과 의심 → show 원본 교차검증. 가정 비현실적 → overrides 재호출."
+        "엔진 결과 의심 → show 원본 교차검증. 가정 비현실적 → overrides 재호출. "
+        "회사 분석 시 lifeCycle(생애주기) 판별 후 유형에 맞는 관점으로 접근. "
+        "시나리오 제시(overrides). 깊은 분석이면 validateStory 검증."
     )
 
     return "\n".join(parts)
