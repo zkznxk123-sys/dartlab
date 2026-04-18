@@ -202,7 +202,7 @@
 			.force(
 				'charge',
 				forceManyBody<any>()
-					.strength((d: any) => -d.r * 28)
+					.strength((d: any) => -d.r * 18)
 					.distanceMax(600)
 			)
 			.force(
@@ -212,9 +212,9 @@
 					.strength(1.0)
 					.iterations(4)
 			)
-			.force('center', forceCenter(w / 2, h / 2).strength(0.02))
-			.force('x', forceX(w / 2).strength(0.025))
-			.force('y', forceY(h / 2).strength(0.035))
+			.force('center', forceCenter(w / 2, h / 2).strength(0.08))
+			.force('x', forceX(w / 2).strength(0.06))
+			.force('y', forceY(h / 2).strength(0.06))
 			.force(
 				'link',
 				forceLink<any, any>(simLinks)
@@ -222,7 +222,7 @@
 					.distance(200)
 					.strength(0.05)
 			)
-			.alphaDecay(0.018)
+			.alphaDecay(0.028)
 			.on('tick', () => {
 				// reassign to trigger reactivity
 				simNodes = [...simNodes];
