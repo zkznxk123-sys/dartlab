@@ -2,6 +2,7 @@
 	import { base } from '$app/paths';
 	import { brand } from '$lib/brand';
 	import Sparkline from './Sparkline.svelte';
+	import RadarChart from './RadarChart.svelte';
 	import FreshnessBadge from './FreshnessBadge.svelte';
 
 	interface Props {
@@ -39,6 +40,7 @@
 	}: Props = $props();
 
 	let aiExpanded = $state(false);
+	let activeTab: 'summary' | 'deep' = $state('summary');
 
 	function fmtKor(v: number | null | undefined, suffix = '원'): string {
 		if (v === null || v === undefined || isNaN(v)) return '-';
@@ -69,6 +71,35 @@
 		// rank 1 = top → percentile 100, rank N = bottom → 0
 		return Math.round(((peer - rank) / (peer - 1 || 1)) * 100);
 	});
+
+	// 5축 레이더 데이터 (수익성/성장/안정성/품질/지배구조)
+	let radarAxes = $derived.by(() => {
+		// 수익성: ROE → 0~100 (ROE -10=0, 20=100)
+		const profitScore = node.roe != null ? Math.min(100, Math.max(0, ((node.roe + 10) / 30) * 100)) : 50;
+		// 성장: CAGR → 0~100 (-10=0, 30=100)
+		const growthScore = node.revCagr != null ? Math.min(100, Math.max(0, ((node.revCagr + 10) / 40) * 100)) : 50;
+		// 안정성: 부채비율 역변환 (50=100, 400=0)
+		const stabilityScore = node.debtRatio != null ? Math.min(100, Math.max(0, ((400 - node.debtRatio) / 350) * 100)) : 50;
+		// 품질: 등급 → 점수
+		const qMap: Record<string, number> = { '우수': 90, '양호': 70, '보통': 50, '주의': 30, '위험': 10 };
+		const qualityScore = qMap[node.qualGrade] ?? 50;
+		// 지배구조: 등급 → 점수
+		const gMap: Record<string, number> = { 'A': 90, 'B': 70, 'C': 50, 'D': 30, 'E': 10 };
+		const govScore = gMap[node.govGrade] ?? 50;
+
+		return [
+			{ label: '수익성', value: profitScore, benchmark: 50 },
+			{ label: '성장', value: growthScore, benchmark: 50 },
+			{ label: '안정성', value: stabilityScore, benchmark: 50 },
+			{ label: '품질', value: qualityScore, benchmark: 50 },
+			{ label: '지배구조', value: govScore, benchmark: 50 }
+		];
+	});
+
+	// 레이더에 표시할 데이터가 있는지 확인
+	let hasRadarData = $derived(
+		node.roe != null || node.revCagr != null || node.debtRatio != null
+	);
 
 	let supplyInsights = $derived(detail?.supplyInsights || {});
 	let aiInsight = $derived(detail?.aiInsight || null);
@@ -274,6 +305,13 @@
 		</div>
 	</div>
 
+	<!-- 탭 바 -->
+	<div class="tab-bar">
+		<button class="tab-btn" class:active={activeTab === 'summary'} onclick={() => (activeTab = 'summary')}>요약</button>
+		<button class="tab-btn" class:active={activeTab === 'deep'} onclick={() => (activeTab = 'deep')}>심층</button>
+	</div>
+
+	{#if activeTab === 'summary'}
 	<!-- 블로그 포스트 (있으면 맨 위에 강조) -->
 	{#if blogPosts.length > 0}
 		<div class="blog-banner">
@@ -345,6 +383,17 @@
 				</div>
 			</div>
 		{/if}
+	{/if}
+
+	<!-- 3.5 레이더 차트 (5축 한눈에) -->
+	{#if hasRadarData}
+		<div class="section radar-section">
+			<h3>체력 진단</h3>
+			<div class="radar-wrap">
+				<RadarChart axes={radarAxes} size={140} />
+				<span class="radar-hint">업종 평균(회색) vs 이 회사(빨강)</span>
+			</div>
+		</div>
 	{/if}
 
 	<!-- 4. scan 스코어 + peer 분위 -->
@@ -525,7 +574,7 @@
 			<ul class="hop2-list">
 				{#each detail.hop2.hop2Neighbors.slice(0, 10) as h (h.stockCode)}
 					<li>
-						<a href="{base}/map?focus={h.stockCode}" class="hop2-far">{h.corpName}</a>
+						<button class="hop2-far" onclick={() => onDetach?.(h.stockCode)}>{h.corpName}</button>
 						<span class="hop2-via">경유: {h.viaName}</span>
 					</li>
 				{/each}
@@ -596,6 +645,130 @@
 				{/each}
 			</div>
 		</div>
+	{/if}
+
+	{:else}
+	<!-- 심층 탭 -->
+	<div class="deep-tab">
+		<!-- 지배구조 -->
+		{#if node.govGrade}
+			<details class="accordion">
+				<summary>지배구조 <span class="acc-badge">등급 {node.govGrade}</span></summary>
+				<div class="acc-body">
+					{#if node.holderPct != null}
+						<div class="acc-row"><span>최대주주 지분</span><span>{node.holderPct.toFixed(1)}%</span></div>
+					{/if}
+					{#if node.holderChange != null}
+						<div class="acc-row"><span>지분 변동</span><span style:color={node.holderChange > 0 ? '#10b981' : node.holderChange < 0 ? '#ef4444' : '#94a3b8'}>{node.holderChange > 0 ? '+' : ''}{node.holderChange.toFixed(1)}%p</span></div>
+					{/if}
+					{#if node.stability}
+						<div class="acc-row"><span>지분 안정성</span><span>{node.stability}</span></div>
+					{/if}
+				</div>
+			</details>
+		{/if}
+
+		<!-- 인력/급여 -->
+		{#if node.empCount}
+			<details class="accordion">
+				<summary>인력 <span class="acc-badge">{node.empCount.toLocaleString()}명</span></summary>
+				<div class="acc-body">
+					<div class="acc-row"><span>직원수</span><span>{node.empCount.toLocaleString()}명</span></div>
+				</div>
+			</details>
+		{/if}
+
+		<!-- 현금흐름 -->
+		{#if node.cfPattern}
+			<details class="accordion">
+				<summary>현금흐름 <span class="acc-badge">{node.cfPattern}</span></summary>
+				<div class="acc-body">
+					<div class="acc-row"><span>CF 패턴</span><span>{node.cfPattern}</span></div>
+					<p class="acc-note">영업/투자/재무 현금흐름의 부호 조합으로 분류한 8가지 유형</p>
+				</div>
+			</details>
+		{/if}
+
+		<!-- 감사 리스크 -->
+		{#if node.auditRisk}
+			<details class="accordion">
+				<summary>감사 리스크 <span class="acc-badge" style:color={node.auditRisk === '안전' ? '#10b981' : node.auditRisk === '주의' || node.auditRisk === '고위험' ? '#ef4444' : '#fbbf24'}>{node.auditRisk}</span></summary>
+				<div class="acc-body">
+					<div class="acc-row"><span>감사 위험 등급</span><span>{node.auditRisk}</span></div>
+				</div>
+			</details>
+		{/if}
+
+		<!-- 이익의 질 -->
+		{#if node.qualGrade}
+			<details class="accordion">
+				<summary>이익의 질 <span class="acc-badge">{node.qualGrade}</span></summary>
+				<div class="acc-body">
+					<div class="acc-row"><span>품질 등급</span><span>{node.qualGrade}</span></div>
+					<p class="acc-note">발생액 비율(Accrual)과 Beneish M-Score 기반 판정</p>
+				</div>
+			</details>
+		{/if}
+
+		<!-- 유동성 -->
+		{#if node.liqGrade}
+			<details class="accordion">
+				<summary>유동성 <span class="acc-badge">{node.liqGrade}</span></summary>
+				<div class="acc-body">
+					<div class="acc-row"><span>유동성 등급</span><span>{node.liqGrade}</span></div>
+				</div>
+			</details>
+		{/if}
+
+		<!-- 주주환원 -->
+		{#if node.capClass}
+			<details class="accordion">
+				<summary>주주환원 <span class="acc-badge">{node.capClass}</span></summary>
+				<div class="acc-body">
+					<div class="acc-row"><span>환원 분류</span><span>{node.capClass}</span></div>
+					<p class="acc-note">배당성향·자사주·증자감자 종합 분류</p>
+				</div>
+			</details>
+		{/if}
+
+		<!-- 신용등급 -->
+		{#if detail?.creditMetrics}
+			<details class="accordion">
+				<summary>신용등급 <span class="acc-badge">{detail.creditMetrics.grade || detail.creditMetrics.creditGrade || '-'}</span></summary>
+				<div class="acc-body">
+					{#if detail.creditMetrics.totalScore != null}
+						<div class="acc-row"><span>종합 점수</span><span>{detail.creditMetrics.totalScore.toFixed(1)}점</span></div>
+					{/if}
+					{#if detail.creditMetrics.grade}
+						<div class="acc-row"><span>등급</span><span>{detail.creditMetrics.grade}</span></div>
+					{/if}
+				</div>
+			</details>
+		{/if}
+
+		<!-- 업종 내 위치 -->
+		{#if node.industryRank}
+			<details class="accordion" open>
+				<summary>업종 내 위치 <span class="acc-badge">{node.industryName}</span></summary>
+				<div class="acc-body">
+					<div class="acc-row"><span>매출 순위</span><span>{node.industryRank}위 / {node.industryPeerCount}사</span></div>
+					{#if node.marketShare}
+						<div class="acc-row"><span>점유율</span><span>{node.marketShare.toFixed(1)}%</span></div>
+					{/if}
+					{#if peerPct !== null}
+						<div class="acc-row"><span>산업 분위</span><span>상위 {(100 - peerPct)}%</span></div>
+					{/if}
+				</div>
+			</details>
+		{/if}
+
+		{#if !node.govGrade && !node.cfPattern && !node.qualGrade && !node.liqGrade && !node.capClass && !node.empCount && !detail?.creditMetrics}
+			<div class="deep-empty">
+				<p>심층 데이터가 아직 없습니다.</p>
+				<p class="acc-note">빌드 파이프라인이 scan digest를 주입하면 여기에 표시됩니다.</p>
+			</div>
+		{/if}
+	</div>
 	{/if}
 
 	<!-- 액션 버튼 -->
@@ -741,6 +914,19 @@
 	.direction-badge.down {
 		background: rgba(239, 68, 68, 0.18);
 		color: #f87171;
+	}
+	.radar-section {
+		text-align: center;
+	}
+	.radar-wrap {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 4px;
+	}
+	.radar-hint {
+		font-size: 9px;
+		color: var(--color-dl-text-dim);
 	}
 	.scan-badges {
 		display: flex;
@@ -1089,9 +1275,14 @@
 		border-bottom: none;
 	}
 	.hop2-far {
-		color: #60a5fa;
-		text-decoration: none;
+		background: none;
+		border: none;
+		padding: 0;
+		color: var(--color-dl-blue);
 		font-weight: 500;
+		font-size: inherit;
+		cursor: pointer;
+		text-align: left;
 	}
 	.hop2-far:hover {
 		text-decoration: underline;
@@ -1322,5 +1513,95 @@
 	}
 	.disclaimer .src {
 		color: #64748b;
+	}
+
+	/* 탭 바 */
+	.tab-bar {
+		display: flex;
+		gap: 0;
+		border-bottom: 1px solid var(--color-dl-border);
+		margin: 0 -16px;
+		padding: 0 16px;
+	}
+	.tab-btn {
+		flex: 1;
+		background: none;
+		border: none;
+		border-bottom: 2px solid transparent;
+		padding: 8px 0;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--color-dl-text-dim);
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.tab-btn:hover {
+		color: var(--color-dl-text-muted);
+	}
+	.tab-btn.active {
+		color: var(--color-dl-primary-light);
+		border-bottom-color: var(--color-dl-primary);
+	}
+
+	/* 심층 탭 */
+	.deep-tab {
+		padding-top: 8px;
+	}
+	.accordion {
+		border-bottom: 1px solid rgba(30, 36, 51, 0.5);
+	}
+	.accordion summary {
+		padding: 10px 0;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--color-dl-text);
+		cursor: pointer;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		list-style: none;
+	}
+	.accordion summary::-webkit-details-marker {
+		display: none;
+	}
+	.accordion summary::before {
+		content: '▸';
+		margin-right: 6px;
+		color: var(--color-dl-text-dim);
+		transition: transform 0.15s;
+	}
+	.accordion[open] summary::before {
+		transform: rotate(90deg);
+	}
+	.acc-badge {
+		font-size: 11px;
+		font-weight: 500;
+		color: var(--color-dl-text-muted);
+		background: rgba(148, 163, 184, 0.08);
+		padding: 1px 8px;
+		border-radius: 4px;
+		margin-left: auto;
+	}
+	.acc-body {
+		padding: 0 0 12px 16px;
+	}
+	.acc-row {
+		display: flex;
+		justify-content: space-between;
+		padding: 3px 0;
+		font-size: 12px;
+		color: var(--color-dl-text-muted);
+	}
+	.acc-note {
+		font-size: 10px;
+		color: var(--color-dl-text-dim);
+		margin: 4px 0 0;
+		line-height: 1.5;
+	}
+	.deep-empty {
+		text-align: center;
+		padding: 24px 0;
+		color: var(--color-dl-text-dim);
+		font-size: 13px;
 	}
 </style>

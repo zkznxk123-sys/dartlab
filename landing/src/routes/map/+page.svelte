@@ -8,6 +8,8 @@
 	import CompareTray from '$lib/components/industry/CompareTray.svelte';
 	import FloatingCard from '$lib/components/industry/FloatingCard.svelte';
 	import MapCommandPalette from '$lib/components/industry/MapCommandPalette.svelte';
+	import TreemapView from '$lib/components/industry/TreemapView.svelte';
+	import SectorHealthCard from '$lib/components/industry/SectorHealthCard.svelte';
 	import { brand } from '$lib/brand';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
@@ -40,6 +42,11 @@
 			colorMetric = metricKeys[e.key];
 			return;
 		}
+		// T → treemap 뷰 토글
+		if (e.key === 't' && !e.ctrlKey && !e.metaKey) {
+			viewMode = viewMode === 'treemap' ? 'atlas' : 'treemap';
+			return;
+		}
 		// ? → 투어
 		if (e.key === '?' && !e.ctrlKey) {
 			tourOpen = true;
@@ -57,9 +64,12 @@
 	// atlas: 34개 산업 노드 + 산업간 supplier flow (default)
 	// companies: 기존 ecosystem 전체 2,664사
 	// industry: 한 산업 내부 drill-down
-	type ViewMode = 'atlas' | 'companies' | 'industry';
+	type ViewMode = 'atlas' | 'treemap' | 'companies' | 'industry';
 	let viewMode: ViewMode = $state('atlas');
 	let drillIndustry: string | null = $state(null);
+	// 업종 체력 카드 (atlas 뷰에서 업종 클릭 시)
+	let sectorHealthId: string | null = $state(null);
+	let sectorHealthName: string = $state('');
 	let industryDetail: any = $state(null);
 	let industryLoading = $state(false);
 
@@ -519,6 +529,17 @@
 		selectedNode = null;
 	}
 
+	// treemap 에서 노드 클릭 → FloatingCard
+	function handleTreemapClick(node: any) {
+		if (!node) return;
+		if (isMobile) {
+			selectedNode = node;
+			loadCompanyDetail(node.id);
+		} else {
+			detachCard(node.id);
+		}
+	}
+
 	// ── 모바일 감지 ──
 	let isMobile = $state(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
 	let sidebarCollapsed = $state(false);
@@ -815,6 +836,24 @@
 				</button>
 				<button
 					class="view-tab"
+					class:active={viewMode === 'treemap'}
+					onclick={() => switchView('treemap')}
+				>
+					<span class="tab-icon">
+						<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+							<rect x="3" y="3" width="8" height="10" rx="1" />
+							<rect x="13" y="3" width="8" height="6" rx="1" />
+							<rect x="13" y="11" width="8" height="10" rx="1" />
+							<rect x="3" y="15" width="8" height="6" rx="1" />
+						</svg>
+					</span>
+					<span class="tab-body">
+						<span class="tab-title">히트맵</span>
+						<span class="hint">시장 전체 한눈에 (T)</span>
+					</span>
+				</button>
+				<button
+					class="view-tab"
 					class:active={viewMode === 'companies'}
 					onclick={() => switchView('companies')}
 				>
@@ -1081,7 +1120,7 @@
 					color: indColorMap.get(ind.id) || '#9ca3af'
 				}))}
 				flows={data.atlas.flows}
-				onSelect={(ind: any) => enterIndustry(ind.id)}
+				onSelect={(ind: any) => { sectorHealthId = ind.id; sectorHealthName = ind.name || ind.id; }}
 				{colorMetric}
 				industryStats={(data as any).industryStats || {}}
 			/>
@@ -1091,6 +1130,14 @@
 				links={industryLinks.map((l: any) => ({ ...l }))}
 				onNodeClick={handleNodeClick}
 			/>
+		{:else if viewMode === 'treemap'}
+			<TreemapView
+				nodes={allNodes}
+				industries={industries}
+				{colorMetric}
+				{colorFor}
+				onNodeClick={handleTreemapClick}
+			/>
 		{:else if viewMode === 'companies'}
 			<EcosystemMap
 				bind:this={mapRef}
@@ -1098,6 +1145,17 @@
 				links={activeLinks}
 				isAtlas={false}
 				onNodeClick={handleNodeClick}
+			/>
+		{/if}
+
+		<!-- 업종 체력 카드 오버레이 -->
+		{#if sectorHealthId && viewMode === 'atlas'}
+			<SectorHealthCard
+				industryId={sectorHealthId}
+				industryName={sectorHealthName}
+				stat={data.industryStats?.[sectorHealthId]}
+				onDrilldown={() => { const id = sectorHealthId; sectorHealthId = null; if (id) enterIndustry(id); }}
+				onClose={() => (sectorHealthId = null)}
 			/>
 		{/if}
 	</main>
@@ -1194,6 +1252,7 @@
 			dataAsOf={data.meta?.dataAsOf}
 			compareDisabled={true}
 			detached={true}
+			onDetach={detachCard}
 			onClose={() => closeFloating(fc.id)}
 		/>
 	</FloatingCard>
@@ -1320,8 +1379,8 @@
 	.freshness-row {
 		padding-bottom: 12px;
 		margin-bottom: 12px;
-		border-bottom: 1px solid #1e2433;
-		overflow-x: auto;
+		border-bottom: 1px solid var(--color-dl-border);
+		overflow: hidden;
 	}
 
 	.header h1 {
