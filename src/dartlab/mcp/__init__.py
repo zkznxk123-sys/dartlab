@@ -303,6 +303,14 @@ def _executeTool(name: str, args: dict) -> str:
                 return _fmt(dartlab.listing("topics"))
             return _fmt(dartlab.listing())
 
+        # ── API Discovery Tools (polars 방식 introspection) ──
+        if name == "listDartlabApi":
+            return _listDartlabApi()
+        if name == "searchDartlabApi":
+            return _searchDartlabApi(args.get("query", ""))
+        if name == "verifyDartlabApi":
+            return _verifyDartlabApi(args.get("apiRef", ""))
+
         return f"Unknown tool: {name}"
 
     except Exception as e:  # noqa: BLE001
@@ -315,6 +323,148 @@ def _executeTool(name: str, args: dict) -> str:
             return f"Error: {e}\n\n{guideMsg}"
         except ImportError:
             return f"Error: {e}"
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# API Discovery — Python introspection 기반
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+def _listDartlabApi() -> str:
+    """dartlab 전체 공개 API — 런타임 introspection."""
+    import inspect
+
+    import dartlab
+    from dartlab.providers.dart.company import Company
+
+    lines: list[str] = ["# dartlab API\n"]
+
+    lines.append("## Module-level")
+    for name in sorted(getattr(dartlab, "__all__", [])):
+        obj = getattr(dartlab, name, None)
+        if obj is None:
+            continue
+        kind = "class" if inspect.isclass(obj) else "function" if callable(obj) else "module"
+        doc = inspect.getdoc(obj)
+        summary = doc.split("\n")[0] if doc else ""
+        lines.append(f"- `dartlab.{name}` ({kind}): {summary}")
+
+    lines.append("\n## Company methods")
+    for name in sorted(dir(Company)):
+        if name.startswith("_"):
+            continue
+        obj = getattr(Company, name, None)
+        if obj is None:
+            continue
+        if not callable(obj) and not isinstance(inspect.getattr_static(Company, name), property):
+            continue
+        impl = getattr(Company, f"_{name}Impl", None)
+        doc = inspect.getdoc(impl or obj) or ""
+        summary = doc.split("\n")[0] if doc else ""
+        lines.append(f"- `Company.{name}`: {summary}")
+
+    return "\n".join(lines)
+
+
+def _searchDartlabApi(query: str) -> str:
+    """dartlab API 검색 — 이름 + docstring 키워드 매칭."""
+    import inspect
+
+    import dartlab
+    from dartlab.providers.dart.company import Company
+
+    if not query.strip():
+        return "query 를 지정하세요. 예: '수익성', 'show', 'scan'"
+
+    q = query.lower()
+    results: list[str] = []
+
+    for name in getattr(dartlab, "__all__", []):
+        obj = getattr(dartlab, name, None)
+        if obj is None:
+            continue
+        doc = inspect.getdoc(obj) or ""
+        if q in name.lower() or q in doc.lower():
+            sig = ""
+            try:
+                sig = str(inspect.signature(obj))
+            except (ValueError, TypeError):
+                pass
+            results.append(f"## dartlab.{name}{sig}\n{doc[:500]}")
+
+    for name in sorted(dir(Company)):
+        if name.startswith("_"):
+            continue
+        obj = getattr(Company, name, None)
+        if obj is None:
+            continue
+        impl = getattr(Company, f"_{name}Impl", None)
+        doc = inspect.getdoc(impl or obj) or ""
+        if q in name.lower() or q in doc.lower():
+            results.append(f"## Company.{name}\n{doc[:500]}")
+
+    if not results:
+        return f"'{query}' 에 해당하는 API 를 찾지 못했습니다."
+    return "\n\n".join(results[:10])
+
+
+def _verifyDartlabApi(apiRef: str) -> str:
+    """dartlab API 존재 확인 + docstring 반환."""
+    import inspect
+
+    import dartlab
+    from dartlab.providers.dart.company import Company
+
+    if not apiRef.strip():
+        return "apiRef 를 지정하세요. 예: 'Company.show', 'dartlab.scan'"
+
+    if apiRef.startswith("Company."):
+        name = apiRef[8:]
+        obj = getattr(Company, name, None)
+        if obj is None:
+            return f"✗ {apiRef} 존재하지 않음"
+        impl = getattr(Company, f"_{name}Impl", None)
+        doc = inspect.getdoc(impl or obj) or ""
+        return f"✓ {apiRef}\n\n{doc[:1000]}"
+
+    name = apiRef.replace("dartlab.", "")
+    obj = getattr(dartlab, name, None)
+    if obj is None:
+        return f"✗ {apiRef} 존재하지 않음"
+    doc = inspect.getdoc(obj) or ""
+    return f"✓ dartlab.{name}\n\n{doc[:1000]}"
+
+
+# Discovery tool 정의 (TOOLS 에 추가)
+_DISCOVERY_TOOLS = [
+    {
+        "name": "listDartlabApi",
+        "description": "dartlab 전체 공개 API 목록 (런타임 introspection). 어떤 함수/메서드가 있는지 확인.",
+        "params": {},
+        "required": [],
+    },
+    {
+        "name": "searchDartlabApi",
+        "description": "dartlab API 검색. 키워드로 관련 함수를 찾고 docstring(시그니처/파라미터/반환값) 반환.",
+        "params": {
+            "query": {"type": "string", "description": "검색어 (함수명, 키워드, 설명). 예: '수익성', 'show', 'scan'"},
+        },
+        "required": ["query"],
+    },
+    {
+        "name": "verifyDartlabApi",
+        "description": "dartlab API 존재 확인 + 전체 docstring. 함수가 실제로 있는지, 어떤 파라미터/반환값인지 확인.",
+        "params": {
+            "apiRef": {
+                "type": "string",
+                "description": "API 참조. 예: 'Company.show', 'dartlab.scan', 'Company.analysis'",
+            },
+        },
+        "required": ["apiRef"],
+    },
+]
+
+_TOOLS.extend(_DISCOVERY_TOOLS)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
