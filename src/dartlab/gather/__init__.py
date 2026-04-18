@@ -185,6 +185,9 @@ class Gather:
             volume : int — 거래량 (주).
             None — 데이터 수집 실패 시.
         """
+        from dartlab.core.market import resolveMarket
+
+        market = resolveMarket(stock_code, market)
         cached = self._cache.get_typed(stock_code, "price")
         if cached is not None:
             return cached  # type: ignore[return-value]
@@ -947,6 +950,9 @@ class Gather:
             snap.price                       # PriceSnapshot
             snap.news                        # 뉴스 리스트
         """
+        from dartlab.core.market import resolveMarket
+
+        market = resolveMarket(stock_code, market)
         cached = self._cache.get_typed(stock_code, "snapshot")
         if cached is not None:
             return cached  # type: ignore[return-value]
