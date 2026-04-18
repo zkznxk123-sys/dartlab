@@ -704,8 +704,7 @@ class TestAsk:
     def test_plain_chat_uses_core_analysis_path(self, client, monkeypatch):
         captured = {}
 
-        async def _fake_collect(company, question, **kwargs):
-            captured["company"] = company
+        async def _fake_collect(question="", **kwargs):
             captured["question"] = question
             captured["kwargs"] = kwargs
             return "core-answer"
@@ -718,7 +717,6 @@ class TestAsk:
         )
         assert resp.status_code == 200
         assert resp.json()["answer"] == "core-answer"
-        assert captured["company"] is None
         assert captured["question"] == "안녕하세요"
         assert captured["kwargs"]["provider"] == "openai"
         assert captured["kwargs"]["model"] == "gpt-5.4"
