@@ -167,10 +167,10 @@
 				if (!l.amount) return 1.5;
 				return Math.max(1.5, Math.min(7, 1.5 + Math.log10(l.amount + 1) * 0.8));
 			},
-			linkGreyoutOpacity: isAtlas ? 0.25 : 0.08,
+			linkGreyoutOpacity: isAtlas ? 0.25 : 0.0,
 			linkArrows: false,
-			linkVisibilityDistanceRange: isAtlas ? [300, 2000] : [100, 3000],
-			linkVisibilityMinTransparency: isAtlas ? 0.75 : 0.15,
+			linkVisibilityDistanceRange: isAtlas ? [300, 2000] : [50, 250],
+			linkVisibilityMinTransparency: isAtlas ? 0.75 : 0.0,
 			curvedLinks: true,
 			curvedLinkSegments: 16,
 			simulation: {
@@ -198,24 +198,14 @@
 				},
 				onZoom: () => {
 					if (graph) {
-						const prevZoom = currentZoom;
 						currentZoom = graph.getZoomLevel();
 						updateLabels();
-						// companies 뷰: 줌 레벨에 따라 엣지 표시/숨김
-						if (!isAtlas) {
-							const showEdges = currentZoom >= 3;
-							const wasShowingEdges = prevZoom >= 3;
-							if (showEdges !== wasShowingEdges) {
-								graph.setData(nodes, showEdges ? links : []);
-							}
-						}
 					}
 				},
 			},
 		});
 
-		// companies 뷰: 초기 줌 아웃에서 엣지 숨김 → 줌 인 시 표시
-		graph.setData(nodes, isAtlas ? links : []);
+		graph.setData(nodes, links);
 
 		// fit view after initial simulation
 		setTimeout(() => graph?.fitView(400), 1200);
