@@ -167,10 +167,11 @@
 				if (!l.amount) return 1.5;
 				return Math.max(1.5, Math.min(7, 1.5 + Math.log10(l.amount + 1) * 0.8));
 			},
-			linkGreyoutOpacity: isAtlas ? 0.25 : 0.0,
+			// companies: 줌 아웃 시 엣지 짧아 숨김, 줌 인하면 화면상 길어져 표시
+			linkGreyoutOpacity: isAtlas ? 0.25 : 0.35,
 			linkArrows: false,
-			linkVisibilityDistanceRange: isAtlas ? [300, 2000] : [50, 250],
-			linkVisibilityMinTransparency: isAtlas ? 0.75 : 0.0,
+			linkVisibilityDistanceRange: isAtlas ? [300, 2000] : [30, 400],
+			linkVisibilityMinTransparency: isAtlas ? 0.75 : 0.1,
 			curvedLinks: true,
 			curvedLinkSegments: 16,
 			simulation: {

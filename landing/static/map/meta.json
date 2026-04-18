@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
-  "buildId": "20260418-175446",
-  "buildTime": "2026-04-18T17:54:46Z",
-  "commitSha": "8bc6776f",
+  "buildId": "20260418-181438",
+  "buildTime": "2026-04-18T18:14:38Z",
+  "commitSha": "d107a5d1",
   "dataAsOf": {
     "dart": "2026-04-10T13:46:23Z",
     "finance": "2026-04-18T08:51:34Z",
-    "reviews": "2026-04-18T17:44:24Z",
+    "reviews": "2026-04-18T18:08:56Z",
     "taxonomy": "2026-04-13T11:46:11Z"
   },
   "sizes": {
-    "ecosystem.json": 5047822,
+    "ecosystem.json": 5043032,
     "atlas.json": 28815,
     "insights.json": 17580,
     "industryStats.json": 183254,
     "search-index.json": 306478,
-    "companies/": 69069568
+    "companies/": 69033681
   },
   "counts": {}
 }

@@ -527,8 +527,8 @@ def _computeLayout(nodes, taxonomy, atlasFlows=None, edges=None) -> dict[str, tu
         if not moved:
             break
 
-    # 7. 산업 내 노드: 회사간 엣지로 force-directed 배치 (산업 내부 관계 반영)
-    # 엣지가 부족하거나 없는 산업은 golden spiral fallback
+    # 7. 산업 내 노드: IndustryDrilldown 알고리즘 재현
+    # stage별 격자 중심점 → stage 내부는 spring_layout (관련 회사끼리 가깝게)
     golden = math.pi * (3 - math.sqrt(5))
     coords: dict[str, tuple[float, float]] = {}
 
@@ -539,7 +539,7 @@ def _computeLayout(nodes, taxonomy, atlasFlows=None, edges=None) -> dict[str, tu
         for e in edges:
             indA = nodeInd.get(e.fromCode)
             indB = nodeInd.get(e.toCode)
-            if indA and indA == indB:  # 같은 산업 내부 엣지만
+            if indA and indA == indB:
                 w = (e.amount or 1e6) * (e.confidence or 0.5)
                 w = math.log1p(w / 1e6)
                 internalEdges.setdefault(indA, []).append((e.fromCode, e.toCode, w))
@@ -547,51 +547,71 @@ def _computeLayout(nodes, taxonomy, atlasFlows=None, edges=None) -> dict[str, tu
     for ind_id, members in byIndustry.items():
         cx, cy = centers[ind_id]
         spread = indSpreads[ind_id]
-        memberCodes = {m.stockCode for m in members}
         indInternalEdges = internalEdges.get(ind_id, [])
 
-        # 엣지가 충분하면 force-directed (노드 수 ≥ 5, 엣지 ≥ 3)
-        if len(members) >= 5 and len(indInternalEdges) >= 3:
-            subG = nx.Graph()
-            for m in members:
-                subG.add_node(m.stockCode, revenue=m.revenue or 0)
-            for f, t, w in indInternalEdges:
-                if f in memberCodes and t in memberCodes:
-                    if subG.has_edge(f, t):
-                        subG[f][t]["weight"] += w
-                    else:
-                        subG.add_edge(f, t, weight=w)
+        # stage별 그룹핑
+        stageGroups: dict[str, list] = {}
+        for m in members:
+            stage = m.stage or "_unclassified"
+            stageGroups.setdefault(stage, []).append(m)
 
-            try:
-                # spring_layout: 엣지 연결된 노드가 가까워짐
-                subPos = nx.spring_layout(
-                    subG, weight="weight", k=spread / math.sqrt(len(members)),
-                    iterations=100, seed=42, scale=spread * 0.8
-                )
-                # 중심 (0,0)으로 정렬 후 산업 중심점으로 이동 (numpy → float 변환)
-                avgX = sum(float(p[0]) for p in subPos.values()) / len(subPos)
-                avgY = sum(float(p[1]) for p in subPos.values()) / len(subPos)
-                for code, (px, py) in subPos.items():
-                    coords[code] = (float(cx + px - avgX), float(cy + py - avgY))
-                # 연결 안 된 노드(isolated) = spiral로 주변 배치
-                isolated = [m for m in members if m.stockCode not in subPos]
-                for j, n in enumerate(sorted(isolated, key=lambda x: x.revenue or 0, reverse=True)):
+        stageKeys = list(stageGroups.keys())
+        cols = max(1, int(math.ceil(math.sqrt(len(stageKeys)))))
+        rows = max(1, int(math.ceil(len(stageKeys) / cols)))
+
+        # stage 중심점 (산업 중심 주변 격자)
+        stageCenters: dict[str, tuple[float, float]] = {}
+        for i, sk in enumerate(stageKeys):
+            col = i % cols
+            row = i // cols
+            # 격자 offset (산업 spread에 비례)
+            dx = (col - (cols - 1) / 2) * (spread * 0.8 / max(1, cols))
+            dy = (row - (rows - 1) / 2) * (spread * 0.8 / max(1, rows))
+            stageCenters[sk] = (cx + dx, cy + dy)
+
+        # 각 stage 내에서 force-directed (엣지 기반)
+        memberByCode = {m.stockCode: m for m in members}
+        for sk, stageMembers in stageGroups.items():
+            scx, scy = stageCenters[sk]
+            stageCodes = {m.stockCode for m in stageMembers}
+            # stage 내 엣지만
+            stageEdges = [(f, t, w) for f, t, w in indInternalEdges
+                          if f in stageCodes and t in stageCodes]
+            stageSpread = max(60, min(400, spread * 0.35))
+
+            if len(stageMembers) >= 4 and len(stageEdges) >= 2:
+                try:
+                    subG = nx.Graph()
+                    for m in stageMembers:
+                        subG.add_node(m.stockCode)
+                    for f, t, w in stageEdges:
+                        if subG.has_edge(f, t):
+                            subG[f][t]["weight"] += w
+                        else:
+                            subG.add_edge(f, t, weight=w)
+
+                    subPos = nx.spring_layout(
+                        subG, weight="weight",
+                        k=stageSpread / math.sqrt(len(stageMembers)),
+                        iterations=80, seed=42, scale=stageSpread
+                    )
+                    avgX = sum(float(p[0]) for p in subPos.values()) / len(subPos)
+                    avgY = sum(float(p[1]) for p in subPos.values()) / len(subPos)
+                    for code, (px, py) in subPos.items():
+                        coords[code] = (float(scx + px - avgX), float(scy + py - avgY))
+                    continue
+                except Exception:
+                    pass
+
+            # Fallback: stage 중심 주변 golden spiral
+            ranked = sorted(stageMembers, key=lambda x: x.revenue or 0, reverse=True)
+            for j, n in enumerate(ranked):
+                if j == 0:
+                    coords[n.stockCode] = (scx, scy)
+                else:
                     angle = golden * j
-                    dist = spread * 0.9 + j * 5  # 바깥 링에
-                    coords[n.stockCode] = (cx + dist * math.cos(angle), cy + dist * math.sin(angle))
-                continue
-            except Exception:
-                pass  # fall through to spiral
-
-        # Fallback: golden spiral (매출 큰 순)
-        ranked = sorted(members, key=lambda x: x.revenue or 0, reverse=True)
-        for j, n in enumerate(ranked):
-            if j == 0:
-                coords[n.stockCode] = (cx, cy)
-            else:
-                angle = golden * j
-                dist = spread * math.sqrt(j) / math.sqrt(len(ranked))
-                coords[n.stockCode] = (cx + dist * math.cos(angle), cy + dist * math.sin(angle))
+                    dist = stageSpread * math.sqrt(j) / math.sqrt(max(1, len(ranked)))
+                    coords[n.stockCode] = (scx + dist * math.cos(angle), scy + dist * math.sin(angle))
 
     return coords
 
