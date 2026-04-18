@@ -206,14 +206,24 @@
 				},
 				onZoom: () => {
 					if (graph) {
+						const prevZoom = currentZoom;
 						currentZoom = graph.getZoomLevel();
 						updateLabels();
+						// companies 뷰: 줌 레벨에 따라 엣지 표시/숨김
+						if (!isAtlas) {
+							const showEdges = currentZoom >= 3;
+							const wasShowingEdges = prevZoom >= 3;
+							if (showEdges !== wasShowingEdges) {
+								graph.setData(nodes, showEdges ? links : []);
+							}
+						}
 					}
 				},
 			},
 		});
 
-		graph.setData(nodes, links);
+		// companies 뷰: 초기 줌 아웃에서 엣지 숨김 → 줌 인 시 표시
+		graph.setData(nodes, isAtlas ? links : []);
 
 		// fit view after initial simulation
 		setTimeout(() => graph?.fitView(400), 1200);
