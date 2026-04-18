@@ -25,17 +25,27 @@ from typing import Any
 
 logging.getLogger().setLevel(logging.ERROR)
 
-# 표준 질문 세트 (src/dartlab/ai/README.md 규격)
+# 표준 질문 세트 (ops/ai.md §10 — dartlab 사상 전체 커버)
+# (stockCode | None, corpName, question_or_axis)
 _STANDARD_SET = [
+    # KR 종목
     ("005930", "삼성전자", "수익성"),
-    ("005930", "삼성전자", "현금흐름"),
-    ("005930", "삼성전자", "안정성"),
-    ("047040", "대우건설", "수익성"),
-    ("047040", "대우건설", "현금흐름"),
     ("047040", "대우건설", "안정성"),
-    ("003230", "삼양식품", "수익성"),
     ("003230", "삼양식품", "현금흐름"),
-    ("003230", "삼양식품", "안정성"),
+    # US 종목
+    ("INTC", "인텔", "인텔 분석해줘"),
+    # 매크로 (종목 없음)
+    (None, None, "경제 어때?"),
+    # 섹터 (종목 없음)
+    (None, None, "반도체 업종 비교해줘"),
+    # 공시
+    ("005930", "삼성전자", "삼성전자 최근 공시 뭐 있어?"),
+    # 종합
+    ("000660", "SK하이닉스", "SK하이닉스 기업이야기 만들어줘"),
+    # 메타 (tool 미호출 기대)
+    (None, None, "dartlab 뭐 할 수 있어?"),
+    # capabilities 자율 조회
+    (None, None, "show 함수 어떻게 써?"),
 ]
 
 
@@ -116,18 +126,25 @@ def _grade(response: str) -> tuple[str, list[str]]:
     return "P", []
 
 
-def runOne(stockCode: str, corpName: str, axis: str, *, provider: str = "oauth-codex") -> dict[str, Any]:
+def runOne(stockCode: str | None, corpName: str | None, axis: str, *, provider: str = "oauth-codex") -> dict[str, Any]:
     """단일 질문 실행 + 등급 판정."""
     import dartlab
 
     dartlab.verbose = False
-    question = f"{corpName} {axis} 분석해줘"
+    # 질문 구성: stockCode 있으면 종목 분석, 없으면 axis 자체가 질문
+    if corpName and axis not in (corpName,):
+        question = f"{corpName} {axis} 분석해줘"
+    else:
+        question = axis  # 매크로/메타/capabilities 질문은 axis 자체가 자연어
 
     start = time.monotonic()
     response = ""
     error: str | None = None
     try:
-        for chunk in dartlab.ask(question, provider=provider, stream=True):
+        kwargs = {"provider": provider, "stream": True}
+        if stockCode:
+            kwargs["stockCode"] = stockCode
+        for chunk in dartlab.ask(question, **kwargs):
             response += chunk
     except Exception as e:
         error = f"{type(e).__name__}: {str(e)[:300]}"
@@ -139,7 +156,7 @@ def runOne(stockCode: str, corpName: str, axis: str, *, provider: str = "oauth-c
             "timestamp": datetime.now().isoformat(timespec="seconds"),
             "provider": provider,
             "question": question,
-            "stockCode": stockCode,
+            "stockCode": stockCode or "",
             "axis": axis,
             "grade": "V",
             "error": error,
@@ -259,12 +276,13 @@ def main() -> int:
     parser.add_argument("--stock", help="단일 종목만 (3축 모두)")
     parser.add_argument("--axis", help="단일 축만")
     parser.add_argument("--provider", default="oauth-codex", help="LLM provider")
-    parser.add_argument("--quick", action="store_true", help="삼성전자 3축만")
+    parser.add_argument("--quick", action="store_true", help="KR종목 + 매크로 + 메타 3개")
     args = parser.parse_args()
 
     # 세트 결정
     if args.quick:
-        questions = [q for q in _STANDARD_SET if q[0] == "005930"]
+        # KR종목(0) + 매크로(4) + 메타(8) — dartlab 사상 3범주 커버
+        questions = [_STANDARD_SET[i] for i in (0, 4, 8) if i < len(_STANDARD_SET)]
     elif args.stock:
         questions = [q for q in _STANDARD_SET if q[0] == args.stock]
         if args.axis:
@@ -279,7 +297,8 @@ def main() -> int:
 
     results: list[dict] = []
     for code, name, axis in questions:
-        print(f"--- {name}({code}) {axis} ---")
+        label = f"{name}({code})" if name else "(시장/메타)"
+        print(f"--- {label} {axis} ---")
         r = runOne(code, name, axis, provider=args.provider)
         results.append(r)
         m = r.get("metrics", {})
