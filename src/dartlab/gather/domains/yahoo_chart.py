@@ -183,7 +183,6 @@ async def fetch_history(
     dartlab은 yahoo_chart → naver_global → fmp 3단계 fallback으로
     어느 한 소스가 실패해도 데이터 수집을 보장한다.
     """
-    from datetime import date as _date
     from datetime import datetime as _dt
 
     symbol = _build_symbol(stock_code, market)
