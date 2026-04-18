@@ -167,10 +167,10 @@
 				if (!l.amount) return 2.0;
 				return Math.max(1.8, Math.min(7, 1.5 + Math.log10(l.amount + 1) * 0.8));
 			},
-			linkGreyoutOpacity: 0.25,
+			linkGreyoutOpacity: isAtlas ? 0.25 : 0.03,
 			linkArrows: false,
-			linkVisibilityDistanceRange: [300, 2000],
-			linkVisibilityMinTransparency: 0.75,
+			linkVisibilityDistanceRange: isAtlas ? [300, 2000] : [50, 500],
+			linkVisibilityMinTransparency: isAtlas ? 0.75 : 0.02,
 			curvedLinks: true,
 			curvedLinkSegments: 16,
 			simulation: isAtlas ? {
