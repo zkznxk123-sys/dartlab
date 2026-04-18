@@ -425,7 +425,7 @@ def _roundOrNone(v, digits: int = 1):
         return None
 
 
-def _computeLayout(nodes, taxonomy, atlasFlows=None) -> dict[str, tuple[float, float]]:
+def _computeLayout(nodes, taxonomy, atlasFlows=None, edges=None) -> dict[str, tuple[float, float]]:
     """관계 기반 2단계 hierarchical layout.
 
     L1 (산업 배치): atlasFlows를 가중치로 networkx Kamada-Kawai + PageRank 허브 중앙.
@@ -482,14 +482,12 @@ def _computeLayout(nodes, taxonomy, atlasFlows=None) -> dict[str, tuple[float, f
         pr = {k: 0 for k in allInds}
 
     # 4. Kamada-Kawai 레이아웃 (flows 반영)
-    # 고립 노드(엣지 없는 산업)는 임시로 원주에 배치 후 Kamada-Kawai 적용
     if G.number_of_edges() > 0:
         try:
             pos = nx.kamada_kawai_layout(G, weight="weight", scale=5000)
         except Exception:
             pos = nx.spring_layout(G, weight="weight", k=2.0, iterations=200, seed=42, scale=5000)
     else:
-        # flows 전혀 없으면 원형 fallback
         pos = nx.circular_layout(G, scale=5000)
 
     # 5. 중심점 스케일 보정 + 허브 중앙 정렬
@@ -529,12 +527,63 @@ def _computeLayout(nodes, taxonomy, atlasFlows=None) -> dict[str, tuple[float, f
         if not moved:
             break
 
-    # 7. 산업 내 노드: 매출 큰 순 golden spiral
+    # 7. 산업 내 노드: 회사간 엣지로 force-directed 배치 (산업 내부 관계 반영)
+    # 엣지가 부족하거나 없는 산업은 golden spiral fallback
     golden = math.pi * (3 - math.sqrt(5))
     coords: dict[str, tuple[float, float]] = {}
+
+    # 산업별 내부 엣지 인덱싱
+    internalEdges: dict[str, list[tuple[str, str, float]]] = {}
+    if edges:
+        nodeInd = {n.stockCode: n.industry for n in nodes}
+        for e in edges:
+            indA = nodeInd.get(e.fromCode)
+            indB = nodeInd.get(e.toCode)
+            if indA and indA == indB:  # 같은 산업 내부 엣지만
+                w = (e.amount or 1e6) * (e.confidence or 0.5)
+                w = math.log1p(w / 1e6)
+                internalEdges.setdefault(indA, []).append((e.fromCode, e.toCode, w))
+
     for ind_id, members in byIndustry.items():
         cx, cy = centers[ind_id]
         spread = indSpreads[ind_id]
+        memberCodes = {m.stockCode for m in members}
+        indInternalEdges = internalEdges.get(ind_id, [])
+
+        # 엣지가 충분하면 force-directed (노드 수 ≥ 5, 엣지 ≥ 3)
+        if len(members) >= 5 and len(indInternalEdges) >= 3:
+            subG = nx.Graph()
+            for m in members:
+                subG.add_node(m.stockCode, revenue=m.revenue or 0)
+            for f, t, w in indInternalEdges:
+                if f in memberCodes and t in memberCodes:
+                    if subG.has_edge(f, t):
+                        subG[f][t]["weight"] += w
+                    else:
+                        subG.add_edge(f, t, weight=w)
+
+            try:
+                # spring_layout: 엣지 연결된 노드가 가까워짐
+                subPos = nx.spring_layout(
+                    subG, weight="weight", k=spread / math.sqrt(len(members)),
+                    iterations=100, seed=42, scale=spread * 0.8
+                )
+                # 중심 (0,0)으로 정렬 후 산업 중심점으로 이동 (numpy → float 변환)
+                avgX = sum(float(p[0]) for p in subPos.values()) / len(subPos)
+                avgY = sum(float(p[1]) for p in subPos.values()) / len(subPos)
+                for code, (px, py) in subPos.items():
+                    coords[code] = (float(cx + px - avgX), float(cy + py - avgY))
+                # 연결 안 된 노드(isolated) = spiral로 주변 배치
+                isolated = [m for m in members if m.stockCode not in subPos]
+                for j, n in enumerate(sorted(isolated, key=lambda x: x.revenue or 0, reverse=True)):
+                    angle = golden * j
+                    dist = spread * 0.9 + j * 5  # 바깥 링에
+                    coords[n.stockCode] = (cx + dist * math.cos(angle), cy + dist * math.sin(angle))
+                continue
+            except Exception:
+                pass  # fall through to spiral
+
+        # Fallback: golden spiral (매출 큰 순)
         ranked = sorted(members, key=lambda x: x.revenue or 0, reverse=True)
         for j, n in enumerate(ranked):
             if j == 0:
@@ -542,10 +591,7 @@ def _computeLayout(nodes, taxonomy, atlasFlows=None) -> dict[str, tuple[float, f
             else:
                 angle = golden * j
                 dist = spread * math.sqrt(j) / math.sqrt(len(ranked))
-                coords[n.stockCode] = (
-                    cx + dist * math.cos(angle),
-                    cy + dist * math.sin(angle),
-                )
+                coords[n.stockCode] = (cx + dist * math.cos(angle), cy + dist * math.sin(angle))
 
     return coords
 
@@ -701,8 +747,8 @@ def buildEcosystem(
                 return s.name
         return stageKey
 
-    # 좌표 사전 계산 (관계 기반 — 고정 위치)
-    coords = _computeLayout(nodes, taxonomy, atlasFlows=atlasFlows)
+    # 좌표 사전 계산 (관계 기반 — 산업 간 + 산업 내부 force-directed)
+    coords = _computeLayout(nodes, taxonomy, atlasFlows=atlasFlows, edges=edges)
 
     # 노드 (Cosmograph 포맷)
     nodeList = []
