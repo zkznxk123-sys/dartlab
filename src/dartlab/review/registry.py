@@ -1312,10 +1312,30 @@ def buildReview(
         review.sections = [Section(key="thesisReport", partId="T", title="논제 검증", blocks=thesis_blocks)]
         return review
 
+    # ── lifeCycle 기반 강조 블록 자동 설정 ──
+    # lifeCycle phase 에 따라 어떤 분석 관점이 중요한지 자동 결정
+    _LIFECYCLE_EMPHASIZE: dict[str, set[str]] = {
+        "earlyGrowth": {"revenueGrowth", "segmentComposition", "cashFlowOverview", "lifeCycleStage"},
+        "highGrowth": {"revenueGrowth", "marginTrend", "capitalAllocation", "lifeCycleStage"},
+        "matureGrowth": {"returnTrend", "capitalAllocation", "cashQuality", "lifeCycleStage"},
+        "matureStable": {"dividendPolicy", "cashFlowOverview", "capitalAllocation", "lifeCycleStage"},
+        "decline": {"leverageTrend", "distressSignals", "cashFlowOverview", "lifeCycleStage"},
+        "turnaround": {"marginTrend", "cashFlowOverview", "leverageTrend", "lifeCycleStage"},
+    }
+    try:
+        from dartlab.analysis.financial.lifeCycle import calcLifeCycle as _calcLC
+        _lcResult = _calcLC(company, basePeriod=basePeriod)
+        _lcPhase = _lcResult.get("phase") if _lcResult else None
+    except (ImportError, AttributeError, TypeError, ValueError):
+        _lcPhase = None
+
     # ── 스토리 템플릿 판별 (기업유형, ReportType과 독립) ──
     detectedTemplate: str | None = None
     detectedTemplates: list[str] = []
     emphasizedKeys: set[str] = set(reportType.emphasize)
+    # lifeCycle 기반 강조 합산
+    if _lcPhase and _lcPhase in _LIFECYCLE_EMPHASIZE:
+        emphasizedKeys |= _LIFECYCLE_EMPHASIZE[_lcPhase]
     if template is not None:
         from dartlab.review.templates import STORY_TEMPLATES
         from dartlab.review.templates import detectTemplate as _detect
