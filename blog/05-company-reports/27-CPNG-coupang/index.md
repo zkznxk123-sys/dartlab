@@ -33,14 +33,17 @@ ai:
     - "개인정보 유출"
   keyMetrics: {revenue: 30.27, opm: 1.4, roe: 0.0, fcf: 0.0}
   dataAsOf: "2026-04-13"
+youtubeId: "i_YUs8MbhZg"
 ---
 
 <script>
+import YouTube from '$lib/components/YouTube.svelte';
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
 import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 </script>
 
+<YouTube id="i_YUs8MbhZg" title="쿠팡 — 매출 49조인데 이익 $208M, 마진 0.6%의 비밀" />
 
 > **매출 49조인데 이익 $208M — 마진 0.6%의 회사가 3,370만명 유출 후에도 살아남은 이유.**
 

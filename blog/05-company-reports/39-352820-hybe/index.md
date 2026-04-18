@@ -47,13 +47,17 @@ ai:
     roe: -7.2
     fcf: 0.3
   dataAsOf: "2026-04-16"
+youtubeId: "Sw0bT31D3VY"
 ---
 
 <script>
+import YouTube from '$lib/components/YouTube.svelte';
 import ComboChart from '$lib/components/blog/ComboChart.svelte';
 import StackBar from '$lib/components/blog/StackBar.svelte';
 import HFDataLink from '$lib/components/blog/HFDataLink.svelte';
 </script>
+
+<YouTube id="Sw0bT31D3VY" title="하이브 — 매출 사상 최대 2.65조인데 당기순손실 2,566억" />
 
 > **위기 잠복 + 구조 전환** | 엔터테인먼트 > K-Pop 레이블 | 2026-04-16 dartlab 실측
 > 데이터: dartlab 2020 ~ 2025 | 엔진: analysis + credit + valuation + industry
